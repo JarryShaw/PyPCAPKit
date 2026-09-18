@@ -417,6 +417,7 @@
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">_AT</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowBase</span> <span class="k">as</span> <span class="n">TraceFlow</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
@@ -425,8 +426,12 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TCP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
 
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
@@ -435,7 +440,7 @@
 
 <div class="viewcode-block" id="TCP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TCP</span><span class="p">(</span><span class="n">TraceFlow</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">[</span><span class="n">_AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TCP</span><span class="p">(</span><span class="n">TraceFlow</span><span class="p">[</span><span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">_AT</span><span class="p">],</span> <span class="n">Index</span><span class="p">,</span> <span class="n">Packet</span><span class="p">[</span><span class="n">_AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_AT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Trace TCP flows.</span>
 
 <span class="sd">    Args:</span>
@@ -443,10 +448,108 @@
 <span class="sd">        format: output format</span>
 <span class="sd">        byteorder: output file byte order</span>
 <span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        bidirectional: trace both halves of a conversation as one flow</span>
+<span class="sd">        analyse: reassemble each flow's application layer, so that</span>
+<span class="sd">            :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
+<span class="sd">            can be read</span>
 <span class="sd">        *args: Arbitrary positional arguments.</span>
 <span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        A TCP connection has two halves, and by default they are traced as **one</span>
+<span class="sd">        flow** -- which is what "following a TCP stream" means everywhere else,</span>
+<span class="sd">        and what this module's own title claims to do. Keying a flow on</span>
+<span class="sd">        (source, destination) instead put a client's packets and the server's</span>
+<span class="sd">        replies in separate flows, separate labels and separate output files,</span>
+<span class="sd">        leaving a caller to pair them up by inspecting the labels.</span>
+
+<span class="sd">        Two consequences of the change are worth knowing:</span>
+
+<span class="sd">        * The reverse half of a conversation no longer produces a flow of its</span>
+<span class="sd">          own, so a capture of *n* connections yields *n* flows rather than</span>
+<span class="sd">          ``2n``, and one output file each rather than two.</span>
+<span class="sd">        * **A teardown does not end a flow.** Seeing a connection close is not the</span>
+<span class="sd">          same as knowing nothing more will arrive on its endpoints: the four-way</span>
+<span class="sd">          close of :rfc:`9293#section-3.6` is FIN, ACK, FIN, ACK, so the</span>
+<span class="sd">          acknowledgement that completes it follows the second FIN, and duplicates</span>
+<span class="sd">          of that acknowledgement can follow in turn. A flow is therefore</span>
+<span class="sd">          finalised only by proof that no more of it can come -- a new</span>
+<span class="sd">          connection's SYN on the same endpoints, or the end of the capture</span>
+<span class="sd">          (:meth:`finish`). What the teardown does is get *recorded*, which is how</span>
+<span class="sd">          that SYN is told from the peer's SYN-ACK; see :meth:`_ended`.</span>
+
+<span class="sd">          Finalising a flow is also when its callbacks run, so they run against</span>
+<span class="sd">          the whole conversation rather than a truncated one.</span>
+
+<span class="sd">        Pass ``bidirectional=False`` for the older per-direction behaviour: a flow</span>
+<span class="sd">        is one direction, and closes on that direction's FIN. That mode reproduces</span>
+<span class="sd">        what flow tracing did before conversations became one flow, RST included --</span>
+<span class="sd">        which is to say it ignores RST, as it always did.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        With ``analyse=True`` a flow also carries its **application layer**:</span>
+<span class="sd">        :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
+<span class="sd">        holds the flow's reassembled datagrams, each with its payload parsed on</span>
+<span class="sd">        demand. The tracer does not reassemble the stream itself -- it feeds</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which already implements</span>
+<span class="sd">        :rfc:`815` and copes with the reordering and retransmission that a tracer</span>
+<span class="sd">        concatenating payloads in capture order would silently corrupt.</span>
+
+<span class="sd">        How many datagrams that is follows from the reassembler's own notion of a</span>
+<span class="sd">        datagram, which is **per direction and per acknowledgement number**: it</span>
+<span class="sd">        buckets as ``self._buffer[BUFID].ack[ACK]`` and emits one datagram per</span>
+<span class="sd">        bucket. Since :meth:`_make_segment` passes each segment's ``ack`` through</span>
+<span class="sd">        untouched, a direction yields one datagram per distinct acknowledgement</span>
+<span class="sd">        number it carried -- not one datagram per direction. Three request/response</span>
+<span class="sd">        round trips on one connection therefore give **six** datagrams, three each</span>
+<span class="sd">        way, one per exchange:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           src=12345  ack=501  payload=b'req1'    src=443  ack=105  payload=b'resp1'</span>
+<span class="sd">           src=12345  ack=506  payload=b'req2'    src=443  ack=109  payload=b'resp2'</span>
+<span class="sd">           src=12345  ack=511  payload=b'req3'    src=443  ack=113  payload=b'resp3'</span>
+
+<span class="sd">        That is deliberate rather than incidental: the acknowledgement number</span>
+<span class="sd">        advances exactly when the peer has spoken, so bucketing on it splits a</span>
+<span class="sd">        direction wherever the other end got a word in -- one datagram per</span>
+<span class="sd">        **exchange**. Merging a whole direction into one stream would instead hand</span>
+<span class="sd">        the application parser every message it ever sent, concatenated, and have</span>
+<span class="sd">        it read only the first.</span>
+
+<span class="sd">        Be precise about what that does and does not buy, though, because the</span>
+<span class="sd">        boundary is the peer's turn and **not** the application's message</span>
+<span class="sd">        boundary. Where an exchange is one request and one reply, the two coincide</span>
+<span class="sd">        and each datagram's payload is a single message that</span>
+<span class="sd">        :attr:`Datagram.packet</span>
+<span class="sd">        &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.packet&gt;` can parse alone.</span>
+<span class="sd">        Where a sender **pipelines** -- several requests in flight before any reply</span>
+<span class="sd">        -- they all carry the same acknowledgement number, so they share a bucket</span>
+<span class="sd">        and are concatenated after all. Measured: two requests sent back to back</span>
+<span class="sd">        on one acknowledgement number come back as a single datagram carrying</span>
+<span class="sd">        ``b'req1req2'``, which</span>
+<span class="sd">        :meth:`test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`</span>
+<span class="sd">        pins. So this narrows the concatenation to within one exchange rather than</span>
+<span class="sd">        eliminating it, and an application parser handed a pipelined datagram</span>
+<span class="sd">        still sees only the first message.</span>
+
+<span class="sd">        A direction that carried one acknowledgement number throughout -- a single</span>
+<span class="sd">        request and its reply, which is what most of the unit tests exercise --</span>
+<span class="sd">        does collapse to one datagram each way, which is where "one per direction"</span>
+<span class="sd">        holds.</span>
+
+<span class="sd">        It is **off by default** because buffering every traced payload is a cost</span>
+<span class="sd">        tracing does not otherwise pay, and tracing's per-packet cost is something</span>
+<span class="sd">        this package has deliberately driven down. Nothing is reassembled, parsed</span>
+<span class="sd">        or retained unless it is asked for.</span>
+
 <span class="sd">    """</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: The reassembly segment model, imported on the first flow that needs it</span>
+        <span class="c1">#: and cached so that :meth:`_make_segment` does not import per packet. Set</span>
+        <span class="c1">#: only when ``analyse`` is on, which is the only time it is read.</span>
+        <span class="n">_reasm_packet</span><span class="p">:</span> <span class="s1">'type[Any]'</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -477,6 +580,43 @@
         <span class="n">output</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span></div>
 
 
+<div class="viewcode-block" id="TCP.make_bufid">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.make_bufid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_bufid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BufferID'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Derive the buffer ID a packet belongs to.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Buffer ID, i.e. ``(address, port, address, port)``.</span>
+
+<span class="sd">        Tracing bidirectionally means both halves of a conversation have to land</span>
+<span class="sd">        on the *same* key, so the two endpoints are ordered canonically -- the</span>
+<span class="sd">        lesser ``(address, port)`` pair first -- rather than as (source,</span>
+<span class="sd">        destination). Sorting is what makes the key direction-independent: the</span>
+<span class="sd">        client's ``A→B`` and the server's ``B→A`` both reduce to</span>
+<span class="sd">        ``min(A, B), max(A, B)``.</span>
+
+<span class="sd">        The result stays a plain :obj:`tuple` of the same shape, which is</span>
+<span class="sd">        deliberate and not merely convenient: it is a :obj:`dict` key, and an</span>
+<span class="sd">        :class:`~pcapkit.corekit.infoclass.Info` cannot be one -- inheriting</span>
+<span class="sd">        :class:`collections.abc.Mapping` sets ``__hash__`` to :data:`None`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Both endpoints of a connection are of the same address family, so the</span>
+<span class="sd">            comparison never has to order an :class:`~ipaddress.IPv4Address`</span>
+<span class="sd">            against an :class:`~ipaddress.IPv6Address` -- which raises</span>
+<span class="sd">            :exc:`TypeError`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">near_addr</span><span class="p">,</span> <span class="n">near_port</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span>
+        <span class="n">far_addr</span><span class="p">,</span> <span class="n">far_port</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dstport</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="ow">and</span> <span class="p">(</span><span class="n">far_addr</span><span class="p">,</span> <span class="n">far_port</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">near_addr</span><span class="p">,</span> <span class="n">near_port</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">far_addr</span><span class="p">,</span> <span class="n">far_port</span><span class="p">,</span> <span class="n">near_addr</span><span class="p">,</span> <span class="n">near_port</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">near_addr</span><span class="p">,</span> <span class="n">near_port</span><span class="p">,</span> <span class="n">far_addr</span><span class="p">,</span> <span class="n">far_port</span><span class="p">)</span></div>
+
+
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">'Literal[True]'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Dumper'</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
@@ -504,58 +644,253 @@
 
 <span class="sd">               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'</span>
 
+<span class="sd">            It is built from the packet that **opened** the flow, not from the</span>
+<span class="sd">            canonical buffer ID, so the label still names the initiator first and</span>
+<span class="sd">            reads the way it always did. The reverse half of a bidirectional</span>
+<span class="sd">            conversation joins that flow rather than minting a label of its own.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># clear cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># Buffer Identifier</span>
-        <span class="n">BUFID</span> <span class="o">=</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="p">)</span>  <span class="c1"># type: BufferID</span>
-        <span class="c1"># SYN = packet.syn  # Synchronise Flag (Establishment)</span>
+        <span class="c1"># Buffer Identifier -- canonical, hence direction-independent, when</span>
+        <span class="c1"># tracing bidirectionally</span>
+        <span class="n">BUFID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bufid</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="n">SYN</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">syn</span>  <span class="c1"># Synchronise Flag (Establishment)</span>
         <span class="n">FIN</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">fin</span>  <span class="c1"># Finish Flag (Termination)</span>
+        <span class="n">RST</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">rst</span>  <span class="c1"># Reset Flag (Abrupt Termination)</span>
+        <span class="c1"># the half of the conversation this packet was sent by</span>
+        <span class="n">END</span> <span class="o">=</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="p">)</span>  <span class="c1"># type: tuple[_AT, int]</span>
 
-        <span class="c1"># # when SYN is set, reset buffer of this seesion</span>
-        <span class="c1"># if SYN and BUFID in self._buffer:</span>
-        <span class="c1">#     temp = self._buffer.pop(BUFID)</span>
-        <span class="c1">#     temp['fpout'] = (self._fproot, self._fdpext)</span>
-        <span class="c1">#     temp['index'] = tuple(temp['index'])</span>
-        <span class="c1">#     self._stream.append(Info(temp))</span>
+        <span class="c1"># A SYN arriving on a flow whose teardown has already been observed is a</span>
+        <span class="c1"># *new* connection reusing the endpoints, and the only signal that proves</span>
+        <span class="c1"># the previous one can receive nothing further. It is what finalises a</span>
+        <span class="c1"># bidirectional flow mid-capture; everything else is flushed by</span>
+        <span class="c1"># :meth:`submit` at the end of the capture.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The state test matters. A SYN alone does not mean "new connection" --</span>
+        <span class="c1"># the peer's SYN-ACK carries the flag too, and it belongs to the flow the</span>
+        <span class="c1"># client's SYN just opened. Gating on the teardown having been seen tells</span>
+        <span class="c1"># the two apart without needing the ACK flag: a SYN-ACK cannot arrive</span>
+        <span class="c1"># after both endpoints have finished, or after a reset.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="ow">and</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="ow">and</span> <span class="n">SYN</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ended</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> superseded by a new connection on the same endpoints'</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
 
         <span class="c1"># initialise buffer with BUFID</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span>
+            <span class="k">if</span> <span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># ``:`` is a path separator on Windows and a drive separator</span>
+                <span class="c1"># elsewhere in the tooling, so an IPv6 label cannot carry it</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'new TCP flow </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">""</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
                                    <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span><span class="p">),</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">origin</span><span class="o">=</span><span class="n">END</span><span class="p">,</span>
+                <span class="n">forward</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">fin</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+                <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">reassembly</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_reassembly</span><span class="p">(),</span>
             <span class="p">)</span>
 
         <span class="c1"># trace frame record</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">fpout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">fpout</span>
-        <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">label</span>
-
-        <span class="c1"># when FIN is set, submit buffer of this session</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span>
+        <span class="n">buffer</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="c1"># ... and again per direction, so the merged ordering above stays</span>
+        <span class="c1"># authoritative while each half remains recoverable on its own</span>
+        <span class="k">if</span> <span class="n">END</span> <span class="o">==</span> <span class="n">buffer</span><span class="o">.</span><span class="n">origin</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">forward</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">reverse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">FIN</span><span class="p">:</span>
-            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
-            <span class="c1"># fpout, label = buf['fpout'], buf['label']</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">fin</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">END</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">RST</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">buffer</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">buffer</span><span class="o">.</span><span class="n">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_segment</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
+        <span class="n">fpout</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">fpout</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">label</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> closed after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span>
-                <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
-                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
-                <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="c1"># A *unidirectional* flow is one direction, and a direction is over when</span>
+        <span class="c1"># its FIN goes out -- so that mode keeps closing on FIN exactly as it did.</span>
+        <span class="c1">#</span>
+        <span class="c1"># A bidirectional flow is a whole connection, and observing its teardown</span>
+        <span class="c1"># is not the same as knowing nothing more will arrive. The four-way close</span>
+        <span class="c1"># is FIN, ACK, FIN, ACK: the final acknowledgement comes *after* the</span>
+        <span class="c1"># second FIN, so submitting on the second FIN drops it from the flow and</span>
+        <span class="c1"># lets it open a fresh buffer under the same canonical buffer ID -- which</span>
+        <span class="c1"># a later connection reusing those endpoints then merges into. Closing on</span>
+        <span class="c1"># the *first* FIN has the same defect one packet earlier, and duplicate</span>
+        <span class="c1"># acknowledgements after the close would defeat any rule that tries to</span>
+        <span class="c1"># name the last packet of the exchange.</span>
+        <span class="c1">#</span>
+        <span class="c1"># So a teardown does not close the flow here at all: it is recorded, and</span>
+        <span class="c1"># the flow keeps accepting the packets that still belong to it. What</span>
+        <span class="c1"># finalises the flow is proof that no more can come -- a new connection's</span>
+        <span class="c1"># SYN on the same endpoints, handled above, or the end of the capture.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="ow">and</span> <span class="n">FIN</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
 
         <span class="c1"># return label or output object</span>
         <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build the reassembler a new flow will feed, if analysis was asked for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler of this</span>
+<span class="sd">            flow's own, or :data:`None` when ``analyse`` is off.</span>
+
+<span class="sd">        One reassembler **per flow** rather than one per tracer, so that</span>
+<span class="sd">        :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
+<span class="sd">        can flush this conversation's buffers without touching another's -- a</span>
+<span class="sd">        shared instance would have to be asked for its datagrams by endpoint, and</span>
+<span class="sd">        flushing it early would finalise flows that are still open.</span>
+
+<span class="sd">        It is constructed with ``strict=False`` so that each direction comes back</span>
+<span class="sd">        as one contiguous payload, which is what an application-layer parse needs,</span>
+<span class="sd">        and it inherits</span>
+<span class="sd">        :attr:`TCP.__timeout__ &lt;pcapkit.foundation.reassembly.tcp.TCP.__timeout__&gt;`</span>
+<span class="sd">        -- no timeout -- so nothing here is evicted on a clock.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analyse</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># NOTE: imported here rather than at module scope. ``traceflow`` and</span>
+        <span class="c1"># ``reassembly`` are sibling subpackages and this is the only edge between</span>
+        <span class="c1"># them; at module scope it is evaluated while ``pcapkit/__init__`` is still</span>
+        <span class="c1"># running, which is the import cycle that already runs through</span>
+        <span class="c1"># ``foundation.extraction``. Kept off the per-*packet* path by caching the</span>
+        <span class="c1"># segment model here: this runs once per flow, ``_make_segment`` once per</span>
+        <span class="c1"># packet.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Reasm_Packet</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reasm_packet</span> <span class="o">=</span> <span class="n">Reasm_Packet</span>
+        <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Describe a traced packet the way the reassembler expects a segment.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet: a flow packet (:term:`trace.tcp.packet`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A :class:`reassembly packet &lt;pcapkit.foundation.reassembly.data.tcp.Packet&gt;`</span>
+<span class="sd">            for the same segment.</span>
+
+<span class="sd">        The tracer does not reassemble anything itself -- it hands the segment to</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.tcp.TCP`, which already implements</span>
+<span class="sd">        the :rfc:`815` hole-descriptor algorithm and handles the out-of-order and</span>
+<span class="sd">        retransmitted segments a tracer concatenating payloads in capture order</span>
+<span class="sd">        would silently corrupt. This is the whole of the translation.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The buffer ID is **(source, destination)** and so unidirectional, which</span>
+<span class="sd">            is what makes each direction of the conversation reassemble separately</span>
+<span class="sd">            even though the *flow* is keyed on the pair. The sequence number is</span>
+<span class="sd">            passed through untouched: a SYN occupies one of its own, and</span>
+<span class="sd">            :meth:`TCP.reassembly &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;`</span>
+<span class="sd">            is where that is accounted for.</span>
+
+<span class="sd">        """</span>
+        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reasm_packet</span><span class="p">(</span>
+            <span class="n">bufid</span><span class="o">=</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span>
+            <span class="n">dsn</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                      <span class="c1"># data sequence number</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                      <span class="c1"># acknowledgement number</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>                    <span class="c1"># original packet range number</span>
+            <span class="n">syn</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span>                      <span class="c1"># synchronise flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">fin</span><span class="p">,</span>                      <span class="c1"># finish flag</span>
+            <span class="n">rst</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">rst</span><span class="p">,</span>                      <span class="c1"># reset connection flag</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                         <span class="c1"># payload length, header excludes</span>
+            <span class="n">first</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                    <span class="c1"># first sequence number of payload</span>
+            <span class="n">last</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>       <span class="c1"># last sequence number of payload</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>              <span class="c1"># raw bytearray type payload</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>          <span class="c1"># capture timestamp</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ended</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a flow's connection has been seen to end.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buffer: a flow buffer (:term:`trace.tcp.buffer`)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether a teardown was observed -- a **FIN from both endpoints**, the</span>
+<span class="sd">            polite close of :rfc:`9293#section-3.6`, or a **RST** from either, the</span>
+<span class="sd">            abrupt one of :rfc:`9293#section-3.5.2`.</span>
+
+<span class="sd">        This is not the same as "nothing more will arrive on these endpoints": the</span>
+<span class="sd">        acknowledgement that completes a four-way close, and any duplicate of it,</span>
+<span class="sd">        still follow. It is used to tell a new connection's SYN from the peer's</span>
+<span class="sd">        SYN-ACK, which is a question the flag alone cannot answer.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">reset</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">fin</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Index'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Finalise a flow: report it, and stop tracing into it.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bufid: buffer identifier of the flow to finalise</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The flow's :term:`index &lt;trace.tcp.index&gt;` entry.</span>
+
+<span class="sd">        Called once per flow, from the one place that can prove a flow is over --</span>
+<span class="sd">        a new connection superseding it, or :meth:`submit` at the end of the</span>
+<span class="sd">        capture. Registering the flow here rather than at teardown is what keeps</span>
+<span class="sd">        the acknowledgement that completes a close inside the flow it belongs to.</span>
+
+<span class="sd">        """</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">label</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow </span><span class="si">%s</span><span class="s1"> finalised after </span><span class="si">%d</span><span class="s1"> frame(s) (</span><span class="si">%d</span><span class="s1"> forward, </span><span class="si">%d</span><span class="s1"> reverse)'</span><span class="p">,</span>
+                     <span class="n">label</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">))</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span>
+            <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span>
+            <span class="c1"># the reassembler goes in unflushed: reading ``packet`` is what asks it</span>
+            <span class="c1"># for its datagrams, and their own ``packet`` is parsed later still</span>
+            <span class="n">packet</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Deferred</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__callback_fn__</span><span class="p">:</span>
+            <span class="n">callback</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">index</span>
+
+<div class="viewcode-block" id="TCP.finish">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.finish">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Finalise every flow still being traced.</span>
+
+<span class="sd">        The end of the capture is the second of the two things that can prove a</span>
+<span class="sd">        bidirectional flow is over -- the first being a new connection on the same</span>
+<span class="sd">        endpoints. Draining the buffer here is what lets a flow keep the</span>
+<span class="sd">        acknowledgement that completes its close and *still* have its callback</span>
+<span class="sd">        fired, rather than having to choose between the two.</span>
+
+<span class="sd">        Idempotent: it drains the buffer, so a second call finds nothing to do.</span>
+
+<span class="sd">        """</span>
+        <span class="k">for</span> <span class="n">bufid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalise</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">'submit'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="TCP.submit">
@@ -566,6 +901,34 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Traced TCP flow (:term:`trace.tcp.index`).</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            This reports flows still being traced **without** finalising them, so</span>
+<span class="sd">            that reading</span>
+<span class="sd">            :attr:`TraceFlow.index &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.index&gt;`</span>
+<span class="sd">            part-way through a capture cannot disturb the tracing -- popping a</span>
+<span class="sd">            buffer there would strand the rest of its conversation in a second</span>
+<span class="sd">            flow. Such a flow is therefore reported here but has not fired its</span>
+<span class="sd">            callback; :meth:`finish` is what does that, at the end of the capture.</span>
+
+<span class="sd">            With ``analyse=True`` that makes an open flow's</span>
+<span class="sd">            :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`</span>
+<span class="sd">            a **snapshot**, and a mid-capture one. The</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` resolves when</span>
+<span class="sd">            it is first read and is then fixed in place, so it holds the flow as it</span>
+<span class="sd">            stood at *that read* -- not as it stood when this method returned, and</span>
+<span class="sd">            not as it will stand once the conversation ends. Read it while the flow</span>
+<span class="sd">            is open and the datagrams cover only the segments seen so far; segments</span>
+<span class="sd">            arriving afterwards are reassembled into the buffer but cannot reach an</span>
+<span class="sd">            already-resolved snapshot, and nothing on the returned :class:`Index`</span>
+<span class="sd">            distinguishes one from the final result that :meth:`finish` produces.</span>
+
+<span class="sd">            This call's own cache is not the cause and does not soften it: both</span>
+<span class="sd">            :meth:`trace` and :meth:`finish` clear ``__cached__['submit']``, so a</span>
+<span class="sd">            later call rebuilds the tuple with fresh</span>
+<span class="sd">            :class:`~pcapkit.foundation.traceflow.data.data.Deferred` objects. It is</span>
+<span class="sd">            the *previously returned* :class:`Index`, if a caller kept one, that</span>
+<span class="sd">            cannot catch up. For a result that is final, read after :meth:`finish`.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'submit'</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cached</span>
@@ -574,7 +937,10 @@
         <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
-                             <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,))</span>
+                             <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                             <span class="n">forward</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">forward</span><span class="p">),</span>
+                             <span class="n">reverse</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reverse</span><span class="p">),</span>
+                             <span class="n">packet</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Deferred</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">reassembly</span><span class="p">),))</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
         <span class="n">ret_submit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
 

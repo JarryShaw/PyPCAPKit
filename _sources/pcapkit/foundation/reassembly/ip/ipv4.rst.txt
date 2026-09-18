@@ -44,6 +44,8 @@ Terminology
             header = ipv4.packet.header,    # raw bytes type header
             payload = bytearray(
                 ipv4.packet.payload),       # raw bytearray type payload
+            timestamp = float(
+                frame.info.time_epoch),     # capture timestamp
           )
 
    reasm.ipv4.datagram
@@ -55,7 +57,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
@@ -67,7 +69,7 @@ Terminology
            |     |--> 'payload' : (bytes) reassembled IPv4 payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
@@ -115,4 +117,20 @@ Terminology
            |                         |               |--> (int) packet range number
            |                         |--> 'header' : (bytes) header buffer
            |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+           |                         |--> 'timestamp' : (float) capture timestamp of the
+           |                                                    first-arriving fragment
            |--> (tuple) BUFID ...
+
+       .. note::
+
+          A buffer is abandoned once the reassembly timeout elapses on the
+          *capture's* clock -- 60 seconds by default, per
+          :rfc:`1122#section-3.3.2` for IPv4 and :rfc:`8200#section-4.5` for
+          IPv6, counted from the first-arriving fragment. Its datagram is
+          reported with ``completed`` set to
+          :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+          rather than
+          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`,
+          which is what tells "these fragments are gone" apart from "these
+          fragments had not arrived yet". See
+          :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`.

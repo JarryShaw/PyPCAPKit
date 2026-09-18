@@ -410,8 +410,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ReassemblyData'</span><span class="p">,</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
@@ -422,6 +423,79 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">IP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Completion</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""How completely a datagram was reassembled, and why it stopped.</span>
+
+<span class="sd">    This is the value of</span>
+<span class="sd">    :attr:`Datagram.completed &lt;pcapkit.foundation.reassembly.data.ip.Datagram.completed&gt;`.</span>
+<span class="sd">    That field used to be a plain :obj:`bool`, and this enumeration is a widening</span>
+<span class="sd">    of it rather than a second channel beside it: reassembly now has *three*</span>
+<span class="sd">    outcomes to report, not two, since a buffer abandoned under the :rfc:`791` /</span>
+<span class="sd">    :rfc:`8200` reassembly timeout is a different event from one that simply had</span>
+<span class="sd">    not finished when the capture did. Telling them apart is the whole point of</span>
+<span class="sd">    having a timeout at all -- an expired datagram says "these fragments are</span>
+<span class="sd">    gone", a partial one says "these fragments had not arrived yet".</span>
+
+<span class="sd">    Truthiness is preserved, so ``if datagram.completed:`` reads exactly as it</span>
+<span class="sd">    did while ``completed`` was a :obj:`bool`: :attr:`COMPLETE` is the only</span>
+<span class="sd">    truthy member. Equality against :obj:`True` and :obj:`False` is *not*</span>
+<span class="sd">    preserved -- ``datagram.completed == True`` is now :data:`False` even for a</span>
+<span class="sd">    complete datagram -- so a caller comparing against a boolean has to compare</span>
+<span class="sd">    against a member instead.</span>
+
+<span class="sd">    It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.httpv1.Type` and</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` do, which buys two things</span>
+<span class="sd">    a plain :class:`enum.Enum` does not: the value survives</span>
+<span class="sd">    :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and</span>
+<span class="sd">    :meth:`Datagram.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` hands this</span>
+<span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so the</span>
+<span class="sd">    new state can be tested for without importing this class.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are</span>
+<span class="sd">        **falsy** makes this a non-empty string that tests false, so ``bool(x)``</span>
+<span class="sd">        and ``bool(str(x))`` disagree. That is deliberate -- the truthiness above</span>
+<span class="sd">        is the property callers of a former :obj:`bool` field rely on -- but code</span>
+<span class="sd">        that takes this for an ordinary string and tests it for truth will read it</span>
+<span class="sd">        backwards.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Reassembled in whole: every octet of the datagram was received.</span>
+    <span class="n">COMPLETE</span> <span class="o">=</span> <span class="s1">'complete'</span>
+
+    <span class="c1">#: Fragments were still outstanding when the buffer was flushed -- at the end</span>
+    <span class="c1">#: of the capture, or when the session was torn down (a TCP FIN/RST, or an</span>
+    <span class="c1">#: IPv4 datagram whose identifier was reused by an unfragmented packet).</span>
+    <span class="c1">#: The missing octets may simply not have been captured.</span>
+    <span class="n">PARTIAL</span> <span class="o">=</span> <span class="s1">'partial'</span>
+
+    <span class="c1">#: Reassembly was **abandoned** under the reassembly timeout, i.e. the</span>
+    <span class="c1">#: capture clock advanced past the deadline of</span>
+    <span class="c1">#: :attr:`Reassembly.timeout &lt;pcapkit.foundation.reassembly.reassembly.ReassemblyBase.timeout&gt;`</span>
+    <span class="c1">#: seconds after the first-arriving fragment while the datagram was still</span>
+    <span class="c1">#: incomplete. :rfc:`8200#section-4.5` requires the held fragments be</span>
+    <span class="c1">#: discarded, so no further fragment will ever be added to this datagram.</span>
+    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="s1">'timeout'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether the datagram was reassembled in whole.</span>
+
+<span class="sd">        Only :attr:`COMPLETE` is truthy; both :attr:`PARTIAL` and</span>
+<span class="sd">        :attr:`TIMEOUT` describe an incomplete datagram.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This override is what a :class:`str` base does *not* give -- every</span>
+<span class="sd">            non-empty string is otherwise truthy, which would make an incomplete</span>
+<span class="sd">            datagram read as a complete one. :meth:`__str__` needs no such</span>
+<span class="sd">            override: :class:`~pcapkit.utilities.compat.StrEnum` already renders a</span>
+<span class="sd">            member as its value.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span>
 
 
 <div class="viewcode-block" id="Deferred">
@@ -506,6 +580,13 @@
 
 <span class="sd">    """</span>
 
+    <span class="c1"># NOTE: the ``super()`` calls below are suppressed for both checkers. They are</span>
+    <span class="c1"># undefined *on this mixin*, which is what a mixin is -- the base arrives at</span>
+    <span class="c1"># the point of use, where every subclass is declared</span>
+    <span class="c1"># ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`</span>
+    <span class="c1"># supplies all three. Neither mypy nor pylint can see that from here, and</span>
+    <span class="c1"># pylint calls it an *error* rather than a warning.</span>
+
 <div class="viewcode-block" id="DeferredPacket.__analyse__">
 <a class="viewcode-back" href="../../../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.DeferredPacket.__analyse__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">__analyse__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Protocol]'</span><span class="p">:</span>
@@ -534,13 +615,13 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="c1"># NOTE: ``Mapping.__contains__`` answers by fetching the value, which</span>
         <span class="c1"># would run the deferred analysis merely to decide that the field exists.</span>
         <span class="c1"># ``packet`` is a declared field, so it is always there.</span>
-        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
@@ -562,7 +643,7 @@
 
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span></div>
 </div>
 
 

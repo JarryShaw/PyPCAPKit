@@ -428,7 +428,7 @@ only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to <a class="reference internal" href="ip.html"><span class="doc">Base Class</span></a> for more information.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ipv4.IPv4">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ipv4.html#IPv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ipv4.IPv4" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ipv4.html#IPv4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ipv4.IPv4" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.foundation.reassembly.ip.IP" title="pcapkit.foundation.reassembly.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a></p>
 <p>Reassembly for IPv4 payload.</p>
 <dl class="field-list simple">
@@ -439,6 +439,8 @@ implemented) when submit</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 (if not, datagram will be discarded after callback)</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – reassembly timeout in seconds, on the capture’s own clock;
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> selects <code class="xref py py-attr docutils literal notranslate"><span class="pre">__timeout__</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -491,6 +493,8 @@ is as following, with <code class="docutils literal notranslate"><span class="pr
   <span class="n">header</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>    <span class="c1"># raw bytes type header</span>
   <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
       <span class="n">ipv4</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>       <span class="c1"># raw bytearray type payload</span>
+  <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+      <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>     <span class="c1"># capture timestamp</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -500,7 +504,7 @@ is as following, with <code class="docutils literal notranslate"><span class="pr
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
  |--&gt; (Info) data
- |     |--&gt; 'completed' : (bool) True --&gt; implemented
+ |     |--&gt; 'completed' : (Completion) COMPLETE --&gt; reassembled in whole
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (IPv4Address) ipv4.src
  |     |            |--&gt; 'dst' --&gt; (IPv4Address) ipv4.dst
@@ -512,7 +516,7 @@ is as following, with <code class="docutils literal notranslate"><span class="pr
  |     |--&gt; 'payload' : (bytes) reassembled IPv4 payload
  |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
  |--&gt; (Info) data
- |     |--&gt; 'completed' : (bool) False --&gt; not implemented
+ |     |--&gt; 'completed' : (Completion) PARTIAL or TIMEOUT --&gt; incomplete
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (IPv4Address) ipv4.src
  |     |            |--&gt; 'dst' --&gt; (IPv4Address) ipv4.dst
@@ -558,8 +562,24 @@ is as following:</p>
  |                         |               |--&gt; (int) packet range number
  |                         |--&gt; 'header' : (bytes) header buffer
  |                         |--&gt; 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+ |                         |--&gt; 'timestamp' : (float) capture timestamp of the
+ |                                                    first-arriving fragment
  |--&gt; (tuple) BUFID ...
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A buffer is abandoned once the reassembly timeout elapses on the
+<em>capture’s</em> clock – 60 seconds by default, per
+<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> for IPv4 and <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> for
+IPv6, counted from the first-arriving fragment. Its datagram is
+reported with <code class="docutils literal notranslate"><span class="pre">completed</span></code> set to
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code>
+rather than
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PARTIAL</span></code>,
+which is what tells “these fragments are gone” apart from “these
+fragments had not arrived yet”. See
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code>.</p>
 </div>
 </dd>
 </dl>

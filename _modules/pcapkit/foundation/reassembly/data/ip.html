@@ -410,7 +410,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredPacket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">,</span> <span class="n">DeferredPacket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -419,9 +419,9 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">overload</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeAlias</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAlias</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
@@ -455,9 +455,14 @@
     <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Capture timestamp of the fragment, in seconds since the Unix epoch. This</span>
+    <span class="c1">#: is the *capture's* clock, not the host's: it is what drives the :rfc:`791`</span>
+    <span class="c1">#: and :rfc:`8200#section-4.5` reassembly timeout, since an offline parser</span>
+    <span class="c1">#: replaying a file has no other notion of time passing.</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'tuple[_AT, _AT, int, TransType]'</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">fo</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">ihl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">tl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -497,8 +502,11 @@
     <span class="c1">#: :meth:`to_dict` and iteration still report the field under its own name.</span>
     <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet'</span><span class="p">]</span>
 
-    <span class="c1">#: Completed flag.</span>
-    <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="c1">#: How completely the datagram was reassembled, and why reassembly stopped.</span>
+    <span class="c1">#: Only :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:``</span>
+    <span class="c1">#: still reads as it did while this was a :obj:`bool`; equality against</span>
+    <span class="c1">#: :obj:`True` or :obj:`False` no longer holds.</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span>
     <span class="c1">#: Original packet identifier.</span>
     <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span>
     <span class="c1">#: Packet numbers.</span>
@@ -513,13 +521,18 @@
     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="nd">@overload</span>  <span class="c1">#pylint: disable=used-before-assignment</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[True]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Protocol | Deferred'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
-
-        <span class="nd">@overload</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Literal[False]'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="c1"># NOTE: one signature, not a pair of ``@overload``\\ s keyed on</span>
+        <span class="c1"># ``completed``. There used to be two, correlating a complete datagram with</span>
+        <span class="c1"># a ``bytes`` payload and a parsed ``packet``, and an incomplete one with a</span>
+        <span class="c1"># tuple of fragments and ``packet=None``. That correlation does not hold:</span>
+        <span class="c1"># under ``strict=False`` an *incomplete* datagram is reported as one</span>
+        <span class="c1"># contiguous ``bytes`` with its holes zero-filled, and analysed, because</span>
+        <span class="c1"># that is the payload buffer as it stands -- which is what</span>
+        <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream</span>
+        <span class="c1"># from. Overloads keyed on a literal cannot be selected from a ``completed``</span>
+        <span class="c1"># computed at runtime anyway, so they only made the reassemblers' own calls</span>
+        <span class="c1"># untypeable while promising a correlation the code does not keep.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="Buffer">
@@ -539,9 +552,15 @@
     <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Data buffer, holes set to ``b'\x00'``.</span>
     <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Capture timestamp of the **first-arriving** fragment of this datagram, in</span>
+    <span class="c1">#: seconds since the Unix epoch. This is the origin of the reassembly timer:</span>
+    <span class="c1">#: :rfc:`8200#section-4.5` counts its 60 seconds "of the reception of the</span>
+    <span class="c1">#: first-arriving fragment", so a later fragment does not extend the</span>
+    <span class="c1">#: deadline and this field is never revised once set.</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

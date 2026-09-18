@@ -484,8 +484,10 @@
             <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers] | Type[Protocol]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                         <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
             <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                        <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
             <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+            <span class="n">reasm_timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                       <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
             <span class="n">trace</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
+            <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                            <span class="c1"># trace settings # pylint: disable=line-too-long</span>
             <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
             <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
             <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
@@ -515,12 +517,19 @@
 <span class="sd">        reassembly: if perform reassembly</span>
 <span class="sd">        reasm_strict: if set strict flag for reassembly</span>
 <span class="sd">        reasm_store: if store reassembled datagrams</span>
+<span class="sd">        reasm_timeout: reassembly timeout in seconds, on the capture's own</span>
+<span class="sd">            clock; :data:`None` selects each protocol's default (60 seconds for</span>
+<span class="sd">            IPv4 and IPv6, disabled for TCP)</span>
 
 <span class="sd">        trace: if trace TCP traffic flows</span>
 <span class="sd">        trace_fout: path name for flow tracer if necessary</span>
 <span class="sd">        trace_format: output file format of flow tracer</span>
 <span class="sd">        trace_byteorder: output file byte order</span>
 <span class="sd">        trace_nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        trace_bidirectional: whether both halves of a conversation are traced as</span>
+<span class="sd">            one flow, which is the default</span>
+<span class="sd">        trace_analyse: whether each traced flow reassembles its application</span>
+<span class="sd">            layer, so that its ``packet`` can be read; off by default</span>
 
 <span class="sd">        ip: if record data for IPv4 &amp; IPv6 reassembly (must be used with ``reassembly=True``)</span>
 <span class="sd">        ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)</span>
@@ -559,8 +568,10 @@
                      <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
                      <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span>
                      <span class="n">reassembly</span><span class="o">=</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">reasm_store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span>
+                     <span class="n">reasm_timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">,</span>
                      <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
                      <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
+                     <span class="n">trace_bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">,</span>
                      <span class="n">buffer_size</span><span class="o">=</span><span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_path</span><span class="o">=</span><span class="n">buffer_path</span><span class="p">,</span> <span class="n">buffer_save</span><span class="o">=</span><span class="n">buffer_save</span><span class="p">,</span>
                      <span class="n">no_eof</span><span class="o">=</span><span class="n">no_eof</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
@@ -568,12 +579,15 @@
 
 <div class="viewcode-block" id="reassemble">
 <a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.reassemble">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | Type[Protocol]'</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Reassembly'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | Type[Protocol]'</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="n">timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Reassembly'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Reassemble fragmented datagrams.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol to be reassembled</span>
 <span class="sd">        strict: if return all datagrams (including those not implemented) when submit</span>
+<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">            :data:`None` selects the protocol's own default</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` object of corresponding protocol.</span>
@@ -586,11 +600,11 @@
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'IPv4'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">IPv4_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IPv4_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'IPv6'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">IPv6_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IPv6_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unsupported reassembly protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
@@ -600,7 +614,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str | Type[Protocol]'</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>
           <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
           <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-          <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlow'</span><span class="p">:</span>
+          <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TraceFlow'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Trace flows.</span>
 
 <span class="sd">    Arguments:</span>
@@ -609,6 +623,8 @@
 <span class="sd">        format: output format</span>
 <span class="sd">        byteorder: output file byte order</span>
 <span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        bidirectional: whether both halves of a conversation are traced as one</span>
+<span class="sd">            flow, which is the default</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` object.</span>
@@ -621,7 +637,8 @@
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">'TCP'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">TCP_TraceFlow</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TCP_TraceFlow</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span>
+                             <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="n">bidirectional</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unsupported flow tracing protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 </pre></div>

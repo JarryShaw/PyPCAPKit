@@ -749,6 +749,7 @@
         <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                <span class="c1"># total length, header includes</span>
         <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                              <span class="c1"># raw bytes type header</span>
         <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>            <span class="c1"># raw bytearray type payload</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>         <span class="c1"># capture timestamp</span>
     <span class="p">)</span></div>
 
 
@@ -829,6 +830,7 @@
         <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span><span class="p">,</span>                     <span class="c1"># this sequence number</span>
         <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>       <span class="c1"># next (wanted) sequence number</span>
         <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                     <span class="c1"># payload length, header excludes</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>   <span class="c1"># capture timestamp</span>
     <span class="p">)</span></div>
 
 
@@ -869,17 +871,23 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapfile.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>  <span class="c1"># isort:skip</span>
 
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data_offset</span><span class="p">,</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
         <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                 <span class="c1"># data link type from savefile header</span>
         <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                        <span class="c1"># frame number</span>
         <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>     <span class="c1"># extracted packet</span>
         <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">syn</span><span class="p">),</span>                                  <span class="c1"># TCP synchronise (SYN) flag</span>
         <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">fin</span><span class="p">),</span>                                  <span class="c1"># TCP finish (FIN) flag</span>
+        <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">rst</span><span class="p">),</span>                                  <span class="c1"># TCP reset (RST) flag</span>
         <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                <span class="c1"># source IP</span>
         <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                <span class="c1"># destination IP</span>
         <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">src_port</span><span class="p">,</span>                               <span class="c1"># TCP source port</span>
         <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dst_port</span><span class="p">,</span>                               <span class="c1"># TCP destination port</span>
         <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                 <span class="c1"># timestamp</span>
+        <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seqnum</span><span class="p">,</span>                                     <span class="c1"># TCP sequence number</span>
+        <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">acknum</span><span class="p">,</span>                                     <span class="c1"># TCP acknowledgement number</span>
+        <span class="n">header</span><span class="o">=</span><span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span>                           <span class="c1"># raw bytes type header</span>
+        <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]),</span>               <span class="c1"># raw bytearray type payload</span>
     <span class="p">)</span></div>
 
 </pre></div>

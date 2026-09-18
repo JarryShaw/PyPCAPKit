@@ -415,10 +415,11 @@
 <span class="sd">which reconstructs fragmented TCP packets back to origin.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deferred</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
                                                     <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span> <span class="k">as</span> <span class="n">Reassembly</span>
@@ -441,6 +442,9 @@
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
+<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">            :data:`None` selects :attr:`__timeout__`, which for TCP disables</span>
+<span class="sd">            expiry</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly import TCP</span>
@@ -482,6 +486,23 @@
     <span class="c1">#: Protocol of current reassembly object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">TCP_Protocol</span>
 
+    <span class="c1">#: float: Default reassembly timeout -- **disabled**, unlike IPv4 and IPv6.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: No specification gives TCP stream reassembly a deadline the way</span>
+    <span class="c1">#: :rfc:`1122#section-3.3.2` and :rfc:`8200#section-4.5` give IP</span>
+    <span class="c1">#: fragmentation one, and the numbers that look like candidates are not</span>
+    <span class="c1">#: reassembly timeouts: the Maximum Segment Lifetime of</span>
+    <span class="c1">#: :rfc:`9293#section-3.4.1` bounds how long a *segment* may linger in the</span>
+    <span class="c1">#: network, and the user timeout of :rfc:`9293#section-3.8.3` aborts a</span>
+    <span class="c1">#: connection whose data goes unacknowledged. Picking either as a default</span>
+    <span class="c1">#: would silently discard buffered stream data on captures that are merely</span>
+    <span class="c1">#: idle -- a long-lived connection with a two-minute lull is ordinary, while</span>
+    <span class="c1">#: a 60-second gap between fragments of one IP datagram is pathological.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: So the mechanism is available and the default is off: pass ``timeout`` to</span>
+    <span class="c1">#: ask for one, e.g. ``2 * 120`` for 2·MSL if that is the policy wanted.</span>
+    <span class="n">__timeout__</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
@@ -499,12 +520,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-        <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>  <span class="c1"># Buffer Identifier</span>
-        <span class="n">DSN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">dsn</span>      <span class="c1"># Data Sequence Number</span>
-        <span class="n">ACK</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">ack</span>      <span class="c1"># Acknowledgement Number</span>
-        <span class="n">FIN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fin</span>      <span class="c1"># Finish Flag (Termination)</span>
-        <span class="n">RST</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">rst</span>      <span class="c1"># Reset Connection Flag (Termination)</span>
-        <span class="n">SYN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">syn</span>      <span class="c1"># Synchronise Flag (Establishment)</span>
+        <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>   <span class="c1"># Buffer Identifier</span>
+        <span class="n">DSN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">dsn</span>       <span class="c1"># Data Sequence Number</span>
+        <span class="n">ACK</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">ack</span>       <span class="c1"># Acknowledgement Number</span>
+        <span class="n">FIN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fin</span>       <span class="c1"># Finish Flag (Termination)</span>
+        <span class="n">RST</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">rst</span>       <span class="c1"># Reset Connection Flag (Termination)</span>
+        <span class="n">SYN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">syn</span>       <span class="c1"># Synchronise Flag (Establishment)</span>
+        <span class="n">TS</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">timestamp</span>  <span class="c1"># Capture timestamp, i.e. the only clock we have</span>
+
+        <span class="c1"># This segment's arrival is the evidence that capture time has reached</span>
+        <span class="c1"># ``TS``. Off by default for TCP -- see ``__timeout__`` -- in which case</span>
+        <span class="c1"># this returns immediately.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">TS</span><span class="p">))</span>
 
         <span class="c1"># Sequence number of the first octet of this segment's payload. A SYN</span>
         <span class="c1"># occupies a sequence number of its own (:rfc:`793`), so payload sent</span>
@@ -544,6 +571,7 @@
                         <span class="n">raw</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">},</span>
+                <span class="n">timestamp</span><span class="o">=</span><span class="n">TS</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># initialise buffer with ACK</span>
@@ -632,12 +660,16 @@
 
 <div class="viewcode-block" id="TCP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+               <span class="n">timeout</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[Datagram]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: :term:`buffer &lt;reasm.tcp.buffer&gt;` dict of reassembled packets</span>
 <span class="sd">            bufid: buffer identifier</span>
+<span class="sd">            timeout: whether this buffer is being submitted because</span>
+<span class="sd">                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`</span>
+<span class="sd">                abandoned it under the reassembly timeout</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Reassembled :term:`packets &lt;reasm.tcp.datagram&gt;`.</span>
@@ -666,6 +698,12 @@
                 <span class="n">holes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">length</span><span class="p">)))</span>
             <span class="n">holes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
+            <span class="c1"># How completely this buffer came out, and why it stopped. Derived</span>
+            <span class="c1"># once per buffer, so the two branches cannot disagree about it.</span>
+            <span class="n">completion</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">COMPLETE</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">holes</span> <span class="k">else</span> <span class="p">(</span>
+                <span class="n">Completion</span><span class="o">.</span><span class="n">TIMEOUT</span> <span class="k">if</span> <span class="n">timeout</span> <span class="k">else</span> <span class="n">Completion</span><span class="o">.</span><span class="n">PARTIAL</span>
+            <span class="p">)</span>
+
             <span class="c1"># if this buffer is not implemented</span>
             <span class="c1"># go through every hole and extract received payload</span>
             <span class="k">if</span> <span class="n">holes</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
@@ -681,7 +719,7 @@
                     <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">data</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
                     <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
-                        <span class="n">completed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
                         <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
                             <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
                             <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
@@ -694,13 +732,20 @@
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
-            <span class="c1"># if this buffer is implemented</span>
-            <span class="c1"># export payload data &amp; convert into bytes</span>
+            <span class="c1"># if this buffer is implemented -- or if it is not, and ``strict``</span>
+            <span class="c1"># asked for one contiguous payload rather than the received runs</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: ``strict=False`` deliberately keeps reporting the whole</span>
+            <span class="c1"># payload buffer with its holes zero-filled, which is what</span>
+            <span class="c1"># :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream</span>
+            <span class="c1"># it is reconstructing best-effort. What changes is only that</span>
+            <span class="c1"># ``completed`` now says so: this branch used to report</span>
+            <span class="c1"># :attr:`Completion.COMPLETE` for a buffer it knew had holes in it.</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">payload</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">raw</span>
                 <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>    <span class="c1"># strip empty buffer</span>
                     <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
-                        <span class="n">completed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
                         <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
                             <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
                             <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>

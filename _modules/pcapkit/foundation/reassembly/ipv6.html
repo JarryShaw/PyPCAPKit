@@ -488,6 +488,8 @@
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
+<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">            :data:`None` selects :attr:`__timeout__`</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly import IPv6</span>
@@ -508,6 +510,25 @@
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv6'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv6_Protocol</span>
+
+    <span class="c1">#: float: Default reassembly timeout, in seconds, on the capture's clock.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`8200#section-4.5` is unambiguous and mandatory: "If insufficient</span>
+    <span class="c1">#: fragments are received to complete reassembly of a packet within 60</span>
+    <span class="c1">#: seconds of the reception of the first-arriving fragment of that packet,</span>
+    <span class="c1">#: reassembly of that packet must be abandoned and all the fragments that</span>
+    <span class="c1">#: have been received for that packet must be discarded."</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Note "first-arriving", not "first" -- the deadline is counted from</span>
+    <span class="c1">#: whichever fragment opened the buffer, not from the one at fragment offset</span>
+    <span class="c1">#: zero, which is why</span>
+    <span class="c1">#: :attr:`Buffer.timestamp &lt;pcapkit.foundation.reassembly.data.ip.Buffer.timestamp&gt;`</span>
+    <span class="c1">#: is set once and never revised. The offset-zero fragment matters only to</span>
+    <span class="c1">#: the second half of the rule, the ICMP Time Exceeded that a live stack</span>
+    <span class="c1">#: "should" send and that an offline parser cannot -- see</span>
+    <span class="c1">#: :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`,</span>
+    <span class="c1">#: which reports the condition in its log record instead.</span>
+    <span class="n">__timeout__</span> <span class="o">=</span> <span class="mf">60.0</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>

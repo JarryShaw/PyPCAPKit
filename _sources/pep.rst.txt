@@ -594,16 +594,112 @@ Two smaller items in the same subsystem:
 
 * **Flow tracing is TCP only**, and blocked on the same generalisation --
   :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
-  so UDP, SCTP and IP conversation tracing have nowhere to go. The TCP tracer
-  itself closes a flow on FIN but never on RST, which is not in its packet model
-  at all, and treats each direction of a connection as a separate flow.
-* **Nothing ever times a partial datagram out.** :rfc:`791` gives IP reassembly
-  a 15-second timer and :rfc:`8200` gives IPv6 60 seconds; neither is
-  implemented, and neither can be until the buffer models carry a timestamp. A
-  buffer is released only when its datagram completes or its flow is torn down,
-  and every in-flight IP datagram identifier holds a fixed 72 KiB of
-  preallocated space -- so a lossy capture, or one with spoofed identifiers,
-  grows the buffer monotonically.
+  so UDP, SCTP and IP conversation tracing have nowhere to go.
+
+  It no longer *treats each direction of a connection as a separate flow*,
+  though, and RST is no longer missing from
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`. :meth:`TCP.make_bufid
+  <pcapkit.foundation.traceflow.tcp.TCP.make_bufid>` orders the two endpoints
+  canonically, so both halves of a conversation reduce to one buffer ID, one
+  label and one output file, and
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Index` reports ``forward`` and
+  ``reverse`` alongside ``index`` so per-direction ordering stays recoverable.
+  This is the default; ``bidirectional=False``
+  (``trace_bidirectional=False`` on
+  :class:`~pcapkit.foundation.extraction.Extractor`,
+  :func:`~pcapkit.interface.core.extract` and
+  :func:`~pcapkit.interface.misc.follow_tcp_stream`) restores the older
+  per-direction behaviour.
+
+  What ends a bidirectional flow is worth stating, because the obvious answer is
+  wrong. A teardown -- a FIN from each endpoint, or a RST from either -- is
+  *recorded* but does not finalise the flow: the four-way close of
+  :rfc:`9293#section-3.6` is FIN, ACK, FIN, ACK, so the final acknowledgement
+  arrives after the second FIN, and finalising on that FIN drops the ACK from the
+  flow and lets it open a fresh buffer under the same canonical buffer ID -- which
+  a later connection reusing those endpoints then merges into. Duplicates of that
+  ACK defeat any rule that tries to name the last packet of the exchange. So the
+  flow is finalised only by proof that nothing more can arrive: a new connection's
+  SYN on the same endpoints, or the end of the capture, via
+  :meth:`TraceFlow.finish
+  <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`. Distinguishing
+  that SYN from the peer's SYN-ACK is what the recorded teardown is for.
+
+  One case remains undecided rather than solved: a capture that *starts* in the
+  middle of a connection, sees no teardown, and then has its endpoints reused. The
+  reuse is indistinguishable from a continuation without the ACK flag on
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`, which would make
+  ``syn and not ack`` a definitive new-connection test on its own.
+
+  **The application layer is wired into flow tracing** as well, though it is a
+  capability rather than a parse to postpone: flow tracing buffered no payload at
+  all, so there was no second parse to defer. Of the two ways of getting one, the
+  tracer **delegates to**
+  :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than growing a
+  per-direction payload buffer of its own. A buffer that concatenated payloads in
+  capture order would be silently wrong on the first retransmission or reordered
+  segment, where the :rfc:`815` hole-descriptor algorithm already in the
+  reassembler is not -- so
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` carries the four segment
+  fields (``seq``, ``ack``, ``header``, ``payload``) that reassembler needs, and
+  the tracer hands each traced segment straight to it.
+
+  :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` then
+  holds one reassembled datagram per direction, and postpones twice: reading it is
+  what flushes the flow's reassembler, and each datagram's own
+  :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed later
+  still, through the same
+  :class:`~pcapkit.foundation.reassembly.data.data.Deferred` arrangement the
+  reassembly side uses. It is **opt-in** -- ``analyse=True``, or
+  ``trace_analyse=True`` on :class:`~pcapkit.foundation.extraction.Extractor`,
+  :func:`~pcapkit.interface.core.extract` and
+  :func:`~pcapkit.interface.misc.follow_tcp_stream` -- because buffering every
+  traced payload is a cost tracing does not otherwise pay, and tracing's
+  per-packet cost is something this package has deliberately driven down. It is
+  unavailable on the ``pyshark`` engine, which reports dissected fields rather
+  than the octets behind them, and which for the same reason has no reassembly
+  adapter at all; asking for it there warns and falls back.
+* **Timing a partial datagram out** is implemented, for IP.
+  :meth:`Reassembly.expire
+  <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire>` abandons a
+  buffer whose first-arriving fragment is older than
+  :attr:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.timeout`
+  seconds, and the buffer models carry the timestamp that makes it possible.
+
+  The clock is the **capture's own timestamps**, not the host's: an offline
+  parser has no other notion of time passing, and keying on
+  :func:`time.time` would make the same file reassemble differently on every
+  run. A fragment being handed over is the only evidence capture time has
+  advanced, so that is when the sweep happens -- which means the clock advances
+  only while the reassembler is being fed. For IPv4 and TCP that is nearly every
+  frame of the protocol; for IPv6 it is only the fragments, so an IPv6 buffer
+  that stalls with no further fragment behind it is reported as
+  :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL` rather
+  than
+  :attr:`~pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT`. That is
+  the honest answer, since the capture never shows the deadline passing; feeding
+  every frame's timestamp to every enabled reassembler would close the gap and
+  is worth doing on its own account.
+
+  On the numbers: the 15 seconds this page used to attribute to :rfc:`791` is
+  that RFC's *initial* timer setting, a lower bound which
+  ``TIMER <- MAX(TIMER,TTL)`` then raises toward the 4.25-minute TTL ceiling --
+  not a deadline. :rfc:`1122#section-3.3.2` supersedes the scheme outright
+  ("The reassembly timeout value SHOULD be a fixed value, not set from the
+  remaining TTL... between 60 seconds and 120 seconds"), so IPv4 uses 60
+  seconds, agreeing with the 60 :rfc:`8200#section-4.5` mandates for IPv6.
+  **TCP is left with no timeout at all**, since no specification gives stream
+  reassembly a deadline and an idle connection is ordinary rather than
+  pathological; ``timeout`` enables one on request.
+
+  Two related things are *not* done. :rfc:`8200#section-4.5` and
+  :rfc:`1122#section-3.3.2` both want an ICMP Time Exceeded sent on expiry when
+  the offset-zero fragment has been received; a parser sends nothing, so the
+  condition is only reported in the log record. And the memory motive is
+  narrowed rather than removed -- an in-flight IP datagram identifier still
+  holds a fixed 72 KiB of preallocated space, but now for at most the timeout's
+  worth of capture time rather than for the life of the
+  :class:`~pcapkit.foundation.extraction.Extractor`.
 
 Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and

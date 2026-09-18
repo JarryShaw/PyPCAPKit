@@ -429,7 +429,7 @@ bases on algorithms described in <span class="target" id="index-0"></span><a cla
 implements datagram reassembly of IP and TCP packets.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_BT</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_BT</span></code></a>]</p>
 <p>Base flow tracing class.</p>
 <div class="admonition-example admonition">
@@ -449,6 +449,8 @@ implemented) when submit</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a> (if not, datagram
 will be discarded after callback)</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – reassembly timeout in seconds, on the capture’s own clock;
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> selects the protocol’s <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__timeout__</span></code></a> default</p></li>
 </ul>
 </dd>
 </dl>
@@ -497,6 +499,15 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.reas
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly timeout, in seconds, of the current reassembly object.</p>
+<p>A buffer whose first-arriving fragment is older than this many seconds
+<strong>on the capture’s own clock</strong> is abandoned rather than held for the life
+of the object – see <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a>. <a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="Link to this definition">¶</a></dt>
@@ -516,13 +527,57 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.reas
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_BT</span></code>, bound= Info)</span>) – buffer dict of reassembled packets</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – arbitrary keyword arguments; implementations accept
+<code class="docutils literal notranslate"><span class="pre">timeout</span></code>, set when the buffer is being submitted because
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="pcapkit.foundation.reassembly.reassembly.Reassembly.expire"><code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code></a> abandoned it rather than because it completed or
+the capture ended</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_DT</span></code>, bound= Info)]</span></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.expire">
+<span class="sig-name descname"><span class="pre">expire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.expire" title="Link to this definition">¶</a></dt>
+<dd><p>Abandon every buffer whose reassembly timeout has elapsed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Current time on the capture’s clock, in seconds since the
+Unix epoch – i.e. the capture timestamp of the packet just
+handed to <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_DT</span></code>, bound= Info)]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Datagrams of the buffers abandoned, reported with
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.TIMEOUT</span></code>.
+Empty when nothing expired, which is the overwhelmingly common case.</p>
+</dd>
+</dl>
+<p>A buffer expires when more than <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.timeout" title="pcapkit.foundation.reassembly.reassembly.Reassembly.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code></a> seconds separate
+<code class="docutils literal notranslate"><span class="pre">timestamp</span></code> from the capture timestamp of its <strong>first-arriving</strong>
+fragment, which is the deadline <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> states (“within
+60 seconds of the reception of the first-arriving fragment”) and which
+<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> suggests implementing by reading “the clock when each first
+fragment arrives”. A later fragment therefore does not extend the
+deadline.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The clock only advances when <em>this</em> reassembly object is fed, since
+a packet handed to it is the only evidence an offline parser has that
+capture time has moved on. For IPv4 and TCP that is nearly every
+frame of the relevant protocol; for IPv6 it is only the fragments,
+so an IPv6 buffer that stalls and is followed by no further IPv6
+fragment is reported as
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.PARTIAL</span></code>
+at the end of the capture. That is the honest answer: the capture
+never shows that the deadline passed. A caller with an outside
+source of time may call this method itself to advance the clock.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -642,6 +697,18 @@ will be discarded after callback.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._timeout">
+<span class="sig-name descname"><span class="pre">_timeout</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._timeout" title="Link to this definition">¶</a></dt>
+<dd><p>Reassembly timeout in seconds, on the capture’s clock.
+<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> disables expiry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
 <span class="sig-name descname"><span class="pre">_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><span class="pre">_IT</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><span class="pre">_BT</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Link to this definition">¶</a></dt>
 <dd><p>Dict buffer field. This field is used to
@@ -711,13 +778,28 @@ to store reassembled datagrams.</p>
 <dd><p>Protocol of current reassembly object.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__">
+<span class="sig-name descname"><span class="pre">__timeout__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">inf</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__timeout__" title="Link to this definition">¶</a></dt>
+<dd><p>Default reassembly timeout, in seconds, for this protocol –
+overridden per protocol, e.g.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6.__timeout__</span></code>.
+<a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> means “never expire”, which is the base default because
+nothing here knows what a protocol’s specification asks for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <section id="internal-definitions">
 <h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.ReassemblyBase">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">ReassemblyBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#ReassemblyBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">ReassemblyBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#ReassemblyBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_BT</span></code></a>]</p>
 <p>Base class for reassembly procedure.</p>
 <dl class="field-list simple">
@@ -728,6 +810,9 @@ implemented) when submit</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code> (if not, datagram
 will be discarded after callback)</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – reassembly timeout in seconds, measured on the
+<em>capture’s</em> clock; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> selects the protocol’s
+own <code class="xref py py-attr docutils literal notranslate"><span class="pre">__timeout__</span></code> default</p></li>
 </ul>
 </dd>
 </dl>

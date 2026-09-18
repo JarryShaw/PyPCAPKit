@@ -436,6 +436,8 @@
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram&gt;`</span>
 <span class="sd">            (if not, datagram will be discarded after callback)</span>
+<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">            :data:`None` selects :attr:`__timeout__`</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly import IPv4</span>
@@ -455,7 +457,33 @@
     <span class="c1">#: Protocol name of current reassembly object.</span>
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv4'</span>
     <span class="c1">#: Protocol of current reassembly object.</span>
-    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4_Protocol</span></div>
+    <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4_Protocol</span>
+
+    <span class="c1">#: float: Default reassembly timeout, in seconds, on the capture's clock.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`1122#section-3.3.2` is the governing text and it is emphatic on both</span>
+    <span class="c1">#: halves: "There MUST be a reassembly timeout. The reassembly timeout value</span>
+    <span class="c1">#: SHOULD be a fixed value, **not set from the remaining TTL**. It is</span>
+    <span class="c1">#: recommended that the value lie between 60 seconds and 120 seconds." Its</span>
+    <span class="c1">#: DISCUSSION explains why it overrode :rfc:`791`: gateways came to treat TTL</span>
+    <span class="c1">#: as a hop count rather than elapsed seconds, so a TTL-derived deadline</span>
+    <span class="c1">#: discards datagrams that were merely slow.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`791#section-3.2` is therefore *not* followed to the letter. Its</span>
+    <span class="c1">#: scheme is ``TIMER &lt;- MAX(TIMER,TTL)`` seeded from a "Timer Lower Bound",</span>
+    <span class="c1">#: for which "the current recommendation for the initial timer setting is 15</span>
+    <span class="c1">#: seconds" -- an initial lower bound that a later fragment's TTL raises,</span>
+    <span class="c1">#: up to the 4.25-minute TTL ceiling, not a 15-second deadline. Two things</span>
+    <span class="c1">#: rule it out here: the recommendation is superseded, and TTL is not in</span>
+    <span class="c1">#: :class:`~pcapkit.foundation.reassembly.data.ip.Packet` at all, so the</span>
+    <span class="c1">#: fragment model would have to grow a field to express a scheme the current</span>
+    <span class="c1">#: requirement asks implementations not to use.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: 60 seconds is the low end of RFC 1122's range, and it makes IPv4 agree</span>
+    <span class="c1">#: with the 60 seconds :rfc:`8200#section-4.5` mandates for IPv6 -- so one</span>
+    <span class="c1">#: timestamp-driven eviction path serves both, which is the whole reason the</span>
+    <span class="c1">#: buffer models carry a timestamp.</span>
+    <span class="n">__timeout__</span> <span class="o">=</span> <span class="mf">60.0</span></div>
 
 </pre></div>
         </article>

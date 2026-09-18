@@ -418,11 +418,12 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="c1"># NB: declared above the ``TYPE_CHECKING`` block, not below it, so that</span>
@@ -499,6 +500,9 @@
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">            will be discarded after callback)</span>
+<span class="sd">        timeout: reassembly timeout in seconds, measured on the</span>
+<span class="sd">            *capture's* clock; :data:`None` selects the protocol's</span>
+<span class="sd">            own :attr:`__timeout__` default</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        This class is for internal use only. For customisation, please use</span>
@@ -517,13 +521,36 @@
     <span class="n">_flag_s</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">'bool'</span>
+    <span class="n">_timeout</span><span class="p">:</span> <span class="s1">'float'</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span>
 
     <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: float: Default reassembly timeout, in seconds, for this protocol --</span>
+    <span class="c1">#: overridden per protocol, e.g.</span>
+    <span class="c1">#: :attr:`IPv6.__timeout__ &lt;pcapkit.foundation.reassembly.ipv6.IPv6.__timeout__&gt;`.</span>
+    <span class="c1">#: :data:`math.inf` means "never expire", which is the base default because</span>
+    <span class="c1">#: nothing here knows what a protocol's specification asks for.</span>
+    <span class="n">__timeout__</span><span class="p">:</span> <span class="s1">'float'</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reassembly timeout, in seconds, of the current reassembly object.</span>
+
+<span class="sd">        A buffer whose first-arriving fragment is older than this many seconds</span>
+<span class="sd">        **on the capture's own clock** is abandoned rather than held for the life</span>
+<span class="sd">        of the object -- see :meth:`expire`. :data:`math.inf` disables expiry.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -608,9 +635,77 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: buffer dict of reassembled packets</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments; implementations accept</span>
+<span class="sd">                ``timeout``, set when the buffer is being submitted because</span>
+<span class="sd">                :meth:`expire` abandoned it rather than because it completed or</span>
+<span class="sd">                the capture ended</span>
 
 <span class="sd">        """</span>
+
+    <span class="c1"># abandon timed-out buffers</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[_DT]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Abandon every buffer whose reassembly timeout has elapsed.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            timestamp: Current time on the capture's clock, in seconds since the</span>
+<span class="sd">                Unix epoch -- i.e. the capture timestamp of the packet just</span>
+<span class="sd">                handed to :meth:`reassembly`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Datagrams of the buffers abandoned, reported with</span>
+<span class="sd">            :attr:`Completion.TIMEOUT &lt;pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT&gt;`.</span>
+<span class="sd">            Empty when nothing expired, which is the overwhelmingly common case.</span>
+
+<span class="sd">        A buffer expires when more than :attr:`timeout` seconds separate</span>
+<span class="sd">        ``timestamp`` from the capture timestamp of its **first-arriving**</span>
+<span class="sd">        fragment, which is the deadline :rfc:`8200#section-4.5` states ("within</span>
+<span class="sd">        60 seconds of the reception of the first-arriving fragment") and which</span>
+<span class="sd">        :rfc:`815` suggests implementing by reading "the clock when each first</span>
+<span class="sd">        fragment arrives". A later fragment therefore does not extend the</span>
+<span class="sd">        deadline.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The clock only advances when *this* reassembly object is fed, since</span>
+<span class="sd">            a packet handed to it is the only evidence an offline parser has that</span>
+<span class="sd">            capture time has moved on. For IPv4 and TCP that is nearly every</span>
+<span class="sd">            frame of the relevant protocol; for IPv6 it is only the fragments,</span>
+<span class="sd">            so an IPv6 buffer that stalls and is followed by no further IPv6</span>
+<span class="sd">            fragment is reported as</span>
+<span class="sd">            :attr:`Completion.PARTIAL &lt;pcapkit.foundation.reassembly.data.data.Completion.PARTIAL&gt;`</span>
+<span class="sd">            at the end of the capture. That is the honest answer: the capture</span>
+<span class="sd">            never shows that the deadline passed. A caller with an outside</span>
+<span class="sd">            source of time may call this method itself to advance the clock.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="c1"># NOTE: The deadline is compared against the buffer's own origin rather</span>
+        <span class="c1"># than an elapsed count decremented per packet, so the answer depends</span>
+        <span class="c1"># only on the timestamps in the capture file and not on how the frames</span>
+        <span class="c1"># were handed over. That is what keeps a replay deterministic.</span>
+        <span class="n">deadline</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span>
+        <span class="n">expired</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">bufid</span> <span class="k">for</span> <span class="p">(</span><span class="n">bufid</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Any'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">deadline</span>
+        <span class="p">]</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
+        <span class="k">for</span> <span class="n">bufid</span> <span class="ow">in</span> <span class="n">expired</span><span class="p">:</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">bufid</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: :rfc:`8200#section-4.5` and :rfc:`1122#section-3.3.2` both</span>
+            <span class="c1"># ask for an ICMP Time Exceeded here, gated on the offset-zero</span>
+            <span class="c1"># fragment having been received. An offline parser sends nothing, so</span>
+            <span class="c1"># the condition is reported instead: the header buffer is non-empty</span>
+            <span class="c1"># exactly when that fragment arrived.</span>
+            <span class="n">owed_icmp</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s1">'header'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="s1">'hdr'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: abandoning buffer </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%.6f</span><span class="s1">s &gt; </span><span class="si">%.6f</span><span class="s1">s timeout '</span>
+                         <span class="s1">'(ICMP Time Exceeded owed: </span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">bufid</span><span class="p">,</span>
+                         <span class="n">timestamp</span> <span class="o">-</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Any'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">,</span> <span class="n">owed_icmp</span><span class="p">)</span>
+
+            <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">bufid</span><span class="o">=</span><span class="n">bufid</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
     <span class="c1"># fetch datagram</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[_DT, ...]'</span><span class="p">:</span>
@@ -714,7 +809,8 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialise packet reassembly.</span>
 
 <span class="sd">        Args:</span>
@@ -723,6 +819,13 @@
 <span class="sd">            store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">                :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">                will be discarded after callback)</span>
+<span class="sd">            timeout: reassembly timeout in seconds, measured on the capture's</span>
+<span class="sd">                own clock rather than the host's; :data:`None` selects this</span>
+<span class="sd">                protocol's :attr:`__timeout__` default, and</span>
+<span class="sd">                :data:`math.inf` disables expiry entirely</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``timeout`` is negative.</span>
 
 <span class="sd">        """</span>
         <span class="c1">#: bool: Strict mode flag. If set to :data:`True`, all</span>
@@ -739,6 +842,15 @@
         <span class="c1">#: :attr:`self._dtgram &lt;_dtgram&gt;` will be repopulated.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__timeout__</span>
+        <span class="k">elif</span> <span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: reassembly timeout must not be '</span>
+                                  <span class="sa">f</span><span class="s1">'negative, got </span><span class="si">{</span><span class="n">timeout</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="c1">#: float: Reassembly timeout in seconds, on the capture's clock.</span>
+        <span class="c1">#: :data:`math.inf` disables expiry.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+
         <span class="c1">#: dict[_IT, _BT]: Dict buffer field. This field is used to</span>
         <span class="c1">#: store reassembled packets in the form of ``{bufid: buffer}``.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[_IT, _BT]</span>
@@ -746,8 +858,8 @@
         <span class="c1">#: to store reassembled datagrams.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[_DT]</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> reassembly initialised (strict=</span><span class="si">%s</span><span class="s1">, store=</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span>
-                     <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> reassembly initialised (strict=</span><span class="si">%s</span><span class="s1">, store=</span><span class="si">%s</span><span class="s1">, timeout=</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeout</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Call packet reassembly.</span>
@@ -793,6 +905,8 @@
 <span class="sd">        store: if store reassembled datagram in memory, i.e.,</span>
 <span class="sd">            :attr:`self._dtgram &lt;_dtgram&gt;` (if not, datagram</span>
 <span class="sd">            will be discarded after callback)</span>
+<span class="sd">        timeout: reassembly timeout in seconds, on the capture's own clock;</span>
+<span class="sd">            :data:`None` selects the protocol's :attr:`__timeout__` default</span>
 
 <span class="sd">    """</span>
 

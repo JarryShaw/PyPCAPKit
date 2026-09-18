@@ -962,19 +962,106 @@ touching that manager and its read-side twin, the construction branch in
 registered reassembler is actually used is worth doing on its own account, and
 would make the fourth protocol cheaper than the third rather than dearer.</p>
 <p>Two smaller items in the same subsystem:</p>
-<ul class="simple">
+<ul>
 <li><p><strong>Flow tracing is TCP only</strong>, and blocked on the same generalisation –
 <a class="reference internal" href="pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.TraceFlowManager" title="pcapkit.foundation.traceflow.TraceFlowManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowManager</span></code></a> holds a single field,
-so UDP, SCTP and IP conversation tracing have nowhere to go. The TCP tracer
-itself closes a flow on FIN but never on RST, which is not in its packet model
-at all, and treats each direction of a connection as a separate flow.</p></li>
-<li><p><strong>Nothing ever times a partial datagram out.</strong> <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> gives IP reassembly
-a 15-second timer and <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> gives IPv6 60 seconds; neither is
-implemented, and neither can be until the buffer models carry a timestamp. A
-buffer is released only when its datagram completes or its flow is torn down,
-and every in-flight IP datagram identifier holds a fixed 72 KiB of
-preallocated space – so a lossy capture, or one with spoofed identifiers,
-grows the buffer monotonically.</p></li>
+so UDP, SCTP and IP conversation tracing have nowhere to go.</p>
+<p>It no longer <em>treats each direction of a connection as a separate flow</em>,
+though, and RST is no longer missing from
+<a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>. <a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP.make_bufid" title="pcapkit.foundation.traceflow.tcp.TCP.make_bufid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.make_bufid</span></code></a> orders the two endpoints
+canonically, so both halves of a conversation reduce to one buffer ID, one
+label and one output file, and
+<a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index" title="pcapkit.foundation.traceflow.data.tcp.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a> reports <code class="docutils literal notranslate"><span class="pre">forward</span></code> and
+<code class="docutils literal notranslate"><span class="pre">reverse</span></code> alongside <code class="docutils literal notranslate"><span class="pre">index</span></code> so per-direction ordering stays recoverable.
+This is the default; <code class="docutils literal notranslate"><span class="pre">bidirectional=False</span></code>
+(<code class="docutils literal notranslate"><span class="pre">trace_bidirectional=False</span></code> on
+<a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>,
+<a class="reference internal" href="pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> and
+<a class="reference internal" href="pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream" title="pcapkit.interface.misc.follow_tcp_stream"><code class="xref py py-func docutils literal notranslate"><span class="pre">follow_tcp_stream()</span></code></a>) restores the older
+per-direction behaviour.</p>
+<p>What ends a bidirectional flow is worth stating, because the obvious answer is
+wrong. A teardown – a FIN from each endpoint, or a RST from either – is
+<em>recorded</em> but does not finalise the flow: the four-way close of
+<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.6"><strong>RFC 9293 Section 3.6</strong></a> is FIN, ACK, FIN, ACK, so the final acknowledgement
+arrives after the second FIN, and finalising on that FIN drops the ACK from the
+flow and lets it open a fresh buffer under the same canonical buffer ID – which
+a later connection reusing those endpoints then merges into. Duplicates of that
+ACK defeat any rule that tries to name the last packet of the exchange. So the
+flow is finalised only by proof that nothing more can arrive: a new connection’s
+SYN on the same endpoints, or the end of the capture, via
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code>. Distinguishing
+that SYN from the peer’s SYN-ACK is what the recorded teardown is for.</p>
+<p>One case remains undecided rather than solved: a capture that <em>starts</em> in the
+middle of a connection, sees no teardown, and then has its endpoints reused. The
+reuse is indistinguishable from a continuation without the ACK flag on
+<a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, which would make
+<code class="docutils literal notranslate"><span class="pre">syn</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">ack</span></code> a definitive new-connection test on its own.</p>
+<p><strong>The application layer is wired into flow tracing</strong> as well, though it is a
+capability rather than a parse to postpone: flow tracing buffered no payload at
+all, so there was no second parse to defer. Of the two ways of getting one, the
+tracer <strong>delegates to</strong>
+<a class="reference internal" href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> rather than growing a
+per-direction payload buffer of its own. A buffer that concatenated payloads in
+capture order would be silently wrong on the first retransmission or reordered
+segment, where the <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a> hole-descriptor algorithm already in the
+reassembler is not – so
+<a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet" title="pcapkit.foundation.traceflow.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> carries the four segment
+fields (<code class="docutils literal notranslate"><span class="pre">seq</span></code>, <code class="docutils literal notranslate"><span class="pre">ack</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code>, <code class="docutils literal notranslate"><span class="pre">payload</span></code>) that reassembler needs, and
+the tracer hands each traced segment straight to it.</p>
+<p><a class="reference internal" href="pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index.packet" title="pcapkit.foundation.traceflow.data.tcp.Index.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Index.packet</span></code></a> then
+holds one reassembled datagram per direction, and postpones twice: reading it is
+what flushes the flow’s reassembler, and each datagram’s own
+<a class="reference internal" href="pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code></a> is parsed later
+still, through the same
+<a class="reference internal" href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> arrangement the
+reassembly side uses. It is <strong>opt-in</strong> – <code class="docutils literal notranslate"><span class="pre">analyse=True</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">trace_analyse=True</span></code> on <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>,
+<a class="reference internal" href="pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> and
+<a class="reference internal" href="pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream" title="pcapkit.interface.misc.follow_tcp_stream"><code class="xref py py-func docutils literal notranslate"><span class="pre">follow_tcp_stream()</span></code></a> – because buffering every
+traced payload is a cost tracing does not otherwise pay, and tracing’s
+per-packet cost is something this package has deliberately driven down. It is
+unavailable on the <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> engine, which reports dissected fields rather
+than the octets behind them, and which for the same reason has no reassembly
+adapter at all; asking for it there warns and falls back.</p>
+</li>
+<li><p><strong>Timing a partial datagram out</strong> is implemented, for IP.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Reassembly.expire</span></code> abandons a
+buffer whose first-arriving fragment is older than
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code>
+seconds, and the buffer models carry the timestamp that makes it possible.</p>
+<p>The clock is the <strong>capture’s own timestamps</strong>, not the host’s: an offline
+parser has no other notion of time passing, and keying on
+<a class="reference external" href="https://docs.python.org/3/library/time.html#time.time" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">time.time()</span></code></a> would make the same file reassemble differently on every
+run. A fragment being handed over is the only evidence capture time has
+advanced, so that is when the sweep happens – which means the clock advances
+only while the reassembler is being fed. For IPv4 and TCP that is nearly every
+frame of the protocol; for IPv6 it is only the fragments, so an IPv6 buffer
+that stalls with no further fragment behind it is reported as
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PARTIAL</span></code> rather
+than
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TIMEOUT</span></code>. That is
+the honest answer, since the capture never shows the deadline passing; feeding
+every frame’s timestamp to every enabled reassembler would close the gap and
+is worth doing on its own account.</p>
+<p>On the numbers: the 15 seconds this page used to attribute to <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> is
+that RFC’s <em>initial</em> timer setting, a lower bound which
+<code class="docutils literal notranslate"><span class="pre">TIMER</span> <span class="pre">&lt;-</span> <span class="pre">MAX(TIMER,TTL)</span></code> then raises toward the 4.25-minute TTL ceiling –
+not a deadline. <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> supersedes the scheme outright
+(“The reassembly timeout value SHOULD be a fixed value, not set from the
+remaining TTL… between 60 seconds and 120 seconds”), so IPv4 uses 60
+seconds, agreeing with the 60 <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> mandates for IPv6.
+<strong>TCP is left with no timeout at all</strong>, since no specification gives stream
+reassembly a deadline and an idle connection is ordinary rather than
+pathological; <code class="docutils literal notranslate"><span class="pre">timeout</span></code> enables one on request.</p>
+<p>Two related things are <em>not</em> done. <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> and
+<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> both want an ICMP Time Exceeded sent on expiry when
+the offset-zero fragment has been received; a parser sends nothing, so the
+condition is only reported in the log record. And the memory motive is
+narrowed rather than removed – an in-flight IP datagram identifier still
+holds a fixed 72 KiB of preallocated space, but now for at most the timeout’s
+worth of capture time rather than for the life of the
+<a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>.</p>
+</li>
 </ul>
 <p>Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and

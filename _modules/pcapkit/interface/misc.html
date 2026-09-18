@@ -430,7 +430,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
@@ -486,7 +486,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
-                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>
+                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'ByteOrder'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                      <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Stream, ...]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Follow TCP streams.</span>
 
 <span class="sd">    Arguments:</span>
@@ -499,6 +501,17 @@
 <span class="sd">        format: output file format of flow tracer</span>
 <span class="sd">        byteorder: output file byte order</span>
 <span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        trace_bidirectional: whether both halves of a conversation are followed</span>
+<span class="sd">            as one stream, which is the default -- a stream then holds the</span>
+<span class="sd">            frames and the reassembled payload of *both* directions, which is</span>
+<span class="sd">            what "following a TCP stream" means elsewhere. :data:`False`</span>
+<span class="sd">            restores one stream per direction.</span>
+<span class="sd">        trace_analyse: whether each traced flow reassembles its application</span>
+<span class="sd">            layer, so that ``Index.packet`` can be read off</span>
+<span class="sd">            :attr:`Extractor.trace &lt;pcapkit.foundation.extraction.Extractor.trace&gt;`.</span>
+<span class="sd">            Off by default, and independent of the ``conversations`` this</span>
+<span class="sd">            function returns -- those come from the reassembly below, which runs</span>
+<span class="sd">            either way.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List of extracted TCP streams.</span>
@@ -541,7 +554,9 @@
                            <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
                            <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                            <span class="n">reassembly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
+                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+                           <span class="n">trace_bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span>
+                           <span class="n">trace_analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">)</span>  <span class="c1"># type: ignore[var-annotated]</span>
 
     <span class="c1"># NOTE: ``Extractor.engine`` returns the running engine *instance* (see</span>
     <span class="c1"># :meth:`Extractor.engine &lt;pcapkit.foundation.extraction.Extractor.engine&gt;`),</span>
@@ -560,6 +575,10 @@
     <span class="n">exeng</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span>
     <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[ReassemblyAdapter]</span>
     <span class="n">pass_count</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#: Reads a frame's capture timestamp back off the frame, for the one adapter</span>
+    <span class="c1">#: whose signature takes it. :data:`None` for the adapters that find it</span>
+    <span class="c1">#: themselves.</span>
+    <span class="n">timestamp_of</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Callable[[Any], float]]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap</span> <span class="k">as</span> <span class="n">tk_pcap</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">pass_count</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_pcap</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">),</span> <span class="kc">False</span>
@@ -568,7 +587,14 @@
         <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">pass_count</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_pcapng</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">),</span> <span class="kc">False</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">DPKT_Engine</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">dpkt</span> <span class="k">as</span> <span class="n">tk_dpkt</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="c1"># NOTE: DPKT's reader hands ``(timestamp, bytes)`` back and only the octets</span>
+        <span class="c1"># become a packet, so its adapters take the capture timestamp as an</span>
+        <span class="c1"># argument rather than finding it on the frame. That timestamp is real and</span>
+        <span class="c1"># available -- :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches it to</span>
+        <span class="c1"># every frame it reads, precisely so that a reader arriving after the</span>
+        <span class="c1"># extraction loop (like this one) can get it back.</span>
         <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_dpkt</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">)</span>
+        <span class="n">timestamp_of</span> <span class="o">=</span> <span class="n">tk_dpkt</span><span class="o">.</span><span class="n">packet2timestamp</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exeng</span><span class="p">,</span> <span class="n">Scapy_Engine</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">scapy</span> <span class="k">as</span> <span class="n">tk_scapy</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ReassemblyAdapter'</span><span class="p">,</span> <span class="n">tk_scapy</span><span class="o">.</span><span class="n">tcp_reassembly</span><span class="p">)</span>
@@ -594,7 +620,9 @@
             <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">pass_count</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">timestamp_of</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">timestamp_of</span><span class="p">(</span><span class="n">frame</span><span class="p">),</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pass_count</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>

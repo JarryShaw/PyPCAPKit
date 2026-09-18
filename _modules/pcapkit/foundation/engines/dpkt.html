@@ -557,8 +557,8 @@
 <span class="sd">            for more operational information.</span>
 
 <span class="sd">        """</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
-                                          <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.dpkt</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">attach_timestamp</span><span class="p">,</span> <span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span>
+                                          <span class="n">packet2dict</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
         <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
@@ -568,6 +568,12 @@
         <span class="n">timestamp</span><span class="p">,</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'tuple[float, bytes]'</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">))</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol</span><span class="p">(</span><span class="n">linktype</span><span class="p">)</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
+
+        <span class="c1"># DPKT hands the record's timestamp back beside its octets and only the</span>
+        <span class="c1"># octets become a packet, so the frame would otherwise not know when it was</span>
+        <span class="c1"># captured -- and anything reading a *stored* frame after this loop has</span>
+        <span class="c1"># moved on could not find out. Keep the two together from the start.</span>
+        <span class="n">attach_timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
 
         <span class="c1"># verbose output</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -588,15 +594,15 @@
         <span class="c1"># record fragments</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv4</span><span class="p">:</span>
-                <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv4</span><span class="p">(</span><span class="n">data_ipv4</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv6</span><span class="p">:</span>
-                <span class="n">data_ipv6</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_ipv6</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv6</span><span class="p">(</span><span class="n">data_ipv6</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
-                <span class="n">data_tcp</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_tcp</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tcp</span><span class="p">)</span>
 

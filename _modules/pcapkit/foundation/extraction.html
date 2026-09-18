@@ -444,8 +444,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">IterableError</span><span class="p">,</span>
                                           <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EngineWarning</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span>
-                                        <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span>
+                                        <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferedReader</span>
@@ -1147,8 +1147,10 @@
                  <span class="n">files</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool | VerboseHandler'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
                  <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[Engines]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="s1">'Optional[Layers]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Protocols]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># extraction settings # pylint: disable=line-too-long</span>
                  <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reasm_strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reasm_store</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                           <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
+                 <span class="n">reasm_timeout</span><span class="p">:</span> <span class="s1">'Optional[float]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                                                                       <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
                  <span class="n">trace</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">'Optional[Formats]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">'Literal["big", "little"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                 <span class="c1"># trace settings # pylint: disable=line-too-long</span>
+                 <span class="n">trace_bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">trace_analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                            <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">ip</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                           <span class="c1"># reassembly/trace settings # pylint: disable=line-too-long</span>
                  <span class="n">buffer_size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># buffer settings # pylint: disable=line-too-long</span>
                  <span class="n">no_eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                                                                                      <span class="c1"># EOF settings # pylint: disable=line-too-long</span>
@@ -1178,12 +1180,27 @@
 <span class="sd">            reassembly: if perform reassembly</span>
 <span class="sd">            reasm_strict: if set strict flag for reassembly</span>
 <span class="sd">            reasm_store: if store reassembled datagrams</span>
+<span class="sd">            reasm_timeout: reassembly timeout in seconds, measured on the</span>
+<span class="sd">                *capture's* own clock rather than the host's, since an offline</span>
+<span class="sd">                parser has no other notion of time passing; :data:`None` selects</span>
+<span class="sd">                each protocol's own default -- 60 seconds for IPv4</span>
+<span class="sd">                (:rfc:`1122#section-3.3.2`) and IPv6 (:rfc:`8200#section-4.5`),</span>
+<span class="sd">                disabled for TCP, which no specification gives a deadline. Pass</span>
+<span class="sd">                :data:`math.inf` to disable it everywhere</span>
 
 <span class="sd">            trace: if trace TCP traffic flows</span>
 <span class="sd">            trace_fout: path name for flow tracer if necessary</span>
 <span class="sd">            trace_format: output file format of flow tracer</span>
 <span class="sd">            trace_byteorder: output file byte order</span>
 <span class="sd">            trace_nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">            trace_bidirectional: whether both halves of a conversation are</span>
+<span class="sd">                traced as one flow, which is the default; :data:`False` restores</span>
+<span class="sd">                the older behaviour of a flow per direction</span>
+<span class="sd">            trace_analyse: whether each traced flow reassembles its application</span>
+<span class="sd">                layer, so that its ``packet`` can be read. Off by default,</span>
+<span class="sd">                because it buffers every traced payload -- a cost tracing does</span>
+<span class="sd">                not otherwise pay. Unavailable on the ``pyshark`` engine, which</span>
+<span class="sd">                reports dissected fields rather than the octets behind them</span>
 
 <span class="sd">            ip: if record data for IPv4 &amp; IPv6 reassembly (must be used with ``reassembly=True``)</span>
 <span class="sd">            ipv4: if perform IPv4 reassembly (must be used with ``reassembly=True``)</span>
@@ -1278,7 +1295,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reasm_cls_ipv4</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
                     <span class="n">reasm_cls_ipv4</span> <span class="o">=</span> <span class="n">reasm_cls_ipv4</span><span class="o">.</span><span class="n">klass</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="s1">'ipv4'</span><span class="p">]</span> <span class="o">=</span> <span class="n">reasm_cls_ipv4</span>  <span class="c1"># update mapping upon import</span>
-                <span class="n">reasm_obj_ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_ipv4</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">))</span>
+                <span class="n">reasm_obj_ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_ipv4</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span>
+                                                                       <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ipv6</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'IPv6 reassembly enabled'</span><span class="p">)</span>
 
@@ -1286,7 +1304,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reasm_cls_ipv6</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
                     <span class="n">reasm_cls_ipv6</span> <span class="o">=</span> <span class="n">reasm_cls_ipv6</span><span class="o">.</span><span class="n">klass</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="s1">'ipv6'</span><span class="p">]</span> <span class="o">=</span> <span class="n">reasm_cls_ipv6</span>  <span class="c1"># update mapping upon import</span>
-                <span class="n">reasm_obj_ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_ipv6</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">))</span>
+                <span class="n">reasm_obj_ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_ipv6</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span>
+                                                                       <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP reassembly enabled'</span><span class="p">)</span>
 
@@ -1294,7 +1313,8 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reasm_cls_tcp</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
                     <span class="n">reasm_cls_tcp</span> <span class="o">=</span> <span class="n">reasm_cls_tcp</span><span class="o">.</span><span class="n">klass</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">reasm_cls_tcp</span>  <span class="c1"># update mapping upon import</span>
-                <span class="n">reasm_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_tcp</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">))</span>
+                <span class="n">reasm_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_Reassembly'</span><span class="p">,</span> <span class="n">reasm_cls_tcp</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">reasm_strict</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">reasm_store</span><span class="p">,</span>
+                                                                    <span class="n">timeout</span><span class="o">=</span><span class="n">reasm_timeout</span><span class="p">))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_reasm</span> <span class="o">=</span> <span class="n">ReassemblyManager</span><span class="p">(</span>
                 <span class="n">ipv4</span><span class="o">=</span><span class="n">reasm_obj_ipv4</span><span class="p">,</span>
@@ -1332,6 +1352,17 @@
                      <span class="s2">"using 'trace_format=</span><span class="se">\"</span><span class="s2">json</span><span class="se">\"</span><span class="s2">' instead"</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
                 <span class="n">trace_format</span> <span class="o">=</span> <span class="s1">'json'</span>
 
+            <span class="c1"># NOTE: PyShark hands the tracer dissected *fields*, not the octets</span>
+            <span class="c1"># behind them, so there is no payload for a flow to reassemble -- which</span>
+            <span class="c1"># is the same reason :mod:`pcapkit.toolkit.pyshark` carries no</span>
+            <span class="c1"># ``tcp_reassembly`` at all. Refuse rather than analyse empty payloads</span>
+            <span class="c1"># into an empty answer that looks like a real one.</span>
+            <span class="k">if</span> <span class="n">trace_analyse</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">==</span> <span class="s1">'pyshark'</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)' does not expose packet payloads; "</span>
+                     <span class="s2">"using 'trace_analyse=False' instead"</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="n">trace_analyse</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'TCP flow tracing enabled'</span><span class="p">)</span>
 
@@ -1340,7 +1371,9 @@
                     <span class="n">trace_cls_tcp</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span><span class="o">.</span><span class="n">klass</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="s1">'tcp'</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace_cls_tcp</span>  <span class="c1"># update mapping upon import</span>
                 <span class="n">trace_obj_tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP_TraceFlow'</span><span class="p">,</span> <span class="n">trace_cls_tcp</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
-                                                                    <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">))</span>
+                                                                    <span class="n">byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">,</span>
+                                                                    <span class="n">bidirectional</span><span class="o">=</span><span class="n">trace_bidirectional</span><span class="p">,</span>
+                                                                    <span class="n">analyse</span><span class="o">=</span><span class="n">trace_analyse</span><span class="p">))</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="n">TraceFlowManager</span><span class="p">(</span>
                 <span class="n">tcp</span><span class="o">=</span><span class="n">trace_obj_tcp</span><span class="p">,</span>
@@ -1478,10 +1511,22 @@
 <span class="sd">        sets :attr:`self._flag_e &lt;pcapkit.foundation.extraction.Extractor._flag_e&gt;`</span>
 <span class="sd">        as :data:`True` and closes the input file (if necessary).</span>
 
+<span class="sd">        It also tells the flow tracer the capture has ended, via</span>
+<span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish&gt;`.</span>
+<span class="sd">        That is the point at which a traced flow nothing has superseded can be</span>
+<span class="sd">        said to be over, so it is where such a flow is finalised and its callbacks</span>
+<span class="sd">        run. This method can be reached twice for one extraction -- the EOF path in</span>
+<span class="sd">        :meth:`_read_frame` and again from :meth:`run` -- so ``finish`` is required</span>
+<span class="sd">        to be idempotent rather than guarded here.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'cleaning up after </span><span class="si">%d</span><span class="s1"> frame(s) from </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>

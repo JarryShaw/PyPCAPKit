@@ -411,12 +411,153 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TraceFlowData'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TraceFlowData'</span><span class="p">,</span> <span class="s1">'Deferred'</span><span class="p">,</span> <span class="s1">'DeferredPacket'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Datagram</span> <span class="k">as</span> <span class="n">TCP_Datagram</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Reassembly</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Index</span> <span class="k">as</span> <span class="n">TCP_Index</span>
+
+
+<div class="viewcode-block" id="Deferred">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.Deferred">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Deferred</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A postponed reassembly of a traced flow's application layer.</span>
+
+<span class="sd">    A traced flow's ``packet`` is the application-layer payload of the</span>
+<span class="sd">    conversation, one datagram per direction. Producing it means reassembling the</span>
+<span class="sd">    stream, which is neither free nor wanted by most callers of a *tracer* -- so</span>
+<span class="sd">    the flow keeps the reassembler it was fed and this holds it until somebody</span>
+<span class="sd">    reads</span>
+<span class="sd">    :attr:`Index.packet &lt;pcapkit.foundation.traceflow.data.tcp.Index.packet&gt;`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Deliberately not</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.data.data.Deferred`, and not shared</span>
+<span class="sd">        with it. That one postpones a single ``analyze()`` call over bytes already</span>
+<span class="sd">        in hand; this postpones a *submit* over a reassembler's buffers. The two</span>
+<span class="sd">        subpackages are siblings and neither should depend on the other, so the</span>
+<span class="sd">        twenty lines are written twice rather than one importing the other -- the</span>
+<span class="sd">        same reason the two ``data/data.py`` modules mirror each other instead of</span>
+<span class="sd">        merging.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        reassembly: The flow's own</span>
+<span class="sd">            :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler, fed the</span>
+<span class="sd">            segments of this conversation as they were traced.</span>
+
+<span class="sd">    """</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'reassembly'</span><span class="p">,)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reassembly</span><span class="p">:</span> <span class="s1">'TCP_Reassembly'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span> <span class="o">=</span> <span class="n">reassembly</span>
+
+<div class="viewcode-block" id="Deferred.__call__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.Deferred.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[TCP_Datagram, ...]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run the postponed reassembly.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            One reassembled datagram per direction of the conversation. Each</span>
+<span class="sd">            carries its *own* postponed analysis in</span>
+<span class="sd">            :attr:`Datagram.packet &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.packet&gt;`,</span>
+<span class="sd">            so parsing the payload as an application-layer protocol is still not</span>
+<span class="sd">            paid for until that is read in turn.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">datagram</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DeferredPacket">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeferredPacket</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Resolves a :class:`Deferred` ``packet`` field on first read.</span>
+
+<span class="sd">    The reading half of the arrangement above, and the counterpart of</span>
+<span class="sd">    :class:`pcapkit.foundation.reassembly.data.data.DeferredPacket`.</span>
+
+<span class="sd">    A subclass has to list ``packet`` in its ``__additional__``. That is what makes</span>
+<span class="sd">    the field lazy at all: :class:`~pcapkit.corekit.infoclass.Info` stores a field</span>
+<span class="sd">    named there under a mangled key and maps it back on the way out, so ``packet``</span>
+<span class="sd">    never lands in :attr:`~object.__dict__` itself -- which routes reading it</span>
+<span class="sd">    through :meth:`__getattr__`, where the deferred reassembly can run, while</span>
+<span class="sd">    ``dict(index)``, :meth:`to_dict` and iteration still report the field under its</span>
+<span class="sd">    own name.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1"># NOTE: the ``super()`` calls below are suppressed for both checkers. They are</span>
+    <span class="c1"># undefined *on this mixin*, which is what a mixin is -- the base arrives at</span>
+    <span class="c1"># the point of use, where every subclass is declared</span>
+    <span class="c1"># ``class X(DeferredPacket, Info)`` and :class:`~pcapkit.corekit.infoclass.Info`</span>
+    <span class="c1"># supplies all three. Neither mypy nor pylint can see that from here, and</span>
+    <span class="c1"># pylint calls it an *error* rather than a warning.</span>
+
+<div class="viewcode-block" id="DeferredPacket.__analyse__">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket.__analyse__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__analyse__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[TCP_Datagram, ...]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve a deferred reassembly, at most once.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The flow's reassembled datagrams, or :data:`None` when the tracer was</span>
+<span class="sd">            not asked to analyse the application layer.</span>
+
+<span class="sd">        """</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Deferred</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="c1"># NOTE: reached only for names absent from ``__dict__``, which ``packet``</span>
+        <span class="c1"># always is -- see ``__additional__`` above. Everything else has to raise,</span>
+        <span class="c1"># or a typo would silently answer with a reassembled flow.</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'packet'</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``Mapping.__contains__`` answers by fetching the value, which would</span>
+        <span class="c1"># run the deferred reassembly merely to decide that the field exists.</span>
+        <span class="c1"># ``packet`` is a declared field, so it is always there.</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">'packet'</span> <span class="ow">or</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DeferredPacket.to_dict">
+<a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.DeferredPacket.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Convert :class:`Index` into :obj:`dict`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The flow's fields, with ``packet`` reassembled if it had not been read</span>
+<span class="sd">            yet -- a :obj:`dict` holding a :class:`Deferred` would leak an</span>
+<span class="sd">            implementation detail into what is meant to be plain data.</span>
+
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore[misc] # pylint: disable=no-member</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="TraceFlowData">

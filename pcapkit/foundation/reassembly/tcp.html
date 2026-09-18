@@ -427,7 +427,7 @@
 which reconstructs fragmented TCP packets back to origin.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet" title="pcapkit.foundation.reassembly.data.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram" title="pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT" title="pcapkit.foundation.reassembly.tcp.pcapkit.foundation.reassembly.data.tcp._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer" title="pcapkit.foundation.reassembly.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>]</p>
 <p>Reassembly for TCP payload.</p>
 <dl class="field-list simple">
@@ -438,6 +438,9 @@ implemented) when submit</p></li>
 <li><p><strong>store</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if store reassembled datagram in memory, i.e.,
 <a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._dtgram</span></code></a>
 (if not, datagram will be discarded after callback)</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – reassembly timeout in seconds, on the capture’s own clock;
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> selects <code class="xref py py-attr docutils literal notranslate"><span class="pre">__timeout__</span></code>, which for TCP disables
+expiry</p></li>
 </ul>
 </dd>
 </dl>
@@ -485,13 +488,16 @@ each hole bound.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP.submit" title="Link to this definition">¶</a></dt>
 <dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>buf</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer" title="pcapkit.foundation.reassembly.data.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a></span>) – <a class="reference internal" href="#term-reasm.tcp.buffer"><span class="xref std std-term">buffer</span></a> dict of reassembled packets</p></li>
 <li><p><strong>bufid</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_AT</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_AT</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – buffer identifier</p></li>
+<li><p><strong>timeout</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether this buffer is being submitted because
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">expire()</span></code>
+abandoned it under the reassembly timeout</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -689,6 +695,8 @@ is as following:</p>
                                   <span class="c1"># last sequence number of payload</span>
   <span class="n">header</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>     <span class="c1"># raw bytes type header</span>
   <span class="n">payload</span> <span class="o">=</span> <span class="n">tcp</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span>              <span class="c1"># raw bytearray type payload</span>
+  <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+      <span class="n">frame</span><span class="o">.</span><span class="n">time_epoch</span><span class="p">),</span>          <span class="c1"># capture timestamp</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -701,7 +709,7 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
  |--&gt; (Info) data
- |     |--&gt; 'completed' : (bool) True --&gt; implemented
+ |     |--&gt; 'completed' : (Completion) COMPLETE --&gt; reassembled in whole
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.src
@@ -717,7 +725,7 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
  |     |--&gt; 'payload' : (bytes) reassembled payload
  |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
  |--&gt; (Info) data
- |     |--&gt; 'completed' : (bool) False --&gt; not implemented
+ |     |--&gt; 'completed' : (Completion) PARTIAL or TIMEOUT --&gt; incomplete
  |     |--&gt; 'id' : (Info) original packet identifier
  |     |            |--&gt; 'src' --&gt; (tuple)
  |     |            |               |--&gt; (IPv4Address) ip.src
@@ -765,8 +773,21 @@ is as following:</p>
  |                                      |                                          holes set to b'\x00'
  |                                      |--&gt; (int) ACK ...
  |                                      |--&gt; ...
+ |                        |--&gt; 'timestamp' : (float) capture timestamp of the
+ |                                                   first segment buffered
  |--&gt; (tuple) BUFID ...
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TCP reassembly has <strong>no</strong> timeout by default: no specification gives
+stream reassembly a deadline the way <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and
+<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP fragmentation one, and an idle
+connection is ordinary rather than pathological. <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is
+recorded regardless, so passing <code class="docutils literal notranslate"><span class="pre">timeout</span></code> to
+<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> enables the same
+eviction the IP reassemblers use – see
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__timeout__</span></code>.</p>
 </div>
 <p>The hole descriptor list is kept in <strong>absolute TCP sequence numbers</strong>,
 once per <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>, whereas each ACK’s payload buffer is indexed from
@@ -868,6 +889,15 @@ own sequence number. Absolute, not an offset into any payload buffer.</p>
 <dd><p>Raw <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a> type payload.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Packet.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Packet.timestamp" title="Link to this definition">¶</a></dt>
+<dd><p>Capture timestamp of the segment, in seconds since the Unix epoch, i.e.
+the <em>capture’s</em> clock rather than the host’s. It drives the reassembly
+timeout, which for TCP is off by default – see
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__timeout__</span></code>.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -902,8 +932,11 @@ own sequence number. Absolute, not an offset into any payload buffer.</p>
 <p>Data model for <a class="reference internal" href="#term-reasm.tcp.datagram"><span class="xref std std-term">TCP</span></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.completed">
-<span class="sig-name descname"><span class="pre">completed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="Link to this definition">¶</a></dt>
-<dd><p>Completed flag.</p>
+<span class="sig-name descname"><span class="pre">completed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Completion</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="Link to this definition">¶</a></dt>
+<dd><p>How completely the datagram was reassembled, and why reassembly stopped;
+see <code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code>. Only
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">Completion.COMPLETE</span></code> is truthy, so <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">datagram.completed:</span></code> reads
+as it did while this was a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1029,6 +1062,14 @@ initial sequence number.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Buffer.ack">
 <span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment" title="pcapkit.foundation.reassembly.data.tcp.Fragment"><span class="pre">Fragment</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.ack" title="Link to this definition">¶</a></dt>
 <dd><p>ACK list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Buffer.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.timestamp" title="Link to this definition">¶</a></dt>
+<dd><p>Capture timestamp of the <strong>first</strong> segment buffered under this buffer ID,
+in seconds since the Unix epoch. Origin of the reassembly timer, and never
+revised: a later segment does not extend the deadline.</p>
 </dd></dl>
 
 </dd></dl>

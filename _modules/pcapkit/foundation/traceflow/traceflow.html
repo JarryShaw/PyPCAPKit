@@ -501,6 +501,8 @@
 <span class="sd">        format: output format</span>
 <span class="sd">        byteorder: output file byte order</span>
 <span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        bidirectional: trace both halves of a conversation as one flow</span>
+<span class="sd">        analyse: reassemble each flow's application layer</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        This class is for internal use only. For customisation, please use</span>
@@ -698,6 +700,28 @@
 
 <span class="sd">        """</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Finalise every flow still being traced.</span>
+
+<span class="sd">        Called by :meth:`Extractor._cleanup</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._cleanup&gt;` once the capture has</span>
+<span class="sd">        been read to its end, which is the point at which a flow that was never</span>
+<span class="sd">        superseded can be said to be over.</span>
+
+<span class="sd">        The base implementation does nothing, so a tracer that has no such notion</span>
+<span class="sd">        -- or an existing third-party subclass that predates this method -- keeps</span>
+<span class="sd">        working unchanged. :meth:`submit` must remain able to report a flow that</span>
+<span class="sd">        was never finalised, since nothing guarantees this is called: a tracer</span>
+<span class="sd">        driven directly rather than through an</span>
+<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` never sees an end of</span>
+<span class="sd">        capture.</span>
+
+<span class="sd">        Implementations must be **idempotent**: :meth:`Extractor._cleanup</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._cleanup&gt;` can run more than once</span>
+<span class="sd">        for one extraction.</span>
+
+<span class="sd">        """</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
@@ -713,7 +737,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">'Optional[str]'</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
-                 <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                 <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">bidirectional</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">analyse</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialise instance.</span>
 
 <span class="sd">        Arguments:</span>
@@ -721,6 +746,14 @@
 <span class="sd">            format: output format</span>
 <span class="sd">            byteorder: output file byte order</span>
 <span class="sd">            nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">            bidirectional: whether the two halves of a conversation are one flow.</span>
+<span class="sd">                :data:`True` -- the default -- keys a flow on the *pair* of</span>
+<span class="sd">                endpoints rather than on (source, destination), so a connection</span>
+<span class="sd">                is traced as the one thing it is; pass :data:`False` for the</span>
+<span class="sd">                older per-direction behaviour.</span>
+<span class="sd">            analyse: whether to reassemble each flow's application layer, so that</span>
+<span class="sd">                its ``packet`` can be read. Off by default: it buffers every</span>
+<span class="sd">                traced payload, a cost tracing does not otherwise pay.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">fout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -740,6 +773,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">=</span> <span class="n">byteorder</span>
         <span class="c1">#: bool: Output nanosecond-resolution file flag.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span> <span class="o">=</span> <span class="n">nanosecond</span>
+        <span class="c1">#: bool: Bidirectional tracing flag. If set to :data:`True`, both halves</span>
+        <span class="c1">#: of a conversation share one buffer entry, one label and one output</span>
+        <span class="c1">#: file; otherwise each direction is a flow of its own.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bidir</span> <span class="o">=</span> <span class="n">bidirectional</span>
+        <span class="c1">#: bool: Application-layer analysis flag. If set to :data:`True`, each</span>
+        <span class="c1">#: flow reassembles the payload it carries so that its ``packet`` can be</span>
+        <span class="c1">#: read; otherwise no payload is buffered and ``packet`` is</span>
+        <span class="c1">#: :data:`None`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_analyse</span> <span class="o">=</span> <span class="n">analyse</span>
 
         <span class="c1"># dump I/O object</span>
         <span class="n">fio</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_fout</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
@@ -749,7 +791,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1"> flow tracing initialised (root=</span><span class="si">%s</span><span class="s1">, format=</span><span class="si">%s</span><span class="s1">, byteorder=</span><span class="si">%s</span><span class="s1">, '</span>
-                     <span class="s1">'nanosecond=</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)</span>
+                     <span class="s1">'nanosecond=</span><span class="si">%s</span><span class="s1">, bidirectional=</span><span class="si">%s</span><span class="s1">, analyse=</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span>
+                     <span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">,</span> <span class="n">bidirectional</span><span class="p">,</span> <span class="n">analyse</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'_PT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Dump frame to output files.</span>
@@ -793,6 +836,8 @@
 <span class="sd">        format: output format</span>
 <span class="sd">        byteorder: output file byte order</span>
 <span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+<span class="sd">        bidirectional: trace both halves of a conversation as one flow</span>
+<span class="sd">        analyse: reassemble each flow's application layer</span>
 
 <span class="sd">    """</span>
 

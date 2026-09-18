@@ -425,6 +425,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -438,9 +439,65 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
+    <span class="s1">'ipv6_hdr_len'</span><span class="p">,</span> <span class="s1">'attach_timestamp'</span><span class="p">,</span> <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span>
 <span class="p">]</span>
+
+<span class="c1">#: Attribute a frame's capture timestamp is stashed under.</span>
+<span class="c1">#:</span>
+<span class="c1">#: `DPKT`_ keeps the two halves of a record apart -- its reader yields</span>
+<span class="c1">#: ``(timestamp, bytes)`` and only the bytes become a packet -- so a frame on its</span>
+<span class="c1">#: own does not know when it was captured. Anything that reads a frame *after* the</span>
+<span class="c1">#: extraction loop has moved on therefore has no way back to the timestamp unless</span>
+<span class="c1">#: the engine puts it somewhere, and this is where</span>
+<span class="c1">#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` puts it.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A `DPKT`_ packet carries a :attr:`~object.__dict__`, so this is an ordinary</span>
+<span class="c1">#: attribute rather than anything exotic; the name is spelled out here so that</span>
+<span class="c1">#: nothing has to know it by hand.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
+<span class="n">TIMESTAMP_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_timestamp__'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">attach_timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stash a frame's capture timestamp on the frame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Capture timestamp of the packet, as `DPKT`_'s reader yielded it</span>
+<span class="sd">            beside the record's octets.</span>
+
+<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">    """</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">TIMESTAMP_ATTR</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read back the capture timestamp of a DPKT packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet, as stored by</span>
+<span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Capture timestamp of the packet, in seconds since the epoch.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UnsupportedCall: If the packet carries no timestamp, i.e. it did not come</span>
+<span class="sd">            through :class:`~pcapkit.foundation.engines.dpkt.DPKT`. Raised rather</span>
+<span class="sd">            than defaulted, because a plausible-looking zero would silently</span>
+<span class="sd">            misdate whatever was going to use it.</span>
+
+<span class="sd">    """</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">TIMESTAMP_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> carries no capture timestamp; only a frame read by '</span>
+            <span class="s2">"'Extractor(engine=dpkt)' has one attached"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'float'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ipv6_hdr_len">
@@ -526,11 +583,18 @@
 
 <div class="viewcode-block" id="ipv4_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv4_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv4Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
+<span class="sd">            timeout. `DPKT`_'s reader yields it beside the record's octets rather</span>
+<span class="sd">            than on the packet, so it is passed in -- as :func:`tcp_traceflow`</span>
+<span class="sd">            already does. A caller holding only a frame can read it back with</span>
+<span class="sd">            :func:`packet2timestamp`, which is where</span>
+<span class="sd">            :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves it.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -571,6 +635,7 @@
             <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                        <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">ihl</span><span class="p">],</span>                           <span class="c1"># raw bytes type header</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">ihl</span><span class="p">:]),</span>               <span class="c1"># raw bytearray type payload</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -579,11 +644,14 @@
 
 <div class="viewcode-block" id="ipv6_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.ipv6_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IP_Packet[IPv6Address] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for IPv6 reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
+<span class="sd">            timeout; :func:`packet2timestamp` reads it back off a stored frame.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -637,6 +705,7 @@
             <span class="n">tl</span><span class="o">=</span><span class="n">hdr_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                           <span class="c1"># total length, header includes</span>
             <span class="n">header</span><span class="o">=</span><span class="n">ipv6</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">hdr_len</span><span class="p">],</span>                        <span class="c1"># raw bytes type header before IPv6-Frag</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>                          <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                 <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -645,11 +714,14 @@
 
 <div class="viewcode-block" id="tcp_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt.tcp_reassembly">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                   <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TCP_Packet | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Capture timestamp of the packet, which drives the reassembly</span>
+<span class="sd">            timeout; :func:`packet2timestamp` reads it back off a stored frame.</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -696,6 +768,7 @@
             <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                      <span class="c1"># first sequence number of payload</span>
             <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>                         <span class="c1"># last sequence number of payload</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                                        <span class="c1"># payload length, header excludes</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
@@ -745,11 +818,16 @@
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>  <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>                                    <span class="c1"># TCP synchronise (SYN) flag</span>
             <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>                                    <span class="c1"># TCP finish (FIN) flag</span>
+            <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">5</span><span class="p">])),</span>                                    <span class="c1"># TCP reset (RST) flag</span>
             <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                           <span class="c1"># source IP</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                           <span class="c1"># destination IP</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">sport</span><span class="p">,</span>                                          <span class="c1"># TCP source port</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span>                                          <span class="c1"># TCP destination port</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                        <span class="c1"># timestamp</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                                <span class="c1"># TCP sequence number</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                                <span class="c1"># TCP acknowledgement number</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">off</span> <span class="o">*</span> <span class="mi">4</span><span class="p">],</span>                            <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)),</span>                         <span class="c1"># raw bytearray type payload</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
     <span class="k">return</span> <span class="kc">None</span></div>
