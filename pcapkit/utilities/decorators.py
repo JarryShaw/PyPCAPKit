@@ -206,8 +206,14 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
     def unpack(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R_prepare':
         cls = cast('Type[R_prepare]', args[0])
         data = cast('bytes | IO[bytes]', args[1])
-        length = cast('Optional[int]', args[2])
-        packet = cast('Optional[dict[str, Any]]', args[3])
+        # ``length`` and ``packet`` are optional, both in the decorated
+        # signature and here: a caller may omit them, pass them positionally,
+        # or pass them by keyword. ``args`` only has an ``[2]``/``[3]`` to
+        # subscript when the caller supplied that many positionals, so fall
+        # back to ``kwargs`` -- and to the documented default of ``None`` --
+        # rather than assuming the position is always filled.
+        length = cast('Optional[int]', args[2] if len(args) > 2 else kwargs.pop('length', None))
+        packet = cast('Optional[dict[str, Any]]', args[3] if len(args) > 3 else kwargs.pop('packet', None))
 
         if isinstance(data, bytes):
             length = len(data) if length is None else length

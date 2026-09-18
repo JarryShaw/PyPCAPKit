@@ -144,6 +144,74 @@ class HTTPUnitTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 HTTP._guess_version(http, 9)
 
+    def test_http_read_explicit_version_uses_same_buffer_as_guess(self) -> None:
+        """Regression test for GH-447.
+
+        The explicit ``version=`` path passed ``self._file`` -- already
+        drained by the outer read -- instead of ``self._data``, so it built
+        the sub-protocol from a short or empty buffer while
+        ``_guess_version``, built from the same bytes, worked fine. This pins
+        the fix by asserting *which* buffer object reaches the sub-protocol
+        constructor, for both ``version=1`` and ``version=2``, rather than
+        merely that a call succeeds.
+        """
+        from pcapkit.protocols.application.http import HTTP
+
+        class RecordingHTTP:
+            version = '1.1'
+            length = 5
+            info = 'recorded-info'
+
+            def __init__(self, file: object, length: int, **kwargs: object) -> None:
+                self.received = file
+
+        http = object.__new__(HTTP)
+        http._data = b'GET / HTTP/1.1\r\n\r\n'
+        # Stands in for a stream already advanced by the outer read; passing
+        # this instead of ``_data`` is exactly the GH-447 defect.
+        http._file = object()
+        http.__cached__ = {}
+
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', RecordingHTTP):
+            http.read(version=1)
+        self.assertIs(http._http.received, http._data)
+
+        with mock.patch('pcapkit.protocols.application.httpv2.HTTP', RecordingHTTP):
+            http.read(version=2)
+        self.assertIs(http._http.received, http._data)
+
+    def test_http_read_explicit_version_1_matches_guess_on_real_bytes(self) -> None:
+        """The literal GH-447 reproduction: a real HTTP/1.1 request parses
+        identically whether the version is guessed or given explicitly."""
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+
+        raw = b'GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n'
+
+        guessed = HTTP(io.BytesIO(raw), len(raw))
+        explicit = HTTP(io.BytesIO(raw), len(raw), version=1)
+
+        self.assertEqual(guessed.alias, 'HTTP/1.1')
+        self.assertEqual(explicit.alias, 'HTTP/1.1')
+        self.assertEqual(explicit.length, guessed.length)
+        self.assertEqual(explicit.info, guessed.info)
+
+    def test_http_read_explicit_version_wraps_malformed_payload(self) -> None:
+        """The second half of GH-447: a payload that fails to parse on the
+        explicit path must surface as a chained :class:`ProtocolError`, not a
+        bare :class:`ValueError` a caller cannot catch as a protocol error."""
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        bad = b'not a valid http request at all'
+
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(bad), len(bad), version=1)
+        self.assertIsInstance(ctx.exception.__cause__, ValueError)
+
     def test_http_make_data_delegates_to_httpv1(self) -> None:
         from pcapkit.const.http.method import Method
         from pcapkit.corekit.multidict import OrderedMultiDict
