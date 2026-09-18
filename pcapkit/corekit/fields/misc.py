@@ -543,20 +543,36 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'collections.ChainMap[str
 
         No dedicated class: an earlier version of this function returned a
         hand-written :class:`dict` subclass, adopted when a bare
-        :class:`collections.ChainMap` was (wrongly) suspected of corrupting
-        the shared :class:`~abc.ABCMeta` cache every :class:`Schema
+        :class:`collections.ChainMap` was suspected of corrupting the shared
+        :class:`~abc.ABCMeta` cache every :class:`Schema
         <pcapkit.protocols.schema.schema.Schema>` subclass used to share on
-        CPython <= 3.10 (issue #439). Measured after the fact: the cache keys
-        on the exact type queried, so asking about a :class:`~collections.ChainMap`
-        instance caches lookups for :class:`~collections.ChainMap`, not for
-        :class:`dict` -- the actual poisoning came from ordinary code asking
-        :func:`isinstance` about a plain :class:`dict`
-        (:func:`~pcapkit.corekit.infoclass.Info.__update__`), which a
-        :class:`~collections.ChainMap`-based context never did either way.
-        #439 has since been fixed directly (every :class:`Schema` subclass
-        now gets its own ``_abc_impl``), which removes the mechanism
-        regardless of what this function returns. Nothing here needs to
-        reimplement the mapping protocol by hand.
+        CPython <= 3.10 (issue #439).
+
+        That suspicion is *probably* wrong, and the honest position is that it
+        is no longer decidable -- so it is recorded here as two measurements
+        that do not fully reconcile rather than as a settled reversal. What is
+        directly measured: the cache keys on the **exact type queried**, so
+        asking about a :class:`~collections.ChainMap` instance caches lookups
+        for :class:`~collections.ChainMap`, not for :class:`dict`, and the
+        poisoning observed in #439 came from ordinary code asking
+        :func:`isinstance` about a plain :class:`dict` --
+        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that --
+        which a :class:`~collections.ChainMap`-based context never did.
+        Against that: swapping this function's ``ChainMap`` for a plain
+        ``{'__packet__': packet}`` literal was, at the time and on a real
+        CPython 3.10 venv, enough to move
+        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``
+        between passing and failing, toggled both ways. The likeliest
+        reconciliation is that the ``ChainMap`` was never causal on its own but
+        changed *which* concrete types flowed through unrelated
+        :func:`isinstance` calls in the same run, and so changed *when* the
+        pre-existing #439 corruption was triggered. That reconciliation is
+        plausible rather than demonstrated, and it cannot now be tested: #439
+        has since been fixed directly (every :class:`Schema` subclass gets its
+        own ``_abc_impl``), which removes the mechanism outright, so the
+        original conditions no longer exist. It does not matter for
+        correctness either way -- with the mechanism gone, nothing here needs
+        to reimplement the mapping protocol by hand.
 
     """
     return collections.ChainMap({'__packet__': packet}, packet)

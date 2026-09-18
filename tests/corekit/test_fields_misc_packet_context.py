@@ -11,7 +11,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 
-class NestedPacketContextTests(unittest.TestCase):
+class NestedPacketContextSemanticsTests(unittest.TestCase):
     """The packet context a nested schema's field callbacks see -- issue #445.
 
     ``SchemaField.pack``/``unpack`` used to hand a nested schema a nested
@@ -33,10 +33,15 @@ class NestedPacketContextTests(unittest.TestCase):
 
     An intermediate version of this fix used a hand-written :class:`dict`
     subclass instead of :class:`collections.ChainMap`, adopted when a bare
-    ``ChainMap`` was (wrongly) suspected of corrupting a shared
-    :class:`~abc.ABCMeta` cache on CPython <= 3.10 (issue #439). Both the
-    suspicion and the workaround it produced have since been retired: #439
-    was fixed directly, and the hand-written subclass's own
+    ``ChainMap`` was suspected of corrupting a shared
+    :class:`~abc.ABCMeta` cache on CPython <= 3.10 (issue #439) -- a suspicion
+    that is probably wrong but is no longer decidable, since #439's direct fix
+    removed the mechanism; see
+    :func:`pcapkit.corekit.fields.misc.nested_packet_context` for why it is
+    recorded as two measurements that do not fully reconcile rather than as a
+    settled reversal. Both the suspicion and the workaround it produced have
+    since been retired: #439 was fixed directly, and the hand-written
+    subclass's own
     ``.setdefault()`` bypassed the fallback the same way :class:`dict`'s
     built-in one does, silently inserting a name locally instead of
     honouring what the enclosing schema already had for it --
