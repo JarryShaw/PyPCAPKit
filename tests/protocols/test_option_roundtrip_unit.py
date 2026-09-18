@@ -356,10 +356,25 @@ EXPECTED_FAILURES = {
         'pcapkit/protocols/internet/hip.py:822 -- Parameter.registry[128] is '
         'UnassignedParameter, because R1CounterParameter declares code=129 only'),
 
-    # Fifteen parameters whose ``_read_param_*`` stores a list-valued field as a
+    # Sixteen parameters whose ``_read_param_*`` stores a list-valued field as a
     # tuple, which ``_make_param_*`` passes straight back to a ``ListField``
     # that accepts only a list. This is the class of defect the reconstruct step
     # exists to find: each one constructs and parses perfectly.
+    #
+    # TRANSPORT_FORMAT_LIST briefly left this group during #466's review: an
+    # early revision reused NAT_TRAVERSAL_MODE/ESP_TRANSFORM/HIP_TRANSPORT_MODE's
+    # shared ``two_octet_prefix_list_len`` guard for this parameter's ``formats``
+    # field too, on the mistaken premise that its ``pkt['len'] - 2`` was
+    # byte-identical *for the same reason*. It is not: :rfc:`7401` Section
+    # 5.2.11 defines this parameter's ``Length`` as literally "2x number of TF
+    # types", with nothing between ``Length`` and the list to subtract -- unlike
+    # the other three, which each genuinely read a two-octet ``reserved``/
+    # ``port`` field first. That reuse turned the parameter's own legitimate
+    # empty-list encoding (``Length = 0``) into a raise, and separately
+    # under-read every non-empty list by two octets on parse -- both fixed by
+    # ``transport_format_list_len`` in pcapkit/protocols/schema/internet/hip.py,
+    # which sizes the list at ``Length`` exactly. With that corrected, this case
+    # is back to failing the same way its fifteen siblings do.
     **{
         f'hip-parameter/{name}': Gap(
             'RECONSTRUCT', "unsupported type <class 'tuple'>",
@@ -368,30 +383,10 @@ EXPECTED_FAILURES = {
         for name in (
             'ACK', 'DH_GROUP_LIST', 'HIP_CIPHER', 'NAT_TRAVERSAL_MODE',
             'HIT_SUITE_LIST', 'REG_INFO', 'REG_REQUEST', 'REG_RESPONSE',
-            'REG_FAILED', 'ESP_TRANSFORM', 'ACK_DATA',
+            'REG_FAILED', 'TRANSPORT_FORMAT_LIST', 'ESP_TRANSFORM', 'ACK_DATA',
             'ROUTE_DST', 'HIP_TRANSPORT_MODE', 'ROUTE_VIA', 'VIA_RVS',
         )
     },
-
-    # #463 gave four ``ListField`` length callbacks -- including this one's --
-    # a shared floor-at-zero-and-raise guard (``two_octet_prefix_list_len``,
-    # pcapkit/protocols/schema/internet/hip.py:219), matching the other three
-    # sites' ``- 2`` accounting for a two-octet ``reserved``/``port`` field
-    # read ahead of the list. But ``TransportFormatListParameter`` has no such
-    # field -- RFC 7401's TRANSPORT_FORMAT_LIST is Type, Length, TF types,
-    # Padding, with nothing between Length and the list -- so its default
-    # (empty ``formats``) case packs with ``Length=0``, and the same
-    # byte-identical ``- 2`` that is correct for the other three now floors
-    # that construction to a raise instead of reaching the tuple/list
-    # mismatch this case used to hit further down the cycle. Pre-existing and
-    # out of #463's scope (a wrong offset, not a missing lower bound); tracked
-    # for a follow-up rather than fixed here, since the fix is directed to be
-    # byte-identical across all four sites.
-    'hip-parameter/TRANSPORT_FORMAT_LIST': Gap(
-        'CONSTRUCT', 'FieldValueError: HIP: invalid parameter length: 0',
-        'pcapkit/protocols/schema/internet/hip.py:219 -- two_octet_prefix_list_len '
-        'assumes a 2-octet prefix that TransportFormatListParameter does not '
-        'have, so its default empty-list case (Length=0) now underflows'),
 
     # ``_make_param_encrypted`` passes ``cipher=``, which is not a field of
     # ``EncryptedParameter`` -- so the cipher id is dropped with an

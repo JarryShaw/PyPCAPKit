@@ -219,11 +219,16 @@ def reg_info_list_len(pkt: 'dict[str, Any]') -> 'int':
 def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
     """Return list length for a parameter with a two-octet prefix.
 
-    Used by the ``modes``, ``formats``, ``suites`` and ``mode`` fields of
-    :class:`NATTraversalModeParameter`, :class:`TransportFormatListParameter`,
-    :class:`ESPTransformParameter` and :class:`HIPTransportModeParameter`
-    respectively, each of which follows a two-octet ``reserved`` or ``port``
-    field with a list of items sized by the remainder of the parameter.
+    Used by the ``modes``, ``suites`` and ``mode`` fields of
+    :class:`NATTraversalModeParameter`, :class:`ESPTransformParameter` and
+    :class:`HIPTransportModeParameter` respectively, each of which follows a
+    two-octet ``reserved`` or ``port`` field with a list of items sized by
+    the remainder of the parameter.
+
+    :class:`TransportFormatListParameter` looked like a fourth call site --
+    same ``pkt['len'] - 2`` expression -- but is not: see
+    :func:`transport_format_list_len` for why it has no such prefix to
+    subtract.
 
     Args:
         pkt: Parameter unpacked schema.
@@ -238,6 +243,50 @@ def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
 
     """
     length = pkt['len'] - 2
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
+def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return ``TRANSPORT_FORMAT_LIST`` transport format list length.
+
+    Used by the ``formats`` field of :class:`TransportFormatListParameter`.
+    Unlike :func:`two_octet_prefix_list_len`'s three call sites, this
+    parameter has no ``reserved`` or ``port`` field between ``Length`` and
+    the list: :rfc:`7401` Section 5.2.11 defines ``Length`` as literally
+    "2x number of TF types" and places the list directly after it --
+
+    ::
+
+        |             Type              |             Length            |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |          TF type #1           |           TF type #2          /
+
+    -- so the list's byte length *is* ``Length``, with nothing to subtract.
+    Subtracting 2 anyway (as a since-corrected revision of this module once
+    did, mirroring the three genuine two-octet-prefix sites) silently
+    dropped the trailing two octets of *every* non-empty list on parse, and
+    rejected the parameter's own legitimate empty-list encoding
+    (``Length = 0``, ``formats = []``) as malformed.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Transport format list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is
+            negative. This cannot happen from real wire bytes -- ``len`` is
+            an unsigned 16-bit field -- but a caller constructing the schema
+            directly, bypassing
+            :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_transport_format_list`,
+            could still pass one; this keeps that path to the same
+            floor-and-raise discipline as :func:`two_octet_prefix_list_len`.
+
+    """
+    length = pkt['len']
     if length < 0:
         raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
     return length
@@ -858,7 +907,7 @@ class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORM
 
     #: Transport formats.
     formats: 'list[Enum_Parameter]' = ListField(
-        length=two_octet_prefix_list_len,
+        length=transport_format_list_len,
         item_type=EnumField(length=1, namespace=Enum_Parameter),
     )
     #: Padding.
