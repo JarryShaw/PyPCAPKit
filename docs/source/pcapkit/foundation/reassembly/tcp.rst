@@ -288,6 +288,9 @@ Terminology
            |                                      |                 |                  |--> ...
            |                                      |--> (int) ACK ...
            |                                      |--> ...
+           |                        |--> 'timestamp' : (float) capture timestamp of the
+           |                                                   first segment buffered
+           |--> (tuple) BUFID ...
 
        ``received`` is deliberately **not** derived from ``hdl`` above.
        ``hdl`` is shared by every ACK in this dict, while each ACK's own
@@ -297,9 +300,6 @@ Terminology
        question previously discarded a fragment's own real bytes whenever a
        different ACK bucket under the same buffer ID happened to cover the
        same range first.
-           |                        |--> 'timestamp' : (float) capture timestamp of the
-           |                                                   first segment buffered
-           |--> (tuple) BUFID ...
 
        .. note::
 

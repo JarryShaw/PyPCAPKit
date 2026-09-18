@@ -188,8 +188,8 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 self._buffer[BUFID].ack[ACK].ind.append(info.num)
 
                 # record fragment payload
-                ISN = self._buffer[BUFID].ack[ACK].isn       # Initial Sequence Number
-                RAW = self._buffer[BUFID].ack[ACK].raw       # Raw Payload Data
+                ISN = self._buffer[BUFID].ack[ACK].isn        # Initial Sequence Number
+                RAW = self._buffer[BUFID].ack[ACK].raw        # Raw Payload Data
                 RCVD = self._buffer[BUFID].ack[ACK].received  # this fragment's own received mask
                 if PSN >= ISN:  # if fragment goes after existing payload
                     LEN = self._buffer[BUFID].ack[ACK].len
