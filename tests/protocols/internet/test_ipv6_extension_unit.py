@@ -2035,6 +2035,85 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             with self.subTest(option=int(key)):
                 self.assertEqual(hopopt_options[key].__name__, opts_options[key].__name__)
 
+    def test_ipv6_route_source_route_make_accepts_tuple_and_list_addresses(self) -> None:
+        """#480 fixed ``Schema.pack``'s ``ListField`` branch to accept a tuple as
+        well as a list, but the one consumer that ships a ``tuple[...]``-typed
+        field against that branch shipped with no test of its own:
+        ``SourceRoute.ip`` on the data model (``tuple[IPv6Address, ...]`` in
+        pcapkit/protocols/data/internet/ipv6_route.py) backed by the
+        ``ListField`` in ``SourceRoute`` here in the schema module. Before
+        #480, building a Type 0 (deprecated Source Route) routing header
+        through :meth:`IPv6_Route.make <pcapkit.protocols.internet.ipv6_route.
+        IPv6_Route.make>` with a tuple of source addresses raised
+        ``ProtocolUnbound`` where the same call with a list succeeded; this
+        pins the ``make`` -> ``pack`` path for both, through the public
+        construction API rather than by building ``Schema_SourceRoute``
+        directly, and checks the two forms produce byte-identical output --
+        the actual invariant #480 established (see #476).
+
+        Boundaries: zero addresses, one, and two, so a fix that special-cases
+        "empty" or stops one item short of the general case is still caught.
+
+        The construct-then-parse check below goes through
+        ``Schema_SourceRoute.unpack`` directly rather than a full
+        ``IPv6_Route`` read (i.e. ``_read_data_type_src``): that method's own
+        ``(header.length - 8) % 16`` check rejects every ``length``
+        ``IPv6_Route.make`` itself computes for this routing type -- for any
+        address count, tuple or list alike -- which looks like a pre-existing
+        defect independent of #480 and is reported separately rather than
+        papered over here.
+
+        """
+        from ipaddress import ip_address
+
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+
+        addr1 = ip_address('2001:db8::1')
+        addr2 = ip_address('2001:db8::2')
+
+        def make_and_pack(ip):
+            proto = object.__new__(IPv6_Route)
+            schema = proto.make(
+                next=TransType.UDP,
+                type=Routing.Source_Route,
+                seg_left=len(ip),
+                data={'ip': ip},
+                payload=b'',
+            )
+            return schema.pack()
+
+        # (case name, tuple form, list form, expected on-wire bytes)
+        cases = [
+            ('empty', (), [],
+             bytes([0x11, 0x04, 0x00, 0x00]) + b'\x00' * 4),
+            ('single', (addr1,), [addr1],
+             bytes([0x11, 0x14, 0x00, 0x01]) + b'\x00' * 4 + addr1.packed),
+            ('double', (addr1, addr2), [addr1, addr2],
+             bytes([0x11, 0x24, 0x00, 0x02]) + b'\x00' * 4 + addr1.packed + addr2.packed),
+        ]
+
+        for name, as_tuple, as_list, expected in cases:
+            with self.subTest(case=name):
+                packed_tuple = make_and_pack(as_tuple)
+                packed_list = make_and_pack(as_list)
+
+                # the actual invariant #480 established: tuple and list of the
+                # same addresses pack identically
+                self.assertEqual(packed_tuple, packed_list)
+                self.assertEqual(packed_tuple, expected)
+                # 4 octets fixed header + 4 reserved + 16 per address
+                self.assertEqual(len(packed_tuple), 8 + 16 * len(as_list))
+
+                # construct-then-parse: the addresses come back, in the same
+                # order, through the schema's own pack/unpack pair
+                data_bytes = packed_tuple[4:]
+                parsed = route_schema.SourceRoute.unpack(
+                    data_bytes, len(data_bytes), {'__length__': len(data_bytes)})
+                self.assertEqual(list(parsed.ip), as_list)
+
 
 if __name__ == '__main__':
     unittest.main()
