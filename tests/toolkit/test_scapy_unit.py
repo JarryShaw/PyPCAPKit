@@ -139,6 +139,11 @@ class ScapyToolkitTests(unittest.TestCase):
         self.assertEqual(reassembled.header, bytes(ipv4)[:20])
         self.assertEqual(bytes(reassembled.payload), bytes(ipv4.payload))
         self.assertTrue(reassembled.mf)
+        # Scapy's ``frag`` is in on-wire 8-octet units (:rfc:`791#section-3.1`),
+        # but ``fo`` indexes the reassembly datagram buffer in octets, so one
+        # unit must become 8 octets -- see #483.
+        self.assertEqual(ipv4.frag, 2)
+        self.assertEqual(reassembled.fo, 16)
 
         self.assertIsNone(toolkit.ipv4_reassembly(self._make_ether_raw(), count=1))
         self.assertIsNone(toolkit.ipv4_reassembly(self._make_ipv4_fragment(df=True), count=1))
@@ -164,6 +169,58 @@ class ScapyToolkitTests(unittest.TestCase):
 
         self.assertIsNone(toolkit.ipv6_reassembly(self._make_ipv4_tcp_packet(), count=1))
         self.assertIsNone(toolkit.ipv6_reassembly(self._make_ipv6_tcp_packet(), count=1))
+
+    def test_ipv4_reassembly_scales_fragment_offset_through_the_reassembler(self) -> None:
+        # Regression test for #483: an unscaled ``fo`` does not just report a
+        # wrong number, it makes the reassembler write the second fragment's
+        # payload *inside* the first fragment's span instead of after it -- so
+        # the defect has to be shown through an actual reassembly, not by
+        # asserting on ``fo`` in isolation (a unit fix could get that right
+        # while some other adapter/consumer mismatch still corrupted the
+        # datagram, and a suite total alone cannot tell the two apart).
+        from scapy.layers.inet import IP
+        from scapy.layers.l2 import Ether
+        from scapy.packet import Raw
+
+        from pcapkit.foundation.reassembly.ipv4 import IPv4
+        from pcapkit.toolkit import scapy as toolkit
+
+        # Fragment 1: offset 0, 40 octets of payload -- a multiple of 8, so
+        # fragment 2's on-wire ``frag=5`` is meant to land at byte offset 40
+        # (5 * 8), immediately after fragment 1's data.
+        frag1 = Ether(**self._ether_kwargs()) / \
+            IP(src='192.0.2.1', dst='198.51.100.1', id=1234, flags='MF', frag=0) / \
+            Raw(b'A' * 40)
+        frag1 = Ether(bytes(frag1))
+
+        # Fragment 2: final fragment, on-wire ``frag=5`` -> byte offset 40.
+        frag2 = Ether(**self._ether_kwargs()) / \
+            IP(src='192.0.2.1', dst='198.51.100.1', id=1234, flags=0, frag=5) / \
+            Raw(b'B' * 8)
+        frag2 = Ether(bytes(frag2))
+
+        packet1 = toolkit.ipv4_reassembly(frag1, count=1)
+        packet2 = toolkit.ipv4_reassembly(frag2, count=2)
+        assert packet1 is not None and packet2 is not None
+        self.assertEqual(packet1.fo, 0)
+        # this is the assertion that fails without the ``* 8`` scaling: an
+        # unscaled ``fo`` reports 5, not the byte offset 40
+        self.assertEqual(packet2.fo, 40)
+
+        reasm = IPv4()
+        reasm(packet1)
+        reasm(packet2)
+
+        datagram, = reasm.datagram
+        # only ``Completion.COMPLETE`` is truthy
+        self.assertTrue(datagram.completed)
+        # under the defect this comes back truncated to 13 octets
+        # (``b'AAAAABBBBBBBB'``): fragment 2 overwrote bytes 5-12 of
+        # fragment 1's span instead of being appended at byte 40, and the
+        # datagram's declared total length is computed from the corrupted
+        # (unscaled) offset of the final fragment
+        self.assertEqual(len(datagram.payload), 48)
+        self.assertEqual(bytes(datagram.payload), b'A' * 40 + b'B' * 8)
 
     def test_tcp_reassembly_and_traceflow(self) -> None:
         from scapy.layers.inet import TCP
