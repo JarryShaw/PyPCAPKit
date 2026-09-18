@@ -118,7 +118,7 @@ class TCPReassemblyTests(unittest.TestCase):
             [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, sys.maxsize)],
             b'',
             {
-                500: Fragment([1], 10, 10, bytearray(b'0123456789'), bytearray(b'\x01' * 10), []),
+                500: Fragment([1], 10, 10, bytearray(b'0123456789'), [], []),
             },
             1000.0,
         )
@@ -155,7 +155,7 @@ class TCPReassemblyTests(unittest.TestCase):
         before_gap._buffer[bufid] = Buffer(
             [HoleDescriptor(50, sys.maxsize)],
             b'',
-            {500: Fragment([1], 10, 5, bytearray(b'world'), bytearray(b'\x01' * 5), [])},
+            {500: Fragment([1], 10, 5, bytearray(b'world'), [], [])},
             1000.0,
         )
         before_gap(self._packet(num=2, dsn=0, payload=b'hello', first=40, last=44))
@@ -185,7 +185,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), bytearray(b'\x01' * 10), [])},
+                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), [], [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -204,8 +204,8 @@ class TCPReassemblyTests(unittest.TestCase):
                 [HoleDescriptor(0, 0), HoleDescriptor(4, 5), HoleDescriptor(7, 7)],
                 b'tcp-header',
                 {
-                    500: Fragment([], 0, 0, bytearray(), bytearray(), []),
-                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), bytearray(b'\x01' * 9), [(2, 3)]),
+                    500: Fragment([], 0, 0, bytearray(), [], []),
+                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), [], [(2, 3)]),
                 },
                 1000.0,
             ),
@@ -228,7 +228,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([3], 0, 3, bytearray(b'abc'), bytearray(b'\x01' * 3), [])},
+                {500: Fragment([3], 0, 3, bytearray(b'abc'), [], [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -240,7 +240,7 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(completed[0].conflict, ())
         self.assertEqual(Analyzer.calls[-1], ((12345, 443), b'abc'))
 
-        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray(), bytearray(), [])},
+        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray(), [], [])},
                                              1000.0),
                                       bufid=bufid), [])
 
@@ -803,6 +803,99 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         self.assertTrue(datagram.completed)
         self.assertEqual(datagram.payload, b'AAAA' + b'X' * 6 + b'CCCC')
         self.assertEqual(datagram.conflict, ())
+
+    def test_a_simultaneous_head_prepend_and_tail_extension_in_one_overlap_call(self) -> None:
+        """Full engulfment plus extension: a new head *and* a new tail in the same call.
+
+        Corrects a wrong comment that used to sit on the reach-back branch,
+        claiming a head-prepend and a tail-append "cannot both happen at
+        once". They can: the old buffer (``isn=100``, ``len=10``) is fully
+        inside the arriving segment's range (``dsn=90``, ``len=30``), so the
+        arriving segment supplies genuinely new bytes *before* ``isn``
+        (90..99) and genuinely new bytes *past* the old buffer's end
+        (110..119) in the very same :meth:`~pcapkit.foundation.reassembly.tcp.TCP._merge_overlap`
+        call. What actually is mutually exclusive is only which one of the
+        old buffer's own tail or a genuinely new one survives -- never both --
+        and that is unaffected by the head also being new.
+
+        The overlapping middle (100..109) deliberately disagrees with the
+        already-buffered bytes there, so the same call also proves
+        first-write-wins and the new head/tail merge correctly coexist.
+
+        """
+        base = self.BASE
+        old_isn = base + 100
+        datagram = self._run(
+            self._packet(num=1, dsn=old_isn, payload=b'0123456789'),  # isn=base+100, len=10
+            self._packet(num=2, dsn=old_isn - 10,                     # dsn=base+90, len=30
+                         payload=b'A' * 10 + b'X' * 10 + b'C' * 10),
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'A' * 10 + b'0123456789' + b'C' * 10)
+        self.assertEqual(datagram.conflict, ((old_isn, old_isn + 9),))
+
+    def test_gap_list_matches_the_zero_filled_positions_across_200_random_trials(self) -> None:
+        """Property test: ``gap`` always names exactly the positions ``raw`` still has as fill.
+
+        This is the correctness check the absolute-interval design is meant
+        to make trivial: since ``gap`` never shifts when ``isn`` moves, the
+        set of octets it names should equal the set of octets in ``raw`` that
+        no segment has ever supplied a real byte for -- checked directly
+        against ``raw``, not inferred from the merge arithmetic, so a bug
+        that got the merged *bytes* right but the *bookkeeping* wrong would
+        still be caught. 200 trials, random overlapping and out-of-order
+        segments fed into a single ACK bucket, fixed seed for a reproducible
+        run.
+
+        Every synthetic payload avoids the zero byte, so an unfilled octet of
+        ``raw`` -- ``b'\\x00'`` -- is unambiguous: it is covered by a ``gap``
+        entry if and only if no segment has ever placed a real byte there.
+
+        """
+        import random
+
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        rng = random.Random(20260918)
+        bufid = self._bufid()
+
+        for trial in range(200):
+            with self.subTest(trial=trial):
+                base = rng.randrange(0, 2 ** 31)
+                reasm = TCP()
+
+                segments = []
+                cursor = 0
+                for num in range(1, rng.randint(2, 8) + 1):
+                    offset = cursor + rng.randint(-5, 10)
+                    length = rng.randint(1, 20)
+                    payload = bytes(rng.randint(1, 255) for _ in range(length))  # never 0x00
+                    segments.append((num, base + offset, payload))
+                    cursor = offset + length
+                rng.shuffle(segments)  # out of order delivery
+                for (num, dsn, payload) in segments:
+                    reasm(self._packet(num=num, dsn=dsn, payload=payload))
+
+                fragment = next(iter(reasm._buffer[bufid].ack.values()))
+                raw, isn, gap = fragment.raw, fragment.isn, fragment.gap
+
+                # every gap entry is itself all-zero in raw, and the entries
+                # are pairwise disjoint
+                covered = set()
+                for (first, last) in gap:
+                    self.assertLessEqual(first, last)
+                    for seq in range(first, last + 1):
+                        self.assertNotIn(seq, covered, 'gap entries overlap')
+                        covered.add(seq)
+                        self.assertEqual(raw[seq - isn], 0)
+
+                # and every zero byte in raw is covered by some gap entry --
+                # i.e. gap is not merely disjoint from real data, it is
+                # *exactly* the zero-filled positions, nothing more and
+                # nothing less
+                for offset in range(len(raw)):
+                    if raw[offset] == 0:
+                        self.assertIn(isn + offset, covered)
 
 
 if __name__ == '__main__':
