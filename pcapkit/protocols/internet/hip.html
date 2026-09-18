@@ -5655,6 +5655,90 @@ registration type octets sized by the remainder of the parameter.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">two_octet_prefix_list_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#two_octet_prefix_list_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len" title="Link to this definition">¶</a></dt>
+<dd><p>Return list length for a parameter with a two-octet prefix.</p>
+<p>Used by the <code class="docutils literal notranslate"><span class="pre">modes</span></code>, <code class="docutils literal notranslate"><span class="pre">suites</span></code> and <code class="docutils literal notranslate"><span class="pre">mode</span></code> fields of
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter" title="pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">NATTraversalModeParameter</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.ESPTransformParameter" title="pcapkit.protocols.schema.internet.hip.ESPTransformParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESPTransformParameter</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter" title="pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIPTransportModeParameter</span></code></a> respectively, each of which follows a
+two-octet <code class="docutils literal notranslate"><span class="pre">reserved</span></code> or <code class="docutils literal notranslate"><span class="pre">port</span></code> field with a list of items sized by
+the remainder of the parameter.</p>
+<p><a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter" title="pcapkit.protocols.schema.internet.hip.TransportFormatListParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportFormatListParameter</span></code></a> looked like a fourth call site –
+same <code class="docutils literal notranslate"><span class="pre">pkt['len']</span> <span class="pre">-</span> <span class="pre">2</span></code> expression – but is not: see
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.transport_format_list_len" title="pcapkit.protocols.schema.internet.hip.transport_format_list_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">transport_format_list_len()</span></code></a> for why it has no such prefix to
+subtract.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Parameter unpacked schema.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List length.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If the parameter’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> on the wire is too
+    short to hold the two octets already read, which would otherwise
+    underflow the list length below zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.transport_format_list_len">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">transport_format_list_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#transport_format_list_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.transport_format_list_len" title="Link to this definition">¶</a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">TRANSPORT_FORMAT_LIST</span></code> transport format list length.</p>
+<p>Used by the <code class="docutils literal notranslate"><span class="pre">formats</span></code> field of <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.TransportFormatListParameter" title="pcapkit.protocols.schema.internet.hip.TransportFormatListParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportFormatListParameter</span></code></a>.
+Unlike <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len" title="pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">two_octet_prefix_list_len()</span></code></a>’s three call sites, this
+parameter has no <code class="docutils literal notranslate"><span class="pre">reserved</span></code> or <code class="docutils literal notranslate"><span class="pre">port</span></code> field between <code class="docutils literal notranslate"><span class="pre">Length</span></code> and
+the list: <span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a> Section 5.2.11 defines <code class="docutils literal notranslate"><span class="pre">Length</span></code> as literally
+“2x number of TF types” and places the list directly after it –</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|</span>             <span class="n">Type</span>              <span class="o">|</span>             <span class="n">Length</span>            <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="o">|</span>          <span class="n">TF</span> <span class="nb">type</span> <span class="c1">#1           |           TF type #2          /</span>
+</pre></div>
+</div>
+<p>– so the list’s byte length <em>is</em> <code class="docutils literal notranslate"><span class="pre">Length</span></code>, with nothing to subtract.
+Subtracting 2 anyway (as a since-corrected revision of this module once
+did, mirroring the three genuine two-octet-prefix sites) silently
+dropped the trailing two octets of <em>every</em> non-empty list on parse, and
+rejected the parameter’s own legitimate empty-list encoding
+(<code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">formats</span> <span class="pre">=</span> <span class="pre">[]</span></code>) as malformed.</p>
+<p>“2x number of TF types” also fixes each <code class="docutils literal notranslate"><span class="pre">TF</span> <span class="pre">type</span></code> entry’s own width at
+two octets – the same width the base <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.Parameter" title="pcapkit.protocols.schema.internet.hip.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a> class uses for
+its own <code class="docutils literal notranslate"><span class="pre">type</span></code> field, since a TF type <em>is</em> a HIP parameter type number
+– which is why <code class="docutils literal notranslate"><span class="pre">formats</span></code>’ <code class="docutils literal notranslate"><span class="pre">item_type</span></code> is
+<code class="docutils literal notranslate"><span class="pre">EnumField(length=2,</span> <span class="pre">...)</span></code>, matching <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter" title="pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIPTransportModeParameter</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">mode</span></code> rather than the one-octet items of <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len" title="pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">two_octet_prefix_list_len()</span></code></a>’s
+other two call sites. This function only answers how many <em>bytes</em> the
+list occupies; getting that number right and the item width wrong (as a
+still-earlier revision did, at one octet) still corrupts every non-empty
+list, just by reading twice as many entries as the wire holds instead of
+dropping octets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Parameter unpacked schema.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transport format list length.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If the parameter’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> on the wire is
+    negative. This cannot happen from real wire bytes – <code class="docutils literal notranslate"><span class="pre">len</span></code> is
+    an unsigned 16-bit field – but a caller constructing the schema
+    directly, bypassing
+    <a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_transport_format_list" title="pcapkit.protocols.internet.hip.HIP._make_param_transport_format_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_param_transport_format_list()</span></code></a>,
+    could still pass one; this keeps that path to the same
+    floor-and-raise discipline as <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len" title="pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len"><code class="xref py py-func docutils literal notranslate"><span class="pre">two_octet_prefix_list_len()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 <section id="module-pcapkit.protocols.data.internet.hip">
