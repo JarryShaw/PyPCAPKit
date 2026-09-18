@@ -724,7 +724,25 @@ class MNIDOption(Option, code=Enum_Option.MN_ID_OPTION_TYPE):
     identifier: 'bytes | str | IPv6Address' = SwitchField(selector=mn_id_selector)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address | int') -> 'None': ...
+        # NOTE: No ``int`` here, and deliberately so even though
+        # :meth:`MH._make_opt_mn_id <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`
+        # *does* accept one. The two annotations describe different boundaries:
+        # the maker's is what a **caller** may pass, while this one is what the
+        # schema can **hold**, and the maker converts between them before ever
+        # constructing this class -- an ``int`` becomes :obj:`bytes` via
+        # :meth:`int.to_bytes` for the octet subtypes and an
+        # :class:`~ipaddress.IPv6Address` for ``IPv6_Address``. Measured through
+        # the maker: ``identifier=0x1234`` arrives here as ``b'\\x124'`` for
+        # ``IMSI``/``DUID`` and as ``IPv6Address('::1234')`` for
+        # ``IPv6_Address``, never as an ``int``. Widening this stub to admit one
+        # would therefore document a value the schema can never hold, and would
+        # positively mislead: ``mn_id_selector`` resolves every subtype but
+        # ``IPv6_Address`` to a
+        # :class:`~pcapkit.corekit.fields.strings.StringField` or
+        # :class:`~pcapkit.corekit.fields.strings.BytesField`, and handing either
+        # a raw ``int`` is precisely the #467 defect -- ``struct.pack()`` cannot
+        # consume it (c.f. #467, #468).
+        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address') -> 'None': ...
 
 
 @schema_final
