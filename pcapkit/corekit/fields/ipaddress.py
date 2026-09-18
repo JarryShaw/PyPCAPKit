@@ -2,8 +2,8 @@
 """IP address field class"""
 
 import abc
+import contextlib
 import ipaddress
-from contextlib import contextmanager
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import Field, NoValue
@@ -29,7 +29,7 @@ _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 _IT = TypeVar('_IT', 'IPv4Interface', 'IPv6Interface')
 
 
-@contextmanager
+@contextlib.contextmanager
 def _reraise_as_field_value_error(description: str) -> 'Iterator[None]':
     """Translate a bare :exc:`ValueError` from :mod:`ipaddress` into :exc:`FieldValueError`.
 
