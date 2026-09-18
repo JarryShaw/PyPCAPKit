@@ -498,8 +498,10 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_opt_mn_id(Option.MN_ID_OPTION_TYPE,
                                                subtype=MNIDSubtype.NAI,
                                                identifier='node@example').length, 13)
+        # default subtype is IPv6_Address, which always packs a fixed 16-octet
+        # address regardless of the identifier's Python type -- see #448.
         self.assertEqual(proto._make_opt_mn_id(Option.MN_ID_OPTION_TYPE,
-                                               identifier=0x1234).length, 3)
+                                               identifier=0x1234).length, 17)
         self.assertEqual(proto._make_opt_auth(Option.AUTH_OPTION_TYPE, subtype=AuthSubtype.MN_HA,
                                               spi=7, data=b'ab').spi, 7)
         with self.assertRaises(ProtocolError):
@@ -2288,6 +2290,45 @@ class MHUnitTests(unittest.TestCase):
                 data = proto._read_opt_dmnp(schema, options=None)  # type: ignore[arg-type]
                 self.assertEqual(data.ipv4, ipv4)
                 self.assertEqual(data.prefix, ipaddress.ip_address(prefix))
+
+    def test_mh_mn_id_option_length_matches_packed_octets(self) -> None:
+        """The MN-ID option's declared length must count what actually gets packed.
+
+        ``_make_opt_mn_id`` used to size the identifier from the *Python type* of
+        the ``identifier`` argument rather than from ``subtype_val``, which is what
+        actually selects the wire format (see ``mn_id_selector``). For the
+        ``IPv6_Address`` subtype -- the method's own default -- the schema always
+        packs a fixed 16-octet address
+        (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` ignores any
+        declared length entirely), so a ``str`` or ``int`` identifier, including
+        the no-argument default, declared a ``length`` that disagreed with what was
+        actually packed: ``len(packed) != length + 2``. See #448.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        # every documented ``identifier`` type, against the subtype that used to
+        # mis-size three of the four -- including the method's own default, which
+        # is itself one of the broken types (``str``).
+        cases = (
+            ('default (no identifier)', {}),
+            ("str '::'", {'identifier': '::'}),
+            ("str '2001:db8::1'", {'identifier': '2001:db8::1'}),
+            ('int 0x1234', {'identifier': 0x1234}),
+            ('bytes (16-octet packed form)',
+             {'identifier': ipaddress.IPv6Address('2001:db8::1').packed}),
+            ('IPv6Address', {'identifier': ipaddress.ip_address('2001:db8::1')}),
+        )
+        for label, kwargs in cases:
+            with self.subTest(label):
+                schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                    Option.MN_ID_OPTION_TYPE, **kwargs)
+                self.assertEqual(schema.length, 17)
+                self.assertEqual(len(schema.pack()), schema.length + 2)
 
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
