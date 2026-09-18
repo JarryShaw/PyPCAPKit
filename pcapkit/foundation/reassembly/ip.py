@@ -118,38 +118,126 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 header=header,                      # header buffer
                 datagram=bytearray(65535),          # data buffer
                 timestamp=TS,                       # first-arriving fragment's clock reading
+                conflict=[],                        # conflicting octet ranges
             )
         else:
             # put header into header buffer
             if not FO:  # pylint: disable=else-if-used
                 self._buffer[BUFID].__update__(header=header)
 
+        buf = self._buffer[BUFID]
+
         # append packet index
-        self._buffer[BUFID].index.append(info.num)
+        buf.index.append(info.num)
 
         # put data into data buffer
         start = FO
         stop = TL - IHL + FO
-        self._buffer[BUFID].datagram[start:stop] = info.payload
+
+        # Find where this fragment disagrees with what the buffer already
+        # holds *before* writing it -- ``buf.RCVBT`` and ``buf.TDL`` still
+        # describe the state as every earlier fragment left it, which is
+        # exactly what :meth:`_detect_conflicts` needs.
+        conflicts = self._detect_conflicts(buf.RCVBT, buf.TDL, buf.datagram, info.payload, start, stop)
+        if conflicts:
+            buf.conflict.extend(conflicts)
+
+        # :rfc:`791` is explicit that an overlapping fragment's data "will use
+        # the more recently arrived copy in the data buffer" -- the opposite of
+        # TCP's first-write-wins (:rfc:`9293#section-3.10`) -- so the arriving
+        # payload always overwrites here; ``conflicts`` above is what records
+        # that it *disagreed* with what it overwrote, which is the part RFC 791
+        # leaves unrecorded and this fix adds.
+        buf.datagram[start:stop] = info.payload
 
         # set RCVBT bits (in 8 octets)
         start = FO // 8
         stop = FO // 8 + (TL - IHL + 7) // 8
-        self._buffer[BUFID].RCVBT[start:stop] = b'\x01' * (stop - start)
+        buf.RCVBT[start:stop] = b'\x01' * (stop - start)
 
         # get total data length (header excludes)
         TDL = 0
         if not MF:
             TDL = TL - IHL + FO
-            self._buffer[BUFID].__update__(TDL=TDL)
+            buf.__update__(TDL=TDL)
 
         # when datagram is reassembled in whole
         start = 0
         stop = (TDL + 7) // 8
-        if TDL and all(self._buffer[BUFID].RCVBT[start:stop]):
+        if TDL and all(buf.RCVBT[start:stop]):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
+
+    @staticmethod
+    def _detect_conflicts(rcvbt: 'bytearray', tdl: 'int', datagram: 'bytearray', payload: 'bytearray',
+                           start: 'int', stop: 'int') -> 'list[tuple[int, int]]':
+        """Find where an arriving fragment disagrees with already-received bytes.
+
+        Arguments:
+            rcvbt: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT`
+                as it stood *before* the arriving fragment's own bits are set,
+                i.e. what earlier fragments had already claimed, in 8-octet
+                blocks.
+            tdl: this buffer's :attr:`~pcapkit.foundation.reassembly.data.ip.Buffer.TDL`
+                as it stood *before* the arriving fragment's own update --
+                ``-1`` while the final fragment (``MF=0``) has not yet
+                arrived.
+            datagram: this buffer's data buffer, read *before* the arriving
+                fragment's payload is written into it.
+            payload: the arriving fragment's payload.
+            start: absolute octet offset of ``payload[0]`` in ``datagram``,
+                i.e. this fragment's ``FO``.
+            stop: absolute octet offset one past ``payload[-1]``, i.e.
+                ``start + len(payload)``.
+
+        Returns:
+            ``(first, last)`` absolute octet ranges, inclusive, where
+            ``datagram`` and ``payload`` disagree over octets this buffer had
+            already genuinely received.
+
+        :rfc:`791` marks receipt in 8-octet blocks (``RCVBT``), coarser than
+        the octet granularity a conflict needs: every fragment but the last is
+        required to be a multiple of 8 octets, and a fragment's ``FO`` is
+        *always* a multiple of 8 -- it is wire-encoded in 8-octet units -- so a
+        non-final fragment's range is always exactly block-aligned. The only
+        block that can be *partially* real is therefore the one holding the
+        final fragment's own tail: the ``RCVBT`` update in :meth:`reassembly`
+        sets that block's bit across its full 8 octets even though only the
+        octets up to ``tdl`` were ever actually written, the rest still being
+        ``datagram``'s zero-fill.
+
+        So once ``tdl`` is known, an octet at or past it is excluded here
+        regardless of its block's bit -- comparing it would manufacture a
+        conflict against a byte nothing ever really sent, over a distinction
+        :meth:`~pcapkit.foundation.reassembly.ip.IP.submit` does not need
+        anyway, since it never reports a payload past ``tdl``. Before ``tdl``
+        is known (``tdl < 0``), every set ``rcvbt`` bit came from a non-final,
+        block-aligned fragment and is exact on its own, with nothing to clip.
+
+        """
+        conflicts = []  # type: list[tuple[int, int]]
+        length = stop - start
+        index = 0
+        while index < length:
+            pos = start + index
+            if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
+                index += 1
+                continue
+            if datagram[pos] == payload[index]:
+                index += 1
+                continue
+            run_stop = index + 1
+            while run_stop < length:
+                pos = start + run_stop
+                if not (rcvbt[pos // 8] and (tdl < 0 or pos < tdl)):
+                    break
+                if datagram[pos] == payload[run_stop]:
+                    break
+                run_stop += 1
+            conflicts.append((start + index, start + run_stop - 1))
+            index = run_stop
+        return conflicts
 
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
                checked: 'bool' = False, timeout: 'bool' = False) -> 'list[Datagram[_AT]]':
@@ -176,6 +264,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         index = buf.index
         header = buf.header
         datagram = buf.datagram
+        conflict = tuple(buf.conflict)
 
         start = 0
         stop = (TDL + 7) // 8
@@ -216,6 +305,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                     header=header,
                     payload=tuple(data),
                     packet=None,
+                    conflict=conflict,
                 )
                 ret.append(packet)
         # if datagram is reassembled in whole -- or if it is not, and ``strict``
@@ -275,6 +365,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 # result most of them never read. ``Deferred`` postpones it to the
                 # first read of ``Datagram.packet``.
                 packet=Deferred(self.protocol.analyze, bufid[3], payload),
+                conflict=conflict,
             )
             ret.append(packet)
 
