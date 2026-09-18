@@ -1840,6 +1840,256 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             HIP(raw, len(raw), extension=True)
 
+    def test_hip_nat_traversal_mode_parameter_rejects_underflowing_length(self) -> None:
+        """#463: a ``NAT_TRAVERSAL_MODE`` parameter's ``Length`` too small
+        for its own two-octet ``reserved`` field must raise, not silently
+        drop the NAT traversal mode list.
+
+        ``modes`` sizes its list of NAT traversal mode entries as
+        ``Length - 2``, the ``- 2`` accounting for the ``reserved`` field
+        read unconditionally ahead of it. Nothing floored that at zero, so a
+        peer declaring ``Length = 0`` drove the list length to ``-2``.
+        Unlike a :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``modes`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=608 (NAT_TRAVERSAL_MODE) len(2)=0, reserved(2), then 2
+        # octets padding out the 8-octet parameter area the outer header
+        # declared.
+        param = (608).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
+    def test_hip_transport_format_list_parameter_accepts_an_empty_list_at_length_zero(self) -> None:
+        """#463/#466: ``TRANSPORT_FORMAT_LIST`` has no two-octet prefix, so
+        ``Length = 0`` is a legitimate empty list, not a malformed one.
+
+        A first pass at #463 applied the same ``pkt['len'] - 2`` guard used
+        by :class:`NATTraversalModeParameter`, :class:`ESPTransformParameter`
+        and :class:`HIPTransportModeParameter` to this parameter's ``formats``
+        field too, on the assumption that the expression was byte-identical
+        across all four sites for the same reason. It is not: :rfc:`7401`
+        Section 5.2.11 defines ``Length`` as literally "2x number of TF
+        types", with nothing between ``Length`` and the list to account for.
+        So ``Length = 0`` with an empty ``formats`` list -- which packs
+        correctly on ``main`` as ``08010000`` -- was turned into a raise by
+        that first pass, a regression rather than a declined fix. This
+        parses it back to confirm the corrected :func:`~pcapkit.protocols.
+        schema.internet.hip.transport_format_list_len` accepts it again.
+
+        Two copies, not one: a single parameter's own total is always
+        ``4 (mod 8)`` under this module's padding rule (see
+        ``examples/generators/options.py``'s ``HIP_COPIES``), so one 40-octet
+        fixed header plus two empty ``TRANSPORT_FORMAT_LIST`` parameters (4
+        octets each) is what actually lands on an 8-octet boundary.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter area to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # Two copies of: type(2)=2049 (TRANSPORT_FORMAT_LIST) len(2)=0, no
+        # formats, no padding -- 4 octets each, 8 octets together.
+        empty = (2049).to_bytes(2, 'big') + (0).to_bytes(2, 'big')
+        self.assertEqual(len(empty), 4)
+        raw = fixed + empty * 2
+
+        proto = HIP(raw, len(raw), extension=True)
+        copies = proto.info.parameters.getlist(Parameter.TRANSPORT_FORMAT_LIST)
+        self.assertEqual(len(copies), 2)
+        self.assertEqual(copies[0].tf_type, ())
+        self.assertEqual(copies[1].tf_type, ())
+
+    def test_hip_transport_format_list_parameter_parses_the_full_declared_length(self) -> None:
+        """#463/#466: a since-corrected revision's ``- 2`` under-read every
+        *non-empty* ``TRANSPORT_FORMAT_LIST``, silently dropping trailing
+        entries; this proves the fully declared list now survives.
+
+        Pre-#463, on ``main``, with the then-one-octet ``item_type`` still in
+        place: ``Length = 4`` and four one-octet transport format entries
+        underflowed to ``pkt['len'] - 2 == 2``, sizing the list at only two
+        entries and silently dropping the last two octets. That bug is
+        independent of the item-width defect fixed alongside it below --
+        confirmed directly against a ``main``-shaped schema object:
+        ``TransportFormatListParameter(type=..., len=4, formats=[10, 20, 30,
+        40])`` packs to twelve octets and reads back as ``formats ==
+        [Unassigned_10, Unassigned_20]``.
+
+        Each ``TF type`` entry is two octets, not one -- :rfc:`7401` Section
+        5.2.11 fixes it at "2x number of TF types" and the diagram shows two
+        16-bit ``TF type`` fields per 32-bit row, matching
+        :class:`HIPTransportModeParameter`'s ``mode`` field rather than the
+        one-octet items :func:`two_octet_prefix_list_len`'s other two call
+        sites use. So this test's four entries are four *two*-octet values
+        (``Length = 8``), and with both defects fixed --
+        :func:`~pcapkit.protocols.schema.internet.hip.
+        transport_format_list_len` returning ``Length`` unchanged, and
+        ``item_type=EnumField(length=2, ...)`` -- all four survive the round
+        trip rather than being dropped or double-counted.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        # next(1) len(1)=7 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 24-octet parameter area to follow: (7 - 4) * 8 == 24.
+        fixed = bytes([0x3b, 0x07, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # Two copies of: type(2)=2049 len(2)=8, four two-octet format entries
+        # (10, 20, 30, 40), no padding needed (8 is already a multiple of
+        # eight under this module's padding rule, which pads the *contents*
+        # to eight and ignores the four-octet type-and-length header) --
+        # 12 octets each, 24 octets together.
+        one = (2049).to_bytes(2, 'big') + (8).to_bytes(2, 'big') + b''.join(
+            n.to_bytes(2, 'big') for n in (10, 20, 30, 40))
+        self.assertEqual(len(one), 12)
+        raw = fixed + one * 2
+
+        proto = HIP(raw, len(raw), extension=True)
+        copies = proto.info.parameters.getlist(Parameter.TRANSPORT_FORMAT_LIST)
+        self.assertEqual(len(copies), 2)
+        for copy in copies:
+            self.assertEqual(len(copy.tf_type), 4)
+            self.assertEqual([int(tf) for tf in copy.tf_type], [10, 20, 30, 40])
+
+    def test_hip_transport_format_list_parameter_round_trips_through_the_maker(self) -> None:
+        """#463/#466: the public maker and the schema's own read path must
+        agree on the entry width, or a hand-built test cannot catch either
+        one being wrong -- which is exactly what happened here.
+
+        ``_make_param_transport_format_list`` computes ``len=2 *
+        len(tf_type)``, already assuming two-octet entries, independently of
+        whatever ``item_type`` the ``formats`` field declares. A hand-built
+        ``TransportFormatListParameter(type=..., len=..., formats=...)``
+        picks a self-consistent ``len`` by hand and so cannot expose a
+        maker/schema disagreement -- which is why the one-octet
+        ``item_type`` survived review once already. Building through the
+        maker instead pins the two to agree: with one-octet items and two
+        real entries, the maker's ``len=4`` reads back as ``len // 1 == 4``
+        entries -- ``[10, 20, 0, 0]``, two spurious trailing zeros -- while
+        with two-octet items it reads back as ``len // 2 == 2`` entries,
+        matching what went in.
+
+        Includes ``Parameter.ESP_TRANSFORM`` (4095) and
+        ``Parameter.HIP_TRANSPORT_MODE`` (7680), both real HIP parameter
+        type numbers over 255 and so within :rfc:`7401`'s own TF type range
+        (2050-4095) -- and both exactly the values a one-octet ``item_type``
+        cannot pack at all (``struct.error: 'B' format requires 0 <= number
+        <= 255``), so the one-octet assumption cannot pass this test
+        silently by falling back to small integers.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        cases = (
+            [],
+            [Parameter.ESP_TRANSFORM],
+            [Parameter.ESP_TRANSFORM, Parameter.HIP_TRANSPORT_MODE],
+            [Parameter.ESP_TRANSFORM, Parameter.HIP_TRANSPORT_MODE, Parameter.HIP_CIPHER],
+        )
+        for formats in cases:
+            with self.subTest(formats=formats):
+                schema = proto._make_param_transport_format_list(
+                    Parameter.TRANSPORT_FORMAT_LIST, version=2, formats=list(formats))
+                self.assertEqual(schema.len, 2 * len(formats))
+
+                packed = bytes(schema)
+                reparsed = hip_schema.TransportFormatListParameter.unpack(packed)
+                self.assertEqual(list(reparsed.formats), list(formats))
+
+    def test_hip_esp_transform_parameter_rejects_underflowing_length(self) -> None:
+        """#463: an ``ESP_TRANSFORM`` parameter's ``Length`` too small for
+        its own two-octet ``reserved`` field must raise, not silently drop
+        the ESP transform suite list.
+
+        ``suites`` sizes its list of ESP transform suite entries as
+        ``Length - 2``, the ``- 2`` accounting for the ``reserved`` field
+        read unconditionally ahead of it. Nothing floored that at zero, so a
+        peer declaring ``Length = 0`` drove the list length to ``-2``.
+        Unlike a :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``suites`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=4095 (ESP_TRANSFORM) len(2)=0, reserved(2), then 2 octets
+        # padding out the 8-octet parameter area the outer header declared.
+        param = (4095).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
+    def test_hip_transport_mode_parameter_rejects_underflowing_length(self) -> None:
+        """#463: a ``HIP_TRANSPORT_MODE`` parameter's ``Length`` too small
+        for its own two-octet ``port`` field must raise, not silently drop
+        the transport mode list.
+
+        ``mode`` sizes its list of transport mode entries as ``Length - 2``,
+        the ``- 2`` accounting for the ``port`` field read unconditionally
+        ahead of it. Nothing floored that at zero, so a peer declaring
+        ``Length = 0`` drove the list length to ``-2``. Unlike a
+        :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``mode`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=7680 (HIP_TRANSPORT_MODE) len(2)=0, port(2), then 2 octets
+        # padding out the 8-octet parameter area the outer header declared.
+        param = (7680).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
     def test_hip_schema_selectors_and_encrypted_parameter_branches(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
@@ -1877,6 +2127,16 @@ class HIPUnitTests(unittest.TestCase):
         # rather than drive the list length negative.
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.registration_type_list_len({'len': 0})
+
+        # #463/#466: ``TRANSPORT_FORMAT_LIST`` has no prefix octet ahead of
+        # its list, so its length is ``Length`` exactly -- including zero.
+        self.assertEqual(hip_schema.transport_format_list_len({'len': 0}), 0)
+        self.assertEqual(hip_schema.transport_format_list_len({'len': 4}), 4)
+        # unreachable from real wire bytes (``len`` is unsigned on the wire),
+        # but a direct, bypassing construction call could still pass a
+        # negative ``len``; keep it to the same floor-and-raise discipline.
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            hip_schema.transport_format_list_len({'len': -1})
 
         missing_packet: dict[str, object] = {}
         with mock.patch('pcapkit.protocols.schema.internet.hip.warn') as warn:
