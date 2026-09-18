@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
-import collections
 import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -491,34 +490,27 @@ class SwitchField(FieldBase[_TC]):
         return self._field.unpack(buffer, packet)
 
 
-def nested_packet_context(packet: 'dict[str, Any]') -> 'collections.ChainMap[str, Any]':
+def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
     """Build the packet context handed to a nested schema's field callbacks.
 
     Args:
         packet: The enclosing schema's own packet data.
 
     Returns:
-        A two-level :class:`collections.ChainMap`: an initially-empty map for
-        the nested schema's own data, chained in front of ``packet``, with
-        the reserved ``__packet__`` key seeded into the first map so it is
-        always reachable regardless of what either map otherwise holds.
+        A plain :class:`dict` holding a shallow copy of ``packet``'s own names,
+        plus the reserved ``__packet__`` key bound to ``packet`` itself.
 
     Notes:
-        A nested schema's field callbacks are written exactly like a
-        top-level schema's -- ``length=lambda pkt: pkt['length']`` -- so a
-        name the nested schema does not itself declare should fall through to
-        the enclosing schema rather than raise :exc:`KeyError`. A
-        :class:`~collections.ChainMap` does this natively: :meth:`__getitem__`,
-        ``in`` and :meth:`~collections.ChainMap.get` all check the first map
-        (the nested schema's own data) before the second (``packet``), and so
-        does :meth:`~collections.ChainMap.setdefault` -- which a hand-written
-        :meth:`dict.setdefault` override would need to duplicate, since
-        :class:`dict`'s own bypasses :meth:`~object.__missing__` the same way
-        :meth:`~dict.get` and :meth:`~dict.__contains__` do. Iterating the
-        mapping (:meth:`~collections.ChainMap.keys`/:meth:`~collections.ChainMap.values`/
-        :meth:`~collections.ChainMap.items`, or plain ``dict(**pkt)``) sees the
-        union of both maps, with the nested schema's own names taking
-        precedence where the two overlap.
+        A nested schema's field callbacks are written exactly like a top-level
+        schema's -- ``length=lambda pkt: pkt['length']`` -- so a name the
+        nested schema does not itself declare has to resolve to the enclosing
+        schema's value rather than raise :exc:`KeyError`. Copying the
+        enclosing names in is what gives that, with no lookup protocol to
+        implement: every mapping operation is :class:`dict`'s own, so
+        ``pkt[key]``, ``key in pkt``, :meth:`~dict.get`,
+        :meth:`~dict.setdefault`, :meth:`~dict.pop`, ``==``, iteration and
+        ``dict(**pkt)`` all behave exactly as a caller reading the code would
+        expect, and none of them needs an override.
 
         The enclosing schema is also reachable *unconditionally* under the
         reserved ``__packet__`` key, for a callback that needs to name the
@@ -530,52 +522,61 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'collections.ChainMap[str
         hand-roll this exact fallback and so are unaffected by (and do not
         need to route through) this function.
 
-        Nothing written through the returned mapping is written back to
-        ``packet``: :class:`~collections.ChainMap` always resolves
-        :meth:`~collections.ChainMap.__setitem__` and
-        :meth:`~collections.ChainMap.__delitem__` against its first map, so a
-        nested schema can set -- or shadow -- a name also declared by the
-        enclosing schema without either write ever reaching the enclosing
-        schema's own data, and without a write silently disappearing either.
-        :meth:`~collections.ChainMap.copy` follows the same rule: it copies
-        only the first map, so the copy still sees the same parent and still
-        keeps its own writes local.
+        Nothing written through the returned mapping reaches ``packet``,
+        because the returned mapping *is* a copy: a nested schema can set --
+        or shadow -- a name also declared by the enclosing schema without the
+        write ever touching the enclosing schema's own data, and without the
+        write silently disappearing either. That matters concretely rather
+        than hypothetically:
+        :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension` declares
+        its own ``length`` while the option enclosing it declares ``length``
+        too, so handing a nested schema the enclosing mapping itself would let
+        the inner ``length`` overwrite the outer one mid-pack.
 
-        No dedicated class: an earlier version of this function returned a
-        hand-written :class:`dict` subclass, adopted when a bare
-        :class:`collections.ChainMap` was suspected of corrupting the shared
-        :class:`~abc.ABCMeta` cache every :class:`Schema
-        <pcapkit.protocols.schema.schema.Schema>` subclass used to share on
-        CPython <= 3.10 (issue #439).
+        Two consequences of it being a copy rather than a live view, both
+        deliberate and neither reached by any current call site. A name
+        deleted from the returned mapping is simply gone, rather than
+        reverting to the enclosing schema's value. And the copy is taken when
+        this function is called, so a later mutation of ``packet`` is not
+        observed through it -- ``__packet__`` remains bound to the live
+        enclosing mapping for any callback that needs the current value.
 
-        That suspicion is *probably* wrong, and the honest position is that it
-        is no longer decidable -- so it is recorded here as two measurements
-        that do not fully reconcile rather than as a settled reversal. What is
-        directly measured: the cache keys on the **exact type queried**, so
-        asking about a :class:`~collections.ChainMap` instance caches lookups
-        for :class:`~collections.ChainMap`, not for :class:`dict`, and the
-        poisoning observed in #439 came from ordinary code asking
-        :func:`isinstance` about a plain :class:`dict` --
-        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that --
-        which a :class:`~collections.ChainMap`-based context never did.
-        Against that: swapping this function's ``ChainMap`` for a plain
-        ``{'__packet__': packet}`` literal was, at the time and on a real
-        CPython 3.10 venv, enough to move
+        No dedicated class and no :class:`~collections.ChainMap`. Earlier
+        versions of this function returned each in turn: a
+        :class:`~collections.ChainMap` first, then a hand-written
+        :class:`dict` subclass adopted when the ``ChainMap`` was suspected of
+        corrupting the shared :class:`~abc.ABCMeta` cache every
+        :class:`Schema <pcapkit.protocols.schema.schema.Schema>` subclass used
+        to share on CPython <= 3.10 (issue #439), and then a
+        :class:`~collections.ChainMap` again once that suspicion was doubted.
+        A plain :class:`dict` ends the question: it satisfies every
+        ``packet: 'dict[str, Any]'`` annotation on the rest of the field
+        classes natively, so no :func:`~typing.cast` is needed at the call
+        site, and it cannot interact with :class:`~abc.ABCMeta` at all because
+        :class:`dict` is not an :class:`~abc.ABCMeta`-based class.
+
+        On the #439 suspicion itself, for the record, since it drove two
+        rewrites: it is *probably* wrong and no longer decidable. What is
+        directly measured is that the cache keys on the **exact type
+        queried**, so asking about a :class:`~collections.ChainMap` instance
+        caches lookups for :class:`~collections.ChainMap` and not for
+        :class:`dict`, and that the poisoning observed in #439 came from
+        ordinary code asking :func:`isinstance` about a plain :class:`dict` --
+        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that.
+        Against that, swapping the ``ChainMap`` for a plain literal was, at
+        the time and on a real CPython 3.10 venv, enough to move
         ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``
         between passing and failing, toggled both ways. The likeliest
-        reconciliation is that the ``ChainMap`` was never causal on its own but
-        changed *which* concrete types flowed through unrelated
-        :func:`isinstance` calls in the same run, and so changed *when* the
-        pre-existing #439 corruption was triggered. That reconciliation is
-        plausible rather than demonstrated, and it cannot now be tested: #439
-        has since been fixed directly (every :class:`Schema` subclass gets its
-        own ``_abc_impl``), which removes the mechanism outright, so the
-        original conditions no longer exist. It does not matter for
-        correctness either way -- with the mechanism gone, nothing here needs
-        to reimplement the mapping protocol by hand.
+        reconciliation -- that the ``ChainMap`` was never causal but changed
+        which concrete types flowed through unrelated :func:`isinstance` calls
+        in the same run, and so changed *when* the pre-existing corruption
+        fired -- is plausible rather than demonstrated, and cannot now be
+        tested: #439 has been fixed directly, every :class:`Schema` subclass
+        gets its own ``_abc_impl``, and the original conditions no longer
+        exist. It does not affect correctness either way.
 
     """
-    return collections.ChainMap({'__packet__': packet}, packet)
+    return {**packet, '__packet__': packet}
 
 
 class SchemaField(FieldBase[_TS]):
@@ -679,16 +680,7 @@ class SchemaField(FieldBase[_TS]):
             return value
 
         packet.update(self._packet)
-        # NOTE: ``nested_packet_context`` returns a ``collections.ChainMap``,
-        # not a ``dict``, so it does not nominally satisfy ``Schema.pack``'s
-        # ``dict[str, Any]`` annotation -- but it satisfies every operation
-        # that annotation promises (subscript, ``in``, ``.get()``, iteration),
-        # which is what the cast below asserts, explicitly, rather than
-        # widening ``Schema.pack``'s own signature. Widening it instead
-        # cascades into every other field class's ``pack``/``unpack``, which
-        # forward the same ``packet`` argument onward with their own
-        # ``dict[str, Any]`` annotations -- see :func:`nested_packet_context`.
-        return value.pack(cast('dict[str, Any]', nested_packet_context(packet)))
+        return value.pack(nested_packet_context(packet))
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.
