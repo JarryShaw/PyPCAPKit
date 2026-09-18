@@ -104,14 +104,15 @@ class ReassemblyDataModelTests(unittest.TestCase):
 
         datagram_id = DatagramID((src, 12345), (dst, 443), 200)
         datagram = Datagram(Completion.COMPLETE, datagram_id, (3,), b'tcp-header', b'hello',
-                            {'parsed': True})
+                            {'parsed': True}, ())
         self.assertIsInstance(datagram.id, TCP_DatagramID)
         self.assertIsInstance(datagram, TCP_Datagram)
         self.assertTrue(datagram.completed)
         self.assertIs(datagram.completed, Completion.COMPLETE)
+        self.assertEqual(datagram.conflict, ())
 
         hole = HoleDescriptor(5, 10)
-        fragment = Fragment([3], 100, 5, bytearray(b'hello'))
+        fragment = Fragment([3], 100, 5, bytearray(b'hello'), [], [])
         buffer = Buffer([hole], b'tcp-header', {200: fragment}, 1000.0)
         self.assertIsInstance(hole, TCP_HoleDescriptor)
         self.assertIsInstance(fragment, TCP_Fragment)

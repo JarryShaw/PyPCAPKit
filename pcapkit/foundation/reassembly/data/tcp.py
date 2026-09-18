@@ -107,6 +107,19 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed TCP payload. Analysed on first read rather than at construction;
     #: a :class:`Deferred` may be passed in its place.
     packet: 'Optional[Protocol]'
+    #: Sequence ranges on which two segments disagreed, i.e. where an arriving
+    #: segment overlapped bytes already buffered but did not repeat them.
+    #: Each entry is ``(first, last)``, absolute TCP sequence numbers and both
+    #: **inclusive** -- the same convention as :attr:`Packet.first` and
+    #: :attr:`Packet.last`. Empty when the stream never saw a contested byte.
+    #:
+    #: Resolution keeps the already-buffered bytes and discards the
+    #: conflicting portion of whichever segment arrived later, per
+    #: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just
+    #: the new data"); this field is what lets a caller tell a clean stream
+    #: from a contested one now that :attr:`completed` no longer does, since a
+    #: contested range does not, on its own, leave a hole.
+    conflict: 'tuple[tuple[int, int], ...]'
 
     if TYPE_CHECKING:
         # NOTE: one signature rather than a pair of ``@overload``\\ s keyed on
@@ -114,7 +127,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies
         # here identically: ``strict=False`` reports an incomplete payload buffer as
         # one contiguous ``bytes`` and analyses it.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -156,9 +169,51 @@ class Fragment(Info):
     len: 'int'
     #: Reassembled payload holes set to b'\x00'.
     raw: 'bytearray'
+    #: Sequence ranges, absolute and inclusive, still zero-fill placeholder in
+    #: :attr:`raw` rather than an actually-received byte *of this fragment*.
+    #: Only the two gap-creating sites in :meth:`TCP.reassembly
+    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` -- the forward
+    #: append and the reach-back prepend, the only places that ever splice a
+    #: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap
+    #: merge only ever shrinks or removes one, filling it from the arriving
+    #: segment.
+    #:
+    #: This is deliberately **not** derived from
+    #: :attr:`Buffer.hdl <pcapkit.foundation.reassembly.data.tcp.Buffer.hdl>`.
+    #: ``hdl`` is one list shared by every acknowledgement number under the
+    #: same buffer ID, so a segment landing in a *different* fragment can
+    #: close a hole in ``hdl`` that this fragment's own :attr:`raw` never
+    #: filled -- and consulting ``hdl`` to decide whether an overlapping
+    #: position here was "already received" then answers a question about
+    #: the wrong fragment. Tracking gaps on the fragment itself is what keeps
+    #: the merge in :meth:`TCP.reassembly
+    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` from discarding
+    #: this fragment's own real bytes because some *other* fragment happened
+    #: to have received something at the same absolute sequence numbers.
+    #:
+    #: Absolute sequence numbers rather than offsets into :attr:`raw` --
+    #: :attr:`conflict` below uses the same convention -- for two reasons:
+    #: it is what :meth:`TCP.reassembly
+    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` already computes
+    #: (``GAP = PSN - (ISN + LEN)`` and its mirror), so this reuses an
+    #: existing concept rather than adding a second one; and it means a gap
+    #: entry never needs shifting when :attr:`isn` is revised downward by the
+    #: reach-back path, unlike an offset-based or a per-octet representation.
+    #: A typical fragment carries zero or a handful of entries, against a
+    #: per-octet marker the length of the whole payload -- the difference
+    #: that matters on a clean stream, where the per-octet form pays a
+    #: buffer-sized cost to record that nothing is missing at all.
+    gap: 'list[tuple[int, int]]'
+    #: Sequence ranges, absolute and inclusive, on which an arriving segment
+    #: disagreed with bytes already held in :attr:`raw`. Accumulated across
+    #: every merge into this fragment, in the order the conflicts were found;
+    #: carried onto :attr:`Datagram.conflict
+    #: <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>` verbatim
+    #: when the buffer is submitted.
+    conflict: 'list[tuple[int, int]]'
 
     if TYPE_CHECKING:
-        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray', gap: 'list[tuple[int, int]]', conflict: 'list[tuple[int, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
