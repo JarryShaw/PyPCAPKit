@@ -169,6 +169,25 @@ class Fragment(Info):
     len: 'int'
     #: Reassembled payload holes set to b'\x00'.
     raw: 'bytearray'
+    #: Per-octet received marker, the same length as :attr:`raw` and aligned
+    #: with it: ``1`` where that octet of :attr:`raw` was placed there by an
+    #: actually-received segment *of this fragment*, ``0`` where it is still
+    #: the zero-fill placeholder for a gap this fragment itself has not
+    #: received yet.
+    #:
+    #: This is deliberately **not** derived from
+    #: :attr:`Buffer.hdl <pcapkit.foundation.reassembly.data.tcp.Buffer.hdl>`.
+    #: ``hdl`` is one list shared by every acknowledgement number under the
+    #: same buffer ID, so a segment landing in a *different* fragment can
+    #: close a hole in ``hdl`` that this fragment's own :attr:`raw` never
+    #: filled -- and consulting ``hdl`` to decide whether an overlapping
+    #: position here was "already received" then answers a question about
+    #: the wrong fragment. Tracking receipt on the fragment itself is what
+    #: keeps the merge in :meth:`TCP.reassembly
+    #: <pcapkit.foundation.reassembly.tcp.TCP.reassembly>` from discarding
+    #: this fragment's own real bytes because some *other* fragment happened
+    #: to have received something at the same absolute sequence numbers.
+    received: 'bytearray'
     #: Sequence ranges, absolute and inclusive, on which an arriving segment
     #: disagreed with bytes already held in :attr:`raw`. Accumulated across
     #: every merge into this fragment, in the order the conflicts were found;
@@ -178,7 +197,7 @@ class Fragment(Info):
     conflict: 'list[tuple[int, int]]'
 
     if TYPE_CHECKING:
-        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray', conflict: 'list[tuple[int, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray', received: 'bytearray', conflict: 'list[tuple[int, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

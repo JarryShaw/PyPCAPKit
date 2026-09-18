@@ -118,7 +118,7 @@ class TCPReassemblyTests(unittest.TestCase):
             [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, sys.maxsize)],
             b'',
             {
-                500: Fragment([1], 10, 10, bytearray(b'0123456789'), []),
+                500: Fragment([1], 10, 10, bytearray(b'0123456789'), bytearray(b'\x01' * 10), []),
             },
             1000.0,
         )
@@ -155,7 +155,7 @@ class TCPReassemblyTests(unittest.TestCase):
         before_gap._buffer[bufid] = Buffer(
             [HoleDescriptor(50, sys.maxsize)],
             b'',
-            {500: Fragment([1], 10, 5, bytearray(b'world'), [])},
+            {500: Fragment([1], 10, 5, bytearray(b'world'), bytearray(b'\x01' * 5), [])},
             1000.0,
         )
         before_gap(self._packet(num=2, dsn=0, payload=b'hello', first=40, last=44))
@@ -185,7 +185,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), [])},
+                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), bytearray(b'\x01' * 10), [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -204,8 +204,8 @@ class TCPReassemblyTests(unittest.TestCase):
                 [HoleDescriptor(0, 0), HoleDescriptor(4, 5), HoleDescriptor(7, 7)],
                 b'tcp-header',
                 {
-                    500: Fragment([], 0, 0, bytearray(), []),
-                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), [(2, 3)]),
+                    500: Fragment([], 0, 0, bytearray(), bytearray(), []),
+                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), bytearray(b'\x01' * 9), [(2, 3)]),
                 },
                 1000.0,
             ),
@@ -228,7 +228,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([3], 0, 3, bytearray(b'abc'), [])},
+                {500: Fragment([3], 0, 3, bytearray(b'abc'), bytearray(b'\x01' * 3), [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -240,7 +240,7 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(completed[0].conflict, ())
         self.assertEqual(Analyzer.calls[-1], ((12345, 443), b'abc'))
 
-        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray(), [])},
+        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray(), bytearray(), [])},
                                              1000.0),
                                       bufid=bufid), [])
 
@@ -744,6 +744,65 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         self.assertIs(complete.completed, Completion.COMPLETE)
         self.assertEqual(complete.payload, b'AAAAAAAA' + b'D' * 12 + b'CCCCCCCC')
         self.assertEqual(complete.conflict, ((base, base + 7),))
+
+    def test_one_ack_buckets_hole_closing_does_not_leak_receipt_into_another(self) -> None:
+        """A hole closed in one ACK bucket must not look received in a different one.
+
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Buffer.hdl` is one hole
+        descriptor list shared by every ACK bucket under the same BUFID, while
+        each bucket's own :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.raw`
+        is private to that bucket. Bucket 2000 here fills the *shared* hole at
+        base+4..base+9 with its own, entirely unrelated data; that must not
+        make bucket 1000's later, real segment for the very same absolute
+        range look like a conflicting retransmission of something bucket 1000
+        already had -- it is bucket 1000's *first* receipt there, and it must
+        survive intact with no conflict recorded.
+
+        """
+        base = self.BASE
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        reasm = TCP()
+        reasm(self._packet(num=1, dsn=base, payload=b'AAAA', ack=1000))          # bucket 1000: base..base+3
+        reasm(self._packet(num=2, dsn=base + 10, payload=b'DDDD', ack=1000))     # bucket 1000: base+10..base+13,
+                                                                                   # gap base+4..base+9 in the shared hdl
+        reasm(self._packet(num=3, dsn=base + 4, payload=b'X' * 6, ack=2000))     # bucket 2000 closes the SHARED hole
+        reasm(self._packet(num=4, dsn=base + 4, payload=b'C' * 6, ack=1000))     # bucket 1000's own first receipt there
+        reasm(self._packet(num=5, dsn=base + 14, payload=b'EEEE', ack=1000))
+
+        datagrams = {d.id.ack: d for d in reasm.fetch()}
+        self.assertTrue(datagrams[1000].completed)
+        self.assertEqual(datagrams[1000].payload, b'AAAA' + b'C' * 6 + b'DDDDEEEE')
+        self.assertEqual(datagrams[1000].conflict, ())
+        self.assertTrue(datagrams[2000].completed)
+        self.assertEqual(datagrams[2000].payload, b'X' * 6)
+        self.assertEqual(datagrams[2000].conflict, ())
+
+    def test_a_genuine_gap_fill_through_the_overlap_merge_is_never_a_conflict(self) -> None:
+        """A hole filled by the overlap-merge path is a gap fill, not a conflict.
+
+        The arriving segment here straddles a real hole *and* touches
+        already-received bytes on both sides of it in the same merge call --
+        the case :meth:`~pcapkit.foundation.reassembly.tcp.TCP._merge_overlap`
+        has to get right on a single call, not just across separate ones. The
+        already-received edges carry bytes identical to what is buffered (a
+        conforming overlap), so nothing there conflicts either; only the
+        hole in the middle is genuinely new, and filling it must not appear
+        in ``conflict`` at all.
+
+        """
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base, payload=b'AAAA'),           # base..base+3
+            self._packet(num=2, dsn=base + 10, payload=b'CCCC'),      # base+10..base+13, gap base+4..base+9
+            # base+2..base+11: 'AA' matches the buffered tail of segment 1,
+            # 'XXXXXX' fills the gap, 'CC' matches the buffered head of
+            # segment 2 -- none of the three is a disagreement
+            self._packet(num=3, dsn=base + 2, payload=b'AA' + b'X' * 6 + b'CC'),
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAA' + b'X' * 6 + b'CCCC')
+        self.assertEqual(datagram.conflict, ())
 
 
 if __name__ == '__main__':

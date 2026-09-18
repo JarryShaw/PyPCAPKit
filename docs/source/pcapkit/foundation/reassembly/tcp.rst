@@ -271,6 +271,14 @@ Terminology
            |                                      |                 |--> 'len' : (int) length of payload buffer
            |                                      |                 |--> 'raw' : (bytearray) reassembled payload,
            |                                      |                                          holes set to b'\x00'
+           |                                      |                 |--> 'received' : (bytearray) per-octet marker,
+           |                                      |                 |                  aligned with 'raw' -- 1 where
+           |                                      |                 |                  that octet was placed there by
+           |                                      |                 |                  a segment *of this fragment*,
+           |                                      |                 |                  0 where it is still 'raw's
+           |                                      |                 |                  zero-fill placeholder for a
+           |                                      |                 |                  gap this fragment has not
+           |                                      |                 |                  received yet
            |                                      |                 |--> 'conflict' : (list) sequence ranges on which
            |                                      |                 |                  an arriving segment disagreed
            |                                      |                 |                  with bytes already in 'raw'
@@ -280,6 +288,15 @@ Terminology
            |                                      |                 |                  |--> ...
            |                                      |--> (int) ACK ...
            |                                      |--> ...
+
+       ``received`` is deliberately **not** derived from ``hdl`` above.
+       ``hdl`` is shared by every ACK in this dict, while each ACK's own
+       ``raw`` is private to it, so a different ACK's segment closing a hole
+       in ``hdl`` says nothing about whether *this* ACK has received
+       anything at the same sequence numbers -- consulting ``hdl`` for that
+       question previously discarded a fragment's own real bytes whenever a
+       different ACK bucket under the same buffer ID happened to cover the
+       same range first.
            |                        |--> 'timestamp' : (float) capture timestamp of the
            |                                                   first segment buffered
            |--> (tuple) BUFID ...
