@@ -414,18 +414,11 @@ EXPECTED_FAILURES = {
         for name in ('DATA', 'HEADERS', 'CONTINUATION')
     },
 
-    # ``SettingsFrame.settings`` declares ``item_type=SettingPair``, the raw
-    # schema class, rather than ``SchemaField(schema=SettingPair)``. So
-    # ``ListField.unpack``'s non-schema branch calls ``SettingPair(packet)``,
-    # binding the packet dict to ``SettingPair``'s first field (``id``)
-    # instead of constructing a field to read with, and then asks the result
-    # for a ``.length`` no ``Schema`` provides.
-    'httpv2-frame/SETTINGS': Gap(
-        'PARSE', "'SettingPair' object has no attribute 'length'",
-        'pcapkit/protocols/schema/application/httpv2.py:285 -- settings '
-        'declares item_type=SettingPair instead of '
-        'SchemaField(schema=SettingPair); unreachable before #445 fixed the '
-        "KeyError: 'flags' this hit first"),
+    # ``httpv2-frame/SETTINGS`` used to hit ``SettingsFrame.settings``
+    # declaring ``item_type=SettingPair`` (the raw schema class) instead of
+    # ``SchemaField(schema=SettingPair)``, filed as #459. #462 wrapped it
+    # correctly and merged, so this now round-trips cleanly -- no entry
+    # needed.
 
     # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
     # octets, so the constructed header always says 14 -- while the reader
