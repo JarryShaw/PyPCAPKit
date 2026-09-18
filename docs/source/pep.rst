@@ -705,3 +705,57 @@ Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 ``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
 :doc:`pcapkit/foundation/engines/index` tabulates that.
+
+Delivery Sequence
+-----------------
+
+The items above are ordered by subject rather than by when anyone intends to do
+them. This section records the intended **order**, so that a contributor can see
+what is being worked on, what is queued behind it, and — more usefully — which
+items are queued because they *depend* on something rather than merely because
+nobody has started them.
+
+It is a sequencing note, not a commitment: nothing here is claimed, and an item
+being in a later wave is not a reason to leave it alone if you want it now. Say
+so in the `discussion thread
+<https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ and it moves.
+
+**Wave 1 — done or in flight.** The Mobility Header registry completion, the
+protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
+:class:`~pcapkit.protocols.link.vlan.VLAN` C-Tag/S-Tag split, the option
+round-trip coverage harness, and reassembly's :rfc:`8200` timeout with
+bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
+`the issue tracker <https://github.com/JarryShaw/PyPCAPKit/issues>`__ rather than
+here.
+
+**Wave 2 — the protocol pairs that want a shared abstract base**, per `More
+Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
+``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** on its own. These are grouped
+because the shared-base question is the design work and doing either half of a
+pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
+size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
+stub.
+
+**Wave 3 — the remaining protocols** from the same list, taken three or four at a
+time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
+new transport and wants that settled first, the other three because a capture in
+the wild is rare enough that the work buys little until the commoner protocols
+are in.
+
+**Queued behind wave 2 — the Mobility Header sub-layer registry.** Several
+mobility options carry a payload belonging to another protocol, and those
+payloads want carrying as :class:`~pcapkit.protocols.misc.raw.Raw` through a
+per-payload registry rather than as bare :obj:`bytes` — see `Mobility Header`_
+above, which describes the payloads in question and why a registry of their own
+is wanted instead of
+:meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
+sequenced *after* wave 2 rather than by preference: the multicast options embed
+:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMP** records —
+both wave 2 deliverables. Landing the registry first would give a dispatch table
+with nothing but ``Raw`` to register. The counter-argument is real though, and
+worth weighing rather than dismissing: changing the parsed shape from
+:obj:`bytes` to ``Raw`` is the disruptive half, since it changes what existing
+captures dump to, so there is a case for taking that churn early and registering
+dissectors later. The third format, the :rfc:`6088` traffic selectors of
+:rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
+nobody has claimed it.
