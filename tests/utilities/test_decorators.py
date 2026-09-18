@@ -146,6 +146,43 @@ class DecoratorTests(unittest.TestCase):
         DemoSchema = self._demo_schema_for_call_shapes()
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', length=7, packet={}))
 
+    def test_prepare_raises_typeerror_for_extra_positional_and_keyword_arguments(self) -> None:
+        """Extras used to vanish silently instead of being forwarded; see #454.
+
+        ``prepare``'s own docstring promised the decorated function receives
+        ``*args, **kwargs``, but the wrapper never populated either --
+        reproduced from the issue::
+
+            Probe.unpack(b'\\x07\\x08', 2, {}, 'EXTRA_POSITIONAL', extra_kw='EXTRA_KW')
+            -> a=7 b=8      # both extras silently gone, no error
+
+        The chosen fix removes the promise (nothing in the tree ever passed
+        extras, and ``@prepare`` decorates exactly one function, whose real
+        signature never had room for them) and rejects extras instead of
+        forwarding them, so a misspelled or unsupported argument is a
+        ``TypeError`` rather than a parse that silently ignored it.
+
+        """
+        DemoSchema = self._demo_schema_for_call_shapes()
+
+        with self.assertRaises(TypeError):
+            DemoSchema.unpack(b'payload', 7, {}, 'EXTRA_POSITIONAL', extra_kw='EXTRA_KW')
+
+    def test_prepare_raises_typeerror_for_length_given_both_positionally_and_by_keyword(self) -> None:
+        """The narrower case #454 calls out.
+
+        Passing ``length`` both positionally and by keyword used to silently
+        keep the positional value and drop the keyword one -- the keyword
+        never reached ``kwargs.pop``, since that branch only runs when the
+        positional slot was *not* supplied. It is now a caller error like any
+        other unconsumed argument.
+
+        """
+        DemoSchema = self._demo_schema_for_call_shapes()
+
+        with self.assertRaises(TypeError):
+            DemoSchema.unpack(b'payload', 7, {}, length=2)
+
     def test_prepare_raises_eof_for_empty_payloads(self) -> None:
         class DemoSchema:
             @classmethod
@@ -162,6 +199,94 @@ class DecoratorTests(unittest.TestCase):
 
         with self.assertRaises(EOFError):
             DemoSchema.unpack(b'', None, None)
+
+    def test_prepare_raises_stream_eof_error_not_a_bare_eof_error(self) -> None:
+        """The genuinely-exhausted case now raises an in-library exception.
+
+        A caller could not previously tell a truncated capture apart from any
+        other ``EOFError``. ``StreamEOFError`` still *is* an ``EOFError`` --
+        so ``pcapkit.foundation.extraction.Extractor``'s existing ``except
+        (EOFError, StopIteration)`` keeps working unchanged -- but it can now
+        be caught specifically via
+        :class:`pcapkit.utilities.exceptions.StreamEOFError`.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet):
+                return None
+
+            def post_process(self, packet):
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls()
+
+        with self.assertRaises(self.exceptions.StreamEOFError):
+            DemoSchema.unpack(b'', None, None)
+
+    def test_prepare_still_raises_eof_for_a_truncated_stream(self) -> None:
+        """A file-like stream already exhausted, with no declared length, is
+        the frame reader's genuine end-of-capture case and must still raise --
+        confirming the #458 fix only changes the *declared*-zero case below,
+        not this one.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet):
+                return None
+
+            def post_process(self, packet):
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls()
+
+        stream = io.BytesIO(b'')
+        with self.assertRaises(self.exceptions.StreamEOFError):
+            DemoSchema.unpack(stream, None, None)
+
+    def test_prepare_accepts_a_declared_zero_length_schema(self) -> None:
+        """A nested, or otherwise genuinely empty, schema sized zero *by the
+        caller* must unpack rather than raise. Reproduced from #458::
+
+            @schema_final
+            class Empty(Schema):
+                pass
+            Empty.unpack(b'', 0, {})
+            -> EOFError: EOFError()     # before the fix
+
+        Distinguishing this from the truncated-stream case above is what
+        ``length is not None`` (a *declared* length, even zero) checks for.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet: dict[str, object]) -> None:
+                packet['prepped'] = True
+
+            def __init__(self, data: bytes) -> None:
+                self.data = data
+
+            def post_process(self, packet: dict[str, object]) -> dict[str, object]:
+                packet['data'] = self.data
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls(data.read())
+
+        packet = DemoSchema.unpack(b'', 0, {})
+
+        self.assertEqual(packet['__length__'], 0)
+        self.assertTrue(packet['prepped'])
+        self.assertEqual(packet['data'], b'')
 
     def test_prepare_leaves_the_schema_clean_after_post_process(self) -> None:
         """``post_process``'s revisions must not mark the schema as needing a re-pack.
