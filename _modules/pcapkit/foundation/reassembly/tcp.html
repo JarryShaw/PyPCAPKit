@@ -569,6 +569,9 @@
                         <span class="n">isn</span><span class="o">=</span><span class="n">PSN</span><span class="p">,</span>
                         <span class="nb">len</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
                         <span class="n">raw</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
+                        <span class="c1"># this segment's own payload is, by definition, all real</span>
+                        <span class="n">gap</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="p">[],</span>
                     <span class="p">),</span>
                 <span class="p">},</span>
                 <span class="n">timestamp</span><span class="o">=</span><span class="n">TS</span><span class="p">,</span>
@@ -583,6 +586,8 @@
                     <span class="n">isn</span><span class="o">=</span><span class="n">PSN</span><span class="p">,</span>
                     <span class="nb">len</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
                     <span class="n">raw</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
+                    <span class="n">gap</span><span class="o">=</span><span class="p">[],</span>
+                    <span class="n">conflict</span><span class="o">=</span><span class="p">[],</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># put header into header buffer</span>
@@ -593,31 +598,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
 
                 <span class="c1"># record fragment payload</span>
-                <span class="n">ISN</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">isn</span>       <span class="c1"># Initial Sequence Number</span>
-                <span class="n">RAW</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">raw</span>       <span class="c1"># Raw Payload Data</span>
-                <span class="k">if</span> <span class="n">PSN</span> <span class="o">&gt;=</span> <span class="n">ISN</span><span class="p">:</span>  <span class="c1"># if fragment goes after existing payload</span>
-                    <span class="n">LEN</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">len</span>
-                    <span class="n">GAP</span> <span class="o">=</span> <span class="n">PSN</span> <span class="o">-</span> <span class="p">(</span><span class="n">ISN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">)</span>     <span class="c1"># gap length between payloads</span>
-                    <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>    <span class="c1"># if fragment goes after existing payload</span>
-                        <span class="n">RAW</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
-                    <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment partially overlaps existing payload</span>
-                        <span class="n">RAW</span><span class="p">[</span><span class="n">PSN</span> <span class="o">-</span> <span class="n">ISN</span><span class="p">:</span><span class="n">PSN</span> <span class="o">-</span> <span class="n">ISN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
-                <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment exceeds existing payload</span>
-                    <span class="n">LEN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span>
-                    <span class="n">GAP</span> <span class="o">=</span> <span class="n">ISN</span> <span class="o">-</span> <span class="p">(</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">)</span>     <span class="c1"># gap length between payloads</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
-                        <span class="n">isn</span><span class="o">=</span><span class="n">PSN</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>    <span class="c1"># if fragment exceeds existing payload</span>
-                        <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">RAW</span>
-                    <span class="k">else</span><span class="p">:</span>           <span class="c1"># if fragment partially overlaps existing payload</span>
-                        <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="n">RAW</span><span class="p">[</span><span class="o">-</span><span class="n">GAP</span><span class="p">:]</span>
-                <span class="c1">#self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram</span>
-                <span class="c1">#self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
-                    <span class="n">raw</span><span class="o">=</span><span class="n">RAW</span><span class="p">,</span>       <span class="c1"># update payload datagram</span>
-                    <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span>  <span class="c1"># update payload length</span>
-                <span class="p">)</span>
+                <span class="n">fragment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">ack</span><span class="p">[</span><span class="n">ACK</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">PSN</span> <span class="o">&gt;=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span><span class="p">:</span>  <span class="c1"># if fragment goes after existing payload</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble_append</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">PSN</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>                    <span class="c1"># if fragment exceeds existing payload</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_reassemble_prepend</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">PSN</span><span class="p">)</span>
 
             <span class="c1"># update hole descriptor list</span>
             <span class="c1">#</span>
@@ -628,28 +613,7 @@
             <span class="c1"># into two adjacent holes covering the very same octets, growing</span>
             <span class="c1"># the list without bound on a long-lived connection.</span>
             <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">HDL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span>                          <span class="c1"># HDL alias</span>
-                <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">hole</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HDL</span><span class="p">):</span>                   <span class="c1"># step one</span>
-                    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>                         <span class="c1"># step two</span>
-                        <span class="k">continue</span>
-                    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                         <span class="c1"># step three</span>
-                        <span class="k">continue</span>
-                    <span class="k">del</span> <span class="n">HDL</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>                                     <span class="c1"># step four</span>
-                    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                        <span class="c1"># step five</span>
-                        <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
-                            <span class="n">first</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">,</span>
-                            <span class="n">last</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
-                        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">FIN</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">RST</span><span class="p">:</span>  <span class="c1"># step six</span>
-                        <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
-                            <span class="n">first</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="n">last</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">last</span>
-                        <span class="p">)</span>
-                        <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
-                    <span class="k">break</span>                                              <span class="c1"># step seven</span>
-                <span class="c1">#self._buffer[BUFID].hdl = HDL                         # update HDL</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_hole_descriptors</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">,</span> <span class="n">FIN</span><span class="p">,</span> <span class="n">RST</span><span class="p">)</span>
 
         <span class="c1"># when FIN/RST is set, submit buffer of this session</span>
         <span class="k">if</span> <span class="n">FIN</span> <span class="ow">or</span> <span class="n">RST</span><span class="p">:</span>
@@ -657,6 +621,244 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
             <span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reassemble_append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'Fragment'</span><span class="p">,</span> <span class="n">PSN</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Merge a segment that starts at or after the buffered payload's end.</span>
+
+<span class="sd">        Covers both an ordinary (or zero-length) forward gap and a tail-side</span>
+<span class="sd">        overlap. Mutates ``fragment`` in place: its ``gap`` list, its</span>
+<span class="sd">        ``conflict`` list, and finally its ``raw``/``len`` via</span>
+<span class="sd">        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>
+<span class="sd">            fragment: this ACK bucket's own</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.data.tcp.Fragment`</span>
+<span class="sd">            PSN: payload sequence number of the arriving segment</span>
+
+<span class="sd">        """</span>
+        <span class="n">ISN</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span>       <span class="c1"># Initial Sequence Number</span>
+        <span class="n">RAW</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">raw</span>       <span class="c1"># Raw Payload Data</span>
+        <span class="n">GAPS</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">gap</span>      <span class="c1"># this fragment's own gap list</span>
+        <span class="n">LEN</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">len</span>
+        <span class="n">GAP</span> <span class="o">=</span> <span class="n">PSN</span> <span class="o">-</span> <span class="p">(</span><span class="n">ISN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">)</span>  <span class="c1"># gap length between payloads</span>
+        <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>             <span class="c1"># if fragment goes after existing payload</span>
+            <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">GAPS</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ISN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">,</span> <span class="n">PSN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">RAW</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fragment partially overlaps existing payload. Per</span>
+            <span class="c1"># :rfc:`9293#section-3.10` ("we reconstruct the segment</span>
+            <span class="c1"># to contain just the new data"), an already-*received*</span>
+            <span class="c1"># byte wins over a conflicting arriving one; only a</span>
+            <span class="c1"># position this *fragment* has not received yet (per</span>
+            <span class="c1"># its own ``gap`` list, not the buffer-wide ``HDL`` --</span>
+            <span class="c1"># see</span>
+            <span class="c1"># :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`)</span>
+            <span class="c1"># has nothing to disagree with, so the arriving byte</span>
+            <span class="c1"># is simply accepted there -- an ordinary gap fill,</span>
+            <span class="c1"># not a conflict.</span>
+            <span class="n">OFFSET</span> <span class="o">=</span> <span class="n">PSN</span> <span class="o">-</span> <span class="n">ISN</span>                     <span class="c1"># index into RAW where the overlap begins</span>
+            <span class="n">OVERLAP</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span> <span class="n">LEN</span> <span class="o">-</span> <span class="n">OFFSET</span><span class="p">)</span>  <span class="c1"># length of the overlapping range</span>
+            <span class="n">merged</span><span class="p">,</span> <span class="n">conflicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_overlap</span><span class="p">(</span>
+                <span class="n">GAPS</span><span class="p">,</span>
+                <span class="nb">bytes</span><span class="p">(</span><span class="n">RAW</span><span class="p">[</span><span class="n">OFFSET</span><span class="p">:</span><span class="n">OFFSET</span> <span class="o">+</span> <span class="n">OVERLAP</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">OVERLAP</span><span class="p">]),</span>
+                <span class="n">PSN</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">RAW</span><span class="p">[</span><span class="n">OFFSET</span><span class="p">:</span><span class="n">OFFSET</span> <span class="o">+</span> <span class="n">OVERLAP</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+            <span class="n">fragment</span><span class="o">.</span><span class="n">conflict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">conflicts</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span> <span class="o">&gt;</span> <span class="n">OVERLAP</span><span class="p">:</span>  <span class="c1"># fragment reaches past the buffered end</span>
+                <span class="n">RAW</span> <span class="o">+=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="n">OVERLAP</span><span class="p">:]</span>
+        <span class="n">fragment</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
+            <span class="n">raw</span><span class="o">=</span><span class="n">RAW</span><span class="p">,</span>       <span class="c1"># update payload datagram</span>
+            <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span>  <span class="c1"># update payload length</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reassemble_prepend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">'Fragment'</span><span class="p">,</span> <span class="n">PSN</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Merge a segment that starts before the buffered payload's own ``isn``.</span>
+
+<span class="sd">        Revises this fragment's ``isn`` down to ``PSN``, then covers both an</span>
+<span class="sd">        ordinary (or zero-length) reach-back gap and a head-side overlap --</span>
+<span class="sd">        which may also extend a new tail past the buffered end in the same</span>
+<span class="sd">        call. Mutates ``fragment`` in place: its ``isn``, its ``gap`` list,</span>
+<span class="sd">        its ``conflict`` list, and finally its ``raw``/``len`` via</span>
+<span class="sd">        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>
+<span class="sd">            fragment: this ACK bucket's own</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.data.tcp.Fragment`</span>
+<span class="sd">            PSN: payload sequence number of the arriving segment</span>
+
+<span class="sd">        """</span>
+        <span class="n">ISN</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">isn</span>       <span class="c1"># Initial Sequence Number, before revision</span>
+        <span class="n">RAW</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">raw</span>       <span class="c1"># Raw Payload Data</span>
+        <span class="n">GAPS</span> <span class="o">=</span> <span class="n">fragment</span><span class="o">.</span><span class="n">gap</span>      <span class="c1"># this fragment's own gap list</span>
+        <span class="n">LEN</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span>
+        <span class="n">GAP</span> <span class="o">=</span> <span class="n">ISN</span> <span class="o">-</span> <span class="p">(</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">)</span>  <span class="c1"># gap length between payloads</span>
+        <span class="n">fragment</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
+            <span class="n">isn</span><span class="o">=</span><span class="n">PSN</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>             <span class="c1"># if fragment exceeds existing payload</span>
+            <span class="k">if</span> <span class="n">GAP</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">GAPS</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">LEN</span><span class="p">,</span> <span class="n">ISN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span> <span class="o">+</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">GAP</span><span class="p">)</span> <span class="o">+</span> <span class="n">RAW</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Mirrored reach-back case: the fragment starts before</span>
+            <span class="c1"># ``ISN`` and its tail overlaps the start of the</span>
+            <span class="c1"># already-buffered payload. Same resolution -- keep</span>
+            <span class="c1"># already-received bytes, fill any gap among them from</span>
+            <span class="c1"># the arriving segment, and prepend the genuinely new</span>
+            <span class="c1"># head. The new head-prepend below is *not* mutually</span>
+            <span class="c1"># exclusive with the rare case of also appending a new</span>
+            <span class="c1"># tail past the buffered end (full engulfment plus</span>
+            <span class="c1"># extension) -- both can happen in the same call, since</span>
+            <span class="c1"># they come from independent ends of the fragment. What</span>
+            <span class="c1"># *is* mutually exclusive is which one of the old tail</span>
+            <span class="c1"># (``RAW[OVERLAP:]``) or a genuinely new one</span>
+            <span class="c1"># (``info.payload[OFFSET + OVERLAP:]``) is non-empty --</span>
+            <span class="c1"># never both, since ``OVERLAP`` is capped at whichever</span>
+            <span class="c1"># of the two is shorter.</span>
+            <span class="c1">#</span>
+            <span class="c1"># ``GAPS`` is not touched here at all: it is kept in</span>
+            <span class="c1"># absolute sequence numbers, so revising ``isn``</span>
+            <span class="c1"># downward above does not require shifting or</span>
+            <span class="c1"># re-prefixing a single entry in it.</span>
+            <span class="n">OFFSET</span> <span class="o">=</span> <span class="n">ISN</span> <span class="o">-</span> <span class="n">PSN</span>                     <span class="c1"># index into info.payload where the overlap begins</span>
+            <span class="n">OVERLAP</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span> <span class="n">LEN</span> <span class="o">-</span> <span class="n">OFFSET</span><span class="p">)</span>  <span class="c1"># length of the overlapping range</span>
+            <span class="n">merged</span><span class="p">,</span> <span class="n">conflicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_overlap</span><span class="p">(</span>
+                <span class="n">GAPS</span><span class="p">,</span>
+                <span class="nb">bytes</span><span class="p">(</span><span class="n">RAW</span><span class="p">[:</span><span class="n">OVERLAP</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="n">OFFSET</span><span class="p">:</span><span class="n">OFFSET</span> <span class="o">+</span> <span class="n">OVERLAP</span><span class="p">]),</span>
+                <span class="n">ISN</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">RAW</span><span class="p">[:</span><span class="n">OVERLAP</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+            <span class="n">fragment</span><span class="o">.</span><span class="n">conflict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">conflicts</span><span class="p">)</span>
+            <span class="n">RAW</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[:</span><span class="n">OFFSET</span><span class="p">]</span> <span class="o">+</span> <span class="n">RAW</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span><span class="p">[</span><span class="n">OFFSET</span> <span class="o">+</span> <span class="n">OVERLAP</span><span class="p">:]</span>
+        <span class="n">fragment</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
+            <span class="n">raw</span><span class="o">=</span><span class="n">RAW</span><span class="p">,</span>       <span class="c1"># update payload datagram</span>
+            <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">RAW</span><span class="p">),</span>  <span class="c1"># update payload length</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_hole_descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">,</span>
+                                  <span class="n">FIN</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">RST</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Update the buffer-wide hole descriptor list per :rfc:`815`.</span>
+
+<span class="sd">        Called only for a segment that carries payload (``info.len &gt; 0``);</span>
+<span class="sd">        a bare acknowledgement, SYN, FIN or RST fills no hole, and running</span>
+<span class="sd">        one through this would split whichever hole contains it into two</span>
+<span class="sd">        adjacent holes covering the very same octets, growing the list</span>
+<span class="sd">        without bound on a long-lived connection.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>
+<span class="sd">            BUFID: buffer identifier of the session this fragment belongs to</span>
+<span class="sd">            FIN: finish flag (termination) of the arriving segment</span>
+<span class="sd">            RST: reset connection flag (termination) of the arriving segment</span>
+
+<span class="sd">        """</span>
+        <span class="n">HDL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span>                          <span class="c1"># HDL alias</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">hole</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HDL</span><span class="p">):</span>                   <span class="c1"># step one</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span><span class="p">:</span>                         <span class="c1"># step two</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                         <span class="c1"># step three</span>
+                <span class="k">continue</span>
+            <span class="k">del</span> <span class="n">HDL</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>                                     <span class="c1"># step four</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">&gt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">:</span>                        <span class="c1"># step five</span>
+                <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
+                    <span class="n">first</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">first</span><span class="p">,</span>
+                    <span class="n">last</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">first</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">&lt;</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">FIN</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">RST</span><span class="p">:</span>  <span class="c1"># step six</span>
+                <span class="n">new_hole</span> <span class="o">=</span> <span class="n">HoleDescriptor</span><span class="p">(</span>
+                    <span class="n">first</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">last</span><span class="o">=</span><span class="n">hole</span><span class="o">.</span><span class="n">last</span>
+                <span class="p">)</span>
+                <span class="n">HDL</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_hole</span><span class="p">)</span>
+            <span class="k">break</span>                                              <span class="c1"># step seven</span>
+        <span class="c1">#self._buffer[BUFID].hdl = HDL                         # update HDL</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_merge_overlap</span><span class="p">(</span><span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">old</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span>
+                        <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, list[tuple[int, int]]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Merge an arriving segment into an overlapping range of buffered bytes.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            gap: this *fragment's own*</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`</span>
+<span class="sd">                list -- absolute, inclusive sequence ranges still zero-fill</span>
+<span class="sd">                placeholder in ``old``. **Mutated in place**: whichever</span>
+<span class="sd">                portion of a gap entry falls inside ``[start, start +</span>
+<span class="sd">                len(old) - 1]`` is filled from ``new`` and removed (or</span>
+<span class="sd">                trimmed, if only part of the entry falls inside the range).</span>
+<span class="sd">                Deliberately **not** derived from</span>
+<span class="sd">                :attr:`~pcapkit.foundation.reassembly.data.tcp.Buffer.hdl`,</span>
+<span class="sd">                which is shared across every acknowledgement number under the</span>
+<span class="sd">                same buffer ID: a *different* fragment closing a hole there</span>
+<span class="sd">                says nothing about what *this* fragment has received, and</span>
+<span class="sd">                using it here previously discarded this fragment's own real</span>
+<span class="sd">                bytes whenever another fragment happened to cover the same</span>
+<span class="sd">                absolute sequence numbers first.</span>
+<span class="sd">            old: already-buffered bytes of this fragment over the range.</span>
+<span class="sd">            new: the arriving segment's bytes over the same range.</span>
+<span class="sd">            start: absolute sequence number of ``old[0]``/``new[0]``, which</span>
+<span class="sd">                cover the same range by construction -- see the two call</span>
+<span class="sd">                sites in :meth:`reassembly`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The bytes to keep for the range, and any ``(first, last)``</span>
+<span class="sd">            absolute sequence ranges -- inclusive, same convention as</span>
+<span class="sd">            :attr:`gap` and :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.conflict`</span>
+<span class="sd">            -- where already-*received* bytes disagreed with the arriving</span>
+<span class="sd">            segment.</span>
+
+<span class="sd">        A position still covered by a ``gap`` entry has no already-received</span>
+<span class="sd">        byte to disagree with, so the arriving segment's byte is simply</span>
+<span class="sd">        accepted there and that slice of the gap is closed: an ordinary gap</span>
+<span class="sd">        fill, not a conflict. Only a position outside every gap -- already</span>
+<span class="sd">        received -- can conflict, per :rfc:`9293#section-3.10`: the</span>
+<span class="sd">        already-received byte wins and the arriving one is discarded, but the</span>
+<span class="sd">        disagreement itself is what this records for :attr:`Fragment.conflict</span>
+<span class="sd">        &lt;pcapkit.foundation.reassembly.data.tcp.Fragment.conflict&gt;`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">1</span>                <span class="c1"># inclusive</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
+
+        <span class="c1"># A position is a hole exactly while some gap entry covers it; build</span>
+        <span class="c1"># that once, per this call, from the compact interval list rather</span>
+        <span class="c1"># than keeping a per-octet marker between calls. Any gap entry (or</span>
+        <span class="c1"># remaining slice of one) outside ``[start, end]`` is untouched.</span>
+        <span class="n">received</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x01</span><span class="s1">'</span> <span class="o">*</span> <span class="n">length</span><span class="p">)</span>  <span class="c1"># scratch for this call only</span>
+        <span class="n">still_gap</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span> <span class="ow">in</span> <span class="n">gap</span><span class="p">:</span>
+            <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">start</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">lo</span> <span class="o">&gt;</span> <span class="n">hi</span><span class="p">:</span>             <span class="c1"># this entry misses the range entirely</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="n">rel_lo</span><span class="p">,</span> <span class="n">rel_hi</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">start</span>         <span class="c1"># inclusive</span>
+            <span class="n">merged</span><span class="p">[</span><span class="n">rel_lo</span><span class="p">:</span><span class="n">rel_hi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span><span class="p">[</span><span class="n">rel_lo</span><span class="p">:</span><span class="n">rel_hi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">received</span><span class="p">[</span><span class="n">rel_lo</span><span class="p">:</span><span class="n">rel_hi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">rel_hi</span> <span class="o">-</span> <span class="n">rel_lo</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">first</span> <span class="o">&lt;</span> <span class="n">lo</span><span class="p">:</span>          <span class="c1"># a leading slice of the entry survives</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">first</span><span class="p">,</span> <span class="n">lo</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">last</span> <span class="o">&gt;</span> <span class="n">hi</span><span class="p">:</span>           <span class="c1"># a trailing slice of the entry survives</span>
+                <span class="n">still_gap</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">hi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">last</span><span class="p">))</span>
+        <span class="n">gap</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">still_gap</span>
+
+        <span class="n">conflicts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[int, int]]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">received</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">or</span> <span class="n">old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">new</span><span class="p">[</span><span class="n">index</span><span class="p">]:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="n">index</span>
+            <span class="k">while</span> <span class="n">stop</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="n">received</span><span class="p">[</span><span class="n">stop</span><span class="p">]</span> <span class="ow">and</span> <span class="n">old</span><span class="p">[</span><span class="n">stop</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new</span><span class="p">[</span><span class="n">stop</span><span class="p">]:</span>
+                <span class="n">stop</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">conflicts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="n">index</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">merged</span><span class="p">),</span> <span class="n">conflicts</span>
 
 <div class="viewcode-block" id="TCP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp.html#pcapkit.foundation.reassembly.tcp.TCP.submit">[docs]</a>
@@ -729,6 +931,7 @@
                         <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
                         <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
                         <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -755,6 +958,7 @@
                         <span class="n">header</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">hdr</span><span class="p">,</span>
                         <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
                         <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span> <span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
+                        <span class="n">conflict</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">conflict</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="n">datagram</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 

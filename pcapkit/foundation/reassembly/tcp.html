@@ -724,6 +724,9 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
  |     |--&gt; 'header' : (bytes) initial TCP header
  |     |--&gt; 'payload' : (bytes) reassembled payload
  |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
+ |     |--&gt; 'conflict' : (tuple) sequence ranges on which two segments disagreed
+ |     |                  |--&gt; (tuple) (first, last), absolute and inclusive
+ |     |                  |--&gt; ...
  |--&gt; (Info) data
  |     |--&gt; 'completed' : (Completion) PARTIAL or TIMEOUT --&gt; incomplete
  |     |--&gt; 'id' : (Info) original packet identifier
@@ -742,9 +745,20 @@ both are <strong>inclusive</strong>, so a segment carrying no payload at all has
  |     |                 |--&gt; (bytes) payload fragment
  |     |                 |--&gt; ...
  |     |--&gt; 'packet' : (None) not implemented
+ |     |--&gt; 'conflict' : (tuple) sequence ranges on which two segments disagreed
+ |     |                  |--&gt; (tuple) (first, last), absolute and inclusive
+ |     |                  |--&gt; ...
  |--&gt; (Info) data ...
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">completed</span></code> and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> are independent signals: a datagram can
+be <code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code>
+and still carry a non-empty <code class="docutils literal notranslate"><span class="pre">conflict</span></code> – the resolution of a
+conflicting overlap is first-write-wins (<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>), so
+it never leaves a hole, and a contested range that was later filled in
+around does not stop the datagram from completing. <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is
+what lets a caller tell a clean stream from a contested one, now that
+<code class="docutils literal notranslate"><span class="pre">completed</span></code> alone no longer can.</p>
 </dd>
 <dt id="term-reasm.tcp.buffer">reasm.tcp.buffer<a class="headerlink" href="#term-reasm.tcp.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
 (<a class="reference internal" href="reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP._buffer</span></code></a>)
@@ -771,6 +785,19 @@ is as following:</p>
  |                                      |                 |--&gt; 'len' : (int) length of payload buffer
  |                                      |                 |--&gt; 'raw' : (bytearray) reassembled payload,
  |                                      |                                          holes set to b'\x00'
+ |                                      |                 |--&gt; 'gap' : (list) sequence ranges still
+ |                                      |                 |                  zero-fill placeholder in 'raw'
+ |                                      |                 |                  |--&gt; (tuple) (first, last),
+ |                                      |                 |                               absolute and
+ |                                      |                 |                               inclusive
+ |                                      |                 |                  |--&gt; ...
+ |                                      |                 |--&gt; 'conflict' : (list) sequence ranges on which
+ |                                      |                 |                  an arriving segment disagreed
+ |                                      |                 |                  with bytes already in 'raw'
+ |                                      |                 |                  |--&gt; (tuple) (first, last),
+ |                                      |                 |                               absolute and
+ |                                      |                 |                               inclusive
+ |                                      |                 |                  |--&gt; ...
  |                                      |--&gt; (int) ACK ...
  |                                      |--&gt; ...
  |                        |--&gt; 'timestamp' : (float) capture timestamp of the
@@ -778,11 +805,27 @@ is as following:</p>
  |--&gt; (tuple) BUFID ...
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">gap</span></code> is deliberately <strong>not</strong> derived from <code class="docutils literal notranslate"><span class="pre">hdl</span></code> above. <code class="docutils literal notranslate"><span class="pre">hdl</span></code> is
+shared by every ACK in this dict, while each ACK’s own <code class="docutils literal notranslate"><span class="pre">raw</span></code> is
+private to it, so a different ACK’s segment closing a hole in <code class="docutils literal notranslate"><span class="pre">hdl</span></code>
+says nothing about whether <em>this</em> ACK has received anything at the
+same sequence numbers – consulting <code class="docutils literal notranslate"><span class="pre">hdl</span></code> for that question
+previously discarded a fragment’s own real bytes whenever a different
+ACK bucket under the same buffer ID happened to cover the same range
+first.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gap</span></code> is kept in the same <strong>absolute, inclusive sequence number</strong>
+convention as <code class="docutils literal notranslate"><span class="pre">conflict</span></code> above (and as <code class="docutils literal notranslate"><span class="pre">hdl</span></code>’s own hole
+descriptors), rather than as a per-octet marker aligned with <code class="docutils literal notranslate"><span class="pre">raw</span></code>.
+That is what lets it survive <code class="docutils literal notranslate"><span class="pre">isn</span></code> being revised downwards by a
+reach-back segment: a per-octet marker aligned with <code class="docutils literal notranslate"><span class="pre">raw</span></code> has to be
+re-prefixed in lockstep with every such revision, while an absolute
+interval needs no shifting at all. It also means a fragment with no
+holes carries an empty list instead of a <code class="docutils literal notranslate"><span class="pre">raw</span></code>-sized marker.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>TCP reassembly has <strong>no</strong> timeout by default: no specification gives
-stream reassembly a deadline the way <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and
-<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP fragmentation one, and an idle
+stream reassembly a deadline the way <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> and
+<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> give IP fragmentation one, and an idle
 connection is ordinary rather than pathological. <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is
 recorded regardless, so passing <code class="docutils literal notranslate"><span class="pre">timeout</span></code> to
 <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP" title="pcapkit.foundation.reassembly.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> enables the same
@@ -971,6 +1014,22 @@ Parsed TCP payload. Analysed on first read rather than at construction;
 a <code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> may be passed in its place.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.conflict">
+<span class="sig-name descname"><span class="pre">conflict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.conflict" title="Link to this definition">¶</a></dt>
+<dd><p>Sequence ranges on which two segments disagreed, i.e. where an arriving
+segment overlapped bytes already buffered but did not repeat them.
+Each entry is <code class="docutils literal notranslate"><span class="pre">(first,</span> <span class="pre">last)</span></code>, absolute TCP sequence numbers and both
+<strong>inclusive</strong> – the same convention as <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.first" title="pcapkit.foundation.reassembly.data.tcp.Packet.first"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.first</span></code></a> and
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.last" title="pcapkit.foundation.reassembly.data.tcp.Packet.last"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.last</span></code></a>. Empty when the stream never saw a contested byte.</p>
+<p>Resolution keeps the already-buffered bytes and discards the
+conflicting portion of whichever segment arrived later, per
+<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a> (“we reconstruct the segment to contain just
+the new data”); this field is what lets a caller tell a clean stream
+from a contested one now that <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed" title="pcapkit.foundation.reassembly.data.tcp.Datagram.completed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">completed</span></code></a> no longer does, since a
+contested range does not, on its own, leave a hole.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1030,6 +1089,50 @@ initial sequence number.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment.raw">
 <span class="sig-name descname"><span class="pre">raw</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.14)"><span class="pre">bytearray</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="Link to this definition">¶</a></dt>
 <dd><p>Reassembled payload holes set to b’x00’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment.gap">
+<span class="sig-name descname"><span class="pre">gap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.gap" title="Link to this definition">¶</a></dt>
+<dd><p>Sequence ranges, absolute and inclusive, still zero-fill placeholder in
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a> rather than an actually-received byte <em>of this fragment</em>.
+Only the two gap-creating sites in <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> – the forward
+append and the reach-back prepend, the only places that ever splice a
+<code class="docutils literal notranslate"><span class="pre">bytearray(GAP)</span></code> filler into <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a> – add an entry; an overlap
+merge only ever shrinks or removes one, filling it from the arriving
+segment.</p>
+<p>This is deliberately <strong>not</strong> derived from
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.hdl" title="pcapkit.foundation.reassembly.data.tcp.Buffer.hdl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.hdl</span></code></a>.
+<code class="docutils literal notranslate"><span class="pre">hdl</span></code> is one list shared by every acknowledgement number under the
+same buffer ID, so a segment landing in a <em>different</em> fragment can
+close a hole in <code class="docutils literal notranslate"><span class="pre">hdl</span></code> that this fragment’s own <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a> never
+filled – and consulting <code class="docutils literal notranslate"><span class="pre">hdl</span></code> to decide whether an overlapping
+position here was “already received” then answers a question about
+the wrong fragment. Tracking gaps on the fragment itself is what keeps
+the merge in <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> from discarding
+this fragment’s own real bytes because some <em>other</em> fragment happened
+to have received something at the same absolute sequence numbers.</p>
+<p>Absolute sequence numbers rather than offsets into <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a> –
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.conflict" title="pcapkit.foundation.reassembly.data.tcp.Fragment.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conflict</span></code></a> below uses the same convention – for two reasons:
+it is what <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.reassembly" title="pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.reassembly</span></code></a> already computes
+(<code class="docutils literal notranslate"><span class="pre">GAP</span> <span class="pre">=</span> <span class="pre">PSN</span> <span class="pre">-</span> <span class="pre">(ISN</span> <span class="pre">+</span> <span class="pre">LEN)</span></code> and its mirror), so this reuses an
+existing concept rather than adding a second one; and it means a gap
+entry never needs shifting when <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.isn" title="pcapkit.foundation.reassembly.data.tcp.Fragment.isn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">isn</span></code></a> is revised downward by the
+reach-back path, unlike an offset-based or a per-octet representation.
+A typical fragment carries zero or a handful of entries, against a
+per-octet marker the length of the whole payload – the difference
+that matters on a clean stream, where the per-octet form pays a
+buffer-sized cost to record that nothing is missing at all.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Fragment.conflict">
+<span class="sig-name descname"><span class="pre">conflict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.conflict" title="Link to this definition">¶</a></dt>
+<dd><p>Sequence ranges, absolute and inclusive, on which an arriving segment
+disagreed with bytes already held in <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">raw</span></code></a>. Accumulated across
+every merge into this fragment, in the order the conflicts were found;
+carried onto <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.conflict" title="pcapkit.foundation.reassembly.data.tcp.Datagram.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.conflict</span></code></a> verbatim
+when the buffer is submitted.</p>
 </dd></dl>
 
 </dd></dl>

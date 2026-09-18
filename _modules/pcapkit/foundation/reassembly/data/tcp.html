@@ -521,6 +521,19 @@
     <span class="c1">#: Parsed TCP payload. Analysed on first read rather than at construction;</span>
     <span class="c1">#: a :class:`Deferred` may be passed in its place.</span>
     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
+    <span class="c1">#: Sequence ranges on which two segments disagreed, i.e. where an arriving</span>
+    <span class="c1">#: segment overlapped bytes already buffered but did not repeat them.</span>
+    <span class="c1">#: Each entry is ``(first, last)``, absolute TCP sequence numbers and both</span>
+    <span class="c1">#: **inclusive** -- the same convention as :attr:`Packet.first` and</span>
+    <span class="c1">#: :attr:`Packet.last`. Empty when the stream never saw a contested byte.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Resolution keeps the already-buffered bytes and discards the</span>
+    <span class="c1">#: conflicting portion of whichever segment arrived later, per</span>
+    <span class="c1">#: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just</span>
+    <span class="c1">#: the new data"); this field is what lets a caller tell a clean stream</span>
+    <span class="c1">#: from a contested one now that :attr:`completed` no longer does, since a</span>
+    <span class="c1">#: contested range does not, on its own, leave a hole.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1"># NOTE: one signature rather than a pair of ``@overload``\\ s keyed on</span>
@@ -528,7 +541,7 @@
         <span class="c1"># :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies</span>
         <span class="c1"># here identically: ``strict=False`` reports an incomplete payload buffer as</span>
         <span class="c1"># one contiguous ``bytes`` and analyses it.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
@@ -576,9 +589,51 @@
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Reassembled payload holes set to b'\x00'.</span>
     <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span>
+    <span class="c1">#: Sequence ranges, absolute and inclusive, still zero-fill placeholder in</span>
+    <span class="c1">#: :attr:`raw` rather than an actually-received byte *of this fragment*.</span>
+    <span class="c1">#: Only the two gap-creating sites in :meth:`TCP.reassembly</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;` -- the forward</span>
+    <span class="c1">#: append and the reach-back prepend, the only places that ever splice a</span>
+    <span class="c1">#: ``bytearray(GAP)`` filler into :attr:`raw` -- add an entry; an overlap</span>
+    <span class="c1">#: merge only ever shrinks or removes one, filling it from the arriving</span>
+    <span class="c1">#: segment.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: This is deliberately **not** derived from</span>
+    <span class="c1">#: :attr:`Buffer.hdl &lt;pcapkit.foundation.reassembly.data.tcp.Buffer.hdl&gt;`.</span>
+    <span class="c1">#: ``hdl`` is one list shared by every acknowledgement number under the</span>
+    <span class="c1">#: same buffer ID, so a segment landing in a *different* fragment can</span>
+    <span class="c1">#: close a hole in ``hdl`` that this fragment's own :attr:`raw` never</span>
+    <span class="c1">#: filled -- and consulting ``hdl`` to decide whether an overlapping</span>
+    <span class="c1">#: position here was "already received" then answers a question about</span>
+    <span class="c1">#: the wrong fragment. Tracking gaps on the fragment itself is what keeps</span>
+    <span class="c1">#: the merge in :meth:`TCP.reassembly</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;` from discarding</span>
+    <span class="c1">#: this fragment's own real bytes because some *other* fragment happened</span>
+    <span class="c1">#: to have received something at the same absolute sequence numbers.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Absolute sequence numbers rather than offsets into :attr:`raw` --</span>
+    <span class="c1">#: :attr:`conflict` below uses the same convention -- for two reasons:</span>
+    <span class="c1">#: it is what :meth:`TCP.reassembly</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.tcp.TCP.reassembly&gt;` already computes</span>
+    <span class="c1">#: (``GAP = PSN - (ISN + LEN)`` and its mirror), so this reuses an</span>
+    <span class="c1">#: existing concept rather than adding a second one; and it means a gap</span>
+    <span class="c1">#: entry never needs shifting when :attr:`isn` is revised downward by the</span>
+    <span class="c1">#: reach-back path, unlike an offset-based or a per-octet representation.</span>
+    <span class="c1">#: A typical fragment carries zero or a handful of entries, against a</span>
+    <span class="c1">#: per-octet marker the length of the whole payload -- the difference</span>
+    <span class="c1">#: that matters on a clean stream, where the per-octet form pays a</span>
+    <span class="c1">#: buffer-sized cost to record that nothing is missing at all.</span>
+    <span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
+    <span class="c1">#: Sequence ranges, absolute and inclusive, on which an arriving segment</span>
+    <span class="c1">#: disagreed with bytes already held in :attr:`raw`. Accumulated across</span>
+    <span class="c1">#: every merge into this fragment, in the order the conflicts were found;</span>
+    <span class="c1">#: carried onto :attr:`Datagram.conflict</span>
+    <span class="c1">#: &lt;pcapkit.foundation.reassembly.data.tcp.Datagram.conflict&gt;` verbatim</span>
+    <span class="c1">#: when the buffer is submitted.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">isn</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 
