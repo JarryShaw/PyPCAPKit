@@ -1261,7 +1261,7 @@ class PCAPNGUnitTests(unittest.TestCase):
 
             class LocalIterableOption(schema_pcapng.Option,
                                       code=[OptionType.if_name],
-                                      namespace='localtest'):
+                                      ns='localtest'):
                 pass
 
             self.assertIs(registry['opt'][OptionType.opt_comment], LocalDefaultOption)
