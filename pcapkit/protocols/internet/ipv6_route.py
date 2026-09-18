@@ -459,7 +459,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         """
         if (header.length - 8) % 16 != 0:
-            raise ProtocolError(f'{self.alias} [TypeNo {type}]: invalid format')
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_SourceRoute(
             next=header.next,
@@ -503,7 +503,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         """
         if header.length != 24:
-            raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_Type2(
             next=header.next,
@@ -543,7 +543,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         """
         if header.length % 16 != 0:
-            raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_RPL(
             next=header.next,

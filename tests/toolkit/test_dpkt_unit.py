@@ -162,7 +162,7 @@ class DPKTToolkitTests(unittest.TestCase):
         fragment = self._make_ipv4_tcp_packet(fragmented=True)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            reassembled = toolkit.ipv4_reassembly(fragment, count=4)
+            reassembled = toolkit.ipv4_reassembly(fragment, 0.0, count=4)
         self.assertIsNotNone(reassembled)
         assert reassembled is not None
         self.assertEqual(reassembled.num, 4)
@@ -175,15 +175,16 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(bytes(reassembled.payload),
                          fragment.ip.pack()[fragment.ip.hl * 4:])
 
-        self.assertIsNone(toolkit.ipv4_reassembly(types.SimpleNamespace(), count=1))
-        self.assertIsNone(toolkit.ipv4_reassembly(self._make_ipv4_tcp_packet(df=True), count=1))
+        self.assertIsNone(toolkit.ipv4_reassembly(types.SimpleNamespace(), 0.0, count=1))
+        self.assertIsNone(toolkit.ipv4_reassembly(self._make_ipv4_tcp_packet(df=True), 0.0,
+                                                  count=1))
 
     def test_tcp_reassembly_and_traceflow_accept_dpkt_data_payload_tcp(self) -> None:
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit import dpkt as toolkit
 
         packet = self._make_ipv4_tcp_packet()
-        tcp = toolkit.tcp_reassembly(packet, count=9)
+        tcp = toolkit.tcp_reassembly(packet, 50.25, count=9)
         self.assertIsNotNone(tcp)
         assert tcp is not None
         self.assertEqual(tcp.bufid[1], 1234)
@@ -206,12 +207,12 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertFalse(flow.fin)
         self.assertEqual(flow.timestamp, 50.25)
 
-        self.assertIsNone(toolkit.tcp_reassembly(types.SimpleNamespace(), count=1))
+        self.assertIsNone(toolkit.tcp_reassembly(types.SimpleNamespace(), 1.0, count=1))
         self.assertIsNone(toolkit.tcp_traceflow(types.SimpleNamespace(), 1.0,
                                                 data_link=LinkType.ETHERNET, count=1))
         raw_ip = types.SimpleNamespace(src=b'\x7f\x00\x00\x01', dst=b'\x7f\x00\x00\x01',
                                        data=b'not tcp')
-        self.assertIsNone(toolkit.tcp_reassembly(types.SimpleNamespace(ip=raw_ip), count=1))
+        self.assertIsNone(toolkit.tcp_reassembly(types.SimpleNamespace(ip=raw_ip), 1.0, count=1))
         self.assertIsNone(toolkit.tcp_traceflow(types.SimpleNamespace(ip=raw_ip), 1.0,
                                                 data_link=LinkType.ETHERNET, count=1))
 
@@ -220,7 +221,7 @@ class DPKTToolkitTests(unittest.TestCase):
         from pcapkit.toolkit import dpkt as toolkit
 
         packet = FakeDPKTPacket()
-        tcp = toolkit.tcp_reassembly(packet, count=12)
+        tcp = toolkit.tcp_reassembly(packet, 60.5, count=12)
         self.assertIsNotNone(tcp)
         assert tcp is not None
         self.assertEqual(tcp.bufid[0], ip_address('2001:db8::10'))
@@ -248,7 +249,7 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(toolkit.ipv6_hdr_len(ipv6), 48)
 
         packet = types.SimpleNamespace(ip6=ipv6)
-        reassembled = toolkit.ipv6_reassembly(packet, count=5)
+        reassembled = toolkit.ipv6_reassembly(packet, 0.0, count=5)
         self.assertIsNotNone(reassembled)
         assert reassembled is not None
         self.assertEqual(reassembled.num, 5)
@@ -268,8 +269,9 @@ class DPKTToolkitTests(unittest.TestCase):
         self.assertEqual(reassembled.ihl, 48)
         self.assertEqual(bytes(reassembled.payload), b'PAYLOAD')
 
-        self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(), count=1))
-        self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6()), count=1))
+        self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(), 0.0, count=1))
+        self.assertIsNone(toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=FakeIPv6()), 0.0,
+                                                  count=1))
 
 
 # ---------------------------------------------------------------------------
@@ -405,7 +407,7 @@ class DPKTTCPHeaderSplitTests(unittest.TestCase):
         self.assertGreater(len(tcp.opts), 0)
         self.assertGreater(tcp.off * 4, tcp.__hdr_len__)
 
-        data = toolkit.tcp_reassembly(packet, count=1)
+        data = toolkit.tcp_reassembly(packet, 0.0, count=1)
         self.assertIsNotNone(data)
         assert data is not None
 
@@ -433,7 +435,7 @@ class DPKTTCPHeaderSplitTests(unittest.TestCase):
         tcp = packet.ip.data
         self.assertGreater(len(tcp.opts), 0)
 
-        data = toolkit.tcp_reassembly(packet, count=1)
+        data = toolkit.tcp_reassembly(packet, 0.0, count=1)
         assert data is not None
         self.assertEqual(data.len, 0)
         self.assertEqual(len(data.payload), 0)
@@ -465,7 +467,7 @@ class DPKTTCPHeaderSplitTests(unittest.TestCase):
             if tcp is None:
                 continue
 
-            data = toolkit.tcp_reassembly(packet, count=index)
+            data = toolkit.tcp_reassembly(packet, 0.0, count=index)
             assert data is not None
             with self.subTest(frame=index):
                 self.assertEqual(len(data.header), tcp.off * 4)
@@ -502,7 +504,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            data = toolkit.ipv4_reassembly(packet, count=1)
+            data = toolkit.ipv4_reassembly(packet, 0.0, count=1)
         self.assertIsNotNone(data)
         assert data is not None
 
@@ -526,7 +528,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            data = toolkit.ipv4_reassembly(packet, count=1)
+            data = toolkit.ipv4_reassembly(packet, 0.0, count=1)
         assert data is not None
 
         self.assertEqual(ipv4.offset, offset_units)
@@ -546,6 +548,11 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
         body = bytes(range(256)) * 6          # 1536 octets, a multiple of 8
         first, second = body[:1024], body[1024:]
 
+        # both fragments carry the one capture timestamp: they belong to a single
+        # datagram, and a spread wider than ``IPv4.__timeout__`` would expire the
+        # buffer rather than complete it, which is a different test
+        timestamp = 1.0
+
         reasm = IPv4(strict=True)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -554,7 +561,7 @@ class DPKTIPv4ReassemblyFieldTests(unittest.TestCase):
                 (len(first) // 8, False, second),
             ), start=1):
                 packet = _make_ipv4_fragment(offset_units=offset_units, mf=mf, body=chunk)
-                data = toolkit.ipv4_reassembly(packet, count=index)
+                data = toolkit.ipv4_reassembly(packet, timestamp, count=index)
                 assert data is not None
                 reasm(data)
 
@@ -597,7 +604,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         self.assertEqual(frag.frag_off, frag._frag_off_resv_m >> 3)
         self.assertNotEqual(frag.frag_off, frag._frag_off_resv_m)
 
-        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=3)
+        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), 0.0, count=3)
         self.assertIsNotNone(data)
         assert data is not None
 
@@ -633,7 +640,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
             offset_units=offset_units, mf=True, body=b'C' * 64,
         ))
-        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=1)
+        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), 0.0, count=1)
         assert data is not None
 
         self.assertEqual(data.fo, 1448)               # 181 units of 8 octets
@@ -659,7 +666,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         self.assertEqual(ipv6.flow, flow)
         self.assertEqual(ipv6.extension_hdrs[44].id, ident)
 
-        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=1)
+        data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), 0.0, count=1)
         assert data is not None
 
         self.assertEqual(data.bufid[2], ident)
@@ -682,6 +689,10 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         first, second = b'E' * 64, b'F' * 64
         third, fourth = b'G' * 64, b'H' * 64
 
+        # one capture timestamp across all four, so that what separates the two
+        # datagrams is the identification alone and not the reassembly timeout
+        timestamp = 1.0
+
         reasm = IPv6(strict=True)
         for index, (ident, offset_units, mf, chunk) in enumerate((
             (1000, 0, True, first),
@@ -692,7 +703,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
             ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
                 offset_units=offset_units, mf=mf, body=chunk, ident=ident, flow=0x12345,
             ))
-            data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=index)
+            data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), timestamp, count=index)
             assert data is not None
             reasm(data)
 
@@ -712,6 +723,10 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
         body = bytes(range(256)) * 6          # 1536 octets, a multiple of 8
         first, second = body[:1024], body[1024:]
 
+        # both fragments carry the one capture timestamp, so the datagram
+        # completes rather than expiring under ``IPv6.__timeout__``
+        timestamp = 1.0
+
         reasm = IPv6(strict=True)
         for index, (offset_units, mf, chunk) in enumerate((
             (0, True, first),
@@ -720,7 +735,7 @@ class DPKTIPv6ReassemblyTests(unittest.TestCase):
             ipv6 = dpkt.ip6.IP6(_ipv6_fragment_bytes(
                 offset_units=offset_units, mf=mf, body=chunk,
             ))
-            data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), count=index)
+            data = toolkit.ipv6_reassembly(types.SimpleNamespace(ip6=ipv6), timestamp, count=index)
             assert data is not None
             reasm(data)
 
@@ -809,6 +824,74 @@ class DPKTEngineParityTests(unittest.TestCase):
             with self.subTest(datagram=index):
                 self.assertEqual(actual[0], expected[0])
                 self.assertEqual(actual[1], expected[1])
+
+
+@unittest.skipUnless(HAS_RUNTIME and HAS_DPKT, 'runtime dependencies not installed')
+class DPKTTimestampTests(unittest.TestCase):
+    """The engine must not drop the timestamp DPKT hands it.
+
+    DPKT's reader yields ``(timestamp, bytes)`` and only the octets become a
+    packet, so a frame does not know when it was captured unless the engine says
+    so. It did not, and
+    :func:`~pcapkit.interface.misc.follow_tcp_stream` -- which reads frames back
+    after the extraction loop has finished -- had nothing to pass its reassembler
+    but a bound zero.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_the_engine_attaches_each_frames_capture_timestamp(self) -> None:
+        import pcapkit
+        from pcapkit.toolkit.dpkt import packet2timestamp
+
+        extractor = pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, store=True,
+                                    engine='dpkt')
+        try:
+            stamps = [packet2timestamp(frame) for frame in extractor.frame]
+        finally:
+            close_extractor(extractor)
+
+        self.assertEqual(len(stamps), 6)
+        # the capture's own clock, not a placeholder and not the host's
+        self.assertTrue(all(stamp > 1_500_000_000 for stamp in stamps), stamps)
+        self.assertEqual(sorted(stamps), stamps, 'timestamps went backwards')
+
+    def test_a_frame_from_elsewhere_has_no_timestamp_and_says_so(self) -> None:
+        """Loudly, rather than defaulting -- a zero would silently misdate.
+
+        Only a frame that came through the engine carries one, so a packet built
+        by hand has to be refused rather than dated to the epoch.
+
+        """
+        import dpkt
+
+        from pcapkit.toolkit.dpkt import packet2timestamp
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        bare = dpkt.ethernet.Ethernet(b'\x00' * 12 + b'\x08\x00' + b'E' + b'\x00' * 19)
+        with self.assertRaises(UnsupportedCall):
+            packet2timestamp(bare)
+
+    def test_following_a_stream_agrees_with_the_default_engine(self) -> None:
+        """And the real timestamp changes nothing, which is worth pinning.
+
+        TCP reassembly has no timeout by default, so the value never reaches a
+        decision -- the fix removes a workaround rather than altering a result.
+
+        """
+        import tempfile
+
+        from pcapkit.interface.misc import follow_tcp_stream
+
+        def follow(engine: str):
+            with tempfile.TemporaryDirectory() as tempdir:
+                streams = follow_tcp_stream(fin=sample_path('in.pcap'), engine=engine,
+                                            fout=tempdir, format='json')
+                return [(len(stream.packets), stream.conversations) for stream in streams]
+
+        self.assertEqual(follow('dpkt'), follow('default'))
 
 
 if __name__ == '__main__':

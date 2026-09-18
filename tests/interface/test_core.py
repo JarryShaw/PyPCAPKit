@@ -88,8 +88,9 @@ class InterfaceCoreTests(unittest.TestCase):
 
         def make_reassembly(name):
             class Reassembly:
-                def __init__(self, strict=False):
+                def __init__(self, strict=False, timeout=None):
                     self.strict = strict
+                    self.timeout = timeout
             Reassembly.__name__ = name
             return Reassembly
 
@@ -152,6 +153,10 @@ class InterfaceCoreTests(unittest.TestCase):
         result = module.reassemble(TCP, strict=True)
         self.assertEqual(type(result).__name__, 'TCP')
         self.assertTrue(result.strict)
+        # ``None`` is passed straight through, so each reassembler picks its own
+        # RFC default rather than having one imposed here
+        self.assertIsNone(result.timeout)
+        self.assertEqual(module.reassemble('IPv4', timeout=30.0).timeout, 30.0)
         self.assertEqual(type(module.reassemble('IPv4')).__name__, 'IPv4')
         self.assertEqual(type(module.reassemble('IPv6')).__name__, 'IPv6')
 

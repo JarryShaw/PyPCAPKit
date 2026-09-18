@@ -163,6 +163,33 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=pkt['hi_len'], schema=schema)
 
 
+def registration_type_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return registration type list length.
+
+    Used by the ``reg_request``, ``reg_response`` and ``reg_failed`` fields of
+    :class:`RegRequestParameter`, :class:`RegResponseParameter` and
+    :class:`RegFailedParameter` respectively, each of which follows a single
+    ``lifetime`` octet with a list of registration type octets sized by the
+    remainder of the parameter.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Registration type list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the ``lifetime`` octet already read, which would
+            otherwise underflow the list length below zero.
+
+    """
+    length = pkt['len'] - 1
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -696,7 +723,7 @@ class RegRequestParameter(Parameter, code=Enum_Parameter.REG_REQUEST):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_request: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
@@ -714,7 +741,7 @@ class RegResponseParameter(Parameter, code=Enum_Parameter.REG_RESPONSE):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_response: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
@@ -732,7 +759,7 @@ class RegFailedParameter(Parameter, code=Enum_Parameter.REG_FAILED):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_failed: 'list[Enum_RegistrationFailure]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_RegistrationFailure),
     )
     #: Padding.
