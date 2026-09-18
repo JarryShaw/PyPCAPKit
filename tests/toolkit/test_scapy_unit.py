@@ -221,6 +221,14 @@ class ScapyToolkitTests(unittest.TestCase):
         # (unscaled) offset of the final fragment
         self.assertEqual(len(datagram.payload), 48)
         self.assertEqual(bytes(datagram.payload), b'A' * 40 + b'B' * 8)
+        # #482's overlap detection is what actually witnesses the corruption:
+        # under the defect fragment 2 lands inside fragment 1's span and
+        # differs from it, so the datagram comes back carrying
+        # ``conflict == ((5, 12),)``. Asserting the record is *empty* pins the
+        # absence of an overlap rather than only the payload that results from
+        # there being none -- a later change could restore the right bytes by
+        # some other route and still be overwriting.
+        self.assertEqual(datagram.conflict, ())
 
     def test_tcp_reassembly_and_traceflow(self) -> None:
         from scapy.layers.inet import TCP
