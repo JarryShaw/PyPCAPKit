@@ -809,6 +809,25 @@ control flow.</p></li>
 </dd></dl>
 
 </section>
+<section id="eoferror-category">
+<h2><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a> Category<a class="headerlink" href="#eoferror-category" title="Link to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.StreamEOFError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">StreamEOFError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#StreamEOFError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.StreamEOFError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EOFError</span></code></a></p>
+<p>Underlying stream exhausted; no data left to read.</p>
+<p>Raised by <a class="reference internal" href="functools.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> when the <em>length</em>
+of a schema’s read was derived by measuring what is actually left in the
+stream – rather than declared by the caller – and that measurement came
+back zero. This is the frame reader’s “no more packets” signal, so it
+subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a> rather than replacing it: existing <code class="docutils literal notranslate"><span class="pre">except</span>
+<span class="pre">(EOFError,</span> <span class="pre">StopIteration)</span></code> handlers keep working unchanged, and a caller
+that wants to be more specific can catch this instead.</p>
+<p>A <em>declared</em> zero length – a nested schema legitimately sized to have
+nothing to read – is a different situation and does not raise this.</p>
+</dd></dl>
+
+</section>
 <section id="keyerror-category">
 <h2><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> Category<a class="headerlink" href="#keyerror-category" title="Link to this heading">¶</a></h2>
 <dl class="py exception">
@@ -928,6 +947,7 @@ control flow.</p></li>
 <li><a class="reference internal" href="#valueerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> Category</a></li>
 <li><a class="reference internal" href="#notimplementederror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NotImplementedError</span></code> Category</a></li>
 <li><a class="reference internal" href="#struct-error-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code> Category</a></li>
+<li><a class="reference internal" href="#eoferror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code> Category</a></li>
 <li><a class="reference internal" href="#keyerror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code> Category</a></li>
 <li><a class="reference internal" href="#modulenotfounderror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code> Category</a></li>
 <li><a class="reference internal" href="#io-unsupportedoperation-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code> Category</a></li>

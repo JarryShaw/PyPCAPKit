@@ -547,7 +547,23 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid HTTP version: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+        <span class="c1"># NOTE: ``protocol.make`` is an ordinary instance method (the abstract</span>
+        <span class="c1"># declaration at ``ProtocolBase.make`` takes ``self``, and the</span>
+        <span class="c1"># versioned overrides use instance-bound helpers such as</span>
+        <span class="c1"># ``self._make_index``/``self.__frame__``), so calling it on the</span>
+        <span class="c1"># class itself -- as this used to -- left ``self`` unfilled and raised</span>
+        <span class="c1"># ``TypeError`` for every real call; see GH-452. There is no ``file``</span>
+        <span class="c1"># or ``length`` to construct with here, since building a packet from</span>
+        <span class="c1"># keyword arguments is the inverse of parsing one, so a bare instance</span>
+        <span class="c1"># via ``protocol.__new__`` -- bypassing ``__init__``'s parse/pack</span>
+        <span class="c1"># machinery entirely -- is what the versioned ``make`` needs to be</span>
+        <span class="c1"># called on. This is safe only as long as the versioned ``make`` never</span>
+        <span class="c1"># reads state that ``__init__``/``__post_init__`` would otherwise have</span>
+        <span class="c1"># established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does today);</span>
+        <span class="c1"># a future ``make`` override that reaches for such state would need a</span>
+        <span class="c1"># different dispatch here.</span>
+        <span class="k">return</span> <span class="n">protocol</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
     <span class="c1">##########################################################################</span>

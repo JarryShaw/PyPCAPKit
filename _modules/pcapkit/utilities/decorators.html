@@ -423,7 +423,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -606,9 +606,22 @@
 
 <span class="sd">            func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',</span>
 <span class="sd">                 data: 'bytes | typing.IO[bytes]',</span>
-<span class="sd">                 length: 'Optional[int],</span>
-<span class="sd">                 packet: 'Optional[dict[str, Any]',</span>
-<span class="sd">                 *args: 'typing.Any', **kwargs: 'Any') -&gt; 'pcapkit.protocols.schema.schema.Schema'</span>
+<span class="sd">                 length: 'Optional[int]',</span>
+<span class="sd">                 packet: 'Optional[dict[str, Any]]') -&gt; 'pcapkit.protocols.schema.schema.Schema'</span>
+
+<span class="sd">        No further positional or keyword arguments are read from -- or</span>
+<span class="sd">        forwarded to -- the decorated function. :func:`prepare` is applied to</span>
+<span class="sd">        exactly one function in this tree,</span>
+<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`,</span>
+<span class="sd">        whose real signature has never had more than these four parameters,</span>
+<span class="sd">        and nothing calls it with more; an earlier revision of this note</span>
+<span class="sd">        nonetheless promised implementors a trailing ``*args, **kwargs``, which</span>
+<span class="sd">        the wrapper below never populated. A caller relying on that promise</span>
+<span class="sd">        got extras silently discarded instead of forwarded -- see `#454</span>
+<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/454&gt;`__ -- so the</span>
+<span class="sd">        wrapper now raises :exc:`TypeError` for a fifth positional argument or</span>
+<span class="sd">        an unconsumed keyword, the same as an ordinary call with too many</span>
+<span class="sd">        arguments would.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`</span>
@@ -629,6 +642,30 @@
         <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[dict[str, Any]]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
+        <span class="c1"># NOTE: The decorated function's real signature is exactly the four</span>
+        <span class="c1"># parameters above -- see #454. Anything left over here is therefore</span>
+        <span class="c1"># unwanted rather than something to forward: a fifth positional</span>
+        <span class="c1"># argument, or a keyword that ``kwargs.pop`` above never touched</span>
+        <span class="c1"># because ``length``/``packet`` arrived positionally instead. The</span>
+        <span class="c1"># latter is also what catches ``length`` (or ``packet``) supplied</span>
+        <span class="c1"># *both* positionally and by keyword -- the positional value wins</span>
+        <span class="c1"># above and the keyword is left in ``kwargs`` unconsumed, so it</span>
+        <span class="c1"># surfaces here rather than silently losing the keyword's value.</span>
+        <span class="n">extra_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">extra_args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">culprits</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">extra_args</span><span class="p">]</span>
+                                  <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s1">() got unexpected argument(s): </span><span class="si">{</span><span class="n">culprits</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># Whether the caller told us exactly how much there is to read, even</span>
+        <span class="c1"># if that is zero -- e.g. a nested schema sized by a ``length`` field</span>
+        <span class="c1"># that evaluates to zero, or an otherwise genuinely empty schema -- as</span>
+        <span class="c1"># opposed to leaving ``length`` to be derived from what is actually</span>
+        <span class="c1"># left in ``data``. Only a *derived* zero means the underlying stream</span>
+        <span class="c1"># itself is exhausted; a *declared* zero means this schema legitimately</span>
+        <span class="c1"># has nothing to read. See #458.</span>
+        <span class="n">declared_length</span> <span class="o">=</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -638,8 +675,13 @@
                 <span class="n">length</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">EOFError</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">declared_length</span><span class="p">:</span>
+            <span class="c1"># Quiet: this is the frame reader's ordinary "no more packets"</span>
+            <span class="c1"># signal, caught as such by</span>
+            <span class="c1"># ``pcapkit.foundation.extraction.Extractor`` and friends -- c.f.</span>
+            <span class="c1"># ``pcapkit.protocols.protocol.ProtocolBase._read_unpack``'s</span>
+            <span class="c1"># ``StructError(..., quiet=True, eof=True)`` for the same pattern.</span>
+            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="s1">'prepare: end of stream'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>

@@ -517,11 +517,22 @@ the revised version of parameter list to the original method.</p>
 <p>The decorated function should have following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'typing.Type[pcapkit.protocols.schema.schema.Schema]'</span><span class="p">,</span>
      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | typing.IO[bytes]'</span><span class="p">,</span>
-     <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int],</span>
-     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]'</span><span class="p">,</span>
-     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.schema.schema.Schema'</span>
+     <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>
+     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.schema.schema.Schema'</span>
 </pre></div>
 </div>
+<p>No further positional or keyword arguments are read from – or
+forwarded to – the decorated function. <a class="reference internal" href="#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> is applied to
+exactly one function in this tree,
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a>,
+whose real signature has never had more than these four parameters,
+and nothing calls it with more; an earlier revision of this note
+nonetheless promised implementors a trailing <code class="docutils literal notranslate"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code>, which
+the wrapper below never populated. A caller relying on that promise
+got extras silently discarded instead of forwarded – see <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/454">#454</a> – so the
+wrapper now raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> for a fifth positional argument or
+an unconsumed keyword, the same as an ordinary call with too many
+arguments would.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>

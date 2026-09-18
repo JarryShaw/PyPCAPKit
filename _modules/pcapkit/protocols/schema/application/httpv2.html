@@ -744,7 +744,7 @@
     <span class="c1">#: Settings.</span>
     <span class="n">settings</span><span class="p">:</span> <span class="s1">'list[SettingPair]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">SettingPair</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">SettingPair</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

@@ -8555,7 +8555,16 @@
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">subtype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">subtype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
+        <span class="c1"># NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),</span>
+        <span class="c1"># not by the Python type of ``identifier``, so the width has to be taken from</span>
+        <span class="c1"># the former. For the ``IPv6_Address`` subtype the schema always packs a fixed</span>
+        <span class="c1"># 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`</span>
+        <span class="c1"># ignores any declared length), so ``identifier`` is normalised to that wire</span>
+        <span class="c1"># form here as well, keeping the packed bytes and the declared length derived</span>
+        <span class="c1"># from one value instead of two independent computations (c.f. #448).</span>
+        <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
+                <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>

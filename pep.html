@@ -622,9 +622,6 @@ so putting it in that chain would make <code class="docutils literal notranslate
 behave wrongly. Changing the parsed shape from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> also
 changes what existing captures dump to, so it is its own change.</p>
 </li>
-<li><p><strong>The MN-ID option’s constructor mis-sizes a non-address identifier</strong>, tracked
-as <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/448">#448</a>. Pre-existing
-and outside the registry-completion work, so it is filed rather than fixed here.</p></li>
 </ul>
 <p>Two wire-format traps are worth knowing before touching this code, since both
 look like ordinary fields and are not:</p>

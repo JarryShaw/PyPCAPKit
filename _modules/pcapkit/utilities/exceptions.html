@@ -453,6 +453,7 @@
     <span class="s1">'FieldValueError'</span><span class="p">,</span> <span class="s1">'SchemaError'</span><span class="p">,</span> <span class="s1">'SeekError'</span><span class="p">,</span> <span class="s1">'TruncateError'</span><span class="p">,</span> <span class="c1"># ValueError</span>
     <span class="s1">'ProtocolNotImplemented'</span><span class="p">,</span> <span class="s1">'VendorNotImplemented'</span><span class="p">,</span>               <span class="c1"># NotImplementedError</span>
     <span class="s1">'StructError'</span><span class="p">,</span>                                                  <span class="c1"># struct.error</span>
+    <span class="s1">'StreamEOFError'</span><span class="p">,</span>                                               <span class="c1"># EOFError</span>
     <span class="s1">'MissingKeyError'</span><span class="p">,</span> <span class="s1">'FragmentError'</span><span class="p">,</span> <span class="s1">'PacketError'</span><span class="p">,</span>              <span class="c1"># KeyError</span>
     <span class="s1">'ModuleNotFound'</span><span class="p">,</span>                                               <span class="c1"># ModuleNotFoundError</span>
 <span class="p">]</span>
@@ -940,6 +941,31 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">eof</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="o">=</span> <span class="n">eof</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># EOFError session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="StreamEOFError">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StreamEOFError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StreamEOFError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Underlying stream exhausted; no data left to read.</span>
+
+<span class="sd">    Raised by :func:`~pcapkit.utilities.decorators.prepare` when the *length*</span>
+<span class="sd">    of a schema's read was derived by measuring what is actually left in the</span>
+<span class="sd">    stream -- rather than declared by the caller -- and that measurement came</span>
+<span class="sd">    back zero. This is the frame reader's "no more packets" signal, so it</span>
+<span class="sd">    subclasses :exc:`EOFError` rather than replacing it: existing ``except</span>
+<span class="sd">    (EOFError, StopIteration)`` handlers keep working unchanged, and a caller</span>
+<span class="sd">    that wants to be more specific can catch this instead.</span>
+
+<span class="sd">    A *declared* zero length -- a nested schema legitimately sized to have</span>
+<span class="sd">    nothing to read -- is a different situation and does not raise this.</span>
+
+<span class="sd">    """</span></div>
 
 
 
