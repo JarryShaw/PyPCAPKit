@@ -745,6 +745,53 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         self.assertEqual(complete.payload, b'AAAAAAAA' + b'D' * 12 + b'CCCCCCCC')
         self.assertEqual(complete.conflict, ((base, base + 7),))
 
+    def test_a_conflict_in_one_ack_bucket_is_not_reported_in_another(self) -> None:
+        """A conflict recorded for one ACK bucket must stay out of every other.
+
+        The sibling test below covers the inverse -- that a *hole* closed in one
+        bucket does not look received in another -- and asserts an empty
+        ``conflict`` for both. Nothing asserted the case where one bucket
+        genuinely *does* record a conflict while another, in flight at the same
+        time, must not: the gap lists and conflict records are per
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment`, and this is
+        what proves it rather than arguing it from where the field is declared.
+
+        Worth stating why this case in particular. The data loss this whole
+        mechanism exists to fix survived six boundary tests precisely because
+        every one of them used a *single* ACK bucket, so none could see state
+        leaking across buckets. The representation has since changed from a
+        per-octet ``received`` mask to
+        :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`, and that
+        change arrived with two more single-bucket tests -- so the same blind
+        spot had reopened against the new mechanism.
+
+        Bucket 1000 takes a real conflicting retransmission over ``base..base+3``
+        and must report exactly that range. Bucket 2000 is interleaved with it,
+        never sees a conflicting byte, and must report nothing at all.
+
+        """
+        base = self.BASE
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        reasm = TCP()
+        reasm(self._packet(num=1, dsn=base, payload=b'AAAA', ack=1000))         # bucket 1000, first receipt
+        reasm(self._packet(num=2, dsn=base, payload=b'XXXX', ack=2000))         # bucket 2000, same range, own first receipt
+        reasm(self._packet(num=3, dsn=base, payload=b'BBBB', ack=1000))         # bucket 1000, CONFLICTS with b'AAAA'
+        reasm(self._packet(num=4, dsn=base + 4, payload=b'YYYY', ack=2000))     # bucket 2000 completes, cleanly
+        reasm(self._packet(num=5, dsn=base + 4, payload=b'CCCC', ack=1000))     # bucket 1000 completes
+
+        datagrams = {d.id.ack: d for d in reasm.fetch()}
+
+        # first-write-wins, so bucket 1000 keeps b'AAAA' and records the range
+        self.assertEqual(datagrams[1000].payload, b'AAAACCCC')
+        self.assertEqual(datagrams[1000].conflict, ((base, base + 3),))
+
+        # bucket 2000 was in flight across the same absolute range the whole
+        # time and never had a conflicting byte -- its record must be empty,
+        # not a copy of its sibling's
+        self.assertEqual(datagrams[2000].payload, b'XXXXYYYY')
+        self.assertEqual(datagrams[2000].conflict, ())
+
     def test_one_ack_buckets_hole_closing_does_not_leak_receipt_into_another(self) -> None:
         """A hole closed in one ACK bucket must not look received in a different one.
 
