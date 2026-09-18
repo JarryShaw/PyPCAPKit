@@ -1921,22 +1921,31 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(copies[1].tf_type, ())
 
     def test_hip_transport_format_list_parameter_parses_the_full_declared_length(self) -> None:
-        """#463/#466: the same ``- 2`` also under-read every *non-empty*
-        ``TRANSPORT_FORMAT_LIST``, silently dropping its last two octets.
+        """#463/#466: a since-corrected revision's ``- 2`` under-read every
+        *non-empty* ``TRANSPORT_FORMAT_LIST``, silently dropping trailing
+        entries; this proves the fully declared list now survives.
 
-        Pre-existing on ``main``, and not introduced by #466's guard: with
-        ``Length = 4`` and four wire octets of transport format entries,
-        ``pkt['len'] - 2 == 2`` sized the list at only two entries.
-        Confirmed directly against a ``main``-shaped schema object before
-        this fix: ``TransportFormatListParameter(type=..., len=4,
-        formats=[10, 20, 30, 40])`` packs to twelve octets and reads back as
-        ``formats == [Unassigned_10, Unassigned_20]`` -- the ``30`` and
-        ``40`` octets are simply gone, with no exception and no diagnostic,
-        because ``Length = 4`` never underflows and so never reaches
-        #460/#463's floor-and-raise guard at all. Removing the ``- 2``
-        (:func:`~pcapkit.protocols.schema.internet.hip.
-        transport_format_list_len`) makes the list length equal to
-        ``Length`` exactly, so all four entries now survive the round trip.
+        Pre-#463, on ``main``, with the then-one-octet ``item_type`` still in
+        place: ``Length = 4`` and four one-octet transport format entries
+        underflowed to ``pkt['len'] - 2 == 2``, sizing the list at only two
+        entries and silently dropping the last two octets. That bug is
+        independent of the item-width defect fixed alongside it below --
+        confirmed directly against a ``main``-shaped schema object:
+        ``TransportFormatListParameter(type=..., len=4, formats=[10, 20, 30,
+        40])`` packs to twelve octets and reads back as ``formats ==
+        [Unassigned_10, Unassigned_20]``.
+
+        Each ``TF type`` entry is two octets, not one -- :rfc:`7401` Section
+        5.2.11 fixes it at "2x number of TF types" and the diagram shows two
+        16-bit ``TF type`` fields per 32-bit row, matching
+        :class:`HIPTransportModeParameter`'s ``mode`` field rather than the
+        one-octet items :func:`two_octet_prefix_list_len`'s other two call
+        sites use. So this test's four entries are four *two*-octet values
+        (``Length = 8``), and with both defects fixed --
+        :func:`~pcapkit.protocols.schema.internet.hip.
+        transport_format_list_len` returning ``Length`` unchanged, and
+        ``item_type=EnumField(length=2, ...)`` -- all four survive the round
+        trip rather than being dropped or double-counted.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -1948,11 +1957,13 @@ class HIPUnitTests(unittest.TestCase):
         fixed = bytes([0x3b, 0x07, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
         self.assertEqual(len(fixed), 40)
 
-        # Two copies of: type(2)=2049 len(2)=4, four one-octet format entries,
-        # four octets of padding (this module's padding rule pads the
-        # *contents* to eight, ignoring the four-octet type-and-length
-        # header) -- 12 octets each, 24 octets together.
-        one = (2049).to_bytes(2, 'big') + (4).to_bytes(2, 'big') + bytes([0x0a, 0x14, 0x1e, 0x28]) + bytes(4)
+        # Two copies of: type(2)=2049 len(2)=8, four two-octet format entries
+        # (10, 20, 30, 40), no padding needed (8 is already a multiple of
+        # eight under this module's padding rule, which pads the *contents*
+        # to eight and ignores the four-octet type-and-length header) --
+        # 12 octets each, 24 octets together.
+        one = (2049).to_bytes(2, 'big') + (8).to_bytes(2, 'big') + b''.join(
+            n.to_bytes(2, 'big') for n in (10, 20, 30, 40))
         self.assertEqual(len(one), 12)
         raw = fixed + one * 2
 
@@ -1962,6 +1973,54 @@ class HIPUnitTests(unittest.TestCase):
         for copy in copies:
             self.assertEqual(len(copy.tf_type), 4)
             self.assertEqual([int(tf) for tf in copy.tf_type], [10, 20, 30, 40])
+
+    def test_hip_transport_format_list_parameter_round_trips_through_the_maker(self) -> None:
+        """#463/#466: the public maker and the schema's own read path must
+        agree on the entry width, or a hand-built test cannot catch either
+        one being wrong -- which is exactly what happened here.
+
+        ``_make_param_transport_format_list`` computes ``len=2 *
+        len(tf_type)``, already assuming two-octet entries, independently of
+        whatever ``item_type`` the ``formats`` field declares. A hand-built
+        ``TransportFormatListParameter(type=..., len=..., formats=...)``
+        picks a self-consistent ``len`` by hand and so cannot expose a
+        maker/schema disagreement -- which is why the one-octet
+        ``item_type`` survived review once already. Building through the
+        maker instead pins the two to agree: with one-octet items and two
+        real entries, the maker's ``len=4`` reads back as ``len // 1 == 4``
+        entries -- ``[10, 20, 0, 0]``, two spurious trailing zeros -- while
+        with two-octet items it reads back as ``len // 2 == 2`` entries,
+        matching what went in.
+
+        Includes ``Parameter.ESP_TRANSFORM`` (4095) and
+        ``Parameter.HIP_TRANSPORT_MODE`` (7680), both real HIP parameter
+        type numbers over 255 and so within :rfc:`7401`'s own TF type range
+        (2050-4095) -- and both exactly the values a one-octet ``item_type``
+        cannot pack at all (``struct.error: 'B' format requires 0 <= number
+        <= 255``), so the one-octet assumption cannot pass this test
+        silently by falling back to small integers.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        cases = (
+            [],
+            [Parameter.ESP_TRANSFORM],
+            [Parameter.ESP_TRANSFORM, Parameter.HIP_TRANSPORT_MODE],
+            [Parameter.ESP_TRANSFORM, Parameter.HIP_TRANSPORT_MODE, Parameter.HIP_CIPHER],
+        )
+        for formats in cases:
+            with self.subTest(formats=formats):
+                schema = proto._make_param_transport_format_list(
+                    Parameter.TRANSPORT_FORMAT_LIST, version=2, formats=list(formats))
+                self.assertEqual(schema.len, 2 * len(formats))
+
+                packed = bytes(schema)
+                reparsed = hip_schema.TransportFormatListParameter.unpack(packed)
+                self.assertEqual(list(reparsed.formats), list(formats))
 
     def test_hip_esp_transform_parameter_rejects_underflowing_length(self) -> None:
         """#463: an ``ESP_TRANSFORM`` parameter's ``Length`` too small for

@@ -270,6 +270,18 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     rejected the parameter's own legitimate empty-list encoding
     (``Length = 0``, ``formats = []``) as malformed.
 
+    "2x number of TF types" also fixes each ``TF type`` entry's own width at
+    two octets -- the same width the base :class:`Parameter` class uses for
+    its own ``type`` field, since a TF type *is* a HIP parameter type number
+    -- which is why ``formats``' ``item_type`` is
+    ``EnumField(length=2, ...)``, matching :class:`HIPTransportModeParameter`'s
+    ``mode`` rather than the one-octet items of :func:`two_octet_prefix_list_len`'s
+    other two call sites. This function only answers how many *bytes* the
+    list occupies; getting that number right and the item width wrong (as a
+    still-earlier revision did, at one octet) still corrupts every non-empty
+    list, just by reading twice as many entries as the wire holds instead of
+    dropping octets.
+
     Args:
         pkt: Parameter unpacked schema.
 
@@ -908,7 +920,7 @@ class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORM
     #: Transport formats.
     formats: 'list[Enum_Parameter]' = ListField(
         length=transport_format_list_len,
-        item_type=EnumField(length=1, namespace=Enum_Parameter),
+        item_type=EnumField(length=2, namespace=Enum_Parameter),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
