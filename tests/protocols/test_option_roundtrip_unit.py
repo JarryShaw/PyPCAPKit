@@ -324,10 +324,25 @@ EXPECTED_FAILURES = {
     # is present while packing and absent while unpacking: ``SchemaField.unpack``
     # starts the nested schema with a fresh context whose parent is under
     # ``__packet__``. A CGA extension has no other carrier, so the whole
-    # ``MH.__extension__`` registry is unreachable through the public API.
+    # ``MH.__extension__`` registry is unreachable through the public API --
+    # every code in it fails here, identically, before its own schema is ever
+    # unpacked. That is #445, and it is why all four entries below name one site
+    # in ``CGAParameter`` rather than anything in the extensions themselves.
     'mh-extension/Multi_Prefix': Gap(
         'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:516 -- needs '
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFD': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFE': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFF': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
         "pkt['__packet__']['length'] on the unpack path"),
 
     # -- HIP ------------------------------------------------------------------
