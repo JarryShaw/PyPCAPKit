@@ -1801,6 +1801,45 @@ class HIPUnitTests(unittest.TestCase):
                 with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
                     HIP(raw, len(raw), extension=True)
 
+    def test_hip_reg_info_parameter_rejects_underflowing_length(self) -> None:
+        """#455: a ``REG_INFO`` parameter's ``Length`` too small for its own
+        ``min_lifetime``/``max_lifetime`` octets must raise, not silently
+        drop the registration list.
+
+        ``reg_info`` sizes its list of registration-type octets as
+        ``Length - 2`` -- the two octets are ``min_lifetime`` and
+        ``max_lifetime``, which ``REG_INFO`` carries in place of the single
+        ``lifetime`` octet #438 fixed for ``reg_request``/``reg_response``/
+        ``reg_failed``. Nothing floored that at zero either, so a peer
+        declaring ``Length = 0`` drove the list length to ``-2``. Unlike a
+        :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``reg_type`` with no exception and no diagnostic:
+        ``proto.info.parameters[930].reg_type == ()``, confirmed against the
+        pre-fix tree at ``da2422728``, rather than rejecting the malformed
+        ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=930 (REG_INFO) len(2)=0, min_lifetime(1) max_lifetime(1),
+        # then 2 octets padding out the 8-octet parameter area the outer
+        # header declared.
+        param = (930).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
     def test_hip_schema_selectors_and_encrypted_parameter_branches(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm

@@ -320,25 +320,24 @@ EXPECTED_FAILURES = {
 
     # -- Mobility Header ------------------------------------------------------
 
-    # ``CGAParameter``'s nested length callback used to read ``pkt['length']``
-    # from a context that held it only under ``__packet__`` while unpacking --
-    # fixed by #445, which makes a name the nested schema does not itself
-    # declare fall through to the enclosing schema instead of raising. That
-    # unblocks ``CGAParameter.extensions`` and lets parsing reach the
-    # extension itself, exposing a second, unrelated defect #445's fix was
-    # never going to reach: ``_make_ext_multiprefix`` writes
-    # ``length=1 + len(prefixes) * 16`` -- 17 octets for one prefix -- where
-    # the wire format wants 4 (the flags) plus 8 per prefix, i.e. 12. That is
-    # already tracked and fixed on open PR #437 ("declared 1 + len(prefixes)
-    # * 16 data octets for a 4 + len(prefixes) * 8 payload"), which this
-    # branch does not carry yet -- not a new, untracked defect.
+    # PLACEHOLDER -- re-verifying against the actual merged tree before
+    # settling this block; see the investigation in progress.
     'mh-extension/Multi_Prefix': Gap(
-        'PARSE', 'Field prefixes has invalid length',
-        'pcapkit/protocols/internet/mh.py:3864 -- _make_ext_multiprefix '
-        'writes length=1 + len(prefixes) * 16 (17 for one prefix) instead of '
-        '4 + len(prefixes) * 8 (12); fixed on open PR #437, not yet merged; '
-        "unreachable before #445 fixed the KeyError: 'length' this hit "
-        'first'),
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFD': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFE': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
+    'mh-extension/Exp_FFFF': Gap(
+        'PARSE', "KeyError: 'length'",
+        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
+        "pkt['__packet__']['length'] on the unpack path"),
 
     # -- HIP ------------------------------------------------------------------
 

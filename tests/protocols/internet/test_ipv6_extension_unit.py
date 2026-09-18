@@ -1726,6 +1726,77 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         self._assert_identification_based_dpd_option_rejects_underflowing_length(IPv6_Opts)
 
+    def _assert_calipso_option_rejects_underflowing_length(self, protocol_cls: type) -> None:
+        """#455: ``Opt Data Len`` too small for CALIPSO's own fixed fields must raise, not crash.
+
+        This is the issue's own reproduction: a CALIPSO option declaring
+        ``Opt Data Len = 0`` and ``Cmpt Len = 0``. ``pad``'s length is
+        ``Opt Data Len - 8 - Cmpt Len * 4`` -- the octets left over after the
+        option's own ``domain``, ``cmpt_len``, ``level`` and ``checksum``
+        fields (8 octets fixed) and its compartment bitmap (``Cmpt Len * 4``
+        octets) -- and nothing floored that at zero, so it drove the padding
+        length to ``-8``. That reached :func:`struct.calcsize` as the template
+        ``'-8s'`` and raised a bare ``struct.error: bad char in struct
+        format`` -- not one of pcapkit's own exception types, and uncatchable
+        through :mod:`pcapkit.utilities.exceptions`.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) hdr_ext_len(1)=1 -> 16-octet extension header; option
+        # type(1)=CALIPSO(0x07) len(1)=0, then domain(4) cmpt_len(1) level(1)
+        # checksum(2) all zero, with four trailing zero octets.
+        raw = bytes.fromhex('3b0007000000000000000000000000')
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid CALIPSO option length'):
+            with time_limit(5):
+                protocol_cls(raw, extension=True)
+
+    def test_hopopt_calipso_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_calipso_option_rejects_underflowing_length(HOPOPT)
+
+    def test_ipv6_opts_calipso_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_calipso_option_rejects_underflowing_length(IPv6_Opts)
+
+    def _assert_mpl_option_rejects_underflowing_length(self, protocol_cls: type) -> None:
+        """#455: ``Opt Data Len`` too small for MPL's own ``flags``/``seq`` octets must raise, not crash.
+
+        An MPL option declaring ``Opt Data Len = 0`` with Seed-ID type ``0``
+        (no Seed-ID octets). ``pad``'s length is ``Opt Data Len - 2 -
+        <Seed-ID length>`` -- the two octets are the ``flags`` and ``seq``
+        fields the option always carries -- and nothing floored that at zero,
+        so it drove the padding length to ``-2``. That reached
+        :func:`struct.calcsize` as the template ``'-2s'`` and raised a bare
+        ``struct.error: bad char in struct format`` -- not one of pcapkit's
+        own exception types, and uncatchable through
+        :mod:`pcapkit.utilities.exceptions`.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) hdr_ext_len(1)=0 -> 8-octet extension header; option
+        # type(1)=MPL_Option(0x6d) len(1)=0, flags(1)=0 (Seed-ID type 0),
+        # seq(1)=0, with two trailing zero octets.
+        raw = bytes.fromhex('3b006d0000000000')
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid MPL option length'):
+            with time_limit(5):
+                protocol_cls(raw, extension=True)
+
+    def test_hopopt_mpl_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_mpl_option_rejects_underflowing_length(HOPOPT)
+
+    def test_ipv6_opts_mpl_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_mpl_option_rejects_underflowing_length(IPv6_Opts)
+
     def _assert_a_truncated_option_area_is_diagnosed(self, protocol_cls: type) -> None:
         """An option area with nothing behind it is an error, not a hang.
 

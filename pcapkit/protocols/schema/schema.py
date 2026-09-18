@@ -635,6 +635,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 field = field.field(packet)
 
             if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match consumes nothing, so it contributes no
+                # octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`
+                # mirrors this for the same reason -- see the ``ForwardMatchField``
+                # branch there. See #446.
                 self.__buffer__[field.name] = b''
                 continue
 
@@ -766,7 +770,23 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match reads ``length`` octets so a later field
+                # can size itself from them, but consumes neither the stream
+                # (the rewind below) nor ``__length__`` (no decrement in this
+                # branch). ``self.__buffer__[field.name]`` above still holds the
+                # octets just read, though, and until here nothing undid that:
+                # ``__bytes__``/``__len__`` concatenate every slot in
+                # ``__buffer__``, so the schema over-reported its length by
+                # exactly the forward match's width -- the same octets are read
+                # again, for real, by whichever field actually needs them, so
+                # nothing is lost by dropping the duplicate here. ``pack()``
+                # above already zeroes this slot for the same field type;
+                # zeroing it here as well is what makes a declared area checked
+                # against ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
+                # and :class:`~pcapkit.corekit.fields.collections.ListField` both
+                # do this -- see the octets actually consumed. See #446.
                 data.seek(-length, io.SEEK_CUR)
+                self.__buffer__[field.name] = b''
             elif isinstance(field, OptionField) and field.option_padding > 0:
                 # the option list ended before the declared field length was
                 # exhausted; give the unconsumed remainder back to ``data``

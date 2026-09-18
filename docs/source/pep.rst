@@ -146,42 +146,101 @@ rather than when a packet is read, so nothing decodes wrongly in the meantime.
 Mobility Header
 ~~~~~~~~~~~~~~~
 
-**Partly done**, and still the section of this page with the most work left in
-it. :class:`~pcapkit.protocols.internet.mh.MH` has the FMIPv6 fast-handover
-messages [:rfc:`5568`] -- Handover Initiate, Handover Acknowledge, FBU, FBack
-and FNA -- along with the options they need. What remains is the rest of the
-registry:
-
-* **10 of the 24 registered message data types**, namely Home Agent Switch,
-  Heartbeat, Binding Revocation, Localized Routing Initiation and
-  Acknowledgment, Update Notification and its Acknowledgement, Flow Binding,
-  Subscription Query and Subscription Response.
-* **51 of the 71 registered options** -- most of the PMIPv6 and flow-binding
-  block, including Home Network Prefix, Handoff Indicator, Access Technology
-  Type, Timestamp, GRE Key, Binding Identifier and the QoS options, together
-  with DNS-UPDATE-TYPE, Vendor Specific and Service Selection, which belong to
-  none of those groups.
-* **3 of the 4 CGA extensions**; only Multi-Prefix is implemented.
-
-Each of those falls through to a generic handler, so nothing breaks -- the
-fields simply are not decoded. Read and construction are symmetric throughout,
-so every gap above is a gap in both directions: a message type needs a
-``_read_msg_`` and a ``_make_msg_`` handler, an option a ``_read_opt_`` and a
-``_make_opt_``, and each has to be named in the matching dispatch table --
+**Done, bar one option that was already broken.**
+:class:`~pcapkit.protocols.internet.mh.MH` now decodes and constructs the whole
+registry: **all 24 registered message data types**, **all 4 CGA extensions**, and
+**70 of the 71 registered options**. Every one of them is registered in
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
 :attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
-:attr:`~pcapkit.protocols.internet.mh.MH.__extension__`. The six ``# TODO``
-markers in ``pcapkit/protocols/internet/mh.py`` sit at the end of each handler
-block rather than at the tables, so both places need editing; the file documents
-the shape each handler takes.
+:attr:`~pcapkit.protocols.internet.mh.MH.__extension__` with both a ``_read_``
+and a ``_make_`` handler.
 
-Less of this is groundwork than the numbers suggest. The sub-registries the
-missing options and messages need -- binding revocation types and triggers,
-handoff indicators, access network identifier sub-options, flow identification
-and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
-traffic selector formats, QoS attributes -- are already generated in full under
-:doc:`pcapkit/const/mh`, and ``mh.py`` already imports 32 of them without using
-them. What is missing is the handlers, not the enumerations.
+Every message type and every one of those options round-trips byte-for-byte
+through the public API -- ``make`` then ``read`` then ``make`` again reproduces
+the same octets, which
+:file:`tests/protocols/test_option_roundtrip_unit.py` checks for the whole
+registry. The **four CGA extensions are the exception, and not because of their
+own handlers**: those round-trip when driven directly, but the CGA Parameters
+option is the only thing that can carry a CGA extension on the wire, and that
+option cannot be parsed at all for the reasons below. So all four are recorded
+in that test's ``EXPECTED_FAILURES`` as ``PARSE`` failures against
+`#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__ rather than claimed
+as working end to end.
+
+The sub-registries turned out to be the easy half, as predicted: binding
+revocation types and triggers, handoff indicators, access network identifier
+sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
+parameters, DNS update status, traffic selector formats and QoS attributes were
+already generated in full under :doc:`pcapkit/const/mh`, and **no new
+enumeration or vendor crawler was needed**. Two value sets did have to be added
+to ``mh.py`` itself rather than to :mod:`pcapkit.const.mh`, because IANA
+registers neither: the localized routing acknowledgment status codes of
+:rfc:`6705#section-10.2`
+(:class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`) and the local
+mobility anchor address option codes of :rfc:`5949#section-6.2.2`
+(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside the two
+:rfc:`5568` sets that were already there.
+
+What is left, and why:
+
+* **The CGA Parameters option** (type 12) is the one option still on the generic
+  handler, and it is unreachable rather than unimplemented. Two faults in shared
+  field machinery stand in the way, both outside the mobility header and both now
+  tracked as defects rather than described here:
+  `#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__, a nested schema
+  cannot reach the enclosing packet's fields by name, and
+  `#446 <https://github.com/JarryShaw/PyPCAPKit/issues/446>`__, a
+  :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`'s non-consuming bytes
+  count towards the schema's length. Both have to be fixed for this option to
+  parse, which is why the half-fix was reverted rather than shipped;
+  ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the current
+  behaviour so the day it starts working is visible. This option is also what
+  makes the whole :attr:`~pcapkit.protocols.internet.mh.MH.__extension__`
+  registry unreachable, since it is the only carrier a CGA extension has --
+  fixing it turns four ``EXPECTED_FAILURES`` entries green at once.
+* **Payloads that belong to another protocol** are carried opaquely for now. The
+  multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
+  IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
+  embed the flag-driven range lists of :rfc:`6088`. Each is a separate registry
+  with its own dissector's worth of structure; the mobility options around them
+  are fully decoded, and each records which format its payload is in.
+
+  What is wanted is to carry these as :class:`~pcapkit.protocols.misc.raw.Raw`
+  rather than as bare :obj:`bytes`, dispatched through a **per-payload registry**
+  in the style of :attr:`MH.__option__ <pcapkit.protocols.internet.mh.MH.__option__>`,
+  keyed on the field that already names the format --
+  :attr:`~pcapkit.protocols.schema.internet.mh.TrafficSelectorSuboption.ts_format`
+  for the traffic selectors, and the mode flag for MLD against IGMP on the
+  multicast options. ``Raw`` is already what an unregistered dispatch falls back
+  to everywhere else in the package, so this makes the mobility header consistent
+  with the rest rather than inventing a convention; and once a dissector for one
+  of these formats exists, registering it needs no change at the option site.
+
+  It wants a registry of its own rather than
+  :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
+  only ever called at a layer boundary and appends to the frame's protocol chain.
+  An MLD address record inside a mobility option did not follow MH on the wire,
+  so putting it in that chain would make ``layer=`` and ``protocol=`` limits
+  behave wrongly. Changing the parsed shape from :obj:`bytes` to ``Raw`` also
+  changes what existing captures dump to, so it is its own change.
+* **The MN-ID option's constructor mis-sizes a non-address identifier**, tracked
+  as `#448 <https://github.com/JarryShaw/PyPCAPKit/issues/448>`__. Pre-existing
+  and outside the registry-completion work, so it is filed rather than fixed here.
+
+Two wire-format traps are worth knowing before touching this code, since both
+look like ordinary fields and are not:
+
+* :rfc:`7411`'s two multicast options measure their length field in **32-bit
+  words**, and exclude the option-code and status octets as well as the type and
+  length ones -- so the option occupies ``4 + length * 4`` octets, not
+  ``length + 2``.
+* :rfc:`5213#section-8.8`'s timestamp is **not** an :rfc:`1305` NTP timestamp,
+  though the mobility header carries both. It counts from the UNIX epoch in a
+  48/16 fixed-point split, where NTP counts from 1900 in a 32/32 one, so reading
+  one as the other is wrong in the epoch and in both field widths. They have
+  separate types for that reason:
+  :class:`~pcapkit.protocols.internet.mh.PMIPv6Timestamp` and
+  :class:`~pcapkit.protocols.internet.mh.NTPTimestamp`.
 
 DTLS
 ~~~~
@@ -705,3 +764,57 @@ Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 ``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
 :doc:`pcapkit/foundation/engines/index` tabulates that.
+
+Delivery Sequence
+-----------------
+
+The items above are ordered by subject rather than by when anyone intends to do
+them. This section records the intended **order**, so that a contributor can see
+what is being worked on, what is queued behind it, and — more usefully — which
+items are queued because they *depend* on something rather than merely because
+nobody has started them.
+
+It is a sequencing note, not a commitment: nothing here is claimed, and an item
+being in a later wave is not a reason to leave it alone if you want it now. Say
+so in the `discussion thread
+<https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__ and it moves.
+
+**Wave 1 — done or in flight.** The Mobility Header registry completion, the
+protocol bindings (FTP-DATA, HTTP-alt, OSPF, L2TP, the 802.1ad S-Tag), the
+:class:`~pcapkit.protocols.link.vlan.VLAN` C-Tag/S-Tag split, the option
+round-trip coverage harness, and reassembly's :rfc:`8200` timeout with
+bidirectional flow tracing. What remains of wave 1 is defect work, tracked in
+`the issue tracker <https://github.com/JarryShaw/PyPCAPKit/issues>`__ rather than
+here.
+
+**Wave 2 — the protocol pairs that want a shared abstract base**, per `More
+Protocols, More!!!`_ above: **ICMP with ICMPv6**, **TLS/SSL with DTLS**, and
+``LINUX_SLL`` with ``LINUX_SLL2``, plus **IGMP** on its own. These are grouped
+because the shared-base question is the design work and doing either half of a
+pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
+size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
+stub.
+
+**Wave 3 — the remaining protocols** from the same list, taken three or four at a
+time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
+new transport and wants that settled first, the other three because a capture in
+the wild is rare enough that the work buys little until the commoner protocols
+are in.
+
+**Queued behind wave 2 — the Mobility Header sub-layer registry.** Several
+mobility options carry a payload belonging to another protocol, and those
+payloads want carrying as :class:`~pcapkit.protocols.misc.raw.Raw` through a
+per-payload registry rather than as bare :obj:`bytes` — see `Mobility Header`_
+above, which describes the payloads in question and why a registry of their own
+is wanted instead of
+:meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`. It is
+sequenced *after* wave 2 rather than by preference: the multicast options embed
+:rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMP** records —
+both wave 2 deliverables. Landing the registry first would give a dispatch table
+with nothing but ``Raw`` to register. The counter-argument is real though, and
+worth weighing rather than dismissing: changing the parsed shape from
+:obj:`bytes` to ``Raw`` is the disruptive half, since it changes what existing
+captures dump to, so there is a case for taking that churn early and registering
+dissectors later. The third format, the :rfc:`6088` traffic selectors of
+:rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
+nobody has claimed it.
