@@ -724,7 +724,14 @@ class MNIDOption(Option, code=Enum_Option.MN_ID_OPTION_TYPE):
     identifier: 'bytes | str | IPv6Address' = SwitchField(selector=mn_id_selector)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address | int') -> 'None': ...
+        # NOTE: No ``int`` here, matching ``identifier``'s own field annotation
+        # above -- ``mn_id_selector`` only ever resolves to an
+        # :class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` (which
+        # would accept one) for the ``IPv6_Address`` subtype; every other
+        # subtype resolves to a :class:`~pcapkit.corekit.fields.strings.StringField`
+        # or :class:`~pcapkit.corekit.fields.strings.BytesField`, neither of
+        # which accepts an ``int`` (c.f. #467).
+        def __init__(self, type: 'Enum_Option', length: 'int', subtype: 'Enum_MNIDSubtype', identifier: 'bytes | str | IPv6Address') -> 'None': ...
 
 
 @schema_final

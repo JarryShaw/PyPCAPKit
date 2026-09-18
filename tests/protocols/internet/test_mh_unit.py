@@ -2330,6 +2330,46 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(schema.length, 17)
                 self.assertEqual(len(schema.pack()), schema.length + 2)
 
+    def test_mh_mn_id_option_rejects_int_identifier_for_non_ipv6_subtypes(self) -> None:
+        """An ``int`` identifier is only meaningful for the ``IPv6_Address`` subtype.
+
+        ``_make_opt_mn_id`` used to size an ``int`` identifier from the
+        integer's own :meth:`int.bit_length` regardless of ``subtype`` -- the
+        same type-vs-subtype confusion #448 fixed for ``IPv6_Address`` -- which
+        produced a schema that could not be packed for any of the other seven
+        subtypes, with a declared ``length`` that was wrong either way. Unlike
+        ``IPv6_Address`` (a spec-fixed 16-octet width, independent of the
+        identifier's value), every other subtype's field is variable-length
+        and sized from the packed ``length`` header rather than from anything
+        ``subtype`` fixes on its own, so there is no non-arbitrary width to
+        convert an ``int`` into -- it is rejected instead. See #467.
+        """
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+
+        # ``NAI``'s field is a ``StringField`` (``str``); the other six are all
+        # ``BytesField`` (``bytes``) via the same generic fallback in
+        # ``mn_id_selector``. Both groups reject ``int``, but for a different
+        # reason, so both are exercised rather than assuming the fix generalises.
+        for subtype in ('NAI', 'IMSI', 'P_TMSI', 'EUI_48_address',
+                        'EUI_64_address', 'GUTI', 'DUID'):
+            with self.subTest(subtype):
+                with self.assertRaises(ProtocolError):
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                        identifier=0x1234)
+
+        # the ``IPv6_Address`` subtype is unaffected -- an ``int`` identifier
+        # still converts to its fixed 16-octet wire form, as #448 fixed.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address, identifier=0x1234)
+        self.assertEqual(schema.length, 17)
+        self.assertEqual(len(schema.pack()), schema.length + 2)
+
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
 

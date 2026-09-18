@@ -7645,11 +7645,22 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_default: MN-ID subtype default value.
             subtype_namespace: MN-ID subtype namespace.
             subtype_reversed: MN-ID subtype reversed flag.
-            identifier: Identifier.
+            identifier: Identifier. An :obj:`int` remains accepted for the
+                ``IPv6_Address`` subtype (converted the same way as any other
+                value :class:`ipaddress.IPv6Address` accepts), but is rejected
+                for every other subtype: their fields are variable-length --
+                :obj:`str` for ``NAI``, :obj:`bytes` for the rest -- sized from
+                the wire ``length`` rather than from anything ``subtype`` fixes
+                on its own, so there is no non-arbitrary width to convert an
+                :obj:`int` into (c.f. #467).
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``identifier`` is an :obj:`int` and ``subtype``
+                is not ``IPv6_Address``.
 
         """
         if option is not None:
@@ -7671,7 +7682,25 @@ class MH(Internet[Data_MH, Schema_MH],
                 identifier = ipaddress.IPv6Address(identifier)
             id_len = 16
         elif isinstance(identifier, int):
-            id_len = math.ceil(identifier.bit_length() / 8)
+            # NOTE: Every other subtype's field is inherently variable-length in
+            # the schema (c.f. ``mn_id_selector``): a
+            # :class:`~pcapkit.corekit.fields.strings.StringField` for ``NAI``, a
+            # :class:`~pcapkit.corekit.fields.strings.BytesField` for the rest --
+            # both sized from the packed ``length`` header, not from anything
+            # ``subtype_val`` fixes on its own. That is unlike ``IPv6_Address``,
+            # whose 16-octet width is a spec-fixed constant independent of the
+            # identifier's value. Neither field type converts an ``int`` --
+            # ``BytesField`` packs the value as-is and ``StringField`` calls
+            # ``.encode()`` on it -- so there is no non-arbitrary width to take
+            # from ``subtype_val`` here: picking one (e.g. from the int's own
+            # ``bit_length()``, as this branch used to) would just reintroduce
+            # the type-vs-subtype confusion that produced this defect, only
+            # without the crash (c.f. #467). Reject instead of silently
+            # accepting a value that cannot pack.
+            expected = 'str' if subtype_val == Enum_MNIDSubtype.NAI else 'bytes'
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] MN-ID subtype '
+                                f'{Enum_MNIDSubtype(subtype_val)!r} identifier must be '
+                                f'{expected}, not int')
         else:
             id_len = len(identifier)
 
