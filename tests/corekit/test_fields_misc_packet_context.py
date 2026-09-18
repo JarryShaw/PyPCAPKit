@@ -31,6 +31,22 @@ class NestedPacketContextTests(unittest.TestCase):
     schema's own, and that nothing the nested schema writes through the
     mapping is ever written back to the enclosing schema's own data.
 
+    An intermediate version of this fix used a hand-written :class:`dict`
+    subclass instead of :class:`collections.ChainMap`, adopted when a bare
+    ``ChainMap`` was (wrongly) suspected of corrupting a shared
+    :class:`~abc.ABCMeta` cache on CPython <= 3.10 (issue #439). Both the
+    suspicion and the workaround it produced have since been retired: #439
+    was fixed directly, and the hand-written subclass's own
+    ``.setdefault()`` bypassed the fallback the same way :class:`dict`'s
+    built-in one does, silently inserting a name locally instead of
+    honouring what the enclosing schema already had for it --
+    :meth:`test_nested_schema_reads_enclosing_field_by_name_and_does_not_leak_writes`
+    pins the corrected behaviour (``setdefault`` on a name absent locally but
+    present in the parent returns the parent's value rather than inserting a
+    new one) precisely because that was the gap. See
+    :func:`pcapkit.corekit.fields.misc.nested_packet_context` for the full
+    history.
+
     """
 
     def setUp(self) -> None:
@@ -72,6 +88,22 @@ class NestedPacketContextTests(unittest.TestCase):
                 captured['get_length'] = packet.get('length', 'sentinel')
                 captured['get_missing'] = packet.get('no_such_name', 'sentinel')
                 captured['keys'] = set(packet.keys())
+                captured['dict_star'] = dict(**packet)
+                # setdefault on a name absent locally but present in the
+                # parent must honour the fallback (return 42, not overwrite
+                # it with 999) -- a plain dict subclass's own setdefault
+                # bypasses __missing__ the same way get/__contains__ do, and
+                # would insert 999 locally instead. ChainMap.setdefault
+                # delegates through __contains__/__getitem__, so it does not.
+                captured['setdefault_existing'] = packet.setdefault('length', 999)
+                captured['setdefault_new'] = packet.setdefault('brand_new', 7)
+                # A copy must keep seeing the parent, and writes to the copy
+                # must stay local to the copy (never touch the original, and
+                # never touch the shared parent either).
+                snapshot = packet.copy()
+                snapshot['tag'] = 0xFF
+                captured['copy_sees_parent_length'] = snapshot['length']
+                captured['copy_write_did_not_leak_to_original'] = packet['tag']
                 # A live reference, not a copy: read again after ``Outer``
                 # finishes, to prove this schema's writes never landed in it.
                 captured['parent_ref'] = packet['__packet__']
@@ -110,9 +142,23 @@ class NestedPacketContextTests(unittest.TestCase):
         self.assertEqual(captured['get_length'], 3)
         self.assertEqual(captured['get_missing'], 'sentinel')
 
-        # Iterating the mapping sees the union of both levels.
-        self.assertEqual(captured['keys'],
-                          {'__packet__', '__length__', 'tag', 'length', 'body'})
+        # Iterating the mapping sees the union of both levels, however it is
+        # asked for: .keys(), or plain dict(**pkt).
+        expected_keys = {'__packet__', '__length__', 'tag', 'length', 'body'}
+        self.assertEqual(captured['keys'], expected_keys)
+        self.assertEqual(set(captured['dict_star']), expected_keys)
+
+        # setdefault falls through to the parent for a name absent locally
+        # (returning its existing value, 3, not inserting a new local 999),
+        # and behaves like a normal dict.setdefault for a name absent
+        # everywhere.
+        self.assertEqual(captured['setdefault_existing'], 3)
+        self.assertEqual(captured['setdefault_new'], 7)
+
+        # A copy still sees the parent, and a write to the copy never
+        # reaches the original it was copied from.
+        self.assertEqual(captured['copy_sees_parent_length'], 3)
+        self.assertEqual(captured['copy_write_did_not_leak_to_original'], 0x22)
 
         # The write path: nothing Inner set (its own 'tag', 'body', ...) is
         # visible on Outer's own packet data once Outer is done. Outer's own
