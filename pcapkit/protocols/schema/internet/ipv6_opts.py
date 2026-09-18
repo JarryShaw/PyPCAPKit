@@ -288,6 +288,49 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
     return length
 
 
+def calipso_pad_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return CALIPSO option padding length.
+
+    Args:
+        pkt: CALIPSO option unpacked schema.
+
+    Returns:
+        CALIPSO option padding length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the fixed header and the compartment bitmap declared by
+            ``cmpt_len``, which would otherwise underflow the padding length
+            below zero.
+
+    """
+    length = pkt['len'] - 8 - pkt['cmpt_len'] * 4
+    if length < 0:
+        raise FieldValueError(f'IPv6-Opts: invalid CALIPSO option length: {pkt["len"]}')
+    return length
+
+
+def mpl_opt_pad_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return MPL option padding length.
+
+    Args:
+        pkt: MPL option unpacked schema.
+
+    Returns:
+        MPL option padding length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the fixed header and the Seed-ID declared by ``flags.type``, which
+            would otherwise underflow the padding length below zero.
+
+    """
+    length = pkt['len'] - 2 - (0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt))
+    if length < 0:
+        raise FieldValueError(f'IPv6-Opts: invalid MPL option length: {pkt["len"]}')
+    return length
+
+
 class Option(EnumSchema[Enum_Option]):
     """Header schema for IPv6-Opts options."""
 
@@ -389,7 +432,7 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
         lambda pkt: pkt['cmpt_len'] > 0,
     )
     #: Padding.
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 8 - pkt['cmpt_len'] * 4)
+    pad: 'bytes' = PaddingField(length=calipso_pad_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', domain: 'int', cmpt_len: 'int',
@@ -655,9 +698,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
         lambda pkt: pkt['flags']['type'] != Enum_SeedID.IPV6_SOURCE_ADDRESS,
     )
     #: Reserved data (padding).
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 2 - (
-        0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
-    ))
+    pad: 'bytes' = PaddingField(length=mpl_opt_pad_len)
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.

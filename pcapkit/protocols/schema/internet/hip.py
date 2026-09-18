@@ -190,6 +190,32 @@ def registration_type_list_len(pkt: 'dict[str, Any]') -> 'int':
     return length
 
 
+def reg_info_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return ``REG_INFO`` registration type list length.
+
+    Used by the ``reg_info`` field of :class:`RegInfoParameter`, which follows
+    a pair of ``min_lifetime`` and ``max_lifetime`` octets with a list of
+    registration type octets sized by the remainder of the parameter.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Registration type list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the ``min_lifetime`` and ``max_lifetime`` octets
+            already read, which would otherwise underflow the list length
+            below zero.
+
+    """
+    length = pkt['len'] - 2
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -704,7 +730,7 @@ class RegInfoParameter(Parameter, code=Enum_Parameter.REG_INFO):
     max_lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_info: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=reg_info_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
