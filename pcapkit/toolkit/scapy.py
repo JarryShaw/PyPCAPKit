@@ -157,7 +157,12 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 Enum_TransType.get(ipv4.proto),        # payload protocol type
             ),
             num=count,                                 # original packet range number
-            fo=ipv4.frag,                              # fragment offset
+            # NOTE: Scapy reports ``IP.frag`` in on-wire 8-octet units
+            # (:rfc:`791#section-3.1`), but the reassembly machinery indexes the
+            # datagram buffer with ``fo`` in octets, so it must be scaled -- the
+            # same scaling this module's own IPv6 path already applies to
+            # ``IPv6ExtHdrFragment.offset`` below.
+            fo=ipv4.frag * 8,                          # fragment offset
             ihl=ipv4.ihl * 4,                          # internet header length
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=ipv4.len,                               # total length, header includes
