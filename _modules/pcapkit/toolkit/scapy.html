@@ -571,7 +571,12 @@
                 <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">proto</span><span class="p">),</span>        <span class="c1"># payload protocol type</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                 <span class="c1"># original packet range number</span>
-            <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">frag</span><span class="p">,</span>                              <span class="c1"># fragment offset</span>
+            <span class="c1"># NOTE: Scapy reports ``IP.frag`` in on-wire 8-octet units</span>
+            <span class="c1"># (:rfc:`791#section-3.1`), but the reassembly machinery indexes the</span>
+            <span class="c1"># datagram buffer with ``fo`` in octets, so it must be scaled -- the</span>
+            <span class="c1"># same scaling this module's own IPv6 path already applies to</span>
+            <span class="c1"># ``IPv6ExtHdrFragment.offset`` below.</span>
+            <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">frag</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>                          <span class="c1"># fragment offset</span>
             <span class="n">ihl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>                          <span class="c1"># internet header length</span>
             <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">MF</span><span class="p">),</span>                    <span class="c1"># more fragment flag</span>
             <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                               <span class="c1"># total length, header includes</span>
