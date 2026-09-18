@@ -389,36 +389,21 @@ EXPECTED_FAILURES = {
     # schemas reach for the HTTP/2 header's ``flags`` bitfield directly --
     # either from a ConditionalField test or from ``FrameType.post_process``.
     # #445 makes a name absent from the nested schema fall through to the
-    # parent instead of raising, which fixes that for all six. RST_STREAM,
+    # parent instead of raising, which fixed that for all six. RST_STREAM,
     # GOAWAY and WINDOW_UPDATE already passed, declaring no flag members at
-    # all; PUSH_PROMISE and PING now round-trip cleanly too, so their entries
-    # are gone. The other three get past ``flags`` and hit their own,
-    # unrelated defects.
+    # all; the other five each got past ``flags`` and hit their own,
+    # unrelated defect in turn -- and every one of those has since been
+    # fixed and merged too, so none of the six needs an entry any more:
     #
-    # DATA, HEADERS and CONTINUATION carry no payload in the case this suite
-    # constructs, so the wire correctly encodes a 9-octet, header-only frame
-    # -- and reading it back asks ``SchemaField.unpack`` to unpack the frame
-    # body schema from 0 remaining octets. ``Schema.unpack``'s ``@prepare``
-    # decorator treats *any* zero-length unpack as end-of-file and raises
-    # unconditionally, which is right for the outermost read and wrong here:
-    # an all-default, zero-octet frame body is a valid schema instance, not
-    # an empty stream.
-    **{
-        f'httpv2-frame/{name}': Gap(
-            'PARSE', 'EOFError',
-            'pcapkit/utilities/decorators.py:228 (prepare) -- raises '
-            'EOFError for any zero-length nested unpack, but a frame with no '
-            'payload legitimately unpacks its body from 0 octets; '
-            "unreachable before #445 fixed the KeyError: 'flags' this hit "
-            'first')
-        for name in ('DATA', 'HEADERS', 'CONTINUATION')
-    },
-
-    # ``httpv2-frame/SETTINGS`` used to hit ``SettingsFrame.settings``
-    # declaring ``item_type=SettingPair`` (the raw schema class) instead of
-    # ``SchemaField(schema=SettingPair)``, filed as #459. #462 wrapped it
-    # correctly and merged, so this now round-trips cleanly -- no entry
-    # needed.
+    # - PUSH_PROMISE, PING: round-tripped cleanly as soon as #445 landed.
+    # - DATA, HEADERS, CONTINUATION: hit ``decorators.py``'s ``@prepare``
+    #   treating a zero-length nested unpack (a frame with no payload) as
+    #   end-of-file. Filed as #458, fixed and merged as #461 (``prepare`` now
+    #   distinguishes a *declared* zero length from a *derived* one).
+    # - SETTINGS: hit ``SettingsFrame.settings`` declaring
+    #   ``item_type=SettingPair`` (the raw schema class) instead of
+    #   ``SchemaField(schema=SettingPair)``. Filed as #459, fixed and merged
+    #   as #462.
 
     # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
     # octets, so the constructed header always says 14 -- while the reader
