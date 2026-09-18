@@ -153,8 +153,19 @@ registry: **all 24 registered message data types**, **all 4 CGA extensions**, an
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
 :attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
 :attr:`~pcapkit.protocols.internet.mh.MH.__extension__` with both a ``_read_``
-and a ``_make_`` handler, and every one round-trips byte-for-byte --
-``make`` then ``read`` then ``make`` again reproduces the same octets.
+and a ``_make_`` handler.
+
+Every message type and every one of those options round-trips byte-for-byte
+through the public API -- ``make`` then ``read`` then ``make`` again reproduces
+the same octets, which
+:file:`tests/protocols/test_option_roundtrip_unit.py` checks for the whole
+registry. The **four CGA extensions are the exception, and not because of their
+own handlers**: those round-trip when driven directly, but the CGA Parameters
+option is the only thing that can carry a CGA extension on the wire, and that
+option cannot be parsed at all for the reasons below. So all four are recorded
+in that test's ``EXPECTED_FAILURES`` as ``PARSE`` failures against
+`#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__ rather than claimed
+as working end to end.
 
 The sub-registries turned out to be the easy half, as predicted: binding
 revocation types and triggers, handoff indicators, access network identifier
@@ -183,7 +194,10 @@ What is left, and why:
   count towards the schema's length. Both have to be fixed for this option to
   parse, which is why the half-fix was reverted rather than shipped;
   ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the current
-  behaviour so the day it starts working is visible.
+  behaviour so the day it starts working is visible. This option is also what
+  makes the whole :attr:`~pcapkit.protocols.internet.mh.MH.__extension__`
+  registry unreachable, since it is the only carrier a CGA extension has --
+  fixing it turns four ``EXPECTED_FAILURES`` entries green at once.
 * **Payloads that belong to another protocol** are carried opaquely for now. The
   multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
   IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
