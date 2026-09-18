@@ -490,6 +490,95 @@ class SwitchField(FieldBase[_TC]):
         return self._field.unpack(buffer, packet)
 
 
+def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
+    """Build the packet context handed to a nested schema's field callbacks.
+
+    Args:
+        packet: The enclosing schema's own packet data.
+
+    Returns:
+        A plain :class:`dict` holding a shallow copy of ``packet``'s own names,
+        plus the reserved ``__packet__`` key bound to ``packet`` itself.
+
+    Notes:
+        A nested schema's field callbacks are written exactly like a top-level
+        schema's -- ``length=lambda pkt: pkt['length']`` -- so a name the
+        nested schema does not itself declare has to resolve to the enclosing
+        schema's value rather than raise :exc:`KeyError`. Copying the
+        enclosing names in is what gives that, with no lookup protocol to
+        implement: every mapping operation is :class:`dict`'s own, so
+        ``pkt[key]``, ``key in pkt``, :meth:`~dict.get`,
+        :meth:`~dict.setdefault`, :meth:`~dict.pop`, ``==``, iteration and
+        ``dict(**pkt)`` all behave exactly as a caller reading the code would
+        expect, and none of them needs an override.
+
+        The enclosing schema is also reachable *unconditionally* under the
+        reserved ``__packet__`` key, for a callback that needs to name the
+        outer schema specifically rather than whichever schema happens to
+        declare a given field -- see
+        :func:`pcapkit.protocols.schema.misc.pcapng.packet_byteorder` and
+        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`
+        for why that distinction matters, and note that both already
+        hand-roll this exact fallback and so are unaffected by (and do not
+        need to route through) this function.
+
+        Nothing written through the returned mapping reaches ``packet``,
+        because the returned mapping *is* a copy: a nested schema can set --
+        or shadow -- a name also declared by the enclosing schema without the
+        write ever touching the enclosing schema's own data, and without the
+        write silently disappearing either. That matters concretely rather
+        than hypothetically:
+        :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension` declares
+        its own ``length`` while the option enclosing it declares ``length``
+        too, so handing a nested schema the enclosing mapping itself would let
+        the inner ``length`` overwrite the outer one mid-pack.
+
+        Two consequences of it being a copy rather than a live view, both
+        deliberate and neither reached by any current call site. A name
+        deleted from the returned mapping is simply gone, rather than
+        reverting to the enclosing schema's value. And the copy is taken when
+        this function is called, so a later mutation of ``packet`` is not
+        observed through it -- ``__packet__`` remains bound to the live
+        enclosing mapping for any callback that needs the current value.
+
+        No dedicated class and no :class:`~collections.ChainMap`. Earlier
+        versions of this function returned each in turn: a
+        :class:`~collections.ChainMap` first, then a hand-written
+        :class:`dict` subclass adopted when the ``ChainMap`` was suspected of
+        corrupting the shared :class:`~abc.ABCMeta` cache every
+        :class:`Schema <pcapkit.protocols.schema.schema.Schema>` subclass used
+        to share on CPython <= 3.10 (issue #439), and then a
+        :class:`~collections.ChainMap` again once that suspicion was doubted.
+        A plain :class:`dict` ends the question: it satisfies every
+        ``packet: 'dict[str, Any]'`` annotation on the rest of the field
+        classes natively, so no :func:`~typing.cast` is needed at the call
+        site, and it cannot interact with :class:`~abc.ABCMeta` at all because
+        :class:`dict` is not an :class:`~abc.ABCMeta`-based class.
+
+        On the #439 suspicion itself, for the record, since it drove two
+        rewrites: it is *probably* wrong and no longer decidable. What is
+        directly measured is that the cache keys on the **exact type
+        queried**, so asking about a :class:`~collections.ChainMap` instance
+        caches lookups for :class:`~collections.ChainMap` and not for
+        :class:`dict`, and that the poisoning observed in #439 came from
+        ordinary code asking :func:`isinstance` about a plain :class:`dict` --
+        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that.
+        Against that, swapping the ``ChainMap`` for a plain literal was, at
+        the time and on a real CPython 3.10 venv, enough to move
+        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``
+        between passing and failing, toggled both ways. The likeliest
+        reconciliation -- that the ``ChainMap`` was never causal but changed
+        which concrete types flowed through unrelated :func:`isinstance` calls
+        in the same run, and so changed *when* the pre-existing corruption
+        fired -- is plausible rather than demonstrated, and cannot now be
+        tested: #439 has been fixed directly, every :class:`Schema` subclass
+        gets its own ``_abc_impl``, and the original conditions no longer
+        exist. It does not affect correctness either way.
+
+    """
+    return {**packet, '__packet__': packet}
+
+
 class SchemaField(FieldBase[_TS]):
     """Schema field for protocol schema.
 
@@ -507,7 +596,7 @@ class SchemaField(FieldBase[_TS]):
     @property
     def length(self) -> 'int':
         """Field size."""
-        return self._length  # type: ignore[has-type]
+        return self._length
 
     @property
     def optional(self) -> 'bool':
@@ -576,9 +665,10 @@ class SchemaField(FieldBase[_TS]):
             Packed field value.
 
         Notes:
-            We will use ``packet`` as a ``__packet__`` key in the packet context
-            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
-            for packing purposes.
+            ``packet`` is reachable from the nested schema's own field
+            callbacks both under a ``__packet__`` key and, for a name the
+            nested schema does not itself declare, directly -- see
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.
 
         """
         if value is None:
@@ -590,9 +680,7 @@ class SchemaField(FieldBase[_TS]):
             return value
 
         packet.update(self._packet)
-        return value.pack({
-            '__packet__': packet,
-        })
+        return value.pack(nested_packet_context(packet))
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.
@@ -605,9 +693,10 @@ class SchemaField(FieldBase[_TS]):
             Unpacked field value.
 
         Notes:
-            We will use ``packet`` as a ``__packet__`` key in the packet context
-            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
-            for unpacking purposes.
+            ``packet`` is reachable from the nested schema's own field
+            callbacks both under a ``__packet__`` key and, for a name the
+            nested schema does not itself declare, directly -- see
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.
 
         """
         if isinstance(buffer, bytes):
@@ -616,9 +705,8 @@ class SchemaField(FieldBase[_TS]):
             file = buffer
 
         packet.update(self._packet)
-        return cast('_TS', self._schema.unpack(file, self.length, {  # type: ignore[call-arg,misc]
-            '__packet__': packet,
-        }))
+        return cast('_TS', self._schema.unpack(file, self.length,  # type: ignore[call-arg,misc]
+                                                nested_packet_context(packet)))
 
 
 class ForwardMatchField(FieldBase[_TC]):
