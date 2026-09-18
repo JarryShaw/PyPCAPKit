@@ -86,6 +86,66 @@ class DecoratorTests(unittest.TestCase):
         self.assertEqual(result['__length__'], 7)
         self.assertEqual(result['data'], b'payload')
 
+    def _demo_schema_for_call_shapes(self):
+        """A ``DemoSchema`` whose ``unpack`` records what ``prepare`` bound.
+
+        Shared by the five call-shape tests below, one per row of `#444
+        <https://github.com/JarryShaw/PyPCAPKit/issues/444>`__'s reproduction
+        table: ``prepare`` used to subscript ``args[2]``/``args[3]``
+        unconditionally, so only the three-positional shape worked and every
+        shorter or keyword call raised ``IndexError`` instead of falling back
+        to the documented ``length=None, packet=None`` defaults.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet: dict[str, object]) -> None:
+                packet['prepped'] = True
+
+            def __init__(self, data: bytes) -> None:
+                self.data = data
+
+            def post_process(self, packet: dict[str, object]) -> dict[str, object]:
+                packet['data'] = self.data
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls(data.read())
+
+        return DemoSchema
+
+    def _assert_call_shape_result(self, packet: dict[str, object]) -> None:
+        self.assertEqual(packet['__length__'], 7)
+        self.assertTrue(packet['prepped'])
+        self.assertEqual(packet['data'], b'payload')
+
+    def test_prepare_accepts_data_only(self) -> None:
+        """``unpack(data)`` -- length and packet both omitted."""
+        DemoSchema = self._demo_schema_for_call_shapes()
+        self._assert_call_shape_result(DemoSchema.unpack(b'payload'))
+
+    def test_prepare_accepts_data_and_positional_length(self) -> None:
+        """``unpack(data, length)`` -- packet omitted."""
+        DemoSchema = self._demo_schema_for_call_shapes()
+        self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7))
+
+    def test_prepare_accepts_data_length_and_packet_positionally(self) -> None:
+        """``unpack(data, length, packet)`` -- the one shape that already worked."""
+        DemoSchema = self._demo_schema_for_call_shapes()
+        self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7, {}))
+
+    def test_prepare_accepts_keyword_length(self) -> None:
+        """``unpack(data, length=2)`` -- length by keyword, packet omitted."""
+        DemoSchema = self._demo_schema_for_call_shapes()
+        self._assert_call_shape_result(DemoSchema.unpack(b'payload', length=7))
+
+    def test_prepare_accepts_keyword_length_and_packet(self) -> None:
+        """``unpack(data, length=2, packet={})`` -- both trailing args by keyword."""
+        DemoSchema = self._demo_schema_for_call_shapes()
+        self._assert_call_shape_result(DemoSchema.unpack(b'payload', length=7, packet={}))
+
     def test_prepare_raises_eof_for_empty_payloads(self) -> None:
         class DemoSchema:
             @classmethod
