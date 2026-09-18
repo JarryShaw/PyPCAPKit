@@ -1883,10 +1883,12 @@ class MHUnitTests(unittest.TestCase):
         raise.
 
         Note:
-            :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters` is absent, and
-            deliberately so: it cannot be parsed at all, on this branch or on
-            ``main``. See
-            :meth:`test_mh_cga_parameters_option_is_unparsable_upstream`.
+            :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters` is absent,
+            deliberately: it now parses (see
+            :meth:`test_mh_cga_parameters_option_now_parses`), but nobody has
+            verified this test's stricter round-trip identity for it yet --
+            that is a separate, deliberate scope decision left for whoever
+            takes it on next, not implied by parsing alone.
         """
         import ipaddress
 
@@ -2383,23 +2385,28 @@ class MHUnitTests(unittest.TestCase):
                          {'vendor': 32473, 'subtype': 3, 'data': payload})])
         self.assertIn(payload, option.pack())
 
-    def test_mh_cga_parameters_option_is_unparsable_upstream(self) -> None:
-        """The CGA Parameters option cannot be parsed, and this is not new.
+    def test_mh_cga_parameters_option_now_parses(self) -> None:
+        """The CGA Parameters option parses -- this used to be pinned as broken.
 
-        :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions` sizes
-        itself from ``pkt['length']``, but :class:`CGAParameter
-        <pcapkit.protocols.schema.internet.mh.CGAParameter>` has no ``length``
-        field of its own and
-        :class:`~pcapkit.corekit.fields.misc.SchemaField` hands a nested schema a
-        fresh packet dict rather than the enclosing option's, so the lookup fails.
-        A well-formed option therefore raises :exc:`KeyError` on parse.
-
-        This is recorded rather than fixed: the remaining half of the fault is in
-        how a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` is counted
-        towards the nested schema's length, which is shared field machinery well
-        outside the mobility header. The test pins the *current* behaviour so that
-        whoever fixes it finds out here.
+        This test used to be
+        ``test_mh_cga_parameters_option_is_unparsable_upstream``, pinning a
+        :exc:`KeyError` on the exact reproduction below: sizing
+        :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions`
+        read ``pkt['length']``, a name only the enclosing
+        :class:`~pcapkit.protocols.schema.internet.mh.CGAParametersOption`
+        declared, and :class:`~pcapkit.corekit.fields.misc.SchemaField` handed
+        a nested schema a fresh packet dict rather than the enclosing
+        option's. Fixed by #445 (the nested lookup now falls through to the
+        enclosing schema). The second half of the fault this test's own
+        docstring named -- a :class:`~pcapkit.corekit.fields.misc.
+        ForwardMatchField` miscounted into the nested schema's length -- was
+        fixed separately, by #446/#456. Both landed, so the option this test
+        exists for now parses end to end; see also
+        :meth:`tests.corekit.test_fields_misc_packet_context.
+        CGAParametersRegressionTests.test_cga_parameters_option_now_parses_end_to_end`
+        for the same reproduction asserting the parsed fields.
         """
+        from pcapkit.const.mh.option import Option
         from pcapkit.protocols.internet.mh import MH
 
         # type 12, 30 octets: a 16-octet modifier, 8-octet subnet prefix, one
@@ -2411,9 +2418,10 @@ class MHUnitTests(unittest.TestCase):
                             '3003010203')
         self.assertEqual(len(raw), 40)
 
-        with self.assertRaises(KeyError) as caught:
-            MH(io.BytesIO(raw), len(raw), extension=True)
-        self.assertEqual(caught.exception.args[0], 'length')
+        mh = MH(io.BytesIO(raw), len(raw), extension=True)
+        option = mh.info.options[Option.CGA_Parameters]
+        self.assertEqual(len(option.parameters), 1)
+        self.assertEqual(option.parameters[0].prefix, 0x20010db8)
 
 
 if __name__ == '__main__':

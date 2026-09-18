@@ -319,25 +319,15 @@ EXPECTED_FAILURES = {
         'assumes bytes; it runs on the pack path too, from schema.py:647'),
 
     # -- Mobility Header ------------------------------------------------------
-
-    # PLACEHOLDER -- re-verifying against the actual merged tree before
-    # settling this block; see the investigation in progress.
-    'mh-extension/Multi_Prefix': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFD': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFE': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFF': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
+    #
+    # ``mh-extension/{Multi_Prefix,Exp_FFFD,Exp_FFFE,Exp_FFFF}`` all round-trip
+    # cleanly now that #445, #437 and #446 are all applied together: #445 let
+    # ``CGAParameter.extensions`` size itself instead of raising
+    # ``KeyError: 'length'``, #437 (merged as registry completion) both
+    # registered the three experimental codes and fixed
+    # ``_make_ext_multiprefix``'s bogus length arithmetic, and #446/#456 fixed
+    # the ``ForwardMatchField`` double-count that stopped ``CGAParametersOption
+    # .parameters`` from sizing correctly. No entries needed here any more.
 
     # -- HIP ------------------------------------------------------------------
 

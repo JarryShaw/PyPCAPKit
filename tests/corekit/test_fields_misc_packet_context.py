@@ -195,9 +195,9 @@ class CGAParametersRegressionTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
-    def test_cga_parameters_option_reaches_the_446_boundary_not_a_keyerror(self) -> None:
+    def test_cga_parameters_option_now_parses_end_to_end(self) -> None:
+        from pcapkit.const.mh.option import Option as Enum_Option
         from pcapkit.protocols.internet.mh import MH
-        from pcapkit.utilities.exceptions import FieldValueError
 
         # The exact 40-octet reproduction from issue #445.
         raw = bytes.fromhex(
@@ -209,10 +209,15 @@ class CGAParametersRegressionTests(unittest.TestCase):
         )
         self.assertEqual(len(raw), 40)
 
-        # #446 (ForwardMatchField counted into Schema.__len__) is a separate,
-        # already-filed defect and is not fixed here: CGA Parameters still
-        # does not parse. What #445 fixes is *which* error that is -- no
-        # longer a KeyError out of CGAParameter.extensions.
-        with self.assertRaises(FieldValueError) as ctx:
-            MH(raw, len(raw), extension=True)
-        self.assertIn('parameters has invalid length', str(ctx.exception))
+        # #446 (ForwardMatchField counted into Schema.__len__, fixed on
+        # #456/main) was a second, separate defect blocking this exact
+        # option: with #445 alone, this reached FieldValueError: Field
+        # parameters has invalid length rather than parsing. With both
+        # fixes applied, CGA Parameters parses end to end.
+        m = MH(raw, len(raw), extension=True)
+        option = m.info.options[Enum_Option.CGA_Parameters]
+        parameter = option.parameters[0]
+        self.assertEqual(parameter.prefix, 0x20010db8)
+        self.assertEqual(parameter.collision_count, 0)
+        self.assertEqual(parameter.public_key, b'\x30\x03\x01\x02\x03')
+        self.assertEqual(len(parameter.extensions), 0)
