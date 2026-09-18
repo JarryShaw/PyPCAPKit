@@ -1118,8 +1118,19 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="c1"># NOTE: a data model may declare a field ``tuple[...]``</span>
+                    <span class="c1"># rather than ``list[...]`` -- e.g. HIP's ``group_id:</span>
+                    <span class="c1"># 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/</span>
+                    <span class="c1"># hip.py -- and ``_read_*`` then hands one straight back</span>
+                    <span class="c1"># here on reconstruction. ``ListField.pack`` only ever</span>
+                    <span class="c1"># iterates its argument, so it does not care which of the</span>
+                    <span class="c1"># two it gets; rejecting the tuple broke every</span>
+                    <span class="c1"># parse-then-reconstruct cycle for such a field. See #476.</span>
+                    <span class="c1"># ``list(data)`` is a no-op for an actual list and keeps</span>
+                    <span class="c1"># ``ListField.pack``'s own ``Optional[list[_TL]]``</span>
+                    <span class="c1"># signature honest rather than widening it too.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolUnbound</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unsupported type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="k">continue</span>
