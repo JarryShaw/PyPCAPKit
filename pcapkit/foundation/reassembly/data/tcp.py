@@ -107,6 +107,19 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed TCP payload. Analysed on first read rather than at construction;
     #: a :class:`Deferred` may be passed in its place.
     packet: 'Optional[Protocol]'
+    #: Sequence ranges on which two segments disagreed, i.e. where an arriving
+    #: segment overlapped bytes already buffered but did not repeat them.
+    #: Each entry is ``(first, last)``, absolute TCP sequence numbers and both
+    #: **inclusive** -- the same convention as :attr:`Packet.first` and
+    #: :attr:`Packet.last`. Empty when the stream never saw a contested byte.
+    #:
+    #: Resolution keeps the already-buffered bytes and discards the
+    #: conflicting portion of whichever segment arrived later, per
+    #: :rfc:`9293#section-3.10` ("we reconstruct the segment to contain just
+    #: the new data"); this field is what lets a caller tell a clean stream
+    #: from a contested one now that :attr:`completed` no longer does, since a
+    #: contested range does not, on its own, leave a hole.
+    conflict: 'tuple[tuple[int, int], ...]'
 
     if TYPE_CHECKING:
         # NOTE: one signature rather than a pair of ``@overload``\\ s keyed on
@@ -114,7 +127,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies
         # here identically: ``strict=False`` reports an incomplete payload buffer as
         # one contiguous ``bytes`` and analyses it.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -156,9 +169,16 @@ class Fragment(Info):
     len: 'int'
     #: Reassembled payload holes set to b'\x00'.
     raw: 'bytearray'
+    #: Sequence ranges, absolute and inclusive, on which an arriving segment
+    #: disagreed with bytes already held in :attr:`raw`. Accumulated across
+    #: every merge into this fragment, in the order the conflicts were found;
+    #: carried onto :attr:`Datagram.conflict
+    #: <pcapkit.foundation.reassembly.data.tcp.Datagram.conflict>` verbatim
+    #: when the buffer is submitted.
+    conflict: 'list[tuple[int, int]]'
 
     if TYPE_CHECKING:
-        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray', conflict: 'list[tuple[int, int]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final

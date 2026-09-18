@@ -118,7 +118,7 @@ class TCPReassemblyTests(unittest.TestCase):
             [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, sys.maxsize)],
             b'',
             {
-                500: Fragment([1], 10, 10, bytearray(b'0123456789')),
+                500: Fragment([1], 10, 10, bytearray(b'0123456789'), []),
             },
             1000.0,
         )
@@ -126,14 +126,25 @@ class TCPReassemblyTests(unittest.TestCase):
         reasm(self._packet(num=2, dsn=25, payload=b'after-gap', first=10, last=18))
         self.assertEqual(reasm._buffer[bufid].ack[500].raw, bytearray(b'0123456789\x00\x00\x00\x00\x00after-gap'))
 
+        # ``OVERLAP`` (abs 15-21) disagrees with the already-received ``56789``
+        # (abs 15-19) -- kept, per first-write-wins, and recorded as a
+        # conflict -- but abs 20-21 is still a hole per the seeded HDL, not
+        # already-received data, so the arriving segment's bytes there
+        # (``AP``) are an ordinary gap fill, not a conflict.
         reasm(self._packet(num=3, dsn=15, payload=b'OVERLAP', first=15, last=21))
         self.assertEqual(reasm._buffer[bufid].ack[500].raw,
-                         bytearray(b'01234OVERLAP\x00\x00\x00after-gap'))
+                         bytearray(b'0123456789AP\x00\x00\x00after-gap'))
+        self.assertEqual(reasm._buffer[bufid].ack[500].conflict, [(15, 19)])
 
+        # The reach-back branch: abs 10-12 (``012``) is already-received data
+        # and disagrees with the arriving ``klm`` -- kept, and a second
+        # conflict recorded -- while abs 0-9 is genuinely new (before the
+        # existing ISN) and merges in untouched.
         reasm(self._packet(num=4, dsn=0, payload=b'abcdefghijklm', first=22, last=24))
         self.assertEqual(reasm._buffer[bufid].ack[500].isn, 0)
         self.assertEqual(reasm._buffer[bufid].ack[500].raw,
-                         bytearray(b'abcdefghijklm34OVERLAP\x00\x00\x00after-gap'))
+                         bytearray(b'abcdefghij0123456789AP\x00\x00\x00after-gap'))
+        self.assertEqual(reasm._buffer[bufid].ack[500].conflict, [(15, 19), (10, 12)])
         self.assertEqual([(hole.first, hole.last) for hole in reasm._buffer[bufid].hdl],
                          [(0, 4), (25, 30), (40, sys.maxsize)])
 
@@ -144,12 +155,13 @@ class TCPReassemblyTests(unittest.TestCase):
         before_gap._buffer[bufid] = Buffer(
             [HoleDescriptor(50, sys.maxsize)],
             b'',
-            {500: Fragment([1], 10, 5, bytearray(b'world'))},
+            {500: Fragment([1], 10, 5, bytearray(b'world'), [])},
             1000.0,
         )
         before_gap(self._packet(num=2, dsn=0, payload=b'hello', first=40, last=44))
         self.assertEqual(before_gap._buffer[bufid].ack[500].raw,
                          bytearray(b'hello\x00\x00\x00\x00\x00world'))
+        self.assertEqual(before_gap._buffer[bufid].ack[500].conflict, [])
 
     def test_submit_incomplete_strict_complete_strict_false_and_empty_buffers(self) -> None:
         from pcapkit.foundation.reassembly.data.data import Completion
@@ -173,7 +185,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'))},
+                {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'), [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -185,14 +197,15 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertIs(datagram.completed, Completion.PARTIAL)
         self.assertEqual(datagram.payload, (bytearray(b'ab'), bytearray(b'efg'), bytearray(b'j')))
         self.assertIsNone(datagram.packet)
+        self.assertEqual(datagram.conflict, ())
 
         mixed = strict.submit(
             Buffer(
                 [HoleDescriptor(0, 0), HoleDescriptor(4, 5), HoleDescriptor(7, 7)],
                 b'tcp-header',
                 {
-                    500: Fragment([], 0, 0, bytearray()),
-                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi')),
+                    500: Fragment([], 0, 0, bytearray(), []),
+                    501: Fragment([9], 0, 9, bytearray(b'abcdefghi'), [(2, 3)]),
                 },
                 1000.0,
             ),
@@ -200,6 +213,9 @@ class TCPReassemblyTests(unittest.TestCase):
         )
         self.assertEqual(len(mixed), 1)
         self.assertEqual(mixed[0].payload, (bytearray(b'bcd'), bytearray(b'g'), b'i'))
+        # ``conflict`` passes through from the fragment untouched -- ``submit``
+        # only reads it, the merge logic in ``reassembly`` is what populates it
+        self.assertEqual(mixed[0].conflict, ((2, 3),))
 
         # ``strict=False`` reports the payload buffer as one contiguous blob with
         # its holes zero-filled -- which is what
@@ -212,7 +228,7 @@ class TCPReassemblyTests(unittest.TestCase):
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
-                {500: Fragment([3], 0, 3, bytearray(b'abc'))},
+                {500: Fragment([3], 0, 3, bytearray(b'abc'), [])},
                 1000.0,
             ),
             bufid=bufid,
@@ -221,9 +237,10 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertIs(completed[0].completed, Completion.PARTIAL)
         self.assertEqual(completed[0].payload, bytearray(b'abc'))
         self.assertEqual(completed[0].packet, b'abc')
+        self.assertEqual(completed[0].conflict, ())
         self.assertEqual(Analyzer.calls[-1], ((12345, 443), b'abc'))
 
-        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray())},
+        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray(), [])},
                                              1000.0),
                                       bufid=bufid), [])
 
@@ -550,6 +567,183 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     # The end-to-end case on a generated capture lives in
     # tests/foundation/reassembly/test_tcp_runtime.py, since the unit-test
     # workflow runs without the generated fixtures.
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class TCPReassemblyConflictTests(unittest.TestCase):
+    """Regression tests for GitHub issue #443.
+
+    Two segments claiming the same sequence range but carrying *different*
+    bytes used to resolve last-write-wins, silently, with ``completed`` still
+    reporting the datagram whole. Per :rfc:`9293#section-3.10` ("we
+    reconstruct the segment to contain just the new data") the resolution is
+    first-write-wins instead: the already-buffered bytes are kept, the
+    conflicting portion of whichever segment arrived later is discarded, and
+    the sequence range on which they disagreed is recorded on
+    :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.conflict` --
+    additive, so ``completed`` is untouched and existing callers are
+    unaffected.
+
+    Every test drives the public API only -- build :class:`Packet`, feed
+    :class:`TCP`, read back the :class:`Datagram` from
+    :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.fetch` --
+    the same shape as the reproduction in the issue itself, which this class
+    starts from verbatim.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _bufid(self):
+        return (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
+
+    def _packet(self, *, num: int, dsn: int, payload: bytes = b'', ack: int = 1000,
+                timestamp: float = 0.0):
+        """One segment, described exactly as the issue's own reproduction does."""
+        from pcapkit.foundation.reassembly.data.tcp import Packet
+
+        return Packet(self._bufid(), dsn, ack, num, False, False, False, len(payload),
+                      dsn, dsn + len(payload) - 1, b'hdr', bytearray(payload), timestamp)
+
+    def _run(self, *packets):
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        reasm = TCP()
+        for packet in packets:
+            reasm(packet)
+        datagram, = reasm.fetch()
+        return datagram
+
+    #: Base sequence number for every scenario below -- deliberately not
+    #: zero, and not the same as the coordinate-system tests' own ``ISN``,
+    #: so a conflict range that happened to be computed as an offset rather
+    #: than an absolute sequence number would not go unnoticed by accident.
+    BASE = 0x7EED0000 + 100
+
+    def test_identical_retransmission_stays_uncontested_and_unchanged(self) -> None:
+        """A conforming retransmission -- same bytes -- reports no conflict at all."""
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base, payload=b'AAAAAAAA'),
+            self._packet(num=2, dsn=base, payload=b'AAAAAAAA'),
+            self._packet(num=3, dsn=base + 8, payload=b'CCCC'),
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAAAAAACCCC')
+        self.assertEqual(datagram.conflict, ())
+
+    def test_conflicting_full_overlap_keeps_the_first_segment(self) -> None:
+        """The issue's own reproduction: first-write-wins, and the range is recorded.
+
+        Before the fix this returned ``completed=True`` and
+        ``payload=b'BBBBBBBBCCCC'`` -- the later, conflicting segment silently
+        won. The RFC-conformant answer keeps the first segment's bytes.
+
+        """
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base, payload=b'AAAAAAAA'),
+            self._packet(num=2, dsn=base, payload=b'BBBBBBBB'),
+            self._packet(num=3, dsn=base + 8, payload=b'CCCC'),
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAAAAAACCCC')
+        self.assertEqual(datagram.conflict, ((base, base + 7),))
+        self.assertEqual(datagram.index, (1, 2, 3))
+
+    def test_conflicting_partial_overlap_on_the_tail_side(self) -> None:
+        """A segment that overlaps the buffered tail and then extends past it.
+
+        Exercises the non-reach-back overlap branch
+        (:meth:`~pcapkit.foundation.reassembly.tcp.TCP.reassembly`, the branch
+        guarded by ``PSN >= ISN``) when the arriving segment's end lies past
+        the already-buffered end: the overlapping half is contested and
+        resolved first-write-wins, the non-overlapping half is genuinely new
+        and is merged in untouched.
+
+        """
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base, payload=b'AAAAAAAA'),        # base .. base+7
+            self._packet(num=2, dsn=base + 4, payload=b'XXXXXXXX'),    # base+4 .. base+11
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAAAAAAXXXX')
+        self.assertEqual(datagram.conflict, ((base + 4, base + 7),))
+
+    def test_conflicting_partial_overlap_on_the_head_side_reach_back(self) -> None:
+        """The mirrored reach-back branch, at the line the issue calls out at :204.
+
+        A segment arriving with a *lower* sequence number than the buffer's
+        current ISN, whose tail overlaps the buffer's head: the overlapping
+        half is contested and resolved first-write-wins, and the segment's
+        own leading bytes -- which lie before the existing ISN -- are
+        genuinely new and are prepended untouched.
+
+        """
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base + 4, payload=b'BBBBBBBB'),    # base+4 .. base+11
+            self._packet(num=2, dsn=base, payload=b'YYYYYYYY'),        # base .. base+7
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'YYYYBBBBBBBB')
+        self.assertEqual(datagram.conflict, ((base + 4, base + 7),))
+
+    def test_three_way_conflict_keeps_the_first_and_records_every_disagreement(self) -> None:
+        """Three segments claiming the same range, each disagreeing with the buffer.
+
+        First-write-wins is decided once, by the first segment to arrive;
+        every later arrival that disagrees with what is already buffered is
+        its own conflict, not just the first one.
+
+        """
+        base = self.BASE
+        datagram = self._run(
+            self._packet(num=1, dsn=base, payload=b'AAAAAAAA'),
+            self._packet(num=2, dsn=base, payload=b'BBBBBBBB'),
+            self._packet(num=3, dsn=base, payload=b'CCCCCCCC'),
+            self._packet(num=4, dsn=base + 8, payload=b'DDDD'),
+        )
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAAAAAADDDD')
+        self.assertEqual(datagram.conflict, ((base, base + 7), (base, base + 7)))
+
+    def test_conflict_persists_once_a_later_segment_completes_the_datagram(self) -> None:
+        """A conflict recorded while the stream is still partial survives to completion.
+
+        The gap between the two original segments is a real hole -- unlike
+        the overlap in the other tests here, filling it is an ordinary gap
+        fill, not a conflict -- and once it closes the datagram reports
+        :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`,
+        per the decision to leave ``completed`` alone: the conflict recorded
+        earlier is still there, on the completed datagram, rather than being
+        dropped or blocking completion.
+
+        """
+        base = self.BASE
+        from pcapkit.foundation.reassembly.data.data import Completion
+        from pcapkit.foundation.reassembly.tcp import TCP
+
+        reasm = TCP()
+        reasm(self._packet(num=1, dsn=base, payload=b'AAAAAAAA'))          # base .. base+7
+        reasm(self._packet(num=2, dsn=base + 20, payload=b'CCCCCCCC'))     # base+20 .. base+27
+
+        partial, = reasm.fetch()
+        self.assertIs(partial.completed, Completion.PARTIAL)
+        self.assertEqual(partial.payload, (b'AAAAAAAA', b'CCCCCCCC'))
+        self.assertEqual(partial.conflict, ())
+
+        # conflicts with segment 1 over base..base+7 -- already-received data
+        reasm(self._packet(num=3, dsn=base, payload=b'BBBBBBBB'))
+        # fills the base+8..base+19 gap exactly -- an ordinary gap fill, not a conflict
+        reasm(self._packet(num=4, dsn=base + 8, payload=b'D' * 12))
+
+        complete, = reasm.fetch()
+        self.assertIs(complete.completed, Completion.COMPLETE)
+        self.assertEqual(complete.payload, b'AAAAAAAA' + b'D' * 12 + b'CCCCCCCC')
+        self.assertEqual(complete.conflict, ((base, base + 7),))
 
 
 if __name__ == '__main__':

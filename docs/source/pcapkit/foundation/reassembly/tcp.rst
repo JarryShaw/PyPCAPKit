@@ -207,6 +207,9 @@ Terminology
            |     |--> 'header' : (bytes) initial TCP header
            |     |--> 'payload' : (bytes) reassembled payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
+           |     |--> 'conflict' : (tuple) sequence ranges on which two segments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data
            |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
@@ -225,7 +228,19 @@ Terminology
            |     |                 |--> (bytes) payload fragment
            |     |                 |--> ...
            |     |--> 'packet' : (None) not implemented
+           |     |--> 'conflict' : (tuple) sequence ranges on which two segments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data ...
+
+       ``completed`` and ``conflict`` are independent signals: a datagram can
+       be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+       and still carry a non-empty ``conflict`` -- the resolution of a
+       conflicting overlap is first-write-wins (:rfc:`9293#section-3.10`), so
+       it never leaves a hole, and a contested range that was later filled in
+       around does not stop the datagram from completing. ``conflict`` is
+       what lets a caller tell a clean stream from a contested one, now that
+       ``completed`` alone no longer can.
 
    reasm.tcp.buffer
        Data structure for internal buffering when performing reassembly algorithms
@@ -256,6 +271,13 @@ Terminology
            |                                      |                 |--> 'len' : (int) length of payload buffer
            |                                      |                 |--> 'raw' : (bytearray) reassembled payload,
            |                                      |                                          holes set to b'\x00'
+           |                                      |                 |--> 'conflict' : (list) sequence ranges on which
+           |                                      |                 |                  an arriving segment disagreed
+           |                                      |                 |                  with bytes already in 'raw'
+           |                                      |                 |                  |--> (tuple) (first, last),
+           |                                      |                 |                               absolute and
+           |                                      |                 |                               inclusive
+           |                                      |                 |                  |--> ...
            |                                      |--> (int) ACK ...
            |                                      |--> ...
            |                        |--> 'timestamp' : (float) capture timestamp of the

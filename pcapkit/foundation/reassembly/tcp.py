@@ -159,6 +159,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         isn=PSN,
                         len=info.len,
                         raw=info.payload,
+                        conflict=[],
                     ),
                 },
                 timestamp=TS,
@@ -173,6 +174,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     isn=PSN,
                     len=info.len,
                     raw=info.payload,
+                    conflict=[],
                 )
             else:
                 # put header into header buffer
@@ -190,8 +192,25 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     GAP = PSN - (ISN + LEN)     # gap length between payloads
                     if GAP >= 0:    # if fragment goes after existing payload
                         RAW += bytearray(GAP) + info.payload
-                    else:           # if fragment partially overlaps existing payload
-                        RAW[PSN - ISN:PSN - ISN + info.len] = info.payload
+                    else:
+                        # Fragment partially overlaps existing payload. Per
+                        # :rfc:`9293#section-3.10` ("we reconstruct the segment
+                        # to contain just the new data"), an already-*received*
+                        # byte wins over a conflicting arriving one; only a
+                        # position still marked as a hole in ``HDL`` has
+                        # nothing to disagree with, so the arriving byte is
+                        # simply accepted there -- an ordinary gap fill, not a
+                        # conflict.
+                        OFFSET = PSN - ISN                     # index into RAW where the overlap begins
+                        OVERLAP = min(info.len, LEN - OFFSET)  # length of the overlapping range
+                        merged, conflicts = self._merge_overlap(
+                            self._buffer[BUFID].hdl, PSN,
+                            bytes(RAW[OFFSET:OFFSET + OVERLAP]), bytes(info.payload[:OVERLAP]),
+                        )
+                        RAW[OFFSET:OFFSET + OVERLAP] = merged
+                        self._buffer[BUFID].ack[ACK].conflict.extend(conflicts)
+                        if info.len > OVERLAP:  # fragment reaches past the buffered end
+                            RAW += info.payload[OVERLAP:]
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
                     GAP = ISN - (PSN + LEN)     # gap length between payloads
@@ -200,8 +219,24 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                     )
                     if GAP >= 0:    # if fragment exceeds existing payload
                         RAW = info.payload + bytearray(GAP) + RAW
-                    else:           # if fragment partially overlaps existing payload
-                        RAW = info.payload + RAW[-GAP:]
+                    else:
+                        # Mirrored reach-back case: the fragment starts before
+                        # ``ISN`` and its tail overlaps the start of the
+                        # already-buffered payload. Same resolution -- keep
+                        # already-received bytes, fill any hole among them from
+                        # the arriving segment, and prepend the genuinely new
+                        # head (or, in the rare case the fragment also reaches
+                        # past the buffered end, append the genuinely new
+                        # tail; the two cannot both happen at once).
+                        OFFSET = ISN - PSN                     # index into info.payload where the overlap begins
+                        OVERLAP = min(len(RAW), LEN - OFFSET)  # length of the overlapping range
+                        merged, conflicts = self._merge_overlap(
+                            self._buffer[BUFID].hdl, ISN,
+                            bytes(RAW[:OVERLAP]), bytes(info.payload[OFFSET:OFFSET + OVERLAP]),
+                        )
+                        RAW[:OVERLAP] = merged
+                        self._buffer[BUFID].ack[ACK].conflict.extend(conflicts)
+                        RAW = info.payload[:OFFSET] + RAW + info.payload[OFFSET + OVERLAP:]
                 #self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram
                 #self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length
                 self._buffer[BUFID].ack[ACK].__update__(
@@ -246,6 +281,66 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
             self._dtgram.extend(
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID)
             )
+
+    @staticmethod
+    def _merge_overlap(hdl: 'list[HoleDescriptor]', start: 'int',
+                        old: 'bytes', new: 'bytes') -> 'tuple[bytes, list[tuple[int, int]]]':
+        """Merge an arriving segment into an overlapping range of buffered bytes.
+
+        Arguments:
+            hdl: this buffer's hole descriptor list, in absolute sequence
+                numbers, *before* the current segment's own update to it --
+                so a position still reads as a hole exactly when nothing has
+                been received there yet, regardless of which segment is
+                arriving now.
+            start: absolute sequence number of ``old[0]`` and ``new[0]``,
+                which cover the same range by construction -- see the two
+                call sites in :meth:`reassembly`.
+            old: already-buffered bytes over the range (zero-filled at any
+                position that is still a hole).
+            new: the arriving segment's bytes over the same range.
+
+        Returns:
+            The bytes to keep for the range, and any ``(first, last)``
+            absolute sequence ranges -- inclusive, same convention as
+            :class:`~pcapkit.foundation.reassembly.data.tcp.HoleDescriptor`
+            -- where already-*received* bytes disagreed with the arriving
+            segment.
+
+        A position that is still a hole has no already-received byte to
+        disagree with, so the arriving segment's byte is simply accepted
+        there: an ordinary gap fill, not a conflict. Only a position with
+        something already received can conflict, per
+        :rfc:`9293#section-3.10`: the already-received byte wins and the
+        arriving one is discarded, but the disagreement itself is what this
+        records for :attr:`Fragment.conflict
+        <pcapkit.foundation.reassembly.data.tcp.Fragment.conflict>`.
+
+        """
+        length = len(old)
+        merged = bytearray(old)
+        received = bytearray(b'\x01' * length)  # 1 = already received, 0 = still a hole
+        for hole in hdl:
+            lo = max(hole.first, start) - start
+            hi = min(hole.last, start + length - 1) - start + 1
+            if hi <= 0 or lo >= length:
+                continue    # hole misses this range entirely
+            lo, hi = max(lo, 0), min(hi, length)
+            merged[lo:hi] = new[lo:hi]      # nothing received yet -- take the arriving bytes
+            received[lo:hi] = bytes(hi - lo)
+
+        conflicts = []  # type: list[tuple[int, int]]
+        index = 0
+        while index < length:
+            if not received[index] or old[index] == new[index]:
+                index += 1
+                continue
+            stop = index
+            while stop < length and received[stop] and old[stop] != new[stop]:
+                stop += 1
+            conflicts.append((start + index, start + stop - 1))
+            index = stop
+        return bytes(merged), conflicts
 
     def submit(self, buf: 'Buffer', *, bufid: 'BufferID',  # type: ignore[override] # pylint: disable=arguments-differ
                timeout: 'bool' = False) -> 'list[Datagram]':
@@ -316,6 +411,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         header=buf.hdr,
                         payload=tuple(data),
                         packet=None,
+                        conflict=tuple(buffer.conflict),
                     )
                     datagram.append(packet)
 
@@ -342,6 +438,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         header=buf.hdr,
                         payload=bytes(payload),
                         packet=Deferred(self.protocol.analyze, (bufid[1], bufid[3]), bytes(payload)),
+                        conflict=tuple(buffer.conflict),
                     )
                     datagram.append(packet)
 
