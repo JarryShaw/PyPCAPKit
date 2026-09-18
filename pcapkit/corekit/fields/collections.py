@@ -166,7 +166,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             field = self._item_type(packet)
 
             if is_schema:
-                data = cast('SchemaField', self._item_type).unpack(file, packet)
+                data = cast('SchemaField', field).unpack(file, packet)
 
                 end = file.tell()
                 if end <= offset:

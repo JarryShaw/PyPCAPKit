@@ -100,7 +100,12 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             else:
                 raise ProtocolError(f"invalid HTTP version: {version}")
 
-            http = protocol(self._file, length, **kwargs)
+            try:
+                http = protocol(self._data, length, **kwargs)
+            except ProtocolError:
+                raise
+            except ValueError as error:
+                raise ProtocolError(f'HTTP/{version}: invalid format') from error
 
         self._version = http.version
         self._length = http.length

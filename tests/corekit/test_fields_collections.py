@@ -314,5 +314,111 @@ class OptionFieldPackageDeclarationTests(unittest.TestCase):
         self.assertEqual(sorted(fell_back), [])
 
 
+class ListFieldSchemaItemTests(unittest.TestCase):
+    """``ListField.unpack``'s schema branch must unpack from the *configured*
+    per-item field, not from ``self._item_type`` itself.
+
+    ``field = self._item_type(packet)`` builds a per-item copy through
+    :meth:`SchemaField.__call__ <pcapkit.corekit.fields.misc.SchemaField.__call__>`,
+    which applies both ``callback`` and ``length_callback`` to that copy -- the
+    schema branch then unpacked from ``self._item_type`` instead of from
+    ``field``, discarding whatever the copy carries. C.f. #433.
+
+    No declaration in this package passes either argument, so nothing here
+    parses differently today; both cases below construct a ``ListField``
+    directly rather than through one of the four in-tree declarations, since
+    those are exactly the shape that hides the bug.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_a_length_callback_is_honoured(self) -> None:
+        """The per-item field's own resolved length must reach its schema.
+
+        ``field``'s ``length_callback`` resolves to ``2``; ``self._item_type``,
+        never having been called, is stuck at the ``-1`` its constructor left
+        it with. ``SchemaField.unpack`` threads its own ``self.length`` through
+        to ``Item.unpack``'s ``length`` argument, which lands in
+        ``packet['__length__']`` -- so which one was used is directly visible
+        to ``Item.pre_unpack`` without ``Item`` ever needing to consume it.
+
+        """
+        from pcapkit.corekit.fields.collections import ListField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        recorded = []  # type: list[int]
+
+        @schema_final
+        class Item(Schema):
+            """A single fixed-width byte: its own width never depends on
+            ``__length__``, so the list keeps making progress whichever length
+            got recorded."""
+
+            marker: 'int' = UInt8Field()
+
+            @classmethod
+            def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+                recorded.append(packet['__length__'])
+
+        item_field = SchemaField(schema=Item, length=lambda pkt: 2)
+        list_field = ListField(length=2, item_type=item_field)
+
+        list_field.unpack(b'\x01\x02', {})
+
+        self.assertEqual(recorded, [2, 2])
+
+    def test_a_callback_is_honoured(self) -> None:
+        """The per-item field's ``callback`` mutation must reach ``unpack``.
+
+        The callback is evaluated regardless: ``field = self._item_type(packet)``
+        runs it for its side effect even on the unpatched code. So what this
+        proves is not that the callback *fires*, but that the mutation it made
+        on its copy is what ``unpack`` actually used. It alternates
+        ``field._schema`` between two otherwise-identical schemas, one per
+        item; unpacking from ``self._item_type`` instead would use the schema
+        fixed at construction time for every item.
+
+        """
+        from pcapkit.corekit.fields.collections import ListField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        seen = []  # type: list[str]
+
+        @schema_final
+        class TypeA(Schema):
+            marker: 'int' = UInt8Field()
+
+            @classmethod
+            def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+                seen.append('A')
+
+        @schema_final
+        class TypeB(Schema):
+            marker: 'int' = UInt8Field()
+
+            @classmethod
+            def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
+                seen.append('B')
+
+        counter = {'n': 0}
+
+        def alternate(field: 'Any', packet: 'dict[str, Any]') -> 'None':
+            field._schema = TypeB if counter['n'] % 2 else TypeA  # pylint: disable=protected-access
+            counter['n'] += 1
+
+        item_field = SchemaField(length=1, schema=TypeA, callback=alternate)
+        list_field = ListField(length=2, item_type=item_field)
+
+        list_field.unpack(b'\x01\x02', {})
+
+        self.assertEqual(seen, ['A', 'B'])
+
+
 if __name__ == '__main__':
     unittest.main()

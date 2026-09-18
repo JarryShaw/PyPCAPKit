@@ -222,6 +222,7 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.smf_dpd_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_tid_selector
+.. autofunction:: pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_id_len
 .. autofunction:: pcapkit.protocols.schema.internet.hopopt.quick_start_data_selector
 
 Data Models

@@ -375,6 +375,51 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         )
         self.assertEqual(rpl_from_data.cmpr_i, 1)
 
+    def test_ipv6_route_read_data_type_errors_report_real_routing_type(self) -> None:
+        """Regression test for GH-442.
+
+        The three ``_read_data_type_*`` diagnostics interpolated a bare
+        ``{type}`` -- which resolves to the *builtin* ``type``, since none of
+        these methods bind a ``type`` parameter -- so every message read
+        ``[TypeNo <class 'type'>]`` instead of the routing type number that
+        ``header.type`` already carries. Asserting only ``ProtocolError`` was
+        raised (as the pre-existing coverage does) would not have caught
+        this, so this checks the rendered message text directly.
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(IPv6_Route)
+        route_type = Routing.get(250)
+        header = types.SimpleNamespace(next=TransType.TCP, length=1, type=route_type, seg_left=0)
+        expected = f'{proto.alias}: [TypeNo {route_type}] invalid format'
+
+        with self.assertRaises(ProtocolError) as src_ctx:
+            proto._read_data_type_src(route_schema.SourceRoute(ip=[]), header=header)
+        self.assertEqual(str(src_ctx.exception), expected)
+
+        with self.assertRaises(ProtocolError) as type2_ctx:
+            proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=header)
+        self.assertEqual(str(type2_ctx.exception), expected)
+
+        rpl_schema = route_schema.RPL(cmpr_i=0, cmpr_e=0, pad={'pad_len': 0}, addresses=[])
+        with self.assertRaises(ProtocolError) as rpl_ctx:
+            proto._read_data_type_rpl(rpl_schema, header=header)
+        self.assertEqual(str(rpl_ctx.exception), expected)
+
+        # The three messages must keep carrying the substrings PR #440's
+        # round-trip table (tests/protocols/test_option_roundtrip_unit.py)
+        # matches on: the alias, the bracket, and "invalid format".
+        for message in (str(src_ctx.exception), str(type2_ctx.exception), str(rpl_ctx.exception)):
+            self.assertIn('IPv6-Route', message)
+            self.assertIn('[TypeNo', message)
+            self.assertIn('invalid format', message)
+            self.assertIn(str(route_type), message)
+            self.assertNotIn("<class 'type'>", message)
+
     def test_ipv6_route_read_make_registry_and_property_edges(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
@@ -1040,7 +1085,6 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ident = schema.SMFIdentificationBasedDPDOption(
             type=Option.SMF_DPD,
             len=7,
-            test={'mode': SMFDPDMode.I_DPD},
             info={'mode': 0, 'type': TaggerID.IPv4, 'len': 3},
             tid=ip_address('192.0.2.1'),
             id=b'id',
@@ -1264,6 +1308,20 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with self.assertRaises(FieldValueError):
             schema.mpl_opt_seed_id_len({'flags': {'type': 4}})
 
+        # #438: a null TaggerID consumes nothing, so the identifier is the whole
+        # of ``Opt Data Len`` less the one octet ``info`` itself already took.
+        self.assertEqual(schema.smf_i_dpd_id_len({'len': 5, 'info': {'type': 0, 'len': 0}}), 4)
+        # a non-null TaggerID additionally takes ``TidLen + 1`` octets (the ``+ 2``
+        # below also counts the octet ``info`` itself took).
+        self.assertEqual(schema.smf_i_dpd_id_len({'len': 7, 'info': {'type': 2, 'len': 3}}), 2)
+        # ``Opt Data Len`` too short to hold the TaggerID it declares must raise
+        # rather than drive the identifier length negative -- c.f. #438, where the
+        # unguarded subtraction reached :func:`struct.calcsize` as ``'-1s'``.
+        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+            schema.smf_i_dpd_id_len({'len': 0, 'info': {'type': 0, 'len': 0}})
+        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+            schema.smf_i_dpd_id_len({'len': 0, 'info': {'type': 2, 'len': 3}})
+
         for mode in (SMFDPDMode.I_DPD, SMFDPDMode.H_DPD):
             field = schema.smf_dpd_data_selector({'test': {'mode': mode, 'len': 4}})
             self.assertIsInstance(field, SchemaField)
@@ -1319,8 +1377,6 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             'info': {'mode': 0, 'type': TaggerID.NULL, 'len': 0},
             'id': b'id',
         }
-        if schema.__name__.endswith('ipv6_opts'):
-            ident_kwargs['test'] = {'mode': SMFDPDMode.I_DPD}
         ident = schema.SMFIdentificationBasedDPDOption(**ident_kwargs)
         self.assertIs(ident.post_process({}), ident)
         self.assertEqual(ident.mode, SMFDPDMode.I_DPD)
@@ -1536,14 +1592,16 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         identifier rather than the whole option. Both cases below hang the
         pristine tree exactly as the hash-based ones do.
 
-        Only the option itself is asserted, not the padding after it: HOPOPT and
-        IPv6-Opts disagree on how much of the option area an
-        ``SMFIdentificationBasedDPDOption`` leaves over, because the IPv6-Opts
-        schema carries an extra forward-matched octet which
-        :attr:`Schema.__buffer__ <pcapkit.protocols.schema.schema.Schema.__buffer__>`
-        records although the stream never consumes it. That is its own
-        ``len(data)``-is-not-consumed defect, distinct from the one #431 is about,
-        and pinning either count here would bless one of the two.
+        Only the option itself is asserted here, not the padding after it -- that
+        parity is what :meth:`_assert_identification_based_dpd_null_tid_option_area_matches`
+        below pins instead. Until #441, HOPOPT and IPv6-Opts disagreed on how much
+        of the option area an ``SMFIdentificationBasedDPDOption`` left over,
+        because the IPv6-Opts schema carried an extra forward-matched ``test``
+        field its HOPOPT twin did not: the field consumed no bytes but still
+        occupied a :attr:`Schema.__buffer__ <pcapkit.protocols.schema.schema.Schema.__buffer__>`
+        slot, so ``len(schema)`` over-reported the option by one octet under
+        IPv6-Opts. That was its own ``len(data)``-is-not-consumed defect, distinct
+        from the one #431 is about.
 
         """
         from pcapkit.const.ipv6.option import Option
@@ -1585,6 +1643,88 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 
         self._assert_identification_based_dpd_options_parse_from_the_wire(IPv6_Opts)
+
+    def _assert_identification_based_dpd_null_tid_option_area_matches(self, protocol_cls: type) -> None:
+        """#441: a null-TaggerID I-DPD option must consume exactly what HOPOPT does.
+
+        This is the issue's own reproduction: a null-TaggerID I-DPD option with a
+        zero-octet identifier, followed by one octet of ``PadN``. ``ipv6_opts.py``'s
+        ``SMFIdentificationBasedDPDOption`` carried a stray ``test``
+        :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` that its HOPOPT
+        twin did not -- see
+        :meth:`_assert_identification_based_dpd_options_parse_from_the_wire` above
+        for the mechanism. On the pristine tree this option parses under HOPOPT
+        but raises ``ProtocolError: IPv6-Opts: invalid format`` under IPv6-Opts,
+        for the identical octets.
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode
+        from pcapkit.const.ipv6.tagger_id import TaggerID
+
+        raw = bytes.fromhex('1100080100010100')
+
+        with time_limit(5):
+            proto = protocol_cls(raw, extension=True)
+
+        options = list(proto.info.options.items(multi=True))
+        self.assertEqual([code for code, _ in options], [Option.SMF_DPD, Option.PadN])
+
+        smf_dpd = options[0][1]
+        self.assertEqual(smf_dpd.length, 3)
+        self.assertEqual(smf_dpd.dpd_type, SMFDPDMode.I_DPD)
+        self.assertEqual(smf_dpd.tid_type, TaggerID.NULL)
+        self.assertEqual(smf_dpd.tid_len, 0)
+        self.assertIsNone(smf_dpd.tid)
+        self.assertEqual(smf_dpd.id, b'')
+
+        padn = options[1][1]
+        self.assertEqual(padn.length, 3)
+
+        # the reader and the writer must agree: repacking the parsed schema has
+        # to give back the very bytes it was read from
+        self.assertEqual(bytes(proto.__header__), raw)
+
+    def test_hopopt_identification_based_dpd_null_tid_option_area_matches(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_identification_based_dpd_null_tid_option_area_matches(HOPOPT)
+
+    def test_ipv6_opts_identification_based_dpd_null_tid_option_area_matches(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_identification_based_dpd_null_tid_option_area_matches(IPv6_Opts)
+
+    def _assert_identification_based_dpd_option_rejects_underflowing_length(self, protocol_cls: type) -> None:
+        """#438: ``Opt Data Len`` too small for a null TaggerID must raise, not crash.
+
+        This is the issue's own reproduction: an I-DPD option (null TaggerID)
+        declaring ``Opt Data Len = 0``, which leaves no room for the one octet
+        ``info`` itself already consumes. ``id``'s length is ``Opt Data Len - 1``
+        for a null TaggerID, and nothing floored that at zero, so it drove the
+        identifier length to ``-1``. That reached :func:`struct.calcsize` as the
+        template ``'-1s'`` and raised a bare ``struct.error: bad char in struct
+        format`` -- not one of pcapkit's own exception types, and uncatchable
+        through :mod:`pcapkit.utilities.exceptions`.
+
+        """
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        raw = bytes.fromhex('3b00080000000000')
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid SMF I-DPD option length'):
+            with time_limit(5):
+                protocol_cls(raw, extension=True)
+
+    def test_hopopt_identification_based_dpd_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_identification_based_dpd_option_rejects_underflowing_length(HOPOPT)
+
+    def test_ipv6_opts_identification_based_dpd_option_rejects_underflowing_length(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_identification_based_dpd_option_rejects_underflowing_length(IPv6_Opts)
 
     def _assert_a_truncated_option_area_is_diagnosed(self, protocol_cls: type) -> None:
         """An option area with nothing behind it is an error, not a hang.
