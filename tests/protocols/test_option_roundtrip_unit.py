@@ -300,31 +300,15 @@ EXPECTED_FAILURES = {
         'assumes bytes; it runs on the pack path too, from schema.py:647'),
 
     # -- Mobility Header ------------------------------------------------------
-
-    # ``CGAParameter``'s nested length callback reads ``pkt['length']``, which
-    # is present while packing and absent while unpacking: ``SchemaField.unpack``
-    # starts the nested schema with a fresh context whose parent is under
-    # ``__packet__``. A CGA extension has no other carrier, so the whole
-    # ``MH.__extension__`` registry is unreachable through the public API --
-    # every code in it fails here, identically, before its own schema is ever
-    # unpacked. That is #445, and it is why all four entries below name one site
-    # in ``CGAParameter`` rather than anything in the extensions themselves.
-    'mh-extension/Multi_Prefix': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFD': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFE': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFF': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
+    #
+    # ``mh-extension/{Multi_Prefix,Exp_FFFD,Exp_FFFE,Exp_FFFF}`` all round-trip
+    # cleanly now that #445, #437 and #446 are all applied together: #445 let
+    # ``CGAParameter.extensions`` size itself instead of raising
+    # ``KeyError: 'length'``, #437 (merged as registry completion) both
+    # registered the three experimental codes and fixed
+    # ``_make_ext_multiprefix``'s bogus length arithmetic, and #446/#456 fixed
+    # the ``ForwardMatchField`` double-count that stopped ``CGAParametersOption
+    # .parameters`` from sizing correctly. No entries needed here any more.
 
     # -- HIP ------------------------------------------------------------------
 
@@ -396,22 +380,26 @@ EXPECTED_FAILURES = {
 
     # -- HTTP/2 ---------------------------------------------------------------
 
-    # ``SchemaField.pack`` gives a nested frame schema a fresh packet context
-    # whose only link to the parent is ``__packet__``, but six frame schemas
-    # reach for the HTTP/2 header's ``flags`` bitfield directly -- either from a
-    # ConditionalField test or from ``FrameType.post_process``. The three frames
-    # that pass are exactly the three declaring no flag members at all:
-    # RST_STREAM, GOAWAY and WINDOW_UPDATE.
-    **{
-        f'httpv2-frame/{name}': Gap(
-            'CONSTRUCT', "KeyError: 'flags'",
-            'pcapkit/protocols/schema/application/httpv2.py:144 '
-            '(FrameType.post_process) and the pad_len ConditionalField tests at '
-            ':175, :204, :305 -- the nested context reaches for the parent '
-            "header's flags")
-        for name in ('DATA', 'HEADERS', 'SETTINGS', 'PUSH_PROMISE', 'PING',
-                     'CONTINUATION')
-    },
+    # ``SchemaField.pack`` used to give a nested frame schema a fresh packet
+    # context whose only link to the parent was ``__packet__``, and six frame
+    # schemas reach for the HTTP/2 header's ``flags`` bitfield directly --
+    # either from a ConditionalField test or from ``FrameType.post_process``.
+    # #445 makes a name absent from the nested schema fall through to the
+    # parent instead of raising, which fixed that for all six. RST_STREAM,
+    # GOAWAY and WINDOW_UPDATE already passed, declaring no flag members at
+    # all; the other five each got past ``flags`` and hit their own,
+    # unrelated defect in turn -- and every one of those has since been
+    # fixed and merged too, so none of the six needs an entry any more:
+    #
+    # - PUSH_PROMISE, PING: round-tripped cleanly as soon as #445 landed.
+    # - DATA, HEADERS, CONTINUATION: hit ``decorators.py``'s ``@prepare``
+    #   treating a zero-length nested unpack (a frame with no payload) as
+    #   end-of-file. Filed as #458, fixed and merged as #461 (``prepare`` now
+    #   distinguishes a *declared* zero length from a *derived* one).
+    # - SETTINGS: hit ``SettingsFrame.settings`` declaring
+    #   ``item_type=SettingPair`` (the raw schema class) instead of
+    #   ``SchemaField(schema=SettingPair)``. Filed as #459, fixed and merged
+    #   as #462.
 
     # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
     # octets, so the constructed header always says 14 -- while the reader
