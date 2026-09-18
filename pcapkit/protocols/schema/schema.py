@@ -687,8 +687,19 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
-                elif isinstance(data, list):
-                    self.__buffer__[field.name] = field.pack(data, packet)
+                elif isinstance(data, (list, tuple)):
+                    # NOTE: a data model may declare a field ``tuple[...]``
+                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
+                    # 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/
+                    # hip.py -- and ``_read_*`` then hands one straight back
+                    # here on reconstruction. ``ListField.pack`` only ever
+                    # iterates its argument, so it does not care which of the
+                    # two it gets; rejecting the tuple broke every
+                    # parse-then-reconstruct cycle for such a field. See #476.
+                    # ``list(data)`` is a no-op for an actual list and keeps
+                    # ``ListField.pack``'s own ``Optional[list[_TL]]``
+                    # signature honest rather than widening it too.
+                    self.__buffer__[field.name] = field.pack(list(data), packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue

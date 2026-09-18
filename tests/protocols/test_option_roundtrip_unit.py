@@ -10,8 +10,10 @@ be identical across the round trip.
 That third step is what this module exists for. A construct-then-parse test
 passes for a ``_make_*`` that takes only keyword arguments and cannot consume
 the data model its own ``_read_*`` produced -- which is a defect that ships, and
-one this suite had no way to see. Sixteen HIP parameters are in exactly that
-state today.
+one this suite had no way to see. Sixteen HIP parameters used to be in exactly
+that state, until :class:`~pcapkit.protocols.schema.schema.Schema`'s
+``ListField`` pack branch was widened to accept the ``tuple`` their own data
+models declare, not just ``list``. See #476.
 
 The case list and the cycle both live in
 :file:`examples/generators/options.py`, next to the generator that turns the
@@ -320,38 +322,6 @@ EXPECTED_FAILURES = {
         'PARSE', "no attribute 'counter'",
         'pcapkit/protocols/internet/hip.py:822 -- Parameter.registry[128] is '
         'UnassignedParameter, because R1CounterParameter declares code=129 only'),
-
-    # Sixteen parameters whose ``_read_param_*`` stores a list-valued field as a
-    # tuple, which ``_make_param_*`` passes straight back to a ``ListField``
-    # that accepts only a list. This is the class of defect the reconstruct step
-    # exists to find: each one constructs and parses perfectly.
-    #
-    # TRANSPORT_FORMAT_LIST briefly left this group during #466's review: an
-    # early revision reused NAT_TRAVERSAL_MODE/ESP_TRANSFORM/HIP_TRANSPORT_MODE's
-    # shared ``two_octet_prefix_list_len`` guard for this parameter's ``formats``
-    # field too, on the mistaken premise that its ``pkt['len'] - 2`` was
-    # byte-identical *for the same reason*. It is not: :rfc:`7401` Section
-    # 5.2.11 defines this parameter's ``Length`` as literally "2x number of TF
-    # types", with nothing between ``Length`` and the list to subtract -- unlike
-    # the other three, which each genuinely read a two-octet ``reserved``/
-    # ``port`` field first. That reuse turned the parameter's own legitimate
-    # empty-list encoding (``Length = 0``) into a raise, and separately
-    # under-read every non-empty list by two octets on parse -- both fixed by
-    # ``transport_format_list_len`` in pcapkit/protocols/schema/internet/hip.py,
-    # which sizes the list at ``Length`` exactly. With that corrected, this case
-    # is back to failing the same way its fifteen siblings do.
-    **{
-        f'hip-parameter/{name}': Gap(
-            'RECONSTRUCT', "unsupported type <class 'tuple'>",
-            'pcapkit/protocols/schema/schema.py:624 -- _read_param_* returns a '
-            'tuple where _make_param_* needs a list')
-        for name in (
-            'ACK', 'DH_GROUP_LIST', 'HIP_CIPHER', 'NAT_TRAVERSAL_MODE',
-            'HIT_SUITE_LIST', 'REG_INFO', 'REG_REQUEST', 'REG_RESPONSE',
-            'REG_FAILED', 'TRANSPORT_FORMAT_LIST', 'ESP_TRANSFORM', 'ACK_DATA',
-            'ROUTE_DST', 'HIP_TRANSPORT_MODE', 'ROUTE_VIA', 'VIA_RVS',
-        )
-    },
 
     # ``_make_param_encrypted`` passes ``cipher=``, which is not a field of
     # ``EncryptedParameter`` -- so the cipher id is dropped with an
