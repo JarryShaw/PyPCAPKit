@@ -537,6 +537,9 @@ interleaves their fragments.</p>
  |     |--&gt; 'header' : (bytes) header before IPv6-Frag
  |     |--&gt; 'payload' : (bytes) reassembled IPv6 payload
  |     |--&gt; 'packet' : (Protocol) parsed reassembled payload
+ |     |--&gt; 'conflict' : (tuple) octet ranges on which two fragments disagreed
+ |     |                  |--&gt; (tuple) (first, last), absolute and inclusive
+ |     |                  |--&gt; ...
  |--&gt; (Info) data
  |     |--&gt; 'completed' : (Completion) PARTIAL or TIMEOUT --&gt; incomplete
  |     |--&gt; 'id' : (Info) original packet identifier
@@ -551,6 +554,9 @@ interleaves their fragments.</p>
  |     |                 |--&gt; (bytes) IPv6 payload fragment
  |     |                 |--&gt; ...
  |     |--&gt; 'packet' : (None)
+ |     |--&gt; 'conflict' : (tuple) octet ranges on which two fragments disagreed
+ |     |                  |--&gt; (tuple) (first, last), absolute and inclusive
+ |     |                  |--&gt; ...
  |--&gt; (Info) data ...
 </pre></div>
 </div>
@@ -576,6 +582,18 @@ mapping view of it (<code class="docutils literal notranslate"><span class="pre"
 <code class="docutils literal notranslate"><span class="pre">repr()</span></code>), runs it and keeps the result; see
 <a class="reference internal" href="../index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a>.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">completed</span></code> and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> are independent signals: a datagram
+can be <code class="xref py py-attr docutils literal notranslate"><span class="pre">COMPLETE</span></code>
+and still carry a non-empty <code class="docutils literal notranslate"><span class="pre">conflict</span></code>. <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves an
+overlapping fragment’s disagreement itself – “this procedure will
+use the more recently arrived copy in the data buffer” – the
+opposite resolution from TCP’s first-write-wins
+(<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>, fixed for TCP by #443) – so a contested
+range never leaves a hole on its own, and <code class="docutils literal notranslate"><span class="pre">conflict</span></code> is what lets
+a caller tell a clean datagram from a contested one. See #477.</p>
+</div>
 </dd>
 <dt id="term-reasm.ipv6.buffer">reasm.ipv6.buffer<a class="headerlink" href="#term-reasm.ipv6.buffer" title="Link to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
 (<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6._buffer</span></code></a>)
@@ -595,8 +613,26 @@ is as following:</p>
  |                         |               |--&gt; (int) packet range number
  |                         |--&gt; 'header' : (bytes) header buffer
  |                         |--&gt; 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+ |                         |--&gt; 'conflict' : (list) octet ranges on which an arriving
+ |                         |                  fragment disagreed with bytes already in
+ |                         |                  'datagram'
+ |                         |                  |--&gt; (tuple) (first, last), absolute and
+ |                         |                               inclusive
+ |                         |                  |--&gt; ...
  |--&gt; (tuple) BUFID ...
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">conflict</span></code> is only ever appended to, and is checked against
+<code class="docutils literal notranslate"><span class="pre">datagram</span></code> and <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> <em>before</em> an arriving fragment’s own write
+and bookkeeping touch them – see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">IP._detect_conflicts</span></code>.
+<code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> records receipt in 8-octet blocks, which is coarser than
+the octet a conflict needs; <code class="docutils literal notranslate"><span class="pre">TDL</span></code> is what recovers the exact
+extent for the one block that can be partially real – the final
+fragment’s own tail – so a conflict here is never wider than the
+octets that genuinely disagreed, even inside that block.</p>
 </div>
 </dd>
 </dl>

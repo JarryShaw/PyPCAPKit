@@ -519,6 +519,34 @@
     <span class="c1">#: :class:`Deferred` may be passed in its place, and reading this attribute</span>
     <span class="c1">#: then runs it and keeps the result.</span>
     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
+    <span class="c1">#: Octet ranges, absolute into the reassembled payload and both</span>
+    <span class="c1">#: **inclusive** -- the same convention as :attr:`Packet.fo` combined with</span>
+    <span class="c1">#: its length -- on which two fragments disagreed, i.e. an arriving</span>
+    <span class="c1">#: fragment overlapped octets already buffered but did not repeat them.</span>
+    <span class="c1">#: Empty when the datagram never saw a contested octet.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`791` resolves the disagreement itself: "In the case that two or</span>
+    <span class="c1">#: more fragments contain the same data either identically or through a</span>
+    <span class="c1">#: partial overlap, this procedure will use the more recently arrived copy</span>
+    <span class="c1">#: in the data buffer and datagram delivered." So :attr:`payload` always</span>
+    <span class="c1">#: holds whichever fragment arrived *last* over a contested range -- the</span>
+    <span class="c1">#: opposite resolution from TCP's first-write-wins</span>
+    <span class="c1">#: (:rfc:`9293#section-3.10`) -- and this field is what lets a caller tell</span>
+    <span class="c1">#: a clean datagram from a contested one, since a resolved conflict does</span>
+    <span class="c1">#: not, on its own, leave a hole for ``completed`` to report.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :attr:`Buffer.RCVBT &lt;pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT&gt;`</span>
+    <span class="c1">#: only records receipt in 8-octet blocks, coarser than the octet</span>
+    <span class="c1">#: granularity a conflict needs. Every fragment but the last is required</span>
+    <span class="c1">#: to be block-aligned (and :attr:`Packet.fo` is *always* a multiple of 8,</span>
+    <span class="c1">#: being wire-encoded in 8-octet units), so the only block that can be</span>
+    <span class="c1">#: partially real is the one holding the final fragment's own tail -- and</span>
+    <span class="c1">#: a range reported here never extends past</span>
+    <span class="c1">#: :attr:`Buffer.TDL &lt;pcapkit.foundation.reassembly.data.ip.Buffer.TDL&gt;`</span>
+    <span class="c1">#: for exactly that reason, even though a whole ``RCVBT`` block straddling</span>
+    <span class="c1">#: it reads as "received". See</span>
+    <span class="c1">#: :meth:`IP._detect_conflicts &lt;pcapkit.foundation.reassembly.ip.IP._detect_conflicts&gt;`.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1"># NOTE: one signature, not a pair of ``@overload``\\ s keyed on</span>
@@ -532,7 +560,7 @@
         <span class="c1"># from. Overloads keyed on a literal cannot be selected from a ``completed``</span>
         <span class="c1"># computed at runtime anyway, so they only made the reassemblers' own calls</span>
         <span class="c1"># untypeable while promising a correlation the code does not keep.</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">'Completion'</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'DatagramID[_AT]'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol | Deferred]'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'tuple[tuple[int, int], ...]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="Buffer">
@@ -558,9 +586,16 @@
     <span class="c1">#: first-arriving fragment", so a later fragment does not extend the</span>
     <span class="c1">#: deadline and this field is never revised once set.</span>
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span>
+    <span class="c1">#: Octet ranges, absolute into :attr:`datagram` and both **inclusive**, on</span>
+    <span class="c1">#: which an arriving fragment disagreed with bytes already placed there by</span>
+    <span class="c1">#: an earlier one. Accumulated across every fragment merged into this</span>
+    <span class="c1">#: buffer, in the order the conflicts were found; carried onto</span>
+    <span class="c1">#: :attr:`Datagram.conflict &lt;pcapkit.foundation.reassembly.data.ip.Datagram.conflict&gt;`</span>
+    <span class="c1">#: verbatim when the buffer is submitted.</span>
+    <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float'</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 </pre></div>
         </article>

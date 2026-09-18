@@ -614,6 +614,17 @@ first-arriving fragment”, so a later fragment does not extend the
 deadline and this field is never revised once set.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.conflict">
+<span class="sig-name descname"><span class="pre">conflict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.conflict" title="Link to this definition">¶</a></dt>
+<dd><p>Octet ranges, absolute into <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.datagram" title="pcapkit.foundation.reassembly.data.ip.Buffer.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> and both <strong>inclusive</strong>, on
+which an arriving fragment disagreed with bytes already placed there by
+an earlier one. Accumulated across every fragment merged into this
+buffer, in the order the conflicts were found; carried onto
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.conflict" title="pcapkit.foundation.reassembly.data.ip.Datagram.conflict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.conflict</span></code></a>
+verbatim when the buffer is submitted.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -693,6 +704,36 @@ still reads as it did while this was a <a class="reference external" href="https
 <dd><p>Parsed IP payload. Analysed on first read, not at construction time; a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> may be passed in its place, and reading this attribute
 then runs it and keeps the result.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.conflict">
+<span class="sig-name descname"><span class="pre">conflict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.conflict" title="Link to this definition">¶</a></dt>
+<dd><p>Octet ranges, absolute into the reassembled payload and both
+<strong>inclusive</strong> – the same convention as <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo" title="pcapkit.foundation.reassembly.data.ip.Packet.fo"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.fo</span></code></a> combined with
+its length – on which two fragments disagreed, i.e. an arriving
+fragment overlapped octets already buffered but did not repeat them.
+Empty when the datagram never saw a contested octet.</p>
+<p><span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves the disagreement itself: “In the case that two or
+more fragments contain the same data either identically or through a
+partial overlap, this procedure will use the more recently arrived copy
+in the data buffer and datagram delivered.” So <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.payload" title="pcapkit.foundation.reassembly.data.ip.Datagram.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> always
+holds whichever fragment arrived <em>last</em> over a contested range – the
+opposite resolution from TCP’s first-write-wins
+(<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – and this field is what lets a caller tell
+a clean datagram from a contested one, since a resolved conflict does
+not, on its own, leave a hole for <code class="docutils literal notranslate"><span class="pre">completed</span></code> to report.</p>
+<p><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.RCVBT</span></code></a>
+only records receipt in 8-octet blocks, coarser than the octet
+granularity a conflict needs. Every fragment but the last is required
+to be block-aligned (and <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo" title="pcapkit.foundation.reassembly.data.ip.Packet.fo"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Packet.fo</span></code></a> is <em>always</em> a multiple of 8,
+being wire-encoded in 8-octet units), so the only block that can be
+partially real is the one holding the final fragment’s own tail – and
+a range reported here never extends past
+<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.TDL" title="pcapkit.foundation.reassembly.data.ip.Buffer.TDL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.TDL</span></code></a>
+for exactly that reason, even though a whole <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block straddling
+it reads as “received”. See
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">IP._detect_conflicts</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
