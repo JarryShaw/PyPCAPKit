@@ -506,6 +506,102 @@ class SchemaUnitTests(unittest.TestCase):
             with time_limit(5):
                 field.unpack(stream, {})
 
+    def _make_previewed_item_schema(self):
+        """A schema whose length is peeked before it is read for real.
+
+        Returns:
+            A :class:`~pcapkit.protocols.schema.schema.Schema` subclass with a
+            :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` that previews
+            the very octet ``length`` then reads again for real -- the shape
+            :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter`'s
+            ``public_key_test`` has, minimised to one octet. ``length_peek``
+            consumes nothing from the stream (:meth:`Schema.unpack
+            <pcapkit.protocols.schema.schema.Schema.unpack>` rewinds past it), so
+            an instance built from ``b'\\x02AB'`` reads 3 octets off the wire --
+            not 4 -- and :meth:`Schema.__len__
+            <pcapkit.protocols.schema.schema.Schema.__len__>` is expected to agree.
+
+        """
+        from pcapkit.corekit.fields.misc import ForwardMatchField
+        from pcapkit.corekit.fields.numbers import UInt8Field
+        from pcapkit.corekit.fields.strings import BytesField
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        @schema_final
+        class PreviewedItem(Schema):
+            #: Non-consuming preview of ``length``, read again below.
+            length_peek: int = ForwardMatchField(UInt8Field(default=0))
+            #: The same octet, read for real this time.
+            length: int = UInt8Field(default=0)
+            #: Sized from the peeked (and re-read) ``length``.
+            data: bytes = BytesField(length=lambda pkt: pkt['length'], default=b'')
+
+        return PreviewedItem
+
+    def test_forward_match_field_does_not_count_toward_length(self) -> None:
+        """A ``ForwardMatchField`` reads octets but must not be billed for them.
+
+        Before the fix, :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` kept the octets a
+        :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` read in
+        ``__buffer__`` even though it rewinds the stream past them, so
+        ``len(schema)`` double-counted them: the same octet is read once by
+        ``length_peek`` (kept in the buffer) and again for real by ``length``
+        (also kept), so a 3-octet input reported length 4. See #446.
+
+        """
+        PreviewedItem = self._make_previewed_item_schema()
+
+        unpacked = PreviewedItem.unpack(b'\x02AB', 3, {})
+
+        self.assertEqual(unpacked.length, 2)
+        self.assertEqual(unpacked.data, b'AB')
+        # 1 octet for ``length_peek``/``length`` together (not 2, one per
+        # field) plus 2 octets of ``data`` -- the input's own 3 octets, not the
+        # 4 a double-counted forward match would report.
+        self.assertEqual(len(unpacked), 3)
+        self.assertEqual(bytes(unpacked), b'\x02AB')
+
+    def test_schema_list_field_rejects_a_declared_area_that_a_forward_match_over_reports(self) -> None:
+        """The failure mode #446 is about: a correct declared area, rejected.
+
+        Two ``PreviewedItem``s take two octets each off the wire -- four in
+        total -- and :class:`~pcapkit.corekit.fields.collections.ListField`
+        is given exactly that as its declared ``length``. Before the fix, each
+        item's over-reported ``len(data)`` (3, not 2) drains the budget one
+        octet too fast: ``4 - 3 = 1`` after the first item, then ``1 - 3 = -2``
+        on the second, and :meth:`ListField.unpack
+        <pcapkit.corekit.fields.collections.ListField.unpack>` raises
+        ``FieldValueError`` on input that is exactly the right length. This is
+        the same mechanism that fails
+        :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter`'s
+        ``extensions`` :class:`~pcapkit.corekit.fields.collections.OptionField`
+        with ``FieldValueError: Field parameters has invalid length.``, minimised
+        to a :class:`~pcapkit.corekit.fields.collections.ListField` so it needs no
+        option registry.
+
+        """
+        from pcapkit.corekit.fields.collections import ListField
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.protocols.schema.schema import Schema, schema_final
+
+        PreviewedItem = self._make_previewed_item_schema()
+
+        @schema_final
+        class PreviewedItemListSchema(Schema):
+            #: Four octets of budget, exactly what two ``PreviewedItem``s take.
+            markers: list[PreviewedItem] = ListField(  # type: ignore[valid-type]
+                length=4,
+                item_type=SchemaField(length=2, schema=PreviewedItem),
+            )
+
+        field = PreviewedItemListSchema.__fields__['markers']
+        unpacked = field.unpack(b'\x01A\x01B', {})
+
+        self.assertEqual(len(unpacked), 2)
+        self.assertEqual(unpacked[0].data, b'A')
+        self.assertEqual(unpacked[1].data, b'B')
+
     def _make_wrapped_options_schema(self):
         """A three-octet option area whose first option over-reads by one octet.
 
