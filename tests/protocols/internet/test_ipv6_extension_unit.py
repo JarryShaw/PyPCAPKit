@@ -375,6 +375,51 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         )
         self.assertEqual(rpl_from_data.cmpr_i, 1)
 
+    def test_ipv6_route_read_data_type_errors_report_real_routing_type(self) -> None:
+        """Regression test for GH-442.
+
+        The three ``_read_data_type_*`` diagnostics interpolated a bare
+        ``{type}`` -- which resolves to the *builtin* ``type``, since none of
+        these methods bind a ``type`` parameter -- so every message read
+        ``[TypeNo <class 'type'>]`` instead of the routing type number that
+        ``header.type`` already carries. Asserting only ``ProtocolError`` was
+        raised (as the pre-existing coverage does) would not have caught
+        this, so this checks the rendered message text directly.
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(IPv6_Route)
+        route_type = Routing.get(250)
+        header = types.SimpleNamespace(next=TransType.TCP, length=1, type=route_type, seg_left=0)
+        expected = f'{proto.alias}: [TypeNo {route_type}] invalid format'
+
+        with self.assertRaises(ProtocolError) as src_ctx:
+            proto._read_data_type_src(route_schema.SourceRoute(ip=[]), header=header)
+        self.assertEqual(str(src_ctx.exception), expected)
+
+        with self.assertRaises(ProtocolError) as type2_ctx:
+            proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=header)
+        self.assertEqual(str(type2_ctx.exception), expected)
+
+        rpl_schema = route_schema.RPL(cmpr_i=0, cmpr_e=0, pad={'pad_len': 0}, addresses=[])
+        with self.assertRaises(ProtocolError) as rpl_ctx:
+            proto._read_data_type_rpl(rpl_schema, header=header)
+        self.assertEqual(str(rpl_ctx.exception), expected)
+
+        # The three messages must keep carrying the substrings PR #440's
+        # round-trip table (tests/protocols/test_option_roundtrip_unit.py)
+        # matches on: the alias, the bracket, and "invalid format".
+        for message in (str(src_ctx.exception), str(type2_ctx.exception), str(rpl_ctx.exception)):
+            self.assertIn('IPv6-Route', message)
+            self.assertIn('[TypeNo', message)
+            self.assertIn('invalid format', message)
+            self.assertIn(str(route_type), message)
+            self.assertNotIn("<class 'type'>", message)
+
     def test_ipv6_route_read_make_registry_and_property_edges(self) -> None:
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
