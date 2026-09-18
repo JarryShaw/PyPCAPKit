@@ -1288,7 +1288,25 @@
     <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">mn_id_selector</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address | int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="c1"># NOTE: No ``int`` here, and deliberately so even though</span>
+        <span class="c1"># :meth:`MH._make_opt_mn_id &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;`</span>
+        <span class="c1"># *does* accept one. The two annotations describe different boundaries:</span>
+        <span class="c1"># the maker's is what a **caller** may pass, while this one is what the</span>
+        <span class="c1"># schema can **hold**, and the maker converts between them before ever</span>
+        <span class="c1"># constructing this class -- an ``int`` becomes :obj:`bytes` via</span>
+        <span class="c1"># :meth:`int.to_bytes` for the octet subtypes and an</span>
+        <span class="c1"># :class:`~ipaddress.IPv6Address` for ``IPv6_Address``. Measured through</span>
+        <span class="c1"># the maker: ``identifier=0x1234`` arrives here as ``b'\\x124'`` for</span>
+        <span class="c1"># ``IMSI``/``DUID`` and as ``IPv6Address('::1234')`` for</span>
+        <span class="c1"># ``IPv6_Address``, never as an ``int``. Widening this stub to admit one</span>
+        <span class="c1"># would therefore document a value the schema can never hold, and would</span>
+        <span class="c1"># positively mislead: ``mn_id_selector`` resolves every subtype but</span>
+        <span class="c1"># ``IPv6_Address`` to a</span>
+        <span class="c1"># :class:`~pcapkit.corekit.fields.strings.StringField` or</span>
+        <span class="c1"># :class:`~pcapkit.corekit.fields.strings.BytesField`, and handing either</span>
+        <span class="c1"># a raw ``int`` is precisely the #467 defect -- ``struct.pack()`` cannot</span>
+        <span class="c1"># consume it (c.f. #467, #468).</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MNIDSubtype'</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">'bytes | str | IPv6Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

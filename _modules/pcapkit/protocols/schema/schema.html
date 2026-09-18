@@ -1190,6 +1190,16 @@
 <span class="sd">            of the remaining data, which is used to determine the length of</span>
 <span class="sd">            the payload field.</span>
 
+<span class="sd">            When this schema is nested -- unpacked through a</span>
+<span class="sd">            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than</span>
+<span class="sd">            directly -- ``packet`` is not the enclosing schema's own data, but</span>
+<span class="sd">            a context built by :func:`~pcapkit.corekit.fields.misc.</span>
+<span class="sd">            nested_packet_context`: a name this schema does not itself</span>
+<span class="sd">            declare falls through to the enclosing schema, and the enclosing</span>
+<span class="sd">            schema is also reachable unconditionally under a ``__packet__``</span>
+<span class="sd">            key. See that function for the exact lookup, write and iteration</span>
+<span class="sd">            semantics.</span>
+
 <span class="sd">            And an ``__option_padding__`` key in the ``packet`` to record how</span>
 <span class="sd">            much of an</span>
 <span class="sd">            :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared</span>

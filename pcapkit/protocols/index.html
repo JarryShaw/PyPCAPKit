@@ -751,6 +751,15 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 <p>We used a <code class="docutils literal notranslate"><span class="pre">__length__</span></code> key in <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record the length
 of the remaining data, which is used to determine the length of
 the payload field.</p>
+<p>When this schema is nested – unpacked through a
+<a class="reference internal" href="../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> rather than
+directly – <code class="docutils literal notranslate"><span class="pre">packet</span></code> is not the enclosing schema’s own data, but
+a context built by <code class="xref py py-func docutils literal notranslate">
+<span class="pre">nested_packet_context()</span></code>: a name this schema does not itself
+declare falls through to the enclosing schema, and the enclosing
+schema is also reachable unconditionally under a <code class="docutils literal notranslate"><span class="pre">__packet__</span></code>
+key. See that function for the exact lookup, write and iteration
+semantics.</p>
 <p>And an <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> key in the <code class="docutils literal notranslate"><span class="pre">packet</span></code> to record how
 much of an
 <a class="reference internal" href="../corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a>’s declared

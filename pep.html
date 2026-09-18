@@ -1168,6 +1168,43 @@ captures dump to, so there is a case for taking that churn early and registering
 dissectors later. The third format, the <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
 <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
 nobody has claimed it.</p>
+<p><strong>Between wave 1 and wave 2 — a library-wide consistency sweep.</strong> Wave 1 closed
+by clearing defects one at a time, each found because something else was being
+worked on nearby. That is a poor way to find the rest of them, so before wave 2
+starts the library gets swept deliberately, in four strands:</p>
+<ul class="simple">
+<li><p><strong>Prose against code.</strong> Docstrings, the README, and inline comments checked
+against what the code now does. Wave 1 produced three separate cases of a
+docstring outliving the thing it described — one of them survived the fix that
+invalidated it by under a minute — so this is a known failure mode rather than
+a hypothetical. Includes the rule that a docstring names the real defining
+module rather than the re-export.</p></li>
+<li><p><strong>Missing tests.</strong> Not coverage percentage, which says nothing useful here, but
+named gaps: registry entries with no round-trip case, error paths that no test
+reaches, and behaviour asserted only in prose. The option round-trip harness
+already enumerates its own coverage and fails when a registered code has no
+case; the sweep asks which <em>other</em> registries deserve the same treatment.</p></li>
+<li><p><strong>Unaligned changes.</strong> Drift where one half of a pair moved and the other did
+not — a schema whose data model disagrees with it, a maker whose annotation
+admits what its schema cannot hold, an <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entry naming a
+case that no longer fails. Several wave 1 defects were exactly this shape.</p></li>
+<li><p><strong>Packet formats against the specifications.</strong> The most valuable strand, and
+the one with the clearest evidence behind it: reading the RFC field-by-field
+against the schema is what produced
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/472">#472</a> — two HIP
+parameters sizing their list entries at one octet where <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> §5.4 and
+<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a> §5.1.2 specify sixteen bits — and the same method then <em>cleared</em>
+fourteen further
+<code class="docutils literal notranslate"><span class="pre">EnumField(length=1)</span></code> sites in the same file against <span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
+<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8002.html"><strong>RFC 8002</strong></a>, <span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8003.html"><strong>RFC 8003</strong></a>, <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a> and <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6078.html"><strong>RFC 6078</strong></a>. It both finds real
+defects and retires suspicion, which is why it is worth doing exhaustively
+rather than opportunistically.</p></li>
+</ul>
+<p>The sweep’s output is <strong>verified issues, not a list of suspicions</strong> — each entry
+reproduced before it is filed, with the reproduction in the issue. An audit that
+files what it merely suspects transfers the work rather than doing it, and this
+project has already had to correct a finding whose count and whose diagnosis were
+both wrong when re-derived.</p>
 </section>
 </section>
 

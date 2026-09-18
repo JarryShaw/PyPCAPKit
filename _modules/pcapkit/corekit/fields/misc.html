@@ -956,6 +956,95 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">nested_packet_context</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the packet context handed to a nested schema's field callbacks.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: The enclosing schema's own packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A plain :class:`dict` holding a shallow copy of ``packet``'s own names,</span>
+<span class="sd">        plus the reserved ``__packet__`` key bound to ``packet`` itself.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        A nested schema's field callbacks are written exactly like a top-level</span>
+<span class="sd">        schema's -- ``length=lambda pkt: pkt['length']`` -- so a name the</span>
+<span class="sd">        nested schema does not itself declare has to resolve to the enclosing</span>
+<span class="sd">        schema's value rather than raise :exc:`KeyError`. Copying the</span>
+<span class="sd">        enclosing names in is what gives that, with no lookup protocol to</span>
+<span class="sd">        implement: every mapping operation is :class:`dict`'s own, so</span>
+<span class="sd">        ``pkt[key]``, ``key in pkt``, :meth:`~dict.get`,</span>
+<span class="sd">        :meth:`~dict.setdefault`, :meth:`~dict.pop`, ``==``, iteration and</span>
+<span class="sd">        ``dict(**pkt)`` all behave exactly as a caller reading the code would</span>
+<span class="sd">        expect, and none of them needs an override.</span>
+
+<span class="sd">        The enclosing schema is also reachable *unconditionally* under the</span>
+<span class="sd">        reserved ``__packet__`` key, for a callback that needs to name the</span>
+<span class="sd">        outer schema specifically rather than whichever schema happens to</span>
+<span class="sd">        declare a given field -- see</span>
+<span class="sd">        :func:`pcapkit.protocols.schema.misc.pcapng.packet_byteorder` and</span>
+<span class="sd">        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`</span>
+<span class="sd">        for why that distinction matters, and note that both already</span>
+<span class="sd">        hand-roll this exact fallback and so are unaffected by (and do not</span>
+<span class="sd">        need to route through) this function.</span>
+
+<span class="sd">        Nothing written through the returned mapping reaches ``packet``,</span>
+<span class="sd">        because the returned mapping *is* a copy: a nested schema can set --</span>
+<span class="sd">        or shadow -- a name also declared by the enclosing schema without the</span>
+<span class="sd">        write ever touching the enclosing schema's own data, and without the</span>
+<span class="sd">        write silently disappearing either. That matters concretely rather</span>
+<span class="sd">        than hypothetically:</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension` declares</span>
+<span class="sd">        its own ``length`` while the option enclosing it declares ``length``</span>
+<span class="sd">        too, so handing a nested schema the enclosing mapping itself would let</span>
+<span class="sd">        the inner ``length`` overwrite the outer one mid-pack.</span>
+
+<span class="sd">        Two consequences of it being a copy rather than a live view, both</span>
+<span class="sd">        deliberate and neither reached by any current call site. A name</span>
+<span class="sd">        deleted from the returned mapping is simply gone, rather than</span>
+<span class="sd">        reverting to the enclosing schema's value. And the copy is taken when</span>
+<span class="sd">        this function is called, so a later mutation of ``packet`` is not</span>
+<span class="sd">        observed through it -- ``__packet__`` remains bound to the live</span>
+<span class="sd">        enclosing mapping for any callback that needs the current value.</span>
+
+<span class="sd">        No dedicated class and no :class:`~collections.ChainMap`. Earlier</span>
+<span class="sd">        versions of this function returned each in turn: a</span>
+<span class="sd">        :class:`~collections.ChainMap` first, then a hand-written</span>
+<span class="sd">        :class:`dict` subclass adopted when the ``ChainMap`` was suspected of</span>
+<span class="sd">        corrupting the shared :class:`~abc.ABCMeta` cache every</span>
+<span class="sd">        :class:`Schema &lt;pcapkit.protocols.schema.schema.Schema&gt;` subclass used</span>
+<span class="sd">        to share on CPython &lt;= 3.10 (issue #439), and then a</span>
+<span class="sd">        :class:`~collections.ChainMap` again once that suspicion was doubted.</span>
+<span class="sd">        A plain :class:`dict` ends the question: it satisfies every</span>
+<span class="sd">        ``packet: 'dict[str, Any]'`` annotation on the rest of the field</span>
+<span class="sd">        classes natively, so no :func:`~typing.cast` is needed at the call</span>
+<span class="sd">        site, and it cannot interact with :class:`~abc.ABCMeta` at all because</span>
+<span class="sd">        :class:`dict` is not an :class:`~abc.ABCMeta`-based class.</span>
+
+<span class="sd">        On the #439 suspicion itself, for the record, since it drove two</span>
+<span class="sd">        rewrites: it is *probably* wrong and no longer decidable. What is</span>
+<span class="sd">        directly measured is that the cache keys on the **exact type</span>
+<span class="sd">        queried**, so asking about a :class:`~collections.ChainMap` instance</span>
+<span class="sd">        caches lookups for :class:`~collections.ChainMap` and not for</span>
+<span class="sd">        :class:`dict`, and that the poisoning observed in #439 came from</span>
+<span class="sd">        ordinary code asking :func:`isinstance` about a plain :class:`dict` --</span>
+<span class="sd">        :func:`~pcapkit.corekit.infoclass.Info.__update__` does exactly that.</span>
+<span class="sd">        Against that, swapping the ``ChainMap`` for a plain literal was, at</span>
+<span class="sd">        the time and on a real CPython 3.10 venv, enough to move</span>
+<span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
+<span class="sd">        between passing and failing, toggled both ways. The likeliest</span>
+<span class="sd">        reconciliation -- that the ``ChainMap`` was never causal but changed</span>
+<span class="sd">        which concrete types flowed through unrelated :func:`isinstance` calls</span>
+<span class="sd">        in the same run, and so changed *when* the pre-existing corruption</span>
+<span class="sd">        fired -- is plausible rather than demonstrated, and cannot now be</span>
+<span class="sd">        tested: #439 has been fixed directly, every :class:`Schema` subclass</span>
+<span class="sd">        gets its own ``_abc_impl``, and the original conditions no longer</span>
+<span class="sd">        exist. It does not affect correctness either way.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">}</span>
+
+
 <div class="viewcode-block" id="SchemaField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SchemaField</span><span class="p">(</span><span class="n">FieldBase</span><span class="p">[</span><span class="n">_TS</span><span class="p">]):</span>
@@ -975,7 +1064,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Field size."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>  <span class="c1"># type: ignore[has-type]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -1049,9 +1138,10 @@
 <span class="sd">            Packed field value.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We will use ``packet`` as a ``__packet__`` key in the packet context</span>
-<span class="sd">            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`</span>
-<span class="sd">            for packing purposes.</span>
+<span class="sd">            ``packet`` is reachable from the nested schema's own field</span>
+<span class="sd">            callbacks both under a ``__packet__`` key and, for a name the</span>
+<span class="sd">            nested schema does not itself declare, directly -- see</span>
+<span class="sd">            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1063,9 +1153,7 @@
             <span class="k">return</span> <span class="n">value</span>
 
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packet</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">pack</span><span class="p">({</span>
-            <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
-        <span class="p">})</span></div>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">nested_packet_context</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="SchemaField.unpack">
@@ -1081,9 +1169,10 @@
 <span class="sd">            Unpacked field value.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            We will use ``packet`` as a ``__packet__`` key in the packet context</span>
-<span class="sd">            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`</span>
-<span class="sd">            for unpacking purposes.</span>
+<span class="sd">            ``packet`` is reachable from the nested schema's own field</span>
+<span class="sd">            callbacks both under a ``__packet__`` key and, for a name the</span>
+<span class="sd">            nested schema does not itself declare, directly -- see</span>
+<span class="sd">            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -1092,9 +1181,8 @@
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
 
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packet</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
-            <span class="s1">'__packet__'</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
-        <span class="p">}))</span></div>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+                                                <span class="n">nested_packet_context</span><span class="p">(</span><span class="n">packet</span><span class="p">)))</span></div>
 </div>
 
 

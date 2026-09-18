@@ -8541,11 +8541,29 @@
 <span class="sd">            subtype_default: MN-ID subtype default value.</span>
 <span class="sd">            subtype_namespace: MN-ID subtype namespace.</span>
 <span class="sd">            subtype_reversed: MN-ID subtype reversed flag.</span>
-<span class="sd">            identifier: Identifier.</span>
+<span class="sd">            identifier: Identifier. An :obj:`int` is accepted for every</span>
+<span class="sd">                subtype except ``NAI``. For ``IPv6_Address`` it is converted</span>
+<span class="sd">                and validated the same way as any other value</span>
+<span class="sd">                :class:`ipaddress.IPv6Address` accepts. For the other six</span>
+<span class="sd">                subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an</span>
+<span class="sd">                EUI-48/64 address, a GUTI, a DUID) -- it is converted to its</span>
+<span class="sd">                own minimal big-endian octets, at least one. ``NAI`` is text</span>
+<span class="sd">                (RFC 4283's ``user@realm`` form) rather than a numeric</span>
+<span class="sd">                identifier, so there is no non-arbitrary int-to-text mapping</span>
+<span class="sd">                the way there is int-to-address or int-to-octets, and an</span>
+<span class="sd">                :obj:`int` is rejected there (c.f. #467, #468).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``identifier`` is a negative :obj:`int` (no</span>
+<span class="sd">                subtype has a wire form for one), an :obj:`int` of any value</span>
+<span class="sd">                with the ``NAI`` subtype, or an :obj:`int` of ``2**128`` or</span>
+<span class="sd">                above with the ``IPv6_Address`` subtype (whose wire form is a</span>
+<span class="sd">                fixed 16 octets, unlike the other subtypes, which have no</span>
+<span class="sd">                ceiling and simply pack into more).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8555,6 +8573,31 @@
             <span class="n">subtype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">subtype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">subtype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
                                            <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># NOTE: checked before the subtype dispatch below, not inside it,</span>
+            <span class="c1"># because *no* subtype has a wire form for a negative identifier and</span>
+            <span class="c1"># each one fails differently on its own: ``int.to_bytes`` raises</span>
+            <span class="c1"># ``OverflowError`` and ``ipaddress.IPv6Address`` an</span>
+            <span class="c1"># ``AddressValueError`` -- itself a bare :exc:`ValueError`, which is</span>
+            <span class="c1"># exactly the class of leak this handler exists to stop, and which a</span>
+            <span class="c1"># guard living inside the ``elif isinstance(identifier, int)`` branch</span>
+            <span class="c1"># could not catch, since the ``IPv6_Address`` dispatch never reaches</span>
+            <span class="c1"># it (c.f. #467, #468).</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back</span>
+                <span class="c1"># into a named member for the message below -- but its own</span>
+                <span class="c1"># ``_missing_`` only auto-extends 9-15 and 16-255, so 0,</span>
+                <span class="c1"># negatives and anything above 255 make the constructor itself</span>
+                <span class="c1"># raise a bare ``ValueError``, which would defeat the point of</span>
+                <span class="c1"># this guard (c.f. #468 review). Caught here and the raw value</span>
+                <span class="c1"># used instead rather than let it propagate.</span>
+                <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">Enum_MNIDSubtype</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype </span><span class="si">{</span><span class="n">subtype_repr</span><span class="si">}</span><span class="s1"> '</span>
+                <span class="sa">f</span><span class="s1">'identifier must be a non-negative int, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
         <span class="c1"># NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),</span>
         <span class="c1"># not by the Python type of ``identifier``, so the width has to be taken from</span>
         <span class="c1"># the former. For the ``IPv6_Address`` subtype the schema always packs a fixed</span>
@@ -8563,11 +8606,59 @@
         <span class="c1"># form here as well, keeping the packed bytes and the declared length derived</span>
         <span class="c1"># from one value instead of two independent computations (c.f. #448).</span>
         <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">identifier</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">128</span><span class="p">:</span>
+                <span class="c1"># NOTE: the upper-bound mirror of the negative-int guard above, and</span>
+                <span class="c1"># it belongs here rather than up there because this bound is</span>
+                <span class="c1"># subtype-*dependent*: ``2**140`` is a perfectly good identifier for</span>
+                <span class="c1"># the six ``BytesField`` subtypes -- it simply packs into more</span>
+                <span class="c1"># octets -- and only ``IPv6_Address`` caps at 128 bits. Left</span>
+                <span class="c1"># unguarded, :class:`ipaddress.IPv6Address` raises</span>
+                <span class="c1"># ``AddressValueError``, itself a bare :exc:`ValueError`, so this</span>
+                <span class="c1"># handler would otherwise ship with its lower bound guarded and its</span>
+                <span class="c1"># upper bound leaking (c.f. #467, #468). Checked explicitly rather</span>
+                <span class="c1"># than by wrapping the construction below, because that would also</span>
+                <span class="c1"># swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or</span>
+                <span class="c1"># ``None`` reaching here -- which is #469's subject, not this one's.</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype IPv6_Address '</span>
+                    <span class="sa">f</span><span class="s1">'identifier must be an int below 2**128, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
                 <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">id_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
+                <span class="c1"># NOTE: NAI's field is a StringField (c.f. mn_id_selector), so an</span>
+                <span class="c1"># int has to become text -- and unlike the numeric subtypes below,</span>
+                <span class="c1"># there is no non-arbitrary way to do that. str(identifier) packs</span>
+                <span class="c1"># and round-trips fine, but an NAI is a network access identifier</span>
+                <span class="c1"># ('user@realm', RFC 4283), and a bare decimal-digit string is not</span>
+                <span class="c1"># one: it is mechanically valid and semantically nonsense, exactly</span>
+                <span class="c1"># the "silently accepting a value that cannot pack" #467 removed,</span>
+                <span class="c1"># just relocated to "silently accepting a value that packs into</span>
+                <span class="c1"># the wrong thing". Rejected instead, with the explicit spelling</span>
+                <span class="c1"># a caller who really wants a decimal-digit NAI can use.</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype NAI identifier '</span>
+                    <span class="sa">f</span><span class="s1">'must be str, not int -- pass str(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if a '</span>
+                    <span class="sa">f</span><span class="s1">'decimal-digit NAI is really what is wanted'</span><span class="p">)</span>
+            <span class="c1"># NOTE: every other subtype's field is a</span>
+            <span class="c1"># BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector) -- a</span>
+            <span class="c1"># numeric identifier, so unlike NAI there IS a non-arbitrary wire</span>
+            <span class="c1"># form: its own minimal big-endian encoding. That is self-consistent</span>
+            <span class="c1"># with the declared length by construction and round-trips exactly.</span>
+            <span class="c1"># ``id_len = math.ceil(identifier.bit_length() / 8)`` was the right</span>
+            <span class="c1"># width all along -- the pre-#467 defect was never the sizing, it</span>
+            <span class="c1"># was that ``identifier`` itself stayed an ``int`` afterwards and</span>
+            <span class="c1"># was handed to ``BytesField`` unconverted, which ``struct.pack()``</span>
+            <span class="c1"># cannot do anything with. #468 initially rejected outright instead</span>
+            <span class="c1"># of noticing that; converting is what this revision does (c.f.</span>
+            <span class="c1"># #467, #468). ``bit_length()`` is 0 for 0 itself, which would</span>
+            <span class="c1"># otherwise declare a zero-octet identifier -- collapsing "the</span>
+            <span class="c1"># identifier's value is 0" into "there is no identifier" -- so the</span>
+            <span class="c1"># width is floored at one octet, matching what any reasonable</span>
+            <span class="c1"># encoder would produce.</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">id_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
 

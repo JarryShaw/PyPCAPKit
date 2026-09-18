@@ -815,3 +815,41 @@ captures dump to, so there is a case for taking that churn early and registering
 dissectors later. The third format, the :rfc:`6088` traffic selectors of
 :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
 nobody has claimed it.
+
+**Between wave 1 and wave 2 — a library-wide consistency sweep.** Wave 1 closed
+by clearing defects one at a time, each found because something else was being
+worked on nearby. That is a poor way to find the rest of them, so before wave 2
+starts the library gets swept deliberately, in four strands:
+
+* **Prose against code.** Docstrings, the README, and inline comments checked
+  against what the code now does. Wave 1 produced three separate cases of a
+  docstring outliving the thing it described — one of them survived the fix that
+  invalidated it by under a minute — so this is a known failure mode rather than
+  a hypothetical. Includes the rule that a docstring names the real defining
+  module rather than the re-export.
+* **Missing tests.** Not coverage percentage, which says nothing useful here, but
+  named gaps: registry entries with no round-trip case, error paths that no test
+  reaches, and behaviour asserted only in prose. The option round-trip harness
+  already enumerates its own coverage and fails when a registered code has no
+  case; the sweep asks which *other* registries deserve the same treatment.
+* **Unaligned changes.** Drift where one half of a pair moved and the other did
+  not — a schema whose data model disagrees with it, a maker whose annotation
+  admits what its schema cannot hold, an ``EXPECTED_FAILURES`` entry naming a
+  case that no longer fails. Several wave 1 defects were exactly this shape.
+* **Packet formats against the specifications.** The most valuable strand, and
+  the one with the clearest evidence behind it: reading the RFC field-by-field
+  against the schema is what produced
+  `#472 <https://github.com/JarryShaw/PyPCAPKit/issues/472>`__ — two HIP
+  parameters sizing their list entries at one octet where :rfc:`5770` §5.4 and
+  :rfc:`7402` §5.1.2 specify sixteen bits — and the same method then *cleared*
+  fourteen further
+  ``EnumField(length=1)`` sites in the same file against :rfc:`7401`,
+  :rfc:`8002`, :rfc:`8003`, :rfc:`5770` and :rfc:`6078`. It both finds real
+  defects and retires suspicion, which is why it is worth doing exhaustively
+  rather than opportunistically.
+
+The sweep's output is **verified issues, not a list of suspicions** — each entry
+reproduced before it is filed, with the reproduction in the issue. An audit that
+files what it merely suspects transfers the work rather than doing it, and this
+project has already had to correct a finding whose count and whose diagnosis were
+both wrong when re-derived.
