@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
+from pcapkit.foundation.traceflow.data.data import Deferred, DeferredPacket
 from pcapkit.utilities.compat import Tuple
 
 __all__ = ['BufferID', 'Packet', 'Buffer', 'Index']
@@ -16,11 +17,24 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
     from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
-#: Buffer ID.
+#: Buffer ID, i.e. ``(address, port, address, port)``.
+#:
+#: A plain :obj:`tuple` rather than an :class:`~pcapkit.corekit.infoclass.Info`
+#: **deliberately**: :class:`~pcapkit.corekit.infoclass.Info` inherits
+#: :class:`collections.abc.Mapping`, which sets ``__hash__ = None``, so an
+#: :class:`~pcapkit.corekit.infoclass.Info` cannot be a :obj:`dict` key at all.
+#:
+#: When tracing bidirectionally -- the default -- the two endpoints are ordered
+#: canonically rather than as (source, destination), so that both halves of one
+#: conversation produce the same key; see
+#: :meth:`TCP.make_bufid <pcapkit.foundation.traceflow.tcp.TCP.make_bufid>`. The
+#: shape is unchanged either way.
 BufferID: 'TypeAlias' = Tuple[_AT, int, _AT, int]
 
 
@@ -44,6 +58,12 @@ class Packet(Info, Generic[_AT]):
     syn: 'bool'
     #: TCP finish (FIN) flag.
     fin: 'bool'
+    #: TCP reset (RST) flag. A connection can end abruptly as well as politely
+    #: (:rfc:`9293#section-3.5.2`), and the tracer cannot notice that unless the
+    #: flag reaches it -- which it did not, so a reset connection used to look
+    #: merely idle and a later connection reusing the same endpoints merged into
+    #: it.
+    rst: 'bool'
     #: Source IP.
     src: '_AT'
     #: Destination IP.
@@ -54,14 +74,27 @@ class Packet(Info, Generic[_AT]):
     dstport: 'int'
     #: Frame timestamp.
     timestamp: 'float'
+    #: TCP sequence number. Carried so that a tracer asked to analyse the
+    #: application layer can hand the segment to
+    #: :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than reassemble the
+    #: stream itself -- a tracer that simply concatenated payloads in capture order
+    #: would be silently wrong on the first retransmission or reordering.
+    seq: 'int'
+    #: TCP acknowledgement number, which is what the reassembler keys a payload
+    #: buffer on.
+    ack: 'int'
+    #: Raw :obj:`bytes` type TCP header.
+    header: 'bytes'
+    #: Raw :obj:`bytearray` type TCP payload, i.e. the application-layer octets
+    #: this segment carries.
+    payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: '_AT', dst: '_AT',
-                     srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', rst: 'bool', src: '_AT', dst: '_AT', srcport: 'int', dstport: 'int', timestamp: 'float', seq: 'int', ack: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
-class Buffer(Info):
+class Buffer(Info, Generic[_AT]):
     """Data structure for **TCP flow tracing**.
 
     See Also:
@@ -72,18 +105,52 @@ class Buffer(Info):
 
     #: Output dumper object.
     fpout: 'Dumper'
-    #: List of frame index.
+    #: List of frame index, **both directions**, in capture order. This is the
+    #: authoritative ordering; :attr:`forward` and :attr:`reverse` are
+    #: subsequences of it.
     index: 'list[int]'
     #: Flow label generated from ``BUFID``.
     label: 'str'
+    #: ``(address, port)`` of the endpoint whose packet opened this flow. It
+    #: defines what "forward" means for the flow, and it is the endpoint the
+    #: :attr:`label` names first.
+    origin: 'tuple[_AT, int]'
+    #: List of frame index sent **by** :attr:`origin`, in capture order.
+    forward: 'list[int]'
+    #: List of frame index sent **to** :attr:`origin`, in capture order. Always
+    #: empty when tracing unidirectionally, since the reverse half of the
+    #: conversation is then a flow of its own.
+    reverse: 'list[int]'
+    #: Endpoints observed to have sent a TCP **FIN**. A bidirectional flow is a
+    #: whole connection, and a connection closes only once *both* halves have
+    #: finished (:rfc:`9293#section-3.6`), so the set has to be tracked rather
+    #: than a single flag: submitting on the first FIN would cut the peer's FIN
+    #: and the final acknowledgement out of the flow.
+    fin: 'set[tuple[_AT, int]]'
+    #: Whether a TCP **RST** has been seen on this flow. A reset ends the
+    #: connection at once (:rfc:`9293#section-3.5.2`), where a polite close needs
+    #: a FIN from each side, so it is tracked as a flag rather than per endpoint.
+    reset: 'bool'
+    #: The flow's own :class:`~pcapkit.foundation.reassembly.tcp.TCP` reassembler,
+    #: fed each segment as it is traced, or :data:`None` when the tracer was not
+    #: asked to analyse the application layer. One per flow rather than one per
+    #: tracer, so that
+    #: :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can
+    #: flush *this* conversation without disturbing any other.
+    reassembly: 'Optional[TCP_Reassembly]'
 
     if TYPE_CHECKING:
-        def __init__(self, fpout: 'Dumper',
-                     index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        # NOTE: one line, however long. ``# pylint: disable`` is *line*-scoped and
+        # ``unused-argument`` is reported against the ``def``, so wrapping the
+        # signature leaves every parameter on a continuation line outside the
+        # disable's reach -- which is why the shorter form this replaces leaked
+        # three ``unused-argument`` messages of its own. Every other data model in
+        # :mod:`pcapkit` writes these stubs on one line for the same reason.
+        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str', origin: 'tuple[_AT, int]', forward: 'list[int]', reverse: 'list[int]', fin: 'set[tuple[_AT, int]]', reset: 'bool', reassembly: 'Optional[TCP_Reassembly]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 @info_final
-class Index(Info):
+class Index(DeferredPacket, Info):
     """Data structure for **TCP flow tracing**.
 
     See Also:
@@ -93,13 +160,36 @@ class Index(Info):
 
     """
 
+    #: Listing ``packet`` here is what makes :attr:`packet` lazy -- see
+    #: :class:`~pcapkit.foundation.traceflow.data.data.DeferredPacket`.
+    __additional__ = ['packet']
+
     #: Output filename if exists.
     fpout: 'Optional[str]'
-    #: Tuple of frame index.
+    #: Tuple of frame index, **both directions**, in capture order.
     index: 'tuple[int, ...]'
     #: Flow label generated from ``BUFID``.
     label: 'str'
+    #: Frame index of the packets travelling in the direction that opened the
+    #: flow, in capture order. That endpoint is the one the :attr:`label` names
+    #: first, so ``frame_number in index.forward`` answers "which way did this
+    #: packet go" without having to take the label apart.
+    forward: 'tuple[int, ...]'
+    #: Frame index of the packets travelling the other way, in capture order.
+    #: Empty when tracing unidirectionally, in which case
+    #: :attr:`forward` ``==`` :attr:`index`.
+    reverse: 'tuple[int, ...]'
+    #: The conversation's **application layer**: one reassembled datagram per
+    #: direction, or :data:`None` when the tracer was not asked for it
+    #: (``analyse=False``, the default).
+    #:
+    #: Reassembled on the first read, not when the flow is finalised, and each
+    #: datagram's own
+    #: :attr:`~pcapkit.foundation.reassembly.data.tcp.Datagram.packet` is parsed
+    #: later still -- two layers of the same postponement, so a caller that only
+    #: wanted frame numbers pays for neither.
+    packet: 'Optional[tuple[TCP_Datagram, ...]]'
 
     if TYPE_CHECKING:
-        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]',
-                     label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        # NOTE: on one line, for the reason given on :class:`Buffer` above.
+        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str', forward: 'tuple[int, ...]', reverse: 'tuple[int, ...]', packet: 'Optional[tuple[TCP_Datagram, ...] | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

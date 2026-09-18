@@ -329,6 +329,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         tl=ipv4.len,                                # total length, header includes
         header=header,                              # raw bytes type header
         payload=bytearray(ipv4.payload),            # raw bytearray type payload
+        timestamp=packet2timestamp(packet),         # capture timestamp
     )
 
 
@@ -403,6 +404,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         first=tcp.seqnum,                     # this sequence number
         last=tcp.seqnum + len(payload),       # next (wanted) sequence number
         len=len(payload),                     # payload length, header excludes
+        timestamp=packet2timestamp(packet),   # capture timestamp
     )
 
 
@@ -440,15 +442,21 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
     from pcapfile.protocols.transport.tcp import TCP  # isort:skip
 
     tcp = TCP(segment)
+    hdr_len = max(tcp.data_offset, TCP_MIN_HEADER_LEN)
     return TF_TCP_Packet(  # type: ignore[type-var]
         protocol=data_link,                                 # data link type from savefile header
         index=count,                                        # frame number
         frame=packet2dict(packet, data_link=data_link),     # extracted packet
         syn=bool(tcp.syn),                                  # TCP synchronise (SYN) flag
         fin=bool(tcp.fin),                                  # TCP finish (FIN) flag
+        rst=bool(tcp.rst),                                  # TCP reset (RST) flag
         src=ipaddress.IPv4Address(ipv4.src),                # source IP
         dst=ipaddress.IPv4Address(ipv4.dst),                # destination IP
         srcport=tcp.src_port,                               # TCP source port
         dstport=tcp.dst_port,                               # TCP destination port
         timestamp=packet2timestamp(packet),                 # timestamp
+        seq=tcp.seqnum,                                     # TCP sequence number
+        ack=tcp.acknum,                                     # TCP acknowledgement number
+        header=segment[:hdr_len],                           # raw bytes type header
+        payload=bytearray(segment[hdr_len:]),               # raw bytearray type payload
     )

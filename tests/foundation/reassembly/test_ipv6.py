@@ -192,7 +192,7 @@ class IPv6ReassemblyHeaderTests(unittest.TestCase):
         src = ip_address('2001:db8::1')
         dst = ip_address('2001:db8::2')
         return Packet((src, dst, 4321, TransType.UDP), num, fo, len(header), mf,
-                      len(header) + len(payload), header, bytearray(payload))
+                      len(header) + len(payload), header, bytearray(payload), 1000.0)
 
     def test_the_reassembled_datagram_does_not_advertise_a_fragment_header(self) -> None:
         from pcapkit.foundation.reassembly.ipv6 import IPv6

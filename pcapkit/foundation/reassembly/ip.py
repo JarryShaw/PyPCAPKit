@@ -16,6 +16,7 @@ however, this implement still used the elder one.
 """
 from typing import TYPE_CHECKING, Generic
 
+from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
@@ -38,6 +39,8 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects the protocol's :attr:`__timeout__` default
 
     Important:
         This class is not intended to be instantiated directly,
@@ -82,11 +85,18 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         self._flag_n = False
         self.__cached__.clear()
 
-        BUFID = info.bufid  # Buffer Identifier
-        FO = info.fo        # Fragment Offset
-        IHL = info.ihl      # Internet Header Length
-        MF = info.mf        # More Fragments flag
-        TL = info.tl        # Total Length
+        BUFID = info.bufid   # Buffer Identifier
+        FO = info.fo         # Fragment Offset
+        IHL = info.ihl       # Internet Header Length
+        MF = info.mf         # More Fragments flag
+        TL = info.tl         # Total Length
+        TS = info.timestamp  # Capture timestamp, i.e. the only clock we have
+
+        # This fragment's arrival is the evidence that capture time has reached
+        # ``TS``, so it is the moment to abandon whatever the deadline has now
+        # passed for -- including, deliberately, buffers this fragment does not
+        # belong to.
+        self._dtgram.extend(self.expire(TS))
 
         # when non-fragmented (possibly discarded) packet received
         if not FO and not MF:
@@ -107,6 +117,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                 index=[],                           # index record
                 header=header,                      # header buffer
                 datagram=bytearray(65535),          # data buffer
+                timestamp=TS,                       # first-arriving fragment's clock reading
             )
         else:
             # put header into header buffer
@@ -141,13 +152,20 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
             )
 
     def submit(self, buf: 'Buffer[_AT]', *, bufid: 'tuple[_AT, _AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
-               checked: 'bool' = False) -> 'list[Datagram[_AT]]':
+               checked: 'bool' = False, timeout: 'bool' = False) -> 'list[Datagram[_AT]]':
         """Submit reassembled payload.
 
         Arguments:
             buf: buffer dict of reassembled packets
             bufid: buffer identifier
             checked: buffer consistency checked flag
+            timeout: whether this buffer is being submitted because
+                :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`
+                abandoned it under the reassembly timeout, which is what
+                separates
+                :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+                from
+                :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
 
         Returns:
             Reassembled packets.
@@ -163,6 +181,12 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
         stop = (TDL + 7) // 8
         flag = checked or (TDL > 0 and all(RCVBT[start:stop]))
         ret = []  # type: list[Datagram[_AT]]
+
+        # How completely this datagram came out, and why it stopped. Derived once,
+        # so the two branches below cannot disagree about it.
+        completion = Completion.COMPLETE if flag else (
+            Completion.TIMEOUT if timeout else Completion.PARTIAL
+        )
 
         # if datagram is not implemented
         if not flag and self._flag_s:
@@ -181,7 +205,7 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
             # strip empty packets
             if data or header:
                 packet = Datagram(
-                    completed=False,
+                    completed=completion,
                     id=DatagramID(
                         src=bufid[0],
                         dst=bufid[1],
@@ -194,11 +218,48 @@ class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[
                     packet=None,
                 )
                 ret.append(packet)
-        # if datagram is reassembled in whole
+        # if datagram is reassembled in whole -- or if it is not, and ``strict``
+        # asked for one contiguous payload rather than the received runs
         else:
-            payload = bytes(datagram[:TDL])
+            # ``TDL`` is the datagram's total length, and it is only known once the
+            # fragment with **MF** clear has arrived -- until then it is still its
+            # initial ``-1``. Which case this is decides how much of the buffer
+            # there is to report.
+            if TDL > 0:
+                # The length is known. Report it, holes and all: the gaps read as
+                # zeros, exactly as they do in the TCP reassembler's loose mode.
+                # This is unchanged behaviour, and the reason ``strict=False``
+                # exists -- a caller who wants the gaps *marked* rather than
+                # zero-filled uses ``strict=True`` and gets the runs.
+                stop = TDL
+            else:
+                # The length is not known, and this is the case that used to slice
+                # ``datagram[:-1]`` -- handing back 65534 octets of the
+                # preallocated buffer, almost all of them zeros the sender never
+                # sent, and calling the result complete.
+                #
+                # Reporting nothing at all would be the other extreme, and it
+                # discards data that really did arrive. So report the **contiguous
+                # prefix**: every octet from offset zero up to the first hole. That
+                # is the longest run whose extent is known without knowing the
+                # total length, it is all genuinely received, and it is the part a
+                # caller asking for one contiguous payload can actually use --
+                # a parser reading a payload from its start cannot use a run that
+                # begins after an unmeasured gap anyway. Anything past the first
+                # hole is still reported by ``strict=True``, which lists the runs
+                # precisely because their offsets cannot be conveyed in a blob.
+                #
+                # ``RCVBT`` records receipt in 8-octet units, so the prefix ends at
+                # the first clear bit.
+                received = 0
+                for bit in RCVBT:
+                    if not bit:
+                        break
+                    received += 1
+                stop = received * 8
+            payload = bytes(datagram[:stop])
             packet = Datagram(
-                completed=True,
+                completed=completion,
                 id=DatagramID(
                     src=bufid[0],
                     dst=bufid[1],

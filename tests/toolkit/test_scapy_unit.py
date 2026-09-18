@@ -198,8 +198,11 @@ class ScapyToolkitTests(unittest.TestCase):
         self.assertEqual(v6_tcp.bufid[0], ip_address('2001:db8::1'))
         self.assertEqual(v6_tcp.bufid[3], 443)
 
-        with mock.patch('pcapkit.toolkit.scapy.time.time', return_value=77.25):
-            flow = toolkit.tcp_traceflow(packet, count=8)
+        # the flow label carries the *capture's* clock, read off ``Packet.time``,
+        # rather than the moment of parsing -- so the deterministic value is
+        # pinned on the packet itself rather than by patching ``time.time``
+        packet.time = 77.25
+        flow = toolkit.tcp_traceflow(packet, count=8)
         self.assertIsNotNone(flow)
         assert flow is not None
         self.assertEqual(flow.protocol, LinkType.ETHERNET)

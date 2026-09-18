@@ -29,7 +29,7 @@ class TCPReassemblyTests(unittest.TestCase):
     def _packet(self, *, num: int, dsn: int, ack: int = 500, payload: bytes = b'',
                 syn: bool = False, fin: bool = False, rst: bool = False,
                 first: int | None = None, last: int | None = None,
-                header: bytes = b'tcp-header'):
+                header: bytes = b'tcp-header', timestamp: float = 1000.0):
         """Build a reassembly packet the way the engine toolkits build one.
 
         ``first`` defaults to ``dsn`` and ``last`` to ``dsn + len(payload) - 1``
@@ -45,7 +45,7 @@ class TCPReassemblyTests(unittest.TestCase):
         if last is None:
             last = first + len(payload) - 1
         return Packet(self._bufid(), dsn, ack, num, syn, fin, rst, len(payload),
-                      first, last, header, bytearray(payload))
+                      first, last, header, bytearray(payload), timestamp)
 
     def test_complete_stream_submits_on_fin_and_analyzes_payload(self) -> None:
         from pcapkit.foundation.reassembly.tcp import TCP
@@ -120,6 +120,7 @@ class TCPReassemblyTests(unittest.TestCase):
             {
                 500: Fragment([1], 10, 10, bytearray(b'0123456789')),
             },
+            1000.0,
         )
 
         reasm(self._packet(num=2, dsn=25, payload=b'after-gap', first=10, last=18))
@@ -144,12 +145,14 @@ class TCPReassemblyTests(unittest.TestCase):
             [HoleDescriptor(50, sys.maxsize)],
             b'',
             {500: Fragment([1], 10, 5, bytearray(b'world'))},
+            1000.0,
         )
         before_gap(self._packet(num=2, dsn=0, payload=b'hello', first=40, last=44))
         self.assertEqual(before_gap._buffer[bufid].ack[500].raw,
                          bytearray(b'hello\x00\x00\x00\x00\x00world'))
 
     def test_submit_incomplete_strict_complete_strict_false_and_empty_buffers(self) -> None:
+        from pcapkit.foundation.reassembly.data.data import Completion
         from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDescriptor
         from pcapkit.foundation.reassembly.tcp import TCP
 
@@ -171,11 +174,15 @@ class TCPReassemblyTests(unittest.TestCase):
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
                 {500: Fragment([1, 2], 0, 10, bytearray(b'abcdefghij'))},
+                1000.0,
             ),
             bufid=bufid,
         )
         datagram, = incomplete
         self.assertFalse(datagram.completed)
+        # PARTIAL rather than TIMEOUT: this buffer was handed to ``submit`` directly,
+        # not abandoned by ``expire``
+        self.assertIs(datagram.completed, Completion.PARTIAL)
         self.assertEqual(datagram.payload, (bytearray(b'ab'), bytearray(b'efg'), bytearray(b'j')))
         self.assertIsNone(datagram.packet)
 
@@ -187,26 +194,37 @@ class TCPReassemblyTests(unittest.TestCase):
                     500: Fragment([], 0, 0, bytearray()),
                     501: Fragment([9], 0, 9, bytearray(b'abcdefghi')),
                 },
+                1000.0,
             ),
             bufid=bufid,
         )
         self.assertEqual(len(mixed), 1)
         self.assertEqual(mixed[0].payload, (bytearray(b'bcd'), bytearray(b'g'), b'i'))
 
+        # ``strict=False`` reports the payload buffer as one contiguous blob with
+        # its holes zero-filled -- which is what
+        # :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream
+        # from -- rather than the runs that arrived. What it must *not* do is call
+        # that blob complete: the holes are still holes, so ``completed`` reads
+        # PARTIAL even though the payload is whole-looking.
         loose = TestTCP(strict=False)
         completed = loose.submit(
             Buffer(
                 [HoleDescriptor(2, 3), HoleDescriptor(7, 8), HoleDescriptor(99, 100)],
                 b'tcp-header',
                 {500: Fragment([3], 0, 3, bytearray(b'abc'))},
+                1000.0,
             ),
             bufid=bufid,
         )
-        self.assertTrue(completed[0].completed)
+        self.assertFalse(completed[0].completed)
+        self.assertIs(completed[0].completed, Completion.PARTIAL)
+        self.assertEqual(completed[0].payload, bytearray(b'abc'))
         self.assertEqual(completed[0].packet, b'abc')
         self.assertEqual(Analyzer.calls[-1], ((12345, 443), b'abc'))
 
-        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray())}),
+        self.assertEqual(loose.submit(Buffer([], b'', {500: Fragment([], 0, 0, bytearray())},
+                                             1000.0),
                                       bufid=bufid), [])
 
 
@@ -267,12 +285,14 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         return TestTCP(**kwargs)
 
     def _segment(self, *, num: int, seq: int, payload: bytes = b'', ack: int = 1000,
-                 syn: bool = False, fin: bool = False, rst: bool = False):
+                 syn: bool = False, fin: bool = False, rst: bool = False,
+                 timestamp: float = 1000.0):
         """One segment, described the way every :mod:`pcapkit.toolkit` describes it."""
         from pcapkit.foundation.reassembly.data.tcp import Packet
 
         return Packet(self._bufid(), seq, ack, num, syn, fin, rst, len(payload),
-                      seq, seq + len(payload) - 1, b'tcp-header', bytearray(payload))
+                      seq, seq + len(payload) - 1, b'tcp-header', bytearray(payload),
+                      timestamp)
 
     def _stream(self, *, segments, isn: int = ISN, syn: bool = True,
                 syn_ack: int = 0, teardown: str | None = 'fin'):
@@ -350,8 +370,10 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         long; anywhere else the datagram disappeared entirely.
 
         """
+        from pcapkit.foundation.reassembly.data.data import Completion
+
         segments = [(0, b'A' * 10), (20, b'C' * 10), (40, b'E' * 10)]
-        expected = (False, (b'A' * 10, b'C' * 10, b'E' * 10))
+        expected = (Completion.PARTIAL, (b'A' * 10, b'C' * 10, b'E' * 10))
 
         for isn in (0, 1, 0x1000, ISN, 0xFFFF0000):
             with self.subTest(isn=isn):
