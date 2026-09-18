@@ -234,6 +234,13 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
    :no-members:
    :show-inheritance:
 
+:exc:`EOFError` Category
+------------------------
+
+.. autoexception:: pcapkit.utilities.exceptions.StreamEOFError
+   :no-members:
+   :show-inheritance:
+
 :exc:`KeyError` Category
 ------------------------
 

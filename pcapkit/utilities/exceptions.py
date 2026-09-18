@@ -47,6 +47,7 @@ __all__ = [
     'FieldValueError', 'SchemaError', 'SeekError', 'TruncateError', # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
+    'StreamEOFError',                                               # EOFError
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
@@ -409,6 +410,28 @@ class StructError(BaseError, struct.error):
     def __init__(self, *args: 'Any', eof: 'bool' = False, **kwargs: 'Any') -> 'None':
         self.eof = eof
         super().__init__(*args, **kwargs)
+
+
+##############################################################################
+# EOFError session.
+##############################################################################
+
+
+class StreamEOFError(BaseError, EOFError):
+    """Underlying stream exhausted; no data left to read.
+
+    Raised by :func:`~pcapkit.utilities.decorators.prepare` when the *length*
+    of a schema's read was derived by measuring what is actually left in the
+    stream -- rather than declared by the caller -- and that measurement came
+    back zero. This is the frame reader's "no more packets" signal, so it
+    subclasses :exc:`EOFError` rather than replacing it: existing ``except
+    (EOFError, StopIteration)`` handlers keep working unchanged, and a caller
+    that wants to be more specific can catch this instead.
+
+    A *declared* zero length -- a nested schema legitimately sized to have
+    nothing to read -- is a different situation and does not raise this.
+
+    """
 
 
 ##############################################################################

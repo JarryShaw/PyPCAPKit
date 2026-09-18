@@ -810,10 +810,6 @@ def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Option.Authorization_Data: {'data': b'\xa5' * 8},
         Enum_Option.Mobility_Header_Link_Layer_Address_option: {
             'address': b'\x00\x11\x22\x33\x44\x55'},
-        # The default identifier is the *string* ``'::'``, whose ``len()`` is 2
-        # rather than the 16 octets the field packs -- so the declared length
-        # is 3 going out and 17 coming back. An address object avoids it.
-        Enum_Option.MN_ID_OPTION_TYPE: {'identifier': ipaddress.IPv6Address('::1')},
         # ``(len + 6) % 4`` has to be 0.
         Enum_Option.AUTH_OPTION_TYPE: {'data': b'\xa5\xa5'},
         # Without this ``_make_opt_mesg_id`` reads the clock, and the capture
