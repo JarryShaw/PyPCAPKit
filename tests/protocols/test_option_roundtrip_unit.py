@@ -272,30 +272,25 @@ EXPECTED_FAILURES = {
 
     # -- IPv6-Route -----------------------------------------------------------
 
-    # ``IPv6_Route.make`` writes a raw octet count into ``length``, which is an
-    # 8-octet-unit field, on the dict and Data paths -- while the bytes and
-    # Schema paths divide by eight. The read-side guards then reject it, and
-    # those guards compare the unit field against octet counts too, so the
-    # RFC-correct value would fail as well.
-    # Both fragments are tuples rather than the whole message, because the
-    # message itself is defective: these two guards interpolate a bare ``type``
-    # into an f-string in a method that has no ``type`` parameter, so the name
-    # resolves to the builtin and the detail reads ``[TypeNo <class 'type'>]``
-    # (issue #442). Matching the literal rendering would pin that bug into this
-    # table and turn it red when #442 is fixed, which says nothing about whether
-    # the round trip closes. The stable parts either side of it do pin the site:
-    # ``[TypeNo`` occurs at exactly three lines of ``ipv6_route.py`` (:462, :506,
-    # :546), against 205 occurrences of ``'invalid format'`` tree-wide.
-    'ipv6-route-type/Source_Route': Gap(
-        'CONSTRUCT', ('IPv6-Route', '[TypeNo', 'invalid format'),
-        'pcapkit/protocols/internet/ipv6_route.py:276 -- length in octets, not '
-        'in 8-octet units; guard at :461'),
-    'ipv6-route-type/Type_2_Routing_Header': Gap(
-        'CONSTRUCT', ('IPv6-Route', '[TypeNo', 'invalid format'),
-        'pcapkit/protocols/internet/ipv6_route.py:276; guard at :505'),
+    # ``Source_Route`` and ``Type_2_Routing_Header`` used to be recorded here:
+    # ``IPv6_Route.make`` wrote a raw octet count into ``length`` (``Hdr Ext
+    # Len``) on the dict and Data paths, a different-and-also-wrong expression
+    # on the bytes and Schema paths, and separately, ``ipv6_route_data_selector``
+    # (pcapkit/protocols/schema/internet/ipv6_route.py) sized the nested
+    # routing-data schema 4 octets short of the wire, missing the "Reserved"
+    # field every routing type's data starts with -- so a hand-built,
+    # spec-correct header failed to parse independently of anything ``make``
+    # produced. #487 fixed both: one shared helper
+    # (``IPv6_Route._make_hdr_ext_len``) computes ``Hdr Ext Len`` in the
+    # 8-octet units :rfc:`8200#section-4.4` specifies, on every ``make``
+    # branch, and ``ipv6_route_data_selector`` accounts for the 4-octet
+    # offset. Both cases round-trip now; entries deleted rather than left
+    # behind, per the note at the top of this table.
+
     # RPL fails earlier still: ``post_process`` assumes ``addresses`` is bytes,
     # which is true after unpacking and false while packing, where it is still
-    # the list the constructor was handed.
+    # the list the constructor was handed. Unrelated to #487 (see #476/#480);
+    # still open.
     'ipv6-route-type/RPL_Source_Route_Header': Gap(
         'CONSTRUCT', 'does not appear to be an IPv4 or IPv6 address',
         'pcapkit/protocols/schema/internet/ipv6_route.py:156 -- post_process '
