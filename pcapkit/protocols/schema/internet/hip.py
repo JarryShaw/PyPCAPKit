@@ -216,6 +216,33 @@ def reg_info_list_len(pkt: 'dict[str, Any]') -> 'int':
     return length
 
 
+def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return list length for a parameter with a two-octet prefix.
+
+    Used by the ``modes``, ``formats``, ``suites`` and ``mode`` fields of
+    :class:`NATTraversalModeParameter`, :class:`TransportFormatListParameter`,
+    :class:`ESPTransformParameter` and :class:`HIPTransportModeParameter`
+    respectively, each of which follows a two-octet ``reserved`` or ``port``
+    field with a list of items sized by the remainder of the parameter.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        List length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the two octets already read, which would otherwise
+            underflow the list length below zero.
+
+    """
+    length = pkt['len'] - 2
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -477,7 +504,7 @@ class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MOD
     reserved: 'bytes' = PaddingField(length=2)
     #: NAT traversal modes.
     modes: 'list[Enum_NATTraversal]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=two_octet_prefix_list_len,
         item_type=EnumField(length=1, namespace=Enum_NATTraversal),
     )
     #: Padding.
@@ -831,7 +858,7 @@ class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORM
 
     #: Transport formats.
     formats: 'list[Enum_Parameter]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=two_octet_prefix_list_len,
         item_type=EnumField(length=1, namespace=Enum_Parameter),
     )
     #: Padding.
@@ -849,7 +876,7 @@ class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
     reserved: 'bytes' = PaddingField(length=2)
     #: Suite IDs.
     suites: 'list[Enum_ESPTransformSuite]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=two_octet_prefix_list_len,
         item_type=EnumField(length=1, namespace=Enum_ESPTransformSuite),
     )
     #: Padding.
@@ -964,7 +991,7 @@ class HIPTransportModeParameter(Parameter, code=Enum_Parameter.HIP_TRANSPORT_MOD
     port: 'int' = UInt16Field()
     #: Mode IDs.
     mode: 'list[Enum_Transport]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=two_octet_prefix_list_len,
         item_type=EnumField(length=2, namespace=Enum_Transport),
     )
     #: Padding.

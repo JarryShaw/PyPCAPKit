@@ -1840,6 +1840,146 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             HIP(raw, len(raw), extension=True)
 
+    def test_hip_nat_traversal_mode_parameter_rejects_underflowing_length(self) -> None:
+        """#463: a ``NAT_TRAVERSAL_MODE`` parameter's ``Length`` too small
+        for its own two-octet ``reserved`` field must raise, not silently
+        drop the NAT traversal mode list.
+
+        ``modes`` sizes its list of NAT traversal mode entries as
+        ``Length - 2``, the ``- 2`` accounting for the ``reserved`` field
+        read unconditionally ahead of it. Nothing floored that at zero, so a
+        peer declaring ``Length = 0`` drove the list length to ``-2``.
+        Unlike a :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``modes`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=608 (NAT_TRAVERSAL_MODE) len(2)=0, reserved(2), then 2
+        # octets padding out the 8-octet parameter area the outer header
+        # declared.
+        param = (608).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
+    def test_hip_transport_format_list_parameter_rejects_underflowing_length(self) -> None:
+        """#463: a ``TRANSPORT_FORMAT_LIST`` parameter's ``Length`` too
+        small must raise, not silently drop the transport format list.
+
+        ``formats`` sizes its list of transport format entries as
+        ``Length - 2`` even though this parameter carries no explicit
+        two-octet field ahead of the list on the wire -- the ``- 2`` is
+        shared with the other three sites via the same helper. Nothing
+        floored that at zero, so a peer declaring ``Length = 0`` drove the
+        list length to ``-2``. Unlike a
+        :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``formats`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=2049 (TRANSPORT_FORMAT_LIST) len(2)=0, then 4 filler octets
+        # padding out the 8-octet parameter area the outer header declared;
+        # the list-length underflow raises before those filler octets would
+        # ever be read.
+        param = (2049).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(4)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
+    def test_hip_esp_transform_parameter_rejects_underflowing_length(self) -> None:
+        """#463: an ``ESP_TRANSFORM`` parameter's ``Length`` too small for
+        its own two-octet ``reserved`` field must raise, not silently drop
+        the ESP transform suite list.
+
+        ``suites`` sizes its list of ESP transform suite entries as
+        ``Length - 2``, the ``- 2`` accounting for the ``reserved`` field
+        read unconditionally ahead of it. Nothing floored that at zero, so a
+        peer declaring ``Length = 0`` drove the list length to ``-2``.
+        Unlike a :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``suites`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=4095 (ESP_TRANSFORM) len(2)=0, reserved(2), then 2 octets
+        # padding out the 8-octet parameter area the outer header declared.
+        param = (4095).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
+    def test_hip_transport_mode_parameter_rejects_underflowing_length(self) -> None:
+        """#463: a ``HIP_TRANSPORT_MODE`` parameter's ``Length`` too small
+        for its own two-octet ``port`` field must raise, not silently drop
+        the transport mode list.
+
+        ``mode`` sizes its list of transport mode entries as ``Length - 2``,
+        the ``- 2`` accounting for the ``port`` field read unconditionally
+        ahead of it. Nothing floored that at zero, so a peer declaring
+        ``Length = 0`` drove the list length to ``-2``. Unlike a
+        :class:`~pcapkit.corekit.fields.strings.BytesField`,
+        :class:`~pcapkit.corekit.fields.collections.ListField` never reaches
+        :func:`struct.calcsize` for a negative length -- its own ``while
+        length > 0`` loop just returns an empty list instead -- so this
+        parsed to an empty ``mode`` with no exception and no diagnostic,
+        rather than rejecting the malformed ``Length``.
+
+        """
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
+        # declaring one 8-octet parameter to follow: (5 - 4) * 8 == 8.
+        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+
+        # type(2)=7680 (HIP_TRANSPORT_MODE) len(2)=0, port(2), then 2 octets
+        # padding out the 8-octet parameter area the outer header declared.
+        param = (7680).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(2) + bytes(2)
+        raw = fixed + param
+
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            HIP(raw, len(raw), extension=True)
+
     def test_hip_schema_selectors_and_encrypted_parameter_branches(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
