@@ -847,6 +847,60 @@ ESP has already laid the groundwork, but the checksum half genuinely wants the
 parent-access question answered first, and that is worth doing deliberately
 rather than as a side effect of a checksum patch.
 
+Release Plan — 1.5.0 in Two Steps
+---------------------------------
+
+The version in :mod:`pcapkit` is already ``1.5.0a1``, and the release is
+sequenced against the waves above in two deliberate steps:
+
+#. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.** Wave 1's
+   feature work has landed; what is left is the defect tail in `the issue tracker
+   <https://github.com/JarryShaw/PyPCAPKit/issues>`__. Closing it earns a beta,
+   not a final release, because the consistency sweep below has not run yet and
+   is expected to find things.
+#. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
+   sweep is described under `Delivery Sequence`_ below — prose against code,
+   missing tests, unaligned changes, and packet formats against the
+   specifications. Its whole point is to find what one-at-a-time defect work
+   does not, so shipping a final release before it has run would be shipping
+   ahead of the evidence.
+
+**The version string is the release button, so it is worth knowing exactly what
+each step does before editing it.** ``.github/workflows/create-release.yml`` is
+version-driven rather than tag-driven: its ``version_check`` job reads
+``pcapkit.__version__`` directly, derives ``PCAPKIT_PRERELEASE`` from
+``packaging.version.Version(...).is_prerelease``, and picks the Anaconda label
+from the same test. So:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 20 40
+
+   * - version
+     - prerelease
+     - conda label
+     - GitHub release
+   * - ``1.5.0a1`` (current)
+     - yes
+     - ``dev``
+     - marked prerelease
+   * - ``1.5.0b1`` (step 1)
+     - yes
+     - ``dev``
+     - marked prerelease
+   * - ``1.5.0`` (step 2)
+     - **no**
+     - **``main``**
+     - full release
+
+Both steps publish to PyPI — the ``pypi`` job carries no prerelease gate — but a
+beta is only installable with ``pip install --pre``, so it reaches people
+who ask for it and nobody else. The consequential change is at step 2, where the
+Anaconda label flips from ``dev`` to ``main``. Neither step needs any change to
+the workflow itself; editing the version string is the whole of it, which is
+precisely why it should be its own commit rather than a line folded into
+something else.
+
 Delivery Sequence
 -----------------
 
