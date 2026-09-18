@@ -7663,8 +7663,11 @@ class MH(Internet[Data_MH, Schema_MH],
 
         Raises:
             ProtocolError: If ``identifier`` is a negative :obj:`int` (no
-                subtype has a wire form for one), or an :obj:`int` of any value
-                with the ``NAI`` subtype.
+                subtype has a wire form for one), an :obj:`int` of any value
+                with the ``NAI`` subtype, or an :obj:`int` of ``2**128`` or
+                above with the ``IPv6_Address`` subtype (whose wire form is a
+                fixed 16 octets, unlike the other subtypes, which have no
+                ceiling and simply pack into more).
 
         """
         if option is not None:
