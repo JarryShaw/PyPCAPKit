@@ -112,7 +112,7 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(datagram.conflict, ())
 
         hole = HoleDescriptor(5, 10)
-        fragment = Fragment([3], 100, 5, bytearray(b'hello'), bytearray(b'\x01' * 5), [])
+        fragment = Fragment([3], 100, 5, bytearray(b'hello'), [], [])
         buffer = Buffer([hole], b'tcp-header', {200: fragment}, 1000.0)
         self.assertIsInstance(hole, TCP_HoleDescriptor)
         self.assertIsInstance(fragment, TCP_Fragment)
