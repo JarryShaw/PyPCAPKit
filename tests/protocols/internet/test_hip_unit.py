@@ -2090,6 +2090,158 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             HIP(raw, len(raw), extension=True)
 
+    def test_hip_nat_traversal_mode_parameter_round_trips_through_the_maker(self) -> None:
+        """#472: the public maker and the schema's own read path must agree
+        on the entry width, or a hand-built test cannot catch either one
+        being wrong -- the same class of defect #463/#466 fixed for
+        ``TRANSPORT_FORMAT_LIST``, at a site that fix did not cover.
+
+        ``_make_param_nat_traversal_mode`` computes ``len=2 + 2 *
+        len(mode_id)``, already assuming two-octet Mode ID entries --
+        :rfc:`5770` Section 5.4 places a 16-bit Mode ID field per entry,
+        after the two-octet ``Reserved`` field, exactly like
+        :class:`HIPTransportModeParameter`'s ``mode``. A hand-built
+        ``NATTraversalModeParameter(type=..., len=..., modes=...)`` picks a
+        self-consistent ``len`` by hand and so cannot expose a maker/schema
+        disagreement. Building through the maker instead pins the two to
+        agree: with the one-octet ``item_type`` this module carried before
+        this fix, one entry's maker-computed ``len=4`` reversed through
+        :func:`~pcapkit.protocols.schema.internet.hip.
+        two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
+        ``[1, 0]``, one spurious trailing entry -- while with the corrected
+        two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
+        matching what went in.
+
+        Measured directly against this defect before this fix, byte for
+        byte: ``modes=[1]`` packed to ``0260000400000100000000`` (11 octets,
+        declared ``len=4``) and read back as ``modes == [1, 0]``.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        cases = ([], [1], [1, 2], [1, 2, 3])
+        for modes in cases:
+            with self.subTest(modes=modes):
+                schema = proto._make_param_nat_traversal_mode(
+                    Parameter.NAT_TRAVERSAL_MODE, version=2, modes=list(modes))
+                self.assertEqual(schema.len, 2 + 2 * len(modes))
+
+                packed = bytes(schema)
+                reparsed = hip_schema.NATTraversalModeParameter.unpack(packed)
+                self.assertEqual([int(mode) for mode in reparsed.modes], list(modes))
+
+    def test_hip_esp_transform_parameter_round_trips_through_the_maker(self) -> None:
+        """#472: the public maker and the schema's own read path must agree
+        on the entry width, or a hand-built test cannot catch either one
+        being wrong -- the same class of defect #463/#466 fixed for
+        ``TRANSPORT_FORMAT_LIST``, at a second site that fix did not cover.
+
+        ``_make_param_esp_transform`` computes ``len=2 + 2 * len(suite_id)``,
+        already assuming two-octet Suite ID entries -- :rfc:`7402` Section
+        5.1.2 places a 16-bit Suite ID field per entry, after the two-octet
+        ``Reserved`` field, exactly like :class:`HIPTransportModeParameter`'s
+        ``mode``. A hand-built ``ESPTransformParameter(type=..., len=...,
+        suites=...)`` picks a self-consistent ``len`` by hand and so cannot
+        expose a maker/schema disagreement. Building through the maker
+        instead pins the two to agree: with the one-octet ``item_type`` this
+        module carried before this fix, one entry's maker-computed ``len=4``
+        reversed through :func:`~pcapkit.protocols.schema.internet.hip.
+        two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
+        ``[1, 0]``, one spurious trailing entry -- while with the corrected
+        two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
+        matching what went in.
+
+        Measured directly against this defect before this fix, byte for
+        byte: ``suites=[1]`` packed to ``0fff000400000100000000`` (11
+        octets, declared ``len=4``) and read back as ``suites == [1, 0]``.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        cases = ([], [1], [1, 2], [1, 2, 3])
+        for suites in cases:
+            with self.subTest(suites=suites):
+                schema = proto._make_param_esp_transform(
+                    Parameter.ESP_TRANSFORM, version=2, suites=list(suites))
+                self.assertEqual(schema.len, 2 + 2 * len(suites))
+
+                packed = bytes(schema)
+                reparsed = hip_schema.ESPTransformParameter.unpack(packed)
+                self.assertEqual([int(suite) for suite in reparsed.suites], list(suites))
+
+    def test_hip_nat_traversal_mode_and_esp_transform_survive_the_full_parser(self) -> None:
+        """#472: both parameters must also round-trip through the full
+        ``HIP()`` parser, not just through a direct schema ``pack``/
+        ``unpack`` -- the maker/schema agreement the two tests above check
+        is necessary but not sufficient, since the full parser is what a
+        real caller actually uses.
+
+        Before this fix, feeding a maker-built ``modes=[1]`` parameter
+        through the full parser did not reproduce the *same* phantom-entry
+        symptom the direct schema round trip shows -- the single 11-octet
+        parameter this module's ``len`` arithmetic produces is not a
+        multiple of eight, so :meth:`HIP.make` raises ``ProtocolError:
+        HIPv2: invalid format`` before a packet even exists to parse, and a
+        hand-built two-copy packet (mimicking the ``HIP_COPIES = 2`` trick
+        ``examples/generators/options.py`` uses for exactly this alignment
+        reason) instead corrupts the second copy and emits ``SchemaWarning:
+        packet length < 0``. Either way the full parser does not silently
+        return a wrong value; it fails outright, which is what this test
+        pins now that the fix makes it succeed instead.
+
+        Two copies land on an 8-octet boundary the same way
+        :class:`TransportFormatListParameter`'s equivalent test does, since
+        a single non-empty parameter here is always ``4 (mod 8)``: the
+        padding rule pads the *contents* to eight and ignores the
+        four-octet type-and-length header.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        proto = object.__new__(HIP)
+
+        nat_schema = proto._make_param_nat_traversal_mode(
+            Parameter.NAT_TRAVERSAL_MODE, version=2, modes=[1])
+        nat_one = bytes(nat_schema)
+        self.assertEqual(nat_one, bytes.fromhex('026000040000000100000000'))
+        self.assertEqual(len(nat_one) % 8, 4)
+
+        esp_schema = proto._make_param_esp_transform(
+            Parameter.ESP_TRANSFORM, version=2, suites=[1])
+        esp_one = bytes(esp_schema)
+        self.assertEqual(esp_one, bytes.fromhex('0fff00040000000100000000'))
+        self.assertEqual(len(esp_one) % 8, 4)
+
+        for one, code, attr in (
+            (nat_one, Parameter.NAT_TRAVERSAL_MODE, 'mode_id'),
+            (esp_one, Parameter.ESP_TRANSFORM, 'suite_id'),
+        ):
+            with self.subTest(code=code):
+                param_area = one * 2
+                self.assertEqual(len(param_area) % 8, 0)
+                hdr_len_units = 4 + len(param_area) // 8
+
+                # next(1) len(1) pkt(1) ver(1)=0x01 (the reserved bit that must
+                # be 1) checksum(2) control(2) shit(16) rhit(16) -- the fixed
+                # 40-octet header, declaring the parameter area to follow.
+                fixed = (bytes([0x3b, hdr_len_units, 0x00, 0x01]) + bytes(2) +
+                          bytes(2) + bytes(16) + bytes(16))
+                self.assertEqual(len(fixed), 40)
+                raw = fixed + param_area
+
+                parsed = HIP(raw, len(raw), extension=True)
+                copies = parsed.info.parameters.getlist(code)
+                self.assertEqual(len(copies), 2)
+                for copy in copies:
+                    self.assertEqual(getattr(copy, attr), (1,))
+
     def test_hip_schema_selectors_and_encrypted_parameter_branches(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
