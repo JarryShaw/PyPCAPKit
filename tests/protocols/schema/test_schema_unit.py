@@ -574,11 +574,13 @@ class SchemaUnitTests(unittest.TestCase):
         <pcapkit.corekit.fields.collections.ListField.unpack>` raises
         ``FieldValueError`` on input that is exactly the right length. This is
         the same mechanism that fails
-        :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter`'s
-        ``extensions`` :class:`~pcapkit.corekit.fields.collections.OptionField`
-        with ``FieldValueError: Field parameters has invalid length.``, minimised
-        to a :class:`~pcapkit.corekit.fields.collections.ListField` so it needs no
-        option registry.
+        :class:`~pcapkit.protocols.schema.internet.mh.CGAParametersOption`'s
+        ``parameters`` :class:`~pcapkit.corekit.fields.collections.ListField`
+        of :class:`~pcapkit.protocols.schema.internet.mh.CGAParameter` items --
+        each carrying its own load-bearing ``public_key_test``
+        ``ForwardMatchField`` -- with the identical
+        ``FieldValueError: Field parameters has invalid length.``, minimised so
+        it needs neither a CGA parameter nor its option registry.
 
         """
         from pcapkit.corekit.fields.collections import ListField
