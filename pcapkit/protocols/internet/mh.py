@@ -7670,7 +7670,8 @@ class MH(Internet[Data_MH, Schema_MH],
                 ceiling and simply pack into more), or ``identifier`` is of a
                 type its subtype's field cannot hold at all: anything but
                 :obj:`str` for ``NAI``, anything but :obj:`bytes`/
-                :obj:`bytearray` for the other six, or anything
+                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
+                is converted rather than rejected there, per #468 -- or anything
                 :class:`ipaddress.IPv6Address` itself does not accept for
                 ``IPv6_Address`` (c.f. #469).
 
@@ -7706,6 +7707,21 @@ class MH(Internet[Data_MH, Schema_MH],
             raise ProtocolError(
                 f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
                 f'identifier must be a non-negative int, not {identifier!r}')
+
+        if isinstance(identifier, bool):
+            # NOTE: checked before the subtype dispatch, because ``bool`` is an
+            # ``int`` subclass and so would otherwise be converted by *two*
+            # different paths below -- ``IPv6Address(1)``, that is ``::1``, for
+            # ``IPv6_Address``, and a one-octet identifier for the six
+            # ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake
+            # in every case rather than a value anyone means, so it is refused
+            # before either path can give it a plausible-looking wire form. A
+            # caller who genuinely wants the integer should pass ``int(flag)``
+            # (c.f. #469 review).
+            raise ProtocolError(
+                f'{self.alias}: [OptNo {type}] MN-ID identifier must not be a '
+                f'bool, not {identifier!r} -- pass int({identifier!r}) if the '
+                f'numeric value is what is wanted')
 
         # NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),
         # not by the Python type of ``identifier``, so the width has to be taken from

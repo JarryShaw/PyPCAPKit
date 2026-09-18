@@ -2594,6 +2594,40 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(schema.length, 17)
         self.assertEqual(len(schema.pack()), schema.length + 2)
 
+    def test_mh_mn_id_option_rejects_a_bool_identifier_for_every_subtype(self) -> None:
+        """A ``bool`` identifier is a caller mistake, not a one-octet integer.
+
+        ``bool`` is an :class:`int` subclass, so before #469's review flagged it
+        ``True``/``False`` fell through to the #468 int-conversion path and
+        silently produced a plausible-looking wire form -- ``IPv6Address(1)``,
+        that is ``::1``, for ``IPv6_Address``, and a one-octet identifier for the
+        six ``BytesField`` subtypes. Refused for every subtype now, before the
+        subtype dispatch, so neither numeric path can reach it. A caller who
+        genuinely wants the integer passes ``int(flag)``, which the message says.
+        """
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+        for subtype in ('NAI', 'IPv6_Address', 'IMSI', 'P_TMSI',
+                        'EUI_48_address', 'EUI_64_address', 'GUTI', 'DUID'):
+            for identifier in (True, False):
+                with self.subTest(subtype=subtype, identifier=identifier):
+                    with self.assertRaises(ProtocolError) as ctx:
+                        proto._make_opt_mn_id(  # type: ignore[arg-type]
+                            Option.MN_ID_OPTION_TYPE,
+                            subtype=getattr(MNIDSubtype, subtype),
+                            identifier=identifier)
+                    self.assertIn('must not be a bool', str(ctx.exception))
+
+        # ``int(flag)`` is the documented escape hatch and still converts.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IMSI,
+            identifier=int(True))
+        self.assertEqual(schema.identifier, b'\x01')
+
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
 
