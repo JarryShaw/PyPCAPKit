@@ -978,7 +978,7 @@ nobody has claimed it.
 **Between wave 1 and wave 2 — a library-wide consistency sweep.** Wave 1 closed
 by clearing defects one at a time, each found because something else was being
 worked on nearby. That is a poor way to find the rest of them, so before wave 2
-starts the library gets swept deliberately, in four strands:
+starts the library gets swept deliberately, in five strands:
 
 * **Prose against code.** Docstrings, the README, and inline comments checked
   against what the code now does. Wave 1 produced three separate cases of a
@@ -1006,6 +1006,32 @@ starts the library gets swept deliberately, in four strands:
   :rfc:`8002`, :rfc:`8003`, :rfc:`5770` and :rfc:`6078`. It both finds real
   defects and retires suspicion, which is why it is worth doing exhaustively
   rather than opportunistically.
+* **Duplicated logic that wants a shared module.** The same method or the same
+  arithmetic written out in several protocols, where one definition would do.
+  This strand has the sharpest evidence of the five, because duplication here has
+  already *caused* defects rather than merely offended tidiness:
+
+  - `#487 <https://github.com/JarryShaw/PyPCAPKit/issues/487>`__ existed because
+    ``IPv6_Route.make()`` computed ``Hdr Ext Len`` in **two** branches with two
+    different wrong units, and the read side computed the inverse in a third
+    place with a fourth. The fix was not new arithmetic but one helper per
+    direction, each documenting the :rfc:`8200#section-4.4` unit and saying what
+    its counterpart is.
+  - `#483 <https://github.com/JarryShaw/PyPCAPKit/issues/483>`__ was the scapy
+    toolkit adapter passing a fragment offset unscaled where every sibling
+    adapter scaled it. Five adapters each restate the same field mapping, so a
+    convention that holds in four and breaks in the fifth is invisible until a
+    capture is wrong.
+
+  So the strand is not a style pass. Look for arithmetic that encodes a wire
+  unit, field-mapping tables restated per engine, and guards of the same shape
+  repeated per registered type — and where extraction is not worth it, say so
+  with the reason rather than leaving the duplication unexplained. Note also that
+  two candidates may look alike and differ deliberately: TCP and IP reassembly
+  resolve overlaps in *opposite* directions because :rfc:`791` and :rfc:`9293`
+  §3.10 specify opposite resolutions, so "these two functions are nearly
+  identical" is a question to answer against the specification, not a defect on
+  its face.
 
 The sweep's output is **verified issues, not a list of suspicions** — each entry
 reproduced before it is filed, with the reproduction in the issue. An audit that
