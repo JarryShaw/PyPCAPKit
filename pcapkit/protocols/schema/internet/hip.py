@@ -566,7 +566,7 @@ class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MOD
     #: NAT traversal modes.
     modes: 'list[Enum_NATTraversal]' = ListField(
         length=two_octet_prefix_list_len,
-        item_type=EnumField(length=1, namespace=Enum_NATTraversal),
+        item_type=EnumField(length=2, namespace=Enum_NATTraversal),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -938,7 +938,7 @@ class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
     #: Suite IDs.
     suites: 'list[Enum_ESPTransformSuite]' = ListField(
         length=two_octet_prefix_list_len,
-        item_type=EnumField(length=1, namespace=Enum_ESPTransformSuite),
+        item_type=EnumField(length=2, namespace=Enum_ESPTransformSuite),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)

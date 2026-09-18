@@ -2332,6 +2332,156 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(schema.length, 17)
                 self.assertEqual(len(schema.pack()), schema.length + 2)
 
+    def test_mh_mn_id_option_converts_int_identifier_per_subtype(self) -> None:
+        """An ``int`` identifier converts to each subtype's own wire form.
+
+        ``_make_opt_mn_id`` used to size an ``int`` identifier from the
+        integer's own :meth:`int.bit_length` regardless of ``subtype``, but
+        never actually turned it into the octets that width described --
+        ``BytesField`` received the ``int`` itself, and ``struct.pack()``
+        cannot do anything with that (#467). An earlier revision of this fix
+        (9b26fa387) rejected ``int`` outright for every subtype but
+        ``IPv6_Address``, on the reasoning that there was no non-arbitrary
+        width to convert it to. That reasoning held for ``NAI`` (its field is
+        a ``StringField``, and NAI is text, not a number) but was wrong for
+        the other six: ``id_len = math.ceil(identifier.bit_length() / 8)``
+        *was* the right, non-arbitrary width all along, self-consistent with
+        the declared ``length`` by construction -- what was missing was
+        actually converting ``identifier`` to those octets via
+        :meth:`int.to_bytes` before handing it to the schema. See #467, #468.
+        """
+        import io
+
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.schema.internet.mh import \
+            MNIDOption as Schema_MNIDOption
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+
+        # every ``BytesField`` subtype (c.f. ``mn_id_selector``'s fallback
+        # ``return BytesField(length=pkt['length'] - 1)``) converts an ``int``
+        # to its own minimal big-endian octets, at least one -- tested through
+        # the maker itself, not a hand-built schema with a self-consistent
+        # ``length`` the maker would never produce, and round-tripped through
+        # the wire (packed, then unpacked back into a fresh schema), not just
+        # packed once and trusted.
+        cases = (
+            (0x1234, 2, b'\x12\x34'),
+            (0x0, 1, b'\x00'),  # bit_length() is 0 for 0 itself; floored at 1
+            (0x1, 1, b'\x01'),
+            (0xff, 1, b'\xff'),
+            (0x100000000, 5, b'\x01\x00\x00\x00\x00'),
+        )
+        for subtype in ('IMSI', 'P_TMSI', 'EUI_48_address', 'EUI_64_address',
+                        'GUTI', 'DUID'):
+            for identifier, id_len, octets in cases:
+                with self.subTest(subtype=subtype, identifier=hex(identifier)):
+                    schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                        identifier=identifier)
+                    self.assertEqual(schema.length, 1 + id_len)
+                    self.assertEqual(schema.identifier, octets)
+                    packed = schema.pack()
+                    self.assertEqual(len(packed), schema.length + 2)
+
+                    unpacked = Schema_MNIDOption.unpack(io.BytesIO(packed), len(packed), {})
+                    self.assertEqual(unpacked.identifier, octets)
+
+        # ``NAI`` is the one subtype with no non-arbitrary int-to-wire mapping
+        # -- its field is text (RFC 4283's ``user@realm``), not a number -- so
+        # an ``int`` is still rejected there, with a message naming the
+        # decimal-string alternative, which is itself checked to actually work.
+        with self.assertRaises(ProtocolError) as ctx:
+            proto._make_opt_mn_id(  # type: ignore[arg-type]
+                Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.NAI, identifier=0x1234)
+        self.assertIn('str(4660)', str(ctx.exception))
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.NAI, identifier=str(0x1234))
+        self.assertEqual(schema.pack()[3:].decode(), '4660')
+
+        # a negative ``int`` has no wire form under any subtype, and each one
+        # fails differently on its own: ``int.to_bytes()`` raises a bare
+        # ``OverflowError`` and ``ipaddress.IPv6Address`` an
+        # ``AddressValueError`` -- itself a bare ``ValueError``. So the guard
+        # sits before the subtype dispatch rather than inside the ``int``
+        # branch, and ``IPv6_Address`` is covered here too: an earlier revision
+        # of this fix guarded only inside that branch, which the
+        # ``IPv6_Address`` dispatch never reaches, leaving
+        # ``identifier=-5, subtype=IPv6_Address`` leaking
+        # ``AddressValueError: -5 (< 0) is not permitted as an IPv6 address``
+        # out of the very handler that exists to stop bare stdlib exceptions
+        # escaping. Confirmed to fail against that revision.
+        for subtype in ('NAI', 'IPv6_Address', 'IMSI', 'P_TMSI',
+                        'EUI_48_address', 'EUI_64_address', 'GUTI', 'DUID'):
+            with self.subTest(subtype=subtype, identifier=-5):
+                with self.assertRaises(BaseError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                        identifier=-5)
+                self.assertIsInstance(ctx.exception, BaseError)
+
+        # the ``IPv6_Address`` subtype is unaffected -- an ``int`` identifier
+        # still converts to its fixed 16-octet wire form via
+        # :class:`ipaddress.IPv6Address`, which both converts and validates,
+        # as #448 fixed and neither revision of this fix has touched.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address, identifier=0x1234)
+        self.assertEqual(schema.length, 17)
+        self.assertEqual(len(schema.pack()), schema.length + 2)
+
+        # ``IPv6_Address`` is the one subtype with an *upper* bound as well, and it
+        # is checked on both sides of the boundary rather than at some large value,
+        # which is how this gap survived the first pass: the earlier probe stopped
+        # at ``2**128 - 1``, exactly one below where the answer changes. Above the
+        # bound ``ipaddress.IPv6Address`` raises ``AddressValueError`` -- a bare
+        # ``ValueError`` -- so it must be rejected in-library instead. The bound is
+        # subtype-dependent: the ``BytesField`` subtypes have no ceiling and simply
+        # produce more octets, which is asserted here too so that a future guard
+        # cannot be hoisted to cover them by mistake.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+            identifier=2 ** 128 - 1)
+        self.assertEqual(schema.length, 17)
+        for identifier in (2 ** 128, 2 ** 140):
+            with self.subTest(subtype='IPv6_Address', identifier=identifier):
+                with self.assertRaises(ProtocolError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+                        identifier=identifier)
+                self.assertIn('below 2**128', str(ctx.exception))
+        for subtype in ('IMSI', 'P_TMSI', 'EUI_48_address', 'EUI_64_address',
+                        'GUTI', 'DUID'):
+            for identifier, id_len in ((2 ** 128, 17), (2 ** 140, 18)):
+                with self.subTest(subtype=subtype, identifier=identifier):
+                    schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE,
+                        subtype=getattr(MNIDSubtype, subtype), identifier=identifier)
+                    self.assertEqual(schema.length, 1 + id_len)
+                    self.assertEqual(len(schema.pack()), schema.length + 2)
+
+        # 0, a negative value, and anything above 255 are all outside what
+        # ``MNIDSubtype._missing_`` extends. Naming the subtype in a rejection
+        # message must not let that enum round-trip's own bare ``ValueError``
+        # escape in its place -- but paired with a non-negative int, an
+        # out-of-range subtype is not itself an error: ``mn_id_selector``
+        # resolves it to the same generic ``BytesField`` fallback as any
+        # unassigned subtype, so only the negative-identifier combination is
+        # expected to raise here.
+        for subtype in (0, -1, 300, 999):
+            with self.subTest(subtype=subtype, identifier=0x1234):
+                schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                    Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=0x1234)
+                self.assertEqual(schema.length, 3)
+                self.assertEqual(len(schema.pack()), schema.length + 2)
+            with self.subTest(subtype=subtype, identifier=-5):
+                with self.assertRaises(BaseError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=-5)
+                self.assertIsInstance(ctx.exception, BaseError)
+
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
 

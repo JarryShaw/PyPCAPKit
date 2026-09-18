@@ -7645,11 +7645,29 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_default: MN-ID subtype default value.
             subtype_namespace: MN-ID subtype namespace.
             subtype_reversed: MN-ID subtype reversed flag.
-            identifier: Identifier.
+            identifier: Identifier. An :obj:`int` is accepted for every
+                subtype except ``NAI``. For ``IPv6_Address`` it is converted
+                and validated the same way as any other value
+                :class:`ipaddress.IPv6Address` accepts. For the other six
+                subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an
+                EUI-48/64 address, a GUTI, a DUID) -- it is converted to its
+                own minimal big-endian octets, at least one. ``NAI`` is text
+                (RFC 4283's ``user@realm`` form) rather than a numeric
+                identifier, so there is no non-arbitrary int-to-text mapping
+                the way there is int-to-address or int-to-octets, and an
+                :obj:`int` is rejected there (c.f. #467, #468).
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If ``identifier`` is a negative :obj:`int` (no
+                subtype has a wire form for one), an :obj:`int` of any value
+                with the ``NAI`` subtype, or an :obj:`int` of ``2**128`` or
+                above with the ``IPv6_Address`` subtype (whose wire form is a
+                fixed 16 octets, unlike the other subtypes, which have no
+                ceiling and simply pack into more).
 
         """
         if option is not None:
@@ -7659,6 +7677,31 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
+        if isinstance(identifier, int) and identifier < 0:
+            # NOTE: checked before the subtype dispatch below, not inside it,
+            # because *no* subtype has a wire form for a negative identifier and
+            # each one fails differently on its own: ``int.to_bytes`` raises
+            # ``OverflowError`` and ``ipaddress.IPv6Address`` an
+            # ``AddressValueError`` -- itself a bare :exc:`ValueError`, which is
+            # exactly the class of leak this handler exists to stop, and which a
+            # guard living inside the ``elif isinstance(identifier, int)`` branch
+            # could not catch, since the ``IPv6_Address`` dispatch never reaches
+            # it (c.f. #467, #468).
+            try:
+                # ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain int back
+                # into a named member for the message below -- but its own
+                # ``_missing_`` only auto-extends 9-15 and 16-255, so 0,
+                # negatives and anything above 255 make the constructor itself
+                # raise a bare ``ValueError``, which would defeat the point of
+                # this guard (c.f. #468 review). Caught here and the raw value
+                # used instead rather than let it propagate.
+                subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
+            except ValueError:
+                subtype_repr = repr(subtype_val)
+            raise ProtocolError(
+                f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
+                f'identifier must be a non-negative int, not {identifier!r}')
+
         # NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),
         # not by the Python type of ``identifier``, so the width has to be taken from
         # the former. For the ``IPv6_Address`` subtype the schema always packs a fixed
@@ -7667,11 +7710,59 @@ class MH(Internet[Data_MH, Schema_MH],
         # form here as well, keeping the packed bytes and the declared length derived
         # from one value instead of two independent computations (c.f. #448).
         if subtype_val == Enum_MNIDSubtype.IPv6_Address:
+            if isinstance(identifier, int) and identifier >= 1 << 128:
+                # NOTE: the upper-bound mirror of the negative-int guard above, and
+                # it belongs here rather than up there because this bound is
+                # subtype-*dependent*: ``2**140`` is a perfectly good identifier for
+                # the six ``BytesField`` subtypes -- it simply packs into more
+                # octets -- and only ``IPv6_Address`` caps at 128 bits. Left
+                # unguarded, :class:`ipaddress.IPv6Address` raises
+                # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
+                # handler would otherwise ship with its lower bound guarded and its
+                # upper bound leaking (c.f. #467, #468). Checked explicitly rather
+                # than by wrapping the construction below, because that would also
+                # swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or
+                # ``None`` reaching here -- which is #469's subject, not this one's.
+                raise ProtocolError(
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
+                    f'identifier must be an int below 2**128, not {identifier!r}')
             if not isinstance(identifier, ipaddress.IPv6Address):
                 identifier = ipaddress.IPv6Address(identifier)
             id_len = 16
         elif isinstance(identifier, int):
-            id_len = math.ceil(identifier.bit_length() / 8)
+            if subtype_val == Enum_MNIDSubtype.NAI:
+                # NOTE: NAI's field is a StringField (c.f. mn_id_selector), so an
+                # int has to become text -- and unlike the numeric subtypes below,
+                # there is no non-arbitrary way to do that. str(identifier) packs
+                # and round-trips fine, but an NAI is a network access identifier
+                # ('user@realm', RFC 4283), and a bare decimal-digit string is not
+                # one: it is mechanically valid and semantically nonsense, exactly
+                # the "silently accepting a value that cannot pack" #467 removed,
+                # just relocated to "silently accepting a value that packs into
+                # the wrong thing". Rejected instead, with the explicit spelling
+                # a caller who really wants a decimal-digit NAI can use.
+                raise ProtocolError(
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype NAI identifier '
+                    f'must be str, not int -- pass str({identifier!r}) if a '
+                    f'decimal-digit NAI is really what is wanted')
+            # NOTE: every other subtype's field is a
+            # BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector) -- a
+            # numeric identifier, so unlike NAI there IS a non-arbitrary wire
+            # form: its own minimal big-endian encoding. That is self-consistent
+            # with the declared length by construction and round-trips exactly.
+            # ``id_len = math.ceil(identifier.bit_length() / 8)`` was the right
+            # width all along -- the pre-#467 defect was never the sizing, it
+            # was that ``identifier`` itself stayed an ``int`` afterwards and
+            # was handed to ``BytesField`` unconverted, which ``struct.pack()``
+            # cannot do anything with. #468 initially rejected outright instead
+            # of noticing that; converting is what this revision does (c.f.
+            # #467, #468). ``bit_length()`` is 0 for 0 itself, which would
+            # otherwise declare a zero-octet identifier -- collapsing "the
+            # identifier's value is 0" into "there is no identifier" -- so the
+            # width is floored at one octet, matching what any reasonable
+            # encoder would produce.
+            id_len = max(1, math.ceil(identifier.bit_length() / 8))
+            identifier = identifier.to_bytes(id_len, 'big')
         else:
             id_len = len(identifier)
 
