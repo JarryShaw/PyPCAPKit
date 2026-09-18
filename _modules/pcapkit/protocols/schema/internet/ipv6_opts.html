@@ -574,6 +574,30 @@
 
 
 
+<div class="viewcode-block" id="smf_i_dpd_id_len">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_id_len">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">smf_i_dpd_id_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return SMF I-DPD identifier length.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: SMF identification-based DPD option unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        SMF I-DPD identifier length.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold</span>
+<span class="sd">            the TaggerID it declares, which would otherwise underflow the</span>
+<span class="sd">            identifier length below zero.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6-Opts: invalid SMF I-DPD option length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="smf_dpd_data_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">smf_dpd_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
@@ -902,9 +926,6 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for IPv6-Opts SMF identification-based DPD options."""</span>
 
-    <span class="n">test</span><span class="p">:</span> <span class="s1">'SMFDPDTestFlag'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">'mode'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="p">}))</span>
     <span class="c1">#: TaggerID information.</span>
     <span class="n">info</span><span class="p">:</span> <span class="s1">'TaggerIDInfo'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'mode'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -917,9 +938,7 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Identifier.</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
-        <span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'info'</span><span class="p">][</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="p">))</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">smf_i_dpd_id_len</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SMFIdentificationBasedDPDOption.post_process">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption.post_process">[docs]</a>

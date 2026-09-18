@@ -593,6 +593,36 @@
 
 
 
+<div class="viewcode-block" id="registration_type_list_len">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.registration_type_list_len">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">registration_type_list_len</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return registration type list length.</span>
+
+<span class="sd">    Used by the ``reg_request``, ``reg_response`` and ``reg_failed`` fields of</span>
+<span class="sd">    :class:`RegRequestParameter`, :class:`RegResponseParameter` and</span>
+<span class="sd">    :class:`RegFailedParameter` respectively, each of which follows a single</span>
+<span class="sd">    ``lifetime`` octet with a list of registration type octets sized by the</span>
+<span class="sd">    remainder of the parameter.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Parameter unpacked schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Registration type list length.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If the parameter's ``Length`` on the wire is too</span>
+<span class="sd">            short to hold the ``lifetime`` octet already read, which would</span>
+<span class="sd">            otherwise underflow the list length below zero.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIP: invalid parameter length: </span><span class="si">{</span><span class="n">pkt</span><span class="p">[</span><span class="s2">"len"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="Parameter">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.Parameter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Parameter</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Parameter</span><span class="p">]):</span>
@@ -1218,7 +1248,7 @@
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Registration types.</span>
     <span class="n">reg_request</span><span class="p">:</span> <span class="s1">'list[Enum_Registration]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">registration_type_list_len</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Registration</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1239,7 +1269,7 @@
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Registration types.</span>
     <span class="n">reg_response</span><span class="p">:</span> <span class="s1">'list[Enum_Registration]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">registration_type_list_len</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Registration</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1260,7 +1290,7 @@
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
     <span class="c1">#: Registration types.</span>
     <span class="n">reg_failed</span><span class="p">:</span> <span class="s1">'list[Enum_RegistrationFailure]'</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'len'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">registration_type_list_len</span><span class="p">,</span>
         <span class="n">item_type</span><span class="o">=</span><span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RegistrationFailure</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
