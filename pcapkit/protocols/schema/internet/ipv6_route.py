@@ -37,6 +37,31 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         pad_len: int
 
 
+def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
+    """Length, in octets, of the IPv6-Route type-specific data for a given ``Hdr Ext Len``.
+
+    Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is *"the length of the
+    Routing header in 8-octet units, not including the first 8 octets"* --
+    i.e. the total on-the-wire header is ``8 + 8 * hdr_ext_len`` octets. Of
+    that, the 4 octets of ``next``/``length``/``type``/``seg_left`` are not
+    part of the type-specific data, so the data itself -- what
+    :func:`ipv6_route_data_selector` hands to the nested ``RoutingType``
+    schema -- is ``4 + 8 * hdr_ext_len`` octets. This is the single place
+    that arithmetic is done on the read side; see
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`
+    for its inverse on the write side. Do NOT drop the ``4 +``: that turns
+    the field back into raw octets and is the exact defect #487 fixed.
+
+    Args:
+        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
+
+    Returns:
+        Length, in octets, of the type-specific data.
+
+    """
+    return 4 + hdr_ext_len * 8
+
+
 def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`IPv6_Route.data` field.
 
@@ -51,7 +76,7 @@ def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Routing', pkt['type'])
     schema = RoutingType.registry[type]
-    return SchemaField(length=pkt['length'] * 8, schema=schema)
+    return SchemaField(length=ipv6_route_data_length(cast('int', pkt['length'])), schema=schema)
 
 
 @schema_final
