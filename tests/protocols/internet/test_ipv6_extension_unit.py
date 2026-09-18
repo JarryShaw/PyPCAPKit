@@ -316,7 +316,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_data_type_src(route_schema.SourceRoute(ip=[]), header=header)
 
-        type2_header = types.SimpleNamespace(next=TransType.TCP, length=24,
+        # Hdr Ext Len for a Type 2 header is fixed at 2 (24 total octets), in
+        # 8-octet units per :rfc:`8200#section-4.4` -- not 24. See #487.
+        type2_header = types.SimpleNamespace(next=TransType.TCP, length=2,
                                              type=Routing.Type_2_Routing_Header, seg_left=1)
         type2 = proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=type2_header)
         self.assertEqual(str(type2.ip), '2001:db8::2')
@@ -461,7 +463,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         decode.assert_called_once()
 
         made_bytes = proto.make(type=Routing.Source_Route, data=b'abcd')
-        self.assertEqual(made_bytes.length, 1)
+        # Hdr Ext Len in 8-octet units (:rfc:`8200#section-4.4`): 4 octets of
+        # raw data is exactly the 4-octet fixed part every routing type's
+        # data starts with, so no additional 8-octet units are needed. See
+        # #487 -- this used to assert ``1``, the pre-fix octet-count value.
+        self.assertEqual(made_bytes.length, 0)
         self.assertEqual(made_bytes.data, b'abcd')
         made_dict = proto.make(type=Routing.Source_Route, data={'ip': ['2001:db8::2']})
         self.assertEqual(made_dict.type, Routing.Source_Route)
@@ -477,7 +483,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             type=Routing.Type_2_Routing_Header,
             data=route_schema.Type2(ip='2001:db8::4'),
         )
-        self.assertEqual(made_schema.length, 3)
+        # 4 reserved + 16-octet address = 20 octets of type-specific data ->
+        # Hdr Ext Len = (20 - 4) / 8 = 2 (:rfc:`8200#section-4.4`). See #487
+        # -- this used to assert ``3``, the pre-fix (wrong-sign) value.
+        self.assertEqual(made_schema.length, 2)
         with self.assertRaises(ProtocolError):
             proto.make(data=object())
 
@@ -2054,14 +2063,20 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         Boundaries: zero addresses, one, and two, so a fix that special-cases
         "empty" or stops one item short of the general case is still caught.
 
-        The construct-then-parse check below goes through
+        #487 update: this test previously round-tripped through
         ``Schema_SourceRoute.unpack`` directly rather than a full
-        ``IPv6_Route`` read (i.e. ``_read_data_type_src``): that method's own
-        ``(header.length - 8) % 16`` check rejects every ``length``
-        ``IPv6_Route.make`` itself computes for this routing type -- for any
-        address count, tuple or list alike -- which looks like a pre-existing
-        defect independent of #480 and is reported separately rather than
-        papered over here.
+        ``IPv6_Route`` read, because ``_read_data_type_src``'s own
+        ``(header.length - 8) % 16`` guard rejected every ``length``
+        ``IPv6_Route.make`` computed for this routing type, for any address
+        count -- and separately, the ``length`` ``make`` computed was itself
+        wrong (raw octets, not the 8-octet units :rfc:`8200#section-4.4`
+        specifies for ``Hdr Ext Len``). Both halves are fixed now (see #487),
+        so this goes through the full ``IPv6_Route`` construct-then-parse
+        path -- which is a strictly stronger check than unpacking the nested
+        schema alone -- and the expected on-wire ``Hdr Ext Len`` byte below
+        changed from the old (buggy) octet counts ``0x04``/``0x14``/``0x24``
+        to the RFC-correct 8-octet-unit values ``0x00``/``0x02``/``0x04``.
+        The tuple-versus-list assertion this test exists for is unchanged.
 
         """
         from ipaddress import ip_address
@@ -2069,7 +2084,6 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         from pcapkit.const.ipv6.routing import Routing
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
 
         addr1 = ip_address('2001:db8::1')
         addr2 = ip_address('2001:db8::2')
@@ -2088,11 +2102,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # (case name, tuple form, list form, expected on-wire bytes)
         cases = [
             ('empty', (), [],
-             bytes([0x11, 0x04, 0x00, 0x00]) + b'\x00' * 4),
+             bytes([0x11, 0x00, 0x00, 0x00]) + b'\x00' * 4),
             ('single', (addr1,), [addr1],
-             bytes([0x11, 0x14, 0x00, 0x01]) + b'\x00' * 4 + addr1.packed),
+             bytes([0x11, 0x02, 0x00, 0x01]) + b'\x00' * 4 + addr1.packed),
             ('double', (addr1, addr2), [addr1, addr2],
-             bytes([0x11, 0x24, 0x00, 0x02]) + b'\x00' * 4 + addr1.packed + addr2.packed),
+             bytes([0x11, 0x04, 0x00, 0x02]) + b'\x00' * 4 + addr1.packed + addr2.packed),
         ]
 
         for name, as_tuple, as_list, expected in cases:
@@ -2107,12 +2121,72 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 # 4 octets fixed header + 4 reserved + 16 per address
                 self.assertEqual(len(packed_tuple), 8 + 16 * len(as_list))
 
-                # construct-then-parse: the addresses come back, in the same
-                # order, through the schema's own pack/unpack pair
-                data_bytes = packed_tuple[4:]
-                parsed = route_schema.SourceRoute.unpack(
-                    data_bytes, len(data_bytes), {'__length__': len(data_bytes)})
-                self.assertEqual(list(parsed.ip), as_list)
+                # construct-then-parse, through the full public API: the
+                # addresses come back, in the same order, from a real
+                # IPv6_Route.read() of the bytes IPv6_Route.make() produced
+                info = IPv6_Route(io.BytesIO(packed_tuple), len(packed_tuple)).info
+                self.assertEqual(list(info.ip), as_list)
+
+    def test_ipv6_route_source_route_construct_then_parse_round_trip(self) -> None:
+        """#487: ``IPv6_Route.make()`` for a Source Route (Type 0) header emitted
+        bytes its own parser rejected, for *every* address count -- the two
+        branches of ``make`` disagreed with each other, and both disagreed with
+        :rfc:`8200#section-4.4`, on the unit of ``Hdr Ext Len``. This is the
+        check the issue asked for explicitly: construct through the public API,
+        parse the result straight back, for each of 0, 1, 2 and 3 addresses --
+        the boundaries, rather than one comfortable middle case.
+
+        """
+        from ipaddress import IPv6Address
+
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        # (n addresses, expected total octets, expected Hdr Ext Len)
+        cases = [
+            (0, 8, 0),
+            (1, 24, 2),
+            (2, 40, 4),
+            (3, 56, 6),
+        ]
+
+        for n, expected_octets, expected_hdr_ext_len in cases:
+            with self.subTest(addresses=n):
+                addrs = tuple(IPv6Address(f'2001:db8::{i + 1}') for i in range(n))
+
+                proto = object.__new__(IPv6_Route)
+                raw = proto.make(type=Routing.Source_Route, data={'ip': addrs},
+                                  next=0, seg_left=n).pack()
+
+                self.assertEqual(len(raw), expected_octets)
+                self.assertEqual(raw[1], expected_hdr_ext_len)
+
+                info = IPv6_Route(io.BytesIO(raw), len(raw)).info
+                self.assertEqual(tuple(info.ip), addrs)
+
+    def test_ipv6_route_source_route_parses_hand_built_wire_form(self) -> None:
+        """#487's more important half: a hand-built, spec-correct Source Route
+        header -- one this library never constructed -- must parse, independent
+        of whatever ``IPv6_Route.make()`` does. A round-trip test alone can pass
+        on two mistakes that cancel out (a constructor and a parser that agree
+        with each other but not with the wire format); this does not go through
+        ``make()`` at all, so it catches exactly that failure mode. Bytes match
+        the issue's own hand-built example: ``next=0``, ``Hdr Ext Len=2``,
+        ``type=0`` (Source Route), ``seg_left=1``, 4 reserved octets, one
+        16-octet address, 24 octets total.
+
+        """
+        from ipaddress import IPv6Address
+
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        addr = IPv6Address('2001:db8::1')
+        hand_built = bytes([0x00, 0x02, 0x00, 0x01]) + b'\x00' * 4 + addr.packed
+        self.assertEqual(len(hand_built), 24)
+
+        info = IPv6_Route(io.BytesIO(hand_built), len(hand_built)).info
+        self.assertEqual(tuple(info.ip), (addr,))
+        self.assertEqual(info.length, 24)
 
 
 if __name__ == '__main__':
