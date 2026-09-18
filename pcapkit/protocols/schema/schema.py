@@ -687,8 +687,19 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
-                elif isinstance(data, list):
-                    self.__buffer__[field.name] = field.pack(data, packet)
+                elif isinstance(data, (list, tuple)):
+                    # NOTE: a data model may declare a field ``tuple[...]``
+                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
+                    # 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/
+                    # hip.py -- and ``_read_*`` then hands one straight back
+                    # here on reconstruction. ``ListField.pack`` only ever
+                    # iterates its argument, so it does not care which of the
+                    # two it gets; rejecting the tuple broke every
+                    # parse-then-reconstruct cycle for such a field. See #476.
+                    # ``list(data)`` is a no-op for an actual list and keeps
+                    # ``ListField.pack``'s own ``Optional[list[_TL]]``
+                    # signature honest rather than widening it too.
+                    self.__buffer__[field.name] = field.pack(list(data), packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
@@ -752,6 +763,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             We used a ``__length__`` key in ``packet`` to record the length
             of the remaining data, which is used to determine the length of
             the payload field.
+
+            When this schema is nested -- unpacked through a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
+            directly -- ``packet`` is not the enclosing schema's own data, but
+            a context built by :func:`~pcapkit.corekit.fields.misc.
+            nested_packet_context`: a name this schema does not itself
+            declare falls through to the enclosing schema, and the enclosing
+            schema is also reachable unconditionally under a ``__packet__``
+            key. See that function for the exact lookup, write and iteration
+            semantics.
 
             And an ``__option_padding__`` key in the ``packet`` to record how
             much of an

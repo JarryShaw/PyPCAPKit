@@ -762,6 +762,145 @@ is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 ``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
 :doc:`pcapkit/foundation/engines/index` tabulates that.
 
+Checksum and Integrity Verification
+-----------------------------------
+
+Eight protocols parse a checksum or CRC field —
+:class:`~pcapkit.protocols.internet.hip.HIP`,
+:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
+:class:`~pcapkit.protocols.link.ospf.OSPF`,
+:class:`~pcapkit.protocols.transport.sctp.SCTP`,
+:class:`~pcapkit.protocols.transport.tcp.TCP` and
+:class:`~pcapkit.protocols.transport.udp.UDP` — and exactly one of them checks
+whether the value is *right*:
+:attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
+For the other seven the field is recorded and never questioned, so a corrupted
+capture parses as cleanly as an intact one.
+
+**These are two different problems and they want separating**, because only one
+of them is cryptographic and the distinction decides what is actually hard.
+
+**The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
+ICMP/ICMPv6 and OSPF, needs no cryptography at all — it is sixteen-bit addition
+with end-around carry, and implementing it is an afternoon. What blocks it is the
+**IP pseudo-header**: the TCP, UDP and ICMPv6 checksums are computed over source
+and destination addresses, the protocol number and the payload length, all of
+which live in the *enclosing* layer. So verification needs a parsed protocol to
+reach back to its parent, which is a structural question about
+:class:`~pcapkit.protocols.protocol.Protocol` rather than an arithmetic one.
+That is precisely why SCTP came first and is not evidence the rest are easy:
+:rfc:`9260#section-6.8` defines its CRC32c over the common header and chunks with
+the checksum field zeroed and **no pseudo-header**, so it can be verified from
+the SCTP packet alone. Note also that SCTP's CRC32c is a hand-rolled lookup table
+in :mod:`pcapkit.protocols.transport.sctp`, not a library call, so it is not
+precedent for a dependency either.
+
+**The cryptographic integrity checks** are where the :mod:`cryptography`
+dependency — introduced for ESP — genuinely buys something new, and half of that
+is already done. :class:`~pcapkit.protocols.internet.esp.ESP` **already verifies
+its ICV** when a Security Association is supplied, and deliberately reports a
+failure rather than raising, so a forged packet still parses and says so. What is
+*not* done is **HIP**: its ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` and
+``RELAY_HMAC`` parameters, and its ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``
+parameters, are parsed into their data models and never checked against the
+packet. Verifying them needs a keying context in the shape ESP already
+established through :mod:`pcapkit.corekit.context`, which is the reusable part of
+the design rather than something to invent.
+
+All three of the policy questions this raised have been settled by the repo
+owner, and each lands on a precedent the library already has:
+
+* **Verification is opt-in.** Checksumming every packet costs real time on a
+  large capture, and `Maybe Even Faster?`_ above is a standing concern, so it is
+  a flag rather than unconditional behaviour.
+* **A wrong checksum is a warning, not a hard failure, and the outcome is
+  recorded on the protocol class.** The warning belongs in
+  :class:`~pcapkit.utilities.warnings.ProtocolWarning`, and the recording has an
+  exact precedent in :class:`~pcapkit.protocols.internet.esp.ESPStatus`: an
+  enumeration of outcomes carried on the parsed result, so a caller can ask
+  after the fact rather than having to have been capturing warnings at the
+  time. That distinction matters — a warning is for the human watching, and the
+  recorded status is for the program. Note ESP's enum also has a member for "the
+  expected state for a capture taken without keys, and is **not** an error",
+  which is the shape the offload case below wants.
+* **The IP pseudo-header gets a pseudo-protocol class.** Rather than giving a
+  parsed protocol a back-reference to its parent, the pseudo-header becomes a
+  first-class thing in its own right, defined once for the IP family and used by
+  **both** the parsing and the constructing path. That is the better answer:
+  a back-reference only helps verification, while a pseudo-header class is also
+  what the construction side needs in order to *emit* a correct checksum, and
+  the two paths then share one definition instead of agreeing by coincidence.
+
+One case still wants a decision at implementation time, since it is about
+wording rather than design: **checksum offload**. A capture taken on the sending
+host routinely contains checksums the NIC had not computed yet, so the field is
+zero or garbage on the wire and "invalid" is the wrong word for it. Whatever
+status enumeration this grows should be able to say *not computed* distinctly
+from *wrong*, or it will cry wolf on the commonest capture there is —
+:class:`~pcapkit.protocols.internet.esp.ESPStatus`'s ``NO_SA`` member is the
+model for how to spell "expected, not an error".
+
+Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
+ESP has already laid the groundwork, but the checksum half genuinely wants the
+parent-access question answered first, and that is worth doing deliberately
+rather than as a side effect of a checksum patch.
+
+Release Plan — 1.5.0 in Two Steps
+---------------------------------
+
+The version in :mod:`pcapkit` is already ``1.5.0a1``, and the release is
+sequenced against the waves above in two deliberate steps:
+
+#. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.** Wave 1's
+   feature work has landed; what is left is the defect tail in `the issue tracker
+   <https://github.com/JarryShaw/PyPCAPKit/issues>`__. Closing it earns a beta,
+   not a final release, because the consistency sweep below has not run yet and
+   is expected to find things.
+#. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
+   sweep is described under `Delivery Sequence`_ below — prose against code,
+   missing tests, unaligned changes, and packet formats against the
+   specifications. Its whole point is to find what one-at-a-time defect work
+   does not, so shipping a final release before it has run would be shipping
+   ahead of the evidence.
+
+**The version string is the release button, so it is worth knowing exactly what
+each step does before editing it.** ``.github/workflows/create-release.yml`` is
+version-driven rather than tag-driven: its ``version_check`` job reads
+``pcapkit.__version__`` directly, derives ``PCAPKIT_PRERELEASE`` from
+``packaging.version.Version(...).is_prerelease``, and picks the Anaconda label
+from the same test. So:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 20 40
+
+   * - version
+     - prerelease
+     - conda label
+     - GitHub release
+   * - ``1.5.0a1`` (current)
+     - yes
+     - ``dev``
+     - marked prerelease
+   * - ``1.5.0b1`` (step 1)
+     - yes
+     - ``dev``
+     - marked prerelease
+   * - ``1.5.0`` (step 2)
+     - **no**
+     - **``main``**
+     - full release
+
+Both steps publish to PyPI — the ``pypi`` job carries no prerelease gate — but a
+beta is only installable with ``pip install --pre``, so it reaches people
+who ask for it and nobody else. The consequential change is at step 2, where the
+Anaconda label flips from ``dev`` to ``main``. Neither step needs any change to
+the workflow itself; editing the version string is the whole of it, which is
+precisely why it should be its own commit rather than a line folded into
+something else.
+
 Delivery Sequence
 -----------------
 
@@ -815,3 +954,54 @@ captures dump to, so there is a case for taking that churn early and registering
 dissectors later. The third format, the :rfc:`6088` traffic selectors of
 :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
 nobody has claimed it.
+
+**Between wave 1 and wave 2 — a library-wide consistency sweep.** Wave 1 closed
+by clearing defects one at a time, each found because something else was being
+worked on nearby. That is a poor way to find the rest of them, so before wave 2
+starts the library gets swept deliberately, in four strands:
+
+* **Prose against code.** Docstrings, the README, and inline comments checked
+  against what the code now does. Wave 1 produced three separate cases of a
+  docstring outliving the thing it described — one of them survived the fix that
+  invalidated it by under a minute — so this is a known failure mode rather than
+  a hypothetical. Includes the rule that a docstring names the real defining
+  module rather than the re-export.
+* **Missing tests.** Not coverage percentage, which says nothing useful here, but
+  named gaps: registry entries with no round-trip case, error paths that no test
+  reaches, and behaviour asserted only in prose. The option round-trip harness
+  already enumerates its own coverage and fails when a registered code has no
+  case; the sweep asks which *other* registries deserve the same treatment.
+* **Unaligned changes.** Drift where one half of a pair moved and the other did
+  not — a schema whose data model disagrees with it, a maker whose annotation
+  admits what its schema cannot hold, an ``EXPECTED_FAILURES`` entry naming a
+  case that no longer fails. Several wave 1 defects were exactly this shape.
+* **Packet formats against the specifications.** The most valuable strand, and
+  the one with the clearest evidence behind it: reading the RFC field-by-field
+  against the schema is what produced
+  `#472 <https://github.com/JarryShaw/PyPCAPKit/issues/472>`__ — two HIP
+  parameters sizing their list entries at one octet where :rfc:`5770` §5.4 and
+  :rfc:`7402` §5.1.2 specify sixteen bits — and the same method then *cleared*
+  fourteen further
+  ``EnumField(length=1)`` sites in the same file against :rfc:`7401`,
+  :rfc:`8002`, :rfc:`8003`, :rfc:`5770` and :rfc:`6078`. It both finds real
+  defects and retires suspicion, which is why it is worth doing exhaustively
+  rather than opportunistically.
+
+The sweep's output is **verified issues, not a list of suspicions** — each entry
+reproduced before it is filed, with the reproduction in the issue. An audit that
+files what it merely suspects transfers the work rather than doing it, and this
+project has already had to correct a finding whose count and whose diagnosis were
+both wrong when re-derived.
+
+**Queued for wave 2 or 3 — checksum and integrity verification.** See `Checksum
+and Integrity Verification`_ above. It splits in two, and the halves are not
+equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
+``RELAY_HMAC`` and its two signature parameters) could start whenever, since
+:class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
+keying-context channel and the report-rather-than-raise policy. The
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP
+pseudo-header, and the owner has settled how: a **pseudo-protocol class** for the
+IP family, serving both the parsing and the constructing path, rather than a
+back-reference from a parsed protocol to its parent. So that half is no longer
+blocked on an open design question -- it is blocked only on someone defining that
+class, which is a bounded piece of work and the natural first step.

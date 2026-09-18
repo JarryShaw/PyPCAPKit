@@ -151,6 +151,83 @@ class IPAddressFieldTests(unittest.TestCase):
         with self.assertRaises(FieldValueError):
             IPv4InterfaceField().pre_process('2001:db8::1/64', {})
 
+    def test_pre_process_malformed_value_raises_in_library_error(self) -> None:
+        """A malformed address/interface string used to let a bare
+        :exc:`ValueError` from :mod:`ipaddress` escape -- unlike the very next
+        statement in the same method, which already raised the library's own
+        :exc:`FieldValueError` for a value that is merely the wrong IP
+        version. So ``except BaseError`` could not reliably catch a bad field
+        value: whether the exception was in-library depended on *how* the
+        value was wrong. All four public field classes must now raise
+        :exc:`FieldValueError` here too, with the original :mod:`ipaddress`
+        message preserved.
+        """
+        from pcapkit.corekit.fields.ipaddress import (
+            IPv4AddressField, IPv6AddressField, IPv4InterfaceField, IPv6InterfaceField,
+        )
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        cases = [
+            (IPv4AddressField(), 'not-an-address'),
+            (IPv6AddressField(), 'not-an-address'),
+            (IPv4InterfaceField(), 'not-an-interface'),
+            (IPv6InterfaceField(), 'not-an-interface'),
+        ]
+        for field, bad_value in cases:
+            with self.subTest(field=type(field).__name__):
+                with self.assertRaises(FieldValueError) as context:
+                    field.pre_process(bad_value, {})
+                # ``FieldValueError`` subclasses ``BaseError``, but assert the
+                # in-library type directly (above) rather than only this.
+                self.assertIsInstance(context.exception, BaseError)
+                # the original stdlib ``ipaddress`` message must survive the
+                # translation, not just some generic replacement text
+                self.assertIn(repr(bad_value), str(context.exception))
+
+    def test_wrong_version_message_is_not_relabelled_as_a_malformed_value(self) -> None:
+        """Wrapping the conversion must not broaden into swallowing the
+        pre-existing wrong-version ``FieldValueError`` -- its message stays
+        the version-mismatch message, not the "invalid IP ..." message used
+        for a genuinely malformed value.
+        """
+        from pcapkit.corekit.fields.ipaddress import IPv6AddressField, IPv6InterfaceField
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        with self.assertRaises(FieldValueError) as address_context:
+            IPv6AddressField().pre_process(ipaddress.IPv4Address('1.2.3.4'), {})
+        self.assertIn('IP version mismatch', str(address_context.exception))
+        self.assertNotIn('invalid IP', str(address_context.exception))
+
+        with self.assertRaises(FieldValueError) as interface_context:
+            IPv6InterfaceField().pre_process(ipaddress.IPv4Interface('1.2.3.4/24'), {})
+        self.assertIn('IP version mismatch', str(interface_context.exception))
+        self.assertNotIn('invalid IP', str(interface_context.exception))
+
+    def test_ipv4_interface_post_process_rejects_a_non_contiguous_netmask(self) -> None:
+        """``IPv4InterfaceField.post_process`` builds
+        ``ipaddress.ip_interface(f'{ip}/{mask}')`` from wire bytes whose
+        trailing four octets are meant to be a dotted netmask. Unlike the
+        leading four octets (always exactly 4 octets, so always a valid
+        address), those trailing octets are not guaranteed to form a
+        *contiguous* netmask -- e.g. a capture with a malformed or corrupted
+        IPv4 interface option can carry ``0.255.0.255``, which
+        :func:`ipaddress.ip_interface` rejects with a bare
+        :exc:`~ipaddress.NetmaskValueError`. This is reachable through
+        :meth:`~pcapkit.corekit.fields.field.FieldBase.unpack` alone, with no
+        malformed-length input required, and must raise :exc:`FieldValueError`
+        instead.
+        """
+        from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        field = IPv4InterfaceField()
+        raw = ipaddress.IPv4Address('1.2.3.4').packed + bytes([0, 255, 0, 255])
+
+        with self.assertRaises(FieldValueError) as context:
+            field.unpack(raw, {})
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('0.255.0.255', str(context.exception))
+
 
 if __name__ == '__main__':
     unittest.main()

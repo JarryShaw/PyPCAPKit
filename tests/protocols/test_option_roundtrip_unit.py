@@ -10,8 +10,10 @@ be identical across the round trip.
 That third step is what this module exists for. A construct-then-parse test
 passes for a ``_make_*`` that takes only keyword arguments and cannot consume
 the data model its own ``_read_*`` produced -- which is a defect that ships, and
-one this suite had no way to see. Sixteen HIP parameters are in exactly that
-state today.
+one this suite had no way to see. Sixteen HIP parameters used to be in exactly
+that state, until :class:`~pcapkit.protocols.schema.schema.Schema`'s
+``ListField`` pack branch was widened to accept the ``tuple`` their own data
+models declare, not just ``list``. See #476.
 
 The case list and the cycle both live in
 :file:`examples/generators/options.py`, next to the generator that turns the
@@ -300,31 +302,15 @@ EXPECTED_FAILURES = {
         'assumes bytes; it runs on the pack path too, from schema.py:647'),
 
     # -- Mobility Header ------------------------------------------------------
-
-    # ``CGAParameter``'s nested length callback reads ``pkt['length']``, which
-    # is present while packing and absent while unpacking: ``SchemaField.unpack``
-    # starts the nested schema with a fresh context whose parent is under
-    # ``__packet__``. A CGA extension has no other carrier, so the whole
-    # ``MH.__extension__`` registry is unreachable through the public API --
-    # every code in it fails here, identically, before its own schema is ever
-    # unpacked. That is #445, and it is why all four entries below name one site
-    # in ``CGAParameter`` rather than anything in the extensions themselves.
-    'mh-extension/Multi_Prefix': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFD': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFE': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
-    'mh-extension/Exp_FFFF': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:873 -- #445; needs '
-        "pkt['__packet__']['length'] on the unpack path"),
+    #
+    # ``mh-extension/{Multi_Prefix,Exp_FFFD,Exp_FFFE,Exp_FFFF}`` all round-trip
+    # cleanly now that #445, #437 and #446 are all applied together: #445 let
+    # ``CGAParameter.extensions`` size itself instead of raising
+    # ``KeyError: 'length'``, #437 (merged as registry completion) both
+    # registered the three experimental codes and fixed
+    # ``_make_ext_multiprefix``'s bogus length arithmetic, and #446/#456 fixed
+    # the ``ForwardMatchField`` double-count that stopped ``CGAParametersOption
+    # .parameters`` from sizing correctly. No entries needed here any more.
 
     # -- HIP ------------------------------------------------------------------
 
@@ -336,38 +322,6 @@ EXPECTED_FAILURES = {
         'PARSE', "no attribute 'counter'",
         'pcapkit/protocols/internet/hip.py:822 -- Parameter.registry[128] is '
         'UnassignedParameter, because R1CounterParameter declares code=129 only'),
-
-    # Sixteen parameters whose ``_read_param_*`` stores a list-valued field as a
-    # tuple, which ``_make_param_*`` passes straight back to a ``ListField``
-    # that accepts only a list. This is the class of defect the reconstruct step
-    # exists to find: each one constructs and parses perfectly.
-    #
-    # TRANSPORT_FORMAT_LIST briefly left this group during #466's review: an
-    # early revision reused NAT_TRAVERSAL_MODE/ESP_TRANSFORM/HIP_TRANSPORT_MODE's
-    # shared ``two_octet_prefix_list_len`` guard for this parameter's ``formats``
-    # field too, on the mistaken premise that its ``pkt['len'] - 2`` was
-    # byte-identical *for the same reason*. It is not: :rfc:`7401` Section
-    # 5.2.11 defines this parameter's ``Length`` as literally "2x number of TF
-    # types", with nothing between ``Length`` and the list to subtract -- unlike
-    # the other three, which each genuinely read a two-octet ``reserved``/
-    # ``port`` field first. That reuse turned the parameter's own legitimate
-    # empty-list encoding (``Length = 0``) into a raise, and separately
-    # under-read every non-empty list by two octets on parse -- both fixed by
-    # ``transport_format_list_len`` in pcapkit/protocols/schema/internet/hip.py,
-    # which sizes the list at ``Length`` exactly. With that corrected, this case
-    # is back to failing the same way its fifteen siblings do.
-    **{
-        f'hip-parameter/{name}': Gap(
-            'RECONSTRUCT', "unsupported type <class 'tuple'>",
-            'pcapkit/protocols/schema/schema.py:624 -- _read_param_* returns a '
-            'tuple where _make_param_* needs a list')
-        for name in (
-            'ACK', 'DH_GROUP_LIST', 'HIP_CIPHER', 'NAT_TRAVERSAL_MODE',
-            'HIT_SUITE_LIST', 'REG_INFO', 'REG_REQUEST', 'REG_RESPONSE',
-            'REG_FAILED', 'TRANSPORT_FORMAT_LIST', 'ESP_TRANSFORM', 'ACK_DATA',
-            'ROUTE_DST', 'HIP_TRANSPORT_MODE', 'ROUTE_VIA', 'VIA_RVS',
-        )
-    },
 
     # ``_make_param_encrypted`` passes ``cipher=``, which is not a field of
     # ``EncryptedParameter`` -- so the cipher id is dropped with an
@@ -396,22 +350,26 @@ EXPECTED_FAILURES = {
 
     # -- HTTP/2 ---------------------------------------------------------------
 
-    # ``SchemaField.pack`` gives a nested frame schema a fresh packet context
-    # whose only link to the parent is ``__packet__``, but six frame schemas
-    # reach for the HTTP/2 header's ``flags`` bitfield directly -- either from a
-    # ConditionalField test or from ``FrameType.post_process``. The three frames
-    # that pass are exactly the three declaring no flag members at all:
-    # RST_STREAM, GOAWAY and WINDOW_UPDATE.
-    **{
-        f'httpv2-frame/{name}': Gap(
-            'CONSTRUCT', "KeyError: 'flags'",
-            'pcapkit/protocols/schema/application/httpv2.py:144 '
-            '(FrameType.post_process) and the pad_len ConditionalField tests at '
-            ':175, :204, :305 -- the nested context reaches for the parent '
-            "header's flags")
-        for name in ('DATA', 'HEADERS', 'SETTINGS', 'PUSH_PROMISE', 'PING',
-                     'CONTINUATION')
-    },
+    # ``SchemaField.pack`` used to give a nested frame schema a fresh packet
+    # context whose only link to the parent was ``__packet__``, and six frame
+    # schemas reach for the HTTP/2 header's ``flags`` bitfield directly --
+    # either from a ConditionalField test or from ``FrameType.post_process``.
+    # #445 makes a name absent from the nested schema fall through to the
+    # parent instead of raising, which fixed that for all six. RST_STREAM,
+    # GOAWAY and WINDOW_UPDATE already passed, declaring no flag members at
+    # all; the other five each got past ``flags`` and hit their own,
+    # unrelated defect in turn -- and every one of those has since been
+    # fixed and merged too, so none of the six needs an entry any more:
+    #
+    # - PUSH_PROMISE, PING: round-tripped cleanly as soon as #445 landed.
+    # - DATA, HEADERS, CONTINUATION: hit ``decorators.py``'s ``@prepare``
+    #   treating a zero-length nested unpack (a frame with no payload) as
+    #   end-of-file. Filed as #458, fixed and merged as #461 (``prepare`` now
+    #   distinguishes a *declared* zero length from a *derived* one).
+    # - SETTINGS: hit ``SettingsFrame.settings`` declaring
+    #   ``item_type=SettingPair`` (the raw schema class) instead of
+    #   ``SchemaField(schema=SettingPair)``. Filed as #459, fixed and merged
+    #   as #462.
 
     # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
     # octets, so the constructed header always says 14 -- while the reader

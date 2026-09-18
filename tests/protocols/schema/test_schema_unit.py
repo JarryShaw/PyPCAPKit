@@ -99,6 +99,43 @@ class SchemaUnitTests(unittest.TestCase):
         # above it leaves none of them absent
         self.assertEqual(list(unpacked), list(FeatureSchema.__fields__))
 
+    def test_list_field_pack_accepts_a_tuple_like_it_accepts_a_list(self) -> None:
+        """A ``ListField`` value packs identically whether it is a list or a tuple.
+
+        See #476: several data models declare a ``ListField``-backed attribute as
+        ``tuple[...]`` (HIP's ``group_id``, MH's ``prefixes``/``fid``/``bid``, and
+        others), and ``_read_*`` hands one straight back to ``_make_*`` on a
+        parse-then-reconstruct cycle. Before the fix, :meth:`Schema.pack
+        <pcapkit.protocols.schema.schema.Schema.pack>` accepted a :obj:`list` but
+        raised :exc:`ProtocolUnbound` on the tuple -- a case no unit test that
+        builds the schema directly with a list could ever see.
+
+        """
+        NestedSchema, FeatureSchema, _, _, _ = self._make_schema_classes()
+        from pcapkit.utilities.exceptions import ProtocolUnbound
+
+        as_list = FeatureSchema(
+            kind=9, maybe=0xAB, peek=0xFE, repeated=[0x10, 0x11],
+            nested=NestedSchema(marker=0x44), payload=b'body',
+        )
+        as_tuple = FeatureSchema(
+            kind=9, maybe=0xAB, peek=0xFE, repeated=(0x10, 0x11),
+            nested=NestedSchema(marker=0x44), payload=b'body',
+        )
+        self.assertEqual(bytes(as_tuple), bytes(as_list))
+        self.assertEqual(bytes(as_tuple), b'\x09\xab\x10\x11\x44\x00\x00body')
+
+        # The branch still rejects what it always rejected: a tuple is accepted
+        # because it is a sequence ``ListField.pack`` can iterate, not because
+        # the check grew permissive. A :obj:`str` is also a sequence but is not
+        # what any data model here declares, so it stays out, same as
+        # ``object()`` did before this fix.
+        with self.assertRaises(ProtocolUnbound):
+            bytes(FeatureSchema(
+                kind=1, repeated='xy',  # type: ignore[arg-type]
+                nested=NestedSchema(marker=0x33), payload=b'',
+            ))
+
     def test_schema_update_unknown_fields_and_builtin_field_mapping(self) -> None:
         _, _, _, _, BuiltinNameSchema = self._make_schema_classes()
 
