@@ -490,7 +490,7 @@ class SwitchField(FieldBase[_TC]):
         return self._field.unpack(buffer, packet)
 
 
-class NestedPacketContext:
+class NestedPacketContext(dict):
     """Packet context handed to a nested schema's field callbacks.
 
     Args:
@@ -499,11 +499,17 @@ class NestedPacketContext:
     A nested schema's field callbacks are written exactly like a top-level
     schema's -- ``length=lambda pkt: pkt['length']`` -- so a name the nested
     schema does not itself declare should fall through to the enclosing
-    schema rather than raise :exc:`KeyError`. That is what
-    :meth:`__getitem__`, ``in`` and :meth:`get` do here: they check the
-    nested schema's own data first and the enclosing schema's second.
-    Iterating this mapping sees the union of both, with the nested schema's
-    own names taking precedence where the two overlap.
+    schema rather than raise :exc:`KeyError`. That is what :meth:`__missing__`
+    gives for free once this is a real :class:`dict` subclass: ``pkt[key]``
+    checks this instance's own storage first (the nested schema's own
+    fields, plus the reserved ``__packet__`` entry) and only calls
+    :meth:`__missing__` -- falling through to the enclosing schema -- when
+    the key is not there. :meth:`__contains__` and :meth:`get` are
+    overridden to honour the same fallback, since the :class:`dict`
+    built-ins for both bypass :meth:`__missing__` entirely. Iterating this
+    mapping (or calling :meth:`keys`/:meth:`values`/:meth:`items`) sees the
+    union of both levels, with the nested schema's own names taking
+    precedence where the two overlap.
 
     The enclosing schema is also reachable *unconditionally* under the
     reserved ``__packet__`` key, for a callback that needs to name the outer
@@ -516,73 +522,67 @@ class NestedPacketContext:
     through) this class.
 
     Nothing written through an instance is written back to ``packet``:
-    :meth:`__setitem__` and :meth:`__delitem__` always act on the nested
-    schema's own data, so a nested schema can set -- or shadow -- a name
-    also declared by the enclosing schema without either write ever
-    reaching the enclosing schema's own data, and without a write silently
-    disappearing either.
+    plain :class:`dict` assignment and deletion (``pkt[key] = value``, ``del
+    pkt[key]``) always act on this instance's own storage -- that is what a
+    :class:`dict` subclass gives for free, with no override needed -- so a
+    nested schema can set or shadow a name also declared by the enclosing
+    schema without either write ever reaching the enclosing schema's own
+    data, and without a write silently disappearing either.
 
-    Deliberately **not** a :class:`collections.abc.Mapping`. On CPython <=
-    3.10, every :class:`~pcapkit.protocols.schema.schema.Schema` subclass
-    shares ``Schema``'s ``_abc_impl`` cache, so ``isinstance``/``issubclass``
+    Deliberately a plain :class:`dict` subclass rather than a
+    :class:`collections.abc.Mapping`. On CPython <= 3.10, every
+    :class:`~pcapkit.protocols.schema.schema.Schema` subclass shares
+    ``Schema``'s ``_abc_impl`` cache, so ``isinstance``/``issubclass``
     against any of them can return whichever answer was asked first (#439).
     An earlier version of this class returned a bare
     :class:`collections.ChainMap`, itself a
-    :class:`collections.abc.MutableMapping`, and using one here was enough to
-    disturb that shared cache and flip an unrelated, later
+    :class:`collections.abc.MutableMapping`, and using one here was enough
+    to disturb that shared cache and flip an unrelated, later
     ``isinstance(some_dict, Schema)`` check elsewhere in the same process
     from :data:`False` to :data:`True` --
     ``test_pcapng_remaining_constructor_branches_and_custom_dispatch`` broke
     on Python 3.10 alone, confirmed by reverting *only* the ``ChainMap`` call
-    (nothing else) and watching it pass again. Implementing the same
-    two-level fallback over a plain object rather than an ABC avoids
-    touching that cache at all.
+    (nothing else) and watching it pass again. :class:`dict` itself is not
+    an :class:`~abc.ABCMeta`-based class -- constructing or using a
+    subclass of it never consults that cache -- so implementing the same
+    two-level fallback as a :class:`dict` subclass avoids touching it at
+    all, while also satisfying every existing ``packet: 'dict[str, Any]'``
+    annotation on the rest of the field classes without having to widen any
+    of them.
 
     """
 
-    __slots__ = ('_local', '_parent')
+    __slots__ = ('_parent',)
 
     def __init__(self, packet: 'dict[str, Any]') -> 'None':
-        self._local = {'__packet__': packet}  # type: dict[str, Any]
+        super().__init__({'__packet__': packet})
         self._parent = packet  # type: dict[str, Any]
 
-    def __repr__(self) -> 'str':
-        return f'{type(self).__name__}({self._local!r}, {self._parent!r})'
+    def __missing__(self, key: 'str') -> 'Any':
+        return self._parent[key]
 
-    def __getitem__(self, key: 'str') -> 'Any':
-        try:
-            return self._local[key]
-        except KeyError:
-            return self._parent[key]
-
-    def __setitem__(self, key: 'str', value: 'Any') -> 'None':
-        self._local[key] = value
-
-    def __delitem__(self, key: 'str') -> 'None':
-        del self._local[key]
-
-    def __contains__(self, key: 'str') -> 'bool':
-        return key in self._local or key in self._parent
+    def __contains__(self, key: 'object') -> 'bool':
+        return dict.__contains__(self, key) or key in self._parent
 
     def __iter__(self) -> 'Iterator[str]':
-        yield from self._local
+        yield from dict.__iter__(self)
         for key in self._parent:
-            if key not in self._local:
+            if not dict.__contains__(self, key):
                 yield key
 
     def __len__(self) -> 'int':
-        return len(set(self._local) | set(self._parent))
+        return len(set(dict.__iter__(self)) | set(self._parent))
 
-    def keys(self) -> 'Iterator[str]':
+    def keys(self) -> 'Iterator[str]':  # type: ignore[override]
         """Iterate the union of names, same as :meth:`dict.keys`."""
         return iter(self)
 
-    def values(self) -> 'Iterator[Any]':
+    def values(self) -> 'Iterator[Any]':  # type: ignore[override]
         """Iterate the values for :meth:`keys`, same as :meth:`dict.values`."""
         for key in self:
             yield self[key]
 
-    def items(self) -> 'Iterator[tuple[str, Any]]':
+    def items(self) -> 'Iterator[tuple[str, Any]]':  # type: ignore[override]
         """Iterate ``(name, value)`` pairs, same as :meth:`dict.items`."""
         for key in self:
             yield key, self[key]
@@ -594,21 +594,16 @@ class NestedPacketContext:
         except KeyError:
             return default
 
-    def update(self, other: 'Any' = (), **kwargs: 'Any') -> 'None':
-        """Update the nested schema's own data, same as :meth:`dict.update`."""
-        if hasattr(other, 'keys'):
-            for key in other.keys():
-                self[key] = other[key]
-        else:
-            for key, value in other:
-                self[key] = value
-        for key, value in kwargs.items():
-            self[key] = value
-
     def copy(self) -> 'NestedPacketContext':
-        """Shallow-copy the nested schema's own data; the parent is shared."""
+        """Shallow-copy the nested schema's own data; the parent is shared.
+
+        Overridden because :meth:`dict.copy` always returns a plain
+        :class:`dict`, even for a subclass instance, which would silently
+        drop the fallback to the enclosing schema.
+
+        """
         new = NestedPacketContext(self._parent)
-        new._local = dict(self._local)
+        dict.update(new, dict.items(self))
         return new
 
 
@@ -643,7 +638,7 @@ class SchemaField(FieldBase[_TS]):
     @property
     def length(self) -> 'int':
         """Field size."""
-        return self._length  # type: ignore[has-type]
+        return self._length
 
     @property
     def optional(self) -> 'bool':

@@ -417,7 +417,7 @@ EXPECTED_FAILURES = {
     **{
         f'httpv2-frame/{name}': Gap(
             'PARSE', 'EOFError',
-            'pcapkit/utilities/decorators.py:222 (prepare) -- raises '
+            'pcapkit/utilities/decorators.py:228 (prepare) -- raises '
             'EOFError for any zero-length nested unpack, but a frame with no '
             'payload legitimately unpacks its body from 0 octets; '
             "unreachable before #445 fixed the KeyError: 'flags' this hit "
