@@ -7659,7 +7659,16 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
-        if isinstance(identifier, ipaddress.IPv6Address):
+        # NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),
+        # not by the Python type of ``identifier``, so the width has to be taken from
+        # the former. For the ``IPv6_Address`` subtype the schema always packs a fixed
+        # 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
+        # ignores any declared length), so ``identifier`` is normalised to that wire
+        # form here as well, keeping the packed bytes and the declared length derived
+        # from one value instead of two independent computations (c.f. #448).
+        if subtype_val == Enum_MNIDSubtype.IPv6_Address:
+            if not isinstance(identifier, ipaddress.IPv6Address):
+                identifier = ipaddress.IPv6Address(identifier)
             id_len = 16
         elif isinstance(identifier, int):
             id_len = math.ceil(identifier.bit_length() / 8)
