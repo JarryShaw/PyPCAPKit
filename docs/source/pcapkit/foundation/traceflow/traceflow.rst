@@ -44,6 +44,7 @@ which is an abstract base class for all flow tracing classes.
 
    .. automethod:: dump
    .. automethod:: trace
+   .. automethod:: finish
    .. automethod:: submit
 
    .. autoattribute:: __output__
@@ -54,6 +55,8 @@ which is an abstract base class for all flow tracing classes.
    .. autoattribute:: _buffer
       :no-value:
    .. autoattribute:: _stream
+      :no-value:
+   .. autoattribute:: _bidir
       :no-value:
 
    .. automethod:: __call__

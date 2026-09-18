@@ -103,8 +103,11 @@ class ExtractorTests(unittest.TestCase):
             ipv6=types.SimpleNamespace(datagram=('ipv6',)),
             tcp=types.SimpleNamespace(datagram=('tcp',)),
         )
+        # ``finish`` as well as ``index``: _cleanup tells the tracer the capture
+        # has ended, which is where a flow nothing superseded is finalised, so a
+        # stand-in for the tracer has to answer to it
         extractor._trace = types.SimpleNamespace(
-            tcp=types.SimpleNamespace(index=('trace',)),
+            tcp=types.SimpleNamespace(index=('trace',), finish=lambda: None),
         )
         extractor._exeng = FakeEngine(extractor)
         extractor._magic = b'fake'
