@@ -8542,7 +8542,9 @@
 <span class="sd">            subtype_namespace: MN-ID subtype namespace.</span>
 <span class="sd">            subtype_reversed: MN-ID subtype reversed flag.</span>
 <span class="sd">            identifier: Identifier. An :obj:`int` is accepted for every</span>
-<span class="sd">                subtype except ``NAI``. For ``IPv6_Address`` it is converted</span>
+<span class="sd">                subtype except ``NAI``, with the sole exception of a</span>
+<span class="sd">                :obj:`bool`, which is rejected for every subtype -- see</span>
+<span class="sd">                ``Raises`` below. For ``IPv6_Address`` it is converted</span>
 <span class="sd">                and validated the same way as any other value</span>
 <span class="sd">                :class:`ipaddress.IPv6Address` accepts. For the other six</span>
 <span class="sd">                subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an</span>
@@ -8558,12 +8560,24 @@
 <span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``identifier`` is a negative :obj:`int` (no</span>
-<span class="sd">                subtype has a wire form for one), an :obj:`int` of any value</span>
-<span class="sd">                with the ``NAI`` subtype, or an :obj:`int` of ``2**128`` or</span>
+<span class="sd">            ProtocolError: If ``identifier`` is a :obj:`bool`, for any subtype</span>
+<span class="sd">                -- :obj:`bool` is an :obj:`int` subclass, so ``True`` would</span>
+<span class="sd">                otherwise be converted by two different paths below, to</span>
+<span class="sd">                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for</span>
+<span class="sd">                the other six, neither of which a caller passing a flag can</span>
+<span class="sd">                plausibly have meant; pass ``int(...)`` to get the numeric</span>
+<span class="sd">                value (c.f. #469). If ``identifier`` is a negative :obj:`int`</span>
+<span class="sd">                (no subtype has a wire form for one), an :obj:`int` of any value</span>
+<span class="sd">                with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or</span>
 <span class="sd">                above with the ``IPv6_Address`` subtype (whose wire form is a</span>
 <span class="sd">                fixed 16 octets, unlike the other subtypes, which have no</span>
-<span class="sd">                ceiling and simply pack into more).</span>
+<span class="sd">                ceiling and simply pack into more), or ``identifier`` is of a</span>
+<span class="sd">                type its subtype's field cannot hold at all: anything but</span>
+<span class="sd">                :obj:`str` for ``NAI``, anything but :obj:`bytes`/</span>
+<span class="sd">                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`</span>
+<span class="sd">                is converted rather than rejected there, per #468 -- or anything</span>
+<span class="sd">                :class:`ipaddress.IPv6Address` itself does not accept for</span>
+<span class="sd">                ``IPv6_Address`` (c.f. #469).</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8598,6 +8612,21 @@
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype </span><span class="si">{</span><span class="n">subtype_repr</span><span class="si">}</span><span class="s1"> '</span>
                 <span class="sa">f</span><span class="s1">'identifier must be a non-negative int, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># NOTE: checked before the subtype dispatch, because ``bool`` is an</span>
+            <span class="c1"># ``int`` subclass and so would otherwise be converted by *two*</span>
+            <span class="c1"># different paths below -- ``IPv6Address(1)``, that is ``::1``, for</span>
+            <span class="c1"># ``IPv6_Address``, and a one-octet identifier for the six</span>
+            <span class="c1"># ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake</span>
+            <span class="c1"># in every case rather than a value anyone means, so it is refused</span>
+            <span class="c1"># before either path can give it a plausible-looking wire form. A</span>
+            <span class="c1"># caller who genuinely wants the integer should pass ``int(flag)``</span>
+            <span class="c1"># (c.f. #469 review).</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID identifier must not be a '</span>
+                <span class="sa">f</span><span class="s1">'bool, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1"> -- pass int(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if the '</span>
+                <span class="sa">f</span><span class="s1">'numeric value is what is wanted'</span><span class="p">)</span>
+
         <span class="c1"># NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),</span>
         <span class="c1"># not by the Python type of ``identifier``, so the width has to be taken from</span>
         <span class="c1"># the former. For the ``IPv6_Address`` subtype the schema always packs a fixed</span>
@@ -8623,7 +8652,23 @@
                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype IPv6_Address '</span>
                     <span class="sa">f</span><span class="s1">'identifier must be an int below 2**128, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
-                <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+                <span class="c1"># NOTE: catches ipaddress.AddressValueError -- itself a bare</span>
+                <span class="c1"># ValueError -- for every identifier ipaddress.IPv6Address</span>
+                <span class="c1"># cannot turn into an address: bytes of the wrong length, a</span>
+                <span class="c1"># str that is not an IPv6 literal, or a type it does not</span>
+                <span class="c1"># accept at all (float, None, list, dict, bytearray,</span>
+                <span class="c1"># memoryview -- ipaddress.IPv6Address only ever dispatches on</span>
+                <span class="c1"># bytes, int or str). The ``try`` wraps only this call, not</span>
+                <span class="c1"># the whole branch, so it cannot swallow the ProtocolError</span>
+                <span class="c1"># raised above for an out-of-range int, which is also a</span>
+                <span class="c1"># ValueError subclass (c.f. #467, #468, #469).</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">identifier</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype IPv6_Address '</span>
+                        <span class="sa">f</span><span class="s1">'identifier must be an ipaddress.IPv6Address, an int, or '</span>
+                        <span class="sa">f</span><span class="s1">'bytes/str it accepts, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
@@ -8659,7 +8704,52 @@
             <span class="c1"># encoder would produce.</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
             <span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">id_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
+            <span class="c1"># NOTE: NAI's field is a StringField (c.f. mn_id_selector), which</span>
+            <span class="c1"># calls ``identifier.encode(...)`` to pack -- so anything but a</span>
+            <span class="c1"># genuine str leaks a bare stdlib exception: AttributeError for</span>
+            <span class="c1"># bytes/list/dict (no ``.encode``), TypeError for float/None/an</span>
+            <span class="c1"># ipaddress.IPv6Address (no ``__len__`` either, so this branch's</span>
+            <span class="c1"># own ``len()`` call below would be the one to raise). Guarded</span>
+            <span class="c1"># here, before ``len()``, rather than relying on whichever of</span>
+            <span class="c1"># those two happens to fire first (c.f. #469). Deliberately not</span>
+            <span class="c1"># decoding a ``bytes`` identifier here: an NAI that happens to be</span>
+            <span class="c1"># ASCII-encodable is still the caller handing over the wrong</span>
+            <span class="c1"># representation, the same "accepts a value that means the wrong</span>
+            <span class="c1"># thing" #467 removed for int, just relocated to bytes.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype NAI '</span>
+                    <span class="sa">f</span><span class="s1">'identifier must be str, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NOTE: every other subtype's field is a</span>
+            <span class="c1"># BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector),</span>
+            <span class="c1"># which hands ``identifier`` to ``struct.pack('Ns', ...)``</span>
+            <span class="c1"># unconverted -- so anything but bytes leaks a bare stdlib</span>
+            <span class="c1"># exception: struct.error for str/list/dict (struct's ``s``</span>
+            <span class="c1"># format demands a bytes object), TypeError for float/None/an</span>
+            <span class="c1"># ipaddress.IPv6Address (no ``__len__``, so this branch's own</span>
+            <span class="c1"># ``len()`` call below would raise instead). Guarded here,</span>
+            <span class="c1"># before ``len()``, for the same reason as the NAI branch above</span>
+            <span class="c1"># (c.f. #469).</span>
+            <span class="c1">#</span>
+            <span class="c1"># bytearray is accepted alongside bytes -- unlike every other</span>
+            <span class="c1"># wrong type here, it already round-trips correctly through</span>
+            <span class="c1"># ``struct.pack('Ns', ...)`` (measured), so rejecting it would</span>
+            <span class="c1"># be a gratuitous behaviour change to a type nothing here is</span>
+            <span class="c1"># actually broken for. memoryview looks equally bytes-like but</span>
+            <span class="c1"># does *not* survive struct's ``s`` format (measured: same</span>
+            <span class="c1"># ``struct.error`` as str/list/dict), so it is rejected with</span>
+            <span class="c1"># everything else rather than let through to leak anyway.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">Enum_MNIDSubtype</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">subtype_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">subtype_val</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] MN-ID subtype </span><span class="si">{</span><span class="n">subtype_repr</span><span class="si">}</span><span class="s1"> '</span>
+                    <span class="sa">f</span><span class="s1">'identifier must be bytes, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_MNIDOption</span><span class="p">(</span>
