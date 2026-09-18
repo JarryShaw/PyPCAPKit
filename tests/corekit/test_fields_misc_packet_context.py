@@ -20,9 +20,10 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     declare -- which every top-level schema writes as ``pkt['length']`` and
     which a nested one inherited unmodified -- raised :exc:`KeyError` instead
     of reaching the enclosing schema. ``pcapkit.corekit.fields.misc.
-    nested_packet_context`` replaces that literal with a two-level
-    :class:`collections.ChainMap`, so a name absent locally falls through to
-    the enclosing schema, while ``__packet__`` keeps naming it explicitly.
+    nested_packet_context`` replaces that literal with a plain :class:`dict`
+    holding a shallow copy of the enclosing schema's own names, so a name the
+    nested schema does not declare resolves to the enclosing schema's value,
+    while ``__packet__`` keeps naming the enclosing mapping explicitly.
 
     :meth:`test_nested_schema_reads_enclosing_field_by_name_and_does_not_leak_writes`
     is the load-bearing case: it fails with the recorded ``KeyError`` before
@@ -31,26 +32,28 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     schema's own, and that nothing the nested schema writes through the
     mapping is ever written back to the enclosing schema's own data.
 
-    An intermediate version of this fix used a hand-written :class:`dict`
-    subclass instead of :class:`collections.ChainMap`, adopted when a bare
-    ``ChainMap`` was suspected of corrupting a shared
-    :class:`~abc.ABCMeta` cache on CPython <= 3.10 (issue #439) -- a suspicion
-    that is probably wrong but is no longer decidable, since #439's direct fix
-    removed the mechanism; see
-    :func:`pcapkit.corekit.fields.misc.nested_packet_context` for why it is
-    recorded as two measurements that do not fully reconcile rather than as a
-    settled reversal. Both the suspicion and the workaround it produced have
-    since been retired: #439 was fixed directly, and the hand-written
-    subclass's own
-    ``.setdefault()`` bypassed the fallback the same way :class:`dict`'s
-    built-in one does, silently inserting a name locally instead of
-    honouring what the enclosing schema already had for it --
+    Intermediate versions of this fix returned a :class:`collections.ChainMap`
+    and then a hand-written :class:`dict` subclass, the latter adopted when the
+    ``ChainMap`` was suspected of corrupting a shared :class:`~abc.ABCMeta`
+    cache on CPython <= 3.10 (issue #439) -- a suspicion that is probably wrong
+    but is no longer decidable, since #439's direct fix removed the mechanism;
+    see :func:`pcapkit.corekit.fields.misc.nested_packet_context` for why it is
+    recorded there as two measurements that do not fully reconcile rather than
+    as a settled reversal.
+
+    Both are retired. What the plain :class:`dict` settles that neither
+    predecessor did: the subclass's own ``.setdefault()`` bypassed the fallback
+    exactly as :class:`dict`'s built-in one does, silently inserting a name
+    locally instead of honouring what the enclosing schema already had for it,
+    and its ``__eq__`` compared only its own storage; the ``ChainMap`` got both
+    right by delegation but needed a :func:`~typing.cast` at the call site,
+    since it does not satisfy ``Schema.pack``'s ``dict[str, Any]`` annotation.
+    A copy needs neither a cast nor an override -- every operation is
+    :class:`dict`'s own.
     :meth:`test_nested_schema_reads_enclosing_field_by_name_and_does_not_leak_writes`
-    pins the corrected behaviour (``setdefault`` on a name absent locally but
-    present in the parent returns the parent's value rather than inserting a
-    new one) precisely because that was the gap. See
-    :func:`pcapkit.corekit.fields.misc.nested_packet_context` for the full
-    history.
+    pins the behaviour that was the gap (``setdefault`` on a name absent
+    locally but present in the parent returns the parent's value rather than
+    inserting a new one), which is issue #474.
 
     """
 
