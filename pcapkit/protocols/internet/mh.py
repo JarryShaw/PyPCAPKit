@@ -7707,6 +7707,22 @@ class MH(Internet[Data_MH, Schema_MH],
         # form here as well, keeping the packed bytes and the declared length derived
         # from one value instead of two independent computations (c.f. #448).
         if subtype_val == Enum_MNIDSubtype.IPv6_Address:
+            if isinstance(identifier, int) and identifier >= 1 << 128:
+                # NOTE: the upper-bound mirror of the negative-int guard above, and
+                # it belongs here rather than up there because this bound is
+                # subtype-*dependent*: ``2**140`` is a perfectly good identifier for
+                # the six ``BytesField`` subtypes -- it simply packs into more
+                # octets -- and only ``IPv6_Address`` caps at 128 bits. Left
+                # unguarded, :class:`ipaddress.IPv6Address` raises
+                # ``AddressValueError``, itself a bare :exc:`ValueError`, so this
+                # handler would otherwise ship with its lower bound guarded and its
+                # upper bound leaking (c.f. #467, #468). Checked explicitly rather
+                # than by wrapping the construction below, because that would also
+                # swallow the wrong-*type* ``AddressValueError`` -- a ``str`` or
+                # ``None`` reaching here -- which is #469's subject, not this one's.
+                raise ProtocolError(
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
+                    f'identifier must be an int below 2**128, not {identifier!r}')
             if not isinstance(identifier, ipaddress.IPv6Address):
                 identifier = ipaddress.IPv6Address(identifier)
             id_len = 16

@@ -2430,6 +2430,36 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(schema.length, 17)
         self.assertEqual(len(schema.pack()), schema.length + 2)
 
+        # ``IPv6_Address`` is the one subtype with an *upper* bound as well, and it
+        # is checked on both sides of the boundary rather than at some large value,
+        # which is how this gap survived the first pass: the earlier probe stopped
+        # at ``2**128 - 1``, exactly one below where the answer changes. Above the
+        # bound ``ipaddress.IPv6Address`` raises ``AddressValueError`` -- a bare
+        # ``ValueError`` -- so it must be rejected in-library instead. The bound is
+        # subtype-dependent: the ``BytesField`` subtypes have no ceiling and simply
+        # produce more octets, which is asserted here too so that a future guard
+        # cannot be hoisted to cover them by mistake.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+            identifier=2 ** 128 - 1)
+        self.assertEqual(schema.length, 17)
+        for identifier in (2 ** 128, 2 ** 140):
+            with self.subTest(subtype='IPv6_Address', identifier=identifier):
+                with self.assertRaises(ProtocolError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+                        identifier=identifier)
+                self.assertIn('below 2**128', str(ctx.exception))
+        for subtype in ('IMSI', 'P_TMSI', 'EUI_48_address', 'EUI_64_address',
+                        'GUTI', 'DUID'):
+            for identifier, id_len in ((2 ** 128, 17), (2 ** 140, 18)):
+                with self.subTest(subtype=subtype, identifier=identifier):
+                    schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE,
+                        subtype=getattr(MNIDSubtype, subtype), identifier=identifier)
+                    self.assertEqual(schema.length, 1 + id_len)
+                    self.assertEqual(len(schema.pack()), schema.length + 2)
+
         # 0, a negative value, and anything above 255 are all outside what
         # ``MNIDSubtype._missing_`` extends. Naming the subtype in a rejection
         # message must not let that enum round-trip's own bare ``ValueError``
