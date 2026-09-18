@@ -226,12 +226,12 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
             PSN: payload sequence number of the arriving segment
 
         """
-        ISN = fragment.isn   # Initial Sequence Number
-        RAW = fragment.raw   # Raw Payload Data
-        GAPS = fragment.gap  # this fragment's own gap list
+        ISN = fragment.isn       # Initial Sequence Number
+        RAW = fragment.raw       # Raw Payload Data
+        GAPS = fragment.gap      # this fragment's own gap list
         LEN = fragment.len
-        GAP = PSN - (ISN + LEN)     # gap length between payloads
-        if GAP >= 0:    # if fragment goes after existing payload
+        GAP = PSN - (ISN + LEN)  # gap length between payloads
+        if GAP >= 0:             # if fragment goes after existing payload
             if GAP > 0:
                 GAPS.append((ISN + LEN, PSN - 1))
             RAW += bytearray(GAP) + info.payload
@@ -280,15 +280,15 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
             PSN: payload sequence number of the arriving segment
 
         """
-        ISN = fragment.isn   # Initial Sequence Number, before revision
-        RAW = fragment.raw   # Raw Payload Data
-        GAPS = fragment.gap  # this fragment's own gap list
+        ISN = fragment.isn       # Initial Sequence Number, before revision
+        RAW = fragment.raw       # Raw Payload Data
+        GAPS = fragment.gap      # this fragment's own gap list
         LEN = info.len
-        GAP = ISN - (PSN + LEN)     # gap length between payloads
+        GAP = ISN - (PSN + LEN)  # gap length between payloads
         fragment.__update__(
             isn=PSN,
         )
-        if GAP >= 0:    # if fragment exceeds existing payload
+        if GAP >= 0:             # if fragment exceeds existing payload
             if GAP > 0:
                 GAPS.append((PSN + LEN, ISN - 1))
             RAW = info.payload + bytearray(GAP) + RAW
