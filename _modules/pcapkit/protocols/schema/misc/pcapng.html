@@ -845,14 +845,19 @@
 <div class="viewcode-block" id="Option.__init_subclass__">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Optional[Enum_OptionType | Iterable[Enum_OptionType]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">namespace</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                          <span class="n">ns</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Register option type to :attr:`__enum__` mapping.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: Option type code. It can be either a single option type enumeration</span>
 <span class="sd">                or a list of option type enumerations.</span>
-<span class="sd">            namespace: Namespace of option type enumeration. If not given, the value</span>
-<span class="sd">                will be inferred from the option type code.</span>
+<span class="sd">            ns: Namespace of option type enumeration. If not given, the value</span>
+<span class="sd">                will be inferred from the option type code. Spelled ``ns`` rather</span>
+<span class="sd">                than ``namespace`` because :meth:`abc.ABCMeta.__new__` names its</span>
+<span class="sd">                own fourth parameter ``namespace``, and before Python 3.11 that</span>
+<span class="sd">                parameter is positional-or-keyword rather than positional-only --</span>
+<span class="sd">                so a class keyword literally called ``namespace`` bound it twice.</span>
+<span class="sd">                See GitHub issue #439.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -867,25 +872,25 @@
 <span class="sd">               from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType</span>
 <span class="sd">               from pcapkit.protocols.schema.misc.pcapng improt Option</span>
 
-<span class="sd">               class NewOption(Option, namespace='opt', code=Enum_OptionType.opt_new):</span>
+<span class="sd">               class NewOption(Option, ns='opt', code=Enum_OptionType.opt_new):</span>
 <span class="sd">                   ...</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            - :class:`pcapkit.const.pcapng.option_type.OptionType`</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span> <span class="o">=</span> <span class="n">namespace</span>
+        <span class="k">if</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span> <span class="o">=</span> <span class="n">ns</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">namespace</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ns</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[str]'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_OptionType</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
-                    <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+                    <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+                <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 
 
@@ -925,7 +930,7 @@
 
 <div class="viewcode-block" id="_OPT_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._OPT_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_OPT_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_OPT_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'opt'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``opt_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -1100,7 +1105,7 @@
 
 <div class="viewcode-block" id="_IF_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._IF_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_IF_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'if'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_IF_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'if'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``if_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -1426,7 +1431,7 @@
 
 <div class="viewcode-block" id="_EPB_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._EPB_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_EPB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'epb'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_EPB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'epb'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``epb_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -1741,7 +1746,7 @@
 
 <div class="viewcode-block" id="_NS_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._NS_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_NS_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'ns'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_NS_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'ns'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``ns_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -1866,7 +1871,7 @@
 
 <div class="viewcode-block" id="_ISB_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._ISB_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_ISB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'isb'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_ISB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'isb'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``isb_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -2225,7 +2230,7 @@
 
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_DSB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'dsb'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_DSB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'dsb'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``dsb_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>
@@ -2306,7 +2311,7 @@
 
 <div class="viewcode-block" id="_PACK_Option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._PACK_Option">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">_PACK_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'pack'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_PACK_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s1">'pack'</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for ``pack_*`` options."""</span>
 
     <span class="c1">#: Option type.</span>

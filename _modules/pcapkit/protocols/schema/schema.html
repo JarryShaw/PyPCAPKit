@@ -412,7 +412,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
@@ -422,7 +421,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">FinalisedState</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolUnbound</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolUnbound</span><span class="p">,</span> <span class="n">SchemaError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -621,7 +620,55 @@
                 <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Schema]'</span><span class="p">:</span>
+    <span class="c1">#: Class keywords that collide with a parameter this class does not</span>
+    <span class="c1">#: control, so a schema class declared with one fails with an opaque</span>
+    <span class="c1">#: ``TypeError`` from several frames away instead of a clear message here.</span>
+    <span class="c1">#: Two different collisions, both reserved:</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: ``mcls``, ``name``, ``bases``, ``namespace`` collide with</span>
+    <span class="c1">#: :meth:`abc.ABCMeta.__new__` -- a *different* function from this one, one</span>
+    <span class="c1">#: level up the ``super().__new__(...)`` call below. Before Python 3.11</span>
+    <span class="c1">#: those four are positional-or-keyword there (from 3.11 they are</span>
+    <span class="c1">#: positional-only, ``def __new__(mcls, name, bases, namespace, /,</span>
+    <span class="c1">#: **kwargs)``), so a class keyword spelled the same as any of them binds</span>
+    <span class="c1">#: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple</span>
+    <span class="c1">#: values for argument '...'``. That is GitHub issue #439's root cause --</span>
+    <span class="c1">#: ``namespace`` collided this way, which is why</span>
+    <span class="c1">#: :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``Option`` subclasses</span>
+    <span class="c1">#: spell it ``ns=`` instead.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: ``cls`` collides one level *later*: every ``__init_subclass__`` is an</span>
+    <span class="c1">#: implicit classmethod, so ``cls`` is always bound as its first argument,</span>
+    <span class="c1">#: and a class keyword also spelled ``cls`` binds it twice there --</span>
+    <span class="c1">#: ``TypeError: Generic.__init_subclass__() got multiple values for</span>
+    <span class="c1">#: argument 'cls'`` for a :class:`Schema` subclass (:class:`Schema`</span>
+    <span class="c1">#: inherits :class:`typing.Generic`), or the equivalent from whichever</span>
+    <span class="c1">#: class in the MRO defines ``__init_subclass__`` first. This one is not</span>
+    <span class="c1">#: specific to ``abc.ABCMeta`` or to this metaclass at all -- it holds for</span>
+    <span class="c1">#: *any* Python class with any ``__init_subclass__`` in its MRO -- but it</span>
+    <span class="c1">#: is reserved here anyway since it is exactly the class of mistake this</span>
+    <span class="c1">#: guard exists to catch early and legibly.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Listed explicitly rather than derived from</span>
+    <span class="c1">#: :func:`inspect.signature(abc.ABCMeta.__new__) &lt;inspect.signature&gt;` at</span>
+    <span class="c1">#: import time: the signature's positional-only marker differs across</span>
+    <span class="c1">#: Python versions, introspecting a CPython internal's exact shape to</span>
+    <span class="c1">#: guard against a CPython internal's exact shape is circular, and five</span>
+    <span class="c1">#: names that will not change are cheaper to read than the machinery to</span>
+    <span class="c1">#: recompute them.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: ``name``, ``bases`` and ``attrs`` -- *this* method's own parameters --</span>
+    <span class="c1">#: collide the same way one level earlier than ``ABCMeta.__new__``, on</span>
+    <span class="c1">#: every Python version, and are not in this set for that reason alone:</span>
+    <span class="c1">#: they are made positional-only below instead (the same fix CPython gave</span>
+    <span class="c1">#: ``ABCMeta.__new__`` in 3.11), which removes the collision rather than</span>
+    <span class="c1">#: merely naming it. ``name`` and ``bases`` stay in this set regardless,</span>
+    <span class="c1">#: because they still collide with ``ABCMeta.__new__``'s parameters of the</span>
+    <span class="c1">#: same name one level up; ``attrs`` does not appear anywhere downstream</span>
+    <span class="c1">#: and so needs no entry once it is positional-only here.</span>
+    <span class="n">_RESERVED_CLASS_KWARGS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'mcls'</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="s1">'bases'</span><span class="p">,</span> <span class="s1">'namespace'</span><span class="p">,</span> <span class="s1">'cls'</span><span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Schema]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create the schema class.</span>
 
 <span class="sd">        Args:</span>
@@ -634,7 +681,22 @@
 <span class="sd">        :attr:`~Schema.__excluded__` fields from the base classes, as well as</span>
 <span class="sd">        populating both fields from the subclass attributes.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            SchemaError: If a class keyword in ``**kwargs`` collides with a</span>
+<span class="sd">                parameter of :meth:`abc.ABCMeta.__new__` or of</span>
+<span class="sd">                ``__init_subclass__`` -- see :attr:`_RESERVED_CLASS_KWARGS`.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">clash</span> <span class="o">:=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_RESERVED_CLASS_KWARGS</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: class keyword(s) </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">clash</span><span class="p">)</span><span class="si">!r}</span><span class="s1"> are reserved -- '</span>
+                <span class="sa">f</span><span class="s1">'each collides with a same-named parameter of either '</span>
+                <span class="sa">f</span><span class="s1">'abc.ABCMeta.__new__ or the implicit __init_subclass__ '</span>
+                <span class="sa">f</span><span class="s1">'classmethod binding, and cannot be used as a class keyword '</span>
+                <span class="sa">f</span><span class="s1">'on a Schema subclass; rename to a different spelling (see '</span>
+                <span class="sa">f</span><span class="s1">'GitHub issue #439)'</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="s1">'__additional__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="s1">'__excluded__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
@@ -646,10 +708,17 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">])</span>
 
-        <span class="c1"># NOTE: for unknown reason, the following code will cause an error</span>
-        <span class="c1"># for duplicated keyword arguments in class definition.</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># See #439: this used to branch on ``sys.version_info &lt; (3, 11)`` and</span>
+        <span class="c1"># call ``type.__new__`` directly below that, to dodge the ``namespace``</span>
+        <span class="c1"># collision described above. That branch skipped ``ABCMeta.__new__``'s</span>
+        <span class="c1"># call to ``abc._abc_init(cls)``, so no :class:`Schema` subclass ever</span>
+        <span class="c1"># got its own ``_abc_impl``, and every one of them fell through the</span>
+        <span class="c1"># MRO to :class:`collections.abc.Mapping`'s -- corrupting</span>
+        <span class="c1"># ``isinstance`` against *any* of them for as long as the process ran.</span>
+        <span class="c1"># The actual fix was renaming the one colliding class keyword that was</span>
+        <span class="c1"># actually in use, which means this can now call ``ABCMeta.__new__``</span>
+        <span class="c1"># unconditionally, on every supported version, like any other</span>
+        <span class="c1"># metaclass would.</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
