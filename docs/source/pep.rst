@@ -223,9 +223,6 @@ What is left, and why:
   so putting it in that chain would make ``layer=`` and ``protocol=`` limits
   behave wrongly. Changing the parsed shape from :obj:`bytes` to ``Raw`` also
   changes what existing captures dump to, so it is its own change.
-* **The MN-ID option's constructor mis-sizes a non-address identifier**, tracked
-  as `#448 <https://github.com/JarryShaw/PyPCAPKit/issues/448>`__. Pre-existing
-  and outside the registry-completion work, so it is filed rather than fixed here.
 
 Two wire-format traps are worth knowing before touching this code, since both
 look like ordinary fields and are not:

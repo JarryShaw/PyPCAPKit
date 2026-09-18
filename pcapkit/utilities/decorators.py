@@ -17,7 +17,7 @@ import os
 import traceback
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.exceptions import StructError, stacklevel
+from pcapkit.utilities.exceptions import StreamEOFError, StructError, stacklevel
 from pcapkit.utilities.logging import DEVMODE, VERBOSE, get_logger
 
 if TYPE_CHECKING:
@@ -192,9 +192,22 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
 
             func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',
                  data: 'bytes | typing.IO[bytes]',
-                 length: 'Optional[int],
-                 packet: 'Optional[dict[str, Any]',
-                 *args: 'typing.Any', **kwargs: 'Any') -> 'pcapkit.protocols.schema.schema.Schema'
+                 length: 'Optional[int]',
+                 packet: 'Optional[dict[str, Any]]') -> 'pcapkit.protocols.schema.schema.Schema'
+
+        No further positional or keyword arguments are read from -- or
+        forwarded to -- the decorated function. :func:`prepare` is applied to
+        exactly one function in this tree,
+        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`,
+        whose real signature has never had more than these four parameters,
+        and nothing calls it with more; an earlier revision of this note
+        nonetheless promised implementors a trailing ``*args, **kwargs``, which
+        the wrapper below never populated. A caller relying on that promise
+        got extras silently discarded instead of forwarded -- see `#454
+        <https://github.com/JarryShaw/PyPCAPKit/issues/454>`__ -- so the
+        wrapper now raises :exc:`TypeError` for a fifth positional argument or
+        an unconsumed keyword, the same as an ordinary call with too many
+        arguments would.
 
     See Also:
         :meth:`pcapkit.protocols.schema.schema.Schema.unpack`
@@ -215,6 +228,30 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         length = cast('Optional[int]', args[2] if len(args) > 2 else kwargs.pop('length', None))
         packet = cast('Optional[dict[str, Any]]', args[3] if len(args) > 3 else kwargs.pop('packet', None))
 
+        # NOTE: The decorated function's real signature is exactly the four
+        # parameters above -- see #454. Anything left over here is therefore
+        # unwanted rather than something to forward: a fifth positional
+        # argument, or a keyword that ``kwargs.pop`` above never touched
+        # because ``length``/``packet`` arrived positionally instead. The
+        # latter is also what catches ``length`` (or ``packet``) supplied
+        # *both* positionally and by keyword -- the positional value wins
+        # above and the keyword is left in ``kwargs`` unconsumed, so it
+        # surfaces here rather than silently losing the keyword's value.
+        extra_args = args[4:]
+        if extra_args or kwargs:
+            culprits = ', '.join([repr(arg) for arg in extra_args]
+                                  + [f'{name}={value!r}' for name, value in kwargs.items()])
+            raise TypeError(f'{func.__qualname__}() got unexpected argument(s): {culprits}')
+
+        # Whether the caller told us exactly how much there is to read, even
+        # if that is zero -- e.g. a nested schema sized by a ``length`` field
+        # that evaluates to zero, or an otherwise genuinely empty schema -- as
+        # opposed to leaving ``length`` to be derived from what is actually
+        # left in ``data``. Only a *derived* zero means the underlying stream
+        # itself is exhausted; a *declared* zero means this schema legitimately
+        # has nothing to read. See #458.
+        declared_length = length is not None
+
         if isinstance(data, bytes):
             length = len(data) if length is None else length
             data = io.BytesIO(data)
@@ -224,8 +261,13 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
                 length = data.seek(0, io.SEEK_END) - current
                 data.seek(current)
 
-        if length == 0:
-            raise EOFError
+        if length == 0 and not declared_length:
+            # Quiet: this is the frame reader's ordinary "no more packets"
+            # signal, caught as such by
+            # ``pcapkit.foundation.extraction.Extractor`` and friends -- c.f.
+            # ``pcapkit.protocols.protocol.ProtocolBase._read_unpack``'s
+            # ``StructError(..., quiet=True, eof=True)`` for the same pattern.
+            raise StreamEOFError('prepare: end of stream', quiet=True)
 
         if packet is None:
             packet = {}
