@@ -7646,7 +7646,9 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_namespace: MN-ID subtype namespace.
             subtype_reversed: MN-ID subtype reversed flag.
             identifier: Identifier. An :obj:`int` is accepted for every
-                subtype except ``NAI``. For ``IPv6_Address`` it is converted
+                subtype except ``NAI``, with the sole exception of a
+                :obj:`bool`, which is rejected for every subtype -- see
+                ``Raises`` below. For ``IPv6_Address`` it is converted
                 and validated the same way as any other value
                 :class:`ipaddress.IPv6Address` accepts. For the other six
                 subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an
@@ -7662,12 +7664,24 @@ class MH(Internet[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``identifier`` is a negative :obj:`int` (no
-                subtype has a wire form for one), an :obj:`int` of any value
-                with the ``NAI`` subtype, or an :obj:`int` of ``2**128`` or
+            ProtocolError: If ``identifier`` is a :obj:`bool`, for any subtype
+                -- :obj:`bool` is an :obj:`int` subclass, so ``True`` would
+                otherwise be converted by two different paths below, to
+                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for
+                the other six, neither of which a caller passing a flag can
+                plausibly have meant; pass ``int(...)`` to get the numeric
+                value (c.f. #469). If ``identifier`` is a negative :obj:`int`
+                (no subtype has a wire form for one), an :obj:`int` of any value
+                with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or
                 above with the ``IPv6_Address`` subtype (whose wire form is a
                 fixed 16 octets, unlike the other subtypes, which have no
-                ceiling and simply pack into more).
+                ceiling and simply pack into more), or ``identifier`` is of a
+                type its subtype's field cannot hold at all: anything but
+                :obj:`str` for ``NAI``, anything but :obj:`bytes`/
+                :obj:`bytearray`/:obj:`int` for the other six -- an :obj:`int`
+                is converted rather than rejected there, per #468 -- or anything
+                :class:`ipaddress.IPv6Address` itself does not accept for
+                ``IPv6_Address`` (c.f. #469).
 
         """
         if option is not None:
@@ -7702,6 +7716,21 @@ class MH(Internet[Data_MH, Schema_MH],
                 f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
                 f'identifier must be a non-negative int, not {identifier!r}')
 
+        if isinstance(identifier, bool):
+            # NOTE: checked before the subtype dispatch, because ``bool`` is an
+            # ``int`` subclass and so would otherwise be converted by *two*
+            # different paths below -- ``IPv6Address(1)``, that is ``::1``, for
+            # ``IPv6_Address``, and a one-octet identifier for the six
+            # ``BytesField`` subtypes. An MN-ID of ``True`` is a caller mistake
+            # in every case rather than a value anyone means, so it is refused
+            # before either path can give it a plausible-looking wire form. A
+            # caller who genuinely wants the integer should pass ``int(flag)``
+            # (c.f. #469 review).
+            raise ProtocolError(
+                f'{self.alias}: [OptNo {type}] MN-ID identifier must not be a '
+                f'bool, not {identifier!r} -- pass int({identifier!r}) if the '
+                f'numeric value is what is wanted')
+
         # NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),
         # not by the Python type of ``identifier``, so the width has to be taken from
         # the former. For the ``IPv6_Address`` subtype the schema always packs a fixed
@@ -7727,7 +7756,23 @@ class MH(Internet[Data_MH, Schema_MH],
                     f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
                     f'identifier must be an int below 2**128, not {identifier!r}')
             if not isinstance(identifier, ipaddress.IPv6Address):
-                identifier = ipaddress.IPv6Address(identifier)
+                # NOTE: catches ipaddress.AddressValueError -- itself a bare
+                # ValueError -- for every identifier ipaddress.IPv6Address
+                # cannot turn into an address: bytes of the wrong length, a
+                # str that is not an IPv6 literal, or a type it does not
+                # accept at all (float, None, list, dict, bytearray,
+                # memoryview -- ipaddress.IPv6Address only ever dispatches on
+                # bytes, int or str). The ``try`` wraps only this call, not
+                # the whole branch, so it cannot swallow the ProtocolError
+                # raised above for an out-of-range int, which is also a
+                # ValueError subclass (c.f. #467, #468, #469).
+                try:
+                    identifier = ipaddress.IPv6Address(identifier)
+                except ValueError as error:
+                    raise ProtocolError(
+                        f'{self.alias}: [OptNo {type}] MN-ID subtype IPv6_Address '
+                        f'identifier must be an ipaddress.IPv6Address, an int, or '
+                        f'bytes/str it accepts, not {identifier!r}') from error
             id_len = 16
         elif isinstance(identifier, int):
             if subtype_val == Enum_MNIDSubtype.NAI:
@@ -7763,7 +7808,52 @@ class MH(Internet[Data_MH, Schema_MH],
             # encoder would produce.
             id_len = max(1, math.ceil(identifier.bit_length() / 8))
             identifier = identifier.to_bytes(id_len, 'big')
+        elif subtype_val == Enum_MNIDSubtype.NAI:
+            # NOTE: NAI's field is a StringField (c.f. mn_id_selector), which
+            # calls ``identifier.encode(...)`` to pack -- so anything but a
+            # genuine str leaks a bare stdlib exception: AttributeError for
+            # bytes/list/dict (no ``.encode``), TypeError for float/None/an
+            # ipaddress.IPv6Address (no ``__len__`` either, so this branch's
+            # own ``len()`` call below would be the one to raise). Guarded
+            # here, before ``len()``, rather than relying on whichever of
+            # those two happens to fire first (c.f. #469). Deliberately not
+            # decoding a ``bytes`` identifier here: an NAI that happens to be
+            # ASCII-encodable is still the caller handing over the wrong
+            # representation, the same "accepts a value that means the wrong
+            # thing" #467 removed for int, just relocated to bytes.
+            if not isinstance(identifier, str):
+                raise ProtocolError(
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype NAI '
+                    f'identifier must be str, not {identifier!r}')
+            id_len = len(identifier)
         else:
+            # NOTE: every other subtype's field is a
+            # BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector),
+            # which hands ``identifier`` to ``struct.pack('Ns', ...)``
+            # unconverted -- so anything but bytes leaks a bare stdlib
+            # exception: struct.error for str/list/dict (struct's ``s``
+            # format demands a bytes object), TypeError for float/None/an
+            # ipaddress.IPv6Address (no ``__len__``, so this branch's own
+            # ``len()`` call below would raise instead). Guarded here,
+            # before ``len()``, for the same reason as the NAI branch above
+            # (c.f. #469).
+            #
+            # bytearray is accepted alongside bytes -- unlike every other
+            # wrong type here, it already round-trips correctly through
+            # ``struct.pack('Ns', ...)`` (measured), so rejecting it would
+            # be a gratuitous behaviour change to a type nothing here is
+            # actually broken for. memoryview looks equally bytes-like but
+            # does *not* survive struct's ``s`` format (measured: same
+            # ``struct.error`` as str/list/dict), so it is rejected with
+            # everything else rather than let through to leak anyway.
+            if not isinstance(identifier, (bytes, bytearray)):
+                try:
+                    subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
+                except ValueError:
+                    subtype_repr = repr(subtype_val)
+                raise ProtocolError(
+                    f'{self.alias}: [OptNo {type}] MN-ID subtype {subtype_repr} '
+                    f'identifier must be bytes, not {identifier!r}')
             id_len = len(identifier)
 
         return Schema_MNIDOption(

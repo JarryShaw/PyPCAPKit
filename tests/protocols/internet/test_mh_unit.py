@@ -2482,6 +2482,152 @@ class MHUnitTests(unittest.TestCase):
                         Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=-5)
                 self.assertIsInstance(ctx.exception, BaseError)
 
+    def test_mh_mn_id_option_rejects_wrong_type_identifier_per_subtype(self) -> None:
+        """Every MN-ID subtype rejects the *other* documented type in-library.
+
+        ``_make_opt_mn_id`` annotates ``identifier`` as
+        ``bytes | str | IPv6Address | int``, and #467/#468 (see
+        ``test_mh_mn_id_option_converts_int_identifier_per_subtype`` above)
+        closed the ``int`` half of that union. But each subtype's field
+        (c.f. ``mn_id_selector``) accepts exactly *one* of ``bytes``/``str``
+        -- a ``StringField`` for ``NAI``, a ``BytesField`` for the other six
+        -- so handing the wrong one, or a value of neither type, used to
+        leak a bare stdlib exception instead of an in-library one:
+
+        * ``bytes``/list/dict for ``NAI`` -- ``AttributeError`` (``StringField``
+          calls ``identifier.encode(...)`` to pack)
+        * ``str``/list/dict for the six octet subtypes -- ``struct.error``
+          (struct's ``s`` format demands a bytes object)
+        * anything without ``__len__`` (``float``, ``None``, an
+          :class:`~ipaddress.IPv6Address`) for any of the seven --
+          ``TypeError: object of type '...' has no len()``
+        * anything :class:`ipaddress.IPv6Address` itself cannot parse, for
+          ``IPv6_Address`` -- ``ipaddress.AddressValueError``, itself a bare
+          ``ValueError``
+
+        Every one of those must become a ``ProtocolError`` naming the subtype
+        and the type it actually accepts. See #469.
+        """
+        from ipaddress import IPv6Address
+
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+
+        octet_subtypes = ('IMSI', 'P_TMSI', 'EUI_48_address', 'EUI_64_address',
+                           'GUTI', 'DUID')
+
+        # values that are the *wrong* type for every subtype below -- none of
+        # bytes, str, an IPv6Address instance, a float, None, a list, or a
+        # dict is what any of these subtypes' fields can hold except the one
+        # matching type tested separately further down.
+        wrong_for_nai = (b'\x01\x02', [1, 2], {'a': 1}, IPv6Address('::1'), 1.5, None, b'')
+        wrong_for_octets = ('user@realm', [1, 2], {'a': 1}, IPv6Address('::1'), 1.5, None, '', memoryview(b'\x01\x02'))
+        wrong_for_ipv6 = (b'\x01\x02', 'user@realm', [1, 2], {'a': 1}, 1.5, None, b'',
+                          bytearray(b'\x00' * 16), memoryview(b'\x00' * 16))
+
+        for value in wrong_for_nai:
+            with self.subTest(subtype='NAI', identifier=value):
+                with self.assertRaises(BaseError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.NAI, identifier=value)
+                self.assertIsInstance(ctx.exception, ProtocolError)
+                self.assertIn('NAI', str(ctx.exception))
+                self.assertIn('str', str(ctx.exception))
+
+        for subtype in octet_subtypes:
+            for value in wrong_for_octets:
+                with self.subTest(subtype=subtype, identifier=value):
+                    with self.assertRaises(BaseError) as ctx:
+                        proto._make_opt_mn_id(  # type: ignore[arg-type]
+                            Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                            identifier=value)
+                    self.assertIsInstance(ctx.exception, ProtocolError)
+                    self.assertIn('bytes', str(ctx.exception))
+
+        for value in wrong_for_ipv6:
+            with self.subTest(subtype='IPv6_Address', identifier=value):
+                with self.assertRaises(BaseError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+                        identifier=value)
+                self.assertIsInstance(ctx.exception, ProtocolError)
+                self.assertIn('IPv6_Address', str(ctx.exception))
+
+        # the matching type, including the empty-value boundary, still works
+        # for every subtype -- this fix must reject the wrong type, not
+        # tighten what already worked.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.NAI, identifier='')
+        self.assertEqual(schema.length, 1)
+        self.assertEqual(len(schema.pack()), schema.length + 2)
+
+        for subtype in octet_subtypes:
+            with self.subTest(subtype=subtype, identifier=b''):
+                schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                    Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                    identifier=b'')
+                self.assertEqual(schema.length, 1)
+                self.assertEqual(len(schema.pack()), schema.length + 2)
+
+            # ``bytearray`` is accepted alongside ``bytes`` for the six octet
+            # subtypes: unlike every value in ``wrong_for_octets`` above, it
+            # already round-trips correctly through
+            # ``struct.pack('Ns', ...)`` (measured separately), so rejecting
+            # it would tighten behaviour that was never broken. ``memoryview``
+            # looks equally bytes-like but does *not* survive that same pack
+            # call, so it stays in ``wrong_for_octets`` above rather than
+            # being let through to leak a bare ``struct.error`` anyway.
+            with self.subTest(subtype=subtype, identifier='bytearray'):
+                schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+                    Option.MN_ID_OPTION_TYPE, subtype=getattr(MNIDSubtype, subtype),
+                    identifier=bytearray(b'\x01\x02'))
+                self.assertEqual(schema.identifier, bytearray(b'\x01\x02'))
+                self.assertEqual(schema.pack()[3:], b'\x01\x02')
+
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+            identifier=IPv6Address('2001:db8::1'))
+        self.assertEqual(schema.length, 17)
+        self.assertEqual(len(schema.pack()), schema.length + 2)
+
+    def test_mh_mn_id_option_rejects_a_bool_identifier_for_every_subtype(self) -> None:
+        """A ``bool`` identifier is a caller mistake, not a one-octet integer.
+
+        ``bool`` is an :class:`int` subclass, so before #469's review flagged it
+        ``True``/``False`` fell through to the #468 int-conversion path and
+        silently produced a plausible-looking wire form -- ``IPv6Address(1)``,
+        that is ``::1``, for ``IPv6_Address``, and a one-octet identifier for the
+        six ``BytesField`` subtypes. Refused for every subtype now, before the
+        subtype dispatch, so neither numeric path can reach it. A caller who
+        genuinely wants the integer passes ``int(flag)``, which the message says.
+        """
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(MH)
+        for subtype in ('NAI', 'IPv6_Address', 'IMSI', 'P_TMSI',
+                        'EUI_48_address', 'EUI_64_address', 'GUTI', 'DUID'):
+            for identifier in (True, False):
+                with self.subTest(subtype=subtype, identifier=identifier):
+                    with self.assertRaises(ProtocolError) as ctx:
+                        proto._make_opt_mn_id(  # type: ignore[arg-type]
+                            Option.MN_ID_OPTION_TYPE,
+                            subtype=getattr(MNIDSubtype, subtype),
+                            identifier=identifier)
+                    self.assertIn('must not be a bool', str(ctx.exception))
+
+        # ``int(flag)`` is the documented escape hatch and still converts.
+        schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
+            Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IMSI,
+            identifier=int(True))
+        self.assertEqual(schema.identifier, b'\x01')
+
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
 
