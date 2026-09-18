@@ -7646,7 +7646,9 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_namespace: MN-ID subtype namespace.
             subtype_reversed: MN-ID subtype reversed flag.
             identifier: Identifier. An :obj:`int` is accepted for every
-                subtype except ``NAI``. For ``IPv6_Address`` it is converted
+                subtype except ``NAI``, with the sole exception of a
+                :obj:`bool`, which is rejected for every subtype -- see
+                ``Raises`` below. For ``IPv6_Address`` it is converted
                 and validated the same way as any other value
                 :class:`ipaddress.IPv6Address` accepts. For the other six
                 subtypes -- all numeric identifiers (an IMSI, a P-TMSI, an
@@ -7662,8 +7664,14 @@ class MH(Internet[Data_MH, Schema_MH],
             Constructed option schema.
 
         Raises:
-            ProtocolError: If ``identifier`` is a negative :obj:`int` (no
-                subtype has a wire form for one), an :obj:`int` of any value
+            ProtocolError: If ``identifier`` is a :obj:`bool`, for any subtype
+                -- :obj:`bool` is an :obj:`int` subclass, so ``True`` would
+                otherwise be converted by two different paths below, to
+                ``::1`` for ``IPv6_Address`` and to a one-octet identifier for
+                the other six, neither of which a caller passing a flag can
+                plausibly have meant; pass ``int(...)`` to get the numeric
+                value (c.f. #469). If ``identifier`` is a negative :obj:`int`
+                (no subtype has a wire form for one), an :obj:`int` of any value
                 with the ``NAI`` subtype, an :obj:`int` of ``2**128`` or
                 above with the ``IPv6_Address`` subtype (whose wire form is a
                 fixed 16 octets, unlike the other subtypes, which have no
