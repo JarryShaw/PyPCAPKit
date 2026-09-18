@@ -7698,8 +7698,20 @@ class MH(Internet[Data_MH, Schema_MH],
             # without the crash (c.f. #467). Reject instead of silently
             # accepting a value that cannot pack.
             expected = 'str' if subtype_val == Enum_MNIDSubtype.NAI else 'bytes'
+            try:
+                # ``Enum_MNIDSubtype(subtype_val)`` round-trips a plain ``int``
+                # back into a named member for the message below -- but its own
+                # ``_missing_`` only auto-extends 9-15 and 16-255, so 0, negatives
+                # and anything above 255 make the constructor itself raise a bare
+                # ``ValueError``. That would defeat the point of this branch,
+                # which exists to stop a bare stdlib exception from escaping
+                # ``_make_opt_mn_id`` in the first place, so it is caught here and
+                # the raw value is used instead rather than let it propagate.
+                subtype_repr = repr(Enum_MNIDSubtype(subtype_val))
+            except ValueError:
+                subtype_repr = repr(subtype_val)
             raise ProtocolError(f'{self.alias}: [OptNo {type}] MN-ID subtype '
-                                f'{Enum_MNIDSubtype(subtype_val)!r} identifier must be '
+                                f'{subtype_repr} identifier must be '
                                 f'{expected}, not int')
         else:
             id_len = len(identifier)

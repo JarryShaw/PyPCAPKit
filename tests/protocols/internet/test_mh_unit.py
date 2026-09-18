@@ -2343,11 +2343,19 @@ class MHUnitTests(unittest.TestCase):
         and sized from the packed ``length`` header rather than from anything
         ``subtype`` fixes on its own, so there is no non-arbitrary width to
         convert an ``int`` into -- it is rejected instead. See #467.
+
+        The rejection message also has to survive an out-of-range ``subtype``:
+        it round-trips ``subtype_val`` through ``Enum_MNIDSubtype`` for a
+        friendly name, and that constructor itself raises a bare ``ValueError``
+        for a value :meth:`MNIDSubtype._missing_` does not auto-extend (only
+        9-15 and 16-255 are). No input to ``_make_opt_mn_id`` may produce a
+        non-:exc:`~pcapkit.utilities.exceptions.BaseError` exception, so that
+        is exercised too rather than assumed from the seven real subtypes.
         """
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
         from pcapkit.protocols.internet.mh import MH
-        from pcapkit.utilities.exceptions import ProtocolError
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         proto = object.__new__(MH)
 
@@ -2369,6 +2377,18 @@ class MHUnitTests(unittest.TestCase):
             Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address, identifier=0x1234)
         self.assertEqual(schema.length, 17)
         self.assertEqual(len(schema.pack()), schema.length + 2)
+
+        # 0, a negative value, and anything above 255 are all outside what
+        # ``MNIDSubtype._missing_`` extends, so the enum constructor itself
+        # raises for them -- this must still come out as an in-library
+        # ``BaseError`` (a ``ProtocolError``, here), never the bare
+        # ``ValueError`` the naming round-trip would otherwise leak.
+        for subtype in (0, -1, 300, 999):
+            with self.subTest(subtype=subtype):
+                with self.assertRaises(BaseError) as ctx:
+                    proto._make_opt_mn_id(  # type: ignore[arg-type]
+                        Option.MN_ID_OPTION_TYPE, subtype=subtype, identifier=0x1234)
+                self.assertIsInstance(ctx.exception, BaseError)
 
     def test_mh_redirect_option_rejects_contradictory_flags(self) -> None:
         """:rfc:`6463#section-4.2` allows exactly one of the ``K`` and ``N`` flags.
