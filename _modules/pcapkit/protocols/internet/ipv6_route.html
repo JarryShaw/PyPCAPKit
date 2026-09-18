@@ -890,7 +890,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1"> [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">]: invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -937,7 +937,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">24</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
@@ -980,7 +980,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
