@@ -809,21 +809,38 @@ packet. Verifying them needs a keying context in the shape ESP already
 established through :mod:`pcapkit.corekit.context`, which is the reusable part of
 the design rather than something to invent.
 
-Three things worth settling before anyone writes code, since they are policy
-rather than implementation:
+All three of the policy questions this raised have been settled by the repo
+owner, and each lands on a precedent the library already has:
 
-* **What a failure does.** ESP's answer — report, never raise — is the right
-  precedent for a dissector, since a capture full of bad checksums is a normal
-  thing to be handed and refusing to parse it makes the tool useless for exactly
-  the case you most want it. Follow it rather than re-deciding it.
-* **Whether verification is opt-in.** Checksumming every packet costs real time
-  on a large capture, and `Maybe Even Faster?`_ above is a standing
-  concern, so this probably wants a flag rather than being unconditional.
-* **Offload.** A capture taken on the sending host routinely contains checksums
-  the NIC had not computed yet, so they are zero or garbage on the wire and
-  "invalid" is the wrong word for them. Anything reporting a failure should be
-  able to say "not computed" distinctly from "wrong", or it will cry wolf on the
-  commonest capture there is.
+* **Verification is opt-in.** Checksumming every packet costs real time on a
+  large capture, and `Maybe Even Faster?`_ above is a standing concern, so it is
+  a flag rather than unconditional behaviour.
+* **A wrong checksum is a warning, not a hard failure, and the outcome is
+  recorded on the protocol class.** The warning belongs in
+  :class:`~pcapkit.utilities.warnings.ProtocolWarning`, and the recording has an
+  exact precedent in :class:`~pcapkit.protocols.internet.esp.ESPStatus`: an
+  enumeration of outcomes carried on the parsed result, so a caller can ask
+  after the fact rather than having to have been capturing warnings at the
+  time. That distinction matters — a warning is for the human watching, and the
+  recorded status is for the program. Note ESP's enum also has a member for "the
+  expected state for a capture taken without keys, and is **not** an error",
+  which is the shape the offload case below wants.
+* **The IP pseudo-header gets a pseudo-protocol class.** Rather than giving a
+  parsed protocol a back-reference to its parent, the pseudo-header becomes a
+  first-class thing in its own right, defined once for the IP family and used by
+  **both** the parsing and the constructing path. That is the better answer:
+  a back-reference only helps verification, while a pseudo-header class is also
+  what the construction side needs in order to *emit* a correct checksum, and
+  the two paths then share one definition instead of agreeing by coincidence.
+
+One case still wants a decision at implementation time, since it is about
+wording rather than design: **checksum offload**. A capture taken on the sending
+host routinely contains checksums the NIC had not computed yet, so the field is
+zero or garbage on the wire and "invalid" is the wrong word for it. Whatever
+status enumeration this grows should be able to say *not computed* distinctly
+from *wrong*, or it will cry wolf on the commonest capture there is —
+:class:`~pcapkit.protocols.internet.esp.ESPStatus`'s ``NO_SA`` member is the
+model for how to spell "expected, not an error".
 
 Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
 ESP has already laid the groundwork, but the checksum half genuinely wants the
@@ -928,8 +945,9 @@ equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
 ``RELAY_HMAC`` and its two signature parameters) could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
-one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) waits on a structural
-question it should not answer by itself: TCP, UDP and ICMPv6 checksums cover the
-IP pseudo-header, so a parsed protocol has to be able to reach its parent. That
-is a :class:`~pcapkit.protocols.protocol.Protocol` design decision, and settling
-it as a side effect of a checksum patch would be the wrong way round.
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP
+pseudo-header, and the owner has settled how: a **pseudo-protocol class** for the
+IP family, serving both the parsing and the constructing path, rather than a
+back-reference from a parsed protocol to its parent. So that half is no longer
+blocked on an open design question -- it is blocked only on someone defining that
+class, which is a bounded piece of work and the natural first step.
