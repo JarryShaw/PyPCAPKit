@@ -408,6 +408,7 @@
 <span class="sd">"""IP address field class"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -421,7 +422,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -432,6 +433,45 @@
              <span class="s1">'IPv4Interface'</span><span class="p">,</span> <span class="s1">'IPv6Interface'</span><span class="p">)</span>
 <span class="n">_AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_AT'</span><span class="p">,</span> <span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="s1">'IPv6Address'</span><span class="p">)</span>
 <span class="n">_IT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_IT'</span><span class="p">,</span> <span class="s1">'IPv4Interface'</span><span class="p">,</span> <span class="s1">'IPv6Interface'</span><span class="p">)</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_reraise_as_field_value_error</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[None]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Translate a bare :exc:`ValueError` from :mod:`ipaddress` into :exc:`FieldValueError`.</span>
+
+<span class="sd">    Every conversion in this module ultimately calls into the stdlib</span>
+<span class="sd">    :mod:`ipaddress` module, which raises a bare :exc:`ValueError` (or a</span>
+<span class="sd">    subclass of it, e.g. :exc:`~ipaddress.AddressValueError` or</span>
+<span class="sd">    :exc:`~ipaddress.NetmaskValueError`) for a malformed value. Left alone,</span>
+<span class="sd">    that exception is not an instance of</span>
+<span class="sd">    :exc:`~pcapkit.utilities.exceptions.BaseError`, unlike every other</span>
+<span class="sd">    exception this module raises -- so a caller cannot rely on</span>
+<span class="sd">    ``except BaseError`` to catch a bad field value. Wrapping the conversion</span>
+<span class="sd">    in this context manager re-raises it as :exc:`FieldValueError` instead,</span>
+<span class="sd">    preserving the original message.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        description: Human-readable description of the value being</span>
+<span class="sd">            converted, used to build the :exc:`FieldValueError` message.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If the code inside the ``with`` block raises</span>
+<span class="sd">            :exc:`ValueError`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">except</span> <span class="n">FieldValueError</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``FieldValueError`` is itself a ``ValueError``, so without this</span>
+        <span class="c1"># clause first, a ``FieldValueError`` raised inside the ``with`` block</span>
+        <span class="c1"># (e.g. a version-mismatch check) would be caught below and re-wrapped,</span>
+        <span class="c1"># losing its original message. Callers are expected to keep such</span>
+        <span class="c1"># raises outside the ``with`` block, but this is the same ordering</span>
+        <span class="c1"># trap ``ProtocolError`` carries at ``exceptions.py``, so it is guarded</span>
+        <span class="c1"># here too rather than relied upon by convention alone.</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
 <div class="viewcode-block" id="_IPField">
@@ -477,11 +517,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``value`` is not a valid IP address, or if it</span>
+<span class="sd">                is the wrong IP version for this field.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># type: IPv4Address | IPv6Address</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IP address'</span><span class="p">):</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ip</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -500,8 +545,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``value`` is the wrong IP version for this</span>
+<span class="sd">                field. ``value`` cannot actually fail the underlying</span>
+<span class="sd">                :func:`ipaddress.ip_address` conversion here -- it is always</span>
+<span class="sd">                exactly 4 or 16 octets, fixed by this field's length, and any</span>
+<span class="sd">                such octet string is a valid address -- but the conversion is</span>
+<span class="sd">                still wrapped for consistency with the rest of this module.</span>
+
 <span class="sd">        """</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IP address'</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span>  <span class="c1"># type: ignore[return-value]</span></div>
@@ -610,11 +664,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``value`` is not a valid IP interface, or if</span>
+<span class="sd">                it is the wrong IP version for this field.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IP interface'</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
             <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -635,16 +694,27 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If the trailing four octets are not a valid</span>
+<span class="sd">                dotted netmask, or if the resulting interface is the wrong IP</span>
+<span class="sd">                version for this field. The leading four octets cannot</span>
+<span class="sd">                actually fail here -- they are always exactly 4 octets, fixed</span>
+<span class="sd">                by this field's length, and any such octet string is a valid</span>
+<span class="sd">                address -- but the conversion is still wrapped for</span>
+<span class="sd">                consistency with the rest of this module.</span>
+
 <span class="sd">        Notes:</span>
 <span class="sd">            The trailing four octets are a dotted netmask, as written by</span>
 <span class="sd">            :meth:`pre_process` -- not a prefix length as in</span>
 <span class="sd">            :meth:`IPv6InterfaceField.post_process`.</span>
 
 <span class="sd">        """</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv4 address'</span><span class="p">):</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span>
 
-        <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv4 interface'</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">mask</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span></div>
@@ -687,11 +757,16 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Processed field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``value`` is not a valid IP interface, or if</span>
+<span class="sd">                it is the wrong IP version for this field.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Interface</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IP interface'</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
             <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -714,7 +789,16 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If the trailing octet is not a valid IPv6 prefix</span>
-<span class="sd">                length, i.e. greater than 128.</span>
+<span class="sd">                length, i.e. greater than 128, or if the resulting interface</span>
+<span class="sd">                is the wrong IP version for this field. Neither the leading</span>
+<span class="sd">                sixteen octets nor the final :func:`ipaddress.ip_interface`</span>
+<span class="sd">                call can actually fail here -- the former is always exactly</span>
+<span class="sd">                16 octets, fixed by this field's length, and any such octet</span>
+<span class="sd">                string is a valid address; the latter is only ever reached</span>
+<span class="sd">                once the prefix length has already been checked above, and</span>
+<span class="sd">                any prefix length in ``0..128`` is valid. Both conversions</span>
+<span class="sd">                are still wrapped for consistency with the rest of this</span>
+<span class="sd">                module.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The trailing octet is the prefix length as a binary integer, as</span>
@@ -722,13 +806,15 @@
 <span class="sd">            :meth:`IPv4InterfaceField.post_process`.</span>
 
 <span class="sd">        """</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv6 address'</span><span class="p">):</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
         <span class="n">prefixlen</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">prefixlen</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid IPv6 prefix length: </span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="s1">'invalid IPv6 interface'</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_interface</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ip</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">prefixlen</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IP version mismatch: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">val</span></div>
