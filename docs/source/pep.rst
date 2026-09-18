@@ -762,6 +762,74 @@ is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 ``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
 :doc:`pcapkit/foundation/engines/index` tabulates that.
 
+Checksum and Integrity Verification
+-----------------------------------
+
+Eight protocols parse a checksum or CRC field —
+:class:`~pcapkit.protocols.internet.hip.HIP`,
+:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
+:class:`~pcapkit.protocols.link.ospf.OSPF`,
+:class:`~pcapkit.protocols.transport.sctp.SCTP`,
+:class:`~pcapkit.protocols.transport.tcp.TCP` and
+:class:`~pcapkit.protocols.transport.udp.UDP` — and exactly one of them checks
+whether the value is *right*:
+:attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
+For the other seven the field is recorded and never questioned, so a corrupted
+capture parses as cleanly as an intact one.
+
+**These are two different problems and they want separating**, because only one
+of them is cryptographic and the distinction decides what is actually hard.
+
+**The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
+ICMP/ICMPv6 and OSPF, needs no cryptography at all — it is sixteen-bit addition
+with end-around carry, and implementing it is an afternoon. What blocks it is the
+**IP pseudo-header**: the TCP, UDP and ICMPv6 checksums are computed over source
+and destination addresses, the protocol number and the payload length, all of
+which live in the *enclosing* layer. So verification needs a parsed protocol to
+reach back to its parent, which is a structural question about
+:class:`~pcapkit.protocols.protocol.Protocol` rather than an arithmetic one.
+That is precisely why SCTP came first and is not evidence the rest are easy:
+:rfc:`9260#section-6.8` defines its CRC32c over the common header and chunks with
+the checksum field zeroed and **no pseudo-header**, so it can be verified from
+the SCTP packet alone. Note also that SCTP's CRC32c is a hand-rolled lookup table
+in :mod:`pcapkit.protocols.transport.sctp`, not a library call, so it is not
+precedent for a dependency either.
+
+**The cryptographic integrity checks** are where the :mod:`cryptography`
+dependency — introduced for ESP — genuinely buys something new, and half of that
+is already done. :class:`~pcapkit.protocols.internet.esp.ESP` **already verifies
+its ICV** when a Security Association is supplied, and deliberately reports a
+failure rather than raising, so a forged packet still parses and says so. What is
+*not* done is **HIP**: its ``HIP_MAC``, ``HIP_MAC_2``, ``RVS_HMAC`` and
+``RELAY_HMAC`` parameters, and its ``HIP_SIGNATURE`` and ``HIP_SIGNATURE_2``
+parameters, are parsed into their data models and never checked against the
+packet. Verifying them needs a keying context in the shape ESP already
+established through :mod:`pcapkit.corekit.context`, which is the reusable part of
+the design rather than something to invent.
+
+Three things worth settling before anyone writes code, since they are policy
+rather than implementation:
+
+* **What a failure does.** ESP's answer — report, never raise — is the right
+  precedent for a dissector, since a capture full of bad checksums is a normal
+  thing to be handed and refusing to parse it makes the tool useless for exactly
+  the case you most want it. Follow it rather than re-deciding it.
+* **Whether verification is opt-in.** Checksumming every packet costs real time
+  on a large capture, and `Maybe Even Faster?`_ above is a standing
+  concern, so this probably wants a flag rather than being unconditional.
+* **Offload.** A capture taken on the sending host routinely contains checksums
+  the NIC had not computed yet, so they are zero or garbage on the wire and
+  "invalid" is the wrong word for them. Anything reporting a failure should be
+  able to say "not computed" distinctly from "wrong", or it will cry wolf on the
+  commonest capture there is.
+
+Sequenced for **wave 2 or 3**. The cryptographic half could be done sooner since
+ESP has already laid the groundwork, but the checksum half genuinely wants the
+parent-access question answered first, and that is worth doing deliberately
+rather than as a side effect of a checksum patch.
+
 Delivery Sequence
 -----------------
 
@@ -853,3 +921,15 @@ reproduced before it is filed, with the reproduction in the issue. An audit that
 files what it merely suspects transfers the work rather than doing it, and this
 project has already had to correct a finding whose count and whose diagnosis were
 both wrong when re-derived.
+
+**Queued for wave 2 or 3 — checksum and integrity verification.** See `Checksum
+and Integrity Verification`_ above. It splits in two, and the halves are not
+equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
+``RELAY_HMAC`` and its two signature parameters) could start whenever, since
+:class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
+keying-context channel and the report-rather-than-raise policy. The
+one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) waits on a structural
+question it should not answer by itself: TCP, UDP and ICMPv6 checksums cover the
+IP pseudo-header, so a parsed protocol has to be able to reach its parent. That
+is a :class:`~pcapkit.protocols.protocol.Protocol` design decision, and settling
+it as a side effect of a checksum patch would be the wrong way round.

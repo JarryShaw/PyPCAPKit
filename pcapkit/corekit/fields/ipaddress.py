@@ -242,9 +242,10 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
             val = value
         else:
             with _reraise_as_field_value_error('invalid IP interface'):
-                val = ipaddress.ip_interface(value)  # type: ignore[assignment]
-            if val.version != self.version:
-                raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
+                parsed = ipaddress.ip_interface(value)
+            if not isinstance(parsed, ipaddress.IPv4Interface):
+                raise FieldValueError(f'IP version mismatch: {parsed.version} != {self.version}')
+            val = parsed
 
         ip = val.ip
         mask = val.netmask
@@ -281,7 +282,7 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
 
         with _reraise_as_field_value_error('invalid IPv4 interface'):
             val = ipaddress.ip_interface(f'{ip}/{mask}')
-        if val.version != self.version:
+        if not isinstance(val, ipaddress.IPv4Interface):
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val
 
@@ -326,9 +327,10 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
             val = value
         else:
             with _reraise_as_field_value_error('invalid IP interface'):
-                val = ipaddress.ip_interface(value)  # type: ignore[assignment]
-            if val.version != self.version:
-                raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
+                parsed = ipaddress.ip_interface(value)
+            if not isinstance(parsed, ipaddress.IPv6Interface):
+                raise FieldValueError(f'IP version mismatch: {parsed.version} != {self.version}')
+            val = parsed
 
         ip = val.ip
         prefixlen = cast('int', val._prefixlen)  # type: ignore[attr-defined] # pylint: disable=protected-access
@@ -372,6 +374,6 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
 
         with _reraise_as_field_value_error('invalid IPv6 interface'):
             val = ipaddress.ip_interface(f'{ip}/{prefixlen}')
-        if val.version != self.version:
+        if not isinstance(val, ipaddress.IPv6Interface):
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val
