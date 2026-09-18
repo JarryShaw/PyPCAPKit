@@ -32,17 +32,19 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(packet.timestamp, 1000.0)
 
         datagram_id = DatagramID(src, dst, 123, TransType.UDP)
-        datagram = Datagram(Completion.PARTIAL, datagram_id, (7,), b'ip-header', (b'payload',), None)
+        datagram = Datagram(Completion.PARTIAL, datagram_id, (7,), b'ip-header', (b'payload',), None, ())
         self.assertIsInstance(datagram.id, IP_DatagramID)
         self.assertIsInstance(datagram, IP_Datagram)
         self.assertFalse(datagram.completed)
         self.assertIs(datagram.completed, Completion.PARTIAL)
         self.assertEqual(datagram.to_dict()['payload'], (b'payload',))
+        self.assertEqual(datagram.conflict, ())
 
-        buffer = Buffer(-1, bytearray(b'\x01'), [7], b'ip-header', bytearray(b'payload'), 1000.0)
+        buffer = Buffer(-1, bytearray(b'\x01'), [7], b'ip-header', bytearray(b'payload'), 1000.0, [])
         self.assertIsInstance(buffer, IP_Buffer)
         self.assertEqual(buffer.index, [7])
         self.assertEqual(buffer.timestamp, 1000.0)
+        self.assertEqual(buffer.conflict, [])
 
         storage = ReassemblyData((datagram,), (), ())
         self.assertEqual(storage.ipv4, (datagram,))

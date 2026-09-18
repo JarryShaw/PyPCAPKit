@@ -16,13 +16,13 @@ class IPReassemblyTests(unittest.TestCase):
         purge_modules(['pcapkit'])
 
     def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
-                header: bytes = b'ip-header', timestamp: float = 1000.0):
+                header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.reassembly.data.ip import Packet
 
         src = ip_address('192.0.2.1')
         dst = ip_address('198.51.100.2')
-        return Packet((src, dst, 42, TransType.UDP), num, fo, 20, mf,
+        return Packet((src, dst, ident, TransType.UDP), num, fo, 20, mf,
                       20 + len(payload), header, bytearray(payload), timestamp)
 
     def test_complete_fragmented_datagram_is_submitted_and_analyzed(self) -> None:
@@ -103,11 +103,163 @@ class IPReassemblyTests(unittest.TestCase):
         dst = ip_address('198.51.100.2')
         self.assertEqual(
             empty.submit(
-                Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0),
+                Buffer(-1, bytearray(b'\x00\x00'), [], b'', bytearray(b''), 1000.0, []),
                 bufid=(src, dst, 42, TransType.UDP),
             ),
             [],
         )
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class IPOverlapConflictTests(unittest.TestCase):
+    """:issue:`477` -- an overlapping fragment carrying different bytes must
+    have the disagreement recorded, not silently overwrite the earlier one.
+
+    :rfc:`791` resolves *which* bytes win itself: "this procedure will use the
+    more recently arrived copy in the data buffer" -- the opposite of TCP's
+    first-write-wins (:rfc:`9293#section-3.10`, fixed for TCP by #443/#478).
+    So every case below still expects the *arriving* fragment's bytes in the
+    reassembled payload; what changes is that ``datagram.conflict`` now
+    records where that overwrite disagreed with what was already there.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _packet(self, *, num: int, fo: int, mf: bool, payload: bytes,
+                header: bytes = b'ip-header', timestamp: float = 1000.0, ident: int = 42):
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.reassembly.data.ip import Packet
+
+        src = ip_address('192.0.2.1')
+        dst = ip_address('198.51.100.2')
+        return Packet((src, dst, ident, TransType.UDP), num, fo, 20, mf,
+                      20 + len(payload), header, bytearray(payload), timestamp)
+
+    def _reasm(self):
+        from pcapkit.foundation.reassembly.ip import IP
+
+        class Analyzer:
+            @classmethod
+            def analyze(cls, proto: object, payload: bytes) -> object:
+                return {'proto': proto, 'payload': payload}
+
+        class TestIP(IP):
+            __protocol_type__ = Analyzer
+
+        return TestIP()
+
+    def test_identical_duplicate_fragment_stays_uncontested(self) -> None:
+        """A byte-for-byte retransmission is not a conflict."""
+        reasm = self._reasm()
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'AAAAAAAA', ident=1))
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'AAAAAAAA', ident=1))
+        reasm(self._packet(num=3, fo=8, mf=False, payload=b'ZZZZ', ident=1))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'AAAAAAAAZZZZ')
+        self.assertEqual(datagram.conflict, ())
+
+    def test_conflicting_full_overlap_records_conflict_and_last_write_wins(self) -> None:
+        """Two block-aligned fragments claiming the same octets, with different data."""
+        reasm = self._reasm()
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'AAAAAAAA', ident=2))
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'BBBBBBBB', ident=2))
+        reasm(self._packet(num=3, fo=8, mf=False, payload=b'ZZZZ', ident=2))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        # per RFC 791, the more recently arrived copy wins
+        self.assertEqual(datagram.payload, b'BBBBBBBBZZZZ')
+        self.assertEqual(datagram.conflict, ((0, 7),))
+
+    def test_conflicting_partial_overlap_extending_left(self) -> None:
+        """The arriving fragment starts before the buffered one and overlaps its head."""
+        reasm = self._reasm()
+        # base: octets 8-15
+        reasm(self._packet(num=1, fo=8, mf=True, payload=b'CCCCCCCC', ident=3))
+        # arriving: octets 0-15 -- overlaps 8-15 with different data
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'0123456789ABCDEF'.replace(
+            b'89ABCDEF', b'DDDDDDDD'), ident=3))
+        reasm(self._packet(num=3, fo=16, mf=False, payload=b'ZZZZ', ident=3))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'01234567DDDDDDDDZZZZ')
+        self.assertEqual(datagram.conflict, ((8, 15),))
+
+    def test_conflicting_partial_overlap_extending_right(self) -> None:
+        """The arriving fragment starts inside the buffered one and overlaps its tail."""
+        reasm = self._reasm()
+        # base: octets 0-15
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'E' * 16, ident=4))
+        # arriving: octets 8-23 -- overlaps 8-15 with different data
+        reasm(self._packet(num=2, fo=8, mf=True, payload=b'F' * 16, ident=4))
+        reasm(self._packet(num=3, fo=24, mf=False, payload=b'ZZZZ', ident=4))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'E' * 8 + b'F' * 16 + b'ZZZZ')
+        self.assertEqual(datagram.conflict, ((8, 15),))
+
+    def test_conflict_inside_final_partial_block_does_not_over_report(self) -> None:
+        """The genuinely coarse case: a conflict inside the *final* fragment's
+        partial 8-octet block, where ``RCVBT`` rounds a 3-octet tail up to a
+        whole 8-octet block.
+
+        Fragment B (the final one) covers only octets 8, 9 and 10, but
+        ``RCVBT`` marks the whole block covering octets 8-15 as received.
+        Fragment C then claims the full block (octets 8-15): it genuinely
+        conflicts with B over 8-10, but 11-15 were never really received by
+        anyone before C -- they are past ``TDL`` -- so they must not be
+        reported as conflicting, even though their ``RCVBT`` block reads as
+        "received".
+
+        """
+        reasm = self._reasm()
+        # keep the buffer open past fragment B below by leaving octets 0-7
+        # unreceived until the very end
+        reasm(self._packet(num=1, fo=16, mf=True, payload=b'A' * 8, ident=5))
+        # final fragment: octets 8, 9, 10 only -- sets TDL=11, rounds the
+        # RCVBT block covering 8-15 to fully "received"
+        reasm(self._packet(num=2, fo=8, mf=False, payload=b'BBB', ident=5))
+        # conflicts with B at 8, 9, 10; 11-15 is new territory, not a conflict
+        reasm(self._packet(num=3, fo=8, mf=True, payload=b'XXXXXXXX', ident=5))
+        # completes the datagram
+        reasm(self._packet(num=4, fo=0, mf=True, payload=b'D' * 8, ident=5))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'D' * 8 + b'XXX')
+        # exactly the real conflict, not the whole 8-15 block
+        self.assertEqual(datagram.conflict, ((8, 10),))
+
+    def test_three_way_conflict_records_each_disagreement(self) -> None:
+        """A third fragment disagreeing with the second's already-resolved overwrite."""
+        reasm = self._reasm()
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8, ident=6))
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'B' * 8, ident=6))
+        reasm(self._packet(num=3, fo=0, mf=True, payload=b'C' * 8, ident=6))
+        reasm(self._packet(num=4, fo=8, mf=False, payload=b'ZZZZ', ident=6))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.payload, b'C' * 8 + b'ZZZZ')
+        self.assertEqual(datagram.conflict, ((0, 7), (0, 7)))
+
+    def test_conflict_is_recorded_even_when_a_later_fragment_completes_the_datagram(self) -> None:
+        """``completed`` and ``conflict`` are independent: a clean completion
+        can still carry a recorded conflict from earlier in reassembly."""
+        reasm = self._reasm()
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'A' * 8, ident=7))
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'B' * 8, ident=7))
+        reasm(self._packet(num=3, fo=8, mf=False, payload=b'ZZZZ', ident=7))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        self.assertEqual(datagram.conflict, ((0, 7),))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
