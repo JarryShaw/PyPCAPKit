@@ -227,7 +227,19 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertIs(BaseEnumSchema.registry[Code.two], OneSchema)
         self.assertIs(BaseEnumSchema.from_dict().registry, BaseEnumSchema.registry)
 
-    def test_schema_final_generated_init_and_legacy_version_branch(self) -> None:
+    def test_schema_final_generated_init(self) -> None:
+        """``schema_final`` generates a typed ``__init__`` from the field table.
+
+        This used to also cover a ``sys.version_info``-mocked "legacy version"
+        branch in ``SchemaMeta.__new__``, which no longer exists: that branch
+        was GitHub issue #439's workaround for a class-keyword collision with
+        ``abc.ABCMeta.__new__`` on Python < 3.11, and the fix removed it (and
+        the ``sys`` import along with it) in favour of renaming the one
+        keyword that actually collided. ``SchemaMeta.__new__`` no longer
+        branches on the interpreter version at all, so there is nothing left
+        for a mocked ``sys.version_info`` to exercise here.
+
+        """
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.protocols.schema.schema import Schema, schema_final
 
@@ -242,12 +254,6 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(bytes(GeneratedInitSchema(value=2)), b'\x02')
         self.assertEqual(bytes(GeneratedInitSchema()), b'\x01')
         self.assertEqual(bytes(EmptyGeneratedSchema()), b'')
-
-        with mock.patch('pcapkit.protocols.schema.schema.sys.version_info', (3, 10)):
-            class LegacyVersionSchema(Schema):
-                value: int = UInt8Field(default=3)
-
-        self.assertIn('value', LegacyVersionSchema.__fields__)
 
     def test_generated_init_is_installed_and_runs_post_init(self) -> None:
         from pcapkit.corekit.fields.collections import ListField
