@@ -797,6 +797,9 @@ def _mh_option_registry() -> 'Any':
 
 
 def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
+    from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
+    from pcapkit.const.mh.lma_mag_suboption import \
+        LMAControlledMAGSuboption as Enum_LMAControlledMAGSuboption
     from pcapkit.const.mh.option import Option as Enum_Option
     import ipaddress
     return {
@@ -820,6 +823,31 @@ def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
         Enum_Option.Permanent_Home_Keygen_Token: {'token': b'\xbb' * 8},
         Enum_Option.Experimental_Mobility_Option: {'data': b'\xcc' * 4},
         Enum_Option.Binding_Authorization_Data_for_FMIPv6: {'data': b'\xb5'},
+        # The four below are not workarounds for defects: each option has a
+        # minimum content its RFC requires, and the no-argument default is not a
+        # well-formed instance of it. The constructors refuse it, correctly, so
+        # the arguments here are what make the code reachable at all.
+        #
+        # ``Length`` of 0 "is not allowed" and the identifier is 1-255 octets
+        # [RFC 5149 section 3]. ``'ims'`` is that RFC's own example.
+        Enum_Option.Service_Selection_Mobility_Option: {'identifier': 'ims'},
+        # "Both the 'K' and 'N' flags cannot be set or unset simultaneously"
+        # [RFC 6463 section 4.2], so exactly one address is present and the
+        # option is 18 octets long for IPv6 or 6 for IPv4. With neither given
+        # the option's own length is undetermined.
+        Enum_Option.Redirect_Mobility_Option: {
+            'ipv6': ipaddress.IPv6Address('2001:db8::1')},
+        # The option "MUST contain at least one ANI sub-option"
+        # [RFC 6757 section 3]; it is a pure container and carries nothing else.
+        Enum_Option.Access_Network_Identifier: {
+            'suboptions': [(Enum_ANISuboption.Network_Identifier,
+                            {'net_name': b'wifi',
+                             'ap_name': b'\x00\x11\x22\x33\x44\x55'})]},
+        # Likewise at least one LCMP sub-option [RFC 8127 section 3].
+        Enum_Option.LMA_Controlled_MAG_Parameters: {
+            'suboptions': [(Enum_LMAControlledMAGSuboption.Heartbeat_Control,
+                            {'interval': 60, 'retransmission_delay': 3,
+                             'max_retransmissions': 5})]},
     }
 
 
