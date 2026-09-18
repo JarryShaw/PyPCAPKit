@@ -680,6 +680,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             of the remaining data, which is used to determine the length of
             the payload field.
 
+            When this schema is nested -- unpacked through a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
+            directly -- ``packet`` is not the enclosing schema's own data, but
+            a context built by :func:`~pcapkit.corekit.fields.misc.
+            nested_packet_context`: a name this schema does not itself
+            declare falls through to the enclosing schema, and the enclosing
+            schema is also reachable unconditionally under a ``__packet__``
+            key. See that function for the exact lookup, write and iteration
+            semantics.
+
             And an ``__option_padding__`` key in the ``packet`` to record how
             much of an
             :class:`~pcapkit.corekit.fields.collections.OptionField`'s declared

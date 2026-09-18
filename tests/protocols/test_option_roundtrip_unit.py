@@ -324,15 +324,25 @@ EXPECTED_FAILURES = {
 
     # -- Mobility Header ------------------------------------------------------
 
-    # ``CGAParameter``'s nested length callback reads ``pkt['length']``, which
-    # is present while packing and absent while unpacking: ``SchemaField.unpack``
-    # starts the nested schema with a fresh context whose parent is under
-    # ``__packet__``. A CGA extension has no other carrier, so the whole
-    # ``MH.__extension__`` registry is unreachable through the public API.
+    # ``CGAParameter``'s nested length callback used to read ``pkt['length']``
+    # from a context that held it only under ``__packet__`` while unpacking --
+    # fixed by #445, which makes a name the nested schema does not itself
+    # declare fall through to the enclosing schema instead of raising. That
+    # unblocks ``CGAParameter.extensions`` and lets parsing reach the
+    # extension itself, exposing a second, unrelated defect #445's fix was
+    # never going to reach: ``_make_ext_multiprefix`` writes
+    # ``length=1 + len(prefixes) * 16`` -- 17 octets for one prefix -- where
+    # the wire format wants 4 (the flags) plus 8 per prefix, i.e. 12. That is
+    # already tracked and fixed on open PR #437 ("declared 1 + len(prefixes)
+    # * 16 data octets for a 4 + len(prefixes) * 8 payload"), which this
+    # branch does not carry yet -- not a new, untracked defect.
     'mh-extension/Multi_Prefix': Gap(
-        'PARSE', "KeyError: 'length'",
-        'pcapkit/protocols/schema/internet/mh.py:516 -- needs '
-        "pkt['__packet__']['length'] on the unpack path"),
+        'PARSE', 'Field prefixes has invalid length',
+        'pcapkit/protocols/internet/mh.py:3864 -- _make_ext_multiprefix '
+        'writes length=1 + len(prefixes) * 16 (17 for one prefix) instead of '
+        '4 + len(prefixes) * 8 (12); fixed on open PR #437, not yet merged; '
+        "unreachable before #445 fixed the KeyError: 'length' this hit "
+        'first'),
 
     # -- HIP ------------------------------------------------------------------
 
@@ -389,22 +399,48 @@ EXPECTED_FAILURES = {
 
     # -- HTTP/2 ---------------------------------------------------------------
 
-    # ``SchemaField.pack`` gives a nested frame schema a fresh packet context
-    # whose only link to the parent is ``__packet__``, but six frame schemas
-    # reach for the HTTP/2 header's ``flags`` bitfield directly -- either from a
-    # ConditionalField test or from ``FrameType.post_process``. The three frames
-    # that pass are exactly the three declaring no flag members at all:
-    # RST_STREAM, GOAWAY and WINDOW_UPDATE.
+    # ``SchemaField.pack`` used to give a nested frame schema a fresh packet
+    # context whose only link to the parent was ``__packet__``, and six frame
+    # schemas reach for the HTTP/2 header's ``flags`` bitfield directly --
+    # either from a ConditionalField test or from ``FrameType.post_process``.
+    # #445 makes a name absent from the nested schema fall through to the
+    # parent instead of raising, which fixes that for all six. RST_STREAM,
+    # GOAWAY and WINDOW_UPDATE already passed, declaring no flag members at
+    # all; PUSH_PROMISE and PING now round-trip cleanly too, so their entries
+    # are gone. The other three get past ``flags`` and hit their own,
+    # unrelated defects.
+    #
+    # DATA, HEADERS and CONTINUATION carry no payload in the case this suite
+    # constructs, so the wire correctly encodes a 9-octet, header-only frame
+    # -- and reading it back asks ``SchemaField.unpack`` to unpack the frame
+    # body schema from 0 remaining octets. ``Schema.unpack``'s ``@prepare``
+    # decorator treats *any* zero-length unpack as end-of-file and raises
+    # unconditionally, which is right for the outermost read and wrong here:
+    # an all-default, zero-octet frame body is a valid schema instance, not
+    # an empty stream.
     **{
         f'httpv2-frame/{name}': Gap(
-            'CONSTRUCT', "KeyError: 'flags'",
-            'pcapkit/protocols/schema/application/httpv2.py:144 '
-            '(FrameType.post_process) and the pad_len ConditionalField tests at '
-            ':175, :204, :305 -- the nested context reaches for the parent '
-            "header's flags")
-        for name in ('DATA', 'HEADERS', 'SETTINGS', 'PUSH_PROMISE', 'PING',
-                     'CONTINUATION')
+            'PARSE', 'EOFError',
+            'pcapkit/utilities/decorators.py:222 (prepare) -- raises '
+            'EOFError for any zero-length nested unpack, but a frame with no '
+            'payload legitimately unpacks its body from 0 octets; '
+            "unreachable before #445 fixed the KeyError: 'flags' this hit "
+            'first')
+        for name in ('DATA', 'HEADERS', 'CONTINUATION')
     },
+
+    # ``SettingsFrame.settings`` declares ``item_type=SettingPair``, the raw
+    # schema class, rather than ``SchemaField(schema=SettingPair)``. So
+    # ``ListField.unpack``'s non-schema branch calls ``SettingPair(packet)``,
+    # binding the packet dict to ``SettingPair``'s first field (``id``)
+    # instead of constructing a field to read with, and then asks the result
+    # for a ``.length`` no ``Schema`` provides.
+    'httpv2-frame/SETTINGS': Gap(
+        'PARSE', "'SettingPair' object has no attribute 'length'",
+        'pcapkit/protocols/schema/application/httpv2.py:285 -- settings '
+        'declares item_type=SettingPair instead of '
+        'SchemaField(schema=SettingPair); unreachable before #445 fixed the '
+        "KeyError: 'flags' this hit first"),
 
     # ``make`` writes ``length = payload + 9`` and a PRIORITY payload is five
     # octets, so the constructed header always says 14 -- while the reader

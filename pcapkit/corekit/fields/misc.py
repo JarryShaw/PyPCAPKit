@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
+import collections
 import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -490,6 +491,51 @@ class SwitchField(FieldBase[_TC]):
         return self._field.unpack(buffer, packet)
 
 
+def nested_packet_context(packet: 'dict[str, Any]') -> 'collections.ChainMap[str, Any]':
+    """Build the packet context handed to a nested schema's field callbacks.
+
+    Args:
+        packet: The enclosing schema's own packet data.
+
+    Returns:
+        A two-level :class:`collections.ChainMap`: the nested schema's own
+        packet data (initially holding only the reserved ``__packet__`` key)
+        chained in front of ``packet``.
+
+    Notes:
+        A nested schema's field callbacks are written exactly like a
+        top-level schema's -- ``length=lambda pkt: pkt['length']`` -- so a
+        name the nested schema does not itself declare should fall through to
+        the enclosing schema rather than raise :exc:`KeyError`. That is what
+        :meth:`~collections.ChainMap.__getitem__`, ``in`` and :meth:`get
+        <collections.ChainMap.get>` do here: they check the nested schema's
+        own data first and the enclosing schema's second. Iterating the
+        mapping (or calling :meth:`~collections.ChainMap.keys`) sees the
+        union of both, with the nested schema's own names taking precedence
+        where the two overlap.
+
+        The enclosing schema is also reachable *unconditionally* under the
+        reserved ``__packet__`` key, for a callback that needs to name the
+        outer schema specifically rather than whichever schema happens to
+        declare a given field -- see
+        :func:`pcapkit.protocols.schema.misc.pcapng.packet_byteorder` and
+        :meth:`~pcapkit.protocols.schema.misc.pcapng.BlockType.post_process`
+        for why that distinction matters, and note that both already
+        hand-roll this exact fallback and so are unaffected by (and do not
+        need to route through) this helper.
+
+        Nothing written through the returned mapping is written back to
+        ``packet``: :class:`~collections.ChainMap` always resolves
+        :meth:`~collections.ChainMap.__setitem__` and
+        :meth:`~collections.ChainMap.__delitem__` against its first map, so a
+        nested schema can set -- or shadow -- a name also declared by the
+        enclosing schema without either write ever reaching the enclosing
+        schema's own data, and without a write silently disappearing either.
+
+    """
+    return collections.ChainMap({'__packet__': packet}, packet)
+
+
 class SchemaField(FieldBase[_TS]):
     """Schema field for protocol schema.
 
@@ -576,9 +622,10 @@ class SchemaField(FieldBase[_TS]):
             Packed field value.
 
         Notes:
-            We will use ``packet`` as a ``__packet__`` key in the packet context
-            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
-            for packing purposes.
+            ``packet`` is reachable from the nested schema's own field
+            callbacks both under a ``__packet__`` key and, for a name the
+            nested schema does not itself declare, directly -- see
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.
 
         """
         if value is None:
@@ -590,9 +637,7 @@ class SchemaField(FieldBase[_TS]):
             return value
 
         packet.update(self._packet)
-        return value.pack({
-            '__packet__': packet,
-        })
+        return value.pack(nested_packet_context(packet))
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.
@@ -605,9 +650,10 @@ class SchemaField(FieldBase[_TS]):
             Unpacked field value.
 
         Notes:
-            We will use ``packet`` as a ``__packet__`` key in the packet context
-            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
-            for unpacking purposes.
+            ``packet`` is reachable from the nested schema's own field
+            callbacks both under a ``__packet__`` key and, for a name the
+            nested schema does not itself declare, directly -- see
+            :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.
 
         """
         if isinstance(buffer, bytes):
@@ -616,9 +662,8 @@ class SchemaField(FieldBase[_TS]):
             file = buffer
 
         packet.update(self._packet)
-        return cast('_TS', self._schema.unpack(file, self.length, {  # type: ignore[call-arg,misc]
-            '__packet__': packet,
-        }))
+        return cast('_TS', self._schema.unpack(file, self.length,  # type: ignore[call-arg,misc]
+                                                nested_packet_context(packet)))
 
 
 class ForwardMatchField(FieldBase[_TC]):
