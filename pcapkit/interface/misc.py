@@ -24,7 +24,7 @@ from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
+    from typing import Any, Callable, Optional
 
     from typing_extensions import Literal
 
@@ -75,7 +75,9 @@ class Stream(Info):
 def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
                       extension: 'bool' = True, engine: 'Optional[Engines]' = None,
                       fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options # pylint: disable=redefined-builtin
-                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False) -> 'tuple[Stream, ...]':
+                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False,
+                      trace_bidirectional: 'bool' = True,
+                      trace_analyse: 'bool' = False) -> 'tuple[Stream, ...]':
     """Follow TCP streams.
 
     Arguments:
@@ -88,6 +90,17 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         format: output file format of flow tracer
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
+        trace_bidirectional: whether both halves of a conversation are followed
+            as one stream, which is the default -- a stream then holds the
+            frames and the reassembled payload of *both* directions, which is
+            what "following a TCP stream" means elsewhere. :data:`False`
+            restores one stream per direction.
+        trace_analyse: whether each traced flow reassembles its application
+            layer, so that ``Index.packet`` can be read off
+            :attr:`Extractor.trace <pcapkit.foundation.extraction.Extractor.trace>`.
+            Off by default, and independent of the ``conversations`` this
+            function returns -- those come from the reassembly below, which runs
+            either way.
 
     Returns:
         List of extracted TCP streams.
@@ -130,7 +143,9 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
                            layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=True,
                            reassembly=False, trace=True, trace_fout=fout, trace_format=format,
-                           trace_byteorder=byteorder, trace_nanosecond=nanosecond)  # type: ignore[var-annotated]
+                           trace_byteorder=byteorder, trace_nanosecond=nanosecond,
+                           trace_bidirectional=trace_bidirectional,
+                           trace_analyse=trace_analyse)  # type: ignore[var-annotated]
 
     # NOTE: ``Extractor.engine`` returns the running engine *instance* (see
     # :meth:`Extractor.engine <pcapkit.foundation.extraction.Extractor.engine>`),
@@ -149,6 +164,10 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     exeng = extraction.engine
     tcp_reassembly = None  # type: Optional[ReassemblyAdapter]
     pass_count = True
+    #: Reads a frame's capture timestamp back off the frame, for the one adapter
+    #: whose signature takes it. :data:`None` for the adapters that find it
+    #: themselves.
+    timestamp_of = None  # type: Optional[Callable[[Any], float]]
     if isinstance(exeng, PCAP_Engine):
         from pcapkit.toolkit import pcap as tk_pcap  # isort: skip # pylint: disable=import-outside-toplevel
         tcp_reassembly, pass_count = cast('ReassemblyAdapter', tk_pcap.tcp_reassembly), False
@@ -157,7 +176,14 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
         tcp_reassembly, pass_count = cast('ReassemblyAdapter', tk_pcapng.tcp_reassembly), False
     elif isinstance(exeng, DPKT_Engine):
         from pcapkit.toolkit import dpkt as tk_dpkt  # isort: skip # pylint: disable=import-outside-toplevel
+        # NOTE: DPKT's reader hands ``(timestamp, bytes)`` back and only the octets
+        # become a packet, so its adapters take the capture timestamp as an
+        # argument rather than finding it on the frame. That timestamp is real and
+        # available -- :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches it to
+        # every frame it reads, precisely so that a reader arriving after the
+        # extraction loop (like this one) can get it back.
         tcp_reassembly = cast('ReassemblyAdapter', tk_dpkt.tcp_reassembly)
+        timestamp_of = tk_dpkt.packet2timestamp
     elif isinstance(exeng, Scapy_Engine):
         from pcapkit.toolkit import scapy as tk_scapy  # isort: skip # pylint: disable=import-outside-toplevel
         tcp_reassembly = cast('ReassemblyAdapter', tk_scapy.tcp_reassembly)
@@ -183,7 +209,9 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             frame = frames[index-1]
             packets.append(frame)
 
-            if pass_count:
+            if timestamp_of is not None:
+                data = tcp_reassembly(frame, timestamp_of(frame), count=index)
+            elif pass_count:
                 data = tcp_reassembly(frame, count=index)
             else:
                 data = tcp_reassembly(frame)

@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.reassembly.data.data import Deferred, DeferredPacket
+from pcapkit.foundation.reassembly.data.data import Completion, Deferred, DeferredPacket
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -13,9 +13,9 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Callable, Optional, overload
+    from typing import Any, Callable, Optional
 
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
@@ -47,9 +47,14 @@ class Packet(Info, Generic[_AT]):
     header: 'bytes'
     #: Raw :obj:`bytearray` type payload.
     payload: 'bytearray'
+    #: Capture timestamp of the fragment, in seconds since the Unix epoch. This
+    #: is the *capture's* clock, not the host's: it is what drives the :rfc:`791`
+    #: and :rfc:`8200#section-4.5` reassembly timeout, since an offline parser
+    #: replaying a file has no other notion of time passing.
+    timestamp: 'float'
 
     if TYPE_CHECKING:
-        def __init__(self, bufid: 'tuple[_AT, _AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, bufid: 'tuple[_AT, _AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
@@ -83,8 +88,11 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: :meth:`to_dict` and iteration still report the field under its own name.
     __additional__ = ['packet']
 
-    #: Completed flag.
-    completed: 'bool'
+    #: How completely the datagram was reassembled, and why reassembly stopped.
+    #: Only :attr:`Completion.COMPLETE` is truthy, so ``if datagram.completed:``
+    #: still reads as it did while this was a :obj:`bool`; equality against
+    #: :obj:`True` or :obj:`False` no longer holds.
+    completed: 'Completion'
     #: Original packet identifier.
     id: 'DatagramID[_AT]'
     #: Packet numbers.
@@ -99,13 +107,18 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     packet: 'Optional[Protocol]'
 
     if TYPE_CHECKING:
-        @overload  #pylint: disable=used-before-assignment
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol | Deferred') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-        def __init__(self, completed: 'bool', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        # NOTE: one signature, not a pair of ``@overload``\\ s keyed on
+        # ``completed``. There used to be two, correlating a complete datagram with
+        # a ``bytes`` payload and a parsed ``packet``, and an incomplete one with a
+        # tuple of fragments and ``packet=None``. That correlation does not hold:
+        # under ``strict=False`` an *incomplete* datagram is reported as one
+        # contiguous ``bytes`` with its holes zero-filled, and analysed, because
+        # that is the payload buffer as it stands -- which is what
+        # :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream
+        # from. Overloads keyed on a literal cannot be selected from a ``completed``
+        # computed at runtime anyway, so they only made the reassemblers' own calls
+        # untypeable while promising a correlation the code does not keep.
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 @info_final
 class Buffer(Info, Generic[_AT]):
@@ -122,6 +135,12 @@ class Buffer(Info, Generic[_AT]):
     header: 'bytes'
     #: Data buffer, holes set to ``b'\x00'``.
     datagram: 'bytearray'
+    #: Capture timestamp of the **first-arriving** fragment of this datagram, in
+    #: seconds since the Unix epoch. This is the origin of the reassembly timer:
+    #: :rfc:`8200#section-4.5` counts its 60 seconds "of the reception of the
+    #: first-arriving fragment", so a later fragment does not extend the
+    #: deadline and this field is never revised once set.
+    timestamp: 'float'
 
     if TYPE_CHECKING:
-        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

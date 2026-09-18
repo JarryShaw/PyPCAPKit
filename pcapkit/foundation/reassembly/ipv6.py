@@ -80,6 +80,8 @@ class IPv6(IP):
         store: if store reassembled datagram in memory, i.e.,
             :attr:`self._dtgram <pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram>`
             (if not, datagram will be discarded after callback)
+        timeout: reassembly timeout in seconds, on the capture's own clock;
+            :data:`None` selects :attr:`__timeout__`
 
     Example:
         >>> from pcapkit.foundation.reassembly import IPv6
@@ -100,6 +102,25 @@ class IPv6(IP):
     __protocol_name__ = 'IPv6'
     #: Protocol of current reassembly object.
     __protocol_type__ = IPv6_Protocol
+
+    #: float: Default reassembly timeout, in seconds, on the capture's clock.
+    #:
+    #: :rfc:`8200#section-4.5` is unambiguous and mandatory: "If insufficient
+    #: fragments are received to complete reassembly of a packet within 60
+    #: seconds of the reception of the first-arriving fragment of that packet,
+    #: reassembly of that packet must be abandoned and all the fragments that
+    #: have been received for that packet must be discarded."
+    #:
+    #: Note "first-arriving", not "first" -- the deadline is counted from
+    #: whichever fragment opened the buffer, not from the one at fragment offset
+    #: zero, which is why
+    #: :attr:`Buffer.timestamp <pcapkit.foundation.reassembly.data.ip.Buffer.timestamp>`
+    #: is set once and never revised. The offset-zero fragment matters only to
+    #: the second half of the rule, the ICMP Time Exceeded that a live stack
+    #: "should" send and that an offline parser cannot -- see
+    #: :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`,
+    #: which reports the condition in its log record instead.
+    __timeout__ = 60.0
 
     ##########################################################################
     # Methods.

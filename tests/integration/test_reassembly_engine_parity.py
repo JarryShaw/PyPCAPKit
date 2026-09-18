@@ -162,10 +162,14 @@ class IPv6AdapterParityTests(EndToEndTestCase):
             import dpkt
 
             from pcapkit.toolkit import dpkt as dpkt_toolkit
+            # ``pcap_frames`` hands back the record octets alone, so the capture
+            # timestamp has to be supplied here -- one value for every fragment,
+            # both because they are one datagram and because the fields compared
+            # below must not depend on which fragment is being looked at
             packets['dpkt'] = [
                 data for number, frame in enumerate(frames, start=1)
                 if (data := dpkt_toolkit.ipv6_reassembly(
-                    dpkt.ethernet.Ethernet(frame), count=number)) is not None
+                    dpkt.ethernet.Ethernet(frame), 0.0, count=number)) is not None
             ]
 
         if HAS_SCAPY:
