@@ -360,6 +360,21 @@ EXPECTED_FAILURES = {
     # tuple, which ``_make_param_*`` passes straight back to a ``ListField``
     # that accepts only a list. This is the class of defect the reconstruct step
     # exists to find: each one constructs and parses perfectly.
+    #
+    # TRANSPORT_FORMAT_LIST briefly left this group during #466's review: an
+    # early revision reused NAT_TRAVERSAL_MODE/ESP_TRANSFORM/HIP_TRANSPORT_MODE's
+    # shared ``two_octet_prefix_list_len`` guard for this parameter's ``formats``
+    # field too, on the mistaken premise that its ``pkt['len'] - 2`` was
+    # byte-identical *for the same reason*. It is not: :rfc:`7401` Section
+    # 5.2.11 defines this parameter's ``Length`` as literally "2x number of TF
+    # types", with nothing between ``Length`` and the list to subtract -- unlike
+    # the other three, which each genuinely read a two-octet ``reserved``/
+    # ``port`` field first. That reuse turned the parameter's own legitimate
+    # empty-list encoding (``Length = 0``) into a raise, and separately
+    # under-read every non-empty list by two octets on parse -- both fixed by
+    # ``transport_format_list_len`` in pcapkit/protocols/schema/internet/hip.py,
+    # which sizes the list at ``Length`` exactly. With that corrected, this case
+    # is back to failing the same way its fifteen siblings do.
     **{
         f'hip-parameter/{name}': Gap(
             'RECONSTRUCT', "unsupported type <class 'tuple'>",
