@@ -141,6 +141,27 @@ def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
     raise FieldValueError(f'IPv6-Opts: invalid MPL Seed-ID type: {s_type}')
 
 
+def smf_i_dpd_id_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return SMF I-DPD identifier length.
+
+    Args:
+        pkt: SMF identification-based DPD option unpacked schema.
+
+    Returns:
+        SMF I-DPD identifier length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the TaggerID it declares, which would otherwise underflow the
+            identifier length below zero.
+
+    """
+    length = pkt['len'] - (1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2))
+    if length < 0:
+        raise FieldValueError(f'IPv6-Opts: invalid SMF I-DPD option length: {pkt["len"]}')
+    return length
+
+
 def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`_SMFDPDOption.data` field.
 
@@ -431,9 +452,6 @@ class SMFDPDOption(Option, EnumSchema[Enum_SMFDPDMode]):
 class SMFIdentificationBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.I_DPD):
     """Header schema for IPv6-Opts SMF identification-based DPD options."""
 
-    test: 'SMFDPDTestFlag' = ForwardMatchField(BitField(length=1, namespace={
-        'mode': (0, 1),
-    }))
     #: TaggerID information.
     info: 'TaggerIDInfo' = BitField(length=1, namespace={
         'mode': (0, 1),
@@ -446,9 +464,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.I_DPD):
         lambda pkt: pkt['info']['type'] != 0,
     )
     #: Identifier.
-    id: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - (
-        1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2)
-    ))
+    id: 'bytes' = BytesField(length=smf_i_dpd_id_len)
 
     def post_process(self, packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption':
         """Revise ``schema`` data after unpacking process.
