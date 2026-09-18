@@ -261,6 +261,88 @@ class IPOverlapConflictTests(unittest.TestCase):
         self.assertTrue(datagram.completed)
         self.assertEqual(datagram.conflict, ((0, 7),))
 
+    def test_conflict_stays_scoped_to_its_own_bufid(self) -> None:
+        """Coverage gap named in #482's review: ``Buffer.conflict`` is created
+        fresh per BUFID, but "created fresh" is an argument, not a test --
+        nothing exercised two BUFIDs actually in flight at once. This is the
+        more valuable of the two gaps: #478's original six boundary cases all
+        shared a single ACK bucket, and that is exactly the shape of gap that
+        let a genuine cross-bucket data-loss regression through undetected.
+
+        So this interleaves two datagrams' fragments -- neither one completes
+        before the other's next fragment arrives -- rather than finishing one
+        datagram before starting the next.
+
+        """
+        reasm = self._reasm()
+
+        # datagram A (ident=100) and datagram B (ident=200) are both open at once
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'AAAAAAAA', ident=100))
+        reasm(self._packet(num=2, fo=0, mf=True, payload=b'PPPPPPPP', ident=200))
+        # A's second fragment conflicts with its first; B is untouched by this
+        reasm(self._packet(num=3, fo=0, mf=True, payload=b'CCCCCCCC', ident=100))
+        # B completes cleanly while A is still open
+        reasm(self._packet(num=4, fo=8, mf=False, payload=b'QQQQ', ident=200))
+        # A completes afterwards
+        reasm(self._packet(num=5, fo=8, mf=False, payload=b'ZZZZ', ident=100))
+
+        by_ident = {datagram.id.id: datagram for datagram in reasm.datagram}
+        self.assertEqual(set(by_ident), {100, 200})
+
+        conflicted = by_ident[100]
+        self.assertTrue(conflicted.completed)
+        self.assertEqual(conflicted.payload, b'CCCCCCCCZZZZ')
+        self.assertEqual(conflicted.conflict, ((0, 7),))
+
+        clean = by_ident[200]
+        self.assertTrue(clean.completed)
+        self.assertEqual(clean.payload, b'PPPPPPPPQQQQ')
+        # the leak this test guards against: B must not see A's conflict
+        self.assertEqual(clean.conflict, ())
+
+    def test_single_write_produces_two_conflict_runs_separated_by_a_match(self) -> None:
+        """Coverage gap named in #482's review: the inner loop of
+        :meth:`~pcapkit.foundation.reassembly.ip.IP._detect_conflicts` breaks a
+        conflict run on a match and resumes detection afterwards, but no
+        existing test drove a single fragment's comparison pass through two
+        separate, non-adjacent conflict runs -- only a leading match (or
+        mismatch) followed by one trailing run.
+
+        One arriving fragment overlaps a base fragment across three 8-octet
+        blocks: octets 8-15 and 24-31 disagree with the base, octets 16-23
+        agree with it (the matching region the two conflict runs sandwich).
+
+        The overlapping/completing fragment is placed at ``fo=8``, not ``0``:
+        a fragment with ``fo=0`` *and* ``mf=False`` is indistinguishable from
+        a whole, never-fragmented packet, and :meth:`IP.reassembly
+        <pcapkit.foundation.reassembly.ip.IP.reassembly>` special-cases that by
+        flushing the pending buffer unread rather than merging it -- which
+        would skip :meth:`_detect_conflicts` entirely and not exercise this
+        gap at all.
+
+        """
+        reasm = self._reasm()
+
+        # leading block, established separately so the fragment under test
+        # does not start at octet 0
+        reasm(self._packet(num=1, fo=0, mf=True, payload=b'AAAAAAAA', ident=300))
+
+        base = b'AAAAAAAA' + b'MMMMMMMM' + b'BBBBBBBB'
+        reasm(self._packet(num=2, fo=8, mf=True, payload=base, ident=300))
+
+        # the single write under test: conflicts at 8-15 and 24-31, agrees at
+        # 16-23, and also completes the datagram (fo=8, mf=False)
+        overwrite = b'XXXXXXXX' + b'MMMMMMMM' + b'YYYYYYYY'
+        reasm(self._packet(num=3, fo=8, mf=False, payload=overwrite, ident=300))
+
+        datagram, = reasm.datagram
+        self.assertTrue(datagram.completed)
+        # per RFC 791, the more recently arrived copy wins -- including its
+        # untouched middle block, which is why the tested range equals the
+        # arriving fragment outright; the leading block is unaffected
+        self.assertEqual(datagram.payload, b'AAAAAAAA' + overwrite)
+        self.assertEqual(datagram.conflict, ((8, 15), (24, 31)))
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DeferredAnalysisTests(unittest.TestCase):
