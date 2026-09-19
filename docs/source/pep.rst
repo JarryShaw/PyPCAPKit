@@ -975,6 +975,59 @@ dissectors later. The third format, the :rfc:`6088` traffic selectors of
 :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
 nobody has claimed it.
 
+**Wave 2 or 3 — per-entry coverage of the option and parameter registries.** The
+option, parameter, block and frame registries are *enumerated* today but not
+*implemented* throughout: a code can be registered, and named, and still have no
+working per-entry read/make pair behind it. Measured against the eighteen
+families :file:`examples/generators/options.py` walks, **327 codes are
+registered and 59 of them do not round-trip** — roughly one in six. The goal of
+this item is to close that to zero for every code whose format is actually
+specified.
+
+Where the gap sits, from ``EXPECTED_FAILURES`` in
+:file:`tests/protocols/test_option_roundtrip_unit.py`:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Family
+     - Not round-tripping
+   * - ``pcapng-option``
+     - 30
+   * - ``tcp-mptcp``
+     - 8
+   * - ``ipv4-option``
+     - 6
+   * - ``hip-parameter``
+     - 4
+   * - ``pcapng-block``
+     - 3
+   * - ``tcp-option``, ``pcapng-secrets``
+     - 2 each
+   * - ``hopopt-option``, ``ipv6-opts-option``, ``ipv6-route-type``, ``httpv2-frame``
+     - 1 each
+
+Two things to be precise about before anyone starts. First, **"does not
+round-trip" is not the same as "unimplemented"** — the 59 are a mix, and at
+least one (``ipv6-route-type/RPL_Source_Route_Header``) is an implemented case
+carrying a tracked defect rather than a missing implementation. The first task
+is to split that list into *missing*, *defective* and *deliberately deferred*,
+because the three want different work. Second, ``pcapng-option``'s 30 is half
+the total on its own, so it is the item that decides whether this is one wave's
+work or several; it deserves sizing before the rest.
+
+This is deliberately **not** the same request as the ``__proto__`` dispatch
+registries. Those name whole protocols, so closing a gap there means
+implementing a dissector — bounded by protocol work that already has its own
+waves above. The option and parameter registries are per-entry formats inside
+protocols that already exist, so the work is self-contained and does not wait on
+anything. Their enumerating harness already exists and already fails when a
+registered code has no case, which is how these 59 are known at all; what is
+missing is the implementations behind the codes, not the accounting of them.
+:file:`tests/protocols/test_dispatch_registry_unit.py` gives the ``__proto__``
+family the same accounting for the separate question of whether a registered
+protocol's dispatch reaches it.
+
 **Between wave 1 and wave 2 — a library-wide consistency sweep.** Wave 1 closed
 by clearing defects one at a time, each found because something else was being
 worked on nearby. That is a poor way to find the rest of them, so before wave 2
