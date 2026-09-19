@@ -850,14 +850,18 @@ rather than as a side effect of a checksum patch.
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
 
-The version in :mod:`pcapkit` is already ``1.5.0a1``, and the release is
-sequenced against the waves above in two deliberate steps:
+The version in :mod:`pcapkit` is ``1.5.0b1``, and the release is sequenced
+against the waves above in two deliberate steps:
 
-#. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.** Wave 1's
-   feature work has landed; what is left is the defect tail in `the issue tracker
-   <https://github.com/JarryShaw/PyPCAPKit/issues>`__. Closing it earns a beta,
-   not a final release, because the consistency sweep below has not run yet and
-   is expected to find things.
+#. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.**
+   *Done.* Wave 1's feature work had landed already; what remained was the
+   defect tail in `the issue tracker
+   <https://github.com/JarryShaw/PyPCAPKit/issues>`__, and closing it earned a
+   beta rather than a final release, because the consistency sweep below had not
+   run yet and was expected to find things. It has since found some: the
+   ipv6-route packing test was added only because the fix it covers had shipped
+   untested, and the `IPv6_Route` Source-Route round-trip defect was found
+   sideways while writing it.
 #. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
    sweep is described under `Delivery Sequence`_ below — prose against code,
    missing tests, unaligned changes, and packet formats against the
@@ -870,7 +874,23 @@ each step does before editing it.** ``.github/workflows/create-release.yml`` is
 version-driven rather than tag-driven: its ``version_check`` job reads
 ``pcapkit.__version__`` directly, derives ``PCAPKIT_PRERELEASE`` from
 ``packaging.version.Version(...).is_prerelease``, and picks the Anaconda label
-from the same test. So:
+from the same test.
+
+Worth spelling out how that workflow is *reached*, because reading its ``on:``
+block alone suggests it is not reachable from an ordinary commit at all — it
+lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain is:
+
+.. code-block:: text
+
+   push to main  ->  "Vendor Update"   (cron-vendor.yml, which triggers on push to main)
+                 ->  "Create Release"  (workflow_run, on Vendor Update completing)
+
+Every publishing job — ``github``, ``tag``, ``pypi``, ``conda`` — is gated on
+``startsWith(github.ref_name, 'v') || PCAPKIT_TAG_EXISTS == 'false'``. That gate
+is why ordinary commits do not publish: ``Create Release`` runs on each one, but
+the tag for the current version already exists, so all four jobs skip. Changing
+the version string is what makes ``PCAPKIT_TAG_EXISTS`` false, and the next push
+then tags and publishes. So:
 
 .. list-table::
    :header-rows: 1
@@ -880,11 +900,11 @@ from the same test. So:
      - prerelease
      - conda label
      - GitHub release
-   * - ``1.5.0a1`` (current)
+   * - ``1.5.0a1`` (shipped earlier)
      - yes
      - ``dev``
      - marked prerelease
-   * - ``1.5.0b1`` (step 1)
+   * - ``1.5.0b1`` (step 1, **current**)
      - yes
      - ``dev``
      - marked prerelease

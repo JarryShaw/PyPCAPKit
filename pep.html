@@ -1203,13 +1203,17 @@ rather than as a side effect of a checksum patch.</p>
 </section>
 <section id="release-plan-1-5-0-in-two-steps">
 <h2>Release Plan — 1.5.0 in Two Steps<a class="headerlink" href="#release-plan-1-5-0-in-two-steps" title="Link to this heading">¶</a></h2>
-<p>The version in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is already <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code>, and the release is
-sequenced against the waves above in two deliberate steps:</p>
+<p>The version in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code>, and the release is sequenced
+against the waves above in two deliberate steps:</p>
 <ol class="arabic simple">
-<li><p><strong>A beta — ``1.5.0b1`` — when wave 1’s remaining issues are closed.</strong> Wave 1’s
-feature work has landed; what is left is the defect tail in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a>. Closing it earns a beta,
-not a final release, because the consistency sweep below has not run yet and
-is expected to find things.</p></li>
+<li><p><strong>A beta — ``1.5.0b1`` — when wave 1’s remaining issues are closed.</strong>
+<em>Done.</em> Wave 1’s feature work had landed already; what remained was the
+defect tail in <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues">the issue tracker</a>, and closing it earned a
+beta rather than a final release, because the consistency sweep below had not
+run yet and was expected to find things. It has since found some: the
+ipv6-route packing test was added only because the fix it covers had shipped
+untested, and the <cite>IPv6_Route</cite> Source-Route round-trip defect was found
+sideways while writing it.</p></li>
 <li><p><strong>The official ``1.5.0`` when the post-wave-1 consistency sweep is done.</strong> The
 sweep is described under <a class="reference internal" href="#delivery-sequence">Delivery Sequence</a> below — prose against code,
 missing tests, unaligned changes, and packet formats against the
@@ -1222,7 +1226,20 @@ each step does before editing it.</strong> <code class="docutils literal notrans
 version-driven rather than tag-driven: its <code class="docutils literal notranslate"><span class="pre">version_check</span></code> job reads
 <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> directly, derives <code class="docutils literal notranslate"><span class="pre">PCAPKIT_PRERELEASE</span></code> from
 <code class="docutils literal notranslate"><span class="pre">packaging.version.Version(...).is_prerelease</span></code>, and picks the Anaconda label
-from the same test. So:</p>
+from the same test.</p>
+<p>Worth spelling out how that workflow is <em>reached</em>, because reading its <code class="docutils literal notranslate"><span class="pre">on:</span></code>
+block alone suggests it is not reachable from an ordinary commit at all — it
+lists only <code class="docutils literal notranslate"><span class="pre">push</span></code> on <code class="docutils literal notranslate"><span class="pre">v*</span></code> tags and a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>. The chain is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>push to main  -&gt;  "Vendor Update"   (cron-vendor.yml, which triggers on push to main)
+              -&gt;  "Create Release"  (workflow_run, on Vendor Update completing)
+</pre></div>
+</div>
+<p>Every publishing job — <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, <code class="docutils literal notranslate"><span class="pre">conda</span></code> — is gated on
+<code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span> <span class="pre">||</span> <span class="pre">PCAPKIT_TAG_EXISTS</span> <span class="pre">==</span> <span class="pre">'false'</span></code>. That gate
+is why ordinary commits do not publish: <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Release</span></code> runs on each one, but
+the tag for the current version already exists, so all four jobs skip. Changing
+the version string is what makes <code class="docutils literal notranslate"><span class="pre">PCAPKIT_TAG_EXISTS</span></code> false, and the next push
+then tags and publishes. So:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
@@ -1239,12 +1256,12 @@ from the same test. So:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (current)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (shipped earlier)</p></td>
 <td><p>yes</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
 <td><p>marked prerelease</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> (step 1)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> (step 1, <strong>current</strong>)</p></td>
 <td><p>yes</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
 <td><p>marked prerelease</p></td>
@@ -1466,7 +1483,7 @@ class, which is a bounded piece of work and the natural first step.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=187fdd2d"></script>
+</div><script src="_static/documentation_options.js?v=2f875747"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
