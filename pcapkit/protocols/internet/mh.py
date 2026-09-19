@@ -1929,8 +1929,11 @@ class MH(Internet[Data_MH, Schema_MH],
 
         Note:
             :rfc:`5568#section-6.2.2` states that the FBU is *identical* to the
-            Mobile IPv6 binding update (BU) message, so the lifetime is read in
-            units of 4 seconds exactly as in :meth:`_read_msg_bu`.
+            Mobile IPv6 binding update (BU) message -- but that statement is
+            about **message layout**, not field units. The same section defines
+            the Lifetime as "the requested time in seconds", unlike the BU
+            lifetime's units of 4 seconds [:rfc:`6275#section-6.1.7`], so it is
+            not scaled on the way in.
 
         Args:
             schema: Parsed message type schema.
@@ -1950,7 +1953,7 @@ class MH(Internet[Data_MH, Schema_MH],
             home=bool(schema.flags['H']),
             lla_compat=bool(schema.flags['L']),
             key_mngt=bool(schema.flags['K']),
-            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
+            lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -1984,6 +1987,11 @@ class MH(Internet[Data_MH, Schema_MH],
             which is local to this module, rather than being mislabelled as a
             :class:`~pcapkit.const.mh.status_code.StatusCode`.
 
+            The Lifetime is likewise defined by :rfc:`5568#section-6.2.3` as
+            "the granted lifetime ... in seconds", unlike the BA lifetime's
+            units of 4 seconds [:rfc:`6275#section-6.1.7`], so it is not scaled
+            on the way in.
+
         Args:
             schema: Parsed message type schema.
             header: Parsed MH header schema.
@@ -2000,7 +2008,7 @@ class MH(Internet[Data_MH, Schema_MH],
             status=FastBindingAcknowledgmentStatus(schema.status),
             key_mngt=bool(schema.flags['K']),
             seq=schema.seq,
-            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
+            lifetime=datetime.timedelta(seconds=schema.lifetime),
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -2808,6 +2816,11 @@ class MH(Internet[Data_MH, Schema_MH],
            |       Refresh Interval        |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Note:
+            The Refresh Interval is measured in units of four seconds
+            [:rfc:`6275#section-6.2.4`], the same unit the BU/BA lifetime uses,
+            so it is scaled here.
+
         Args:
             schema: Parsed option schema.
             options: Parsed MH options.
@@ -2822,7 +2835,7 @@ class MH(Internet[Data_MH, Schema_MH],
         data = Data_BindingRefreshAdviceOption(
             type=schema.type,
             length=schema.length + 2,
-            interval=schema.interval,
+            interval=datetime.timedelta(seconds=schema.interval * 4),
         )
         return data
 
@@ -6587,7 +6600,10 @@ class MH(Internet[Data_MH, Schema_MH],
             home: Home registration flag.
             lla_compat: LLA compatibility flag.
             key_mngt: Key management mobility option flag.
-            lifetime: Lifetime in seconds or timedelta.
+            lifetime: Lifetime, in seconds or as a
+                :class:`~datetime.timedelta`. Unlike the BU/BA lifetime, this
+                one counts seconds rather than units of 4 seconds
+                [:rfc:`5568#section-6.2.2`], so the value is not scaled.
             options: Mobility options.
             **kwargs: Arbitrary keyword arguments.
 
@@ -6615,7 +6631,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 'L': lla_compat,
                 'K': key_mngt,
             },
-            lifetime=math.ceil(lifetime_val / 4),
+            lifetime=lifetime_val,
             options=self._make_mh_options(options),
         )
 
@@ -6640,7 +6656,10 @@ class MH(Internet[Data_MH, Schema_MH],
             status_reversed: Reverse status code namespace.
             key_mngt: Key management mobility option flag.
             seq: Sequence number.
-            lifetime: Lifetime in seconds or timedelta.
+            lifetime: Lifetime, in seconds or as a
+                :class:`~datetime.timedelta`. Unlike the BU/BA lifetime, this
+                one counts seconds rather than units of 4 seconds
+                [:rfc:`5568#section-6.2.3`], so the value is not scaled.
             options: Mobility options.
             **kwargs: Arbitrary keyword arguments.
 
@@ -6666,7 +6685,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 'K': key_mngt,
             },
             seq=seq,
-            lifetime=math.ceil(lifetime_val / 4),
+            lifetime=lifetime_val,
             options=self._make_mh_options(options),
         )
 
@@ -7471,14 +7490,16 @@ class MH(Internet[Data_MH, Schema_MH],
         )
 
     def _make_opt_bra(self, type: 'Enum_Option', option: 'Optional[Data_BindingRefreshAdviceOption]' = None, *,
-                      interval: 'int' = 0,
+                      interval: 'int | timedelta' = 0,
                       **kwargs: 'Any') -> 'Schema_BindingRefreshAdviceOption':
         """Make MH binding refresh advice option.
 
         Args:
             type: Option type.
             option: Option data model.
-            interval: Refresh interval.
+            interval: Refresh interval before re-registration, in units of 4
+                seconds or as a :class:`~datetime.timedelta`
+                [:rfc:`6275#section-6.2.4`].
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -7486,12 +7507,14 @@ class MH(Internet[Data_MH, Schema_MH],
 
         """
         if option is not None:
-            interval = option.interval
+            interval_val = math.ceil(option.interval.total_seconds() / 4)
+        else:
+            interval_val = self._seconds(interval, 4)
 
         return Schema_BindingRefreshAdviceOption(
             type=type,
             length=2,
-            interval=interval,
+            interval=interval_val,
         )
 
     def _make_opt_aca(self, type: 'Enum_Option', option: 'Optional[Data_AlternateCareofAddressOption]' = None, *,

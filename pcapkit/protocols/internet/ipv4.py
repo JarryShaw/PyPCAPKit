@@ -517,6 +517,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while
+        # ``data.offset`` is in octets (see :meth:`read`), so scale back down to
+        # keep the data-to-schema round trip exact, mirroring
+        # :meth:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag._make_data`.
         return {
             'tos_pre': data.tos.pre,
             'tos_del': data.tos['del'],
@@ -526,13 +530,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'id': data.id,
             'df': data.flags.df,
             'mf': data.flags.mf,
-            'offset': data.offset,
+            'offset': data.offset // 8,
             'ttl': data.ttl,
             'protocol': data.protocol,
             'checksum': data.checksum,
             'src': data.src,
             'dst': data.dst,
-            'options': data.options,
+            # NOTE: ``options`` is only present on ``data`` when the packet's
+            # ``hdr_len`` exceeds the fixed 20-octet header (see :meth:`read`),
+            # so read it defensively rather than assuming it always exists.
+            'options': getattr(data, 'options', None),
             'payload': cls._make_payload(data),
         }
 
@@ -1359,7 +1366,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Args:
             kind: option type code
             option: option data
-            sec: security option
+            level: classification level
+            level_default: default value for classification level
+            level_namespace: namespace for classification level
+            level_reversed: whether classification level is reversed
+            authorities: list of protection authority flags
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1773,8 +1784,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         """Make IPv4 Quick-Start (``QS``) option.
 
         Args:
-            code: option type value
-            opt: option data
+            kind: option type code
+            option: option data
             func: QS function type
             func_default: default value for QS function type
             func_namespace: namespace for QS function type

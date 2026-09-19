@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import datetime
 import importlib.util
+import io
 from ipaddress import ip_address
 import types
 import unittest
 from unittest import mock
+import warnings
 
 from tests._support import purge_modules
 
@@ -55,6 +57,54 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(values['src'], '192.0.2.10')
         self.assertEqual(values['dst'], '198.51.100.20')
         self.assertIn('payload', values)
+
+    def test_ipv4_make_data_scales_offset_and_defaults_missing_options(self) -> None:
+        """Regression test for #494.
+
+        Two defects live in :meth:`IPv4._make_data
+        <pcapkit.protocols.internet.ipv4.IPv4._make_data>`: the fragment
+        ``offset`` was handed back in octets to a parameter that
+        :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>` takes in
+        on-wire 8-octet units (:rfc:`791`), and ``data.options`` was read
+        unconditionally even though :meth:`IPv4.read
+        <pcapkit.protocols.internet.ipv4.IPv4.read>` only sets it when
+        ``hdr_len`` exceeds the fixed 20-octet header.
+
+        The two interact: the missing-``options`` ``AttributeError`` fires
+        before the unscaled ``offset`` can even be returned, so a fixture
+        that always supplies ``options`` -- like the ``DummyDict`` one above,
+        which also uses ``offset=0``, the one value for which the missing
+        ``// 8`` is invisible -- cannot catch either. This test uses a
+        non-zero offset *and* a real packet with no options, so both
+        defects are exercised together, exactly as the issue's own repro
+        does.
+
+        """
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        proto = object.__new__(IPv4)
+
+        # Wire Fragment Offset of 5 (8-octet units), no options -> hdr_len
+        # stays at the fixed 20 octets and read() never sets ``.options``.
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            raw = proto.make(offset=5, protocol=6, payload=b'\xaa' * 8).pack()
+            data = IPv4(io.BytesIO(raw), len(raw)).info
+
+        self.assertFalse(hasattr(data, 'options'))
+        self.assertEqual(data.offset, 40)  # read() scales wire units to octets
+
+        values = IPv4._make_data(data)
+        self.assertEqual(values['offset'], 5)  # scaled back down to wire units
+        self.assertIsNone(values['options'])
+
+        # Full round trip: re-packing with the recovered offset must
+        # reproduce the exact original wire bytes.
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            raw2 = proto.make(offset=values['offset'], protocol=6,
+                              payload=b'\xaa' * 8).pack()
+        self.assertEqual(raw, raw2)
 
     def test_ipv4_properties_read_and_make_cover_packet_paths(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber

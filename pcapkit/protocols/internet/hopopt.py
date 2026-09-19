@@ -323,7 +323,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             next_default: Default value of next header type.
             next_namespace: Namespace of next header type.
             next_reversed: If the namespace of next header type is reversed.
-            option: Hop-by-Hop Options.
+            options: Hop-by-Hop Options.
             payload: Payload of current protocol.
             **kwargs: Arbitrary keyword arguments.
 
@@ -499,7 +499,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -537,7 +537,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -594,7 +594,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -628,7 +628,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -668,7 +668,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -732,7 +732,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -795,7 +795,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -854,7 +854,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -917,7 +917,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -961,7 +961,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1022,7 +1022,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1054,7 +1054,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1085,7 +1085,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1129,7 +1129,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1167,7 +1167,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             schema: parsed parameter schema
-            option: extracted HOPOPT options
+            options: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1238,7 +1238,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         """Make options for HOPOPT.
 
         Args:
-            option: HOPOPT options
+            options: HOPOPT options
 
         Returns:
             Tuple of options and total length of options.
