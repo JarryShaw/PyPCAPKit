@@ -110,13 +110,6 @@ class DispatchRegistryTests(unittest.TestCase):
     KNOWN_DEGRADED = {
         label: Degrade(*value)
         for label, value in {
-            'link/Novell_Inc_0x8137': ('0 is not a valid Socket',
-                                       'pcapkit/protocols/internet/ipx.py -- Socket(0) is not '
-                                       'a valid member; IPX cannot be constructed or parsed '
-                                       'at all (#492)'),
-            'internet/IPX_in_IP': ('0 is not a valid Socket',
-                                   'same defect as link/Novell_Inc_0x8137 -- both dispatch to '
-                                   'pcapkit.protocols.internet.ipx.IPX (#492)'),
             'sctp/PayloadProtocolIdentifier_3GPP_NG_Application_Protocol': (
                 ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
                 'placeholder payload is not an aligned PER NGAP-PDU; building '

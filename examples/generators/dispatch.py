@@ -834,20 +834,6 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
 #: names has been fixed; a case *not* listed here must reach its target, or a
 #: fresh regression has gone unnoticed.
 KNOWN_DEGRADED = {
-    # ``IPX()`` cannot be constructed with no arguments at all --
-    # ``Socket(0)`` is not a valid member of the ``Socket`` enumeration -- so
-    # every packet dispatched to it, well-formed or not, fails inside
-    # ``_make_data``/``read`` and is caught by the ``beholder`` decorator,
-    # which substitutes ``Raw`` and records the exception under
-    # ``info['error']``. GitHub issue #492.
-    'link/Novell_Inc_0x8137': (
-        "0 is not a valid Socket",
-        'pcapkit/protocols/internet/ipx.py -- Socket(0) is not a valid member; '
-        'IPX cannot be constructed or parsed at all (#492)'),
-    'internet/IPX_in_IP': (
-        "0 is not a valid Socket",
-        'same defect as link/Novell_Inc_0x8137 -- both dispatch to '
-        'pcapkit.protocols.internet.ipx.IPX (#492)'),
     # NGAP is registered for both PPIDs (SCTP.__proto__ is a defaultdict of
     # exactly two entries). Building a well-formed PER-encoded NGAP-PDU is out
     # of scope for a minimal dispatch probe -- this uses the same placeholder
