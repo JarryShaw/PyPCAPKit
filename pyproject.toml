@@ -231,6 +231,27 @@ docs = [
 test = [
     "pytest>=8",
     "typing-extensions",
+    # Enough of the ``vendor`` extra for a test to import a vendor crawler.
+    # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports "9 skipped"
+    # rather than failing, so the byte-for-byte regeneration check that is the
+    # only guard on the hand-maintained IPX socket registry never runs on any CI
+    # path: the ``unit-tests.yml`` jobs install ``.[test]``, and
+    # ``cron-vendor.yml`` installs ``.[all]`` but never invokes pytest.
+    #
+    # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
+    # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports
+    # every crawler unconditionally -- seven of which import ``bs4`` at module
+    # scope. Its ``try: import bs4`` guard suppresses only the warning, not the
+    # ``ModuleNotFoundError`` that the crawler imports below it raise anyway.
+    #
+    # Plain, without the ``vendor`` extra's ``[socks]`` and ``[html5lib]``:
+    # nothing in the test suite goes through a proxy, and no unit-tier test
+    # parses HTML (none of them may -- the tier makes no network call), so
+    # neither parser nor proxy support is reachable from here. Their absence
+    # makes :mod:`pcapkit.vendor` log two ``VendorWarning``s at import, which
+    # pytest captures and shows only on failure; they change no result. See #507.
+    "requests",
+    "beautifulsoup4",
 ]
 
 # setuptools specific
