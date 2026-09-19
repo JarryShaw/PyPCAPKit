@@ -20,13 +20,18 @@ from typing import TYPE_CHECKING
 # silently goes back to emitting unresolvable annotations.
 from sphinx_autodoc_typehints._resolver import resolve_type_guarded_imports
 
+# NB: this must precede ``import pcapkit``. ``pcapkit.utilities.logging`` reads
+# ``PCAPKIT_SPHINX`` at *import* time to compute ``SPHINX_TYPE_CHECKING``, and
+# importing ``pcapkit`` already pulls in the schema modules -- so setting it any
+# later leaves every ``if SPHINX_TYPE_CHECKING:`` TypedDict undefined and autodoc
+# cannot document them.
+os.environ['PCAPKIT_SPHINX'] = '1'
+
 import pcapkit
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Optional
     from sphinx.application import Sphinx
-
-os.environ['PCAPKIT_SPHINX'] = '1'
 
 logger = logging.getLogger('pcapkit-sphinx')
 logger.setLevel(logging.INFO)
