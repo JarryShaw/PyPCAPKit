@@ -85,6 +85,15 @@ class Socket(Vendor):
 
         enum = []  # type: list[str]
         miss = []  # type: list[str]
+
+        # NOTE: 0x0000 is not listed as a well-known socket in the Wikipedia
+        # registry table scraped below, but it is the IPX protocol's own
+        # default for the ``dst``/``src`` socket field (an ordinary
+        # "unspecified socket"), so it must be present regardless of what the
+        # scraped table contains; see #492.
+        desc = self.wrap_comment("Unspecified socket; this is IPX's own default for the dst/src socket field.")
+        enum.append(f'#: {desc}\n    Unspecified = 0x0000')
+
         for item in content:
             line = item.find_all('td')
 

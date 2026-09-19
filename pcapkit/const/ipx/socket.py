@@ -18,6 +18,9 @@ __all__ = ['Socket']
 class Socket(IntEnum):
     """[Socket] Socket Types"""
 
+    #: Unspecified socket; this is IPX's own default for the dst/src socket field.
+    Unspecified = 0x0000
+
     #: Routing Information Packet
     Routing_Information_Packet = 0x0001
 
