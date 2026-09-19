@@ -298,6 +298,29 @@ class ESPRegistryTests(unittest.TestCase):
         self.assertFalse(null.authenticated)
         self.assertIsNone(null.unavailable())
 
+    def test_security_association_rejects_a_bool_destination(self) -> None:
+        """``destination`` calls :func:`ipaddress.ip_address` directly, with
+        no version check at all -- unlike the ``Field`` classes in
+        :mod:`pcapkit.corekit.fields.ipaddress`, ESP does not route through
+        that abstraction. Before this fix,
+        ``SecurityAssociation(spi=1, destination=True).destination`` silently
+        became ``IPv4Address('0.0.0.1')``, with no exception and no warning.
+        See #491.
+        """
+        from pcapkit.protocols.internet.esp import SecurityAssociation
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for value in (True, False):
+            with self.subTest(destination=value):
+                with self.assertRaises(ProtocolError) as ctx:
+                    SecurityAssociation(spi=1, destination=value)  # type: ignore[arg-type]
+                self.assertIn('must not be a bool', str(ctx.exception))
+
+        # the escape hatch still works, and None still means "any"
+        sa = SecurityAssociation(spi=1, destination=int(True))  # type: ignore[arg-type]
+        self.assertEqual(str(sa.destination), '0.0.0.1')
+        self.assertIsNone(SecurityAssociation(spi=1).destination)
+
     def test_security_association_repr_holds_no_key_material(self) -> None:
         from pcapkit.protocols.internet.esp import (Cipher, ESPContext, Integrity,
                                                     SecurityAssociation)
