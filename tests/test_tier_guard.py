@@ -13,8 +13,10 @@ Four things are worth pinning, and they are the four ways this could rot:
   (:class:`TierClassificationTests`, :class:`WorkflowAgreementTests`);
 * committedness comes from git rather than from a list of names that goes stale
   the moment a seventh capture is committed (:class:`CommittedCaptureTests`);
-* a violation is caught and explained, and the legitimate reads next to it are
-  not (:class:`AuditTests`, :class:`RuntimeCheckTests`);
+* a violation is caught and explained, the legitimate reads next to it are not,
+  and several violations in one module are listed in the order those violations
+  appear in the file rather than in the order a tree walk happened to reach them
+  (:class:`AuditTests`, :class:`RuntimeCheckTests`);
 * the suite as it stands is clean (:class:`SuiteIsCleanTests`), and a checkout
   without git degrades instead of failing (:class:`DegradationTests`).
 
@@ -288,6 +290,70 @@ class AuditTests(unittest.TestCase):
             """)
         self.assertEqual(_tiers.audit_module(module), [])
         self.assertEqual(_tiers.sample_path_calls(str(module)), ())
+
+    def test_calls_and_findings_come_out_in_source_order(self) -> None:
+        """Four violations at three nesting depths, reported top to bottom.
+
+        The arrangement is the whole test, and the module below is wrong for the
+        walk in two independent ways, because each half of the ``(lineno,
+        col_offset)`` sort key needs a case that fails without it.
+
+        Across lines, ``lineno``: :func:`ast.walk` is breadth-first, so it reaches
+        the *shallowest* call first however late in the file it is written. Here
+        the earliest call is the most deeply nested one and the latest is at module
+        level, so an unsorted collection reports lines 14, 11, 7, 7 -- the file
+        read backwards.
+
+        Within line 7, ``col_offset``: the two calls there are the ``body`` and the
+        ``test`` of a conditional expression, and :class:`ast.IfExp` stores its
+        fields ``test, body, orelse`` while source writes them ``body, test,
+        orelse``. The walk therefore reaches ``'http6.cap'`` before
+        ``'test.pcap'``, which is written to its left, and sorting on ``lineno``
+        alone preserves that -- a stable sort leaves a tie in walk order. Only
+        ``col_offset`` puts the pair back.
+
+        A tuple of two calls, which is what this module used to hold here, pins
+        neither half: :class:`ast.Tuple` keeps its elements in one field list, so
+        the walk yields them left to right already and the test passed with
+        ``col_offset`` dropped. :class:`ast.Dict` is the other shape that gets a
+        single line wrong, since all of its ``keys`` are walked before any of its
+        ``values``.
+
+        """
+        module = write_module(self.tmp_path, 'test_order_unit.py', """
+            from tests._support import sample_path
+
+
+            class Tests:
+                def test_from_a_nested_function(self):
+                    def helper():
+                        return sample_path('test.pcap') if sample_path('http6.cap') else None
+                    return helper()
+
+                def test_from_a_method(self):
+                    return sample_path('http.cap')
+
+
+            TOP_LEVEL = sample_path('dhcp_big_endian.pcapng')
+            """)
+
+        expected = [(7, 'test.pcap'), (7, 'http6.cap'), (11, 'http.cap'),
+                    (14, 'dhcp_big_endian.pcapng')]
+
+        calls = _tiers.sample_path_calls(str(module))
+        self.assertEqual([(call.lineno, call.name) for call in calls], expected)
+
+        # audit_module emits one finding per call and inherits this order, which is
+        # what the reader of a failed collection actually sees. Matched on the
+        # capture name as well as the line, because the two calls on line 7 share a
+        # line and the name is the only thing that distinguishes them -- so this is
+        # the assertion that catches a lost col_offset in the diagnostic itself.
+        findings = _tiers.audit_module(module)
+        pattern = re.compile(r":(\d+) is a unit-tier test module and reads '([^']+)'")
+        located = [pattern.search(finding) for finding in findings]
+        self.assertTrue(all(match is not None for match in located), findings)
+        self.assertEqual([(int(match.group(1)), match.group(2))
+                          for match in located if match is not None], expected)
 
     def test_an_unparseable_module_is_not_this_guards_problem(self) -> None:
         """A syntax error is reported by pytest, far better than from here."""
