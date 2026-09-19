@@ -404,7 +404,7 @@ engine, and is not needed by the test suite.
 .. [1] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
    3.14; it ran on 3.10--3.13.
 
-.. [2] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
+.. [2] `PyPCAPFile`_ 0.12.0 imports ``imp``, which Python removed in 3.12.
 
 .. [3] `PyPCAP`_ 1.3.0 could not be built here: its build does not search
    Homebrew's libpcap library prefix. It is also unsupported on Python 3.12+.
