@@ -363,7 +363,6 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         """Make Authentication field when Cryptographic Authentication is employed.
 
         Args:
-            auth_type: Authentication type.
             auth_data: Authentication data.
 
         Returns:

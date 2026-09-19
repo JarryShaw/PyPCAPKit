@@ -1019,8 +1019,8 @@ class Extractor(Generic[_P]):
         """Works as a simple wrapper for the iteration protocol.
 
         Raises:
-            IterableError: If :attr:`self._flag_a <pcapkit.foundation.extraction.Extractor._flag_a>`
-                is :data:`True`, as iteration is not applicable.
+            CallableError: If :attr:`self._flag_a <pcapkit.foundation.extraction.Extractor._flag_a>`
+                is :data:`True`, as such operation is not applicable.
 
         """
         if not self._flag_a:

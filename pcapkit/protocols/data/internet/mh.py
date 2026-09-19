@@ -315,7 +315,8 @@ class FastBindingUpdateMessage(MH):
     lla_compat: 'bool'
     #: Key management mobility capability flag.
     key_mngt: 'bool'
-    #: Lifetime.
+    #: Lifetime. :rfc:`5568#section-6.2.2` counts this in seconds rather than in
+    #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
@@ -340,7 +341,8 @@ class FastBindingAcknowledgmentMessage(MH):
     key_mngt: 'bool'
     #: Sequence number.
     seq: 'int'
-    #: Lifetime.
+    #: Lifetime. :rfc:`5568#section-6.2.3` counts this in seconds rather than in
+    #: the units of 4 seconds the binding messages use.
     lifetime: 'timedelta'
     #: Mobility options.
     options: 'OrderedMultiDict[Enum_Option, Option]'
@@ -677,11 +679,12 @@ class PadOption(Option):
 class BindingRefreshAdviceOption(Option):
     """Data model for Binding Refresh Advice option."""
 
-    #: Refresh interval.
-    interval: 'int'
+    #: Refresh interval before re-registration. Counted on the wire in units of
+    #: 4 seconds [:rfc:`6275#section-6.2.4`].
+    interval: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', length: 'int', interval: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', length: 'int', interval: 'timedelta') -> 'None': ...
 
 
 @info_final
