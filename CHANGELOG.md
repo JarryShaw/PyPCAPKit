@@ -37,4 +37,4 @@ Preceded by `1.5.0a1` (2026-09-15), `1.5.0b1` and `1.5.0b2` (both 2026-09-18) an
 
 ---
 
-Only the version being released is kept here. Every entry, including this one, lives in the repository as `docs/source/changelog/<version>.rst`, and the whole history is rendered at <https://jarryshaw.github.io/PyPCAPKit/changelog.html>.
+Full changelog: <https://jarryshaw.github.io/PyPCAPKit/changelog.html>

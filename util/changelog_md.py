@@ -143,13 +143,16 @@ RFC_URL = 'https://datatracker.ietf.org/doc/html/rfc'
 #: history. ``tests/project/test_changelog_md.py`` asserts the two agree.
 DOCS_URL = 'https://jarryshaw.github.io/PyPCAPKit/changelog.html'
 
-#: Closing note on the generated file, explaining why it holds one release.
+#: Closing note on the generated file, pointing at the rest of the history.
+#:
+#: Deliberately short. This file is read on a GitHub release page and on PyPI,
+#: where a reader has no repository in front of them -- so an explanation of
+#: which ``docs/source/changelog/<version>.rst`` the entry came from is noise to
+#: them, while the link is the one thing that is useful everywhere.
 TRAILER = (
     '---\n'
     '\n'
-    'Only the version being released is kept here. Every entry, including this'
-    ' one, lives in the repository as `docs/source/changelog/<version>.rst`,'
-    f' and the whole history is rendered at <{DOCS_URL}>.\n'
+    f'Full changelog: <{DOCS_URL}>\n'
 )
 
 #: A single-backtick code span. Replaced by :data:`_SPAN` before :func:`residual`
