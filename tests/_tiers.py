@@ -55,15 +55,37 @@ check sees the name however it was computed, e.g. ``sample_path(sample)`` in a
 parametrised loop, but only once the call is reached.
 
 What neither catches, deliberately: a unit-tier module that opens a capture
-without going through :func:`~tests._support.sample_path` at all.
-:file:`tests/protocols/misc/test_pcapng_unit.py` does this today at the line
-holding ``os.path.join('examples', 'captures', 'dhcp_big_endian.pcapng')``, and
-it is tier-safe -- it checks :func:`os.path.isfile` and skips -- but it is
-invisible here. Flagging that shape would mean recognising a second,
-much woollier "the absence is handled" idiom on top of the ``try``/``except``
-one, and getting it wrong would fail correct code for everybody. So the rule
-this module enforces is stated as it is: capture reads go through
-:func:`~tests._support.sample_path`, and that is the door with the lock on it.
+without going through :func:`~tests._support.sample_path` at all, e.g. by joining
+:file:`examples/captures/` and a name itself. No *unit-tier* module does this
+today -- :file:`tests/protocols/misc/test_pcapng_unit.py` was the last one and
+now reads ``sample_path('dhcp_big_endian.pcapng')`` inside the ``try``/``except
+FileNotFoundError`` idiom :func:`explain` recommends. Only the *unit* tier is
+claimed there, deliberately: fixture-tier modules join the directory freely and
+are entitled to, e.g. :file:`tests/protocols/test_option_coverage_runtime.py`,
+which imports :data:`SAMPLE_ROOT` from here and joins names onto it -- legal,
+because that tier runs only once the fixtures exist. The one unit-tier module that
+touches :data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, only stats
+:file:`in.pcap`, which is committed. But nothing stops the next unit-tier module
+from opening a *generated* capture that way, and the shape stays invisible here.
+
+Flagging it in general was considered and rejected, with a measurement behind the
+decision. A rule as broad as "any string literal ending in ``.pcap``" matches 18
+distinct literal values in the unit-tier modules under :file:`tests/`, across 85
+occurrences of them -- 199 occurrences once the fixture tier is counted too. Only
+two of the 18 are a :func:`~tests._support.sample_path` argument at all, and both
+are already legal: ``'in.pcap'`` is committed, and ``'test.pcap'`` is read inside
+the sanctioned ``try``/``except``. The other 16 name no capture at all --
+``'out.pcap'``, ``'input.pcap'``, ``'capture.pcap'``, scratch paths written by
+tests that read no fixture, and ``'pcapkit.foundation.engines.pcap'``, which is a
+dotted module name rather than a path. So the figure that matters is 16 false
+positives, counted as distinct literal values in the unit tier: the broad rule
+would invent every one of them and catch nothing this rule misses, and a false
+positive here aborts collection for everybody rather than failing one test.
+Narrowing it would mean recognising a second, much woollier "the absence is
+handled" idiom -- an :func:`os.path.isfile` check and a skip -- on top of the
+``try``/``except`` one. So the rule this module enforces is stated as it is:
+capture reads go through :func:`~tests._support.sample_path`, and that is the door
+with the lock on it.
 
 Nothing here imports :mod:`tests._support` -- the dependency runs the other way,
 and adding the reverse edge would make it a cycle. Nothing here imports
@@ -414,16 +436,58 @@ def _is_sample_path(func: 'ast.expr') -> 'bool':
 
 @functools.lru_cache(maxsize=None)
 def sample_path_calls(module_path: 'str') -> 'tuple[SampleCall, ...]':
-    """Every ``sample_path(...)`` call in ``module_path``, in source order."""
+    """Every ``sample_path(...)`` call in ``module_path``, in source order.
+
+    Source order -- ascending ``(lineno, col_offset)`` -- is a promise that has
+    to be kept by sorting, because :func:`ast.walk` does not give it. It walks
+    breadth-first, so it yields a call written near the top of the file but nested
+    inside a method *after* one written at the bottom at module level. Measured on
+    the four-call module that
+    ``test_calls_and_findings_come_out_in_source_order`` in
+    :file:`tests/test_tier_guard.py` builds for the purpose: an unsorted walk
+    reported its calls as lines 14, 11, 7, 7, i.e. the file read backwards.
+
+    That matters because :func:`audit_module` emits one finding per call in this
+    order, and this guard's entire value is a diagnostic the reader can act on.
+    Breadth-first order is not the order anything appears in the file, and it
+    shifts when unrelated code moves between nesting levels -- so the same set of
+    violations gets listed differently from one edit to the next, and a reader
+    comparing two runs cannot tell a reordering from a new finding.
+
+    Sorted rather than collected by a lexical-order visitor, because the sort is
+    the whole fix in one expression and needs nothing kept in step with it: a
+    second traversal written by hand is another thing that can disagree with
+    :func:`ast.walk` about where calls live.
+
+    ``col_offset`` is the other half of the key, and which AST shapes actually need
+    it is the reusable fact. A tuple does not: :class:`ast.Tuple` holds its
+    elements in one field list, so ``(sample_path('a.pcap'),
+    sample_path('b.pcap'))`` already comes out of the walk left to right and
+    ``lineno`` alone would do. Two shapes do need it, because they spread one
+    line's expressions across separate fields that the walk visits in an order
+    source does not use: :class:`ast.Dict`, whose ``keys`` are all visited before
+    any of its ``values``, and :class:`ast.IfExp`, which stores
+    ``test, body, orelse`` but is written ``body if test else orelse``. So
+    ``sample_path('a.pcap') if sample_path('b.pcap') else None`` is walked b then
+    a, and sorting on ``lineno`` alone keeps it that way -- the sort is stable, so
+    a tie is left in walk order. That is the shape
+    ``test_calls_and_findings_come_out_in_source_order`` puts on one line, which is
+    what makes dropping ``col_offset`` turn that test red.
+
+    """
     tree = _parse(module_path)
     if tree is None:
         return ()
 
     handled = handled_lines(module_path)
+    calls = sorted(
+        (node for node in ast.walk(tree)
+         if isinstance(node, ast.Call) and _is_sample_path(node.func)),
+        key=lambda node: (node.lineno, node.col_offset),
+    )
     return tuple(
         SampleCall(node.lineno, _literal_name(node), node.lineno in handled)
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and _is_sample_path(node.func)
+        for node in calls
     )
 
 
