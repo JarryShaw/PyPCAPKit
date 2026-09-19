@@ -18,6 +18,17 @@ two defects -- and the fix -- stay pinned: a future regeneration of the
 ``pcapkit.const`` tree (see :mod:`pcapkit.vendor`) that drops either fix will
 fail this suite rather than silently reintroducing GitHub issue #492.
 
+Every test class purges :mod:`pcapkit` from :data:`sys.modules` in ``setUp``,
+matching the convention every other module in this suite uses (see
+:func:`tests._support.purge_modules`). It matters more here than usual: this
+module is the first thing in the whole suite to import *every* submodule
+under :mod:`pcapkit.const`, including ones nothing else touches (e.g.
+:mod:`pcapkit.const.reg.apptype`). ``tests/cli/test_main.py`` stubs pieces of
+:mod:`pcapkit.utilities.compat` and :mod:`pcapkit.utilities.exceptions`
+straight into :data:`sys.modules` for its own isolation and, depending on
+suite order, that stub can still be sitting there when this module runs --
+purging first forces a clean re-import instead of tripping over it.
+
 """
 from __future__ import annotations
 
@@ -29,7 +40,7 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag
 
-import pcapkit.const as const_pkg
+from tests._support import purge_modules
 
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
@@ -60,6 +71,8 @@ def _iter_const_int_enums() -> 'list[type]':
         The discovered enum classes, in walk order.
 
     """
+    import pcapkit.const as const_pkg
+
     classes = []  # type: list[type]
     for module_info in pkgutil.walk_packages(const_pkg.__path__, const_pkg.__name__ + '.'):
         module = importlib.import_module(module_info.name)
@@ -79,6 +92,7 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        purge_modules(['pcapkit'])
         cls.enums = _iter_const_int_enums()
 
     def test_every_registry_enum_was_discovered(self) -> None:
@@ -135,6 +149,9 @@ class ConstMissingClassmethodTests(unittest.TestCase):
 
     """
 
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
     def test_every_missing_is_a_classmethod(self) -> None:
         offenders = []  # type: list[str]
         checked = 0
@@ -165,6 +182,9 @@ class ConstMissingClassmethodTests(unittest.TestCase):
 
 class RouterAlertPacketParseTests(unittest.TestCase):
     """Parse an on-the-wire packet carrying RFC 2113's Router Alert value 0."""
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
 
     def test_parses_igmp_over_router_alert_zero(self) -> None:
         from pcapkit.protocols.internet.ipv4 import IPv4
