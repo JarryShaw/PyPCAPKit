@@ -505,7 +505,8 @@ class SecurityAssociation:
             an SA by ``(SPI, destination, protocol)``, and supplying the
             address is what lets several tunnels sharing an SPI be told
             apart. Matched only when the outer destination is known to
-            :mod:`pcapkit`; see :meth:`ESP.read`.
+            :mod:`pcapkit`; see :meth:`ESP.read`. Must not be a :obj:`bool`
+            -- see ``Raises`` below.
         strict: Whether a padding pattern that does not follow the
             monotonically increasing sequence of :rfc:`4303` §2.4 should be
             treated as a decryption failure. Only applied when nothing else
@@ -514,7 +515,13 @@ class SecurityAssociation:
             with zeros; set to :data:`False` for those.
 
     Raises:
-        ProtocolError: If the algorithms or key lengths are inconsistent.
+        ProtocolError: If the algorithms or key lengths are inconsistent, or
+            ``destination`` is a :obj:`bool` (c.f. #491) -- :obj:`bool` is an
+            :class:`int` subclass, and :func:`ipaddress.ip_address` treats
+            any :class:`int` below ``2**32`` as IPv4, so without this check
+            ``destination=True`` would silently become
+            ``IPv4Address('0.0.0.1')`` with no exception and no warning; pass
+            ``int(destination)`` if the numeric value is what is wanted.
 
     Important:
         Key material is held in *private* attributes of this object, and is
@@ -537,6 +544,20 @@ class SecurityAssociation:
                  strict: 'bool' = True) -> 'None':
         if spi is not None and not 0 <= spi <= 0xFFFFFFFF:
             raise ProtocolError(f'invalid SPI: {spi}')
+
+        if isinstance(destination, bool):
+            # NOTE: checked before the ``ipaddress.ip_address`` call below, for
+            # the same reason as ``_reject_bool`` in
+            # ``pcapkit.corekit.fields.ipaddress`` (this module calls
+            # ``ipaddress.ip_address`` directly rather than through a Field, so
+            # it needs its own copy of the guard): ``bool`` is an ``int``
+            # subclass, and ``ipaddress.ip_address()`` treats any ``int`` below
+            # ``2**32`` as IPv4 -- so without this check, ``destination=True``
+            # would silently become ``IPv4Address('0.0.0.1')``, with no
+            # exception and no warning (c.f. #491).
+            raise ProtocolError(
+                f'invalid destination: must not be a bool, not {destination!r} -- '
+                f'pass int({destination!r}) if the numeric value is what is wanted')
 
         #: Optional[int]: Security Parameters Index, or :data:`None` for any.
         self.spi = spi
