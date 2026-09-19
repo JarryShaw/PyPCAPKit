@@ -26,15 +26,15 @@ from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.io import SeekableReader
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
-from pcapkit.foundation.engines.engine import Engine
+from pcapkit.foundation.engines.engine import Engine, EngineBase
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.reassembly.data import ReassemblyData
-from pcapkit.foundation.reassembly.reassembly import Reassembly
+from pcapkit.foundation.reassembly.reassembly import Reassembly, ReassemblyBase
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.traceflow.data import TraceFlowData
-from pcapkit.foundation.traceflow.traceflow import TraceFlow
+from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           RegistryError, UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import get_logger
@@ -387,7 +387,12 @@ class Extractor(Generic[_P]):
         """
         if isinstance(engine, ModuleDescriptor):
             engine = engine.klass
-        if not issubclass(engine, Engine):
+        # NOTE: checked against ``EngineBase`` rather than ``Engine``: every built-in
+        # engine subclasses the base directly (``engines/pcap.py`` imports it as
+        # ``EngineBase as Engine``) precisely so that it is *not* auto-registered by
+        # ``Engine.__init_subclass__``, which made this check reject pcapkit's own
+        # classes. ``Engine`` is itself an ``EngineBase``, so this only widens. See #513.
+        if not issubclass(engine, EngineBase):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
         if name in cls.__engine__:
             warn(f'engine {name} already registered, overwriting', RegistryWarning)
@@ -409,7 +414,9 @@ class Extractor(Generic[_P]):
         """
         if isinstance(reassembly, ModuleDescriptor):
             reassembly = reassembly.klass
-        if not issubclass(reassembly, Reassembly):
+        # NOTE: ``ReassemblyBase`` rather than ``Reassembly``, for the reason given in
+        # :meth:`register_engine` above -- see #513.
+        if not issubclass(reassembly, ReassemblyBase):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
         if protocol in cls.__reassembly__:
             warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
@@ -431,7 +438,9 @@ class Extractor(Generic[_P]):
         """
         if isinstance(traceflow, ModuleDescriptor):
             traceflow = traceflow.klass
-        if not issubclass(traceflow, TraceFlow):
+        # NOTE: ``TraceFlowBase`` rather than ``TraceFlow``, for the reason given in
+        # :meth:`register_engine` above -- see #513.
+        if not issubclass(traceflow, TraceFlowBase):
             raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
         if protocol in cls.__traceflow__:
             warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
