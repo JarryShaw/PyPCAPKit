@@ -322,11 +322,13 @@ class MHUnitTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 proto._read_opt_pad(bad, options=options)
 
+        # RFC 6275, section 6.2.4 -- the Refresh Interval is measured in units
+        # of four seconds, the same unit the BU/BA lifetime uses.
         self.assertEqual(proto._read_opt_bra(
             schema.BindingRefreshAdviceOption(type=Option.Binding_Refresh_Advice,
                                               length=2, interval=7),
             options=options,
-        ).interval, 7)
+        ).interval, datetime.timedelta(seconds=28))
         self.assertEqual(str(proto._read_opt_aca(
             schema.AlternateCareofAddressOption(type=Option.Alternate_Care_of_Address,
                                                 length=16, address='2001:db8::1'),
@@ -480,6 +482,9 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(warn.call_count, 2)
 
         self.assertEqual(proto._make_opt_bra(Option.Binding_Refresh_Advice, interval=9).interval, 9)
+        self.assertEqual(proto._make_opt_bra(
+            Option.Binding_Refresh_Advice, interval=datetime.timedelta(seconds=36),
+        ).interval, 9)
         self.assertEqual(str(proto._make_opt_aca(Option.Alternate_Care_of_Address,
                                                  address='2001:db8::1').address), '2001:db8::1')
         self.assertEqual(proto._make_opt_ni(Option.Nonce_Indices, home=1, careof=2).careof, 2)
@@ -544,7 +549,8 @@ class MHUnitTests(unittest.TestCase):
         option_dict = OrderedMultiDict([
             (Option.Binding_Refresh_Advice,
              data.BindingRefreshAdviceOption(type=Option.Binding_Refresh_Advice,
-                                              length=4, interval=11)),
+                                              length=4,
+                                              interval=datetime.timedelta(seconds=44))),
         ])
         self.assertEqual(proto._make_mh_options(option_dict)[0].interval, 11)
 
@@ -896,8 +902,10 @@ class MHUnitTests(unittest.TestCase):
         def header(type_: Packet) -> SimpleNamespace:
             return SimpleNamespace(next=TransType.UDP, length=5, type=type_, chksum=b'\x12\x34')
 
-        # RFC 5568, section 6.2.2 -- FBU is identical to the RFC 6275 BU, so the
-        # lifetime is carried in units of 4 seconds.
+        # RFC 5568, section 6.2.2 -- the FBU message *layout* is identical to
+        # the RFC 6275 BU, but its Lifetime field is separately defined as
+        # "the requested time in seconds", unlike the BU/BA lifetime's units
+        # of 4 seconds, so it is read unscaled (c.f. #493).
         fbu = proto._read_msg_fbu(SimpleNamespace(seq=0x1234,
                                                  flags={'A': 1, 'H': 1, 'L': 0, 'K': 1},
                                                  lifetime=10, options=[]),
@@ -907,11 +915,13 @@ class MHUnitTests(unittest.TestCase):
         self.assertTrue(fbu.home)
         self.assertFalse(fbu.lla_compat)
         self.assertTrue(fbu.key_mngt)
-        self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=40))
+        self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=10))
         self.assertEqual(fbu.options, 'opts')
 
         # RFC 5568, section 6.2.3 -- status 1 is "FBU accepted but NCoA is invalid",
         # which is *not* what StatusCode(1) means, hence the module-local enum.
+        # The Lifetime here is likewise "the granted lifetime ... in seconds"
+        # (c.f. #493), so it too is read unscaled.
         fback = proto._read_msg_fback(SimpleNamespace(status=1, flags={'K': 1}, seq=0x1234,
                                                      lifetime=10, options=[]),
                                      header=header(Packet.Fast_Binding_Acknowledgment))
@@ -921,7 +931,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertNotIsInstance(fback.status, type(HandoverACKStatus.Administratively_prohibited))
         self.assertTrue(fback.key_mngt)
         self.assertEqual(fback.seq, 0x1234)
-        self.assertEqual(fback.lifetime, datetime.timedelta(seconds=40))
+        self.assertEqual(fback.lifetime, datetime.timedelta(seconds=10))
 
         # RFC 4068, section 6.3.3 -- two reserved octets, then mobility options.
         fna = proto._read_msg_fna(SimpleNamespace(options=[]),
@@ -965,7 +975,7 @@ class MHUnitTests(unittest.TestCase):
         made_fbu = proto._make_msg_fbu(None, seq=7, ack=True, home=True, key_mngt=True,
                                        lifetime=datetime.timedelta(seconds=40), options=[])
         self.assertEqual(made_fbu.seq, 7)
-        self.assertEqual(made_fbu.lifetime, 10)
+        self.assertEqual(made_fbu.lifetime, 40)
         self.assertEqual(made_fbu.flags, {'A': True, 'H': True, 'L': False, 'K': True})
         self.assertEqual(proto._make_msg_fbu(SimpleNamespace(
             seq=8, ack=False, home=True, lla_compat=True, key_mngt=False,
@@ -975,7 +985,7 @@ class MHUnitTests(unittest.TestCase):
         made_fback = proto._make_msg_fback(None, status=131, key_mngt=True, seq=9, lifetime=40,
                                            options=[])
         self.assertEqual(made_fback.status, 131)
-        self.assertEqual(made_fback.lifetime, 10)
+        self.assertEqual(made_fback.lifetime, 40)
         self.assertEqual(proto._make_msg_fback(
             None, status=FastBindingAcknowledgmentStatus.Insufficient_resources, options=[],
         ).status, 130)
@@ -1014,6 +1024,79 @@ class MHUnitTests(unittest.TestCase):
             seq=14, buffer=False, proxy=True, forward=False,
             code=HandoverACKStatus.Handover_Accepted_use_PCoA, options=[],
         )).seq, 14)
+
+    def test_mh_fbu_fback_lifetime_is_plain_seconds_unlike_bu_ba(self) -> None:
+        """FBU/FBack ``Lifetime`` is in seconds, not the BU/BA's 4-second units.
+
+        :rfc:`5568#section-6.2.2` states that the FBU message is *identical* to
+        the Mobile IPv6 Binding Update (BU) -- but only in **layout**. The same
+        section, two paragraphs on, defines the FBU Lifetime as "the requested
+        time in seconds", and :rfc:`5568#section-6.2.3` likewise defines the
+        FBack Lifetime as "the granted lifetime ... in seconds". Neither
+        mentions a 4-second unit at all -- unlike :rfc:`6275#section-6.1.7`,
+        which spells it out for the BU/BA Lifetime it actually applies to
+        (c.f. #493).
+
+        The BU/BA cases here are the control: they show the ``* 4`` / ``/ 4``
+        scaling this module uses elsewhere is deliberately preserved, so the
+        FBU/FBack assertions below are evidence of the fix rather than of a
+        module-wide convention change.
+        """
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.mh.status_code import StatusCode
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+        proto._read_mh_options = mock.Mock(return_value='opts')
+        proto._make_mh_options = mock.Mock(return_value=['made'])
+
+        def header(type_: Packet) -> SimpleNamespace:
+            return SimpleNamespace(next=None, length=2, type=type_, chksum=b'\x12\x34')
+
+        accepted = StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted
+
+        # -- read side: wire lifetime=100 --
+
+        fbu = proto._read_msg_fbu(SimpleNamespace(
+            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0}, lifetime=100, options=[],
+        ), header=header(Packet.Fast_Binding_Update))
+        self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=100))
+
+        fback = proto._read_msg_fback(SimpleNamespace(
+            status=0, flags={'K': 0}, seq=1, lifetime=100, options=[],
+        ), header=header(Packet.Fast_Binding_Acknowledgment))
+        self.assertEqual(fback.lifetime, datetime.timedelta(seconds=100))
+
+        # control: BU/BA still scale by 4 on read.
+        bu = proto._read_msg_bu(SimpleNamespace(
+            seq=1, flags={'A': 1, 'H': 1, 'L': 0, 'K': 0}, lifetime=100, options=[],
+        ), header=header(Packet.Binding_Update))
+        self.assertEqual(bu.lifetime, datetime.timedelta(seconds=400))
+
+        ba = proto._read_msg_ba(SimpleNamespace(
+            status=accepted, flags={'K': 0}, seq=1, lifetime=100, options=[],
+        ), header=header(Packet.Binding_Acknowledgement))
+        self.assertEqual(ba.lifetime, datetime.timedelta(seconds=400))
+
+        # -- make side: caller lifetime=100 seconds --
+
+        made_fbu = proto._make_msg_fbu(None, seq=1, lifetime=datetime.timedelta(seconds=100),
+                                       options=[])
+        self.assertEqual(made_fbu.lifetime, 100)
+
+        made_fback = proto._make_msg_fback(None, status=0, seq=1,
+                                           lifetime=datetime.timedelta(seconds=100),
+                                           options=[])
+        self.assertEqual(made_fback.lifetime, 100)
+
+        # control: BU/BA still divide by 4 on make.
+        made_bu = proto._make_msg_bu(None, seq=1, lifetime=datetime.timedelta(seconds=400),
+                                     options=[])
+        self.assertEqual(made_bu.lifetime, 100)
+
+        made_ba = proto._make_msg_ba(None, status=accepted, seq=1,
+                                     lifetime=datetime.timedelta(seconds=400), options=[])
+        self.assertEqual(made_ba.lifetime, 100)
 
     def test_mh_fmipv6_option_readers_constructors_and_guards(self) -> None:
         from pcapkit.const.mh.option import Option
@@ -1154,7 +1237,8 @@ class MHUnitTests(unittest.TestCase):
             self.assertTrue(fbu.home)
             self.assertFalse(fbu.lla_compat)
             self.assertTrue(fbu.key_mngt)
-            self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=40))
+            # lifetime=0x000a=10 is read as 10 seconds, not units of 4 (c.f. #493)
+            self.assertEqual(fbu.lifetime, datetime.timedelta(seconds=10))
             self.assertEqual(str(fbu.options[acoa_type].address), '2001:db8:1::2')
             self.assertEqual(fbu.options[badf_type].spi, 0xdeadbeef)
             self.assertEqual(fbu.options[badf_type].data, bytes(range(12)))
@@ -1174,7 +1258,8 @@ class MHUnitTests(unittest.TestCase):
             )
             self.assertTrue(fback.key_mngt)
             self.assertEqual(fback.seq, 0x1234)
-            self.assertEqual(fback.lifetime, datetime.timedelta(seconds=40))
+            # lifetime=0x000a=10 is read as 10 seconds, not units of 4 (c.f. #493)
+            self.assertEqual(fback.lifetime, datetime.timedelta(seconds=10))
             self.assertEqual(fback.options[badf_type].spi, 0)
 
         with self.subTest('FNA, RFC 4068 section 6.3.3'):
