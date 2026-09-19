@@ -203,6 +203,68 @@ class IPAddressFieldTests(unittest.TestCase):
         self.assertIn('IP version mismatch', str(interface_context.exception))
         self.assertNotIn('invalid IP', str(interface_context.exception))
 
+    def test_address_and_interface_fields_reject_a_bool_value_for_every_version(self) -> None:
+        """A :obj:`bool` value must not be silently accepted as an IP address.
+
+        :obj:`bool` is an :class:`int` subclass, and :func:`ipaddress.ip_address`/
+        :func:`ipaddress.ip_interface` both treat any :class:`int` below
+        ``2**32`` as IPv4 -- so before this fix, ``True``/``False`` were
+        silently converted to ``0.0.0.1``/``0.0.0.0`` (or the equivalent
+        interface) on an IPv4-typed field, with no exception and no warning.
+        On an IPv6-typed field the same conversion happened to raise instead,
+        because the resulting :class:`~ipaddress.IPv4Address`'s version
+        mismatched -- and that asymmetry is exactly what let this survive
+        #481, which fixed the identical mechanism at only one call site
+        (``MH._make_opt_mn_id``). See #491.
+
+        Sweeps ``{True, False}`` across both address and interface field
+        types, for both IPv4 and IPv6, since the asymmetry above is exactly
+        what a partial sweep would miss.
+        """
+        from pcapkit.corekit.fields.ipaddress import (
+            IPv4AddressField, IPv4InterfaceField, IPv6AddressField, IPv6InterfaceField,
+        )
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        fields = [
+            IPv4AddressField(),
+            IPv6AddressField(),
+            IPv4InterfaceField(),
+            IPv6InterfaceField(),
+        ]
+
+        for field in fields:
+            for value in (True, False):
+                with self.subTest(field=type(field).__name__, value=value):
+                    with self.assertRaises(FieldValueError) as context:
+                        field.pre_process(value, {})
+                    # ``FieldValueError`` subclasses ``BaseError``, but assert
+                    # the in-library type directly (above) rather than only this.
+                    self.assertIsInstance(context.exception, BaseError)
+                    self.assertIn('must not be a bool', str(context.exception))
+                    self.assertIn(repr(value), str(context.exception))
+                    # the escape hatch the message points at must actually work
+                    self.assertIn(f'int({value!r})', str(context.exception))
+
+        # the escape hatch: int(True)/int(False) still convert correctly,
+        # proving this tightens bool specifically rather than int generally
+        self.assertEqual(fields[0].pre_process(int(True), {}), b'\x00\x00\x00\x01')
+        self.assertEqual(fields[0].pre_process(int(False), {}), b'\x00\x00\x00\x00')
+
+    def test_ipv4_make_rejects_a_bool_address_through_the_public_api(self) -> None:
+        """The corruption reported in #491, reproduced through the public API.
+
+        Before this fix, ``IPv4.make(src=True, dst=False)`` packed and
+        decoded without any exception or warning, silently corrupting the
+        addresses to ``0.0.0.1``/``0.0.0.0``. It must now raise instead.
+        """
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.utilities.exceptions import BaseError
+
+        proto = object.__new__(IPv4)
+        with self.assertRaises(BaseError):
+            proto.make(src=True, dst=False).pack()
+
     def test_ipv4_interface_post_process_rejects_a_non_contiguous_netmask(self) -> None:
         """``IPv4InterfaceField.post_process`` builds
         ``ipaddress.ip_interface(f'{ip}/{mask}')`` from wire bytes whose

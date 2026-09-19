@@ -68,6 +68,43 @@ def _reraise_as_field_value_error(description: str) -> 'Iterator[None]':
         raise FieldValueError(f'{description}: {error}') from error
 
 
+def _reject_bool(value: 'object', description: str) -> 'None':
+    """Reject a :obj:`bool` value before it reaches :mod:`ipaddress`.
+
+    Args:
+        value: Value to check.
+        description: Human-readable description of what ``value`` is, used
+            to build the :exc:`FieldValueError` message.
+
+    Raises:
+        FieldValueError: If ``value`` is a :obj:`bool`.
+
+    Notes:
+        :obj:`bool` is an :class:`int` subclass, and every conversion in this
+        module ultimately calls :func:`ipaddress.ip_address` or
+        :func:`ipaddress.ip_interface`, both of which treat any :class:`int`
+        below ``2**32`` as IPv4 -- so without this guard, ``True``/``False``
+        are silently accepted as ``0.0.0.1``/``0.0.0.0`` (or the equivalent
+        interface) on an IPv4-typed field, with **no exception and no
+        warning**. On an IPv6-typed field the same conversion happens to
+        raise instead, because the resulting
+        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that
+        asymmetry is exactly what let this slip past #481's otherwise
+        equivalent guard for :meth:`MH._make_opt_mn_id
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (c.f. #491).
+
+        Every caller checks this *before* dispatching on the value's type,
+        for the same placement reason #481 gives: a correct check in the
+        wrong position does not fire, and that placement mistake has
+        already been made twice in this repository's history.
+
+    """
+    if isinstance(value, bool):
+        raise FieldValueError(
+            f'{description}: must not be a bool, not {value!r} -- pass '
+            f'int({value!r}) if the numeric value is what is wanted')
+
+
 class _IPField(Field[_T], Generic[_T]):
     """Internal IP related value for protocol fields.
 
@@ -105,10 +142,13 @@ class _IPAddressField(_IPField[_AT]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is not a valid IP address, or if it
-                is the wrong IP version for this field.
+            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+                :func:`_reject_bool`), is not a valid IP address, or is the
+                wrong IP version for this field.
 
         """
+        _reject_bool(value, 'invalid IP address')
+
         if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             ip = value  # type: IPv4Address | IPv6Address
         else:
@@ -234,10 +274,13 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is not a valid IP interface, or if
-                it is the wrong IP version for this field.
+            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+                :func:`_reject_bool`), is not a valid IP interface, or is the
+                wrong IP version for this field.
 
         """
+        _reject_bool(value, 'invalid IP interface')
+
         if isinstance(value, ipaddress.IPv4Interface):
             val = value
         else:
@@ -319,10 +362,13 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is not a valid IP interface, or if
-                it is the wrong IP version for this field.
+            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+                :func:`_reject_bool`), is not a valid IP interface, or is the
+                wrong IP version for this field.
 
         """
+        _reject_bool(value, 'invalid IP interface')
+
         if isinstance(value, ipaddress.IPv6Interface):
             val = value
         else:
