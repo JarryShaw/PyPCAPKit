@@ -644,7 +644,7 @@ class PadOption(Option, code=[Enum_Option.Pad1,
 class BindingRefreshAdviceOption(Option, code=Enum_Option.Binding_Refresh_Advice):
     """Header schema for MH binding refresh advice options."""
 
-    #: Refresh interval.
+    #: Refresh interval. One time unit is 4 seconds [:rfc:`6275#section-6.2.4`].
     interval: 'int' = UInt16Field()
 
     if TYPE_CHECKING:
@@ -2694,7 +2694,7 @@ class FastBindingUpdateMessage(Packet, code=Enum_Packet.Fast_Binding_Update):
         'L': (2, 1),
         'K': (3, 1),
     })
-    #: Lifetime. One time unit is 4 seconds.
+    #: Lifetime, in seconds [:rfc:`5568#section-6.2.2`].
     lifetime: 'int' = UInt16Field()
     #: Mobility options.
     options: 'list[Option]' = OptionField(
@@ -2736,7 +2736,7 @@ class FastBindingAcknowledgmentMessage(Packet, code=Enum_Packet.Fast_Binding_Ack
     })
     #: Sequence number.
     seq: 'int' = UInt16Field()
-    #: Lifetime. One time unit is 4 seconds.
+    #: Lifetime, in seconds [:rfc:`5568#section-6.2.3`].
     lifetime: 'int' = UInt16Field()
     #: Mobility options.
     options: 'list[Option]' = OptionField(
