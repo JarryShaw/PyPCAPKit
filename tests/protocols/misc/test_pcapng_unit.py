@@ -3024,11 +3024,22 @@ class PCAPNGUnitTests(unittest.TestCase):
         # door onto examples/captures/, so it is the only read the tier guard in
         # tests/_tiers.py can see, and a hand-built path would sit outside both
         # halves of it. The try/except is the guard's sanctioned idiom for a
-        # unit-tier test that wants a generated capture -- it degrades to a skip
-        # on a fresh clone instead of failing -- and it is what
-        # GeneratedFixtureInUnitTierError subclassing FileNotFoundError is for.
+        # unit-tier test that wants a generated capture, and it is the handled-line
+        # opt-out that does the work: check_unit_tier_read() returns None for any
+        # line inside a try whose handler catches a missing file, so this read is
+        # excused and degrades to a skip on a fresh clone instead of failing. What
+        # fires when the capture really is absent is therefore the plain
+        # FileNotFoundError sample_path raises, not GeneratedFixtureInUnitTierError
+        # -- that subclass is for an *unhandled* call reached from inside a try
+        # further up the stack, where subclassing FileNotFoundError is what keeps
+        # the outer handler working.
+        #
         # It also drops a dependency on pytest's working directory, which the
-        # relative path this replaces quietly had.
+        # relative os.path.join('examples', ...) this replaces quietly had. Run
+        # from anywhere but the repository root that path never resolved, so this
+        # test skipped with "run make_samples.py first" on a tree that in fact had
+        # every fixture -- a silent hole rather than a failure. Measured from /tmp:
+        # this version passes where the previous one skipped.
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.interface import extract
 
