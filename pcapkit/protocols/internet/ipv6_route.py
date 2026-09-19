@@ -42,6 +42,7 @@ from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_S
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType
 from pcapkit.protocols.schema.internet.ipv6_route import ipv6_route_data_length
+from pcapkit.protocols.schema.internet.ipv6_route import ipv6_route_header_length
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -444,7 +445,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         """
         ipv6_route = Data_UnknownType(
             next=header.next,
-            length=header.length * 8 + 8,
+            length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
             data=schema.data,
@@ -511,7 +512,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         ipv6_route = Data_SourceRoute(
             next=header.next,
-            length=header.length * 8 + 8,
+            length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
             ip=tuple(schema.ip),
@@ -559,7 +560,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         ipv6_route = Data_Type2(
             next=header.next,
-            length=header.length * 8 + 8,
+            length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
             ip=schema.ip,
@@ -613,7 +614,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
         ipv6_route = Data_RPL(
             next=header.next,
-            length=header.length * 8 + 8,
+            length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
             cmpr_i=schema.cmpr_i,

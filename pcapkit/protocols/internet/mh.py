@@ -1368,6 +1368,33 @@ class MH(Internet[Data_MH, Schema_MH],
             return mh
         return self._decode_next_layer(mh, schema.next, length - mh.length)
 
+    @staticmethod
+    def _mh_message_length(header_len: 'int') -> 'int':
+        """Compute the total on-the-wire MH header length for a given ``Header Len``.
+
+        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the
+        Mobility Header, in units of 8 octets, excluding the first 8
+        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,
+        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``
+        below reports this value back as the parsed message's own
+        ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`
+        then subtracts from the outer packet length to find the next
+        layer's length -- precisely the role ``Hdr Ext Len`` played in
+        #487, and the same read-side duplication :meth:`make`'s write-side
+        expression (``(len(data_val) + 6) // 8 - 1``, this formula's
+        inverse) had already been unified out of. Do NOT drop the ``+ 1``:
+        the units either side of it differ (octets vs. 8-octet units), and
+        dropping the offset silently reinterprets the field.
+
+        Args:
+            header_len: raw ``Header Len`` field value, as read off the wire.
+
+        Returns:
+            Total length, in octets, of the on-the-wire MH header.
+
+        """
+        return (header_len + 1) * 8
+
     def make(self,
              next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
              next_default: 'Optional[int]' = None,
@@ -1565,7 +1592,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UnknownMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             data=schema.data,
@@ -1600,7 +1627,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_BindingRefreshRequestMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             options=self._read_mh_options(schema.options)
@@ -1639,7 +1666,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_HomeTestInitMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             cookie=schema.cookie,
@@ -1679,7 +1706,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_CareofTestInitMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             cookie=schema.cookie,
@@ -1723,7 +1750,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_HomeTestMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             nonce_index=schema.nonce_index,
@@ -1769,7 +1796,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_CareofTestMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             nonce_index=schema.nonce_index,
@@ -1809,7 +1836,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_BindingUpdateMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -1852,7 +1879,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_BindingAcknowledgementMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             status=schema.status,
@@ -1898,7 +1925,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_BindingErrorMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             status=schema.status,
@@ -1945,7 +1972,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_FastBindingUpdateMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2002,7 +2029,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_FastBindingAcknowledgmentMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             status=FastBindingAcknowledgmentStatus(schema.status),
@@ -2047,7 +2074,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_FastNeighborAdvertisementMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             options=self._read_mh_options(schema.options),
@@ -2090,7 +2117,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_ExperimentalMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             data=schema.data,
@@ -2133,7 +2160,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_HandoverInitiateMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2183,7 +2210,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_HandoverAcknowledgeMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2243,7 +2270,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_HomeAgentSwitchMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             addresses=tuple(schema.addresses),
@@ -2287,7 +2314,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_HeartbeatMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             unsolicited=bool(schema.flags['U']),
@@ -2354,7 +2381,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_BindingRevocationMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             br_type=schema.br_type,
@@ -2403,7 +2430,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_LocalizedRoutingInitiationMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2449,7 +2476,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_LocalizedRoutingAcknowledgmentMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2494,7 +2521,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UpdateNotificationMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2536,7 +2563,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UpdateNotificationAcknowledgementMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2598,7 +2625,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_FlowBindingMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             fb_type=schema.fb_type,
@@ -2642,7 +2669,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_SubscriptionQueryMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2679,7 +2706,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_SubscriptionResponseMessage(
             next=header.next,
-            length=(header.length + 1) * 8,
+            length=self._mh_message_length(header.length),
             type=header.type,
             chksum=header.chksum,
             seq=schema.seq,
@@ -2687,6 +2714,37 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._read_mh_options(schema.options),
         )
         return data
+
+    @staticmethod
+    def _mh_option_length(schema_length: 'int') -> 'int':
+        """Compute an MH option's whole-option length from its on-the-wire ``Option Length``.
+
+        Per :rfc:`6275#section-6.2`, an MH option's ``Option Length`` field
+        (what each ``Schema_*Option.length`` here holds) counts *"the length
+        of the option, in octets, excluding the Option Type and Option
+        Length fields"* -- so the whole option, which is what every
+        ``_read_opt_*`` below reports back as the parsed option's own
+        ``.length``, is two octets more. This is the exact ``+2``/``-2``
+        mismatch #398 fixed independently in six places (see
+        ``Data_PadOption.length`` vs. ``Schema_PadOption.length`` below, at
+        the surviving explanation of that fix); collecting the read-side
+        half of it into one helper is so a future fix to this arithmetic
+        only has to happen once. Do NOT drop the ``+ 2``: that is precisely
+        the mismatch #398 fixed.
+
+        Note that only the *stored-length* read-side call sites are
+        collected here -- most ``_make_opt_*`` methods recompute the wire
+        ``Option Length`` from ``len(value)`` rather than reading a parsed
+        ``.length`` back, so they have nothing to unify against this helper.
+
+        Args:
+            schema_length: raw ``Option Length`` field value, as read off the wire.
+
+        Returns:
+            Whole-option length, in octets, including the Type and Length fields.
+
+        """
+        return schema_length + 2
 
     def _read_mh_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read MH options.
@@ -2741,7 +2799,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UnassignedOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             data=schema.data,
         )
         return data
@@ -2834,7 +2892,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_BindingRefreshAdviceOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             interval=datetime.timedelta(seconds=schema.interval * 4),
         )
         return data
@@ -2874,7 +2932,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AlternateCareofAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -2908,7 +2966,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_NonceIndicesOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             home=schema.home,
             careof=schema.careof,
         )
@@ -2947,7 +3005,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AuthorizationDataOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             data=schema.data,
         )
         return data
@@ -2990,7 +3048,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MobileNetworkPrefixOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix=prefix,
         )
         return data
@@ -3024,7 +3082,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LinkLayerAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             code=schema.code,
             lla=schema.lla,
         )
@@ -3056,7 +3114,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_MNIDOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
             identifier=schema.identifier,
         )
@@ -3093,7 +3151,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AuthOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
             spi=schema.spi,
             data=schema.data,
@@ -3131,7 +3189,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MesgIDOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             timestamp=schema.timestamp,
             ntp_timestamp=NTPTimestamp(schema.seconds, schema.fraction),
         )
@@ -3164,7 +3222,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_CGAParametersRequestOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
         )
         return data
 
@@ -3202,7 +3260,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_CGAParametersOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             parameters=tuple(Data_CGAParameter(
                 modifier=param.modifier,
                 prefix=param.prefix,
@@ -3243,7 +3301,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_SignatureOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             signature=schema.signature,
         )
         return data
@@ -3278,7 +3336,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_PermanentHomeKeygenTokenOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             token=schema.token,
         )
         return data
@@ -3310,7 +3368,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_CareofTestInitOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
         )
         return data
 
@@ -3345,7 +3403,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_CareofTestOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             token=schema.token,
         )
         return data
@@ -3374,7 +3432,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_ExperimentalMobilityOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             data=schema.data,
         )
         return data
@@ -3484,7 +3542,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv6AddressPrefixOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             code=IPv6AddressPrefixCode(schema.code),
             prefix_length=schema.prefix_length,
             address=schema.address,
@@ -3531,7 +3589,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_DNSUpdateOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             status=schema.status,
             remove=bool(schema.flags['R']),
             identity=schema.identity,
@@ -3575,7 +3633,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_VendorSpecificOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             vendor=schema.vendor,
             subtype=schema.subtype,
             data=schema.data,
@@ -3616,7 +3674,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_ServiceSelectionOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             identifier=schema.identifier,
         )
         return data
@@ -3658,7 +3716,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_HomeNetworkPrefixOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -3691,7 +3749,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_HandoffIndicatorOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             hi=schema.hi,
         )
         return data
@@ -3729,7 +3787,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AccessTechnologyTypeOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             att=schema.att,
         )
         return data
@@ -3774,7 +3832,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MNLLIdentifierOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             lli=schema.lli,
         )
         return data
@@ -3820,7 +3878,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LinkLocalAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -3868,7 +3926,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_TimestampOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             timestamp=datetime.datetime.fromtimestamp(
                 seconds + fraction / 65536, tz=datetime.timezone.utc),
             pmip_timestamp=PMIPv6Timestamp(seconds, fraction),
@@ -3910,7 +3968,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_RestartCounterOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             counter=schema.counter,
         )
         return data
@@ -3952,7 +4010,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4HomeAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=prefix_length,
             address=schema.address,
             request_prefix=bool(schema.flags['P']),
@@ -3999,7 +4057,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4AddressAcknowledgementOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             status=schema.status,
             prefix_length=schema.flags['prefix_length'],
             address=schema.address,
@@ -4041,7 +4099,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_NATDetectionOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             force=bool(schema.flags['F']),
             refresh=datetime.timedelta(seconds=schema.refresh),
         )
@@ -4081,7 +4139,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4CareofAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -4121,7 +4179,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_GREKeyOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             key=schema.key if schema.length == 6 else None,
         )
         return data
@@ -4171,7 +4229,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_BindingIdentifierOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             bid=schema.bid,
             status=schema.status,
             simultaneous=bool(schema.flags['H']),
@@ -4215,7 +4273,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4HomeAddressRequestOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=schema.flags['prefix_length'],
             address=schema.address,
         )
@@ -4256,7 +4314,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4HomeAddressReplyOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             status=schema.status,
             prefix_length=schema.flags['prefix_length'],
             address=schema.address,
@@ -4293,7 +4351,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4DefaultRouterAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -4330,7 +4388,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4DHCPSupportModeOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             mode=Enum_DHCPSupportMode(schema.flags['S']),
         )
         return data
@@ -4394,7 +4452,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_ContextRequestOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             requests=tuple(requests),
         )
         return data
@@ -4434,7 +4492,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LMAAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             code=LMAAddressCode(schema.code),
             address=schema.address,
         )
@@ -4472,7 +4530,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MNLLAIIDOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             iid=schema.iid,
         )
         return data
@@ -4510,7 +4568,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_TransientBindingOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             late=bool(schema.flags['L']),
             lifetime=datetime.timedelta(milliseconds=schema.lifetime * 100),
         )
@@ -4552,7 +4610,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_FlowSummaryOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             fid=tuple(schema.fid),
         )
         return data
@@ -4624,7 +4682,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
             if code in (Enum_FlowIDSuboption.Pad, Enum_FlowIDSuboption.PadN):
                 pad = cast('Schema_PadFlowIdentificationSuboption', schema)
-                size = 1 if code == Enum_FlowIDSuboption.Pad else pad.length + 2
+                size = 1 if code == Enum_FlowIDSuboption.Pad else self._mh_option_length(pad.length)
                 data = Data_PadFlowIdentificationSuboption(
                     type=code,
                     length=size,
@@ -4633,14 +4691,14 @@ class MH(Internet[Data_MH, Schema_MH],
                 bid_ref = cast('Schema_BIDReferenceSuboption', schema)
                 data = Data_BIDReferenceSuboption(
                     type=code,
-                    length=bid_ref.length + 2,
+                    length=self._mh_option_length(bid_ref.length),
                     bid=tuple(bid_ref.bid),
                 )
             elif code == Enum_FlowIDSuboption.Traffic_Selector:
                 selector = cast('Schema_TrafficSelectorSuboption', schema)
                 data = Data_TrafficSelectorSuboption(
                     type=code,
-                    length=selector.length + 2,
+                    length=self._mh_option_length(selector.length),
                     ts_format=selector.ts_format,
                     selector=selector.selector,
                 )
@@ -4648,21 +4706,21 @@ class MH(Internet[Data_MH, Schema_MH],
                 action = cast('Schema_FlowBindingActionSuboption', schema)
                 data = Data_FlowBindingActionSuboption(
                     type=code,
-                    length=action.length + 2,
+                    length=self._mh_option_length(action.length),
                     action=action.action,
                 )
             elif code == Enum_FlowIDSuboption.Target_Care_of_Address:
                 target = cast('Schema_TargetCareofAddressSuboption', schema)
                 data = Data_TargetCareofAddressSuboption(
                     type=code,
-                    length=target.length + 2,
+                    length=self._mh_option_length(target.length),
                     address=target.address,
                 )
             else:
                 unknown = cast('Schema_UnassignedFlowIdentificationSuboption', schema)
                 data = Data_UnassignedFlowIdentificationSuboption(
                     type=code,
-                    length=unknown.length + 2,
+                    length=self._mh_option_length(unknown.length),
                     data=unknown.data,
                 )
 
@@ -4708,7 +4766,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_FlowIdentificationOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             fid=schema.fid,
             fid_pri=schema.fid_pri,
             status=schema.status,
@@ -4744,7 +4802,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_RedirectCapabilityOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
         )
         return data
 
@@ -4794,7 +4852,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_RedirectOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             ipv6=schema.ipv6,
             ipv4=schema.ipv4,
         )
@@ -4840,7 +4898,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LoadInformationOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             priority=schema.priority,
             sessions_in_use=schema.sessions_in_use,
             max_sessions=schema.max_sessions,
@@ -4878,7 +4936,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AlternateIPv4CareofAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -4913,7 +4971,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MNGroupIdentifierOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
             group_id=schema.group_id,
         )
@@ -4959,7 +5017,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MAGIPv6AddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address_length=schema.address_length,
             address=schema.address,
         )
@@ -5009,7 +5067,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 net = cast('Schema_ANINetworkIdentifierSuboption', schema)
                 data = Data_ANINetworkIdentifierSuboption(
                     type=code,
-                    length=net.length + 2,
+                    length=self._mh_option_length(net.length),
                     utf8=bool(net.flags['E']),
                     net_name=net.net_name,
                     ap_name=net.ap_name,
@@ -5020,7 +5078,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 raw_lon = self._decode_signed(geo.location['longitude'], 24)
                 data = Data_ANIGeoLocationSuboption(
                     type=code,
-                    length=geo.length + 2,
+                    length=self._mh_option_length(geo.length),
                     latitude=raw_lat / 2 ** 15,
                     longitude=raw_lon / 2 ** 15,
                     raw_latitude=raw_lat,
@@ -5030,7 +5088,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 operator = cast('Schema_ANIOperatorIdentifierSuboption', schema)
                 data = Data_ANIOperatorIdentifierSuboption(
                     type=code,
-                    length=operator.length + 2,
+                    length=self._mh_option_length(operator.length),
                     op_id_type=operator.op_id_type,
                     identifier=operator.identifier,
                 )
@@ -5038,7 +5096,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 civic = cast('Schema_ANICivicLocationSuboption', schema)
                 data = Data_ANICivicLocationSuboption(
                     type=code,
-                    length=civic.length + 2,
+                    length=self._mh_option_length(civic.length),
                     format=civic.format,
                     location=civic.location,
                 )
@@ -5046,21 +5104,21 @@ class MH(Internet[Data_MH, Schema_MH],
                 group = cast('Schema_ANIMAGGroupIdentifierSuboption', schema)
                 data = Data_ANIMAGGroupIdentifierSuboption(
                     type=code,
-                    length=group.length + 2,
+                    length=self._mh_option_length(group.length),
                     group_id=group.group_id,
                 )
             elif code == Enum_ANISuboption.ANI_Update_Timer:
                 timer = cast('Schema_ANIUpdateTimerSuboption', schema)
                 data = Data_ANIUpdateTimerSuboption(
                     type=code,
-                    length=timer.length + 2,
+                    length=self._mh_option_length(timer.length),
                     timer=datetime.timedelta(seconds=timer.timer * 4),
                 )
             else:
                 unknown = cast('Schema_UnassignedANISuboption', schema)
                 data = Data_UnassignedANISuboption(
                     type=code,
-                    length=unknown.length + 2,
+                    length=self._mh_option_length(unknown.length),
                     data=unknown.data,
                 )
 
@@ -5128,7 +5186,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AccessNetworkIdentifierOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             suboptions=self._read_ani_suboptions(schema.suboptions),
         )
         return data
@@ -5172,7 +5230,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_IPv4TrafficOffloadSelectorOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             mode=bool(schema.flags['M']),
             selector=self._read_fid_suboptions(schema.selector),
         )
@@ -5226,7 +5284,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_DynamicIPMulticastSelectorOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             protocol=schema.protocol,
             mode=bool(schema.flags['M']),
             records=schema.records,
@@ -5279,7 +5337,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_DelegatedMNPOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             ipv4=ipv4,
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
@@ -5325,7 +5383,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_ActiveMulticastSubscriptionIPv4Option(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             igmp_type=schema.igmp_type,
             context=schema.context,
         )
@@ -5369,7 +5427,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_ActiveMulticastSubscriptionIPv6Option(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             mld_type=schema.mld_type,
             context=schema.context,
         )
@@ -5416,7 +5474,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 session = cast('Schema_PerSessionBitRateAttribute', schema)
                 data = Data_PerSessionBitRateAttribute(
                     type=code,
-                    length=session.length + 2,
+                    length=self._mh_option_length(session.length),
                     service=bool(session.flags['S']),
                     exclude=bool(session.flags['E']),
                     rate=session.rate,
@@ -5430,14 +5488,14 @@ class MH(Internet[Data_MH, Schema_MH],
                 rate = cast('Schema_BitRateAttribute', schema)
                 data = Data_BitRateAttribute(
                     type=code,
-                    length=rate.length + 2,
+                    length=self._mh_option_length(rate.length),
                     rate=rate.rate,
                 )
             elif code == Enum_QoSAttribute.Allocation_Retention_Priority:
                 arp = cast('Schema_AllocationRetentionPriorityAttribute', schema)
                 data = Data_AllocationRetentionPriorityAttribute(
                     type=code,
-                    length=arp.length + 2,
+                    length=self._mh_option_length(arp.length),
                     priority_level=arp.priority['PL'],
                     preemption_capability=arp.priority['PC'],
                     preemption_vulnerability=arp.priority['PV'],
@@ -5446,7 +5504,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 selector = cast('Schema_QoSTrafficSelectorAttribute', schema)
                 data = Data_QoSTrafficSelectorAttribute(
                     type=code,
-                    length=selector.length + 2,
+                    length=self._mh_option_length(selector.length),
                     ts_format=selector.ts_format,
                     selector=selector.selector,
                 )
@@ -5454,7 +5512,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 vendor = cast('Schema_QoSVendorSpecificAttribute', schema)
                 data = Data_QoSVendorSpecificAttribute(
                     type=code,
-                    length=vendor.length + 2,
+                    length=self._mh_option_length(vendor.length),
                     vendor=vendor.vendor,
                     subtype=vendor.subtype,
                     data=vendor.data,
@@ -5463,7 +5521,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 unknown = cast('Schema_UnassignedQoSAttribute', schema)
                 data = Data_UnassignedQoSAttribute(
                     type=code,
-                    length=unknown.length + 2,
+                    length=self._mh_option_length(unknown.length),
                     data=unknown.data,
                 )
 
@@ -5507,7 +5565,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_QualityOfServiceOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             sr_id=schema.sr_id,
             dscp=schema.tc >> 2,
             oc=schema.oc,
@@ -5557,7 +5615,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LMAUserPlaneAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=cast('Optional[IPv4Address | IPv6Address]',
                          schema.address if schema.length != 2 else None),
         )
@@ -5692,7 +5750,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 rereg = cast('Schema_BindingReregistrationControlSuboption', schema)
                 data = Data_BindingReregistrationControlSuboption(
                     type=code,
-                    length=rereg.length + 2,
+                    length=self._mh_option_length(rereg.length),
                     start_time=datetime.timedelta(seconds=rereg.start_time * 4),
                     initial_retransmission=datetime.timedelta(
                         seconds=rereg.initial_retransmission),
@@ -5702,7 +5760,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 heartbeat = cast('Schema_HeartbeatControlSuboption', schema)
                 data = Data_HeartbeatControlSuboption(
                     type=code,
-                    length=heartbeat.length + 2,
+                    length=self._mh_option_length(heartbeat.length),
                     interval=datetime.timedelta(seconds=heartbeat.interval),
                     retransmission_delay=datetime.timedelta(
                         seconds=heartbeat.retransmission_delay),
@@ -5712,7 +5770,7 @@ class MH(Internet[Data_MH, Schema_MH],
                 unknown = cast('Schema_UnassignedLMAControlledMAGSuboption', schema)
                 data = Data_UnassignedLMAControlledMAGSuboption(
                     type=code,
-                    length=unknown.length + 2,
+                    length=self._mh_option_length(unknown.length),
                     data=unknown.data,
                 )
 
@@ -5756,7 +5814,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LMAControlledMAGParametersOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             suboptions=self._read_lcmp_suboptions(schema.suboptions),
         )
         return data
@@ -5800,7 +5858,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MAGMultipathBindingOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             att=schema.att,
             label=schema.label,
             bid=schema.bid,
@@ -5844,7 +5902,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_MAGIdentifierOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             subtype=schema.subtype,
             identifier=schema.identifier,
         )
@@ -5887,7 +5945,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_AnchoredPrefixOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -5930,7 +5988,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_LocalPrefixOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=schema.prefix_length,
             prefix=schema.prefix,
         )
@@ -5986,7 +6044,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_PreviousMAAROption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             prefix_length=schema.prefix_length,
             maar=schema.maar,
             prefix=schema.prefix,
@@ -6033,7 +6091,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_ServingMAAROption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -6073,7 +6131,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_DLIFLinkLocalAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             address=schema.address,
         )
         return data
@@ -6116,7 +6174,7 @@ class MH(Internet[Data_MH, Schema_MH],
 
         data = Data_DLIFLinkLayerAddressOption(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             lla=schema.lla,
         )
         return data
@@ -6178,7 +6236,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UnknownExtension(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             data=schema.data,
         )
         return data
@@ -6225,7 +6283,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_MultiPrefixExtension(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             flag=bool(schema.flags['P']),
             prefixes=tuple(schema.prefixes),
         )
@@ -6270,7 +6328,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_ExperimentalExtension(
             type=schema.type,
-            length=schema.length + 2,
+            length=self._mh_option_length(schema.length),
             data=schema.data,
         )
         return data
