@@ -647,10 +647,47 @@ attribute:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_make_hdr_ext_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route._make_hdr_ext_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len" title="Link to this definition">¶</a></dt>
+<dd><p>Compute <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> for a type-specific data payload of <code class="docutils literal notranslate"><span class="pre">data_length</span></code> octets.</p>
+<p>Per <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
+Routing header in 8-octet units, not including the first 8
+octets”</em>. The routing header’s fixed part (<code class="docutils literal notranslate"><span class="pre">next</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code>/
+<code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">seg_left</span></code>) is 4 octets, so the total on-the-wire header
+is <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">data_length</span></code> octets; equating that to <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span>
+<span class="pre">hdr_ext_len</span></code> and solving gives <code class="docutils literal notranslate"><span class="pre">hdr_ext_len</span> <span class="pre">=</span> <span class="pre">(data_length</span> <span class="pre">-</span> <span class="pre">4)</span> <span class="pre">/</span>
+<span class="pre">8</span></code>. <code class="docutils literal notranslate"><span class="pre">ipv6_route_data_length</span></code> in
+<a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipv6_route" title="pcapkit.protocols.schema.internet.ipv6_route"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route</span></code></a> is this
+expression’s inverse, used on the read side.</p>
+<p>This is the <em>only</em> place <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is computed on the write
+side: <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a> used to compute it twice, once per branch, in two
+different (and both wrong) units – that duplication, not either
+expression individually, is what let the two drift and is why there
+is one helper now rather than two call sites. Do NOT “simplify” the
+<code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">4</span></code> / <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">8</span></code> away: the units either side of it differ (octets
+vs. 8-octet units), and dropping the offset silently reinterprets
+the field, which is exactly the defect #487 fixed (compare the
+<code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">8</span></code> unit bug behind #483 in the scapy adapter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – packed length, in octets, of the type-specific data
+(i.e. <code class="docutils literal notranslate"><span class="pre">len(data_val.pack())</span></code> for a <code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code>-based payload, or the padded raw
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> length for the unknown/raw-bytes case).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_none">
 <span class="sig-name descname"><span class="pre">_read_data_type_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route._read_data_type_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_none" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Route unknown type data.</p>
-<p>Structure of IPv6-Route unknown type data [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>]:</p>
+<p>Structure of IPv6-Route unknown type data [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>][<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Next Header  |  Hdr Ext Len  |  Routing Type | Segments Left |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -682,7 +719,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src">
 <span class="sig-name descname"><span class="pre">_read_data_type_src</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route._read_data_type_src"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Route Source Route data.</p>
-<p>Structure of IPv6-Route Source Route data [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>]:</p>
+<p>Structure of IPv6-Route Source Route data [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Next Header  |  Hdr Ext Len  | Routing Type=0| Segments Left |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -738,7 +775,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2">
 <span class="sig-name descname"><span class="pre">_read_data_type_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route._read_data_type_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Route Type 2 data.</p>
-<p>Structure of IPv6-Route Type 2 data [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<p>Structure of IPv6-Route Type 2 data [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Next Header  | Hdr Ext Len=2 | Routing Type=2|Segments Left=1|
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -768,7 +805,7 @@ attribute:</p>
 <dd class="field-odd"><p>Parsed route data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">24</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -777,7 +814,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl">
 <span class="sig-name descname"><span class="pre">_read_data_type_rpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route._read_data_type_rpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl" title="Link to this definition">¶</a></dt>
 <dd><p>Read IPv6-Route RPL Source data.</p>
-<p>Structure of IPv6-Route RPL Source data [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>]:</p>
+<p>Structure of IPv6-Route RPL Source data [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1147,6 +1184,34 @@ parse the routing type by itself.</p>
 <dd class="field-odd"><p>A <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> wrapped
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.RoutingType" title="pcapkit.protocols.schema.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a>
 instance based on <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type" title="pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Route.type</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">ipv6_route_data_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hdr_ext_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv6_route.html#ipv6_route_data_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length" title="Link to this definition">¶</a></dt>
+<dd><p>Length, in octets, of the IPv6-Route type-specific data for a given <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code>.</p>
+<p>Per <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.4"><strong>RFC 8200 Section 4.4</strong></a>, <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is <em>“the length of the
+Routing header in 8-octet units, not including the first 8 octets”</em> –
+i.e. the total on-the-wire header is <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> octets. Of
+that, the 4 octets of <code class="docutils literal notranslate"><span class="pre">next</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code>/<code class="docutils literal notranslate"><span class="pre">type</span></code>/<code class="docutils literal notranslate"><span class="pre">seg_left</span></code> are not
+part of the type-specific data, so the data itself – what
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector" title="pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv6_route_data_selector()</span></code></a> hands to the nested <code class="docutils literal notranslate"><span class="pre">RoutingType</span></code>
+schema – is <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">8</span> <span class="pre">*</span> <span class="pre">hdr_ext_len</span></code> octets. This is the single place
+that arithmetic is done on the read side; see
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hdr_ext_len()</span></code></a>
+for its inverse on the write side. Do NOT drop the <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span></code>: that turns
+the field back into raw octets and is the exact defect #487 fixed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hdr_ext_len</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – raw <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> field value, as read off the wire.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Length, in octets, of the type-specific data.</p>
 </dd>
 </dl>
 </dd></dl>

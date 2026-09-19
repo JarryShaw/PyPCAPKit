@@ -447,6 +447,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Schema_SourceRoute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Schema_Type2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Schema_UnknownType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6_route_data_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -625,6 +626,45 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6_route</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ipv6_route</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="IPv6_Route._make_hdr_ext_len">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_hdr_ext_len</span><span class="p">(</span><span class="n">data_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.</span>
+
+<span class="sd">        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is *"the length of the</span>
+<span class="sd">        Routing header in 8-octet units, not including the first 8</span>
+<span class="sd">        octets"*. The routing header's fixed part (``next``/``length``/</span>
+<span class="sd">        ``type``/``seg_left``) is 4 octets, so the total on-the-wire header</span>
+<span class="sd">        is ``4 + data_length`` octets; equating that to ``8 + 8 *</span>
+<span class="sd">        hdr_ext_len`` and solving gives ``hdr_ext_len = (data_length - 4) /</span>
+<span class="sd">        8``. ``ipv6_route_data_length`` in</span>
+<span class="sd">        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is this</span>
+<span class="sd">        expression's inverse, used on the read side.</span>
+
+<span class="sd">        This is the *only* place ``Hdr Ext Len`` is computed on the write</span>
+<span class="sd">        side: :meth:`make` used to compute it twice, once per branch, in two</span>
+<span class="sd">        different (and both wrong) units -- that duplication, not either</span>
+<span class="sd">        expression individually, is what let the two drift and is why there</span>
+<span class="sd">        is one helper now rather than two call sites. Do NOT "simplify" the</span>
+<span class="sd">        ``- 4`` / ``/ 8`` away: the units either side of it differ (octets</span>
+<span class="sd">        vs. 8-octet units), and dropping the offset silently reinterprets</span>
+<span class="sd">        the field, which is exactly the defect #487 fixed (compare the</span>
+<span class="sd">        ``* 8`` unit bug behind #483 in the scapy adapter).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_length: packed length, in octets, of the type-specific data</span>
+<span class="sd">                (i.e. ``len(data_val.pack())`` for a :class:`~pcapkit.protocols.</span>
+<span class="sd">                schema.schema.Schema`-based payload, or the padded raw</span>
+<span class="sd">                :obj:`bytes` length for the unknown/raw-bytes case).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``Hdr Ext Len`` field value.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="IPv6_Route.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -670,8 +710,13 @@
                                          <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
-            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
+            <span class="c1"># ``data`` here *is* the type-specific data (no per-type</span>
+            <span class="c1"># constructor involved), so pad it out to the next octet count</span>
+            <span class="c1"># ``_make_hdr_ext_len`` can express exactly, then use that same</span>
+            <span class="c1"># helper -- rather than a third, separate expression -- to derive</span>
+            <span class="c1"># ``Hdr Ext Len`` from the now-aligned length.</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>  <span class="c1"># type: bytes | Schema_RoutingType</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_IPv6_Route</span><span class="p">)):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__routing__</span><span class="p">,</span> <span class="n">type_val</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -686,9 +731,9 @@
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_val</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_val</span><span class="p">)</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="o">.</span><span class="n">pack</span><span class="p">()))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_hdr_ext_len</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()))</span>
             <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid routing data type: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -889,7 +934,13 @@
 <span class="sd">            Parsed route data.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200</span>
+        <span class="c1"># #section-4.4`), not octets -- each 16-octet address costs 2 of</span>
+        <span class="c1"># those units, so a well-formed Source Route header always carries</span>
+        <span class="c1"># an even ``Hdr Ext Len``. The previous ``(header.length - 8) % 16``</span>
+        <span class="c1"># check assumed ``header.length`` was already a total octet count,</span>
+        <span class="c1"># which is never true of this field; see #487.</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
@@ -933,10 +984,14 @@
 <span class="sd">            Parsed route data.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``length`` is **NOT** ``24``.</span>
+<span class="sd">            ProtocolError: If ``Hdr Ext Len`` is **NOT** ``2``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">24</span><span class="p">:</span>
+        <span class="c1"># A Type 2 Routing header is fixed at 24 octets total (4 fixed + 4</span>
+        <span class="c1"># reserved + 16-octet home address), so its ``Hdr Ext Len`` -- in</span>
+        <span class="c1"># 8-octet units, not octets (:rfc:`8200#section-4.4`) -- is always</span>
+        <span class="c1"># ``2``; a literal ``24`` here could never match. See #487.</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
@@ -979,6 +1034,19 @@
 <span class="sd">            Parsed route data.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: this guard has the same surface shape as the Source Route and</span>
+        <span class="c1"># Type 2 unit confusion #487 fixed above -- ``header.length`` is</span>
+        <span class="c1"># ``Hdr Ext Len`` in 8-octet units, not octets, and ``% 16`` reads</span>
+        <span class="c1"># like a leftover assumption that it was already a total octet</span>
+        <span class="c1"># count. It is left as-is here: RPL addresses are variable-length</span>
+        <span class="c1"># (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is</span>
+        <span class="c1"># not obviously the right invariant even under correct units, and</span>
+        <span class="c1"># this module's RPL construction already fails before ever reaching</span>
+        <span class="c1"># this method, from an unrelated defect (``RPL.post_process`` in</span>
+        <span class="c1"># pcapkit/protocols/schema/internet/ipv6_route.py assumes ``bytes``</span>
+        <span class="c1"># on a path ``Schema.pack`` also runs, per #476/#480) -- so there is</span>
+        <span class="c1"># no working round trip here to validate a replacement against.</span>
+        <span class="c1"># Flagged for follow-up rather than guessed at.</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 

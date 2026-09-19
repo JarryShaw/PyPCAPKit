@@ -35,6 +35,7 @@ Octets      Bits        Name                    Description
    .. automethod:: make
 
    .. automethod:: _make_data
+   .. automethod:: _make_hdr_ext_len
 
    .. automethod:: _read_data_type_none
    .. automethod:: _read_data_type_src
@@ -92,6 +93,7 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length
 
 Data Models
 -----------
