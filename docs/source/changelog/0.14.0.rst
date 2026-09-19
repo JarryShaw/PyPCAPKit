@@ -1,0 +1,5 @@
+0.14.0 -- 2019-03-02
+====================
+
+**Changed** -- the TCP reassembly pipeline handles the RST flag. Docker build
+files were added.

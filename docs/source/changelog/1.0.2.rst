@@ -1,0 +1,12 @@
+1.0.2 -- 2023-06-05
+===================
+
+* **Added** -- Mobility Header (MH) parsing and construction [:rfc:`6275`],
+  including the message types, mobility options, CGA parameters and link-layer
+  address option codes, and the binding error status codes.
+* **Fixed** -- ``pcapkit.extract`` failing on interpreters where
+  ``decimal.localcontext`` takes no keyword arguments (#139); wheel filenames
+  now carry the correct Python tags.
+
+*Also released:* ``1.0.2.post1`` through ``1.0.2.post8`` (through 2023-06-27);
+``post6`` also reset the conda build number.

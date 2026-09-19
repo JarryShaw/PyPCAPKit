@@ -1,0 +1,16 @@
+1.3.3 -- 2024-11-03
+===================
+
+* **Fixed** -- errors reading PCAP files from both the CLI and the library
+  (#240): missing optional CLI dependencies are handled gracefully and console
+  output is far less verbose; installation from source, which ``setup.py`` had
+  broken (#221); PCAP output during flow tracing (#180).
+* **Changed** -- the base protocol data class carries ``packet``; ``Info``
+  iteration skips excluded fields.
+
+1.3.2 was never released. The version string existed in-tree for a few hours on
+2024-11-03 and was superseded by 1.3.3 the same day, so there is no ``v1.3.2``
+tag and no distribution.
+
+*Also released:* ``1.3.3.post1``, ``1.3.3.post2`` (through 2024-11-14);
+``post1`` fixed a PyPI metadata problem.

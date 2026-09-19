@@ -1,0 +1,5 @@
+0.14.1 -- 2019-03-07
+====================
+
+**Added** -- the ``PCAPKIT_DEVMODE`` environment variable, which turns on
+development-mode behaviour without a code change.
