@@ -146,10 +146,10 @@ rather than when a packet is read, so nothing decodes wrongly in the meantime.
 Mobility Header
 ~~~~~~~~~~~~~~~
 
-**Done, bar one option that was already broken.**
+**Done.**
 :class:`~pcapkit.protocols.internet.mh.MH` now decodes and constructs the whole
 registry: **all 24 registered message data types**, **all 4 CGA extensions**, and
-**70 of the 71 registered options**. Every one of them is registered in
+**all 71 registered options**. Every one of them is registered in
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
 :attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
 :attr:`~pcapkit.protocols.internet.mh.MH.__extension__` with both a ``_read_``
@@ -159,13 +159,11 @@ Every message type and every one of those options round-trips byte-for-byte
 through the public API -- ``make`` then ``read`` then ``make`` again reproduces
 the same octets, which
 :file:`tests/protocols/test_option_roundtrip_unit.py` checks for the whole
-registry. The **four CGA extensions are the exception, and not because of their
-own handlers**: those round-trip when driven directly, but the CGA Parameters
-option is the only thing that can carry a CGA extension on the wire, and that
-option cannot be parsed at all for the reasons below. So all four are recorded
-in that test's ``EXPECTED_FAILURES`` as ``PARSE`` failures against
-`#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__ rather than claimed
-as working end to end.
+registry. The **four CGA extensions round-trip end to end as well**, which they
+could not do for as long as the CGA Parameters option -- the only thing that can
+carry a CGA extension on the wire -- was unparsable. Both of the shared
+field-machinery faults behind that have since been fixed, so no ``mh-extension``
+entry remains in that test's ``EXPECTED_FAILURES``.
 
 The sub-registries turned out to be the easy half, as predicted: binding
 revocation types and triggers, handoff indicators, access network identifier
@@ -181,23 +179,24 @@ mobility anchor address option codes of :rfc:`5949#section-6.2.2`
 (:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside the two
 :rfc:`5568` sets that were already there.
 
+The CGA Parameters option (type 12) was the last one left on the generic handler,
+and it is now registered like the rest. It was unreachable rather than
+unimplemented: two faults in shared field machinery stood in the way, both
+outside the mobility header --
+`#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__, a nested schema
+could not reach the enclosing packet's fields by name, and
+`#446 <https://github.com/JarryShaw/PyPCAPKit/issues/446>`__, a
+:class:`~pcapkit.corekit.fields.misc.ForwardMatchField`'s non-consuming bytes
+counted towards the schema's length. Both had to be fixed for this option to
+parse, which is why the half-fix was reverted rather than shipped; they landed
+separately, and ``test_mh_cga_parameters_option_now_parses`` is the pinning test
+renamed to record it. Fixing the option reached the whole
+:attr:`~pcapkit.protocols.internet.mh.MH.__extension__` registry with it, since
+it is the only carrier a CGA extension has -- four ``EXPECTED_FAILURES`` entries
+went green at once.
+
 What is left, and why:
 
-* **The CGA Parameters option** (type 12) is the one option still on the generic
-  handler, and it is unreachable rather than unimplemented. Two faults in shared
-  field machinery stand in the way, both outside the mobility header and both now
-  tracked as defects rather than described here:
-  `#445 <https://github.com/JarryShaw/PyPCAPKit/issues/445>`__, a nested schema
-  cannot reach the enclosing packet's fields by name, and
-  `#446 <https://github.com/JarryShaw/PyPCAPKit/issues/446>`__, a
-  :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`'s non-consuming bytes
-  count towards the schema's length. Both have to be fixed for this option to
-  parse, which is why the half-fix was reverted rather than shipped;
-  ``test_mh_cga_parameters_option_is_unparsable_upstream`` pins the current
-  behaviour so the day it starts working is visible. This option is also what
-  makes the whole :attr:`~pcapkit.protocols.internet.mh.MH.__extension__`
-  registry unreachable, since it is the only carrier a CGA extension has --
-  fixing it turns four ``EXPECTED_FAILURES`` entries green at once.
 * **Payloads that belong to another protocol** are carried opaquely for now. The
   multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
   IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
@@ -296,11 +295,12 @@ complaint and yields nothing useful.
   21 to FTP, port 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
   The two counts differ because 80 and 8080 are each bound twice, once per
   transport.
-* **none of the 75**
+* **2 of the 75**
   :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-  values. :attr:`SCTP.__proto__
-  <pcapkit.protocols.transport.sctp.SCTP.__proto__>` ships empty, so every DATA
-  chunk payload is ``Raw`` until something calls
+  values, in :attr:`SCTP.__proto__
+  <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, both to
+  :class:`~pcapkit.protocols.application.ngap.NGAP`. Every other DATA chunk
+  payload is ``Raw`` until something calls
   :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
 
 Most of those want a dissector written and are covered by the stub list above.
@@ -365,8 +365,9 @@ Three follow-ups the above deliberately left alone:
   asymmetry predates the 8080 entries. Reconciling it changes what existing
   captures parse to, so it wants its own change and its own decision, which is
   why it is asked for here. The separate defect that ``http.HTTP``'s explicit
-  ``version=`` path is unusable is tracked as
-  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__.
+  ``version=`` path was unusable --
+  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__ -- has since been
+  fixed, and is no longer part of this request.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
@@ -406,24 +407,32 @@ suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 ``%s``. The IO-batching idea the thread proposed was never the bottleneck.
 
-Three larger wins remain, all outside the parse path and each wanting its own
-review:
+Of the three larger wins this section listed, all outside the parse path, one has
+landed in full and the other two in part:
 
-* **The flow dumper reopens its output file once per frame** and rebuilds a whole
+* **The flow dumper reopens its output file once per frame**
+  (``pcapkit/dumpkit/pcap.py:120``). It no longer *also* rebuilds a whole
   :class:`~pcapkit.protocols.misc.pcap.frame.Frame` to obtain bytes it already
-  holds (``pcapkit/dumpkit/pcap.py:94,128``). That is 80% of the flow-tracing
-  cost, and a counterfactual left 330 of 331 output files byte-identical. This is
-  the best-evidenced and lowest-risk piece of work on this page.
-* :meth:`analyze() <pcapkit.foundation.reassembly.ip.IP_Reassembly.analyze>`
-  **runs eagerly on every frame, fragmented or not**, because
-  ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag. A capture with no
-  fragments at all still produces one "datagram" per frame -- 86% of the
-  IP-reassembly cost plus a 133 ms garbage-collection bill. Making the ``packet``
-  field lazy is mechanical; whether unfragmented frames should be emitted at all
-  is a design question worth settling first.
-* **Every option is parsed twice** (``pcapkit/corekit/fields/collections.py:262-270``):
-  2274 schema unpacks for 1137 options, the pre-parse always discarded. About
-  15% of a PCAP-NG extraction, and the riskiest of the three.
+  holds: dropping that re-dissection was about 82% of the cost of a flow-traced
+  extraction by itself, and the counterfactual that proposed it had left 330 of
+  331 output files byte-identical. The reopen is what remains.
+* **A datagram is submitted for every frame, fragmented or not**, because
+  ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag -- so a capture
+  with no fragments at all still produces one "datagram" per frame. Parsing its
+  payload is no longer part of that cost:
+  :meth:`~pcapkit.protocols.protocol.ProtocolBase.analyze` used to run eagerly on
+  each one, 86% of the IP-reassembly cost plus a 133 ms garbage-collection bill,
+  and :attr:`Datagram.packet
+  <pcapkit.foundation.reassembly.data.ip.Datagram.packet>` is now a
+  :class:`~pcapkit.foundation.reassembly.data.data.Deferred` parsed on first
+  read. Whether unfragmented frames should be emitted at all is the design
+  question that is left, and it is worth settling deliberately.
+* **Done.** Every option was parsed twice -- 2274 schema unpacks for 1137
+  options, the pre-parse always discarded, about 15% of a PCAP-NG extraction.
+  :class:`~pcapkit.corekit.fields.collections.OptionField` now reads only the
+  base schema's type field to choose the option schema, rather than unpacking the
+  whole base schema and throwing it away
+  (``pcapkit/corekit/fields/collections.py:402-420``).
 
 Two traps for anyone benchmarking this library. ``reassembly=True`` and
 ``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
@@ -574,7 +583,7 @@ each engine has a matching module.
 Test Cases
 ----------
 
-**Largely done.** There is now a systematic test suite under ``tests/`` -- 91
+**Largely done.** There is now a systematic test suite under ``tests/`` -- 105
 modules matching ``test_*.py`` -- and it runs in CI against Python 3.10
 through 3.14, plus an allowed-to-fail 3.15 leg, per
 ``.github/workflows/unit-tests.yml``.
@@ -596,7 +605,7 @@ have no implementation yet.
 The original ask also included **shipping the suite**, and that is now a
 deliberate decision rather than an omission. ``tests`` is excluded from the wheel
 by ``[tool.setuptools.packages.find]`` in ``pyproject.toml``; the sdist does carry
-all 91 modules, so a distribution packager building from source has them. The
+all 105 modules, so a distribution packager building from source has them. The
 wheel stays lean because the suite could not run from an installed package
 anyway: the generated sample captures are not shipped, and ``tests/_tiers.py``
 resolves paths from a repository root that an installed package does not have.
@@ -610,7 +619,8 @@ Reassembly Beyond IP and TCP
 IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
-back together, and ``sctp`` appears nowhere in :mod:`pcapkit.foundation` at all.
+back together, and ``sctp`` appears nowhere in
+:mod:`pcapkit.foundation.reassembly` at all.
 
 What that costs is concrete. The dissector already exposes everything a
 reassembler needs, on
@@ -850,7 +860,7 @@ rather than as a side effect of a checksum patch.
 Release Plan — 1.5.0 in Two Steps
 ---------------------------------
 
-The version in :mod:`pcapkit` is ``1.5.0b1``, and the release is sequenced
+The version in :mod:`pcapkit` is ``1.5.0b3``, and the release is sequenced
 against the waves above in two deliberate steps:
 
 #. **A beta — ``1.5.0b1`` — when wave 1's remaining issues are closed.**
@@ -860,8 +870,9 @@ against the waves above in two deliberate steps:
    beta rather than a final release, because the consistency sweep below had not
    run yet and was expected to find things. It has since found some: the
    ipv6-route packing test was added only because the fix it covers had shipped
-   untested, and the `IPv6_Route` Source-Route round-trip defect was found
-   sideways while writing it.
+   untested, and the
+   :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route` Source-Route
+   round-trip defect was found sideways while writing it.
 #. **The official ``1.5.0`` when the post-wave-1 consistency sweep is done.** The
    sweep is described under `Delivery Sequence`_ below — prose against code,
    missing tests, unaligned changes, and packet formats against the
@@ -904,7 +915,11 @@ then tags and publishes. So:
      - yes
      - ``dev``
      - marked prerelease
-   * - ``1.5.0b1`` (step 1, **current**)
+   * - ``1.5.0b1`` (step 1)
+     - yes
+     - ``dev``
+     - marked prerelease
+   * - ``1.5.0b3`` (**current**)
      - yes
      - ``dev``
      - marked prerelease
