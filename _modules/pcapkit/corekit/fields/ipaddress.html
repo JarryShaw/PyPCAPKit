@@ -474,6 +474,43 @@
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Reject a :obj:`bool` value before it reaches :mod:`ipaddress`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Value to check.</span>
+<span class="sd">        description: Human-readable description of what ``value`` is, used</span>
+<span class="sd">            to build the :exc:`FieldValueError` message.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool`.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        :obj:`bool` is an :class:`int` subclass, and every conversion in this</span>
+<span class="sd">        module ultimately calls :func:`ipaddress.ip_address` or</span>
+<span class="sd">        :func:`ipaddress.ip_interface`, both of which treat any :class:`int`</span>
+<span class="sd">        below ``2**32`` as IPv4 -- so without this guard, ``True``/``False``</span>
+<span class="sd">        are silently accepted as ``0.0.0.1``/``0.0.0.0`` (or the equivalent</span>
+<span class="sd">        interface) on an IPv4-typed field, with **no exception and no</span>
+<span class="sd">        warning**. On an IPv6-typed field the same conversion happens to</span>
+<span class="sd">        raise instead, because the resulting</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that</span>
+<span class="sd">        asymmetry is exactly what let this slip past #481's otherwise</span>
+<span class="sd">        equivalent guard for :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (c.f. #491).</span>
+
+<span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
+<span class="sd">        for the same placement reason #481 gives: a correct check in the</span>
+<span class="sd">        wrong position does not fire, and that placement mistake has</span>
+<span class="sd">        already been made twice in this repository's history.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: must not be a bool, not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> -- pass '</span>
+            <span class="sa">f</span><span class="s1">'int(</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="_IPField">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._IPField">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">_IPField</span><span class="p">(</span><span class="n">Field</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
@@ -518,10 +555,13 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is not a valid IP address, or if it</span>
-<span class="sd">                is the wrong IP version for this field.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`_reject_bool`), is not a valid IP address, or is the</span>
+<span class="sd">                wrong IP version for this field.</span>
 
 <span class="sd">        """</span>
+        <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'invalid IP address'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># type: IPv4Address | IPv6Address</span>
         <span class="k">else</span><span class="p">:</span>
@@ -665,10 +705,13 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is not a valid IP interface, or if</span>
-<span class="sd">                it is the wrong IP version for this field.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`_reject_bool`), is not a valid IP interface, or is the</span>
+<span class="sd">                wrong IP version for this field.</span>
 
 <span class="sd">        """</span>
+        <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'invalid IP interface'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
@@ -759,10 +802,13 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is not a valid IP interface, or if</span>
-<span class="sd">                it is the wrong IP version for this field.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`_reject_bool`), is not a valid IP interface, or is the</span>
+<span class="sd">                wrong IP version for this field.</span>
 
 <span class="sd">        """</span>
+        <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'invalid IP interface'</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Interface</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>

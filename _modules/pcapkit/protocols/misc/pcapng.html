@@ -1735,7 +1735,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[dt_type, Decimal]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read timestmap.</span>
+<span class="w">        </span><span class="sd">"""Read timestamp.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            timestamp_high: Higher 32-bit integer value of timestamp.</span>
@@ -4156,7 +4156,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            block: Block data model.</span>
 <span class="sd">            interface_id: Interface ID.</span>
-<span class="sd">            timestmap: Packet timestamp.</span>
+<span class="sd">            timestamp: Packet timestamp.</span>
 <span class="sd">            captured_len: Captured length.</span>
 <span class="sd">            original_len: Original length.</span>
 <span class="sd">            packet_data: Payload of the block.</span>
@@ -4288,7 +4288,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            block: Block data model.</span>
 <span class="sd">            interface_id: Interface ID.</span>
-<span class="sd">            timestmap: Block timestamp.</span>
+<span class="sd">            timestamp: Block timestamp.</span>
 <span class="sd">            options: Block options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -4328,7 +4328,6 @@
 <span class="sd">        Args:</span>
 <span class="sd">            block: Block data model.</span>
 <span class="sd">            entries: :manpage:`systemd(1)` journal export entries.</span>
-<span class="sd">            options: Block options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -4511,7 +4510,7 @@
 <span class="sd">            block: Block data model.</span>
 <span class="sd">            interface_id: Interface ID.</span>
 <span class="sd">            drop_count: Drops count.</span>
-<span class="sd">            timestmap: Packet timestamp.</span>
+<span class="sd">            timestamp: Packet timestamp.</span>
 <span class="sd">            captured_len: Captured length.</span>
 <span class="sd">            original_len: Original length.</span>
 <span class="sd">            packet_data: Payload of the block.</span>
@@ -5252,7 +5251,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            os: Operating system name.</span>
+<span class="sd">            hardware: Hardware information.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -5742,7 +5741,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            ip: DNS server IPv6 address.</span>
+<span class="sd">            timestamp: Start time.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -5778,7 +5777,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            ip: DNS server IPv6 address.</span>
+<span class="sd">            timestamp: End time.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -6385,7 +6384,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Secrets type.</span>
 <span class="sd">            secrets: Secrets data model.</span>
-<span class="sd">            data: Secrets data.</span>
+<span class="sd">            entries: WireGuard Key Log entries.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>

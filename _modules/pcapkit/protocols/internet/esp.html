@@ -934,7 +934,8 @@
 <span class="sd">            an SA by ``(SPI, destination, protocol)``, and supplying the</span>
 <span class="sd">            address is what lets several tunnels sharing an SPI be told</span>
 <span class="sd">            apart. Matched only when the outer destination is known to</span>
-<span class="sd">            :mod:`pcapkit`; see :meth:`ESP.read`.</span>
+<span class="sd">            :mod:`pcapkit`; see :meth:`ESP.read`. Must not be a :obj:`bool`</span>
+<span class="sd">            -- see ``Raises`` below.</span>
 <span class="sd">        strict: Whether a padding pattern that does not follow the</span>
 <span class="sd">            monotonically increasing sequence of :rfc:`4303` §2.4 should be</span>
 <span class="sd">            treated as a decryption failure. Only applied when nothing else</span>
@@ -943,7 +944,13 @@
 <span class="sd">            with zeros; set to :data:`False` for those.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ProtocolError: If the algorithms or key lengths are inconsistent.</span>
+<span class="sd">        ProtocolError: If the algorithms or key lengths are inconsistent, or</span>
+<span class="sd">            ``destination`` is a :obj:`bool` (c.f. #491) -- :obj:`bool` is an</span>
+<span class="sd">            :class:`int` subclass, and :func:`ipaddress.ip_address` treats</span>
+<span class="sd">            any :class:`int` below ``2**32`` as IPv4, so without this check</span>
+<span class="sd">            ``destination=True`` would silently become</span>
+<span class="sd">            ``IPv4Address('0.0.0.1')`` with no exception and no warning; pass</span>
+<span class="sd">            ``int(destination)`` if the numeric value is what is wanted.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        Key material is held in *private* attributes of this object, and is</span>
@@ -966,6 +973,20 @@
                  <span class="n">strict</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">spi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">spi</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFFFF</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid SPI: </span><span class="si">{</span><span class="n">spi</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># NOTE: checked before the ``ipaddress.ip_address`` call below, for</span>
+            <span class="c1"># the same reason as ``_reject_bool`` in</span>
+            <span class="c1"># ``pcapkit.corekit.fields.ipaddress`` (this module calls</span>
+            <span class="c1"># ``ipaddress.ip_address`` directly rather than through a Field, so</span>
+            <span class="c1"># it needs its own copy of the guard): ``bool`` is an ``int``</span>
+            <span class="c1"># subclass, and ``ipaddress.ip_address()`` treats any ``int`` below</span>
+            <span class="c1"># ``2**32`` as IPv4 -- so without this check, ``destination=True``</span>
+            <span class="c1"># would silently become ``IPv4Address('0.0.0.1')``, with no</span>
+            <span class="c1"># exception and no warning (c.f. #491).</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'invalid destination: must not be a bool, not </span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1"> -- '</span>
+                <span class="sa">f</span><span class="s1">'pass int(</span><span class="si">{</span><span class="n">destination</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
 
         <span class="c1">#: Optional[int]: Security Parameters Index, or :data:`None` for any.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spi</span> <span class="o">=</span> <span class="n">spi</span>

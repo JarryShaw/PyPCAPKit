@@ -942,6 +942,10 @@
 <span class="sd">            Key-value pairs for protocol construction.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: ``make`` takes ``offset`` in on-wire 8-octet units, while</span>
+        <span class="c1"># ``data.offset`` is in octets (see :meth:`read`), so scale back down to</span>
+        <span class="c1"># keep the data-to-schema round trip exact, mirroring</span>
+        <span class="c1"># :meth:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag._make_data`.</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">'tos_pre'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tos</span><span class="o">.</span><span class="n">pre</span><span class="p">,</span>
             <span class="s1">'tos_del'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">tos</span><span class="p">[</span><span class="s1">'del'</span><span class="p">],</span>
@@ -951,13 +955,16 @@
             <span class="s1">'id'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s1">'df'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
             <span class="s1">'mf'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>
-            <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
+            <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s1">'ttl'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>
             <span class="s1">'protocol'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="s1">'src'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
             <span class="s1">'dst'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
-            <span class="s1">'options'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="c1"># NOTE: ``options`` is only present on ``data`` when the packet's</span>
+            <span class="c1"># ``hdr_len`` exceeds the fixed 20-octet header (see :meth:`read`),</span>
+            <span class="c1"># so read it defensively rather than assuming it always exists.</span>
+            <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
@@ -1847,7 +1854,11 @@
 <span class="sd">        Args:</span>
 <span class="sd">            kind: option type code</span>
 <span class="sd">            option: option data</span>
-<span class="sd">            sec: security option</span>
+<span class="sd">            level: classification level</span>
+<span class="sd">            level_default: default value for classification level</span>
+<span class="sd">            level_namespace: namespace for classification level</span>
+<span class="sd">            level_reversed: whether classification level is reversed</span>
+<span class="sd">            authorities: list of protection authority flags</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -2294,8 +2305,8 @@
 <span class="w">        </span><span class="sd">"""Make IPv4 Quick-Start (``QS``) option.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            code: option type value</span>
-<span class="sd">            opt: option data</span>
+<span class="sd">            kind: option type code</span>
+<span class="sd">            option: option data</span>
 <span class="sd">            func: QS function type</span>
 <span class="sd">            func_default: default value for QS function type</span>
 <span class="sd">            func_namespace: namespace for QS function type</span>
