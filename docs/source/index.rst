@@ -30,6 +30,7 @@ construction and analysis library.
    ext
    demo
    pep
+   changelog
 
 About
 =====
