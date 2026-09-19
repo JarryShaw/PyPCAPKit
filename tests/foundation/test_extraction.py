@@ -493,6 +493,33 @@ class ExtractorTests(unittest.TestCase):
         self.assertEqual(extractor.magic_number, b'\xa1\xb2\xc3\xd4')
         extractor._ifile.close()
 
+    def test_auto_mode_call_raises_the_class_the_docstring_names(self) -> None:
+        # #490: __call__'s docstring promises ``CallableError`` under auto mode --
+        # ``__iter__``'s sibling ``Raises:`` block, one method up, promises
+        # ``IterableError`` for the identical condition. The two are siblings
+        # (both ``BaseError, TypeError``) and neither subclasses the other, so
+        # this pins the *actually raised* class on a real ``Extractor(auto=True)``
+        # instance (not a hand-built stand-in) against both names, guarding
+        # against either the raise or the docstring drifting again unnoticed.
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.exceptions import CallableError, IterableError
+
+        self.assertFalse(issubclass(CallableError, IterableError))
+        self.assertFalse(issubclass(IterableError, CallableError))
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            capture = pathlib.Path(tempdir) / 'sample.pcap'
+            capture.write_bytes(b'\xa1\xb2\xc3\xd4payload')
+            with mock.patch.object(Extractor, 'run'):
+                extractor = Extractor(str(capture), str(pathlib.Path(tempdir) / 'out'),
+                                      format='json', auto=True, nofile=True)
+        self.addCleanup(extractor._ifile.close)
+
+        with self.assertRaises(CallableError):
+            extractor()
+        with self.assertRaises(IterableError):
+            iter(extractor)
+
     def test_constructor_configuration_branches_with_run_patched(self) -> None:
         from pcapkit.foundation.extraction import Extractor
 

@@ -1276,7 +1276,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int', *,
                         interface_id: 'int' = 0) -> 'tuple[dt_type, Decimal]':
-        """Read timestmap.
+        """Read timestamp.
 
         Args:
             timestamp_high: Higher 32-bit integer value of timestamp.
@@ -3500,7 +3500,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             block: Block data model.
             interface_id: Interface ID.
-            timestmap: Packet timestamp.
+            timestamp: Packet timestamp.
             captured_len: Captured length.
             original_len: Original length.
             packet_data: Payload of the block.
@@ -3623,7 +3623,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             block: Block data model.
             interface_id: Interface ID.
-            timestmap: Block timestamp.
+            timestamp: Block timestamp.
             options: Block options.
             **kwargs: Arbitrary keyword arguments.
 
@@ -3660,7 +3660,6 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             block: Block data model.
             entries: :manpage:`systemd(1)` journal export entries.
-            options: Block options.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -3834,7 +3833,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             block: Block data model.
             interface_id: Interface ID.
             drop_count: Drops count.
-            timestmap: Packet timestamp.
+            timestamp: Packet timestamp.
             captured_len: Captured length.
             original_len: Original length.
             packet_data: Payload of the block.
@@ -4518,7 +4517,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            os: Operating system name.
+            hardware: Hardware information.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -4972,7 +4971,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            ip: DNS server IPv6 address.
+            timestamp: Start time.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -5005,7 +5004,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            ip: DNS server IPv6 address.
+            timestamp: End time.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -5567,7 +5566,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Secrets type.
             secrets: Secrets data model.
-            data: Secrets data.
+            entries: WireGuard Key Log entries.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

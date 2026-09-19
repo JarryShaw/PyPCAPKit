@@ -119,10 +119,11 @@ Algorithm
       } give up until (no entry from HDL)
    }
 
-The following algorithm implement is based on **IP Datagram
-Reassembly Algorithm** introduced in :rfc:`815`. It described an
-algorithm dealing with ``RCVBT`` (fragment received bit table)
-appeared in :rfc:`791`. And here is the process:
+The following algorithm implement is based on the **IP Datagram
+Reassembly Algorithm** introduced in :rfc:`815`, which presents hole
+descriptors as an alternative to the ``RCVBT`` (fragment received bit
+table) approach used by the reassembly procedure in :rfc:`791`. And
+here is the process:
 
 1. Select the next hole descriptor from the hole descriptor
    list. If there are no more entries, go to step eight.

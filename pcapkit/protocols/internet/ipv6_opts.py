@@ -334,7 +334,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             next_default: Default value of next header type.
             next_namespace: Namespace of next header type.
             next_reversed: If the namespace of next header type is reversed.
-            option: Hop-by-Hop Options.
+            options: Hop-by-Hop Options.
             payload: Payload of current protocol.
             **kwargs: Arbitrary keyword arguments.
 
@@ -510,7 +510,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -548,7 +548,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -606,7 +606,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -640,7 +640,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -680,7 +680,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -744,7 +744,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -807,7 +807,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -866,7 +866,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -929,7 +929,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -973,7 +973,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1034,7 +1034,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1066,7 +1066,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1097,7 +1097,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1141,7 +1141,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1179,7 +1179,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Args:
             schema: parsed parameter schema
-            option: extracted IPv6-Opts options
+            options: extracted IPv6-Opts options
 
         Returns:
             Parsed option data.
@@ -1250,7 +1250,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         """Make options for IPv6-Opts.
 
         Args:
-            option: IPv6-Opts options
+            options: IPv6-Opts options
 
         Returns:
             Tuple of options and total length of options.
