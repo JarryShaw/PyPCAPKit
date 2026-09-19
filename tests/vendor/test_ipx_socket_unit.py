@@ -37,13 +37,22 @@ if TYPE_CHECKING:
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Whether :mod:`requests` is importable. ``pcapkit.vendor.default`` imports it
-#: at module scope, so every test here needs it -- but it ships in the ``vendor``
-#: extra (:file:`pyproject.toml`), not ``test``, and CI installs ``.[test]``.
-#: Guarded the same way :file:`tests/protocols/test_dispatch_registry_unit.py`
-#: guards its own optional runtime dependencies, rather than making the whole
-#: unit tier depend on the crawler's requirements. See #507.
-HAS_REQUESTS = importlib.util.find_spec('requests') is not None
+#: Whether the crawler machinery is importable at all. Two packages are needed
+#: and neither is optional to this file: ``pcapkit.vendor.default`` imports
+#: :mod:`requests` at module scope, and :mod:`pcapkit.vendor` then imports every
+#: crawler unconditionally, seven of which import :mod:`bs4` at module scope --
+#: so importing *one* crawler needs both. (:mod:`pcapkit.vendor`'s own
+#: ``try: import bs4`` suppresses the warning, not the ``ModuleNotFoundError``
+#: raised by the crawler imports below it.)
+#:
+#: Both now ship in the ``test`` extra as well as ``vendor``
+#: (:file:`pyproject.toml`), because CI installs ``.[test]`` and a skipped pin
+#: guards nothing. The guard is kept as belt-and-braces for an environment that
+#: lacks them anyway, so this file skips rather than erroring -- the same way
+#: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional
+#: dependencies. See #507.
+HAS_CRAWLER_DEPS = all(importlib.util.find_spec(name) is not None
+                       for name in ('requests', 'bs4'))
 
 #: Every member the generated :class:`pcapkit.const.ipx.socket.Socket` is
 #: expected to carry, as ``(name, value)`` in definition order. Spelled out
@@ -81,6 +90,36 @@ EXPECTED_RANGES = (
     (0x8000, 0xFFFF, 'Statically Assigned Socket Numbers'),
 )
 
+#: Sampled sockets and the member name each is expected to resolve to, at the
+#: bounds of every range plus the gaps between. The *name* is pinned as well as
+#: the value because the value alone cannot tell a live range branch from a
+#: masked one: every branch of the generated ``_missing_`` returns ``value``, so
+#: only the name says which branch ran, and asserting the value alone would pass
+#: just as happily with three of the five branches deleted.
+#:
+#: Three of them are in fact unreachable -- ``(0x0001, 0x0BB8)`` masks
+#: ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)`` masks both
+#: ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)``. That is preserved scrape
+#: behaviour rather than a defect this change introduces, and it is documented on
+#: :data:`pcapkit.vendor.ipx.socket.RANGES`; pinning the names is what makes that
+#: documentation fail here if it ever stops being true.
+EXPECTED_MISSING_NAMES = {
+    0x0000: 'Unspecified',                    # a defined member
+    0x0001: 'Routing_Information_Packet',     # a defined member
+    0x0004: 'Registered by Xerox_0x0004',
+    0x0020: 'Registered by Xerox_0x0020',     # masks 'Experimental'
+    0x003F: 'Registered by Xerox_0x003F',     # masks 'Experimental'
+    0x0BB8: 'Registered by Xerox_0x0BB8',
+    0x0BB9: 'Dynamically Assigned_0x0BB9',
+    0x4000: 'Dynamically Assigned_0x4000',    # masks 'Dynamically Assigned Socket Numbers'
+    0x4FFF: 'Dynamically Assigned_0x4FFF',    # masks 'Dynamically Assigned Socket Numbers'
+    0x7FFF: 'Dynamically Assigned_0x7FFF',
+    0x8000: 'Dynamically Assigned_0x8000',    # masks 'Statically Assigned Socket Numbers'
+    0x8061: 'Dynamically Assigned_0x8061',    # masks 'Statically Assigned Socket Numbers'
+    0x9094: 'Dynamically Assigned_0x9094',    # masks 'Statically Assigned Socket Numbers'
+    0xFFFF: 'Dynamically Assigned_0xFFFF',    # masks 'Statically Assigned Socket Numbers'
+}
+
 
 def _normalize(context: 'str') -> 'str':
     """Apply the whitespace normalisation the generator writes files through.
@@ -109,7 +148,7 @@ def _normalize(context: 'str') -> 'str':
     return '\n'.join(lines) + '\n'
 
 
-@unittest.skipUnless(HAS_REQUESTS, 'requests not installed (vendor extra)')
+@unittest.skipUnless(HAS_CRAWLER_DEPS, 'requests and/or beautifulsoup4 not installed')
 class IPXSocketVendorTests(unittest.TestCase):
     """The hand-maintained registry, and the crawler that no longer crawls."""
 
@@ -143,7 +182,9 @@ class IPXSocketVendorTests(unittest.TestCase):
 
         ``Vendor.__init__`` regenerates and *writes* the constant file as a side
         effect of construction, which a test has no business doing to the
-        working tree, so the four attributes it sets are set here instead.
+        working tree, so the three attributes it sets -- ``NAME``, ``DOCS`` and
+        ``record``, at :file:`pcapkit/vendor/default.py` lines 338, 340 and 343
+        -- are set here instead.
 
         """
         vendor = self.vendor_module.Socket.__new__(self.vendor_module.Socket)
@@ -215,11 +256,12 @@ class IPXSocketVendorTests(unittest.TestCase):
 
     def test_unlisted_sockets_still_resolve(self) -> None:
         # _missing_ has to cover the whole 16-bit space, so no legal wire value
-        # raises. Sampled at the bounds of every range plus the gaps between.
-        for value in (0x0000, 0x0001, 0x0004, 0x0020, 0x003F, 0x0BB8, 0x0BB9,
-                      0x4000, 0x4FFF, 0x7FFF, 0x8000, 0x8061, 0x9094, 0xFFFF):
+        # raises -- and it has to reach the branch it looks like it reaches.
+        for value, name in EXPECTED_MISSING_NAMES.items():
             with self.subTest(socket=f'0x{value:04X}'):
-                self.assertEqual(int(self.const_module.Socket(value)), value)
+                member = self.const_module.Socket(value)
+                self.assertEqual(int(member), value)
+                self.assertEqual(member.name, name)
 
     def test_out_of_range_sockets_are_rejected(self) -> None:
         for value in (-1, 0x10000):
