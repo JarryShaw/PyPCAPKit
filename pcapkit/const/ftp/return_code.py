@@ -41,6 +41,7 @@ class ResponseKind(IntEnum):
     PermanentNegativeCompletion = 5
     Protected = 6
 
+    @classmethod
     def _missing_(cls, value: 'int') -> 'ResponseKind':
         """Lookup function used when value is not found.
 
@@ -63,6 +64,7 @@ class GroupingInformation(IntEnum):
     Unspecified = 4
     FileSystem = 5
 
+    @classmethod
     def _missing_(cls, value: 'int') -> 'GroupingInformation':
         """Lookup function used when value is not found.
 

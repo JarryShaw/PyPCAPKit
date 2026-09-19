@@ -36,8 +36,11 @@ class RouterAlert(Vendor):
             Enumeration fields and missing fields.
 
         """
+        # NOTE: Unlike most IANA registry CSVs, the ``ipv4-router-alert-option-values``
+        # registry ships with no header row -- its very first row is the ``0`` entry
+        # (RFC 2113's "Router shall examine packet", the only value that RFC defines).
+        # Skipping a "header" here silently drops that row; see #492.
         reader = csv.reader(data)
-        next(reader)  # header
 
         enum = []  # type: list[str]
         miss = []  # type: list[str]

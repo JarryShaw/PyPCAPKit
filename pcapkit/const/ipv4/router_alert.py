@@ -18,6 +18,9 @@ __all__ = ['RouterAlert']
 class RouterAlert(IntEnum):
     """[RouterAlert] IPv4 Router Alert Option Values"""
 
+    #: Router shall examine packet [:rfc:`2113`]
+    Router_shall_examine_packet = 0
+
     #: Aggregated Reservation Nesting Level [:rfc:`3175`]
     Aggregated_Reservation_Nesting_Level_0 = 1
 
