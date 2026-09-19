@@ -588,7 +588,8 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length: route data length
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
 
         Returns:
             Parsed route data.
