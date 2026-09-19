@@ -141,6 +141,27 @@ def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
     raise FieldValueError(f'HOPOPT: invalid MPL Seed-ID type: {s_type}')
 
 
+def smf_i_dpd_id_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return SMF I-DPD identifier length.
+
+    Args:
+        pkt: SMF identification-based DPD option unpacked schema.
+
+    Returns:
+        SMF I-DPD identifier length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the TaggerID it declares, which would otherwise underflow the
+            identifier length below zero.
+
+    """
+    length = pkt['len'] - (1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2))
+    if length < 0:
+        raise FieldValueError(f'HOPOPT: invalid SMF I-DPD option length: {pkt["len"]}')
+    return length
+
+
 def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`_SMFDPDOption.data` field.
 
@@ -155,12 +176,22 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
           wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption`
           instance.
 
+    Note:
+        The field is sized ``Opt Data Len + 2`` rather than ``Opt Data Len``.
+        ``Opt Data Len`` counts only what follows the option header
+        [:rfc:`8200#section-4.2`], while both schemas this may return inherit
+        :attr:`Option.type` and :attr:`Option.len` and so parse those two octets
+        themselves. Sizing the field at ``Opt Data Len`` handed them an area two
+        octets short of the option they read, which
+        :class:`~pcapkit.corekit.fields.collections.OptionField` then mis-counted
+        against the option area -- c.f. #431.
+
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
     schema = SMFDPDOption.registry[mode]
     if schema is None:
         raise FieldValueError(f'HOPOPT: invalid SMF DPD mode: {mode}')
-    return SchemaField(length=pkt['test']['len'], schema=schema)
+    return SchemaField(length=pkt['test']['len'] + 2, schema=schema)
 
 
 def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -254,6 +285,49 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
     length = pkt.get('len', 0)
     if not isinstance(length, int):  # ``NoValue`` (skipped) or :obj:`None` (unset)
         return 0
+    return length
+
+
+def calipso_pad_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return CALIPSO option padding length.
+
+    Args:
+        pkt: CALIPSO option unpacked schema.
+
+    Returns:
+        CALIPSO option padding length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the fixed header and the compartment bitmap declared by
+            ``cmpt_len``, which would otherwise underflow the padding length
+            below zero.
+
+    """
+    length = pkt['len'] - 8 - pkt['cmpt_len'] * 4
+    if length < 0:
+        raise FieldValueError(f'HOPOPT: invalid CALIPSO option length: {pkt["len"]}')
+    return length
+
+
+def mpl_opt_pad_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return MPL option padding length.
+
+    Args:
+        pkt: MPL option unpacked schema.
+
+    Returns:
+        MPL option padding length.
+
+    Raises:
+        FieldValueError: If ``Opt Data Len`` on the wire is too short to hold
+            the fixed header and the Seed-ID declared by ``flags.type``, which
+            would otherwise underflow the padding length below zero.
+
+    """
+    length = pkt['len'] - 2 - (0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt))
+    if length < 0:
+        raise FieldValueError(f'HOPOPT: invalid MPL option length: {pkt["len"]}')
     return length
 
 
@@ -358,7 +432,7 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
         lambda pkt: pkt['cmpt_len'] > 0,
     )
     #: Padding.
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 8 - pkt['cmpt_len'] * 4)
+    pad: 'bytes' = PaddingField(length=calipso_pad_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', domain: 'int', cmpt_len: 'int',
@@ -367,11 +441,21 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
 
 @schema_final
 class _SMFDPDOption(Schema):
-    """Header schema for HOPOPT SMF DPD options with generic representation."""
+    """Header schema for HOPOPT SMF DPD options with generic representation.
+
+    The ``test`` field forward-matches the first three octets of the option --
+    ``Option Type``, ``Opt Data Len`` and the octet carrying the DPD mode bit --
+    without consuming them, so that :func:`smf_dpd_data_selector` can size and
+    choose the schema which then reads the option properly. Its ``namespace``
+    offsets are therefore bit offsets into the *option*, not into any one field
+    of it: ``Opt Data Len`` is octet 1, i.e. bits 8 to 15, and the mode bit is
+    the first bit of octet 2 [:rfc:`6621#section-8.1`].
+
+    """
 
     #: SMF DPD mode.
     test: 'SMFDPDTestFlag' = ForwardMatchField(BitField(length=3, namespace={
-        'len': (1, 8),
+        'len': (8, 8),
         'mode': (16, 1),
     }))
     #: SMF DPD data.
@@ -423,9 +507,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.I_DPD):
         lambda pkt: pkt['info']['type'] != 0,
     )
     #: Identifier.
-    id: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - (
-        1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2)
-    ))
+    id: 'bytes' = BytesField(length=smf_i_dpd_id_len)
 
     def post_process(self, packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption':
         """Revise ``schema`` data after unpacking process.
@@ -611,9 +693,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
         lambda pkt: pkt['flags']['type'] != Enum_SeedID.IPV6_SOURCE_ADDRESS,
     )
     #: Reserved data (padding).
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 2 - (
-        0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
-    ))
+    pad: 'bytes' = PaddingField(length=mpl_opt_pad_len)
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.

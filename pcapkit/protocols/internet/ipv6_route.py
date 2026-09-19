@@ -41,6 +41,7 @@ from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IP
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_SourceRoute
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType
+from pcapkit.protocols.schema.internet.ipv6_route import ipv6_route_data_length
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -201,7 +202,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             length = len(self)
         schema = self.__header__
 
-        name = self.__routing__[schema.type]
+        name = self._lookup_registry(self.__routing__, schema.type)
         if isinstance(name, str):
             name = f'_read_data_type_{name.lower()}'
             meth = cast('TypeParser',
@@ -213,6 +214,42 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         if extension:
             return ipv6_route
         return self._decode_next_layer(ipv6_route, schema.next, length - ipv6_route.length)
+
+    @staticmethod
+    def _make_hdr_ext_len(data_length: 'int') -> 'int':
+        """Compute ``Hdr Ext Len`` for a type-specific data payload of ``data_length`` octets.
+
+        Per :rfc:`8200#section-4.4`, ``Hdr Ext Len`` is *"the length of the
+        Routing header in 8-octet units, not including the first 8
+        octets"*. The routing header's fixed part (``next``/``length``/
+        ``type``/``seg_left``) is 4 octets, so the total on-the-wire header
+        is ``4 + data_length`` octets; equating that to ``8 + 8 *
+        hdr_ext_len`` and solving gives ``hdr_ext_len = (data_length - 4) /
+        8``. ``ipv6_route_data_length`` in
+        :mod:`pcapkit.protocols.schema.internet.ipv6_route` is this
+        expression's inverse, used on the read side.
+
+        This is the *only* place ``Hdr Ext Len`` is computed on the write
+        side: :meth:`make` used to compute it twice, once per branch, in two
+        different (and both wrong) units -- that duplication, not either
+        expression individually, is what let the two drift and is why there
+        is one helper now rather than two call sites. Do NOT "simplify" the
+        ``- 4`` / ``/ 8`` away: the units either side of it differ (octets
+        vs. 8-octet units), and dropping the offset silently reinterprets
+        the field, which is exactly the defect #487 fixed (compare the
+        ``* 8`` unit bug behind #483 in the scapy adapter).
+
+        Args:
+            data_length: packed length, in octets, of the type-specific data
+                (i.e. ``len(data_val.pack())`` for a :class:`~pcapkit.protocols.
+                schema.schema.Schema`-based payload, or the padded raw
+                :obj:`bytes` length for the unknown/raw-bytes case).
+
+        Returns:
+            The ``Hdr Ext Len`` field value.
+
+        """
+        return math.ceil(max(0, data_length - 4) / 8)
 
     def make(self,
              dst: 'Optional[IPv6Address | str | int| bytes]' = None,
@@ -257,10 +294,15 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                                          reversed=type_reversed, pack=False))
 
         if isinstance(data, bytes):
-            length = math.ceil((len(data) + 4) / 8)
-            data_val = data.ljust(length * 8 - 4, b'\x00')  # type: bytes | Schema_RoutingType
+            # ``data`` here *is* the type-specific data (no per-type
+            # constructor involved), so pad it out to the next octet count
+            # ``_make_hdr_ext_len`` can express exactly, then use that same
+            # helper -- rather than a third, separate expression -- to derive
+            # ``Hdr Ext Len`` from the now-aligned length.
+            length = self._make_hdr_ext_len(len(data))
+            data_val = data.ljust(ipv6_route_data_length(length), b'\x00')  # type: bytes | Schema_RoutingType
         elif isinstance(data, (dict, Data_IPv6_Route)):
-            name = self.__routing__[type_val]
+            name = self._lookup_registry(self.__routing__, type_val)
             if isinstance(name, str):
                 name = f'_make_data_type_{name.lower()}'
                 meth = cast('TypeConstructor',
@@ -273,9 +315,9 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                 data_val = meth(type_val, dst=dst_val, **data)
             else:
                 data_val = meth(type_val, data, dst=dst_val)
-            length = len(data_val.pack())
+            length = self._make_hdr_ext_len(len(data_val.pack()))
         elif isinstance(data, Schema):
-            length = math.ceil((len(data.pack()) + 4) / 8)
+            length = self._make_hdr_ext_len(len(data.pack()))
             data_val = data
         else:
             raise ProtocolError(f'{self.alias}: invalid routing data type: {data.__class__}')
@@ -458,8 +500,14 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         """
-        if (header.length - 8) % 16 != 0:
-            raise ProtocolError(f'{self.alias} [TypeNo {type}]: invalid format')
+        # ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200
+        # #section-4.4`), not octets -- each 16-octet address costs 2 of
+        # those units, so a well-formed Source Route header always carries
+        # an even ``Hdr Ext Len``. The previous ``(header.length - 8) % 16``
+        # check assumed ``header.length`` was already a total octet count,
+        # which is never true of this field; see #487.
+        if header.length % 2 != 0:
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_SourceRoute(
             next=header.next,
@@ -499,11 +547,15 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         Raises:
-            ProtocolError: If ``length`` is **NOT** ``24``.
+            ProtocolError: If ``Hdr Ext Len`` is **NOT** ``2``.
 
         """
-        if header.length != 24:
-            raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
+        # A Type 2 Routing header is fixed at 24 octets total (4 fixed + 4
+        # reserved + 16-octet home address), so its ``Hdr Ext Len`` -- in
+        # 8-octet units, not octets (:rfc:`8200#section-4.4`) -- is always
+        # ``2``; a literal ``24`` here could never match. See #487.
+        if header.length != 2:
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_Type2(
             next=header.next,
@@ -542,8 +594,21 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         """
+        # NOTE: this guard has the same surface shape as the Source Route and
+        # Type 2 unit confusion #487 fixed above -- ``header.length`` is
+        # ``Hdr Ext Len`` in 8-octet units, not octets, and ``% 16`` reads
+        # like a leftover assumption that it was already a total octet
+        # count. It is left as-is here: RPL addresses are variable-length
+        # (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is
+        # not obviously the right invariant even under correct units, and
+        # this module's RPL construction already fails before ever reaching
+        # this method, from an unrelated defect (``RPL.post_process`` in
+        # pcapkit/protocols/schema/internet/ipv6_route.py assumes ``bytes``
+        # on a path ``Schema.pack`` also runs, per #476/#480) -- so there is
+        # no working round trip here to validate a replacement against.
+        # Flagged for follow-up rather than guessed at.
         if header.length % 16 != 0:
-            raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
+            raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_RPL(
             next=header.next,

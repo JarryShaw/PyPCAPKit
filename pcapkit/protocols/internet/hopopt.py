@@ -467,7 +467,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         for schema in self.__header__.options:
             dscp = schema.type
-            name = self.__option__[dscp]
+            name = self._lookup_registry(self.__option__, dscp)
 
             if isinstance(name, str):
                 meth_name = f'_read_opt_{name}'
@@ -1275,7 +1275,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                     if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
                         continue
 
-                    name = self.__option__[code]  # type: str | tuple[OptionParser, OptionConstructor]
+                    name = self._lookup_registry(self.__option__, code)
                     if isinstance(name, str):
                         meth_name = f'_make_opt_{name}'
                         meth = cast('OptionConstructor',
@@ -1306,7 +1306,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             if code in (Enum_Option.Pad1, Enum_Option.PadN):
                 continue
 
-            name = self.__option__[code]
+            name = self._lookup_registry(self.__option__, code)
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
                 meth = cast('OptionConstructor',

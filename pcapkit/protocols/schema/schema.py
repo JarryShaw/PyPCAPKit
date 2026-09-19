@@ -6,7 +6,6 @@ import collections
 import collections.abc
 import io
 import itertools
-import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
@@ -16,7 +15,7 @@ from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
-from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, stacklevel
+from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
 from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
@@ -72,18 +71,41 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     args_ = [f'{key}=NoValue' for key in cls.__fields__]
     dict_ = [f'{key}={key}' for key in cls.__fields__]
 
-    # NOTE: We shall only attempt to generate ``__init__`` method
-    # if the class does not define such method.
-    if not hasattr(cls, '__init__'):
+    # NOTE: We shall only attempt to generate ``__init__`` method if the class
+    # does not define such method -- which is a test on ``cls.__dict__``, not on
+    # ``hasattr``: every class inherits ``__init__`` from :obj:`object`, so
+    # ``hasattr(cls, '__init__')`` is unconditionally true and the generated
+    # method was never installed. ``Schema(...)`` therefore ran
+    # :meth:`Schema.__update__` alone and never reached
+    # :meth:`Schema.__post_init__`, leaving a schema built from a subset of its
+    # fields holding :class:`~pcapkit.corekit.fields.field.FieldBase` objects in
+    # place of the omitted values, so that it could not be packed at all and
+    # failed with an error naming a field class rather than a field. See #422.
+    #
+    # :class:`~pcapkit.protocols.schema.misc.null.NoPayload` is what the test
+    # protects: it declares an argument-less ``__init__`` of its own so that no
+    # generated one displaces it.
+    if '__init__' not in cls.__dict__:
         # NOTE: We only generate typed ``__init__`` method if only the class
         # has field definition from any of itself and its base classes.
         if args_:
             # NOTE: The following code is to make the ``__init__`` method work.
             # It is inspired from the :func:`dataclasses._create_fn` function.
+            #
+            # ``**kwargs`` is forwarded rather than rejected, so that a keyword
+            # naming something other than a field keeps reaching
+            # :meth:`Schema.__update__` and drawing its
+            # :class:`~pcapkit.utilities.warnings.UnknownFieldWarning`, as it did
+            # while ``__init__`` *was* ``__update__``. Several schemas are
+            # constructed that way on purpose -- the Multipath TCP options take a
+            # ``kind`` and a ``length`` that the enclosing option owns and that
+            # ``MPTCP`` declares only for the type checker -- so a strict
+            # signature here would turn a warning into a :exc:`TypeError` on a
+            # path that has nothing to do with the missing ``__post_init__``.
             init_ = (
                 f'def __create_fn__():\n'
-                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None):\n'
-                f'        self.__update__({", ".join(dict_)})\n'
+                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None, **kwargs):\n'
+                f'        self.__update__({", ".join(dict_)}, **kwargs)\n'
                 f'        self.__post_init__(__packet__)\n'
                 f'    return __init__\n'
             )
@@ -187,7 +209,55 @@ class SchemaMeta(abc.ABCMeta):
                 fields.update(base.__fields__)
         return collections.OrderedDict(__fields__=fields)
 
-    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Schema]':
+    #: Class keywords that collide with a parameter this class does not
+    #: control, so a schema class declared with one fails with an opaque
+    #: ``TypeError`` from several frames away instead of a clear message here.
+    #: Two different collisions, both reserved:
+    #:
+    #: ``mcls``, ``name``, ``bases``, ``namespace`` collide with
+    #: :meth:`abc.ABCMeta.__new__` -- a *different* function from this one, one
+    #: level up the ``super().__new__(...)`` call below. Before Python 3.11
+    #: those four are positional-or-keyword there (from 3.11 they are
+    #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
+    #: **kwargs)``), so a class keyword spelled the same as any of them binds
+    #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
+    #: values for argument '...'``. That is GitHub issue #439's root cause --
+    #: ``namespace`` collided this way, which is why
+    #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``Option`` subclasses
+    #: spell it ``ns=`` instead.
+    #:
+    #: ``cls`` collides one level *later*: every ``__init_subclass__`` is an
+    #: implicit classmethod, so ``cls`` is always bound as its first argument,
+    #: and a class keyword also spelled ``cls`` binds it twice there --
+    #: ``TypeError: Generic.__init_subclass__() got multiple values for
+    #: argument 'cls'`` for a :class:`Schema` subclass (:class:`Schema`
+    #: inherits :class:`typing.Generic`), or the equivalent from whichever
+    #: class in the MRO defines ``__init_subclass__`` first. This one is not
+    #: specific to ``abc.ABCMeta`` or to this metaclass at all -- it holds for
+    #: *any* Python class with any ``__init_subclass__`` in its MRO -- but it
+    #: is reserved here anyway since it is exactly the class of mistake this
+    #: guard exists to catch early and legibly.
+    #:
+    #: Listed explicitly rather than derived from
+    #: :func:`inspect.signature(abc.ABCMeta.__new__) <inspect.signature>` at
+    #: import time: the signature's positional-only marker differs across
+    #: Python versions, introspecting a CPython internal's exact shape to
+    #: guard against a CPython internal's exact shape is circular, and five
+    #: names that will not change are cheaper to read than the machinery to
+    #: recompute them.
+    #:
+    #: ``name``, ``bases`` and ``attrs`` -- *this* method's own parameters --
+    #: collide the same way one level earlier than ``ABCMeta.__new__``, on
+    #: every Python version, and are not in this set for that reason alone:
+    #: they are made positional-only below instead (the same fix CPython gave
+    #: ``ABCMeta.__new__`` in 3.11), which removes the collision rather than
+    #: merely naming it. ``name`` and ``bases`` stay in this set regardless,
+    #: because they still collide with ``ABCMeta.__new__``'s parameters of the
+    #: same name one level up; ``attrs`` does not appear anywhere downstream
+    #: and so needs no entry once it is positional-only here.
+    _RESERVED_CLASS_KWARGS = frozenset({'mcls', 'name', 'bases', 'namespace', 'cls'})
+
+    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', /, **kwargs: 'Any') -> 'Type[Schema]':
         """Create the schema class.
 
         Args:
@@ -200,7 +270,22 @@ class SchemaMeta(abc.ABCMeta):
         :attr:`~Schema.__excluded__` fields from the base classes, as well as
         populating both fields from the subclass attributes.
 
+        Raises:
+            SchemaError: If a class keyword in ``**kwargs`` collides with a
+                parameter of :meth:`abc.ABCMeta.__new__` or of
+                ``__init_subclass__`` -- see :attr:`_RESERVED_CLASS_KWARGS`.
+
         """
+        if clash := cls._RESERVED_CLASS_KWARGS.intersection(kwargs):
+            raise SchemaError(
+                f'{name}: class keyword(s) {sorted(clash)!r} are reserved -- '
+                f'each collides with a same-named parameter of either '
+                f'abc.ABCMeta.__new__ or the implicit __init_subclass__ '
+                f'classmethod binding, and cannot be used as a class keyword '
+                f'on a Schema subclass; rename to a different spelling (see '
+                f'GitHub issue #439)'
+            )
+
         if '__additional__' not in attrs:
             attrs['__additional__'] = []
         if '__excluded__' not in attrs:
@@ -212,10 +297,17 @@ class SchemaMeta(abc.ABCMeta):
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
 
-        # NOTE: for unknown reason, the following code will cause an error
-        # for duplicated keyword arguments in class definition.
-        if sys.version_info < (3, 11):
-            return type.__new__(cls, name, bases, attrs, **kwargs)
+        # See #439: this used to branch on ``sys.version_info < (3, 11)`` and
+        # call ``type.__new__`` directly below that, to dodge the ``namespace``
+        # collision described above. That branch skipped ``ABCMeta.__new__``'s
+        # call to ``abc._abc_init(cls)``, so no :class:`Schema` subclass ever
+        # got its own ``_abc_impl``, and every one of them fell through the
+        # MRO to :class:`collections.abc.Mapping`'s -- corrupting
+        # ``isinstance`` against *any* of them for as long as the process ran.
+        # The actual fix was renaming the one colliding class keyword that was
+        # actually in use, which means this can now call ``ABCMeta.__new__``
+        # unconditionally, on every supported version, like any other
+        # metaclass would.
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
@@ -278,10 +370,64 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         return self
 
     def __post_init__(self, packet: 'Optional[dict[str, Any]]' = None) -> 'None':
+        """Fill in the fields the caller left unset.
+
+        Args:
+            packet: Packet data, as forwarded from the ``__packet__`` keyword
+                argument of the generated ``__init__``. The schema is packed
+                here only when one is given; see the note below.
+
+        """
         for name, field in self.__fields__.items():
-            if self.__dict__[name] in (NoValue, None):
-                self.__dict__[name] = field.default
-        self.pack(packet)
+            # NOTE: Read with a fallback rather than by subscript, since the
+            # generated ``__init__`` is not the only caller: :meth:`from_dict`
+            # seeds only the keys its argument carries, so a field the caller left
+            # out is missing from ``__dict__`` entirely rather than holding
+            # ``NoValue``, and subscripting it raised :exc:`KeyError` naming the
+            # field.
+            #
+            # What is tested is ``NoValue`` alone, not ``NoValue`` or ``None``.
+            # This method fills in what the caller did not say, and a ``None`` the
+            # caller passed *is* something said: on an optional field it is the
+            # chosen value, meaning this packet does not carry the field. It is
+            # also what :meth:`unpack` stores for a
+            # :class:`~pcapkit.corekit.fields.misc.ConditionalField` whose test
+            # fails -- including one that declares a default of its own -- so
+            # substituting the default here would leave a constructed schema
+            # disagreeing with a parsed one about the same packet, and
+            # ``from_dict(parsed.to_dict())`` no longer reproducing what it was
+            # given. Telling the two apart is what ``NoValue`` is for.
+            value = self.__dict__.get(name, NoValue)
+            if value is not NoValue:
+                continue
+
+            default = field.default
+            if default is not NoValue:
+                self.__dict__[name] = default
+            else:
+                # NOTE: Nothing to fill an unset field with, so the ``NoValue``
+                # the generated ``__init__`` seeded it with is dropped rather than
+                # kept: it is a *field* sentinel, not a value a schema may hold.
+                # Dropping it rather than storing ``None`` also keeps the name out
+                # of the context :meth:`pack` builds from ``__dict__``, which a
+                # schema may be relying on to seed for itself -- the PCAP-NG
+                # section header block reads its Byte-Order Magic from a ``match``
+                # its own :meth:`pre_pack` supplies, and only when the context
+                # does not name one already. :meth:`pack` reads an absent field as
+                # ``None`` regardless.
+                self.__dict__.pop(name, None)
+
+        # NOTE: Packed here only when a packet context was actually handed over.
+        # A schema is not in general packable from its own fields alone: a field
+        # callback may read a key that the *enclosing* layer owns, as the
+        # Multipath TCP options do with the ``length`` of the TCP option that
+        # carries them, and packing without it raises rather than producing
+        # octets. ``__updated__`` is still set, so a schema left unpacked here is
+        # packed by :meth:`__bytes__` on first use -- by which time the enclosing
+        # layer has supplied the context, which is where the octets were produced
+        # before this method ran on construction at all.
+        if packet is not None:
+            self.pack(packet)
 
     def __update__(self, dict_: 'Optional[Mapping[str, _VT] | Iterable[tuple[str, _VT]]]' = None,
                    **kwargs: '_VT') -> 'None':
@@ -508,11 +654,22 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         for field in self.__fields__.values():
             field = field(packet)
 
+            # NOTE: Read from the instance rather than with :func:`getattr`, which
+            # finds the *class* attribute when the instance has none -- and a
+            # schema's class attribute for a field is the
+            # :class:`~pcapkit.corekit.fields.field.FieldBase` object itself. A
+            # field the caller never set therefore arrived below as the field
+            # rather than as a value: ``getattr(self, name, None)`` could not
+            # return its ``None`` for one, so the absent-value branches never
+            # fired, and what surfaced instead was a failure from inside the
+            # packing of a field object -- naming a field *class*, and so saying
+            # nothing about which field had been left out. See #422.
+            data = self.__dict__.get(self.__map__.get(field.name, field.name))
+
             if isinstance(field, PayloadField):
                 from pcapkit.protocols.protocol import \
                     Protocol  # pylint: disable=import-outside-toplevel
 
-                data = getattr(self, field.name, None)
                 if data is None:
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, Protocol):
@@ -526,13 +683,23 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 continue
 
             if isinstance(field, ListField):
-                data = getattr(self, field.name, None)
                 if data is None:
                     self.__buffer__[field.name] = b''
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
-                elif isinstance(data, list):
-                    self.__buffer__[field.name] = field.pack(data, packet)
+                elif isinstance(data, (list, tuple)):
+                    # NOTE: a data model may declare a field ``tuple[...]``
+                    # rather than ``list[...]`` -- e.g. HIP's ``group_id:
+                    # 'tuple[Group, ...]'`` in pcapkit/protocols/data/internet/
+                    # hip.py -- and ``_read_*`` then hands one straight back
+                    # here on reconstruction. ``ListField.pack`` only ever
+                    # iterates its argument, so it does not care which of the
+                    # two it gets; rejecting the tuple broke every
+                    # parse-then-reconstruct cycle for such a field. See #476.
+                    # ``list(data)`` is a no-op for an actual list and keeps
+                    # ``ListField.pack``'s own ``Optional[list[_TL]]``
+                    # signature honest rather than widening it too.
+                    self.__buffer__[field.name] = field.pack(list(data), packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
@@ -548,12 +715,15 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 field = field.field(packet)
 
             if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match consumes nothing, so it contributes no
+                # octets to ``bytes(self)``/``len(self)`` either. :meth:`unpack`
+                # mirrors this for the same reason -- see the ``ForwardMatchField``
+                # branch there. See #446.
                 self.__buffer__[field.name] = b''
                 continue
 
-            value = getattr(self, field.name)
             try:
-                temp = field.pack(value, packet)
+                temp = field.pack(data, packet)
             except NoDefaultValue:
                 temp = bytes(field.length)
             self.__buffer__[field.name] = temp
@@ -593,6 +763,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             We used a ``__length__`` key in ``packet`` to record the length
             of the remaining data, which is used to determine the length of
             the payload field.
+
+            When this schema is nested -- unpacked through a
+            :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
+            directly -- ``packet`` is not the enclosing schema's own data, but
+            a context built by :func:`~pcapkit.corekit.fields.misc.
+            nested_packet_context`: a name this schema does not itself
+            declare falls through to the enclosing schema, and the enclosing
+            schema is also reachable unconditionally under a ``__packet__``
+            key. See that function for the exact lookup, write and iteration
+            semantics.
 
             And an ``__option_padding__`` key in the ``packet`` to record how
             much of an
@@ -670,7 +850,23 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
+                # NOTE: a forward match reads ``length`` octets so a later field
+                # can size itself from them, but consumes neither the stream
+                # (the rewind below) nor ``__length__`` (no decrement in this
+                # branch). ``self.__buffer__[field.name]`` above still holds the
+                # octets just read, though, and until here nothing undid that:
+                # ``__bytes__``/``__len__`` concatenate every slot in
+                # ``__buffer__``, so the schema over-reported its length by
+                # exactly the forward match's width -- the same octets are read
+                # again, for real, by whichever field actually needs them, so
+                # nothing is lost by dropping the duplicate here. ``pack()``
+                # above already zeroes this slot for the same field type;
+                # zeroing it here as well is what makes a declared area checked
+                # against ``len(self)`` -- :class:`~pcapkit.corekit.fields.collections.OptionField`
+                # and :class:`~pcapkit.corekit.fields.collections.ListField` both
+                # do this -- see the octets actually consumed. See #446.
                 data.seek(-length, io.SEEK_CUR)
+                self.__buffer__[field.name] = b''
             elif isinstance(field, OptionField) and field.option_padding > 0:
                 # the option list ended before the declared field length was
                 # exhausted; give the unconsumed remainder back to ``data``

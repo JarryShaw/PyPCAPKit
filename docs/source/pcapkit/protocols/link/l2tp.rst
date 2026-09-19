@@ -4,92 +4,74 @@ L2TP - Layer Two Tunnelling Protocol
 .. module:: pcapkit.protocols.link.l2tp
 
 :mod:`pcapkit.protocols.link.l2tp` contains
-:class:`~pcapkit.protocols.link.l2tp.L2TP` only,
-which implements extractor for Layer Two Tunnelling
-Protocol (L2TP) [*]_, whose structure is described
-as below:
+:class:`~pcapkit.protocols.link.l2tp.L2TP` only, an abstract base class for the
+Layer Two Tunnelling Protocol family [*]_. The concrete versions live in modules
+of their own:
 
-.. table::
+.. list-table::
+   :header-rows: 1
 
-   ======= ===== ===================== ==========================================
-    Octets Bits  Name                  Description
-   ======= ===== ===================== ==========================================
-    0          0 ``l2tp.flags``        Flags and Version Info
-   ------- ----- --------------------- ------------------------------------------
-    0          0 ``l2tp.flags.type``   Type (control / data)
-   ------- ----- --------------------- ------------------------------------------
-    0          1 ``l2tp.flags.len``    Length
-   ------- ----- --------------------- ------------------------------------------
-    0          2                       Reserved (must be zero ``x00``)
-   ------- ----- --------------------- ------------------------------------------
-    0          4 ``l2tp.flags.seq``    Sequence
-   ------- ----- --------------------- ------------------------------------------
-    0          5                       Reserved (must be zero ``x00``)
-   ------- ----- --------------------- ------------------------------------------
-    0          6 ``l2tp.flags.offset`` Offset
-   ------- ----- --------------------- ------------------------------------------
-    0          7 ``l2tp.flags.prio``   Priority
-   ------- ----- --------------------- ------------------------------------------
-    1          8                       Reserved (must be zero ``x00``)
-   ------- ----- --------------------- ------------------------------------------
-    1         12 ``l2tp.version``      Version (``2``)
-   ------- ----- --------------------- ------------------------------------------
-    2         16 ``l2tp.length``       Length (optional by ``len``)
-   ------- ----- --------------------- ------------------------------------------
-    4         32 ``l2tp.tunnelid``     Tunnel ID
-   ------- ----- --------------------- ------------------------------------------
-    6         48 ``l2tp.sessionid``    Session ID
-   ------- ----- --------------------- ------------------------------------------
-    8         64 ``l2tp.ns``           Sequence Number (optional by ``seq``)
-   ------- ----- --------------------- ------------------------------------------
-    10        80 ``l2tp.nr``           Next Sequence Number (optional by ``seq``)
-   ------- ----- --------------------- ------------------------------------------
-    12        96 ``l2tp.offset``       Offset Size (optional by ``offset``)
-   ======= ===== ===================== ==========================================
+   * - Version
+     - Class
+     - Specification
+   * - L2TPv2
+     - :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`
+     - :rfc:`2661`
+
+Only L2TPv2 is implemented.
+
+The base deliberately carries **no header parsing at all**, in the way
+:class:`~pcapkit.protocols.internet.ip.IP` carries none for its family. That is
+not tidiness: the versions genuinely do not share a header. All that is common
+across them is the *first 16-bit word carrying a version nibble at bits 12-15*;
+everything after it differs, so a base that parsed further would be assuming one
+version's layout for all of them.
+
+What the family still wants
+---------------------------
+
+**L2TPv3** [:rfc:`3931`] has a different session header and a different control
+message header from v2, and is reachable two ways -- over UDP port 1701 like v2,
+and directly over IP as **protocol number 115**. That second route is why
+:attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
+leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a
+different framing decision. It also means v3 is the first member of this family
+to have a real :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__`, and so
+the first that must have a module of its own under the project's one-module-per-index
+rule.
+
+**L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*
+an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves
+the value 1 "to permit detection of L2F packets should they arrive intermixed with
+L2TP packets". L2F is a separate protocol with its own header. It is therefore to
+be implemented as ``L2F``, the canonical name, carrying ``L2TPv1`` only as an
+alias in its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` -- the same
+relationship HTTP/3 has to QUIC. c.f.
+:meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
+version-flavoured alias is spelled: canonical name first, alias second, since
+callers take element zero as canonical.
+
+Selecting a version
+-------------------
+
+Nothing dispatches on the version nibble yet, because only one version exists.
+When a second lands, the mechanism it wants already has a precedent in
+:class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and
+delegates to a per-version class. L2TP is the easier case:
+:meth:`HTTP._guess_version <pcapkit.protocols.application.http.HTTP._guess_version>`
+has to *trial-parse* each candidate because the wire format carries no version
+field, whereas L2TP states its version explicitly in those four bits. So a
+deterministic switch on ``Ver`` is enough, and no new registry is needed.
 
 .. autoclass:: pcapkit.protocols.link.l2tp.L2TP
    :no-members:
    :show-inheritance:
 
-   .. autoproperty:: name
-   .. autoproperty:: length
-   .. autoproperty:: type
+   .. autoproperty:: info_name
 
-   .. automethod:: read
-   .. automethod:: make
-
-   .. automethod:: _make_data
+   .. automethod:: id
 
    .. automethod:: __index__
-
-Header Schemas
---------------
-
-.. module:: pcapkit.protocols.schema.link.l2tp
-
-.. autoclass:: pcapkit.protocols.schema.link.l2tp.L2TP
-   :members:
-   :show-inheritance:
-
-Type Stubs
-~~~~~~~~~~
-
-.. autoclass:: pcapkit.protocols.schema.link.l2tp.FlagsType
-   :members:
-   :show-inheritance:
-
-Data Models
------------
-
-.. module:: pcapkit.protocols.data.link.l2tp
-
-.. autoclass:: pcapkit.protocols.data.link.l2tp.L2TP
-   :members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.data.link.l2tp.Flags
-   :members:
-   :show-inheritance:
 
 .. rubric:: Footnotes
 

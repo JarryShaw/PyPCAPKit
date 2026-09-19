@@ -35,7 +35,6 @@ its caller.
 
 """
 import ipaddress
-import time
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
@@ -158,12 +157,18 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 Enum_TransType.get(ipv4.proto),        # payload protocol type
             ),
             num=count,                                 # original packet range number
-            fo=ipv4.frag,                              # fragment offset
+            # NOTE: Scapy reports ``IP.frag`` in on-wire 8-octet units
+            # (:rfc:`791#section-3.1`), but the reassembly machinery indexes the
+            # datagram buffer with ``fo`` in octets, so it must be scaled -- the
+            # same scaling this module's own IPv6 path already applies to
+            # ``IPv6ExtHdrFragment.offset`` below.
+            fo=ipv4.frag * 8,                          # fragment offset
             ihl=ipv4.ihl * 4,                          # internet header length
             mf=bool(ipv4.flags.MF),                    # more fragment flag
             tl=ipv4.len,                               # total length, header includes
             header=bytes(ipv4)[:ipv4.ihl * 4],         # raw bytes type header
             payload=bytearray(bytes(ipv4.payload)),    # raw bytearray type payload
+            timestamp=float(packet.time),              # capture timestamp
         )
         return data
     return None
@@ -232,6 +237,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
             tl=hdr_len + len(payload),                    # total length, header includes
             header=bytes(ipv6)[:hdr_len],                 # raw bytes type header before IPv6-Frag
             payload=payload,                              # raw bytearray type payload after IPv6-Frag
+            timestamp=float(packet.time),                 # capture timestamp
         )
         return data
     return None
@@ -285,6 +291,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
             first=tcp.seq,                          # first sequence number of payload
             last=tcp.seq + raw_len - 1,             # last sequence number of payload
             len=raw_len,                            # payload length, header excludes
+            timestamp=float(packet.time),           # capture timestamp
         )
         return data
     return None
@@ -319,11 +326,22 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
             frame=packet2dict(packet),                           # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag
             fin=bool(tcp.flags.F),                               # TCP finish (FIN) flag
+            rst=bool(tcp.flags.R),                               # TCP reset (RST) flag
             src=ipaddress.ip_address(ip.src),                    # source IP
             dst=ipaddress.ip_address(ip.dst),                    # destination IP
             srcport=tcp.sport,                                   # TCP source port
             dstport=tcp.dport,                                   # TCP destination port
-            timestamp=time.time(),                               # timestamp
+            # NOTE: the *capture's* clock, not the host's. This read
+            # ``time.time()``, which put the moment of parsing into every flow
+            # label -- so the same capture traced twice produced different label
+            # strings and different output filenames. Scapy carries the record's
+            # own timestamp on ``Packet.time``, which is what every other
+            # engine's adapter reports.
+            timestamp=float(packet.time),                        # capture timestamp
+            seq=tcp.seq,                                         # TCP sequence number
+            ack=tcp.ack,                                         # TCP acknowledgement number
+            header=bytes(tcp)[:tcp.dataofs * 4],                 # raw bytes type header
+            payload=bytearray(bytes(tcp.payload)),               # raw bytearray type payload
         )
         return data
     return None

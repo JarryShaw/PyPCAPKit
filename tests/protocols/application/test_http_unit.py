@@ -144,6 +144,142 @@ class HTTPUnitTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 HTTP._guess_version(http, 9)
 
+    def test_http_make_dispatches_to_real_versioned_classes(self) -> None:
+        """Regression test for GH-452.
+
+        ``HTTP.make`` used to dispatch with ``protocol.make(**kwargs)``, where
+        ``protocol`` is the imported *class* -- an unbound call, since neither
+        ``HTTPv1.make`` nor ``HTTPv2.make`` is declared ``staticmethod`` or
+        ``classmethod`` on the real class (both are plain ``def make(self,
+        ...)``, matching the abstract ``ProtocolBase.make``). Every real call
+        therefore raised ``TypeError: make() missing 1 required positional
+        argument: 'self'``.
+
+        This deliberately exercises the **real** ``HTTPv1``/``HTTPv2``
+        classes rather than a fake with a ``staticmethod`` ``make`` --
+        ``test_http_read_make_and_guess_version_delegation_paths`` above uses
+        exactly such a fake, which is what let the original defect through:
+        a ``staticmethod`` absorbs an unbound call the same as a bound one,
+        so a fake-based assertion passes whether or not ``self`` is actually
+        threaded through.
+        """
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTPv1
+        from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTPv2
+
+        http = object.__new__(HTTP)
+
+        schema_v1 = http.make(version=1, method='GET', uri='/index.html')
+        self.assertIsInstance(schema_v1, Schema_HTTPv1)
+        self.assertIn(b'GET /index.html HTTP/1.1\r\n', schema_v1.data)
+
+        schema_v2 = http.make(version=2, sid=1, frame=b'payload')
+        self.assertIsInstance(schema_v2, Schema_HTTPv2)
+        self.assertEqual(schema_v2.stream['sid'], 1)
+        self.assertEqual(schema_v2.frame, b'payload')
+
+    def test_http_construction_reaches_the_versioned_make_callee(self) -> None:
+        """Regression test for GH-452, using the corrected reproduction.
+
+        The issue's original reproduction called ``HTTP.make(version=1,
+        ...)`` directly on the class -- but the *outer* ``HTTP.make`` is
+        itself an ordinary instance method, so that call fails at the outer
+        method and never demonstrates anything about the inner
+        ``protocol.make(**kwargs)`` dispatch this issue is actually about.
+
+        The real, supported entry point is construction:
+        :meth:`ProtocolBase.__init__` (``protocol.py:519``, the ``**kwargs``-
+        only overload at ``:517``) calls ``self.pack(**kwargs)`` when built
+        with no ``file``, and :meth:`ProtocolBase.pack` (``protocol.py:284``)
+        is ``self.__header__ = self.make(**kwargs)`` -- a *bound* call on the
+        outer ``HTTP`` instance, which is what actually reaches the inner,
+        previously-unbound ``protocol.make(**kwargs)``. So the reachable
+        reproduction is ``HTTP(version=1, ...)``, not ``HTTP.make(...)``:
+
+        - on the unfixed code, this raises ``TypeError: HTTP.make() missing
+          1 required positional argument: 'self'`` -- the *same* exception
+          text as the wrong reproduction, but reached legitimately this time.
+        - on the fixed code, deliberately minimal keyword arguments (no
+          ``method``/``status``) reach ``HTTPv1.make`` and are rejected
+          *there*, as ``ProtocolError: HTTP/1: invalid format`` -- proving
+          the callee was actually reached, which "no ``TypeError``" alone
+          would not.
+        """
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(version=1, http_version='1.1', method='GET', uri='/')
+        self.assertEqual(str(ctx.exception), 'HTTP/1: invalid format')
+
+    def test_http_read_explicit_version_uses_same_buffer_as_guess(self) -> None:
+        """Regression test for GH-447.
+
+        The explicit ``version=`` path passed ``self._file`` -- already
+        drained by the outer read -- instead of ``self._data``, so it built
+        the sub-protocol from a short or empty buffer while
+        ``_guess_version``, built from the same bytes, worked fine. This pins
+        the fix by asserting *which* buffer object reaches the sub-protocol
+        constructor, for both ``version=1`` and ``version=2``, rather than
+        merely that a call succeeds.
+        """
+        from pcapkit.protocols.application.http import HTTP
+
+        class RecordingHTTP:
+            version = '1.1'
+            length = 5
+            info = 'recorded-info'
+
+            def __init__(self, file: object, length: int, **kwargs: object) -> None:
+                self.received = file
+
+        http = object.__new__(HTTP)
+        http._data = b'GET / HTTP/1.1\r\n\r\n'
+        # Stands in for a stream already advanced by the outer read; passing
+        # this instead of ``_data`` is exactly the GH-447 defect.
+        http._file = object()
+        http.__cached__ = {}
+
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTP', RecordingHTTP):
+            http.read(version=1)
+        self.assertIs(http._http.received, http._data)
+
+        with mock.patch('pcapkit.protocols.application.httpv2.HTTP', RecordingHTTP):
+            http.read(version=2)
+        self.assertIs(http._http.received, http._data)
+
+    def test_http_read_explicit_version_1_matches_guess_on_real_bytes(self) -> None:
+        """The literal GH-447 reproduction: a real HTTP/1.1 request parses
+        identically whether the version is guessed or given explicitly."""
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+
+        raw = b'GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n'
+
+        guessed = HTTP(io.BytesIO(raw), len(raw))
+        explicit = HTTP(io.BytesIO(raw), len(raw), version=1)
+
+        self.assertEqual(guessed.alias, 'HTTP/1.1')
+        self.assertEqual(explicit.alias, 'HTTP/1.1')
+        self.assertEqual(explicit.length, guessed.length)
+        self.assertEqual(explicit.info, guessed.info)
+
+    def test_http_read_explicit_version_wraps_malformed_payload(self) -> None:
+        """The second half of GH-447: a payload that fails to parse on the
+        explicit path must surface as a chained :class:`ProtocolError`, not a
+        bare :class:`ValueError` a caller cannot catch as a protocol error."""
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        bad = b'not a valid http request at all'
+
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(bad), len(bad), version=1)
+        self.assertIsInstance(ctx.exception.__cause__, ValueError)
+
     def test_http_make_data_delegates_to_httpv1(self) -> None:
         from pcapkit.const.http.method import Method
         from pcapkit.corekit.multidict import OrderedMultiDict
@@ -281,6 +417,57 @@ class HTTPUnitTests(unittest.TestCase):
             warn.assert_called_once()
         finally:
             HTTPv2.__dict__['__frame__'][Frame.DATA] = original
+
+    def test_unregistered_frame_type_does_not_mutate_the_class_registry(self) -> None:
+        """Parsing must not write to the shared ``HTTPv2.__frame__``.
+
+        #425's defect on HTTP/2 frame dispatch. ``__frame__`` is a
+        :class:`collections.defaultdict` on a class attribute shared by every
+        :class:`~pcapkit.protocols.application.httpv2.HTTP` instance in the
+        process, so ``__frame__[type]`` inserted every frame type it missed --
+        and the value it inserted was ``'none'``, which the default factory
+        returns anyway.
+
+        Frame type ``0xF0`` sits in the range :rfc:`9113` leaves for extensions,
+        so an unrecognised frame type is expected traffic rather than a
+        malformed frame -- HTTP/2 requires an endpoint to ignore one.
+
+        """
+        import io
+
+        from pcapkit.const.http.frame import Frame
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+
+        # Length 13, type 0xF0, no flags, stream 1, then four octets of payload.
+        #
+        # 13 is the *whole* frame, header included, which is this library's
+        # convention rather than :rfc:`9113#section-4.1`'s -- that one counts the
+        # payload alone, so a real frame with four octets of payload declares 4.
+        # ``make`` writes ``payload + 9`` (httpv2.py:292) and the readers recover
+        # the payload as ``length - 9`` (httpv2.py:658,668), and ``read`` rejects
+        # anything under 9 outright, so a wire-accurate 4 raises here. Declaring
+        # 13 is what reaches the registry lookup; the mismatch with the RFC is a
+        # separate defect and not this test's to assert.
+        packet = bytes.fromhex('00000d' 'f0' '00' '00000001' '61626364')
+        self.assertEqual(int.from_bytes(packet[:3], 'big'), len(packet))
+
+        registry = HTTPv2.__dict__['__frame__']
+        before = set(registry)
+        self.assertNotIn(Frame(0xF0), before)
+
+        try:
+            with mock.patch('pcapkit.protocols.application.httpv2.warn'):
+                proto = HTTPv2(io.BytesIO(packet), len(packet))
+
+            # The frame is still parsed, by the fallback the registry declares.
+            self.assertEqual(proto.info.data, b'abcd')
+            self.assertEqual(set(registry), before)
+
+            with mock.patch('pcapkit.protocols.application.httpv2.warn') as warn:
+                HTTPv2.register_frame(Frame(0xF0), 'none')
+            self.assertEqual(warn.call_count, 0)
+        finally:
+            registry.pop(Frame(0xF0), None)
 
     def test_httpv2_frame_readers_cover_successful_frames(self) -> None:
         from pcapkit.const.http.error_code import ErrorCode
@@ -642,6 +829,61 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_http_length(SimpleNamespace(pack=lambda: b'abc'), 0), 3)
         with self.assertRaises(ProtocolError):
             proto.make(type=Frame.DATA, frame=object())
+
+    def test_settings_frame_settings_field_wraps_item_schema(self) -> None:
+        """Regression test for GH-459.
+
+        ``SettingsFrame.settings`` used to pass the bare ``SettingPair``
+        *class* as ``ListField``'s ``item_type``, where every sibling
+        (``tcp.py``'s ``SACK.sack``, ``hip.py``, ``mh.py``'s
+        ``CGAParametersOption.parameters``, ``sctp.py``'s
+        ``gap_blocks``/``dup_tsn``) wraps its schema item in a
+        :class:`~pcapkit.corekit.fields.misc.SchemaField`. A bare
+        ``SchemaMeta`` is not a field instance, so ``ListField.unpack``'s
+        schema branch -- ``field = self._item_type(packet)`` -- constructed a
+        ``SettingPair`` from the packet *dict* instead of configuring a
+        per-item field, and the ``isinstance(self._item_type, SchemaField)``
+        check that picks the schema branch was ``False`` for a bare class in
+        the first place, so it fell through to the plain-field branch and
+        failed there instead: ``field.length`` does not exist on a
+        ``SettingPair`` instance.
+
+        This is a unit-level check on the field wiring, not an end-to-end
+        ``HTTPv2`` round trip: the SETTINGS frame's pack path still dies
+        earlier on ``KeyError: 'flags'``, raised by ``FrameType.post_process``
+        at ``schema/application/httpv2.py:144`` where it reaches the enclosing
+        header's ``flags`` field through a nested packet context that cannot
+        see it (GH-445, fixed by the still-open PR #457), so a real
+        ``SettingsFrame.pack()``/``HTTPv2(...).make()`` round trip through this
+        field remains unreachable until that lands. The
+        ``httpv2-frame/SETTINGS`` entry in ``EXPECTED_FAILURES`` records that
+        same ``KeyError: 'flags'``.
+        """
+        from pcapkit.corekit.fields.misc import SchemaField
+        from pcapkit.protocols.schema.application.httpv2 import SettingPair, SettingsFrame
+
+        field = SettingsFrame.__fields__['settings']
+
+        # The type-check the ``# type: ignore[arg-type]`` used to silence:
+        # ``item_type`` must be a field instance, not the schema class itself.
+        self.assertIsInstance(field._item_type, SchemaField)
+        self.assertIs(field._item_type.schema, SettingPair)
+
+        # Two SETTINGS pairs, 6 octets each: HEADER_TABLE_SIZE=4096,
+        # ENABLE_PUSH=0.
+        raw = (1).to_bytes(2, 'big') + (4096).to_bytes(4, 'big') \
+            + (2).to_bytes(2, 'big') + (0).to_bytes(4, 'big')
+        packet = {'__length__': len(raw)}
+
+        settings = field(packet).unpack(raw, packet)
+
+        self.assertEqual(len(settings), 2)
+        self.assertIsInstance(settings[0], SettingPair)
+        self.assertIsInstance(settings[1], SettingPair)
+        self.assertEqual(settings[0].id, 1)
+        self.assertEqual(settings[0].value, 4096)
+        self.assertEqual(settings[1].id, 2)
+        self.assertEqual(settings[1].value, 0)
 
     def test_httpv2_callable_frame_registry_paths(self) -> None:
         from pcapkit.const.http.frame import Frame

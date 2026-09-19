@@ -2,15 +2,95 @@ from __future__ import annotations
 
 import abc
 import collections.abc
+import contextlib
 import importlib.util
 import inspect
+import math
 import pathlib
+import signal
 import sys
+import time
 import types
-from typing import Iterable
+import unittest
+from typing import Iterable, Iterator
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
+
+
+@contextlib.contextmanager
+def time_limit(seconds: int = 5) -> Iterator[None]:
+    """Fail the calling test if its body has not finished in ``seconds`` seconds.
+
+    A parser defect that degenerates into a loop making no progress -- GitHub
+    issue #431 is one -- offers a test nothing to assert on: the call under test
+    simply never returns. A test written for it without a deadline does not fail,
+    it *wedges*, taking the rest of the run with it, so the deadline is as much a
+    part of the regression test as the assertion is.
+
+    :func:`signal.alarm` is what interrupts the body, rather than a watchdog
+    thread: the loops this guards are pure Python and hold the GIL for the whole
+    of an iteration, so nothing in another thread gets to run and stop them,
+    whereas a signal is delivered between bytecodes. That also rules out
+    :data:`signal.SIGTERM` from an outer :program:`timeout`, which such a loop
+    likewise never gets around to handling.
+
+    There is only ever one pending alarm per process, so arming this one cancels
+    whatever was already scheduled -- an enclosing ``time_limit``, or a deadline the
+    test runner set for itself. Both the handler and that pending alarm are put back
+    on the way out, the alarm with the seconds spent in the body deducted, so an
+    enclosing deadline keeps counting down across the ``with`` rather than being
+    silently dropped.
+
+    An enclosing deadline whose moment falls inside the body is not delivered on
+    time, and the reason is this helper rather than the body: arming an alarm
+    *replaces* the pending one, so the enclosing deadline was already cancelled
+    before the body began and there was nothing left to fire when it came due. It
+    is re-armed for one second on the way out rather than dropped -- honouring it
+    late is the lesser wrong, and dropping it is how an enclosing timeout goes
+    missing altogether. That one-second floor covers every case where the body ran
+    for longer than the enclosing deadline had left.
+
+    Args:
+        seconds: Whole seconds to allow the body. :func:`signal.alarm` counts in
+            whole seconds, so this cannot usefully be fractional.
+
+    Yields:
+        Nothing. The deadline applies to the body of the ``with`` statement.
+
+    Raises:
+        TimeoutError: If the body has not finished within ``seconds`` seconds.
+
+    """
+    # An interval timer is a POSIX facility, and the deadline is the whole point
+    # of this helper: silently running the body without one would restore exactly
+    # the wedged run it exists to prevent, so the test is skipped instead.
+    if not hasattr(signal, 'SIGALRM'):
+        raise unittest.SkipTest('signal.alarm is unavailable on this platform')
+
+    def expire(signum: int, frame: object) -> None:
+        raise TimeoutError(f'did not finish within {seconds}s')
+
+    previous_handler = signal.signal(signal.SIGALRM, expire)
+
+    # NOTE: ``signal.alarm`` returns the seconds left on the alarm it replaces, or
+    # zero when there was none. That return value is the only record of an
+    # enclosing deadline, so it is read here rather than discarded -- there is no
+    # way to ask for it again afterwards.
+    pending = signal.alarm(seconds)
+    started = time.monotonic()
+    try:
+        yield
+    finally:
+        # Cancel first, so that an alarm which fires between here and the handler
+        # being restored cannot be delivered to whatever handler was installed
+        # before -- and so that the alarm re-armed below belongs to that handler
+        # rather than to ``expire``.
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if pending:
+            left = pending - (time.monotonic() - started)
+            signal.alarm(max(1, math.ceil(left)))
 
 
 def sample_path(name: str) -> str:

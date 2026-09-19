@@ -335,6 +335,43 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         no_stop._exproto = 'raw'
         self.assertFalse(no_stop._check_term_threshold())
 
+    def test_lookup_registry_reads_the_fallback_without_recording_it(self) -> None:
+        """The non-recording lookup is generic over what the registry holds.
+
+        ``__proto__`` maps to protocol classes, but the ``__option__`` /
+        ``__chunk__`` / ``__block__`` family maps to *method names* -- a
+        :obj:`str`, or a ``(parser, constructor)`` pair. Those have no
+        :class:`~pcapkit.corekit.module.ModuleDescriptor` to resolve, so they
+        want the lookup on its own, which is why it is a helper of its own rather
+        than something buried inside
+        :meth:`~pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+
+        parser, constructor = object(), object()
+        registry = collections.defaultdict(lambda: 'donone', {
+            2: 'mss',
+            3: (parser, constructor),
+        })
+
+        # A hit is returned as it is, whichever shape it has.
+        self.assertEqual(DummyProtocol._lookup_registry(registry, 2), 'mss')
+        self.assertEqual(DummyProtocol._lookup_registry(registry, 3),
+                         (parser, constructor))
+
+        # A miss reads the declared fallback and leaves no trace.
+        self.assertEqual(DummyProtocol._lookup_registry(registry, 156), 'donone')
+        self.assertNotIn(156, registry)
+        self.assertEqual(set(registry), {2, 3})
+
+        # A tuple key -- which is what ``PCAPNG.__option__`` is keyed on, since
+        # its option codes collide across block namespaces -- is no different.
+        namespaced = collections.defaultdict(lambda: 'unknown', {('if', 2): 'if_name'})
+        self.assertEqual(DummyProtocol._lookup_registry(namespaced, ('if', 2)), 'if_name')
+        self.assertEqual(DummyProtocol._lookup_registry(namespaced, ('if', 42)), 'unknown')
+        self.assertEqual(set(namespaced), {('if', 2)})
+
     def test_lookup_next_layer_reads_the_fallback_without_recording_it(self) -> None:
         """A missed lookup must not turn into a registration.
 

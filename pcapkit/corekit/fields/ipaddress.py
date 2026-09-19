@@ -2,6 +2,7 @@
 """IP address field class"""
 
 import abc
+import contextlib
 import ipaddress
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -15,7 +16,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable
+    from typing import Any, Callable, Iterator
 
     from typing_extensions import Literal, Self
 
@@ -26,6 +27,45 @@ _T = TypeVar('_T', 'IPv4Address', 'IPv6Address',
              'IPv4Interface', 'IPv6Interface')
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 _IT = TypeVar('_IT', 'IPv4Interface', 'IPv6Interface')
+
+
+@contextlib.contextmanager
+def _reraise_as_field_value_error(description: str) -> 'Iterator[None]':
+    """Translate a bare :exc:`ValueError` from :mod:`ipaddress` into :exc:`FieldValueError`.
+
+    Every conversion in this module ultimately calls into the stdlib
+    :mod:`ipaddress` module, which raises a bare :exc:`ValueError` (or a
+    subclass of it, e.g. :exc:`~ipaddress.AddressValueError` or
+    :exc:`~ipaddress.NetmaskValueError`) for a malformed value. Left alone,
+    that exception is not an instance of
+    :exc:`~pcapkit.utilities.exceptions.BaseError`, unlike every other
+    exception this module raises -- so a caller cannot rely on
+    ``except BaseError`` to catch a bad field value. Wrapping the conversion
+    in this context manager re-raises it as :exc:`FieldValueError` instead,
+    preserving the original message.
+
+    Args:
+        description: Human-readable description of the value being
+            converted, used to build the :exc:`FieldValueError` message.
+
+    Raises:
+        FieldValueError: If the code inside the ``with`` block raises
+            :exc:`ValueError`.
+
+    """
+    try:
+        yield
+    except FieldValueError:
+        # NOTE: ``FieldValueError`` is itself a ``ValueError``, so without this
+        # clause first, a ``FieldValueError`` raised inside the ``with`` block
+        # (e.g. a version-mismatch check) would be caught below and re-wrapped,
+        # losing its original message. Callers are expected to keep such
+        # raises outside the ``with`` block, but this is the same ordering
+        # trap ``ProtocolError`` carries at ``exceptions.py``, so it is guarded
+        # here too rather than relied upon by convention alone.
+        raise
+    except ValueError as error:
+        raise FieldValueError(f'{description}: {error}') from error
 
 
 class _IPField(Field[_T], Generic[_T]):
@@ -64,11 +104,16 @@ class _IPAddressField(_IPField[_AT]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If ``value`` is not a valid IP address, or if it
+                is the wrong IP version for this field.
+
         """
         if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             ip = value  # type: IPv4Address | IPv6Address
         else:
-            ip = ipaddress.ip_address(value)
+            with _reraise_as_field_value_error('invalid IP address'):
+                ip = ipaddress.ip_address(value)
 
         if ip.version != self.version:
             raise FieldValueError(f'IP version mismatch: {ip.version} != {self.version}')
@@ -84,8 +129,17 @@ class _IPAddressField(_IPField[_AT]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If ``value`` is the wrong IP version for this
+                field. ``value`` cannot actually fail the underlying
+                :func:`ipaddress.ip_address` conversion here -- it is always
+                exactly 4 or 16 octets, fixed by this field's length, and any
+                such octet string is a valid address -- but the conversion is
+                still wrapped for consistency with the rest of this module.
+
         """
-        val = ipaddress.ip_address(value)
+        with _reraise_as_field_value_error('invalid IP address'):
+            val = ipaddress.ip_address(value)
         if val.version != self.version:
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val  # type: ignore[return-value]
@@ -179,13 +233,19 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If ``value`` is not a valid IP interface, or if
+                it is the wrong IP version for this field.
+
         """
         if isinstance(value, ipaddress.IPv4Interface):
             val = value
         else:
-            val = ipaddress.ip_interface(value)  # type: ignore[assignment]
-            if val.version != self.version:
-                raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
+            with _reraise_as_field_value_error('invalid IP interface'):
+                parsed = ipaddress.ip_interface(value)
+            if not isinstance(parsed, ipaddress.IPv4Interface):
+                raise FieldValueError(f'IP version mismatch: {parsed.version} != {self.version}')
+            val = parsed
 
         ip = val.ip
         mask = val.netmask
@@ -201,17 +261,28 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If the trailing four octets are not a valid
+                dotted netmask, or if the resulting interface is the wrong IP
+                version for this field. The leading four octets cannot
+                actually fail here -- they are always exactly 4 octets, fixed
+                by this field's length, and any such octet string is a valid
+                address -- but the conversion is still wrapped for
+                consistency with the rest of this module.
+
         Notes:
             The trailing four octets are a dotted netmask, as written by
             :meth:`pre_process` -- not a prefix length as in
             :meth:`IPv6InterfaceField.post_process`.
 
         """
-        ip = ipaddress.IPv4Address(value[:4])
-        mask = ipaddress.IPv4Address(value[4:])
+        with _reraise_as_field_value_error('invalid IPv4 address'):
+            ip = ipaddress.IPv4Address(value[:4])
+            mask = ipaddress.IPv4Address(value[4:])
 
-        val = ipaddress.ip_interface(f'{ip}/{mask}')
-        if val.version != self.version:
+        with _reraise_as_field_value_error('invalid IPv4 interface'):
+            val = ipaddress.ip_interface(f'{ip}/{mask}')
+        if not isinstance(val, ipaddress.IPv4Interface):
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val
 
@@ -247,13 +318,19 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If ``value`` is not a valid IP interface, or if
+                it is the wrong IP version for this field.
+
         """
         if isinstance(value, ipaddress.IPv6Interface):
             val = value
         else:
-            val = ipaddress.ip_interface(value)  # type: ignore[assignment]
-            if val.version != self.version:
-                raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
+            with _reraise_as_field_value_error('invalid IP interface'):
+                parsed = ipaddress.ip_interface(value)
+            if not isinstance(parsed, ipaddress.IPv6Interface):
+                raise FieldValueError(f'IP version mismatch: {parsed.version} != {self.version}')
+            val = parsed
 
         ip = val.ip
         prefixlen = cast('int', val._prefixlen)  # type: ignore[attr-defined] # pylint: disable=protected-access
@@ -271,7 +348,16 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
 
         Raises:
             FieldValueError: If the trailing octet is not a valid IPv6 prefix
-                length, i.e. greater than 128.
+                length, i.e. greater than 128, or if the resulting interface
+                is the wrong IP version for this field. Neither the leading
+                sixteen octets nor the final :func:`ipaddress.ip_interface`
+                call can actually fail here -- the former is always exactly
+                16 octets, fixed by this field's length, and any such octet
+                string is a valid address; the latter is only ever reached
+                once the prefix length has already been checked above, and
+                any prefix length in ``0..128`` is valid. Both conversions
+                are still wrapped for consistency with the rest of this
+                module.
 
         Notes:
             The trailing octet is the prefix length as a binary integer, as
@@ -279,13 +365,15 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
             :meth:`IPv4InterfaceField.post_process`.
 
         """
-        ip = ipaddress.IPv6Address(value[:16])
+        with _reraise_as_field_value_error('invalid IPv6 address'):
+            ip = ipaddress.IPv6Address(value[:16])
         prefixlen = value[16]
 
         if prefixlen > 128:
             raise FieldValueError(f'invalid IPv6 prefix length: {prefixlen}')
 
-        val = ipaddress.ip_interface(f'{ip}/{prefixlen}')
-        if val.version != self.version:
+        with _reraise_as_field_value_error('invalid IPv6 interface'):
+            val = ipaddress.ip_interface(f'{ip}/{prefixlen}')
+        if not isinstance(val, ipaddress.IPv6Interface):
             raise FieldValueError(f'IP version mismatch: {val.version} != {self.version}')
         return val

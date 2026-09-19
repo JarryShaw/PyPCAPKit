@@ -100,7 +100,12 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             else:
                 raise ProtocolError(f"invalid HTTP version: {version}")
 
-            http = protocol(self._file, length, **kwargs)
+            try:
+                http = protocol(self._data, length, **kwargs)
+            except ProtocolError:
+                raise
+            except ValueError as error:
+                raise ProtocolError(f'HTTP/{version}: invalid format') from error
 
         self._version = http.version
         self._length = http.length
@@ -126,7 +131,23 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
-        return protocol.make(**kwargs)  # type: ignore[return-value]
+
+        # NOTE: ``protocol.make`` is an ordinary instance method (the abstract
+        # declaration at ``ProtocolBase.make`` takes ``self``, and the
+        # versioned overrides use instance-bound helpers such as
+        # ``self._make_index``/``self.__frame__``), so calling it on the
+        # class itself -- as this used to -- left ``self`` unfilled and raised
+        # ``TypeError`` for every real call; see GH-452. There is no ``file``
+        # or ``length`` to construct with here, since building a packet from
+        # keyword arguments is the inverse of parsing one, so a bare instance
+        # via ``protocol.__new__`` -- bypassing ``__init__``'s parse/pack
+        # machinery entirely -- is what the versioned ``make`` needs to be
+        # called on. This is safe only as long as the versioned ``make`` never
+        # reads state that ``__init__``/``__post_init__`` would otherwise have
+        # established (neither ``HTTPv1.make`` nor ``HTTPv2.make`` does today);
+        # a future ``make`` override that reaches for such state would need a
+        # different dispatch here.
+        return protocol.__new__(protocol).make(**kwargs)  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

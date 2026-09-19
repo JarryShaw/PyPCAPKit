@@ -47,6 +47,8 @@ Terminology
             header = ipv6_info.fragment
                      .header[:hdr_len],     # raw bytes type header before IPv6-Frag
             payload = payload,              # raw bytearray type payload after IPv6-Frag
+            timestamp = float(
+                frame.info.time_epoch),     # capture timestamp
           )
 
        .. note::
@@ -77,7 +79,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
@@ -88,8 +90,11 @@ Terminology
            |     |--> 'header' : (bytes) header before IPv6-Frag
            |     |--> 'payload' : (bytes) reassembled IPv6 payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
+           |     |--> 'conflict' : (tuple) octet ranges on which two fragments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv6Address) ipv6.src
            |     |            |--> 'dst' --> (IPv6Address) ipv6.dst
@@ -102,6 +107,9 @@ Terminology
            |     |                 |--> (bytes) IPv6 payload fragment
            |     |                 |--> ...
            |     |--> 'packet' : (None)
+           |     |--> 'conflict' : (tuple) octet ranges on which two fragments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data ...
 
        .. note::
@@ -126,6 +134,18 @@ Terminology
           ``repr()``), runs it and keeps the result; see
           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
 
+       .. note::
+
+          ``completed`` and ``conflict`` are independent signals: a datagram
+          can be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+          and still carry a non-empty ``conflict``. :rfc:`791` resolves an
+          overlapping fragment's disagreement itself -- "this procedure will
+          use the more recently arrived copy in the data buffer" -- the
+          opposite resolution from TCP's first-write-wins
+          (:rfc:`9293#section-3.10`, fixed for TCP by #443) -- so a contested
+          range never leaves a hole on its own, and ``conflict`` is what lets
+          a caller tell a clean datagram from a contested one. See #477.
+
    reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`IPv6._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
@@ -148,4 +168,22 @@ Terminology
            |                         |               |--> (int) packet range number
            |                         |--> 'header' : (bytes) header buffer
            |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+           |                         |--> 'conflict' : (list) octet ranges on which an arriving
+           |                         |                  fragment disagreed with bytes already in
+           |                         |                  'datagram'
+           |                         |                  |--> (tuple) (first, last), absolute and
+           |                         |                               inclusive
+           |                         |                  |--> ...
            |--> (tuple) BUFID ...
+
+       .. note::
+
+          ``conflict`` is only ever appended to, and is checked against
+          ``datagram`` and ``RCVBT`` *before* an arriving fragment's own write
+          and bookkeeping touch them -- see
+          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
+          ``RCVBT`` records receipt in 8-octet blocks, which is coarser than
+          the octet a conflict needs; ``TDL`` is what recovers the exact
+          extent for the one block that can be partially real -- the final
+          fragment's own tail -- so a conflict here is never wider than the
+          octets that genuinely disagreed, even inside that block.

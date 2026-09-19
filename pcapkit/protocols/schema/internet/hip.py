@@ -163,6 +163,147 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=pkt['hi_len'], schema=schema)
 
 
+def registration_type_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return registration type list length.
+
+    Used by the ``reg_request``, ``reg_response`` and ``reg_failed`` fields of
+    :class:`RegRequestParameter`, :class:`RegResponseParameter` and
+    :class:`RegFailedParameter` respectively, each of which follows a single
+    ``lifetime`` octet with a list of registration type octets sized by the
+    remainder of the parameter.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Registration type list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the ``lifetime`` octet already read, which would
+            otherwise underflow the list length below zero.
+
+    """
+    length = pkt['len'] - 1
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
+def reg_info_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return ``REG_INFO`` registration type list length.
+
+    Used by the ``reg_info`` field of :class:`RegInfoParameter`, which follows
+    a pair of ``min_lifetime`` and ``max_lifetime`` octets with a list of
+    registration type octets sized by the remainder of the parameter.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Registration type list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the ``min_lifetime`` and ``max_lifetime`` octets
+            already read, which would otherwise underflow the list length
+            below zero.
+
+    """
+    length = pkt['len'] - 2
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
+def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return list length for a parameter with a two-octet prefix.
+
+    Used by the ``modes``, ``suites`` and ``mode`` fields of
+    :class:`NATTraversalModeParameter`, :class:`ESPTransformParameter` and
+    :class:`HIPTransportModeParameter` respectively, each of which follows a
+    two-octet ``reserved`` or ``port`` field with a list of items sized by
+    the remainder of the parameter.
+
+    :class:`TransportFormatListParameter` looked like a fourth call site --
+    same ``pkt['len'] - 2`` expression -- but is not: see
+    :func:`transport_format_list_len` for why it has no such prefix to
+    subtract.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        List length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too
+            short to hold the two octets already read, which would otherwise
+            underflow the list length below zero.
+
+    """
+    length = pkt['len'] - 2
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
+def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return ``TRANSPORT_FORMAT_LIST`` transport format list length.
+
+    Used by the ``formats`` field of :class:`TransportFormatListParameter`.
+    Unlike :func:`two_octet_prefix_list_len`'s three call sites, this
+    parameter has no ``reserved`` or ``port`` field between ``Length`` and
+    the list: :rfc:`7401` Section 5.2.11 defines ``Length`` as literally
+    "2x number of TF types" and places the list directly after it --
+
+    ::
+
+        |             Type              |             Length            |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |          TF type #1           |           TF type #2          /
+
+    -- so the list's byte length *is* ``Length``, with nothing to subtract.
+    Subtracting 2 anyway (as a since-corrected revision of this module once
+    did, mirroring the three genuine two-octet-prefix sites) silently
+    dropped the trailing two octets of *every* non-empty list on parse, and
+    rejected the parameter's own legitimate empty-list encoding
+    (``Length = 0``, ``formats = []``) as malformed.
+
+    "2x number of TF types" also fixes each ``TF type`` entry's own width at
+    two octets -- the same width the base :class:`Parameter` class uses for
+    its own ``type`` field, since a TF type *is* a HIP parameter type number
+    -- which is why ``formats``' ``item_type`` is
+    ``EnumField(length=2, ...)``, matching :class:`HIPTransportModeParameter`'s
+    ``mode`` rather than the one-octet items of :func:`two_octet_prefix_list_len`'s
+    other two call sites. This function only answers how many *bytes* the
+    list occupies; getting that number right and the item width wrong (as a
+    still-earlier revision did, at one octet) still corrupts every non-empty
+    list, just by reading twice as many entries as the wire holds instead of
+    dropping octets.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Transport format list length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is
+            negative. This cannot happen from real wire bytes -- ``len`` is
+            an unsigned 16-bit field -- but a caller constructing the schema
+            directly, bypassing
+            :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_transport_format_list`,
+            could still pass one; this keeps that path to the same
+            floor-and-raise discipline as :func:`two_octet_prefix_list_len`.
+
+    """
+    length = pkt['len']
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -424,8 +565,8 @@ class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MOD
     reserved: 'bytes' = PaddingField(length=2)
     #: NAT traversal modes.
     modes: 'list[Enum_NATTraversal]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
-        item_type=EnumField(length=1, namespace=Enum_NATTraversal),
+        length=two_octet_prefix_list_len,
+        item_type=EnumField(length=2, namespace=Enum_NATTraversal),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -677,7 +818,7 @@ class RegInfoParameter(Parameter, code=Enum_Parameter.REG_INFO):
     max_lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_info: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=reg_info_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
@@ -696,7 +837,7 @@ class RegRequestParameter(Parameter, code=Enum_Parameter.REG_REQUEST):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_request: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
@@ -714,7 +855,7 @@ class RegResponseParameter(Parameter, code=Enum_Parameter.REG_RESPONSE):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_response: 'list[Enum_Registration]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
@@ -732,7 +873,7 @@ class RegFailedParameter(Parameter, code=Enum_Parameter.REG_FAILED):
     lifetime: 'int' = UInt8Field()
     #: Registration types.
     reg_failed: 'list[Enum_RegistrationFailure]' = ListField(
-        length=lambda pkt: pkt['len'] - 1,
+        length=registration_type_list_len,
         item_type=EnumField(length=1, namespace=Enum_RegistrationFailure),
     )
     #: Padding.
@@ -778,8 +919,8 @@ class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORM
 
     #: Transport formats.
     formats: 'list[Enum_Parameter]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
-        item_type=EnumField(length=1, namespace=Enum_Parameter),
+        length=transport_format_list_len,
+        item_type=EnumField(length=2, namespace=Enum_Parameter),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -796,8 +937,8 @@ class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
     reserved: 'bytes' = PaddingField(length=2)
     #: Suite IDs.
     suites: 'list[Enum_ESPTransformSuite]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
-        item_type=EnumField(length=1, namespace=Enum_ESPTransformSuite),
+        length=two_octet_prefix_list_len,
+        item_type=EnumField(length=2, namespace=Enum_ESPTransformSuite),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -911,7 +1052,7 @@ class HIPTransportModeParameter(Parameter, code=Enum_Parameter.HIP_TRANSPORT_MOD
     port: 'int' = UInt16Field()
     #: Mode IDs.
     mode: 'list[Enum_Transport]' = ListField(
-        length=lambda pkt: pkt['len'] - 2,
+        length=two_octet_prefix_list_len,
         item_type=EnumField(length=2, namespace=Enum_Transport),
     )
     #: Padding.

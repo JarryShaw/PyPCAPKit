@@ -44,6 +44,8 @@ Terminology
             header = ipv4.packet.header,    # raw bytes type header
             payload = bytearray(
                 ipv4.packet.payload),       # raw bytearray type payload
+            timestamp = float(
+                frame.info.time_epoch),     # capture timestamp
           )
 
    reasm.ipv4.datagram
@@ -55,7 +57,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
@@ -66,8 +68,11 @@ Terminology
            |     |--> 'header' : (bytes) IPv4 header
            |     |--> 'payload' : (bytes) reassembled IPv4 payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
+           |     |--> 'conflict' : (tuple) octet ranges on which two fragments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (IPv4Address) ipv4.src
            |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
@@ -80,6 +85,9 @@ Terminology
            |     |                 |--> (bytes) IPv4 payload fragment
            |     |                 |--> ...
            |     |--> 'packet' : (None)
+           |     |--> 'conflict' : (tuple) octet ranges on which two fragments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data ...
 
        .. note::
@@ -92,6 +100,18 @@ Terminology
           mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
+
+       .. note::
+
+          ``completed`` and ``conflict`` are independent signals: a datagram
+          can be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+          and still carry a non-empty ``conflict``. :rfc:`791` resolves an
+          overlapping fragment's disagreement itself -- "this procedure will
+          use the more recently arrived copy in the data buffer" -- the
+          opposite resolution from TCP's first-write-wins
+          (:rfc:`9293#section-3.10`, fixed for TCP by #443) -- so a contested
+          range never leaves a hole on its own, and ``conflict`` is what lets
+          a caller tell a clean datagram from a contested one. See #477.
 
    reasm.ipv4.buffer
        Data structure for internal buffering when performing reassembly algorithms
@@ -115,4 +135,38 @@ Terminology
            |                         |               |--> (int) packet range number
            |                         |--> 'header' : (bytes) header buffer
            |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+           |                         |--> 'timestamp' : (float) capture timestamp of the
+           |                         |                          first-arriving fragment
+           |                         |--> 'conflict' : (list) octet ranges on which an arriving
+           |                         |                  fragment disagreed with bytes already in
+           |                         |                  'datagram'
+           |                         |                  |--> (tuple) (first, last), absolute and
+           |                         |                               inclusive
+           |                         |                  |--> ...
            |--> (tuple) BUFID ...
+
+       .. note::
+
+          ``conflict`` is only ever appended to, and is checked against
+          ``datagram`` and ``RCVBT`` *before* an arriving fragment's own write
+          and bookkeeping touch them -- see
+          :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`.
+          ``RCVBT`` records receipt in 8-octet blocks, which is coarser than
+          the octet a conflict needs; ``TDL`` is what recovers the exact
+          extent for the one block that can be partially real -- the final
+          fragment's own tail -- so a conflict here is never wider than the
+          octets that genuinely disagreed, even inside that block.
+
+       .. note::
+
+          A buffer is abandoned once the reassembly timeout elapses on the
+          *capture's* clock -- 60 seconds by default, per
+          :rfc:`1122#section-3.3.2` for IPv4 and :rfc:`8200#section-4.5` for
+          IPv6, counted from the first-arriving fragment. Its datagram is
+          reported with ``completed`` set to
+          :attr:`Completion.TIMEOUT <pcapkit.foundation.reassembly.data.data.Completion.TIMEOUT>`
+          rather than
+          :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`,
+          which is what tells "these fragments are gone" apart from "these
+          fragments had not arrived yet". See
+          :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`.

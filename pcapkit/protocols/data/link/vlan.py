@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""data models for 802.1Q customer VLAN tag type"""
+"""data models for 802.1Q/802.1ad VLAN tag types
+
+The customer tag (802.1Q) and the service tag (802.1ad) carry an identical
+layout, so :class:`~pcapkit.protocols.link.c_tag.C_Tag` and
+:class:`~pcapkit.protocols.link.s_tag.S_Tag` share the data model below.
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -31,7 +37,7 @@ class TCI(Data):
 
 @info_final
 class VLAN(Protocol):
-    """Data model for 802.1Q customer VLAN tag type."""
+    """Data model for an 802.1Q/802.1ad VLAN tag."""
 
     #: Tag control information.
     tci: 'TCI'

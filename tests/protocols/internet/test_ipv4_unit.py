@@ -162,58 +162,204 @@ class IPv4UnitTests(unittest.TestCase):
 
     def test_ipv4_register_option_warns_on_overwrite(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.data.internet import ipv4 as ipv4_data
         from pcapkit.protocols.internet.ipv4 import IPv4
-        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
 
-        read_name = f'_read_opt_{OptionNumber.EOOL.name.lower()}'
-        make_name = f'_make_opt_{OptionNumber.EOOL.name.lower()}'
-        original_read = getattr(IPv4, read_name)
-        original_make = getattr(IPv4, make_name)
+        registry = IPv4.__dict__['__option__']
+
+        original = registry[OptionNumber.EOOL]
         try:
             with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
                 IPv4.register_option(OptionNumber.EOOL, 'eool')
             warn.assert_called_once()
-            self.assertIs(getattr(IPv4, read_name), original_read)
-            self.assertIs(getattr(IPv4, make_name), original_make)
+            self.assertEqual(registry[OptionNumber.EOOL], 'eool')
         finally:
-            setattr(IPv4, read_name, original_read)
-            setattr(IPv4, make_name, original_make)
+            registry[OptionNumber.EOOL] = original
 
+        # An unregistered code carries no entry, so registering one is not an
+        # overwrite. The setattr form could not tell the two apart: it keyed the
+        # warning on ``hasattr(cls, f'_read_opt_{name}')``, which is true of every
+        # shipped handler as well as of anything a user had already installed.
         custom = OptionNumber.get(31)
-        custom_read_name = f'_read_opt_{custom.name.lower()}'
-        custom_make_name = f'_make_opt_{custom.name.lower()}'
-        original_custom_read = getattr(IPv4, custom_read_name, None)
-        original_custom_make = getattr(IPv4, custom_make_name, None)
+        self.assertNotIn(custom, registry)
+        try:
+            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+                IPv4.register_option(custom, 'unassigned')
+            warn.assert_not_called()
+            self.assertEqual(registry[custom], 'unassigned')
+
+            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+                IPv4.register_option(custom, 'unassigned')
+            warn.assert_called_once()
+        finally:
+            registry.pop(custom, None)
+
+    def test_ipv4_register_option_dispatches_a_registered_callable_pair(self) -> None:
+        """A ``(parser, constructor)`` pair must reach both dispatch directions.
+
+        The pair is called with the signatures :data:`OptionParser` and
+        :data:`OptionConstructor` declare -- ``(schema, *, options)`` and
+        ``(code, option=None, **kwargs)`` -- i.e. as plain callables rather than
+        as methods with an implicit ``self``. That is the calling convention
+        every other dispatch family uses, and the reason the registry form
+        replaced ``setattr``: installing the callable on the class made it a
+        descriptor, so dispatch passed ``self`` as the first positional argument
+        and a handler written to the declared signature could not be called at
+        all.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.data.internet import ipv4 as ipv4_data
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+
+        registry = IPv4.__dict__['__option__']
+        custom = OptionNumber.get(31)
+        proto = object.__new__(IPv4)
+        seen = []  # type: list[str]
 
         def read_option(schema, *, options):
+            seen.append('read')
             return ipv4_data.UnassignedOption(
                 code=schema.type,
-                type=IPv4._read_ipv4_opt_type(schema.type),
+                type=proto._read_ipv4_opt_type(schema.type),
                 length=schema.length,
                 data=schema.data,
             )
 
         def make_option(code, option=None, *, data=b'', **kwargs):
+            seen.append('make')
             if option is not None:
                 data = option.data
-            return ipv4_schema.UnassignedOption(type=code, length=len(data), data=data)
+            return ipv4_schema.UnassignedOption(type=code, length=len(data) + 2,
+                                                data=data)
 
+        self.assertNotIn(custom, registry)
         try:
-            with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
-                IPv4.register_option(custom, (read_option, make_option))
-            warn.assert_not_called()
-            self.assertIs(getattr(IPv4, custom_read_name), read_option)
-            self.assertIs(getattr(IPv4, custom_make_name), make_option)
+            IPv4.register_option(custom, (read_option, make_option))
+            self.assertEqual(registry[custom], (read_option, make_option))
+
+            proto.__header__ = types.SimpleNamespace(
+                options=[ipv4_schema.UnassignedOption(type=custom, length=4,
+                                                      data=b'xx')],
+            )
+            parsed = proto._read_ipv4_options(4)
+            self.assertEqual(seen, ['read'])
+            self.assertEqual(parsed[custom].data, b'xx')
+
+            # the list-of-tuples branch of the constructor
+            seen.clear()
+            made_list, list_len = proto._make_ipv4_options([(custom, {'data': b'yy'})])
+            self.assertEqual(seen, ['make'])
+            self.assertEqual(made_list[0].data, b'yy')
+            self.assertEqual(list_len, 4)
+
+            # ... and the OrderedMultiDict branch, which the two halves of an
+            # issue like this are equally easy to fix one of and forget the other
+            seen.clear()
+            made_dict, dict_len = proto._make_ipv4_options(
+                OrderedMultiDict([(custom, parsed[custom])]))
+            self.assertEqual(seen, ['make'])
+            self.assertEqual(made_dict[0].data, b'xx')
+            self.assertEqual(dict_len, 4)
         finally:
-            if original_custom_read is None:
-                delattr(IPv4, custom_read_name)
-            else:
-                setattr(IPv4, custom_read_name, original_custom_read)
-            if original_custom_make is None:
-                delattr(IPv4, custom_make_name)
-            else:
-                setattr(IPv4, custom_make_name, original_custom_make)
+            registry.pop(custom, None)
+
+    def test_ipv4_option_registry_covers_every_shipped_handler(self) -> None:
+        """Every ``_read_opt_*`` / ``_make_opt_*`` pair must be reachable.
+
+        The setattr form derived the handler name from ``code.name.lower()``, so
+        a handler was reachable by construction and "what is registered?" had no
+        direct answer. Under the registry the mapping is explicit data, which
+        means a handler added without its registry entry becomes dead code --
+        this pins the two sides together.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.protocols.internet.ipv4 import IPv4
+
+        registry = IPv4.__dict__['__option__']
+        fallback = registry.default_factory()
+        self.assertEqual(fallback, 'unassigned')
+
+        registered = set(registry.values()) | {fallback}
+        shipped = {name[len('_read_opt_'):] for name in vars(IPv4)
+                   if name.startswith('_read_opt_')}
+        self.assertEqual(shipped, registered)
+        self.assertEqual(
+            {name[len('_make_opt_'):] for name in vars(IPv4)
+             if name.startswith('_make_opt_')},
+            registered,
+        )
+
+        # every key is a real option number, and every value names real methods
+        for code, name in registry.items():
+            with self.subTest(code=code):
+                self.assertIsInstance(code, OptionNumber)
+                self.assertTrue(hasattr(IPv4, f'_read_opt_{name}'))
+                self.assertTrue(hasattr(IPv4, f'_make_opt_{name}'))
+
+    def test_ipv4_unregistered_option_code_does_not_mutate_the_registry(self) -> None:
+        """Parsing must not write to the shared IPv4 option registry.
+
+        :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
+        is a :class:`collections.defaultdict` on a class attribute shared by
+        every instance in the process, so ``registry[code]`` would insert each
+        code it missed -- the leak #428 swept out of the sixteen registries that
+        already existed. This one is new, so the guard has to be pinned here too:
+        the reads go through
+        :meth:`~pcapkit.protocols.protocol.ProtocolBase._lookup_registry`.
+
+        Option number 31 is unassigned in IANA's registry and 134 is ``CIPSO``,
+        which is assigned but has no parser, so both take the fallback.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+
+        registry = IPv4.__dict__['__option__']
+        proto = object.__new__(IPv4)
+
+        for code in (OptionNumber.get(31), OptionNumber.CIPSO):
+            with self.subTest(code=code):
+                before = set(registry)
+                self.assertNotIn(code, before)
+
+                proto.__header__ = types.SimpleNamespace(
+                    options=[ipv4_schema.UnassignedOption(type=code, length=4,
+                                                          data=b'xx')],
+                )
+                proto._read_ipv4_options(4)
+                self.assertEqual(set(registry), before)
+
+                # both constructor branches, since either can leak on its own
+                proto._make_ipv4_options([(code, {'data': b'xx'})])
+                self.assertEqual(set(registry), before)
+
+                # The OrderedMultiDict branch cannot get as far as building the
+                # option: :meth:`IPv4._make_opt_unassigned
+                # <pcapkit.protocols.internet.ipv4.IPv4._make_opt_unassigned>`
+                # declares ``data`` keyword-only with no default, where every
+                # sibling fallback constructor defaults it to ``b''``, so it
+                # raises before reading the payload out of ``option.data``. That
+                # predates the registry migration and is left alone here; what
+                # this asserts is that the *lookup* which runs first still does
+                # not insert.
+                with self.assertRaises(TypeError):
+                    proto._make_ipv4_options(OrderedMultiDict([
+                        (code, types.SimpleNamespace(data=b'xx')),
+                    ]))
+                self.assertEqual(set(registry), before)
+
+                # a leak would make the next genuine registration warn
+                with mock.patch('pcapkit.protocols.internet.ipv4.warn') as warn:
+                    try:
+                        IPv4.register_option(code, 'unassigned')
+                        warn.assert_not_called()
+                    finally:
+                        registry.pop(code, None)
 
     def test_ipv4_option_constructors_cover_common_and_error_branches(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -832,6 +978,34 @@ class IPv4UnitTests(unittest.TestCase):
             unknown.post_process({})
         self.assertEqual(tuple(unknown.timestamp), (1,))
         warn.assert_called_once()
+
+    def test_an_option_area_longer_than_the_datagram_still_parses(self) -> None:
+        """An ``ihl`` promising more options than are there is tolerated.
+
+        The header below sets ``ihl`` to 10 -- a 20-octet option area -- and stops
+        after the fixed 20 octets, so there are no option octets at all. Reading
+        past them yields ``b''``, which decodes the option number as 0, and 0 is
+        IPv4's end-of-option-list, so the option loop breaks there and reports the
+        whole area as padding. That is how a datagram cut short by the snapshot
+        length parses at all, and it is why :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` checks each
+        option's progress *after* its end-of-option-list break rather than before:
+        checking first turns every such header into an error. C.f. #431.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from tests._support import time_limit
+
+        raw = bytes.fromhex('4a00001800010000400600000a0000010a000002')
+        with time_limit(5):
+            proto = IPv4(raw, len(raw))
+
+        self.assertEqual(proto.info.hdr_len, 40)
+        self.assertEqual(
+            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(OptionNumber.EOOL, 1)],
+        )
 
 
 if __name__ == '__main__':

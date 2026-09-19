@@ -58,6 +58,7 @@ __all__ = ['ProtocolBase']
 _PT = TypeVar('_PT', bound='Data')
 _ST = TypeVar('_ST', bound='Schema')
 _CTX = TypeVar('_CTX', bound='ProtocolContext')
+_VT = TypeVar('_VT')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
@@ -1238,6 +1239,42 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return proto.from_data(data[name])
 
     @staticmethod
+    def _lookup_registry(registry: 'DefaultDict[Any, _VT]', code: 'Any') -> '_VT':
+        """Look up a dispatch registry entry without recording a miss.
+
+        Arguments:
+            registry: dispatch registry to read, i.e. :attr:`self.__proto__
+                <ProtocolBase.__proto__>` or one of the per-protocol
+                ``__option__`` / ``__chunk__`` / ``__block__`` family. Passed in
+                rather than read from the class, so that a caller reaching the
+                registry through an instance keeps doing so.
+            code: registry key to look up, i.e. the wire code being dispatched on
+
+        Returns:
+            The entry registered for ``code``, or the fallback ``registry``
+            declares when ``code`` is not registered.
+
+        Important:
+            Every one of these registries is a :class:`collections.defaultdict`
+            held on a *class* attribute, shared by every instance of the class in
+            the process. So ``registry[code]`` inserts each code it misses, and
+            parsing one packet carrying an unrecognised code is enough to grow
+            the registry permanently.
+
+            The inserted value is whatever the default factory would have
+            produced anyway, so the entry buys nothing. It costs a spurious
+            "already registered" warning from the next genuine ``register`` call
+            for that code, and it makes "is this code registered?"
+            unanswerable by inspection, since the answer depends on what has
+            been parsed. The fallback is therefore read from the default factory
+            directly rather than through a lookup that records it.
+
+        """
+        if code in registry:
+            return registry[code]
+        return cast('Callable[[], _VT]', registry.default_factory)()
+
+    @staticmethod
     def _lookup_next_layer(registry: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
                            proto: 'int') -> 'Type[ProtocolBase]':
         """Look up the protocol class registered for a next layer code.
@@ -1255,31 +1292,29 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             ``proto`` is not registered.
 
         Important:
-            ``registry`` is a :class:`collections.defaultdict`, so indexing it
-            with an unregistered code would *insert* that code. It is
-            class-level -- shared by every instance in the process -- so parsing
-            a single packet with an unregistered code would grow it, and make
-            :meth:`self.register <ProtocolBase.register>` afterwards report that
-            code as already registered. The fallback is therefore read from the
-            default factory rather than through a lookup that records it.
+            The lookup itself is :meth:`self._lookup_registry
+            <ProtocolBase._lookup_registry>`, so a miss does not grow the shared
+            registry. What this adds is the next-layer-specific resolution step:
+            a registered code may hold a
+            :class:`~pcapkit.corekit.module.ModuleDescriptor` rather than a
+            class, and importing it is written back so the import happens once.
 
-            Resolving a :class:`~pcapkit.corekit.module.ModuleDescriptor` is
-            still written back, since that is memoisation of an import for a
-            code that *is* registered rather than a new entry.
+            That write-back is deliberately confined to a *hit*. Memoising the
+            fallback's resolution under ``proto`` would be exactly the insertion
+            :meth:`self._lookup_registry <ProtocolBase._lookup_registry>` exists
+            to avoid.
 
         """
-        if proto in registry:
-            protocol = registry[proto]
-            if isinstance(protocol, ModuleDescriptor):
-                protocol = protocol.klass
-                registry[proto] = protocol  # update mapping upon import
-            return protocol
-
-        fallback = cast('Callable[[], ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]',
-                        registry.default_factory)()
-        if isinstance(fallback, ModuleDescriptor):
-            return fallback.klass
-        return fallback
+        protocol = ProtocolBase._lookup_registry(registry, proto)
+        if isinstance(protocol, ModuleDescriptor):
+            klass = protocol.klass
+            # a descriptor can also come back from the default factory, and that
+            # one has no key to memoise under -- writing it back would recreate
+            # the insertion-on-miss this exists to avoid
+            if proto in registry:
+                registry[proto] = klass  # update mapping upon import
+            return klass
+        return protocol
 
     def _decode_next_layer(self, dict_: '_PT', proto: 'int', length: 'Optional[int]' = None, *,
                            packet: 'Optional[dict[str, Any]]' = None) -> '_PT':

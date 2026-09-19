@@ -175,6 +175,8 @@ Terminology
                                             # last sequence number of payload
             header = tcp.packet.header,     # raw bytes type header
             payload = tcp.raw,              # raw bytearray type payload
+            timestamp = float(
+                frame.time_epoch),          # capture timestamp
           )
 
        Both ``first`` and ``last`` are absolute TCP sequence numbers and
@@ -190,7 +192,7 @@ Terminology
 
           (tuple) datagram
            |--> (Info) data
-           |     |--> 'completed' : (bool) True --> implemented
+           |     |--> 'completed' : (Completion) COMPLETE --> reassembled in whole
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (tuple)
            |     |            |               |--> (IPv4Address) ip.src
@@ -205,8 +207,11 @@ Terminology
            |     |--> 'header' : (bytes) initial TCP header
            |     |--> 'payload' : (bytes) reassembled payload
            |     |--> 'packet' : (Protocol) parsed reassembled payload
+           |     |--> 'conflict' : (tuple) sequence ranges on which two segments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data
-           |     |--> 'completed' : (bool) False --> not implemented
+           |     |--> 'completed' : (Completion) PARTIAL or TIMEOUT --> incomplete
            |     |--> 'id' : (Info) original packet identifier
            |     |            |--> 'src' --> (tuple)
            |     |            |               |--> (IPv4Address) ip.src
@@ -223,7 +228,19 @@ Terminology
            |     |                 |--> (bytes) payload fragment
            |     |                 |--> ...
            |     |--> 'packet' : (None) not implemented
+           |     |--> 'conflict' : (tuple) sequence ranges on which two segments disagreed
+           |     |                  |--> (tuple) (first, last), absolute and inclusive
+           |     |                  |--> ...
            |--> (Info) data ...
+
+       ``completed`` and ``conflict`` are independent signals: a datagram can
+       be :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`
+       and still carry a non-empty ``conflict`` -- the resolution of a
+       conflicting overlap is first-write-wins (:rfc:`9293#section-3.10`), so
+       it never leaves a hole, and a contested range that was later filled in
+       around does not stop the datagram from completing. ``conflict`` is
+       what lets a caller tell a clean stream from a contested one, now that
+       ``completed`` alone no longer can.
 
    reasm.tcp.buffer
        Data structure for internal buffering when performing reassembly algorithms
@@ -254,9 +271,53 @@ Terminology
            |                                      |                 |--> 'len' : (int) length of payload buffer
            |                                      |                 |--> 'raw' : (bytearray) reassembled payload,
            |                                      |                                          holes set to b'\x00'
+           |                                      |                 |--> 'gap' : (list) sequence ranges still
+           |                                      |                 |                  zero-fill placeholder in 'raw'
+           |                                      |                 |                  |--> (tuple) (first, last),
+           |                                      |                 |                               absolute and
+           |                                      |                 |                               inclusive
+           |                                      |                 |                  |--> ...
+           |                                      |                 |--> 'conflict' : (list) sequence ranges on which
+           |                                      |                 |                  an arriving segment disagreed
+           |                                      |                 |                  with bytes already in 'raw'
+           |                                      |                 |                  |--> (tuple) (first, last),
+           |                                      |                 |                               absolute and
+           |                                      |                 |                               inclusive
+           |                                      |                 |                  |--> ...
            |                                      |--> (int) ACK ...
            |                                      |--> ...
+           |                        |--> 'timestamp' : (float) capture timestamp of the
+           |                                                   first segment buffered
            |--> (tuple) BUFID ...
+
+       ``gap`` is deliberately **not** derived from ``hdl`` above. ``hdl`` is
+       shared by every ACK in this dict, while each ACK's own ``raw`` is
+       private to it, so a different ACK's segment closing a hole in ``hdl``
+       says nothing about whether *this* ACK has received anything at the
+       same sequence numbers -- consulting ``hdl`` for that question
+       previously discarded a fragment's own real bytes whenever a different
+       ACK bucket under the same buffer ID happened to cover the same range
+       first.
+
+       ``gap`` is kept in the same **absolute, inclusive sequence number**
+       convention as ``conflict`` above (and as ``hdl``'s own hole
+       descriptors), rather than as a per-octet marker aligned with ``raw``.
+       That is what lets it survive ``isn`` being revised downwards by a
+       reach-back segment: a per-octet marker aligned with ``raw`` has to be
+       re-prefixed in lockstep with every such revision, while an absolute
+       interval needs no shifting at all. It also means a fragment with no
+       holes carries an empty list instead of a ``raw``-sized marker.
+
+       .. note::
+
+          TCP reassembly has **no** timeout by default: no specification gives
+          stream reassembly a deadline the way :rfc:`1122#section-3.3.2` and
+          :rfc:`8200#section-4.5` give IP fragmentation one, and an idle
+          connection is ordinary rather than pathological. ``timestamp`` is
+          recorded regardless, so passing ``timeout`` to
+          :class:`~pcapkit.foundation.reassembly.tcp.TCP` enables the same
+          eviction the IP reassemblers use -- see
+          :attr:`TCP.__timeout__ <pcapkit.foundation.reassembly.tcp.TCP.__timeout__>`.
 
        The hole descriptor list is kept in **absolute TCP sequence numbers**,
        once per ``BUFID``, whereas each ACK's payload buffer is indexed from

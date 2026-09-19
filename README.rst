@@ -386,6 +386,17 @@ and ``make test-all`` regenerates them before running the whole suite:
 The same fixtures back the demonstration scripts in
 ``examples/legacy_smoke/``, which read them as ``../captures/…``.
 
+One of the generators works differently from the rest and is worth knowing about.
+``examples/generators/options.py`` does not describe packets it wants; it asks the
+library which option, chunk, parameter, message, frame and block codes it
+registers, and then constructs one of each through the public construction API,
+parses it back, and constructs it again from what was parsed. The
+``options-*.pcap`` captures are the cases that survive that round trip, so they
+record what this version of ``pcapkit`` builds rather than what a third-party
+tool builds. ``tests/protocols/test_option_roundtrip_unit.py`` runs the same
+cases without needing a fixture at all, and carries a table of the ones that do
+not yet close the cycle, each named against the defect that stops it.
+
 Continuous integration runs the ``make test`` selection, since the fixtures are
 not in the repository. ``tshark`` is only required to exercise the PyShark
 engine, and is not needed by the test suite.

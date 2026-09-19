@@ -25,7 +25,20 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 #: yardstick every other engine is judged by: every engine reaching this module
 #: is expected to agree on it, either by dissecting the capture itself or by being
 #: redirected to the default engine.
-IN_PCAP_TCP_STREAMS = 3
+#:
+#: **Two, not three.** Flow tracing was keyed on (source, destination), so the two
+#: halves of one connection came back as two flows; it is now keyed on the pair of
+#: endpoints, so a conversation is one flow. ``in.pcap``'s three TCP frames are
+#: frame 3 (``123.129.210.135:80`` -> ``192.168.1.100:55232``), frame 4 (the same
+#: connection the other way) and frame 5 (``192.168.1.100:55216`` ->
+#: ``123.129.210.135:80``, a second connection). Frames 3 and 4 share an address
+#: pair and a port pair and differ only in direction, so they are one TCP
+#: connection and now one flow -- leaving two conversations, not three.
+IN_PCAP_TCP_STREAMS = 2
+
+#: The same capture with ``trace_bidirectional=False``, i.e. the per-direction
+#: behaviour flow tracing had before conversations became one flow.
+IN_PCAP_TCP_FLOWS_PER_DIRECTION = 3
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -33,14 +46,16 @@ class FollowTCPStreamTests(unittest.TestCase):
     """:func:`~pcapkit.interface.misc.follow_tcp_stream` per extraction engine.
 
     ``examples/captures/in.pcap`` (committed, so unit-tier safe) holds three TCP
-    conversations. #399: the reassembly adapter was chosen by comparing the
-    engine *instance* to a string -- a comparison that is never true -- so every
-    engine silently used the pcapkit adapter regardless of which engine ran. That
-    crashed on DPKT frames (``AttributeError: 'dict' object has no attribute
-    'packet'``) and returned an empty, misleading result on Scapy frames.
+    frames making up **two** conversations -- see
+    :data:`IN_PCAP_TCP_STREAMS` for which frames pair up and why. #399: the
+    reassembly adapter was chosen by comparing the engine *instance* to a string --
+    a comparison that is never true -- so every engine silently used the pcapkit
+    adapter regardless of which engine ran. That crashed on DPKT frames
+    (``AttributeError: 'dict' object has no attribute 'packet'``) and returned an
+    empty, misleading result on Scapy frames.
 
     Both third-party engines that dissect this capture -- DPKT and Scapy -- must
-    therefore agree with the default engine on all three streams. Engines that do
+    therefore agree with the default engine on every stream. Engines that do
     no dissection at all (PyPCAP) or have no reassembly adapter (PyShark) are
     redirected to the default engine instead, and are asserted separately below.
 
@@ -51,7 +66,7 @@ class FollowTCPStreamTests(unittest.TestCase):
     from :class:`~pcapkit.foundation.engines.scapy.Scapy` importing only
     :mod:`scapy.sendrecv`, which populates none of Scapy's layer registries, so
     every frame came back as an undissected ``Raw``. Zero was the polluted
-    answer and three is the truthful one.
+    answer and the count here is the truthful one.
     """
 
     def setUp(self) -> None:
@@ -74,14 +89,28 @@ class FollowTCPStreamTests(unittest.TestCase):
         streams = self._follow()
         self.assertEqual(len(streams), IN_PCAP_TCP_STREAMS)
         # Each detected flow carries the frames traceflow grouped into it, and names
-        # the file its trace was written to. in.pcap's three TCP flows are one frame
-        # each and single-segment, so there is no multi-segment payload to
-        # reassemble -- the empty conversations are a property of this capture, not
-        # of the reassembly, which is why the parity test below compares them rather
-        # than requiring them non-empty.
+        # the file its trace was written to. in.pcap's TCP segments are
+        # single-segment, so there is no multi-segment payload to reassemble -- the
+        # empty conversations are a property of this capture, not of the reassembly,
+        # which is why the parity test below compares them rather than requiring
+        # them non-empty.
         for stream in streams:
             self.assertGreaterEqual(len(stream.packets), 1)
             self.assertIsNotNone(stream.filename)
+        # the merged conversation carries both of its frames, which is the point:
+        # keyed per direction they were two streams of one frame each
+        self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 2])
+
+    def test_per_direction_tracing_still_splits_the_conversation(self) -> None:
+        """``trace_bidirectional=False`` restores the older per-direction flows.
+
+        The compatibility escape hatch has to keep working, and it is what makes
+        the merge above measurable rather than merely asserted.
+
+        """
+        streams = self._follow(trace_bidirectional=False)
+        self.assertEqual(len(streams), IN_PCAP_TCP_FLOWS_PER_DIRECTION)
+        self.assertEqual(sorted(len(stream.packets) for stream in streams), [1, 1, 1])
 
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
     def test_dpkt_engine_matches_the_default_engine(self) -> None:
