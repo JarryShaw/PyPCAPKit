@@ -13,8 +13,10 @@ Four things are worth pinning, and they are the four ways this could rot:
   (:class:`TierClassificationTests`, :class:`WorkflowAgreementTests`);
 * committedness comes from git rather than from a list of names that goes stale
   the moment a seventh capture is committed (:class:`CommittedCaptureTests`);
-* a violation is caught and explained, and the legitimate reads next to it are
-  not (:class:`AuditTests`, :class:`RuntimeCheckTests`);
+* a violation is caught and explained, the legitimate reads next to it are not,
+  and several of them are listed in the order they appear in the file rather
+  than in the order a tree walk happened to reach them
+  (:class:`AuditTests`, :class:`RuntimeCheckTests`);
 * the suite as it stands is clean (:class:`SuiteIsCleanTests`), and a checkout
   without git degrades instead of failing (:class:`DegradationTests`).
 
@@ -288,6 +290,54 @@ class AuditTests(unittest.TestCase):
             """)
         self.assertEqual(_tiers.audit_module(module), [])
         self.assertEqual(_tiers.sample_path_calls(str(module)), ())
+
+    def test_calls_and_findings_come_out_in_source_order(self) -> None:
+        """Four violations at three nesting depths, reported top to bottom.
+
+        The arrangement is the whole test. :func:`ast.walk` is breadth-first, so
+        it reaches the *shallowest* call first however late in the file it is
+        written: here the earliest call is the most deeply nested one and the
+        latest is at module level, so a breadth-first collection reports them
+        14, 11, 7, 7 -- exactly backwards -- and this test fails. It passes only
+        once the calls are really sorted by position, which is what
+        :func:`~tests._tiers.sample_path_calls` documents.
+
+        The two calls sharing line 7 pin the ``col_offset`` tie-break: they come
+        out left to right rather than in whatever order the walk happened to
+        reach them.
+
+        """
+        module = write_module(self.tmp_path, 'test_order_unit.py', """
+            from tests._support import sample_path
+
+
+            class Tests:
+                def test_from_a_nested_function(self):
+                    def helper():
+                        return sample_path('test.pcap'), sample_path('http6.cap')
+                    return helper()
+
+                def test_from_a_method(self):
+                    return sample_path('http.cap')
+
+
+            TOP_LEVEL = sample_path('dhcp_big_endian.pcapng')
+            """)
+
+        calls = _tiers.sample_path_calls(str(module))
+        self.assertEqual(
+            [(call.lineno, call.name) for call in calls],
+            [(7, 'test.pcap'), (7, 'http6.cap'), (11, 'http.cap'),
+             (14, 'dhcp_big_endian.pcapng')],
+        )
+
+        # audit_module emits one finding per call and inherits this order, which
+        # is what the reader of a failed collection actually sees.
+        findings = _tiers.audit_module(module)
+        located = [re.search(r':(\d+) is a unit-tier', finding) for finding in findings]
+        self.assertTrue(all(match is not None for match in located), findings)
+        self.assertEqual([int(match.group(1)) for match in located if match is not None],
+                         [7, 7, 11, 14])
 
     def test_an_unparseable_module_is_not_this_guards_problem(self) -> None:
         """A syntax error is reported by pytest, far better than from here."""
