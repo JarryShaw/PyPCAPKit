@@ -12,6 +12,8 @@ import abc
 import collections
 import contextlib
 import csv
+import functools
+import importlib.metadata
 import inspect
 import os
 import re
@@ -22,6 +24,7 @@ from typing import TYPE_CHECKING
 
 import requests
 
+from pcapkit import __version__
 from pcapkit.utilities.exceptions import VendorNotImplemented
 from pcapkit.utilities.logging import BOOLEAN_STATES
 from pcapkit.utilities.warnings import VendorRequestWarning, warn
@@ -34,6 +37,16 @@ __all__ = ['Vendor']
 
 MAX_RETRY = int(os.environ.get('PCAPKIT_VENDOR_RETRY', 5)) or 1
 CI_MODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_CI_MODE', 'false').casefold(), False)
+
+#: Distribution name of this package, i.e. the name its metadata is registered
+#: under, which is not the import name (:mod:`pcapkit`).
+DISTRIBUTION = 'pypcapkit'
+
+#: Project URL used as the contact address in :func:`get_user_agent` when the
+#: distribution metadata cannot be read, i.e. when running straight from a
+#: source checkout that was never installed. Kept in step with ``repository``
+#: under ``[project.urls]`` in :file:`pyproject.toml`.
+PROJECT_URL = 'https://github.com/JarryShaw/PyPCAPKit'
 
 #: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
@@ -112,6 +125,50 @@ def get_proxies() -> 'dict[str, str]':
     if HTTPS_PROXY is not None:
         PROXIES['https'] = HTTPS_PROXY
     return PROXIES
+
+
+@functools.lru_cache(maxsize=1)
+def get_user_agent() -> 'str':
+    """Get the ``User-Agent`` header the crawlers identify themselves with.
+
+    Many :attr:`~Vendor.LINK` registries are Wikipedia articles, and the
+    Wikimedia Foundation's User-Agent policy refuses |requests|_' default
+    ``python-requests/<version>`` agent outright -- HTTP 403 with a body reading
+    *"Please set a user-agent and respect our robot policy"*. What the policy
+    asks for is an agent that names the tool and gives a contact address, so that
+    a misbehaving client can be reached instead of simply blocked. It does
+    **not** ask for a browser agent, and sending one would misrepresent what is
+    making the request, so this deliberately identifies the crawler as itself.
+
+    The string is composed from the package's own metadata -- distribution name,
+    :data:`pcapkit.__version__` and the ``repository`` project URL -- rather than
+    written out as a literal, so that it follows the package instead of going
+    stale. Where the distribution metadata cannot be read, i.e. when running from
+    a source checkout that was never installed, :data:`DISTRIBUTION` and
+    :data:`PROJECT_URL` stand in for it.
+
+    Returns:
+        Value for the ``User-Agent`` request header.
+
+    See Also:
+        `Wikimedia Foundation User-Agent policy
+        <https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy>`__
+
+    """
+    name = DISTRIBUTION
+    url = PROJECT_URL
+
+    with contextlib.suppress(importlib.metadata.PackageNotFoundError):
+        metadata = importlib.metadata.metadata(DISTRIBUTION)
+
+        name = metadata.get('Name') or name
+        for entry in metadata.get_all('Project-URL') or []:
+            label, _, value = entry.partition(',')
+            if label.strip().casefold() == 'repository' and value.strip():
+                url = value.strip()
+                break
+
+    return f'{name}/{__version__} (+{url}) python-requests/{requests.__version__}'
 
 
 class VendorMeta(abc.ABCMeta):
@@ -395,13 +452,19 @@ class Vendor(metaclass=VendorMeta):
         if self.LINK is None:
             return self.request()  # type: ignore[unreachable]
 
+        # NOTE: both branches below send this. Wikimedia rejects ``requests``'
+        # default agent with HTTP 403, so a crawler without it fetches 126 bytes
+        # of robot-policy text and retries MAX_RETRY times against a refusal
+        # that no amount of retrying will lift; see #518.
+        headers = {'User-Agent': get_user_agent()}
+
         try:
             counter = 1
             while True:
                 if counter > MAX_RETRY:
                     raise requests.exceptions.RequestException
 
-                page = requests.get(self.LINK)  # nosec: B113
+                page = requests.get(self.LINK, headers=headers)  # nosec: B113
                 if not page.ok or not page.text:
                     warn(f'Connection failed; retry for {counter}/{MAX_RETRY}...',
                          VendorRequestWarning, stacklevel=2)
@@ -423,7 +486,7 @@ class Vendor(metaclass=VendorMeta):
                     if counter > MAX_RETRY:
                         raise
 
-                    page = requests.get(self.LINK, proxies=proxies)  # nosec: B113
+                    page = requests.get(self.LINK, headers=headers, proxies=proxies)  # nosec: B113
                     if not page.ok or not page.text:
                         warn(f'Connection failed; retry with proxy for {counter}/{MAX_RETRY}...',
                              VendorRequestWarning, stacklevel=2)
