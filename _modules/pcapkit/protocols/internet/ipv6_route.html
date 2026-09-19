@@ -448,6 +448,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Schema_Type2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Schema_UnknownType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6_route_data_length</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">ipv6_route_header_length</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -875,7 +876,7 @@
 <span class="sd">        """</span>
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_UnknownType</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -945,7 +946,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
@@ -996,7 +997,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span>
@@ -1053,7 +1054,7 @@
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">,</span>

@@ -474,6 +474,33 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">ipv6_route_header_length</span><span class="p">(</span><span class="n">hdr_ext_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Total length, in octets, of the on-the-wire IPv6-Route header for a given ``Hdr Ext Len``.</span>
+
+<span class="sd">    This is the fixed 4 octets of ``next``/``length``/``type``/``seg_left``</span>
+<span class="sd">    plus the type-specific data computed by :func:`ipv6_route_data_length`,</span>
+<span class="sd">    i.e. ``4 + (4 + 8 * hdr_ext_len)`` -- a *different* quantity from</span>
+<span class="sd">    :func:`ipv6_route_data_length` itself (``8 + 8 * hdr_ext_len`` here vs.</span>
+<span class="sd">    ``4 + 8 * hdr_ext_len`` there), not a duplicate of it. It is what each</span>
+<span class="sd">    ``_read_data_type_*`` in</span>
+<span class="sd">    :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed</span>
+<span class="sd">    route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.</span>
+<span class="sd">    ipv6_route.IPv6_Route.read` then subtracts from the outer packet length</span>
+<span class="sd">    to find the next layer's length. #489 unified the write side</span>
+<span class="sd">    (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)</span>
+<span class="sd">    into one helper; this is the matching read-side helper for the total</span>
+<span class="sd">    header length, finishing that half of #487/#489.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Total length, in octets, of the on-the-wire IPv6-Route header.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">ipv6_route_data_length</span><span class="p">(</span><span class="n">hdr_ext_len</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="ipv6_route_data_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv6_route_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>

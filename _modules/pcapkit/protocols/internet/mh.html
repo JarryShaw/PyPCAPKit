@@ -1821,6 +1821,33 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">mh</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">mh</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mh_message_length</span><span class="p">(</span><span class="n">header_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute the total on-the-wire MH header length for a given ``Header Len``.</span>
+
+<span class="sd">        Per :rfc:`6275#section-6.1.1`, ``Header Len`` is *"the length of the</span>
+<span class="sd">        Mobility Header, in units of 8 octets, excluding the first 8</span>
+<span class="sd">        octets"* -- i.e. the total header is ``8 + 8 * header_len`` octets,</span>
+<span class="sd">        or equivalently ``(header_len + 1) * 8``. Every ``_read_msg_*``</span>
+<span class="sd">        below reports this value back as the parsed message's own</span>
+<span class="sd">        ``.length``, which :meth:`~pcapkit.protocols.internet.mh.MH.read`</span>
+<span class="sd">        then subtracts from the outer packet length to find the next</span>
+<span class="sd">        layer's length -- precisely the role ``Hdr Ext Len`` played in</span>
+<span class="sd">        #487, and the same read-side duplication :meth:`make`'s write-side</span>
+<span class="sd">        expression (``(len(data_val) + 6) // 8 - 1``, this formula's</span>
+<span class="sd">        inverse) had already been unified out of. Do NOT drop the ``+ 1``:</span>
+<span class="sd">        the units either side of it differ (octets vs. 8-octet units), and</span>
+<span class="sd">        dropping the offset silently reinterprets the field.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            header_len: raw ``Header Len`` field value, as read off the wire.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Total length, in octets, of the on-the-wire MH header.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">header_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span>
+
 <div class="viewcode-block" id="MH.make">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.make">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -2041,7 +2068,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -2079,7 +2106,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRefreshRequestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
@@ -2121,7 +2148,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestInitMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
@@ -2164,7 +2191,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestInitMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
@@ -2211,7 +2238,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
@@ -2260,7 +2287,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
@@ -2303,7 +2330,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingUpdateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -2349,7 +2376,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingAcknowledgementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
@@ -2398,7 +2425,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingErrorMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
@@ -2448,7 +2475,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingUpdateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -2508,7 +2535,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastBindingAcknowledgmentMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
@@ -2556,7 +2583,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastNeighborAdvertisementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
@@ -2602,7 +2629,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -2648,7 +2675,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverInitiateMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -2701,7 +2728,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoverAcknowledgeMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -2764,7 +2791,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeAgentSwitchMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">addresses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">addresses</span><span class="p">),</span>
@@ -2811,7 +2838,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HeartbeatMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">unsolicited</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'U'</span><span class="p">]),</span>
@@ -2881,7 +2908,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRevocationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">br_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">br_type</span><span class="p">,</span>
@@ -2933,7 +2960,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalizedRoutingInitiationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -2982,7 +3009,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalizedRoutingAcknowledgmentMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3030,7 +3057,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UpdateNotificationMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3075,7 +3102,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UpdateNotificationAcknowledgementMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3140,7 +3167,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowBindingMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">fb_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fb_type</span><span class="p">,</span>
@@ -3187,7 +3214,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SubscriptionQueryMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3227,7 +3254,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SubscriptionResponseMessage</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_message_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
@@ -3236,6 +3263,37 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mh_option_length</span><span class="p">(</span><span class="n">schema_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute an MH option's whole-option length from its on-the-wire ``Option Length``.</span>
+
+<span class="sd">        Per :rfc:`6275#section-6.2`, an MH option's ``Option Length`` field</span>
+<span class="sd">        (what each ``Schema_*Option.length`` here holds) counts *"the length</span>
+<span class="sd">        of the option, in octets, excluding the Option Type and Option</span>
+<span class="sd">        Length fields"* -- so the whole option, which is what every</span>
+<span class="sd">        ``_read_opt_*`` below reports back as the parsed option's own</span>
+<span class="sd">        ``.length``, is two octets more. This is the exact ``+2``/``-2``</span>
+<span class="sd">        mismatch #398 fixed independently in six places (see</span>
+<span class="sd">        ``Data_PadOption.length`` vs. ``Schema_PadOption.length`` below, at</span>
+<span class="sd">        the surviving explanation of that fix); collecting the read-side</span>
+<span class="sd">        half of it into one helper is so a future fix to this arithmetic</span>
+<span class="sd">        only has to happen once. Do NOT drop the ``+ 2``: that is precisely</span>
+<span class="sd">        the mismatch #398 fixed.</span>
+
+<span class="sd">        Note that only the *stored-length* read-side call sites are</span>
+<span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
+<span class="sd">        ``Option Length`` from ``len(value)`` rather than reading a parsed</span>
+<span class="sd">        ``.length`` back, so they have nothing to unify against this helper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema_length: raw ``Option Length`` field value, as read off the wire.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whole-option length, in octets, including the Type and Length fields.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">schema_length</span> <span class="o">+</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="MH._read_mh_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_mh_options">[docs]</a>
@@ -3295,7 +3353,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3394,7 +3452,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRefreshAdviceOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">interval</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3437,7 +3495,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AlternateCareofAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3474,7 +3532,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_NonceIndicesOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
             <span class="n">careof</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">careof</span><span class="p">,</span>
         <span class="p">)</span>
@@ -3516,7 +3574,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AuthorizationDataOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3562,7 +3620,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MobileNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3599,7 +3657,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LinkLayerAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lla</span><span class="p">,</span>
         <span class="p">)</span>
@@ -3634,7 +3692,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span>
@@ -3674,7 +3732,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AuthOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -3715,7 +3773,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MesgIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
             <span class="n">ntp_timestamp</span><span class="o">=</span><span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">fraction</span><span class="p">),</span>
         <span class="p">)</span>
@@ -3751,7 +3809,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CGAParametersRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3792,7 +3850,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CGAParametersOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">Data_CGAParameter</span><span class="p">(</span>
                 <span class="n">modifier</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">modifier</span><span class="p">,</span>
                 <span class="n">prefix</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
@@ -3836,7 +3894,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SignatureOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">signature</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3874,7 +3932,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PermanentHomeKeygenTokenOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3909,7 +3967,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestInitOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3947,7 +4005,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3979,7 +4037,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalMobilityOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4095,7 +4153,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv6AddressPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">code</span><span class="o">=</span><span class="n">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
@@ -4145,7 +4203,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DNSUpdateOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">remove</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'R'</span><span class="p">]),</span>
             <span class="n">identity</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identity</span><span class="p">,</span>
@@ -4192,7 +4250,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_VendorSpecificOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">vendor</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">vendor</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -4236,7 +4294,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ServiceSelectionOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4281,7 +4339,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeNetworkPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -4317,7 +4375,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HandoffIndicatorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">hi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hi</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4358,7 +4416,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AccessTechnologyTypeOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">att</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">att</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4406,7 +4464,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNLLIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">lli</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lli</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4455,7 +4513,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LinkLocalAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4506,7 +4564,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TimestampOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
                 <span class="n">seconds</span> <span class="o">+</span> <span class="n">fraction</span> <span class="o">/</span> <span class="mi">65536</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span>
             <span class="n">pmip_timestamp</span><span class="o">=</span><span class="n">PMIPv6Timestamp</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="n">fraction</span><span class="p">),</span>
@@ -4551,7 +4609,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RestartCounterOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">counter</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4596,7 +4654,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4HomeAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="n">request_prefix</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
@@ -4646,7 +4704,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4AddressAcknowledgementOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'prefix_length'</span><span class="p">],</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
@@ -4691,7 +4749,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_NATDetectionOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">force</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'F'</span><span class="p">]),</span>
             <span class="n">refresh</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">refresh</span><span class="p">),</span>
         <span class="p">)</span>
@@ -4734,7 +4792,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4CareofAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4777,7 +4835,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_GREKeyOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">key</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">6</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -4830,7 +4888,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">bid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">bid</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">simultaneous</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'H'</span><span class="p">]),</span>
@@ -4877,7 +4935,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4HomeAddressRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'prefix_length'</span><span class="p">],</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
@@ -4921,7 +4979,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4HomeAddressReplyOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'prefix_length'</span><span class="p">],</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
@@ -4961,7 +5019,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4DefaultRouterAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5001,7 +5059,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4DHCPSupportModeOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">mode</span><span class="o">=</span><span class="n">Enum_DHCPSupportMode</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5068,7 +5126,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ContextRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">requests</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5111,7 +5169,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LMAAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">code</span><span class="o">=</span><span class="n">LMAAddressCode</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
@@ -5152,7 +5210,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNLLAIIDOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">iid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">iid</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5193,7 +5251,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TransientBindingOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">late</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'L'</span><span class="p">]),</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">100</span><span class="p">),</span>
         <span class="p">)</span>
@@ -5238,7 +5296,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowSummaryOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">fid</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">fid</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5313,7 +5371,7 @@
 
             <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Pad</span><span class="p">,</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
                 <span class="n">pad</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_PadFlowIdentificationSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-                <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Pad</span> <span class="k">else</span> <span class="n">pad</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Pad</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PadFlowIdentificationSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
@@ -5322,14 +5380,14 @@
                 <span class="n">bid_ref</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_BIDReferenceSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BIDReferenceSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">bid_ref</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">bid_ref</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">bid</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bid_ref</span><span class="o">.</span><span class="n">bid</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Traffic_Selector</span><span class="p">:</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_TrafficSelectorSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TrafficSelectorSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
                     <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -5337,21 +5395,21 @@
                 <span class="n">action</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_FlowBindingActionSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowBindingActionSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_FlowIDSuboption</span><span class="o">.</span><span class="n">Target_Care_of_Address</span><span class="p">:</span>
                 <span class="n">target</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_TargetCareofAddressSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_TargetCareofAddressSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">address</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">unknown</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedFlowIdentificationSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedFlowIdentificationSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -5400,7 +5458,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FlowIdentificationOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">fid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fid</span><span class="p">,</span>
             <span class="n">fid_pri</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">fid_pri</span><span class="p">,</span>
             <span class="n">status</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
@@ -5439,7 +5497,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RedirectCapabilityOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -5492,7 +5550,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RedirectOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">ipv6</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ipv6</span><span class="p">,</span>
             <span class="n">ipv4</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ipv4</span><span class="p">,</span>
         <span class="p">)</span>
@@ -5541,7 +5599,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LoadInformationOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">priority</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
             <span class="n">sessions_in_use</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sessions_in_use</span><span class="p">,</span>
             <span class="n">max_sessions</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">max_sessions</span><span class="p">,</span>
@@ -5582,7 +5640,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AlternateIPv4CareofAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5620,7 +5678,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNGroupIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">group_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">group_id</span><span class="p">,</span>
         <span class="p">)</span>
@@ -5669,7 +5727,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MAGIPv6AddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address_length</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
@@ -5722,7 +5780,7 @@
                 <span class="n">net</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_ANINetworkIdentifierSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANINetworkIdentifierSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">utf8</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'E'</span><span class="p">]),</span>
                     <span class="n">net_name</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">net_name</span><span class="p">,</span>
                     <span class="n">ap_name</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">ap_name</span><span class="p">,</span>
@@ -5733,7 +5791,7 @@
                 <span class="n">raw_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_signed</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="s1">'longitude'</span><span class="p">],</span> <span class="mi">24</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANIGeoLocationSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">geo</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">latitude</span><span class="o">=</span><span class="n">raw_lat</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span><span class="p">,</span>
                     <span class="n">longitude</span><span class="o">=</span><span class="n">raw_lon</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span><span class="p">,</span>
                     <span class="n">raw_latitude</span><span class="o">=</span><span class="n">raw_lat</span><span class="p">,</span>
@@ -5743,7 +5801,7 @@
                 <span class="n">operator</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_ANIOperatorIdentifierSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANIOperatorIdentifierSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">op_id_type</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">op_id_type</span><span class="p">,</span>
                     <span class="n">identifier</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -5751,7 +5809,7 @@
                 <span class="n">civic</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_ANICivicLocationSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANICivicLocationSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">civic</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="nb">format</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
                     <span class="n">location</span><span class="o">=</span><span class="n">civic</span><span class="o">.</span><span class="n">location</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -5759,21 +5817,21 @@
                 <span class="n">group</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_ANIMAGGroupIdentifierSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANIMAGGroupIdentifierSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">group_id</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">group_id</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_ANISuboption</span><span class="o">.</span><span class="n">ANI_Update_Timer</span><span class="p">:</span>
                 <span class="n">timer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_ANIUpdateTimerSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ANIUpdateTimerSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">timer</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">timer</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">timer</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">unknown</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedANISuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedANISuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -5847,7 +5905,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AccessNetworkIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">suboptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ani_suboptions</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suboptions</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -5894,7 +5952,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_IPv4TrafficOffloadSelectorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">mode</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'M'</span><span class="p">]),</span>
             <span class="n">selector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fid_suboptions</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">selector</span><span class="p">),</span>
         <span class="p">)</span>
@@ -5951,7 +6009,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DynamicIPMulticastSelectorOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">mode</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'M'</span><span class="p">]),</span>
             <span class="n">records</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">records</span><span class="p">,</span>
@@ -6007,7 +6065,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DelegatedMNPOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
@@ -6056,7 +6114,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ActiveMulticastSubscriptionIPv4Option</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">igmp_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">igmp_type</span><span class="p">,</span>
             <span class="n">context</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6103,7 +6161,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ActiveMulticastSubscriptionIPv6Option</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">mld_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">mld_type</span><span class="p">,</span>
             <span class="n">context</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6153,7 +6211,7 @@
                 <span class="n">session</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_PerSessionBitRateAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PerSessionBitRateAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">service</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]),</span>
                     <span class="n">exclude</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'E'</span><span class="p">]),</span>
                     <span class="n">rate</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
@@ -6167,14 +6225,14 @@
                 <span class="n">rate</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_BitRateAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BitRateAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">rate</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_QoSAttribute</span><span class="o">.</span><span class="n">Allocation_Retention_Priority</span><span class="p">:</span>
                 <span class="n">arp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_AllocationRetentionPriorityAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AllocationRetentionPriorityAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">arp</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">priority_level</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PL'</span><span class="p">],</span>
                     <span class="n">preemption_capability</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PC'</span><span class="p">],</span>
                     <span class="n">preemption_vulnerability</span><span class="o">=</span><span class="n">arp</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="s1">'PV'</span><span class="p">],</span>
@@ -6183,7 +6241,7 @@
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QoSTrafficSelectorAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QoSTrafficSelectorAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">ts_format</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">ts_format</span><span class="p">,</span>
                     <span class="n">selector</span><span class="o">=</span><span class="n">selector</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -6191,7 +6249,7 @@
                 <span class="n">vendor</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_QoSVendorSpecificAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QoSVendorSpecificAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">vendor</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">vendor</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">vendor</span><span class="p">,</span>
                     <span class="n">subtype</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">vendor</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -6200,7 +6258,7 @@
                 <span class="n">unknown</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedQoSAttribute'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedQoSAttribute</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -6247,7 +6305,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QualityOfServiceOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">sr_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">sr_id</span><span class="p">,</span>
             <span class="n">dscp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">tc</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">oc</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">oc</span><span class="p">,</span>
@@ -6300,7 +6358,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LMAUserPlaneAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv4Address | IPv6Address]'</span><span class="p">,</span>
                          <span class="n">schema</span><span class="o">.</span><span class="n">address</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
         <span class="p">)</span>
@@ -6444,7 +6502,7 @@
                 <span class="n">rereg</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_BindingReregistrationControlSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingReregistrationControlSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">rereg</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">rereg</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">start_time</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">rereg</span><span class="o">.</span><span class="n">start_time</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
                     <span class="n">initial_retransmission</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span>
                         <span class="n">seconds</span><span class="o">=</span><span class="n">rereg</span><span class="o">.</span><span class="n">initial_retransmission</span><span class="p">),</span>
@@ -6454,7 +6512,7 @@
                 <span class="n">heartbeat</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_HeartbeatControlSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HeartbeatControlSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">heartbeat</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">heartbeat</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">heartbeat</span><span class="o">.</span><span class="n">interval</span><span class="p">),</span>
                     <span class="n">retransmission_delay</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span>
                         <span class="n">seconds</span><span class="o">=</span><span class="n">heartbeat</span><span class="o">.</span><span class="n">retransmission_delay</span><span class="p">),</span>
@@ -6464,7 +6522,7 @@
                 <span class="n">unknown</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_UnassignedLMAControlledMAGSuboption'</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedLMAControlledMAGSuboption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-                    <span class="n">length</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">unknown</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">unknown</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -6511,7 +6569,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LMAControlledMAGParametersOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">suboptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_lcmp_suboptions</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suboptions</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6558,7 +6616,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MAGMultipathBindingOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">att</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">att</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
             <span class="n">bid</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">bid</span><span class="p">,</span>
@@ -6605,7 +6663,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MAGIdentifierOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6651,7 +6709,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AnchoredPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6697,7 +6755,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LocalPrefixOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
@@ -6756,7 +6814,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PreviousMAAROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">maar</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">maar</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
@@ -6806,7 +6864,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ServingMAAROption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6849,7 +6907,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DLIFLinkLocalAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6895,7 +6953,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_DLIFLinkLayerAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lla</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -6963,7 +7021,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -7013,7 +7071,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MultiPrefixExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">flag</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
             <span class="n">prefixes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">prefixes</span><span class="p">),</span>
         <span class="p">)</span>
@@ -7061,7 +7119,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
