@@ -103,6 +103,74 @@ class FoundationRegistryTests(unittest.TestCase):
                                                   'TCP_TraceFlow')
         self.assertIsInstance(register.call_args.args[1], registry.ModuleDescriptor)
 
+    def test_registration_accepts_pcapkit_own_builtin_classes(self) -> None:
+        """The built-ins pass the ``issubclass`` gate, and non-subclasses still fail.
+
+        This is the regression for GitHub issue #513. Every sibling test in this
+        module mocks ``Extractor.register_*`` away, so none of them reaches the
+        validation at :file:`pcapkit/foundation/extraction.py` -- which is why the
+        defect survived: all three entry points rejected pcapkit's *own* engines,
+        reassembly and flow-tracing classes with
+        :exc:`~pcapkit.utilities.exceptions.RegistryError`.
+
+        The cause was that each check named the auto-registering public class
+        (``Engine``, ``Reassembly``, ``TraceFlow``) while every built-in subclasses
+        the ``*Base`` variant -- imported under an alias, e.g.
+        ``from ...engine import EngineBase as Engine`` at
+        :file:`pcapkit/foundation/engines/pcap.py`, specifically so that it is not
+        auto-registered. So ``issubclass(PCAP, Engine)`` was :data:`False` while
+        ``issubclass(PCAP, EngineBase)`` was :data:`True`.
+
+        Deliberately does **not** mock, because the point is to exercise the gate.
+
+        """
+        # NOTE: imported inside the test because ``setUp`` purges ``pcapkit`` from
+        # ``sys.modules``, which is why every sibling test imports locally too.
+        # ``Extractor`` is needed by name here so the registries can be read back.
+        from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
+        from pcapkit.foundation.registry.foundation import (register_extractor_engine,
+                                                            register_extractor_reassembly,
+                                                            register_extractor_traceflow)
+        from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+        from pcapkit.utilities.exceptions import RegistryError
+
+        for name, func, klass, store in (
+            ('engine', register_extractor_engine, PCAP_Engine,
+             Extractor.__engine__),
+            ('reassembly', register_extractor_reassembly, IPv4_Reassembly,
+             Extractor.__reassembly__),
+            ('traceflow', register_extractor_traceflow, TCP_TraceFlow,
+             Extractor.__traceflow__),
+        ):
+            with self.subTest(kind=name, accepted=True):
+                # NOTE: a distinct key per call, so this neither collides with the
+                # built-in registrations already present nor emits the
+                # ``already registered, overwriting`` warning.
+                key = f'unit-513-{name}'
+                func(key, klass)
+
+                # NOTE: the registry is read back rather than merely asserting that
+                # no exception escaped. Without this, the test passes against a
+                # helper that runs the ``issubclass`` gate and then silently drops
+                # the class -- measured, not hypothetical: inserting a bare
+                # ``return`` after the check and before the registry write leaves
+                # this test reporting ``1 passed, 6 subtests passed``, exit 0.
+                self.assertIn(key, store)
+                self.assertIs(store[key], klass)
+
+        # And the gate still rejects something that is genuinely not a subclass --
+        # the widening must not have turned the check into a no-op.
+        for name, func in (
+            ('engine', register_extractor_engine),
+            ('reassembly', register_extractor_reassembly),
+            ('traceflow', register_extractor_traceflow),
+        ):
+            with self.subTest(kind=name, accepted=False):
+                with self.assertRaises(RegistryError):
+                    func(f'unit-513-reject-{name}', int)  # type: ignore[arg-type]
+
 
 if __name__ == '__main__':
     unittest.main()
