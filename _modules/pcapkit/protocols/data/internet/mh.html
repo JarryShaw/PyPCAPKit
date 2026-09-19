@@ -753,7 +753,8 @@
     <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Key management mobility capability flag.</span>
     <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
-    <span class="c1">#: Lifetime.</span>
+    <span class="c1">#: Lifetime. :rfc:`5568#section-6.2.2` counts this in seconds rather than in</span>
+    <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
@@ -781,7 +782,8 @@
     <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Lifetime.</span>
+    <span class="c1">#: Lifetime. :rfc:`5568#section-6.2.3` counts this in seconds rather than in</span>
+    <span class="c1">#: the units of 4 seconds the binding messages use.</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Enum_Option, Option]'</span>
@@ -1172,11 +1174,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for Binding Refresh Advice option."""</span>
 
-    <span class="c1">#: Refresh interval.</span>
-    <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: Refresh interval before re-registration. Counted on the wire in units of</span>
+    <span class="c1">#: 4 seconds [:rfc:`6275#section-6.2.4`].</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="s1">'timedelta'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

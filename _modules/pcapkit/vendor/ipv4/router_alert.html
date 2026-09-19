@@ -444,8 +444,11 @@
 <span class="sd">            Enumeration fields and missing fields.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: Unlike most IANA registry CSVs, the ``ipv4-router-alert-option-values``</span>
+        <span class="c1"># registry ships with no header row -- its very first row is the ``0`` entry</span>
+        <span class="c1"># (RFC 2113's "Router shall examine packet", the only value that RFC defines).</span>
+        <span class="c1"># Skipping a "header" here silently drops that row; see #492.</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
 
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>

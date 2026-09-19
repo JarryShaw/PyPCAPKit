@@ -1190,7 +1190,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">BindingRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Binding_Refresh_Advice</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for MH binding refresh advice options."""</span>
 
-    <span class="c1">#: Refresh interval.</span>
+    <span class="c1">#: Refresh interval. One time unit is 4 seconds [:rfc:`6275#section-6.2.4`].</span>
     <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -3576,7 +3576,7 @@
         <span class="s1">'L'</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s1">'K'</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">})</span>
-    <span class="c1">#: Lifetime. One time unit is 4 seconds.</span>
+    <span class="c1">#: Lifetime, in seconds [:rfc:`5568#section-6.2.2`].</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
@@ -3621,7 +3621,7 @@
     <span class="p">})</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
-    <span class="c1">#: Lifetime. One time unit is 4 seconds.</span>
+    <span class="c1">#: Lifetime, in seconds [:rfc:`5568#section-6.2.3`].</span>
     <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Mobility options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>

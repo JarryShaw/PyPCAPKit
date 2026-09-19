@@ -2432,8 +2432,11 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            :rfc:`5568#section-6.2.2` states that the FBU is *identical* to the</span>
-<span class="sd">            Mobile IPv6 binding update (BU) message, so the lifetime is read in</span>
-<span class="sd">            units of 4 seconds exactly as in :meth:`_read_msg_bu`.</span>
+<span class="sd">            Mobile IPv6 binding update (BU) message -- but that statement is</span>
+<span class="sd">            about **message layout**, not field units. The same section defines</span>
+<span class="sd">            the Lifetime as "the requested time in seconds", unlike the BU</span>
+<span class="sd">            lifetime's units of 4 seconds [:rfc:`6275#section-6.1.7`], so it is</span>
+<span class="sd">            not scaled on the way in.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed message type schema.</span>
@@ -2453,7 +2456,7 @@
             <span class="n">home</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'H'</span><span class="p">]),</span>
             <span class="n">lla_compat</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'L'</span><span class="p">]),</span>
             <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -2490,6 +2493,11 @@
 <span class="sd">            which is local to this module, rather than being mislabelled as a</span>
 <span class="sd">            :class:`~pcapkit.const.mh.status_code.StatusCode`.</span>
 
+<span class="sd">            The Lifetime is likewise defined by :rfc:`5568#section-6.2.3` as</span>
+<span class="sd">            "the granted lifetime ... in seconds", unlike the BA lifetime's</span>
+<span class="sd">            units of 4 seconds [:rfc:`6275#section-6.1.7`], so it is not scaled</span>
+<span class="sd">            on the way in.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed message type schema.</span>
 <span class="sd">            header: Parsed MH header schema.</span>
@@ -2506,7 +2514,7 @@
             <span class="n">status</span><span class="o">=</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
             <span class="n">key_mngt</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'K'</span><span class="p">]),</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -3368,6 +3376,11 @@
 <span class="sd">           |       Refresh Interval        |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            The Refresh Interval is measured in units of four seconds</span>
+<span class="sd">            [:rfc:`6275#section-6.2.4`], the same unit the BU/BA lifetime uses,</span>
+<span class="sd">            so it is scaled here.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
 <span class="sd">            options: Parsed MH options.</span>
@@ -3382,7 +3395,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRefreshAdviceOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="n">interval</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">interval</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -7408,7 +7421,10 @@
 <span class="sd">            home: Home registration flag.</span>
 <span class="sd">            lla_compat: LLA compatibility flag.</span>
 <span class="sd">            key_mngt: Key management mobility option flag.</span>
-<span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
+<span class="sd">            lifetime: Lifetime, in seconds or as a</span>
+<span class="sd">                :class:`~datetime.timedelta`. Unlike the BU/BA lifetime, this</span>
+<span class="sd">                one counts seconds rather than units of 4 seconds</span>
+<span class="sd">                [:rfc:`5568#section-6.2.2`], so the value is not scaled.</span>
 <span class="sd">            options: Mobility options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -7436,7 +7452,7 @@
                 <span class="s1">'L'</span><span class="p">:</span> <span class="n">lla_compat</span><span class="p">,</span>
                 <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -7464,7 +7480,10 @@
 <span class="sd">            status_reversed: Reverse status code namespace.</span>
 <span class="sd">            key_mngt: Key management mobility option flag.</span>
 <span class="sd">            seq: Sequence number.</span>
-<span class="sd">            lifetime: Lifetime in seconds or timedelta.</span>
+<span class="sd">            lifetime: Lifetime, in seconds or as a</span>
+<span class="sd">                :class:`~datetime.timedelta`. Unlike the BU/BA lifetime, this</span>
+<span class="sd">                one counts seconds rather than units of 4 seconds</span>
+<span class="sd">                [:rfc:`5568#section-6.2.3`], so the value is not scaled.</span>
 <span class="sd">            options: Mobility options.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -7490,7 +7509,7 @@
                 <span class="s1">'K'</span><span class="p">:</span> <span class="n">key_mngt</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lifetime_val</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime_val</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -8349,14 +8368,16 @@
 <div class="viewcode-block" id="MH._make_opt_bra">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_bra">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Option'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_BindingRefreshAdviceOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">interval</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">interval</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_BindingRefreshAdviceOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH binding refresh advice option.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            interval: Refresh interval.</span>
+<span class="sd">            interval: Refresh interval before re-registration, in units of 4</span>
+<span class="sd">                seconds or as a :class:`~datetime.timedelta`</span>
+<span class="sd">                [:rfc:`6275#section-6.2.4`].</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -8364,12 +8385,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">interval</span>
+            <span class="n">interval_val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">interval</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interval_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seconds</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_BindingRefreshAdviceOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval_val</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

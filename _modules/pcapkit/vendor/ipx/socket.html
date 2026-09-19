@@ -493,6 +493,15 @@
 
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+
+        <span class="c1"># NOTE: 0x0000 is not listed as a well-known socket in the Wikipedia</span>
+        <span class="c1"># registry table scraped below, but it is the IPX protocol's own</span>
+        <span class="c1"># default for the ``dst``/``src`` socket field (an ordinary</span>
+        <span class="c1"># "unspecified socket"), so it must be present regardless of what the</span>
+        <span class="c1"># scraped table contains; see #492.</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="s2">"Unspecified socket; this is IPX's own default for the dst/src socket field."</span><span class="p">)</span>
+        <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="se">\n</span><span class="s1">    Unspecified = 0x0000'</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)</span>
 

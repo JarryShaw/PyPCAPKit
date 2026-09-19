@@ -1328,6 +1328,67 @@ captures dump to, so there is a case for taking that churn early and registering
 dissectors later. The third format, the <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6088.html"><strong>RFC 6088</strong></a> traffic selectors of
 <span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>, has no wave at all — it is a registry of its own and
 nobody has claimed it.</p>
+<p><strong>Wave 2 or 3 — per-entry coverage of the option and parameter registries.</strong> The
+option, parameter, block and frame registries are <em>enumerated</em> today but not
+<em>implemented</em> throughout: a code can be registered, and named, and still have no
+working per-entry read/make pair behind it. Measured against the eighteen
+families <code class="file docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code> walks, <strong>327 codes are
+registered and 59 of them do not round-trip</strong> — roughly one in six. The goal of
+this item is to close that to zero for every code whose format is actually
+specified.</p>
+<p>Where the gap sits, from <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Not round-tripping</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcapng-option</span></code></p></td>
+<td><p>30</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tcp-mptcp</span></code></p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ipv4-option</span></code></p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hip-parameter</span></code></p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcapng-block</span></code></p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tcp-option</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapng-secrets</span></code></p></td>
+<td><p>2 each</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hopopt-option</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6-opts-option</span></code>, <code class="docutils literal notranslate"><span class="pre">ipv6-route-type</span></code>, <code class="docutils literal notranslate"><span class="pre">httpv2-frame</span></code></p></td>
+<td><p>1 each</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two things to be precise about before anyone starts. First, <strong>“does not
+round-trip” is not the same as “unimplemented”</strong> — the 59 are a mix, and at
+least one (<code class="docutils literal notranslate"><span class="pre">ipv6-route-type/RPL_Source_Route_Header</span></code>) is an implemented case
+carrying a tracked defect rather than a missing implementation. The first task
+is to split that list into <em>missing</em>, <em>defective</em> and <em>deliberately deferred</em>,
+because the three want different work. Second, <code class="docutils literal notranslate"><span class="pre">pcapng-option</span></code>’s 30 is half
+the total on its own, so it is the item that decides whether this is one wave’s
+work or several; it deserves sizing before the rest.</p>
+<p>This is deliberately <strong>not</strong> the same request as the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> dispatch
+registries. Those name whole protocols, so closing a gap there means
+implementing a dissector — bounded by protocol work that already has its own
+waves above. The option and parameter registries are per-entry formats inside
+protocols that already exist, so the work is self-contained and does not wait on
+anything. Their enumerating harness already exists and already fails when a
+registered code has no case, which is how these 59 are known at all; what is
+missing is the implementations behind the codes, not the accounting of them.
+<code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_registry_unit.py</span></code> gives the <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>
+family the same accounting for the separate question of whether a registered
+protocol’s dispatch reaches it.</p>
 <p><strong>Between wave 1 and wave 2 — a library-wide consistency sweep.</strong> Wave 1 closed
 by clearing defects one at a time, each found because something else was being
 worked on nearby. That is a poor way to find the rest of them, so before wave 2
