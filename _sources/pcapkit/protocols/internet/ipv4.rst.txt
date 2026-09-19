@@ -14,16 +14,19 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== =============================================
   0           0   ``ip.version``          Version (``4``)
   0           4   ``ip.hdr_len``          Internal Header Length (IHL)
-  1           8   ``ip.dsfield.dscp``     Differentiated Services Code Point (DSCP)
-  1          14   ``ip.dsfield.ecn``      Explicit Congestion Notification (ECN)
+  1           8   ``ip.tos.pre``          Precedence
+  1          11   ``ip.tos.del``          Delay
+  1          12   ``ip.tos.thr``          Throughput
+  1          13   ``ip.tos.rel``          Reliability
+  1          14   ``ip.tos.ecn``          Explicit Congestion Notification (ECN)
   2          16   ``ip.len``              Total Length
   4          32   ``ip.id``               Identification
   6          48                           Reserved Bit (must be ``\x00``)
   6          49   ``ip.flags.df``         Don't Fragment (DF)
   6          50   ``ip.flags.mf``         More Fragments (MF)
-  6          51   ``ip.frag_offset``      Fragment Offset
+  6          51   ``ip.offset``           Fragment Offset
   8          64   ``ip.ttl``              Time To Live (TTL)
-  9          72   ``ip.proto``            Protocol (Transport Layer)
+  9          72   ``ip.protocol``         Protocol (Transport Layer)
   10         80   ``ip.checksum``         Header Checksum
   12         96   ``ip.src``              Source IP Address
   16        128   ``ip.dst``              Destination IP Address

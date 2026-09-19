@@ -549,10 +549,10 @@ rather than when a packet is read, so nothing decodes wrongly in the meantime.</
 </section>
 <section id="mobility-header">
 <h3>Mobility Header<a class="headerlink" href="#mobility-header" title="Link to this heading">¶</a></h3>
-<p><strong>Done, bar one option that was already broken.</strong>
+<p><strong>Done.</strong>
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> now decodes and constructs the whole
 registry: <strong>all 24 registered message data types</strong>, <strong>all 4 CGA extensions</strong>, and
-<strong>70 of the 71 registered options</strong>. Every one of them is registered in
+<strong>all 71 registered options</strong>. Every one of them is registered in
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__message__" title="pcapkit.protocols.internet.mh.MH.__message__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__message__</span></code></a>,
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__option__" title="pcapkit.protocols.internet.mh.MH.__option__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__option__</span></code></a> or
 <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a> with both a <code class="docutils literal notranslate"><span class="pre">_read_</span></code>
@@ -561,13 +561,11 @@ and a <code class="docutils literal notranslate"><span class="pre">_make_</span>
 through the public API – <code class="docutils literal notranslate"><span class="pre">make</span></code> then <code class="docutils literal notranslate"><span class="pre">read</span></code> then <code class="docutils literal notranslate"><span class="pre">make</span></code> again reproduces
 the same octets, which
 <code class="file docutils literal notranslate"><span class="pre">tests/protocols/test_option_roundtrip_unit.py</span></code> checks for the whole
-registry. The <strong>four CGA extensions are the exception, and not because of their
-own handlers</strong>: those round-trip when driven directly, but the CGA Parameters
-option is the only thing that can carry a CGA extension on the wire, and that
-option cannot be parsed at all for the reasons below. So all four are recorded
-in that test’s <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> as <code class="docutils literal notranslate"><span class="pre">PARSE</span></code> failures against
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/445">#445</a> rather than claimed
-as working end to end.</p>
+registry. The <strong>four CGA extensions round-trip end to end as well</strong>, which they
+could not do for as long as the CGA Parameters option – the only thing that can
+carry a CGA extension on the wire – was unparsable. Both of the shared
+field-machinery faults behind that have since been fixed, so no <code class="docutils literal notranslate"><span class="pre">mh-extension</span></code>
+entry remains in that test’s <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>.</p>
 <p>The sub-registries turned out to be the easy half, as predicted: binding
 revocation types and triggers, handoff indicators, access network identifier
 sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
@@ -581,23 +579,23 @@ registers neither: the localized routing acknowledgment status codes of
 mobility anchor address option codes of <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a>
 (<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LMAAddressCode" title="pcapkit.protocols.internet.mh.LMAAddressCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">LMAAddressCode</span></code></a>), alongside the two
 <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> sets that were already there.</p>
-<p>What is left, and why:</p>
-<ul>
-<li><p><strong>The CGA Parameters option</strong> (type 12) is the one option still on the generic
-handler, and it is unreachable rather than unimplemented. Two faults in shared
-field machinery stand in the way, both outside the mobility header and both now
-tracked as defects rather than described here:
+<p>The CGA Parameters option (type 12) was the last one left on the generic handler,
+and it is now registered like the rest. It was unreachable rather than
+unimplemented: two faults in shared field machinery stood in the way, both
+outside the mobility header –
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/445">#445</a>, a nested schema
-cannot reach the enclosing packet’s fields by name, and
+could not reach the enclosing packet’s fields by name, and
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/446">#446</a>, a
 <a class="reference internal" href="pcapkit/corekit/fields/misc.html#pcapkit.corekit.fields.misc.ForwardMatchField" title="pcapkit.corekit.fields.misc.ForwardMatchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardMatchField</span></code></a>’s non-consuming bytes
-count towards the schema’s length. Both have to be fixed for this option to
-parse, which is why the half-fix was reverted rather than shipped;
-<code class="docutils literal notranslate"><span class="pre">test_mh_cga_parameters_option_is_unparsable_upstream</span></code> pins the current
-behaviour so the day it starts working is visible. This option is also what
-makes the whole <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a>
-registry unreachable, since it is the only carrier a CGA extension has –
-fixing it turns four <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entries green at once.</p></li>
+counted towards the schema’s length. Both had to be fixed for this option to
+parse, which is why the half-fix was reverted rather than shipped; they landed
+separately, and <code class="docutils literal notranslate"><span class="pre">test_mh_cga_parameters_option_now_parses</span></code> is the pinning test
+renamed to record it. Fixing the option reached the whole
+<a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__extension__" title="pcapkit.protocols.internet.mh.MH.__extension__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__extension__</span></code></a> registry with it, since
+it is the only carrier a CGA extension has – four <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entries
+went green at once.</p>
+<p>What is left, and why:</p>
+<ul>
 <li><p><strong>Payloads that belong to another protocol</strong> are carried opaquely for now. The
 multicast options (54, 56, 57, 60 and 61) embed <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3810.html"><strong>RFC 3810</strong></a> MLD or <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3376.html"><strong>RFC 3376</strong></a>
 IGMP address records, and the traffic selectors of <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6089.html"><strong>RFC 6089</strong></a> and <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7222.html"><strong>RFC 7222</strong></a>
@@ -690,10 +688,11 @@ RARP, IPv4, IPv6, IPX and both VLAN tags.</p></li>
 21 to FTP, port 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
 The two counts differ because 80 and 8080 are each bound twice, once per
 transport.</p></li>
-<li><p><strong>none of the 75</strong>
+<li><p><strong>2 of the 75</strong>
 <a class="reference internal" href="pcapkit/const/sctp.html#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a>
-values. <a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a> ships empty, so every DATA
-chunk payload is <code class="docutils literal notranslate"><span class="pre">Raw</span></code> until something calls
+values, in <a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code></a>: PPIDs 60 and 66, both to
+<a class="reference internal" href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code></a>. Every other DATA chunk
+payload is <code class="docutils literal notranslate"><span class="pre">Raw</span></code> until something calls
 <a class="reference internal" href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp" title="pcapkit.foundation.registry.protocols.register_sctp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_sctp()</span></code></a>.</p></li>
 </ul>
 <p>Most of those want a dissector written and are covered by the stub list above.
@@ -758,8 +757,9 @@ the same ports at <a class="reference internal" href="pcapkit/protocols/applicat
 asymmetry predates the 8080 entries. Reconciling it changes what existing
 captures parse to, so it wants its own change and its own decision, which is
 why it is asked for here. The separate defect that <code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit
-<code class="docutils literal notranslate"><span class="pre">version=</span></code> path is unusable is tracked as
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/447">#447</a>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">version=</span></code> path was unusable –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/447">#447</a> – has since been
+fixed, and is no longer part of this request.</p></li>
 </ul>
 <p>Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
@@ -797,24 +797,31 @@ them again: <a class="reference internal" href="pcapkit/corekit/infoclass.html#p
 suspect – is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 <code class="docutils literal notranslate"><span class="pre">%s</span></code>. The IO-batching idea the thread proposed was never the bottleneck.</p>
-<p>Three larger wins remain, all outside the parse path and each wanting its own
-review:</p>
+<p>Of the three larger wins this section listed, all outside the parse path, one has
+landed in full and the other two in part:</p>
 <ul class="simple">
-<li><p><strong>The flow dumper reopens its output file once per frame</strong> and rebuilds a whole
+<li><p><strong>The flow dumper reopens its output file once per frame</strong>
+(<code class="docutils literal notranslate"><span class="pre">pcapkit/dumpkit/pcap.py:120</span></code>). It no longer <em>also</em> rebuilds a whole
 <a class="reference internal" href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> to obtain bytes it already
-holds (<code class="docutils literal notranslate"><span class="pre">pcapkit/dumpkit/pcap.py:94,128</span></code>). That is 80% of the flow-tracing
-cost, and a counterfactual left 330 of 331 output files byte-identical. This is
-the best-evidenced and lowest-risk piece of work on this page.</p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code>
-<strong>runs eagerly on every frame, fragmented or not</strong>, because
-<code class="docutils literal notranslate"><span class="pre">pcapkit/toolkit/pcap.py:53</span></code> filters only on the <em>DF</em> flag. A capture with no
-fragments at all still produces one “datagram” per frame – 86% of the
-IP-reassembly cost plus a 133 ms garbage-collection bill. Making the <code class="docutils literal notranslate"><span class="pre">packet</span></code>
-field lazy is mechanical; whether unfragmented frames should be emitted at all
-is a design question worth settling first.</p></li>
-<li><p><strong>Every option is parsed twice</strong> (<code class="docutils literal notranslate"><span class="pre">pcapkit/corekit/fields/collections.py:262-270</span></code>):
-2274 schema unpacks for 1137 options, the pre-parse always discarded. About
-15% of a PCAP-NG extraction, and the riskiest of the three.</p></li>
+holds: dropping that re-dissection was about 82% of the cost of a flow-traced
+extraction by itself, and the counterfactual that proposed it had left 330 of
+331 output files byte-identical. The reopen is what remains.</p></li>
+<li><p><strong>A datagram is submitted for every frame, fragmented or not</strong>, because
+<code class="docutils literal notranslate"><span class="pre">pcapkit/toolkit/pcap.py:53</span></code> filters only on the <em>DF</em> flag – so a capture
+with no fragments at all still produces one “datagram” per frame. Parsing its
+payload is no longer part of that cost:
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code> used to run eagerly on
+each one, 86% of the IP-reassembly cost plus a 133 ms garbage-collection bill,
+and <a class="reference internal" href="pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a> is now a
+<a class="reference internal" href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> parsed on first
+read. Whether unfragmented frames should be emitted at all is the design
+question that is left, and it is worth settling deliberately.</p></li>
+<li><p><strong>Done.</strong> Every option was parsed twice – 2274 schema unpacks for 1137
+options, the pre-parse always discarded, about 15% of a PCAP-NG extraction.
+<a class="reference internal" href="pcapkit/corekit/fields/collections.html#pcapkit.corekit.fields.collections.OptionField" title="pcapkit.corekit.fields.collections.OptionField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionField</span></code></a> now reads only the
+base schema’s type field to choose the option schema, rather than unpacking the
+whole base schema and throwing it away
+(<code class="docutils literal notranslate"><span class="pre">pcapkit/corekit/fields/collections.py:402-420</span></code>).</p></li>
 </ul>
 <p>Two traps for anyone benchmarking this library. <code class="docutils literal notranslate"><span class="pre">reassembly=True</span></code> and
 <code class="docutils literal notranslate"><span class="pre">trace=True</span></code> are <strong>no-ops</strong> without <code class="docutils literal notranslate"><span class="pre">ip=</span></code>/<code class="docutils literal notranslate"><span class="pre">tcp=</span></code>, so a benchmark that passes
@@ -950,7 +957,7 @@ each engine has a matching module.</p>
 </section>
 <section id="test-cases">
 <h2>Test Cases<a class="headerlink" href="#test-cases" title="Link to this heading">¶</a></h2>
-<p><strong>Largely done.</strong> There is now a systematic test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code> – 91
+<p><strong>Largely done.</strong> There is now a systematic test suite under <code class="docutils literal notranslate"><span class="pre">tests/</span></code> – 105
 modules matching <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code> – and it runs in CI against Python 3.10
 through 3.14, plus an allowed-to-fail 3.15 leg, per
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code>.</p>
@@ -969,7 +976,7 @@ have no implementation yet.</p>
 <p>The original ask also included <strong>shipping the suite</strong>, and that is now a
 deliberate decision rather than an omission. <code class="docutils literal notranslate"><span class="pre">tests</span></code> is excluded from the wheel
 by <code class="docutils literal notranslate"><span class="pre">[tool.setuptools.packages.find]</span></code> in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>; the sdist does carry
-all 91 modules, so a distribution packager building from source has them. The
+all 105 modules, so a distribution packager building from source has them. The
 wheel stays lean because the suite could not run from an installed package
 anyway: the generated sample captures are not shipped, and <code class="docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>
 resolves paths from a repository root that an installed package does not have.
@@ -982,7 +989,8 @@ Anyone wanting to run the tests wants the repository, which is where they are.</
 IPv4 and IPv6 share the <span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> procedure, and TCP uses the <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
-back together, and <code class="docutils literal notranslate"><span class="pre">sctp</span></code> appears nowhere in <a class="reference internal" href="pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> at all.</p>
+back together, and <code class="docutils literal notranslate"><span class="pre">sctp</span></code> appears nowhere in
+<a class="reference internal" href="pcapkit/foundation/reassembly/index.html#module-pcapkit.foundation.reassembly" title="pcapkit.foundation.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly</span></code></a> at all.</p>
 <p>What that costs is concrete. The dissector already exposes everything a
 reassembler needs, on
 <a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.data.transport.sctp.DATAChunk" title="pcapkit.protocols.data.transport.sctp.DATAChunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">DATAChunk</span></code></a> – <code class="docutils literal notranslate"><span class="pre">tsn</span></code>,
@@ -1203,7 +1211,7 @@ rather than as a side effect of a checksum patch.</p>
 </section>
 <section id="release-plan-1-5-0-in-two-steps">
 <h2>Release Plan — 1.5.0 in Two Steps<a class="headerlink" href="#release-plan-1-5-0-in-two-steps" title="Link to this heading">¶</a></h2>
-<p>The version in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code>, and the release is sequenced
+<p>The version in <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code>, and the release is sequenced
 against the waves above in two deliberate steps:</p>
 <ol class="arabic simple">
 <li><p><strong>A beta — ``1.5.0b1`` — when wave 1’s remaining issues are closed.</strong>
@@ -1212,8 +1220,9 @@ defect tail in <a class="reference external" href="https://github.com/JarryShaw/
 beta rather than a final release, because the consistency sweep below had not
 run yet and was expected to find things. It has since found some: the
 ipv6-route packing test was added only because the fix it covers had shipped
-untested, and the <cite>IPv6_Route</cite> Source-Route round-trip defect was found
-sideways while writing it.</p></li>
+untested, and the
+<a class="reference internal" href="pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a> Source-Route
+round-trip defect was found sideways while writing it.</p></li>
 <li><p><strong>The official ``1.5.0`` when the post-wave-1 consistency sweep is done.</strong> The
 sweep is described under <a class="reference internal" href="#delivery-sequence">Delivery Sequence</a> below — prose against code,
 missing tests, unaligned changes, and packet formats against the
@@ -1261,12 +1270,17 @@ then tags and publishes. So:</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
 <td><p>marked prerelease</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> (step 1, <strong>current</strong>)</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> (step 1)</p></td>
 <td><p>yes</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
 <td><p>marked prerelease</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> (step 2)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (<strong>current</strong>)</p></td>
+<td><p>yes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p></td>
+<td><p>marked prerelease</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.5.0</span></code> (step 2)</p></td>
 <td><p><strong>no</strong></p></td>
 <td><p><strong>``main``</strong></p></td>
 <td><p>full release</p></td>
