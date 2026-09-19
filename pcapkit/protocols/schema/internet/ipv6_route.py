@@ -62,6 +62,33 @@ def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
     return 4 + hdr_ext_len * 8
 
 
+def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
+    """Total length, in octets, of the on-the-wire IPv6-Route header for a given ``Hdr Ext Len``.
+
+    This is the fixed 4 octets of ``next``/``length``/``type``/``seg_left``
+    plus the type-specific data computed by :func:`ipv6_route_data_length`,
+    i.e. ``4 + (4 + 8 * hdr_ext_len)`` -- a *different* quantity from
+    :func:`ipv6_route_data_length` itself (``8 + 8 * hdr_ext_len`` here vs.
+    ``4 + 8 * hdr_ext_len`` there), not a duplicate of it. It is what each
+    ``_read_data_type_*`` in
+    :mod:`pcapkit.protocols.internet.ipv6_route` reports back as the parsed
+    route data's own ``.length``, which :meth:`~pcapkit.protocols.internet.
+    ipv6_route.IPv6_Route.read` then subtracts from the outer packet length
+    to find the next layer's length. #489 unified the write side
+    (:meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`)
+    into one helper; this is the matching read-side helper for the total
+    header length, finishing that half of #487/#489.
+
+    Args:
+        hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.
+
+    Returns:
+        Total length, in octets, of the on-the-wire IPv6-Route header.
+
+    """
+    return 4 + ipv6_route_data_length(hdr_ext_len)
+
+
 def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`IPv6_Route.data` field.
 

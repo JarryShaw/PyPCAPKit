@@ -460,6 +460,37 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         bin_ = bin(kind)[2:].zfill(8)
         return int(bin_[:2], base=2), bool(int(bin_[2], base=2))
 
+    @staticmethod
+    def _ipv6_opts_option_length(schema_len: 'int') -> 'int':
+        """Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.
+
+        Per :rfc:`8200#section-4.3`, an option's ``Opt Data Len`` field
+        (what each ``Schema_*Option.len`` here holds) counts *"the length of
+        the Option Data field of this option, in octets"* -- i.e. it
+        excludes the Option Type and Opt Data Len fields themselves, so the
+        whole option, which is what every ``_read_opt_*`` below reports back
+        as the parsed option's own ``.length``, is two octets more. This is
+        the exact ``+2``/``-2`` mismatch #398 fixed independently in six
+        places (see ``Data_PadOption.length`` vs. ``Schema_PadOption.length``
+        below, at the surviving explanation of that fix); collecting the
+        read-side half of it into one helper is so a future fix to this
+        arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
+        precisely the mismatch #398 fixed.
+
+        Note that only the *stored-length* read-side call sites are
+        collected here -- most ``_make_opt_*`` methods recompute the wire
+        ``Opt Data Len`` from ``len(value)`` rather than reading a parsed
+        ``.length`` back, so they have nothing to unify against this helper.
+
+        Args:
+            schema_len: raw ``Opt Data Len`` field value, as read off the wire.
+
+        Returns:
+            Whole-option length, in octets, including the Type and Opt Data Len fields.
+
+        """
+        return schema_len + 2
+
     def _read_ipv6_opts(self, length: 'int') -> 'Option':
         """Read IPv6-Opts options.
 
@@ -520,7 +551,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             data=schema.data,
         )
         return opt
@@ -581,7 +612,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         if code == Enum_Option.Pad1:
             _size = 1
         else:
-            _size = schema.len + 2
+            _size = self._ipv6_opts_option_length(schema.len)
 
         opt = Data_PadOption(
             type=schema.type,
@@ -622,7 +653,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             limit=schema.limit,
         )
         return opt
@@ -656,7 +687,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             value=schema.alert,
         )
         return opt
@@ -698,7 +729,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             domain=schema.domain,
             cmpt_len=schema.cmpt_len * 4,
             level=schema.level,
@@ -765,7 +796,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
-                length=schema.len + 2,
+                length=self._ipv6_opts_option_length(schema.len),
                 dpd_type=mode,
                 tid_type=tid_type,
                 tid_len=tid_len,
@@ -780,7 +811,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
-                length=schema.len + 2,
+                length=self._ipv6_opts_option_length(schema.len),
                 dpd_type=mode,
                 hav=schema.hav,
             )
@@ -823,7 +854,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             scaledtlr=schema.scaledtlr,
             scaledtls=schema.scaledtls,
             psntp=schema.psntp,
@@ -887,7 +918,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
-                length=schema_req.len + 2,
+                length=self._ipv6_opts_option_length(schema_req.len),
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
@@ -901,7 +932,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 type=schema.type,
                 action=Enum_OptionAction.get(schema.type >> 6),
                 change=bool(schema.type & 0b00100000),
-                length=schema_rep.len + 2,
+                length=self._ipv6_opts_option_length(schema_rep.len),
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce['nonce'],
@@ -945,7 +976,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             flags=Data_RPLFlags(
                 down=bool(schema.flags['down']),
                 rank_err=bool(schema.flags['rank_err']),
@@ -1006,7 +1037,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             seed_type=kind,
             flags=Data_MPLFlags(
                 max=bool(schema.flags['max']),
@@ -1044,7 +1075,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             nonce=schema.nonce,
         )
         return opt
@@ -1076,7 +1107,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             line_id_len=schema.id_len,
             line_id=schema.id,
         )
@@ -1113,7 +1144,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             jumbo_len=schema.jumbo_len,
         )
         return opt
@@ -1157,7 +1188,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             address=schema.addr,
         )
         return opt
@@ -1195,7 +1226,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             type=schema.type,
             action=Enum_OptionAction.get(schema.type >> 6),
             change=bool(schema.type & 0b00100000),
-            length=schema.len + 2,
+            length=self._ipv6_opts_option_length(schema.len),
             version=schema.flags['ver'],
             flags=Data_DFFFlags(
                 dup=bool(schema.flags['dup']),
