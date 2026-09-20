@@ -1582,6 +1582,16 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid timestamp value: {timestamp}')
             pointer = 5 + len(ts_list) * 4
 
+        # NOTE: ``ts_data``, the name of the field on
+        # :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, and not the
+        # ``data`` this used to pass. ``data`` is the attribute that schema's
+        # ``post_process`` *derives* from ``ts_data``, so naming it here dropped
+        # every timestamp: :meth:`Schema.__update__
+        # <pcapkit.protocols.schema.schema.Schema.__update__>` warns
+        # ``UnknownFieldWarning`` for a name it does not know and carries on, which
+        # left ``ts_data`` bound to its class-level ``ListField`` -- and made the
+        # IPv4 Timestamp option unbuildable through ``make``, since
+        # ``post_process`` then iterated the field object itself. See #552.
         return Schema_TSOption(
             type=kind,
             length=length,
@@ -1590,7 +1600,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'oflw': overflow,
                 'flag': flag,
             },
-            data=ts_list,
+            ts_data=ts_list,
         )
 
     def _make_opt_e_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_ESECOption]' = None, *,
