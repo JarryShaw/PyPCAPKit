@@ -1,0 +1,5 @@
+0.15.3 -- 2020-08-17
+====================
+
+* **Fixed** -- ARP parsing (#55).
+* **Added** -- logging, through a ``pcapkit`` logger.

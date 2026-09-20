@@ -770,4 +770,4 @@ Data Models
 
 .. rubric:: Footnotes
 
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html

@@ -25,6 +25,21 @@ vendor crawlers include:
    * - :class:`PCAPNG_FilterType <pcapkit.vendor.pcapng.filter_type.FilterType>`
      - Filter Types [*]_
 
+.. note::
+
+   The three crawlers that scrape a registry table --
+   :class:`BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`,
+   :class:`OptionType <pcapkit.vendor.pcapng.option_type.OptionType>` and
+   :class:`RecordType <pcapkit.vendor.pcapng.record_type.RecordType>` -- all read
+   revision ``-03`` of the draft, as each one's ``LINK`` below shows. They used to
+   read ``https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html``, which
+   is dead: measured 2026-09-19 as a 404 under any User-Agent. The revision number
+   was wrong as well as the path -- ``-02`` renders its registries as ASCII art
+   inside ``<pre>`` and carries no registry ``<table>`` at all, so the ``table-1``
+   through ``table-10`` ids the three crawlers select on first exist in ``-03``,
+   where the registries became real tables. The footnotes below point at ``-03``
+   for the same reason. See #518.
+
 Block Types
 ===========
 
@@ -111,10 +126,10 @@ which is automatically generating :class:`pcapkit.const.pcapng.filter_type.Filte
 
 .. rubric:: Footnotes
 
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-flags
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block

@@ -1,0 +1,13 @@
+1.4.1 -- 2026-08-22
+===================
+
+Release engineering only -- no library behaviour changed.
+
+* **Added** -- a unit-test CI workflow, and the packaging, vendor-cron and
+  documentation workflows are now gated on it, so a release can no longer be cut
+  from a tree whose tests fail.
+* **Changed** -- the vendor cron refuses to publish when the registry update
+  itself failed, rather than shipping a half-refreshed release.
+* **Fixed** -- unit-test compatibility on Python 3.10.
+
+*Also released:* ``1.4.1.post1``, ``1.4.1.post2`` (through 2026-09-12).
