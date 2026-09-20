@@ -573,8 +573,19 @@ class _MPTCP(Schema):
     """Header schema for Multipath TCP options in a generic representation."""
 
     #: Subtype and flags.
+    #:
+    #: The forward match is anchored at the option's first octet, not after the
+    #: option header: this schema is what :data:`Option.registry` dispatches to
+    #: for ``kind == Multipath_TCP`` and, unlike the other option schemas, it
+    #: does not inherit :class:`Option` and so consumes ``kind`` and ``length``
+    #: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,
+    #: ``length`` in bits 8-15, and the subtype in bits 16-19 of this 3-octet
+    #: window -- which is why ``subtype`` reads from bit 16 and ``length`` has
+    #: to read from bit 8. It read from bit 1 until #553, straddling the low
+    #: seven bits of ``kind`` and the high bit of ``length``, so a 12-octet
+    #: MP_CAPABLE (``1e 0c 01``) decoded its length as 60.
     test: 'MPTCPSubtypeTest' = ForwardMatchField(BitField(length=3, namespace={
-        'length': (1, 8),
+        'length': (8, 8),
         'subtype': (16, 4),
     }))
     #: Subtype-specific data.
