@@ -1393,6 +1393,9 @@
 <span class="sd">            ProtocolError: If length is **NOT** multiply of ``8`` plus ``2``.</span>
 
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SACK</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
@@ -3651,8 +3654,8 @@
 <span class="sd">            dsn: data sequence number</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                Constructed option schema.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -3681,8 +3684,8 @@
 <span class="sd">            key: option receiver's key</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                Constructed option schema.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

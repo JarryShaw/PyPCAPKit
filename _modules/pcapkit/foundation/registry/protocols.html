@@ -1021,7 +1021,7 @@
 <span class="c1"># NOTE: pcapkit.protocols.internet.mh.MH.__extension__</span>
 <div class="viewcode-block" id="register_mh_extension">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_mh_extension">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'MH_CGAExtension'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]'</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_mh_extension</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'MH_CGAExtension'</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[Schema_MH_CGAExtension]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Register a CGA extension parser.</span>
 

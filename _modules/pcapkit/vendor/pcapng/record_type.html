@@ -478,8 +478,9 @@
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 0xFFFF'</span>
-    <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span>
+    <span class="c1">#: Link to registry. See :mod:`pcapkit.vendor.pcapng.block_type` for why this</span>
+    <span class="c1">#: is the ``-03`` revision in the immutable I-D archive; see #518.</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count field records."""</span>

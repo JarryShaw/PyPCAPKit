@@ -666,6 +666,17 @@
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)</span>
 
+            <span class="c1"># NOTE: MediaWiki renders a trailing ``|-`` row separator in the</span>
+            <span class="c1"># wikitext as an empty ``&lt;tr class="mw-empty-elt"&gt;``, which revision</span>
+            <span class="c1"># 1354125851 of the article carries at the end of this table. It has</span>
+            <span class="c1"># no cells at all, so reading ``line[0]`` raised ``IndexError`` and</span>
+            <span class="c1"># took the whole crawler down. Skipping cell-less rows is the fix</span>
+            <span class="c1"># rather than indexing defensively further down, because a row that</span>
+            <span class="c1"># cannot supply both a code and an explanation has nothing to</span>
+            <span class="c1"># contribute either way; see #518.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="n">code</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="k">continue</span>

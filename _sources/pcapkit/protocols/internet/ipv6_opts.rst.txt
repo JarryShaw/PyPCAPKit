@@ -191,14 +191,17 @@ Type Stubs
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
+   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
+   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
+   :no-index:
    :members:
    :show-inheritance:
 

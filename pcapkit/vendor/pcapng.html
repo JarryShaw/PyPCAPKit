@@ -492,6 +492,21 @@ vendor crawlers include:</p>
 </tbody>
 </table>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The three crawlers that scrape a registry table –
+<a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType" title="pcapkit.vendor.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockType</span></code></a>,
+<a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType" title="pcapkit.vendor.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
+<a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="pcapkit.vendor.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a> – all read
+revision <code class="docutils literal notranslate"><span class="pre">-03</span></code> of the draft, as each one’s <code class="docutils literal notranslate"><span class="pre">LINK</span></code> below shows. They used to
+read <code class="docutils literal notranslate"><span class="pre">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html</span></code>, which
+is dead: measured 2026-09-19 as a 404 under any User-Agent. The revision number
+was wrong as well as the path – <code class="docutils literal notranslate"><span class="pre">-02</span></code> renders its registries as ASCII art
+inside <code class="docutils literal notranslate"><span class="pre">&lt;pre&gt;</span></code> and carries no registry <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code> at all, so the <code class="docutils literal notranslate"><span class="pre">table-1</span></code>
+through <code class="docutils literal notranslate"><span class="pre">table-10</span></code> ids the three crawlers select on first exist in <code class="docutils literal notranslate"><span class="pre">-03</span></code>,
+where the registries became real tables. The footnotes below point at <code class="docutils literal notranslate"><span class="pre">-03</span></code>
+for the same reason. See #518.</p>
+</div>
 <section id="module-pcapkit.vendor.pcapng.block_type">
 <span id="block-types"></span><h2>Block Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.block_type" title="Link to this heading">¶</a></h2>
 <p>This module contains the vendor crawler for <strong>Block Types</strong>,
@@ -509,7 +524,7 @@ which is automatically generating <a class="reference internal" href="../const/p
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.block_type.BlockType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.block_type.BlockType.LINK" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.block_type.BlockType.LINK" title="Link to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -551,8 +566,9 @@ which is automatically generating <a class="reference internal" href="../const/p
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.option_type.OptionType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType.LINK" title="Link to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry. See <a class="reference internal" href="#module-pcapkit.vendor.pcapng.block_type" title="pcapkit.vendor.pcapng.block_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.block_type</span></code></a> for why this
+is the <code class="docutils literal notranslate"><span class="pre">-03</span></code> revision in the immutable I-D archive; see #518.</p>
 </dd></dl>
 
 </dd></dl>
@@ -575,8 +591,9 @@ which is automatically generating <a class="reference internal" href="../const/p
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.pcapng.record_type.RecordType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType.LINK" title="Link to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'</span></span><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType.LINK" title="Link to this definition">¶</a></dt>
+<dd><p>Link to registry. See <a class="reference internal" href="#module-pcapkit.vendor.pcapng.block_type" title="pcapkit.vendor.pcapng.block_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.block_type</span></code></a> for why this
+is the <code class="docutils literal notranslate"><span class="pre">-03</span></code> revision in the immutable I-D archive; see #518.</p>
 </dd></dl>
 
 </dd></dl>
@@ -639,31 +656,31 @@ which is automatically generating <a class="reference internal" href="../const/p
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id8" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod</a></p>
 </aside>
 <aside class="footnote brackets" id="id9" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options</a></p>
 </aside>
 <aside class="footnote brackets" id="id10" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-flags">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-flags</a></p>
 </aside>
 <aside class="footnote brackets" id="id11" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">§</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block</a></p>
 </aside>
 <aside class="footnote brackets" id="id12" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">¶</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block</a></p>
 </aside>
 <aside class="footnote brackets" id="id13" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">#</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block</a></p>
 </aside>
 <aside class="footnote brackets" id="id14" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">♠</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block</a></p>
+<p><a class="reference external" href="https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block">https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block</a></p>
 </aside>
 </aside>
 </section>

@@ -1138,12 +1138,28 @@
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">):</span>
+                <span class="c1"># NOTE: ``ProtocolBase``, not ``Protocol``. The two were one class</span>
+                <span class="c1"># until the metaclass revision split them, which renamed the base to</span>
+                <span class="c1"># ``ProtocolBase`` and kept ``Protocol`` as a thin subclass that adds</span>
+                <span class="c1"># auto-registration for externally defined engines. Every module under</span>
+                <span class="c1"># ``pcapkit.protocols.schema`` was updated to import the base under the</span>
+                <span class="c1"># old name; this one was missed, because its import is a runtime import</span>
+                <span class="c1"># inside a method rather than a ``TYPE_CHECKING`` one at module level.</span>
+                <span class="c1"># No protocol in the library subclasses ``Protocol``, so the branch</span>
+                <span class="c1"># below had been unreachable ever since: handing a payload field any</span>
+                <span class="c1"># protocol instance -- which is exactly what :meth:`ProtocolBase._make_payload</span>
+                <span class="c1"># &lt;pcapkit.protocols.protocol.ProtocolBase._make_payload&gt;` returns, and</span>
+                <span class="c1"># what ``make``'s own ``bytes | Protocol | Schema`` signature advertises</span>
+                <span class="c1"># -- fell through to the ``ProtocolUnbound`` below instead of being</span>
+                <span class="c1"># packed. That is what stopped ``from_data`` reconstructing any parsed</span>
+                <span class="c1"># packet. An external ``Protocol`` subclass is still a ``ProtocolBase``,</span>
+                <span class="c1"># so nothing that worked before is affected. See #506.</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> \
-                    <span class="n">Protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+                    <span class="n">ProtocolBase</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
                 <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>

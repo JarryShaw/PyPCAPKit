@@ -464,23 +464,136 @@
 <span class="c1">###############################################################################</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">bs4</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.vendor.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vendor</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span>
-
 <span class="c1">###############################################################################</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 <span class="c1">###############################################################################</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Packet'</span><span class="p">]</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># NOTE: this crawler no longer crawls, and the registry below is maintained by</span>
+<span class="c1"># hand; see #518. It is the same failure, on the same article and the same</span>
+<span class="c1"># removal revision, that retired the sibling socket crawler in #507.</span>
+<span class="c1">#</span>
+<span class="c1"># It used to scrape the packet-type table out of</span>
+<span class="c1"># https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure,</span>
+<span class="c1"># and two separate things broke that. Wikipedia now answers ``requests``'</span>
+<span class="c1"># default ``python-requests/&lt;version&gt;`` User-Agent with HTTP 403 (measured</span>
+<span class="c1"># 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent, 200</span>
+<span class="c1"># and 114117 bytes for a descriptive one). That half is fixed in</span>
+<span class="c1"># ``Vendor._request``, which now sends the descriptive agent</span>
+<span class="c1"># :func:`~pcapkit.vendor.default.get_user_agent` builds -- but it only gets the</span>
+<span class="c1"># crawler as far as a page that no longer holds the data. The table was deleted</span>
+<span class="c1"># from the article on 2026-08-25, in revision 1371327031 ("deleted some</span>
+<span class="c1"># irrelevant technical tables"), leaving the live page (revision 1372814585)</span>
+<span class="c1"># with a single ``wikitable`` -- the IPX header format one, headers</span>
+<span class="c1"># ``['Octets', 'Field']`` -- so that ``find_all('table', class_='wikitable')[1]``</span>
+<span class="c1"># raises ``IndexError`` even once the fetch succeeds.</span>
+<span class="c1">#</span>
+<span class="c1"># Pointing ``LINK`` at the last revision that still carries the table</span>
+<span class="c1"># (``oldid=1368657333``, re-measured 2026-09-19: 200, 118834 bytes, 4</span>
+<span class="c1"># ``wikitable``s, ``table[1]`` headers ``['Value', 'Meaning/Protocol']``, 8 body</span>
+<span class="c1"># rows) would have worked, and running the old ``process()`` against it</span>
+<span class="c1"># reproduces the committed constant file byte for byte. It is still the wrong</span>
+<span class="c1"># fix: a network fetch pinned to a frozen snapshot is all of the fragility of a</span>
+<span class="c1"># crawler with none of the freshness, and it would go on selecting a table by</span>
+<span class="c1"># index out of a document that nothing stops from changing shape again.</span>
+<span class="c1">#</span>
+<span class="c1"># What settles it is that the registry is closed. IPX packet types were Novell's</span>
+<span class="c1"># to assign -- :rfc:`1362`, :rfc:`1551` and :rfc:`1634` all say "Packet Types</span>
+<span class="c1"># also need to be assigned by Novell" -- and there is no longer a Novell to</span>
+<span class="c1"># assign them. IPX will not gain new packet types, so there is nothing for a</span>
+<span class="c1"># crawler to pick up on its next run.</span>
+<span class="c1">#</span>
+<span class="c1"># The table below is therefore transcribed from that last revision that carried</span>
+<span class="c1"># it, row for row, and each entry names the primary source for the assignment</span>
+<span class="c1"># where one exists.</span>
+<span class="c1">###############################################################################</span>
+
+<span class="c1">#: IPX packet type registry, transcribed from the last revision of the Wikipedia</span>
+<span class="c1">#: article that still carried the table,</span>
+<span class="c1">#: https://en.wikipedia.org/w/index.php?title=Internetwork_Packet_Exchange&amp;oldid=1368657333</span>
+<span class="c1">#:</span>
+<span class="c1">#: Maps a packet type to the enumeration name it takes and the comment rendered</span>
+<span class="c1">#: above it. Names go through :meth:`~Vendor.rename`, so the generated member is</span>
+<span class="c1">#: the :meth:`~Vendor.safe_name` of the first element; comments are stored as the</span>
+<span class="c1">#: scrape rendered them, reStructuredText markup and all, since the prose-mangling</span>
+<span class="c1">#: the old ``process()`` did to Wikipedia's cell text has no source left to mangle.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Every value below is independently corroborated by Wireshark's IPX dissector,</span>
+<span class="c1">#: ``epan/dissectors/packet-ipx.h`` (fetched 2026-09-19), which defines</span>
+<span class="c1">#: ``IPX_PACKET_TYPE_IPX 0``, ``_RIP 1``, ``_ECHO 2``, ``_ERROR 3``, ``_PEP 4``,</span>
+<span class="c1">#: ``_SPX 5``, ``_NCP 17`` and ``_WANBCAST 20`` -- the same eight values in the</span>
+<span class="c1">#: same order. Types 1-5 are inherited from Xerox XNS IDP, which IPX was derived</span>
+<span class="c1">#: from; no RFC assigns them, and the notes below say so where that is the case.</span>
+<span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># NOTE: not a protocol assignment. The scraped table listed 0 as "Unknown",</span>
+    <span class="c1"># and it doubles as the IPX protocol's own default for the ``type`` field.</span>
+    <span class="c1"># Wireshark calls the same value plain ``IPX``. The archived revision is the</span>
+    <span class="c1"># only source for the word "Unknown".</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Unknown'</span><span class="p">,</span> <span class="s1">'Unknown'</span><span class="p">),</span>
+
+    <span class="c1"># :rfc:`1582` ("Extensions to RIP to Support Demand Circuits", 1994) and</span>
+    <span class="c1"># :rfc:`2091` ("Triggered Extensions to RIP to Support Demand Circuits",</span>
+    <span class="c1"># 1997) are the citation the article itself carried, and they do describe</span>
+    <span class="c1"># IPX RIP -- "the Routing Information Protocol (RIP) which runs over the</span>
+    <span class="c1"># Internetwork Packet Exchange (IPX) protocol using socket number 453h".</span>
+    <span class="c1"># Note honestly that they extend IPX RIP rather than assign it packet type</span>
+    <span class="c1"># 1; for the assignment they defer to Novell, "IPX Router Specification",</span>
+    <span class="c1"># Version 1.10, October 1992, which :rfc:`1582` lists as reference [3].</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">'RIP'</span><span class="p">,</span> <span class="s1">'``RIP``, Routing Information Protocol ([:rfc:`1582`], [:rfc:`2091`])'</span><span class="p">),</span>
+
+    <span class="c1"># XNS IDP inheritances. The archived revision is the only source found for</span>
+    <span class="c1"># these two names: no RFC and no Novell document reachable today lists</span>
+    <span class="c1"># either against a packet-type number. Wireshark corroborates the values as</span>
+    <span class="c1"># ``ECHO 2`` and ``ERROR 3``.</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Echo Packet'</span><span class="p">,</span> <span class="s1">'Echo Packet'</span><span class="p">),</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Error Packet'</span><span class="p">,</span> <span class="s1">'Error Packet'</span><span class="p">),</span>
+
+    <span class="c1"># NOTE: the best-sourced row in the table, by a distance. :rfc:`1362`,</span>
+    <span class="c1"># :rfc:`1551` and :rfc:`1634` all state "The packets use the IPX defined</span>
+    <span class="c1"># packet type 04 defining a Packet Exchange Packet", and tabulate it as</span>
+    <span class="c1"># ``| Packet Type | 04 | Packet Exchange Packet |``. :rfc:`1791` adds "UDP</span>
+    <span class="c1"># over IPX uses the IPX packet type 4, a normal IPX packet type" and "TCP,</span>
+    <span class="c1"># like UDP, uses IPX packet type 4". :rfc:`1132` gives it from the other</span>
+    <span class="c1"># side -- "IPX packets may be unicast by setting the IPX header Packet Type</span>
+    <span class="c1"># field to 0x04".</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="p">(</span><span class="s1">'PEP'</span><span class="p">,</span> <span class="s1">'``PEP``, Packet Exchange Protocol, used for SAP (Service Advertising Protocol)'</span><span class="p">),</span>
+
+    <span class="c1"># :rfc:`1553` names the protocol -- "The Sequenced Packet Exchange (SPX) is</span>
+    <span class="c1"># the reliable connection-based transport protocol commonly used by</span>
+    <span class="c1"># applications" -- but not its packet-type number, which rests on Wireshark</span>
+    <span class="c1"># and the archived revision.</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="p">(</span><span class="s1">'SPX'</span><span class="p">,</span> <span class="s1">'``SPX``, Sequenced Packet Exchange'</span><span class="p">),</span>
+
+    <span class="c1"># :rfc:`1553` names this one too -- "the Netware Core Protocol (NCP), which</span>
+    <span class="c1"># is used for file server access" -- and again without the number. 17</span>
+    <span class="c1"># (0x11) rests on Wireshark and the archived revision.</span>
+    <span class="mi">17</span><span class="p">:</span> <span class="p">(</span><span class="s1">'NCP'</span><span class="p">,</span> <span class="s1">'``NCP``, NetWare Core Protocol'</span><span class="p">),</span>
+
+    <span class="c1"># NOTE: :rfc:`1132`, "A Standard for the Transmission of 802.2 Packets over</span>
+    <span class="c1"># IPX Networks", assigns this one outright: "IPX packets may be broadcast by</span>
+    <span class="c1"># setting the IPX header Packet Type field to 0x14" -- 0x14 being 20.</span>
+    <span class="c1"># Wireshark calls it ``WANBCAST`` / "NetBIOS Broadcast".</span>
+    <span class="c1">#</span>
+    <span class="c1"># The archived table rendered the row as ``Broadcast[4]``, where ``[4]`` is</span>
+    <span class="c1"># Wikipedia's own footnote marker for its citation of that RFC rather than</span>
+    <span class="c1"># any part of the name, and it leaked into the generated member name. Both</span>
+    <span class="c1"># the name and the comment are kept verbatim so that regenerating the</span>
+    <span class="c1"># constant file stays a no-op against the last scraped output: renaming the</span>
+    <span class="c1"># member would break :attr:`pcapkit.const.ipx.packet.Packet.Broadcast_4` for</span>
+    <span class="c1"># anyone using it, which is a call for the maintainer rather than for #518.</span>
+    <span class="c1"># This is the same artefact, from the same article, as the ``LLC_4`` member</span>
+    <span class="c1"># #507 flagged in :mod:`pcapkit.vendor.ipx.socket`.</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Broadcast[4]'</span><span class="p">,</span> <span class="s1">'Broadcast[4]'</span><span class="p">),</span>
+<span class="p">}</span>  <span class="c1"># type: dict[int, tuple[str, str]]</span>
 
 
 <div class="viewcode-block" id="Packet">
@@ -490,10 +603,17 @@
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0 &lt;= value &lt;= 255'</span>
-    <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'BeautifulSoup'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+<span class="w">        </span><span class="sd">"""Fetch registry data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Registry data (:data:`~pcapkit.vendor.ipx.packet.DATA`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">DATA</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Count field records.</span>
 
 <span class="sd">        Args:</span>
@@ -503,67 +623,28 @@
 <span class="sd">            Field recordings.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BeautifulSoup'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
-<span class="w">        </span><span class="sd">"""Fetch HTML source.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            text: Context from :attr:`~Vendor.LINK`.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed HTML source.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">'html5lib'</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">'BeautifulSoup'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
-<span class="w">        </span><span class="sd">"""Process HTML source.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Process registry data.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: Parsed HTML source.</span>
+<span class="sd">            data: Registry data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields and missing fields.</span>
 
 <span class="sd">        """</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'table'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">'wikitable'</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">bs4</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">Tag</span><span class="p">),</span> <span class="n">table</span><span class="o">.</span><span class="n">tbody</span><span class="p">)</span>
-        <span class="nb">next</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># header</span>
-
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)</span>
 
-            <span class="n">pval</span> <span class="o">=</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pval</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pval</span><span class="p">)</span>
 
-            <span class="n">split</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ('</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">cmmt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'RFC (\d+)'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">'[:rfc:`\1`]'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">',([^ ])'</span><span class="p">,</span> <span class="sa">r</span><span class="s1">', \1'</span><span class="p">,</span> <span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">')'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">cmmt</span> <span class="o">=</span> <span class="n">desc</span><span class="p">,</span> <span class="s1">''</span>
-            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">cmmt</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'``</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">``'</span>
-                <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">', </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">tmp1</span> <span class="o">=</span> <span class="s1">''</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">tmp1</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">pval</span><span class="si">}</span><span class="s2">"</span>
-            <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span>
-
-            <span class="c1"># if len(pres) &gt; 74:</span>
-            <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
-
-            <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
-            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">pval</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

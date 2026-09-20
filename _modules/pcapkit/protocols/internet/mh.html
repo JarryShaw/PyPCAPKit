@@ -3314,12 +3314,21 @@
 <span class="sd">        Length fields"* -- so the whole option, which is what every</span>
 <span class="sd">        ``_read_opt_*`` below reports back as the parsed option's own</span>
 <span class="sd">        ``.length``, is two octets more. This is the exact ``+2``/``-2``</span>
-<span class="sd">        mismatch #398 fixed independently in six places (see</span>
-<span class="sd">        ``Data_PadOption.length`` vs. ``Schema_PadOption.length`` below, at</span>
-<span class="sd">        the surviving explanation of that fix); collecting the read-side</span>
-<span class="sd">        half of it into one helper is so a future fix to this arithmetic</span>
-<span class="sd">        only has to happen once. Do NOT drop the ``+ 2``: that is precisely</span>
-<span class="sd">        the mismatch #398 fixed.</span>
+<span class="sd">        mismatch #398 fixed independently in six places (see the ``Note:``</span>
+<span class="sd">        on :meth:`_read_opt_pad` below, which explains why a ``Pad1``</span>
+<span class="sd">        option -- the one option with no ``Option Length`` field at all --</span>
+<span class="sd">        is this helper's sole exception); collecting the read-side half of</span>
+<span class="sd">        it into one helper is so a future fix to this arithmetic only has</span>
+<span class="sd">        to happen once. Do NOT drop the ``+ 2``: that is precisely the</span>
+<span class="sd">        mismatch #398 fixed.</span>
+
+<span class="sd">        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility</span>
+<span class="sd">        option, whose Option Type and Option Length are one octet each. It</span>
+<span class="sd">        is **not** a universal contract for everything this class parses:</span>
+<span class="sd">        a CGA extension's Extension Type and Extension Data Length are two</span>
+<span class="sd">        octets each [:rfc:`4581#section-2`], so those readers use</span>
+<span class="sd">        :meth:`_mh_extension_length` instead. Reusing this helper for them</span>
+<span class="sd">        reported every parsed CGA extension two octets short (#512).</span>
 
 <span class="sd">        Note that only the *stored-length* read-side call sites are</span>
 <span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>
@@ -3330,7 +3339,8 @@
 <span class="sd">            schema_length: raw ``Option Length`` field value, as read off the wire.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Whole-option length, in octets, including the Type and Length fields.</span>
+<span class="sd">            Whole-option length, in octets, including the Option Type and</span>
+<span class="sd">            Option Length fields.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">schema_length</span> <span class="o">+</span> <span class="mi">2</span>
@@ -3434,6 +3444,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option data.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            A ``Pad1`` option occupies a single octet and carries no</span>
+<span class="sd">            ``Option Length`` field, so its</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.mh.PadOption.length` is</span>
+<span class="sd">            ``1`` rather than ``length + 2``. That one-octet wire shape is</span>
+<span class="sd">            enforced by</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.internet.mh.PadOption` itself,</span>
+<span class="sd">            which sizes both the length octet and the padding data from the</span>
+<span class="sd">            option type [:rfc:`6275#section-6.2.5`]; ``clen`` is therefore</span>
+<span class="sd">            always ``0`` here for a parsed ``Pad1``, and the check below only</span>
+<span class="sd">            guards a schema built by hand.</span>
+
 <span class="sd">        """</span>
         <span class="n">code</span><span class="p">,</span> <span class="n">clen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span>
 
@@ -3447,7 +3469,7 @@
         <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">size</span> <span class="o">=</span> <span class="n">clen</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">clen</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -6999,6 +7021,40 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mh_extension_length</span><span class="p">(</span><span class="n">schema_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Compute a CGA extension's whole-structure length from its on-the-wire ``Extension Data Length``.</span>
+
+<span class="sd">        This is the CGA-extension counterpart of :meth:`_mh_option_length`, and</span>
+<span class="sd">        it deliberately adds ``4`` rather than ``2``. A CGA extension is **not**</span>
+<span class="sd">        an :rfc:`6275#section-6.2` mobility option: per :rfc:`4581#section-2`,</span>
+<span class="sd">        which defines the TLV format and formally updates :rfc:`3972`, its</span>
+<span class="sd">        ``Extension Type`` is a *"16-bit identifier of the type of the Extension</span>
+<span class="sd">        Field"* and its ``Extension Data Length`` a *"16-bit unsigned integer.</span>
+<span class="sd">        Length of the Extension Data field of this option, in octets"*. So the</span>
+<span class="sd">        fixed header is two 2-octet fields, not two 1-octet ones, and the whole</span>
+<span class="sd">        structure is ``4`` octets more than the stored length -- a fact</span>
+<span class="sd">        :rfc:`5535#section-5` states from the other direction for the one</span>
+<span class="sd">        non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of</span>
+<span class="sd">        the Extension in octets, not including the first 4 octets"*.</span>
+
+<span class="sd">        Passing these lengths through :meth:`_mh_option_length` reported every</span>
+<span class="sd">        parsed CGA extension two octets short (#512): an 8-octet extension with</span>
+<span class="sd">        an ``Extension Data Length`` of ``4`` came back as ``6``. Note</span>
+<span class="sd">        :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``</span>
+<span class="sd">        instead, so the write side was already right and only the read side</span>
+<span class="sd">        disagreed with the wire.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema_length: raw ``Extension Data Length`` field value, as read off the wire.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whole-extension length, in octets, including the Extension Type and</span>
+<span class="sd">            Extension Data Length fields.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">schema_length</span> <span class="o">+</span> <span class="mi">4</span>
+
 <div class="viewcode-block" id="MH._read_cga_extensions">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_cga_extensions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_cga_extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extensions_schema</span><span class="p">:</span> <span class="s1">'list[Schema_CGAExtension]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extension'</span><span class="p">:</span>
@@ -7061,7 +7117,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_extension_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
@@ -7111,7 +7167,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MultiPrefixExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_extension_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">flag</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'P'</span><span class="p">]),</span>
             <span class="n">prefixes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">prefixes</span><span class="p">),</span>
         <span class="p">)</span>
@@ -7159,7 +7215,7 @@
 <span class="sd">        """</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_ExperimentalExtension</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_option_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mh_extension_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>

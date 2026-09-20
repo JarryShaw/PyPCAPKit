@@ -930,7 +930,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_opts_option_length</span><span class="p">(</span><span class="n">schema_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.</span>
 
-<span class="sd">        Per :rfc:`8200#section-4.3`, an option's ``Opt Data Len`` field</span>
+<span class="sd">        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field</span>
 <span class="sd">        (what each ``Schema_*Option.len`` here holds) counts *"the length of</span>
 <span class="sd">        the Option Data field of this option, in octets"* -- i.e. it</span>
 <span class="sd">        excludes the Option Type and Opt Data Len fields themselves, so the</span>
@@ -942,6 +942,15 @@
 <span class="sd">        read-side half of it into one helper is so a future fix to this</span>
 <span class="sd">        arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is</span>
 <span class="sd">        precisely the mismatch #398 fixed.</span>
+
+<span class="sd">        Section 4.2 is the citation because it is what defines the TLV option</span>
+<span class="sd">        format, and it is where the sentence quoted above actually appears.</span>
+<span class="sd">        IPv6-Opts itself is the Destination Options header of</span>
+<span class="sd">        :rfc:`8200#section-4.6`, which carries those TLVs but says nothing</span>
+<span class="sd">        about their internal length arithmetic. This cited</span>
+<span class="sd">        :rfc:`8200#section-4.3` until #517 -- that is the Hop-by-Hop Options</span>
+<span class="sd">        header, which is a different header and not the one this class</span>
+<span class="sd">        implements.</span>
 
 <span class="sd">        Note that only the *stored-length* read-side call sites are</span>
 <span class="sd">        collected here -- most ``_make_opt_*`` methods recompute the wire</span>

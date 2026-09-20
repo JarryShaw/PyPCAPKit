@@ -607,7 +607,7 @@
     <span class="c1">#: Entering Long Passive Mode (long address, port).</span>
     <span class="n">CODE_228</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">228</span><span class="p">,</span> <span class="s1">'Entering Long Passive Mode.'</span>
 
-    <span class="c1">#: Entering Extended Passive Mode (|||port|).</span>
+    <span class="c1">#: Entering Extended Passive Mode ( |||port| ).</span>
     <span class="n">CODE_229</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">229</span><span class="p">,</span> <span class="s1">'Entering Extended Passive Mode.'</span>
 
     <span class="c1">#: User logged in, proceed.</span>
@@ -637,6 +637,10 @@
     <span class="c1">#: data needs to be exchanged.</span>
     <span class="n">CODE_334</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">334</span><span class="p">,</span> <span class="s1">'Server accepts the security mechanism specified by the client; some security data needs to be exchanged.'</span>
 
+    <span class="c1">#: Server accepts the security data given by the client; more security data</span>
+    <span class="c1">#: needs to be exchanged.</span>
+    <span class="n">CODE_335</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">335</span><span class="p">,</span> <span class="s1">'Server accepts the security data given by the client; more security data needs to be exchanged.'</span>
+
     <span class="c1">#: Username okay, password okay. Challenge is ". . . . ".</span>
     <span class="n">CODE_336</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span> <span class="s1">'Username okay, password okay.'</span>
 
@@ -659,14 +663,13 @@
     <span class="c1">#: Requested host unavailable.</span>
     <span class="n">CODE_434</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">434</span><span class="p">,</span> <span class="s1">'Requested host unavailable.'</span>
 
-    <span class="c1">#: Requested file action not taken.</span>
+    <span class="c1">#: Requested file action not taken. File unavailable (e.g., file busy).</span>
     <span class="n">CODE_450</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">450</span><span class="p">,</span> <span class="s1">'Requested file action not taken.'</span>
 
     <span class="c1">#: Requested action aborted. Local error in processing.</span>
     <span class="n">CODE_451</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">'Requested action aborted.'</span>
 
-    <span class="c1">#: Requested action not taken. Insufficient storage space in system. File</span>
-    <span class="c1">#: unavailable (e.g., file busy).</span>
+    <span class="c1">#: Requested action not taken. Insufficient storage space in system.</span>
     <span class="n">CODE_452</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">452</span><span class="p">,</span> <span class="s1">'Requested action not taken.'</span>
 
     <span class="c1">#: Syntax error in parameters or arguments.</span>

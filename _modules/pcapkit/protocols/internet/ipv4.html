@@ -1771,12 +1771,23 @@
                 <span class="c1"># force alignment to 32-bit boundary</span>
                 <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
                     <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+                    <span class="c1"># NOTE: The terminator goes in as an EOOL option *schema*, the</span>
+                    <span class="c1"># way the padding above goes in as a NOP schema. What used to be</span>
+                    <span class="c1"># appended was ``Enum_OptionNumber.EOOL`` itself -- the wire code</span>
+                    <span class="c1"># rather than an option -- and the enclosing ``options`` field</span>
+                    <span class="c1"># takes only schemas and :obj:`bytes`, so packing the header</span>
+                    <span class="c1"># failed with ``FieldValueError: Field options has invalid</span>
+                    <span class="c1"># value``. Any option whose length is not already a multiple of</span>
+                    <span class="c1"># four reaches this branch, so that made the packet unpackable</span>
+                    <span class="c1"># whether it was built by hand or rebuilt from a parsed one. See</span>
+                    <span class="c1"># #506.</span>
                     <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                    <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                     <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
                     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                    <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_opt</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
 
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1802,12 +1813,17 @@
             <span class="c1"># force alignment to 32-bit boundary</span>
             <span class="k">if</span> <span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">:</span>
                 <span class="n">pad_len</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">data_len</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+                <span class="c1"># NOTE: An EOOL option schema rather than the bare wire code, for the</span>
+                <span class="c1"># reason spelled out in the list branch above. This is the branch the</span>
+                <span class="c1"># ``from_data`` path takes, since a parsed packet hands its options</span>
+                <span class="c1"># back as a container. See #506.</span>
                 <span class="n">pad_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_nop</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="n">end_opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_eool</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
                 <span class="n">total_length</span> <span class="o">+=</span> <span class="n">pad_len</span>
 
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pad_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad_opt</span><span class="p">)</span>
-                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end_opt</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span></div>
 
 
