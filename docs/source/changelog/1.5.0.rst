@@ -192,6 +192,16 @@ pull requests between #326 and #509.
   ``OptionParser``/``OptionConstructor`` signature now works where it could
   previously never be called at all, and a pair written with an explicit leading
   ``self`` -- the only shape that used to work -- now does not.
+* **Fixed** -- the identical defect one layer up, in the schema layer's own
+  ``EnumSchema.registry``: ``Option.registry[code]`` for an unregistered
+  ``code`` inserted the default schema under that code, so a single lookup
+  made an unassigned TCP option number, e.g. ``156``, read back as registered
+  for the rest of the process. ``EnumSchema.__enum__`` is now built (or, when a
+  subclass seeds it manually in its own class body -- ``PCAPNG.Option``'s
+  namespaced mapping, ``TCP.MPTCP``'s plain one) as a retention-safe mapping
+  that still returns the registered default on a miss, it just stops recording
+  it; ``.registry`` keeps returning the same object it always did, so nothing
+  that held a reference to it is affected (#555).
 * **Fixed** -- on Python 3.10 and older, no ``Schema`` subclass got its own
   ``_abc_impl``: all of them fell through to ``collections.abc.Mapping``'s, so a
   single ``isinstance`` or ``issubclass`` answer poisoned every later question
