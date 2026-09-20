@@ -36,6 +36,19 @@ all engine support functionality.
          This property is also available as a class variable. Its
          value can be set by :attr:`__engine_module__` class attribute.
 
+   .. property:: registry
+      :type: dict[str, ModuleDescriptor[EngineBase] | Type[EngineBase]]
+
+      Mapping of engine names to engine classes.
+
+      .. note::
+
+         This property is only available as a class variable, since it is
+         defined on :class:`EngineMeta`. It reads
+         :attr:`~pcapkit.foundation.extraction.Extractor.__engine__`, the
+         single table every engine registration lands in, so it is not a
+         per-class mapping.
+
    .. autoproperty:: extractor
 
    .. automethod:: unsupported_reason

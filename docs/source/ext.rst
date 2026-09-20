@@ -386,7 +386,13 @@ The following code snippet shows how to create a new engine class:
        from scapy.packet import Packet
 
 
-   class MyScapy(Engine['Packet']):
+   # NOTE: The ``name`` keyword is what registers the engine with the Extractor,
+   # and it is the key ``Extractor(engine=...)`` will look it up under. It is
+   # required: registration is opt-in, so omitting it defines a perfectly usable
+   # class that is simply not selectable by name. Note that __engine_name__ is
+   # *not* an opt-in -- it sets the name the engine reports about itself, which
+   # it does whether or not the engine is registered.
+   class MyScapy(Engine['Packet'], name='scapy'):
 
        __engine_name__ = 'Scapy'  # friendly name of the engine
        __engine_module__ = 'scapy'  # module name that the engine is based on
@@ -739,7 +745,15 @@ The following code snippet shows how to create a new reassembly class:
    # a subclass of the base class, i.e., Reassembly, and implement the core
    # methods, i.e., reassembly and submit, for reassembling the fragmented
    # packets and submitting the reassembled datagram, respectively.
-   class MyReassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
+   #
+   # The ``protocol`` keyword is what registers the class, and it is the key it
+   # will be looked up under. It is required: registration is opt-in, so omitting
+   # it defines a perfectly usable class that is simply not selectable by name.
+   # Note that __protocol_name__ is *not* an opt-in -- it sets the name the class
+   # reports about itself, registered or not. Note also that the keyword is
+   # spelled ``protocol`` here and ``name`` on Engine above.
+   class MyReassembly(Reassembly[Packet, Datagram, BufferID, Buffer],
+                      protocol='ipv4'):
 
        __protocol_name__ = 'IPv4'  # name of the protocol
        __protocol_type__ = IPv4  # type of the protocol

@@ -137,6 +137,38 @@ pull requests between #326 and #509.
   (#439); and ``examples/sample`` and ``examples/samples`` -- one letter apart,
   holding different things -- are now ``examples/captures`` and
   ``examples/generators``.
+* **Changed** -- subclass registration is **opt-in** for ``Engine``,
+  ``Reassembly``, ``TraceFlow`` and ``dumpkit``'s ``Dumper`` (#514). Each
+  registers if and only if its registry keyword is given -- ``name=`` for
+  ``Engine``, ``protocol=`` for ``Reassembly`` and ``TraceFlow``, ``fmt=`` for
+  ``Dumper``. Previously an absent keyword fell back to the class' own name, so
+  *every* subclass of the public class was registered, and declining meant
+  subclassing the parallel ``*Base`` class under an alias -- which is what every
+  built-in does, and why the public classes had **0** subclasses between them
+  against the ``*Base`` classes' 9, 5, 2 and 3. **This breaks out-of-tree code
+  that subclasses one of the four and relies on the derived key**; pass the
+  keyword, or call the matching ``register_*`` function. Nothing the library
+  ships is affected, and the ``*Base`` classes remain importable. Two things
+  that were silent are now loud: an unrecognised class keyword raises
+  ``UnsupportedCall`` instead of being swallowed by ``**kwargs`` -- which used
+  to register the class under its own name, so passing ``name=`` to a
+  ``Reassembly`` subclass silently ignored the key it was given, ``protocol=``
+  being the real one -- and ``Dumper``'s ``ext=`` without ``fmt=`` likewise. A class
+  attribute is not an opt-in: ``__engine_name__`` and ``__protocol_name__`` still
+  set the name a class reports, registered or not. Each metaclass also gained a
+  class-level ``registry`` property mirroring ``EnumSchema.registry``. As a side
+  effect a ``Dumper`` subclass no longer touches the filesystem while its
+  ``class`` statement runs: inferring ``fmt`` from the ``kind`` property meant
+  instantiating the class against a ``NamedTemporaryFile`` mid-definition.
+  **One constraint specific to Python 3.10**, where this matters because the
+  keyword is now the only class-definition path: ``Engine``'s keyword is literally
+  ``name``, and ``mcls``, ``name``, ``bases`` and ``namespace`` collide with
+  ``abc.ABCMeta.__new__``'s own parameters, which are positional-or-keyword
+  before 3.11 and positional-only from 3.11. So on 3.10 a class statement passing
+  ``name=`` raises ``TypeError`` from the metaclass before the hook is reached,
+  and an engine has to be registered with ``Extractor.register_engine`` instead
+  -- which works on every version. ``protocol=`` and ``fmt=`` do not collide and
+  are unaffected. Measured on 3.10.21, 3.11.15 and 3.14.7.
 * **Changed** -- extraction is around 46% faster on a 1,117-frame HTTP capture,
   with byte-identical output (#420). A reassembled datagram's payload is now
   analysed on first read rather than eagerly, which cuts IP reassembly's own

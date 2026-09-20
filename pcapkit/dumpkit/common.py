@@ -15,7 +15,6 @@ import datetime
 import decimal
 import enum
 import ipaddress
-import tempfile
 from typing import TYPE_CHECKING
 
 import aenum
@@ -24,6 +23,7 @@ import dictdumper.dumper
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.logging import get_logger
 
 __all__ = ['make_dumper']
@@ -56,10 +56,37 @@ class Dumper(DumperBase):
 
     This class is a customised :class:`~dictdumper.dumper.Dumper` for the
     :mod:`pcapkit.dumpkit` implementation, which is generally customised
-    for automatic registration to the
+    for opt-in registration to the
     :class:`~pcapkit.foundation.extraction.Extractor` and
     :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output
     dumper registries.
+
+    Example:
+
+        Registration is opt-in. Pass keyword argument ``fmt`` at class
+        definition to register the dumper under that output format:
+
+        .. code-block:: python
+
+           class MyDumper(Dumper, fmt='my_format', ext='.mine'):
+               ...
+
+        Omit it and the subclass is *not* registered:
+
+        .. code-block:: python
+
+           class MyMixin(Dumper):  # not registered
+               ...
+
+        Such a class can still be registered later, on demand. Note this hook
+        writes *both* output registries, so the equivalent manual call is the
+        module-level one that does the same, not either class' own method:
+
+        .. code-block:: python
+
+           from pcapkit.foundation.registry.foundation import register_dumper
+
+           register_dumper('my_mixin', MyMixin, '.mine')
 
     """
 
@@ -73,15 +100,31 @@ class Dumper(DumperBase):
         output dumper registries.
 
         Args:
-            fmt: Output format to register.
-            ext: Output file extension.
+            fmt: Output format to register the subclass under, lowercased.
+                :data:`None` (the default) skips registration entirely.
+            ext: Output file extension; :data:`None` infers it from ``fmt``.
+                Only meaningful alongside ``fmt``.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
-        If the ``fmt`` is not provided, we will try to get it from the
-        :attr:`~dictdumper.dumper.Dumper.kind` property of the subclass.
-        And if the ``ext`` is not provided, we will infer it from the
-        ``fmt``.
+        Raises:
+            UnsupportedCall: If ``ext`` is given without ``fmt``, or if any
+                unrecognised class keyword is given.
+
+        Registration is **opt-in**: the subclass is registered if and only if
+        ``fmt`` is given. This is what lets a subclass decline registration
+        rather than having to inherit :class:`DumperBase` to avoid it, and it
+        matches :meth:`EnumSchema.__init_subclass__
+        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        has guarded on its own ``code`` keyword all along.
+
+        Note:
+            The previous behaviour inferred ``fmt`` from the subclass'
+            :attr:`~dictdumper.dumper.Dumper.kind` property, which it could
+            only read off an *instance* -- so it constructed one against a
+            :func:`tempfile.NamedTemporaryFile` while the ``class`` statement
+            was still executing. Guarding on ``fmt`` removes that: a class
+            definition no longer touches the filesystem.
 
         See Also:
             - :func:`pcapkit.foundation.registry.foundation.register_dumper`
@@ -91,18 +134,32 @@ class Dumper(DumperBase):
             - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`
 
         """
-        if fmt is None:
-            with tempfile.NamedTemporaryFile() as temp:
-                fmt = cls(temp.name).kind
-        fmt = fmt.lower()
+        # NOTE: as in the four sibling hooks, an unrecognised class keyword would
+        # otherwise land in ``**kwargs`` and be dropped by the bare
+        # ``super().__init_subclass__()`` below, silently skipping registration.
+        if args or kwargs:
+            unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
+            raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
+        # NOTE: ``ext`` alone cannot register anything -- there is no format to
+        # register it against -- so it would silently do nothing. Say so instead.
+        if fmt is None:
+            if ext is not None:
+                raise UnsupportedCall(f'{cls.__name__}: ext={ext!r} given without fmt')
+            return super().__init_subclass__()
+
+        fmt = fmt.lower()
         if ext is None:
             ext = f'.{fmt}'
 
-        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.extraction import \
+            Extractor  # pylint: disable=import-outside-toplevel
+
         Extractor.register_dumper(fmt, cls, ext)
 
-        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+        from pcapkit.foundation.traceflow.traceflow import \
+            TraceFlow  # pylint: disable=import-outside-toplevel
+
         TraceFlow.register_dumper(fmt, cls, ext)
 
         return super().__init_subclass__()

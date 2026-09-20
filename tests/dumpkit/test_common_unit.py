@@ -54,7 +54,17 @@ class DumpkitCommonTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
-    def test_dumper_subclass_registration_explicit_and_inferred(self) -> None:
+    def test_dumper_subclass_registration_is_opt_in(self) -> None:
+        """Registration happens if and only if ``fmt`` is given.
+
+        This is the #514 opt-in contract, extended to the fifth pair. Before it,
+        an absent ``fmt`` was *inferred* from the subclass'
+        :attr:`~dictdumper.dumper.Dumper.kind` property -- which is an instance
+        property, so the old code constructed an instance against a
+        :func:`tempfile.NamedTemporaryFile` while the ``class`` statement was
+        still executing. A class definition no longer touches the filesystem.
+
+        """
         from pcapkit.dumpkit.common import Dumper
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
@@ -65,15 +75,59 @@ class DumpkitCommonTests(unittest.TestCase):
         extractor.assert_called_once_with('custom', ExplicitDumper, '.custom')
         traceflow.assert_called_once_with('custom', ExplicitDumper, '.custom')
 
+        # ``ext`` is still inferred from ``fmt`` -- that is a default for a format
+        # that *was* given, not a decision to register.
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
             with mock.patch('pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper') as traceflow:
-                class InferredDumper(Dumper):
-                    @property
-                    def kind(self):
-                        return 'AUTO'
+                class FormatOnlyDumper(Dumper, fmt='FMTONLY'):
+                    pass
 
-        extractor.assert_called_once_with('auto', InferredDumper, '.auto')
-        traceflow.assert_called_once_with('auto', InferredDumper, '.auto')
+        extractor.assert_called_once_with('fmtonly', FormatOnlyDumper, '.fmtonly')
+        traceflow.assert_called_once_with('fmtonly', FormatOnlyDumper, '.fmtonly')
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
+            with mock.patch('pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper') as traceflow:
+                with mock.patch('tempfile.NamedTemporaryFile') as named_temp:
+                    class InferredDumper(Dumper):
+                        @property
+                        def kind(self):
+                            return 'AUTO'
+
+        extractor.assert_not_called()
+        traceflow.assert_not_called()
+        # the old inference path is gone, not merely unused
+        named_temp.assert_not_called()
+
+    def test_dumper_subclass_rejects_ext_without_fmt(self) -> None:
+        """``ext`` alone cannot register anything, so it raises rather than no-op.
+
+        With registration keyed on ``fmt``, an ``ext`` on its own has no format
+        to attach to. Accepting it would silently discard the caller's intent.
+
+        """
+        from pcapkit.dumpkit.common import Dumper
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
+            with self.assertRaises(UnsupportedCall) as caught:
+                class ExtOnly(Dumper, ext='.lonely'):
+                    pass
+
+        extractor.assert_not_called()
+        self.assertIn('.lonely', str(caught.exception))
+
+    def test_dumper_subclass_rejects_unrecognised_keyword(self) -> None:
+        """A misspelled class keyword raises instead of being swallowed."""
+        from pcapkit.dumpkit.common import Dumper
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_dumper') as extractor:
+            with self.assertRaises(UnsupportedCall) as caught:
+                class Typo(Dumper, format='wrong-keyword-for-dumper'):
+                    pass
+
+        extractor.assert_not_called()
+        self.assertIn('format', str(caught.exception))
 
     def test_make_dumper_object_hook_conversions_and_fallbacks(self) -> None:
         from pcapkit.corekit.infoclass import Info

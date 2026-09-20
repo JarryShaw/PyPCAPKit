@@ -14,7 +14,7 @@ import abc
 import collections
 import os
 import sys
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from dictdumper.dumper import Dumper
 
@@ -22,7 +22,7 @@ from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.misc.raw import Raw
-from pcapkit.utilities.exceptions import FileExists, RegistryError, stacklevel
+from pcapkit.utilities.exceptions import FileExists, RegistryError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, RegistryWarning, warn
 
@@ -80,6 +80,35 @@ class TraceFlowMeta(abc.ABCMeta):
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
         return protocol_registry.get(cls.name.upper(), Raw)
+
+    @property
+    def registry(cls) -> 'dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]':
+        """Mapping of protocol names to flow tracing classes.
+
+        Note:
+            Unlike :attr:`EnumSchema.registry
+            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            a per-class mapping: every flow tracing registration lands in the
+            single :attr:`Extractor.__traceflow__
+            <pcapkit.foundation.extraction.Extractor.__traceflow__>` table, so
+            reading it through any subclass returns that same object. The
+            property exists so ``MyTraceFlow.registry`` is spelled the same way
+            here as it is for schemas.
+
+            Note also that :class:`EnumSchema` carries *two* ``registry``
+            properties, one on its metaclass and one on the class body, so it
+            answers on an instance as well. This one is on the metaclass only,
+            so it is available as a class attribute and **not** on an instance.
+
+            This is *not* :attr:`TraceFlow.__output__
+            <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__>`,
+            which is the separate output-dumper table this class also owns.
+
+        """
+        from pcapkit.foundation.extraction import \
+            Extractor  # pylint: disable=import-outside-toplevel
+
+        return Extractor.__traceflow__
 
 
 class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
@@ -409,13 +438,27 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
 
     Example:
 
-        Use keyword argument ``protocol`` to specify the protocol
-        name at class definition:
+        Registration is opt-in. Pass keyword argument ``protocol`` at class
+        definition to register the flow tracing class under that protocol name:
 
         .. code-block:: python
 
            class MyProtocol(TraceFlow, protocol='my_protocol'):
                ...
+
+        Omit it and the subclass is *not* registered, which is how a class
+        that is not meant to be selectable by name declines:
+
+        .. code-block:: python
+
+           class MyMixin(TraceFlow):  # not registered
+               ...
+
+        Such a class can still be registered later, on demand:
+
+        .. code-block:: python
+
+           Extractor.register_traceflow('my_mixin', MyMixin)
 
     Arguments:
         fout: output path
@@ -430,23 +473,50 @@ class TraceFlow(TraceFlowBase[_DT, _BT, _IT, _PT], Generic[_DT, _BT, _IT, _PT]):
     def __init_subclass__(cls, /, protocol: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialise subclass.
 
-        This method is to be used for registering the engine class to
+        This method is to be used for registering the flow tracing class to
         :class:`~pcapkit.foundation.extraction.Extractor` class.
 
         Args:
-            name: Protocol name, default to class name.
+            protocol: Protocol name to register the subclass under, lowercased.
+                :data:`None` (the default) skips registration entirely.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
+
+        Raises:
+            UnsupportedCall: If any unrecognised class keyword is given.
+
+        Registration is **opt-in**: the subclass is registered if and only if
+        ``protocol`` is given. This is what lets a subclass decline registration
+        rather than having to inherit :class:`TraceFlowBase` to avoid it, and it
+        matches :meth:`EnumSchema.__init_subclass__
+        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        has guarded on its own ``code`` keyword all along.
+
+        Note:
+            :attr:`__protocol_name__` is *not* an opt-in. It supplies the
+            :attr:`name <pcapkit.foundation.traceflow.traceflow.TraceFlowMeta.name>`
+            the class reports, which it does whether or not the class is
+            registered; only the keyword decides registration.
 
         See Also:
             For more details, please refer to
             :meth:`pcapkit.foundation.extraction.Extractor.register_traceflow`.
 
         """
-        if protocol is None:
-            protocol = cast('str', cls.name)
+        # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
+        # idea ``name`` -- so guessing ``name=`` by analogy is the expected
+        # mistake, not a careless one. It used to land in ``**kwargs``, get
+        # dropped by the bare ``super().__init_subclass__()`` below, and leave
+        # the class registered under its own class name instead: no exception, no
+        # warning. See the sibling note in ``Engine.__init_subclass__``.
+        if args or kwargs:
+            unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
+            raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
-        from pcapkit.foundation.extraction import Extractor
-        Extractor.register_traceflow(protocol.lower(), cls)
+        if protocol is not None:
+            from pcapkit.foundation.extraction import \
+                Extractor  # pylint: disable=import-outside-toplevel
+
+            Extractor.register_traceflow(protocol.lower(), cls)
 
         return super().__init_subclass__()

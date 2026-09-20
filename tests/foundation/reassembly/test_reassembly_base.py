@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from unittest import mock
 
@@ -122,7 +123,13 @@ class ReassemblyBaseTests(unittest.TestCase):
         with self.assertRaises(UnsupportedCall):
             _ = reasm.datagram
 
-    def test_reassembly_subclass_registration_uses_explicit_and_default_protocols(self) -> None:
+    def test_reassembly_subclass_registration_is_opt_in(self) -> None:
+        """Registration happens if and only if ``protocol`` is given.
+
+        This is the #514 opt-in contract; see the sibling test in
+        ``tests/foundation/engines/test_engine_base.py`` for the full rationale.
+
+        """
         from pcapkit.corekit.infoclass import Info, info_final
         from pcapkit.foundation.reassembly.reassembly import Reassembly
 
@@ -160,7 +167,82 @@ class ReassemblyBaseTests(unittest.TestCase):
                 def submit(self, buf: DummyBuffer, **kwargs: object) -> list[DummyDatagram]:
                     return []
 
-        register.assert_called_once_with('defaultproto', Default)
+        # #514: registration is opt-in. Before it, the absent keyword fell back to
+        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- and this registered
+        # under ``'defaultproto'``. A class attribute is not a registry key.
+        register.assert_not_called()
+        self.assertEqual(Default.name, 'DefaultProto')
+        self.assertEqual(Default.__callback_fn__, [])
+
+    def test_reassembly_subclass_rejects_unrecognised_keyword(self) -> None:
+        """A misspelled class keyword raises instead of being swallowed.
+
+        It used to land in ``**kwargs``, get dropped by the bare
+        ``super().__init_subclass__()``, and leave the class registered under its
+        own class name -- no exception, no warning.
+
+        The keyword used here is deliberately *not* ``name``. Four class keyword
+        names -- ``mcls``, ``name``, ``bases`` and ``namespace`` -- collide with
+        :meth:`abc.ABCMeta.__new__`'s own parameters, which are
+        positional-or-keyword on Python 3.10 and positional-only from 3.11. On
+        3.10 the collision therefore raises :exc:`TypeError` from the metaclass
+        *before* ``__init_subclass__`` is reached, so testing the guard with
+        ``name=`` would only exercise it on 3.11+. Measured on 3.10.21, 3.11.15
+        and 3.14.7. The colliding case is pinned separately below.
+
+        """
+        from pcapkit.corekit.infoclass import Info, info_final
+        from pcapkit.foundation.reassembly.reassembly import Reassembly
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        @info_final
+        class DummyPacket(Info):
+            value: int
+
+        @info_final
+        class DummyDatagram(Info):
+            index: tuple[int, ...]
+
+        @info_final
+        class DummyBuffer(Info):
+            entries: list[int]
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
+            with self.assertRaises(UnsupportedCall) as caught:
+                class Typo(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer],
+                           reassembly='wrong-keyword-for-reassembly'):
+                    def reassembly(self, info: DummyPacket) -> None:
+                        super().reassembly(info)
+
+                    def submit(self, buf: DummyBuffer, **kwargs: object) -> list[DummyDatagram]:
+                        return []
+
+        register.assert_not_called()
+        self.assertIn('reassembly', str(caught.exception))
+
+        # ``name=`` is the mistake a user actually makes, by analogy with
+        # ``Engine``, and it is one of the four colliding names -- so which
+        # exception surfaces is version-dependent. Pinned rather than skipped, so
+        # the 3.10 behaviour is recorded rather than merely untested.
+        expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
+            with self.assertRaises(expected):
+                class Collides(Reassembly[DummyPacket, DummyDatagram, tuple[str], DummyBuffer],
+                               name='collides-with-ABCMeta-on-3.10'):
+                    def reassembly(self, info: DummyPacket) -> None:
+                        super().reassembly(info)
+
+                    def submit(self, buf: DummyBuffer, **kwargs: object) -> list[DummyDatagram]:
+                        return []
+
+        register.assert_not_called()
+
+    def test_reassembly_registry_property_reads_the_extractor_table(self) -> None:
+        """``Reassembly.registry`` is a class-level accessor, as on ``EnumSchema``."""
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly.reassembly import Reassembly
+
+        self.assertIs(Reassembly.registry, Extractor.__reassembly__)
 
 
 if __name__ == '__main__':

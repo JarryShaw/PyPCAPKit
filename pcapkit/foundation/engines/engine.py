@@ -9,13 +9,16 @@ all engine support functionality.
 
 """
 import abc
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['Engine']
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Optional, Type
 
+    from pcapkit.corekit.module import ModuleDescriptor
     from pcapkit.foundation.extraction import Extractor
 
 _T = TypeVar('_T')
@@ -48,6 +51,31 @@ class EngineMeta(abc.ABCMeta, Generic[_T]):
         if hasattr(cls, '__engine_module__'):
             return cls.__engine_module__
         return cls.__module__
+
+    @property
+    def registry(cls) -> 'dict[str, ModuleDescriptor[Engine] | Type[Engine]]':
+        """Mapping of engine names to engine classes.
+
+        Note:
+            Unlike :attr:`EnumSchema.registry
+            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            a per-class mapping: every engine registration lands in the single
+            :attr:`Extractor.__engine__
+            <pcapkit.foundation.extraction.Extractor.__engine__>` table, so
+            reading it through any subclass returns that same object. The
+            property exists so ``MyEngine.registry`` is spelled the same way
+            here as it is for schemas.
+
+            Note also that :class:`EnumSchema` carries *two* ``registry``
+            properties, one on its metaclass and one on the class body, so it
+            answers on an instance as well. This one is on the metaclass only,
+            so it is available as a class attribute and **not** on an instance.
+
+        """
+        from pcapkit.foundation.extraction import \
+            Extractor  # pylint: disable=import-outside-toplevel
+
+        return Extractor.__engine__
 
 
 class EngineBase(Generic[_T], metaclass=EngineMeta):
@@ -187,13 +215,27 @@ class Engine(EngineBase[_T], Generic[_T]):
 
     Example:
 
-        Use keyword argument ``name`` to specify the engine name at
-        class definition:
+        Registration is opt-in. Pass keyword argument ``name`` at class
+        definition to register the engine under that name:
 
         .. code-block:: python
 
            class MyEngine(Engine, name='my_engine'):
                ...
+
+        Omit it and the subclass is *not* registered, which is how a class
+        that is not meant to be selectable by name declines:
+
+        .. code-block:: python
+
+           class MyMixin(Engine):  # not registered
+               ...
+
+        Such a class can still be registered later, on demand:
+
+        .. code-block:: python
+
+           Extractor.register_engine('my_mixin', MyMixin)
 
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
@@ -207,19 +249,75 @@ class Engine(EngineBase[_T], Generic[_T]):
         :class:`~pcapkit.foundation.extraction.Extractor` class.
 
         Args:
-            name: Engine name, default to class name.
+            name: Engine name to register the subclass under, lowercased.
+                :data:`None` (the default) skips registration entirely.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
+
+        Raises:
+            UnsupportedCall: If any unrecognised class keyword is given.
+
+        Registration is **opt-in**: the subclass is registered if and only if
+        ``name`` is given. This is what lets a subclass decline registration
+        rather than having to inherit :class:`EngineBase` to avoid it, and it
+        matches :meth:`EnumSchema.__init_subclass__
+        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        has guarded on its own ``code`` keyword all along.
+
+        Note:
+            :attr:`__engine_name__` is *not* an opt-in. It supplies the
+            :attr:`name <pcapkit.foundation.engines.engine.EngineMeta.name>`
+            the engine reports, which it does whether or not the engine is
+            registered; only the keyword decides registration.
+
+        Warning:
+            **On Python 3.10 the ``name`` keyword cannot be passed at all.**
+            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and
+            ``namespace`` as positional-*or-keyword* parameters before 3.11, so a
+            class keyword named ``name`` collides with one of them and the class
+            statement raises :exc:`TypeError` -- ``ABCMeta.__new__() got multiple
+            values for argument 'name'`` -- from the metaclass, before this method
+            is reached. From 3.11 those parameters are positional-only and the
+            keyword arrives here normally. Measured on 3.10.21, 3.11.15 and
+            3.14.7.
+
+            The consequence on 3.10 is that an engine cannot be registered at
+            class definition; register it explicitly instead, which works on every
+            version::
+
+                class MyEngine(Engine):     # no keyword, so not registered
+                    ...
+
+                Extractor.register_engine('my_engine', MyEngine)
+
+            The sibling hooks are unaffected, their keywords being ``protocol``
+            and ``fmt``.
 
         See Also:
             For more details, please refer to
             :meth:`pcapkit.foundation.extraction.Extractor.register_engine`.
 
         """
-        if name is None:
-            name = cast('str', cls.name)
+        # NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then
+        # dropped by the bare ``super().__init_subclass__()`` below, since
+        # ``object.__init_subclass__`` takes none. Silently swallowing it is how
+        # ``class MyEngine(Engine, nmae='x')`` used to register under its class
+        # name instead -- no exception, no warning. Now that a missing keyword
+        # means "do not register", the same typo would silently skip
+        # registration altogether, which is quieter still. So reject it.
+        #
+        # ``args`` is checked alongside ``kwargs`` for completeness rather than
+        # because a ``class`` statement can fill it -- class creation passes
+        # keywords only. It is reachable through a direct
+        # ``__init_subclass__(...)`` call, which the declared signature permits.
+        if args or kwargs:
+            unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
+            raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
-        from pcapkit.foundation.extraction import Extractor
-        Extractor.register_engine(name.lower(), cls)
+        if name is not None:
+            from pcapkit.foundation.extraction import \
+                Extractor  # pylint: disable=import-outside-toplevel
+
+            Extractor.register_engine(name.lower(), cls)
 
         return super().__init_subclass__()

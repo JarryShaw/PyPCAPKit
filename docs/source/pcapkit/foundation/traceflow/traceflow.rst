@@ -36,6 +36,20 @@ which is an abstract base class for all flow tracing classes.
          This property is also available as a class variable. Its
          value can be set by :attr:`__protocol_type__` class attribute.
 
+   .. property:: registry
+      :type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
+
+      Mapping of protocol names to flow tracing classes.
+
+      .. note::
+
+         This property is only available as a class variable, since it is
+         defined on :class:`TraceFlowMeta`. It reads
+         :attr:`~pcapkit.foundation.extraction.Extractor.__traceflow__`, the
+         single table every flow tracing registration lands in, so it is not a
+         per-class mapping. It is *not* :attr:`__output__`, which is the
+         separate output-dumper table this class also owns.
+
    .. autoproperty:: index
 
    .. automethod:: register_dumper
