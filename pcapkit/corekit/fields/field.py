@@ -106,7 +106,11 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
     @property
     def length(self) -> 'int':
         """Field size."""
-        return struct.calcsize(self.template)
+        # Cache calcsize to avoid massive CPU overhead during unpacking
+        if getattr(self, '_length_cache_key', None) != self.template:
+            self._length_cache = struct.calcsize(self.template)
+            self._length_cache_key = self.template
+        return self._length_cache
 
     @property
     def optional(self) -> 'bool':
