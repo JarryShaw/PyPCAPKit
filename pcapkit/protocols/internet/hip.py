@@ -3916,6 +3916,11 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            lifetime: lifetime
+            reg_response: registration response list
+            reg_response_default: default registration response
+            reg_response_namespace: registration response namespace
+            reg_response_reversed: reverse registration response namespace
 
         Returns:
             HIP parameter schema.
@@ -4296,6 +4301,9 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            symmetric: symmetric flag
+            must_follow: must-follow flag
+            hit: list of HITs
 
         Returns:
             HIP parameter schema.

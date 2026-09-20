@@ -409,9 +409,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Returns:
             Parsed packet data.
 
-        Raises:
-            ProtocolError: If the packet is malformed.
-
         """
         if any(header.flags):
             #raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
@@ -454,9 +451,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Parsed packet data.
-
-        Raises:
-            ProtocolError: If the packet is malformed.
 
         """
         flag = Data_DataFrameFlags(
@@ -509,9 +503,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Parsed packet data.
-
-        Raises:
-            ProtocolError: If the packet is malformed.
 
         """
         flag = Data_HeadersFrameFlags(
@@ -818,9 +809,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         Returns:
             Parsed packet data.
 
-        Raises:
-            ProtocolError: If the packet is malformed.
-
         """
         data = Data_GoawayFrame(
             length=header.length,
@@ -898,9 +886,6 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Returns:
             Parsed packet data.
-
-        Raises:
-            ProtocolError: If the packet is malformed.
 
         """
         flag = Data_ContinuationFrameFlags(
