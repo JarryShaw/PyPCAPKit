@@ -1,0 +1,14 @@
+1.3.0 -- 2023-10-04
+===================
+
+A redesign of the extension points, on metaclasses.
+
+* **Changed** -- the protocol, reassembly, flow-tracing, engine, vendor and
+  field base classes are all built on metaclasses, which is what registers a
+  subclass and fixes its name and module.
+* **Added** -- ``ModuleDescriptor``, so a registry entry can name a module and
+  class that are imported lazily on first use rather than at registration; the
+  registry functions accept it throughout. ``VersionInfo`` gained a ``version``
+  property.
+* **Changed** -- ``_Engine`` renamed ``EngineBase``; the ``beholder`` decorator
+  logs the error it swallows under devmode and verbose mode.
