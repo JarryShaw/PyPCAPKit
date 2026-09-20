@@ -1939,6 +1939,14 @@ class MHUnitTests(unittest.TestCase):
         The RFC assigns the codepoints and gives their extension data no structure
         at all, so an opaque payload is the whole of the correct parse rather than
         a placeholder for a better one. All three share a handler.
+
+        The ``data.length`` assertion below read ``len(payload) + 2`` until #512.
+        That contradicted the ``len(schema.pack())`` assertion four lines above it
+        -- the same test proved the wire was ``len(payload) + 4`` and then asserted
+        the parsed length was two octets less. The ``+ 4`` is the wire's own count:
+        a CGA extension's Extension Type and Extension Data Length are two octets
+        each [:rfc:`4581#section-2`], not one each as an :rfc:`6275#section-6.2`
+        mobility option's are.
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
         from pcapkit.protocols.internet.mh import MH
@@ -1954,11 +1962,168 @@ class MHUnitTests(unittest.TestCase):
 
                     data = proto._read_ext_exp(schema, extensions=None)  # type: ignore[arg-type]
                     self.assertEqual(data.type, code)
-                    self.assertEqual(data.length, len(payload) + 2)
+                    self.assertEqual(data.length, len(payload) + 4)
+                    self.assertEqual(data.length, len(schema.pack()))
                     self.assertEqual(data.data, payload)
 
                     again = proto._make_ext_exp(code, data)  # type: ignore[arg-type]
                     self.assertEqual(again.pack(), schema.pack())
+
+    def test_mh_cga_extension_length_counts_the_four_octet_header(self) -> None:
+        """Every CGA extension reader must report the octets actually on the wire (#512).
+
+        All three readers -- :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_none`,
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_multiprefix` and
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp` -- passed their
+        ``Extension Data Length`` through
+        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length`, which adds the
+        ``2`` octets an :rfc:`6275#section-6.2` mobility option's Option Type and
+        Option Length occupy. A CGA extension's header is twice that: per
+        :rfc:`4581#section-2` the ``Extension Type`` is a *"16-bit identifier"* and
+        the ``Extension Data Length`` a *"16-bit unsigned integer"* counting
+        *"[t]he length of the Extension Data field of this option, in octets"*.
+        :rfc:`5535#section-5` says the same from the other side: its ``Ext Len`` is
+        the length *"not including the first 4 octets"*.
+
+        So every parsed extension reported a length two octets short of what it
+        consumed. ``len(schema.pack())`` is the arbiter here -- the write side has
+        always measured the real thing, which is why only the read side was wrong.
+        """
+        from pcapkit.const.mh.cga_extension import CGAExtension
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.schema.internet import mh as schema
+
+        proto = object.__new__(MH)
+
+        # the exact measurement from #512: 8 octets on the wire, Extension Data
+        # Length 4. Those type octets are 0x0012, so a dispatched read would reach
+        # _read_ext_multiprefix; the unknown reader is called directly here because
+        # it is the reader the issue measured.
+        wire = bytes.fromhex('00120004deadbeef')
+        self.assertEqual(len(wire), 8)
+        unknown = schema.UnknownExtension.unpack(wire)
+        self.assertEqual(unknown.length, 4)
+        self.assertEqual(len(unknown.pack()), 8)
+        self.assertEqual(
+            proto._read_ext_none(unknown, extensions=None).length, 8)  # type: ignore[arg-type]
+
+        cases = (
+            ('unknown', proto._read_ext_none,
+             lambda n: schema.UnknownExtension(
+                 type=CGAExtension.get(0x0001), length=n, data=bytes(n))),
+            ('experimental', proto._read_ext_exp,
+             lambda n: schema.ExperimentalExtension(
+                 type=CGAExtension.Exp_FFFF, length=n, data=bytes(n))),
+        )
+        for name, reader, build in cases:
+            for size in (0, 1, 4, 16, 255):
+                with self.subTest(extension=name, data=size):
+                    built = build(size)
+                    packed = built.pack()
+                    self.assertEqual(len(packed), size + 4)
+
+                    # the reported length is the octet count, not the data count
+                    parsed = reader(built, extensions=None)  # type: ignore[arg-type]
+                    self.assertEqual(parsed.length, len(packed))
+                    self.assertEqual(parsed.length, size + 4)
+
+                    # and it survives a real unpack of those same octets
+                    reparsed = reader(type(built).unpack(packed),  # type: ignore[arg-type]
+                                      extensions=None)
+                    self.assertEqual(reparsed.length, len(packed))
+
+        # multi-prefix carries a 4-octet flag word plus 8 octets per prefix
+        for count in (0, 1, 2, 5):
+            with self.subTest(extension='multiprefix', prefixes=count):
+                built = proto._make_ext_multiprefix(  # type: ignore[arg-type]
+                    CGAExtension.Multi_Prefix, flag=True, prefixes=list(range(count)))
+                packed = built.pack()
+                self.assertEqual(built.length, 4 + count * 8)
+                self.assertEqual(len(packed), built.length + 4)
+
+                parsed = proto._read_ext_multiprefix(built, extensions=None)  # type: ignore[arg-type]
+                self.assertEqual(parsed.length, len(packed))
+
+        # the dispatching entry point agrees too, for every registered reader
+        extensions = proto._read_cga_extensions([
+            schema.UnknownExtension(type=CGAExtension.get(0x0001), length=2, data=b'xx'),
+            schema.ExperimentalExtension(type=CGAExtension.Exp_FFFD, length=3, data=b'yyy'),
+            proto._make_ext_multiprefix(  # type: ignore[arg-type]
+                CGAExtension.Multi_Prefix, flag=False, prefixes=[7]),
+        ])
+        self.assertEqual(
+            [ext.length for ext in extensions.values()],
+            [2 + 4, 3 + 4, 12 + 4],
+        )
+
+    def test_mh_option_and_extension_length_helpers_do_not_share_a_header_width(self) -> None:
+        """The two wire-unit helpers are distinct because the two headers are (#512).
+
+        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` is correct and
+        stays correct -- an :rfc:`6275#section-6.2` mobility option's Option Type and
+        Option Length are one octet each. What was wrong was reusing it for CGA
+        extensions, whose two header fields are 16 bits each
+        [:rfc:`4581#section-2`]. This pins both contracts side by side so the next
+        reader picks the right one, and pins the ``+2`` against being "fixed" to
+        ``+4`` to suit the three callers that were the actual defect.
+        """
+        from pcapkit.protocols.internet.mh import MH
+
+        # the numbers quoted in #512
+        self.assertEqual(MH._mh_option_length(4), 6)
+        self.assertEqual(MH._mh_extension_length(4), 8)
+
+        for stored in (0, 1, 2, 4, 12, 16, 255):
+            with self.subTest(stored=stored):
+                self.assertEqual(MH._mh_option_length(stored), stored + 2)
+                self.assertEqual(MH._mh_extension_length(stored), stored + 4)
+                self.assertEqual(
+                    MH._mh_extension_length(stored) - MH._mh_option_length(stored), 2)
+
+        # a real mobility option still round-trips through the 2-octet helper
+        from pcapkit.protocols.schema.internet import mh as schema
+        option = schema.BindingRefreshAdviceOption.unpack(bytes.fromhex('02020064'))
+        self.assertEqual(MH._mh_option_length(option.length), 4)
+        self.assertEqual(MH._mh_option_length(option.length), len(option.pack()))
+
+    def test_mh_pad_option_reader_delegates_to_the_option_length_helper(self) -> None:
+        """``_read_opt_pad`` must route through the helper, not open-code ``clen + 2`` (#517).
+
+        #509 extracted
+        :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` so that "a future
+        fix to this arithmetic only has to happen once", and converted the equivalent
+        branch in both ``hopopt.py`` and ``ipv6_opts.py``. The ``mh.py`` branch was
+        left open-coding ``clen + 2``, so the arithmetic still existed twice in the
+        very file that introduced the helper.
+
+        A value assertion cannot catch that -- ``clen + 2`` and the helper return the
+        same number, which is why the conversion is behaviour-neutral and why
+        ``test_mh_padding_options_parse_from_the_wire`` passed throughout. What is
+        testable is the *delegation*: patch the helper and a converted reader follows
+        it, while an open-coded one ignores it.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.protocols.schema.internet import mh as schema
+
+        proto = object.__new__(MH)
+        padn = schema.PadOption(type=Option.PadN, length=5)
+
+        # unpatched: the helper's real answer
+        self.assertEqual(proto._read_opt_pad(padn, options=None).length, 7)  # type: ignore[arg-type]
+
+        # patched: a converted reader reports the sentinel, an open-coded one says 7
+        with mock.patch.object(MH, '_mh_option_length',
+                               staticmethod(lambda n: 1000 + n)):
+            self.assertEqual(
+                proto._read_opt_pad(padn, options=None).length, 1005)  # type: ignore[arg-type]
+
+        # Pad1 is the documented exception: one octet, and it must not call the helper
+        pad1 = schema.PadOption(type=Option.Pad1, length=0)
+        with mock.patch.object(MH, '_mh_option_length',
+                               staticmethod(lambda n: 1000 + n)):
+            self.assertEqual(
+                proto._read_opt_pad(pad1, options=None).length, 1)  # type: ignore[arg-type]
 
     def test_mh_pmipv6_options_round_trip_byte_for_byte(self) -> None:
         """Every mobility option this module decodes must survive a round trip.

@@ -2725,12 +2725,21 @@ class MH(Internet[Data_MH, Schema_MH],
         Length fields"* -- so the whole option, which is what every
         ``_read_opt_*`` below reports back as the parsed option's own
         ``.length``, is two octets more. This is the exact ``+2``/``-2``
-        mismatch #398 fixed independently in six places (see
-        ``Data_PadOption.length`` vs. ``Schema_PadOption.length`` below, at
-        the surviving explanation of that fix); collecting the read-side
-        half of it into one helper is so a future fix to this arithmetic
-        only has to happen once. Do NOT drop the ``+ 2``: that is precisely
-        the mismatch #398 fixed.
+        mismatch #398 fixed independently in six places (see the ``Note:``
+        on :meth:`_read_opt_pad` below, which explains why a ``Pad1``
+        option -- the one option with no ``Option Length`` field at all --
+        is this helper's sole exception); collecting the read-side half of
+        it into one helper is so a future fix to this arithmetic only has
+        to happen once. Do NOT drop the ``+ 2``: that is precisely the
+        mismatch #398 fixed.
+
+        The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
+        option, whose Option Type and Option Length are one octet each. It
+        is **not** a universal contract for everything this class parses:
+        a CGA extension's Extension Type and Extension Data Length are two
+        octets each [:rfc:`4581#section-2`], so those readers use
+        :meth:`_mh_extension_length` instead. Reusing this helper for them
+        reported every parsed CGA extension two octets short (#512).
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
@@ -2741,7 +2750,8 @@ class MH(Internet[Data_MH, Schema_MH],
             schema_length: raw ``Option Length`` field value, as read off the wire.
 
         Returns:
-            Whole-option length, in octets, including the Type and Length fields.
+            Whole-option length, in octets, including the Option Type and
+            Option Length fields.
 
         """
         return schema_length + 2
@@ -2837,6 +2847,18 @@ class MH(Internet[Data_MH, Schema_MH],
         Returns:
             Constructed option data.
 
+        Note:
+            A ``Pad1`` option occupies a single octet and carries no
+            ``Option Length`` field, so its
+            :attr:`~pcapkit.protocols.data.internet.mh.PadOption.length` is
+            ``1`` rather than ``length + 2``. That one-octet wire shape is
+            enforced by
+            :class:`~pcapkit.protocols.schema.internet.mh.PadOption` itself,
+            which sizes both the length octet and the padding data from the
+            option type [:rfc:`6275#section-6.2.5`]; ``clen`` is therefore
+            always ``0`` here for a parsed ``Pad1``, and the check below only
+            guards a schema built by hand.
+
         """
         code, clen = schema.type, schema.length
 
@@ -2850,7 +2872,7 @@ class MH(Internet[Data_MH, Schema_MH],
         if code == Enum_Option.Pad1:
             size = 1
         else:
-            size = clen + 2
+            size = self._mh_option_length(clen)
 
         data = Data_PadOption(
             type=schema.type,
@@ -6179,6 +6201,40 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
+    @staticmethod
+    def _mh_extension_length(schema_length: 'int') -> 'int':
+        """Compute a CGA extension's whole-structure length from its on-the-wire ``Extension Data Length``.
+
+        This is the CGA-extension counterpart of :meth:`_mh_option_length`, and
+        it deliberately adds ``4`` rather than ``2``. A CGA extension is **not**
+        an :rfc:`6275#section-6.2` mobility option: per :rfc:`4581#section-2`,
+        which defines the TLV format and formally updates :rfc:`3972`, its
+        ``Extension Type`` is a *"16-bit identifier of the type of the Extension
+        Field"* and its ``Extension Data Length`` a *"16-bit unsigned integer.
+        Length of the Extension Data field of this option, in octets"*. So the
+        fixed header is two 2-octet fields, not two 1-octet ones, and the whole
+        structure is ``4`` octets more than the stored length -- a fact
+        :rfc:`5535#section-5` states from the other direction for the one
+        non-experimental assigned type, whose ``Ext Len`` is the *"[l]ength of
+        the Extension in octets, not including the first 4 octets"*.
+
+        Passing these lengths through :meth:`_mh_option_length` reported every
+        parsed CGA extension two octets short (#512): an 8-octet extension with
+        an ``Extension Data Length`` of ``4`` came back as ``6``. Note
+        :meth:`_make_cga_extensions` has always measured ``len(schema.pack())``
+        instead, so the write side was already right and only the read side
+        disagreed with the wire.
+
+        Args:
+            schema_length: raw ``Extension Data Length`` field value, as read off the wire.
+
+        Returns:
+            Whole-extension length, in octets, including the Extension Type and
+            Extension Data Length fields.
+
+        """
+        return schema_length + 4
+
     def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
         """Read CGA extensions.
 
@@ -6236,7 +6292,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_UnknownExtension(
             type=schema.type,
-            length=self._mh_option_length(schema.length),
+            length=self._mh_extension_length(schema.length),
             data=schema.data,
         )
         return data
@@ -6283,7 +6339,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_MultiPrefixExtension(
             type=schema.type,
-            length=self._mh_option_length(schema.length),
+            length=self._mh_extension_length(schema.length),
             flag=bool(schema.flags['P']),
             prefixes=tuple(schema.prefixes),
         )
@@ -6328,7 +6384,7 @@ class MH(Internet[Data_MH, Schema_MH],
         """
         data = Data_ExperimentalExtension(
             type=schema.type,
-            length=self._mh_option_length(schema.length),
+            length=self._mh_extension_length(schema.length),
             data=schema.data,
         )
         return data
