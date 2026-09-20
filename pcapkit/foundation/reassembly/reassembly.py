@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pcapkit.corekit.infoclass import Info
+    from pcapkit.corekit.module import ModuleDescriptor
     from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
     CallbackFn = Callable[[list[_DT]], None]
@@ -79,6 +80,31 @@ class ReassemblyMeta(abc.ABCMeta):
             return cls.__protocol_type__
         return protocol_registry.get(cls.name.upper(), Raw)
 
+    @property
+    def registry(cls) -> 'dict[str, ModuleDescriptor[Reassembly] | Type[Reassembly]]':
+        """Mapping of protocol names to reassembly classes.
+
+        Note:
+            Unlike :attr:`EnumSchema.registry
+            <pcapkit.protocols.schema.schema.EnumSchema.registry>`, this is not
+            a per-class mapping: every reassembly registration lands in the
+            single :attr:`Extractor.__reassembly__
+            <pcapkit.foundation.extraction.Extractor.__reassembly__>` table, so
+            reading it through any subclass returns that same object. The
+            property exists so ``MyReassembly.registry`` is spelled the same way
+            here as it is for schemas.
+
+            Note also that :class:`EnumSchema` carries *two* ``registry``
+            properties, one on its metaclass and one on the class body, so it
+            answers on an instance as well. This one is on the metaclass only,
+            so it is available as a class attribute and **not** on an instance.
+
+        """
+        from pcapkit.foundation.extraction import \
+            Extractor  # pylint: disable=import-outside-toplevel
+
+        return Extractor.__reassembly__
+
 
 class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
     """Base class for reassembly procedure.
@@ -95,7 +121,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
 
     Note:
         This class is for internal use only. For customisation, please use
-        :class:`TraceFlow` instead.
+        :class:`Reassembly` instead.
 
     """
     if TYPE_CHECKING:
@@ -473,17 +499,31 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
 
 
 class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]):
-    """Base flow tracing class.
+    """Base reassembly class.
 
     Example:
 
-        Use keyword argument ``protocol`` to specify the protocol
-        name at class definition:
+        Registration is opt-in. Pass keyword argument ``protocol`` at class
+        definition to register the reassembly under that protocol name:
 
         .. code-block:: python
 
            class MyProtocol(Reassembly, protocol='my_protocol'):
                ...
+
+        Omit it and the subclass is *not* registered, which is how a class
+        that is not meant to be selectable by name declines:
+
+        .. code-block:: python
+
+           class MyMixin(Reassembly):  # not registered
+               ...
+
+        Such a class can still be registered later, on demand:
+
+        .. code-block:: python
+
+           Extractor.register_reassembly('my_mixin', MyMixin)
 
     Arguments:
         strict: if return all datagrams (including those not
@@ -499,23 +539,50 @@ class Reassembly(ReassemblyBase[_PT, _DT, _IT, _BT], Generic[_PT, _DT, _IT, _BT]
     def __init_subclass__(cls, /, protocol: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialise subclass.
 
-        This method is to be used for registering the engine class to
+        This method is to be used for registering the reassembly class to
         :class:`~pcapkit.foundation.extraction.Extractor` class.
 
         Args:
-            name: Protocol name, default to class name.
+            protocol: Protocol name to register the subclass under, lowercased.
+                :data:`None` (the default) skips registration entirely.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
+
+        Raises:
+            UnsupportedCall: If any unrecognised class keyword is given.
+
+        Registration is **opt-in**: the subclass is registered if and only if
+        ``protocol`` is given. This is what lets a subclass decline registration
+        rather than having to inherit :class:`ReassemblyBase` to avoid it, and it
+        matches :meth:`EnumSchema.__init_subclass__
+        <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
+        has guarded on its own ``code`` keyword all along.
+
+        Note:
+            :attr:`__protocol_name__` is *not* an opt-in. It supplies the
+            :attr:`name <pcapkit.foundation.reassembly.reassembly.ReassemblyMeta.name>`
+            the reassembly reports, which it does whether or not the class is
+            registered; only the keyword decides registration.
 
         See Also:
             For more details, please refer to
             :meth:`pcapkit.foundation.extraction.Extractor.register_reassembly`.
 
         """
-        if protocol is None:
-            protocol = cast('str', cls.name)
+        # NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same
+        # idea ``name`` -- so guessing ``name=`` by analogy is the expected
+        # mistake, not a careless one. It used to land in ``**kwargs``, get
+        # dropped by the bare ``super().__init_subclass__()`` below, and leave
+        # the class registered under its own class name instead: no exception, no
+        # warning. See the sibling note in ``Engine.__init_subclass__``.
+        if args or kwargs:
+            unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
+            raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
-        from pcapkit.foundation.extraction import Extractor
-        Extractor.register_reassembly(protocol.lower(), cls)
+        if protocol is not None:
+            from pcapkit.foundation.extraction import \
+                Extractor  # pylint: disable=import-outside-toplevel
+
+            Extractor.register_reassembly(protocol.lower(), cls)
 
         return super().__init_subclass__()
