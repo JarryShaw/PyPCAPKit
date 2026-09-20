@@ -184,7 +184,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         Important:
             The port is forwarded **whether or not it is registered**, since
             :meth:`ProtocolBase._import_next_layer
-            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` passes
+            <pcapkit.protocols.protocol.Protocol._import_next_layer>` passes
             it on as ``alias`` and :class:`~pcapkit.protocols.misc.raw.Raw`
             records it as :attr:`Data_Raw.protocol
             <pcapkit.protocols.data.misc.raw.Raw.protocol>`. Dropping it -- as

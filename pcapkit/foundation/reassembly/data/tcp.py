@@ -103,9 +103,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     header: 'bytes'
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
-    #: Parsed reassembled payload.
     #: Parsed TCP payload. Analysed on first read rather than at construction;
-    #: a :class:`Deferred` may be passed in its place.
+    #: a :class:`Deferred` may be passed in its place, and reading this
+    #: attribute then runs it and keeps the result.
     packet: 'Optional[Protocol]'
     #: Sequence ranges on which two segments disagreed, i.e. where an arriving
     #: segment overlapped bytes already buffered but did not repeat them.

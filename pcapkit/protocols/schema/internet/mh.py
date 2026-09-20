@@ -1798,7 +1798,7 @@ class ANIGeoLocationSuboption(ANISuboption, code=Enum_ANISuboption.Geo_Location)
         with 9 integer bits [:rfc:`6757#section-3.1.2`]. A
         :class:`~pcapkit.corekit.fields.strings.BitField` reads them unsigned,
         so the sign is applied when
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_ani_geo` builds the data
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_ani_suboptions` builds the data
         model.
 
     """

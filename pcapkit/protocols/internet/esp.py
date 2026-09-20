@@ -1395,7 +1395,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
 
         The payload is surfaced as :class:`~pcapkit.protocols.misc.raw.Raw`
         -- which is what a next header of :data:`None` resolves to -- so that
-        :attr:`self.payload <pcapkit.protocols.protocol.ProtocolBase.payload>`
+        :attr:`self.payload <pcapkit.protocols.protocol.Protocol.payload>`
         and the protocol chain behave as they do for any other protocol, and
         the trailer fields are left :data:`None` rather than guessed at.
 

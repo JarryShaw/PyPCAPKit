@@ -57,7 +57,14 @@ jobs:
         with:
           python-version: '3.14'
 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      # Builds the Sphinx documentation into `docs/build/html`, which the deploy
+      # step below publishes. `PCAPKIT_SPHINX` is what makes the
+      # `if SPHINX_TYPE_CHECKING:` TypedDicts visible to autodoc; `PCAPKIT_DEVMODE`
+      # puts the library logger at DEBUG on stderr and leaves tracebacks untrimmed,
+      # so an autodoc import failure is legible in the run log. Both are read at
+      # import time, so they are exported before anything imports `pcapkit` --
+      # `docs/source/conf.py` sets `PCAPKIT_SPHINX` itself for the same reason.
+      - name: Install and Build 🔧
         run: |
           set -x
 

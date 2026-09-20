@@ -7,7 +7,7 @@ Character Set Detection
 turning the bytes of a text field into a :obj:`str`. It is shared by
 :meth:`StringField.post_process
 <pcapkit.corekit.fields.strings.StringField.post_process>` and
-:meth:`ProtocolBase.decode <pcapkit.protocols.protocol.ProtocolBase.decode>`,
+:meth:`ProtocolBase.decode <pcapkit.protocols.protocol.Protocol.decode>`,
 which is why it lives here rather than beside either of them.
 
 .. _chardet: https://chardet.readthedocs.io

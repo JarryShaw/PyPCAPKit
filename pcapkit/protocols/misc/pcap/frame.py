@@ -403,8 +403,8 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             self: :class:`Frame` object or :obj:`None`.
 
         Returns:
-            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
-            exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
+            If the object is initiated, i.e. ``self._fnum`` exists, returns the
+            frame index number of itself; else raises :exc:`UnsupportedCall`.
 
         Raises:
             UnsupportedCall: This protocol has no registry entry.

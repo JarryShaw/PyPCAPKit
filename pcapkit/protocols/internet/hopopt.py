@@ -597,7 +597,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         Note:
             A ``Pad1`` option occupies a single octet and carries no
             ``Opt Data Len`` field, so its
-            :attr:`~pcapkit.protocols.data.internet.hopopt.PadOption.length` is
+            :attr:`~pcapkit.protocols.data.internet.hopopt.Option.length` is
             ``1`` rather than ``len + 2``. That one-octet wire shape is enforced
             by :class:`~pcapkit.protocols.schema.internet.hopopt.PadOption`
             itself, which sizes both the length octet and the padding data from
@@ -1421,7 +1421,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
 
         Note:
             :attr:`Data_PadOption.length
-            <pcapkit.protocols.data.internet.hopopt.PadOption.length>` counts the
+            <pcapkit.protocols.data.internet.hopopt.Option.length>` counts the
             *whole* option, whereas :attr:`Schema_PadOption.len
             <pcapkit.protocols.schema.internet.hopopt.PadOption.len>` is the
             ``Opt Data Len`` field -- two octets fewer, and absent altogether for

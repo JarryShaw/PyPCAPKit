@@ -696,8 +696,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             try to find the corresponding class in the
             :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
             modules respectively. If the class is not found, the default
-            :class:`~pcapkit.protocols.schema.schema.Schema_Raw` and
-            :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.
+            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and
+            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
 
         """
         super().__init_subclass__()
@@ -1428,8 +1428,8 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
             try to find the corresponding class in the
             :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
             modules respectively. If the class is not found, the default
-            :class:`~pcapkit.protocols.schema.schema.Schema_Raw` and
-            :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.
+            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and
+            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
 
         This method also registers the subclass to the protocol registry,
         i.e., :attr:`pcapkit.protocols.__proto__`.

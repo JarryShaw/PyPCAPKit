@@ -20,13 +20,13 @@ Rather than adding protocol specific keyword arguments to
 :class:`~pcapkit.foundation.extraction.Extractor`, such information is passed
 as a :class:`~pcapkit.corekit.context.ContextRegistry` -- a mapping of
 protocol index ID (c.f. :meth:`Protocol.id
-<pcapkit.protocols.protocol.ProtocolBase.id>`) to a
+<pcapkit.protocols.protocol.Protocol.id>`) to a
 :class:`~pcapkit.corekit.context.ProtocolContext` instance. The registry is
 handed to :class:`~pcapkit.foundation.extraction.Extractor` once, and is then
 propagated down the protocol stack by
-:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`,
+:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`,
 so that a protocol nested arbitrarily deep can reach it through
-:meth:`Protocol._get_context <pcapkit.protocols.protocol.ProtocolBase._get_context>`.
+:meth:`Protocol._get_context <pcapkit.protocols.protocol.Protocol._get_context>`.
 
 Decoding an ESP tunnel end to end:
 

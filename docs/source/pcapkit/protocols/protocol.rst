@@ -65,7 +65,9 @@ utility arguments and methods of specified protocols.
    .. automethod:: _lookup_next_layer
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
+   .. automethod:: _get_context
 
+   .. autoattribute:: _data
    .. autoattribute:: _file
    .. autoattribute:: _info
    .. autoattribute:: __data__
@@ -83,6 +85,7 @@ utility arguments and methods of specified protocols.
 
    .. autoattribute:: _exlayer
    .. autoattribute:: _exproto
+   .. autoattribute:: _exctx
 
 Data Models
 -----------

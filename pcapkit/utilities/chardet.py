@@ -41,7 +41,7 @@ def detect(value: 'bytes') -> 'str':
         retains 19.1 MB. :data:`DETECT_CACHE_SIZE` therefore caps the entries
         rather than the footprint, which matters because
         :meth:`ProtocolBase.decode
-        <pcapkit.protocols.protocol.ProtocolBase.decode>` is public and a caller
+        <pcapkit.protocols.protocol.Protocol.decode>` is public and a caller
         may hand it a whole payload. Use :meth:`detect.cache_clear
         <functools.lru_cache.cache_clear>` to release it in a long-running
         process.

@@ -8,8 +8,8 @@
 :class:`~pcapkit.protocols.application.http.HTTP`
 only, which is a base class for Hypertext Transfer
 Protocol (HTTP) [*]_ family, eg.
-:class:`HTTP/1.* <pcapkit.protocols.application.application.httpv1>`
-and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
+:class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTP>`
+and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 

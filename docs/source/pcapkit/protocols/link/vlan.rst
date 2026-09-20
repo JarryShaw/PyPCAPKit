@@ -50,14 +50,14 @@ tags appear in one frame:
    ethernet.s_tag.c_tag.tci.vid = 200     <- customer tag, 802.1Q
    ethernet.s_tag.c_tag.type    = 0x0800
 
-:attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name` -- ``s_tag`` against
+:attr:`~pcapkit.protocols.protocol.Protocol.info_name` -- ``s_tag`` against
 ``c_tag`` -- is what keeps the two apart in the parsed
 :class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes
 would nest one ``c_tag`` inside another, leaving nothing in the output to say
 which of the two was the service tag.
 
 Two distinct EtherTypes also means two distinct
-:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the
+:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the
 project's rule for when protocols get separate modules: siblings that *share* an
 index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
 :mod:`~pcapkit.protocols.link.arp` and
