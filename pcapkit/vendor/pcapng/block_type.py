@@ -27,22 +27,19 @@ if TYPE_CHECKING:
 ###############################################################################
 # NOTE: on the registry URL, which this module and its two siblings
 # (:mod:`~pcapkit.vendor.pcapng.option_type`,
-# :mod:`~pcapkit.vendor.pcapng.record_type`) share; see #518.
+# :mod:`~pcapkit.vendor.pcapng.record_type`) share. Why all three read ``-03`` is
+# stated for readers in the note in ``docs/source/pcapkit/vendor/pcapng.rst``,
+# which renders; what follows is the measurement detail behind it. See #518.
 #
-# All three used to point at
-# https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, which is dead
-# -- measured 2026-09-19 as 404 with any User-Agent, serving a 77968-byte HTML
-# error page, so ``Vendor._request`` rejects it on ``page.ok`` and retries
-# MAX_RETRY times against a page that will never come back.
-#
-# The revision number in that URL was wrong as well as the path, which is why
-# this is now ``-03`` and not ``-02``. The ``-02`` draft renders its registries
-# as ASCII art inside ``<pre>``, and carries exactly one HTML ``<table>`` -- the
-# running-header one -- so ``soup.select('table#table-9')`` below finds nothing
-# and raises ``IndexError``. The ``table-1`` .. ``table-10`` ids the three
-# crawlers select on first exist in ``-03``, where the registries became real
-# tables. Measured across every published revision, ``-03`` is also the only one
-# that reproduces all three committed constant files byte for byte.
+# The dead ``-02`` URL,
+# https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, serves a
+# 77968-byte HTML error page rather than a clean refusal, so ``Vendor._request``
+# rejects it on ``page.ok`` and retries MAX_RETRY times against a page that will
+# never come back. On ``-02`` the registries are ASCII art inside ``<pre>`` and
+# the only HTML ``<table>`` is the running-header one, so
+# ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.
+# Measured across every published revision, ``-03`` is the only one that
+# reproduces all three committed constant files byte for byte.
 #
 # Two renderings of ``-03`` were compared, and both reproduce the three constant
 # files byte-identically, so the choice is about exposure rather than data:
