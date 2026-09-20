@@ -3527,13 +3527,26 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             if len(iv) != 16:
                 raise ProtocolError(f'HIPv{version}: [ParamNo {code}] IV length must be 16 bytes for AES cipher')
 
-        return Schema_EncryptedParameter(
+        schema = Schema_EncryptedParameter(
             type=code,
             len=4 + len(iv or b'') + len(data),
-            cipher=cipher_id,
             iv=iv,
             data=data,
         )
+        # NOTE: ``cipher`` is not a schema field -- ``ENCRYPTED``'s own wire
+        # format carries no cipher ID of its own, only the preceding
+        # ``HIP_CIPHER`` parameter does -- so passing it as a constructor
+        # keyword (as this used to) drew an ``UnknownFieldWarning`` and was
+        # dropped, leaving ``pre_unpack`` to fall back to its own sibling
+        # lookup, which a standalone ``make`` call gives no ``options`` to
+        # search and which then always treated the parameter as cipher-less
+        # and silently packed the ``ENCRYPTED`` parameter without its IV.
+        # Setting the already-resolved ``cipher_id`` as a plain attribute
+        # instead reaches ``pack()``'s packet context via
+        # ``packet.update(self.__dict__)``, where ``pre_unpack`` now honours
+        # it ahead of that lookup. See #556.
+        schema.cipher = cipher_id
+        return schema
 
     def _make_param_host_id(self, code: 'Enum_Parameter', param: 'Optional[Data_HostIDParameter]' = None, *,  # pylint: disable=unused-argument
                             version: 'int',

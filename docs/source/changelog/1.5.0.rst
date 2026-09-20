@@ -282,6 +282,15 @@ pull requests between #326 and #509.
   (#413), ambiguous cross-references and five autodoc signature failures (#416),
   and ``Extractor``'s documented exception plus 40 phantom or stale ``Args:``
   labels (#501).
+* **Fixed** -- two dropped-keyword/wrong-cast defects flagged in review during
+  this release and never filed until now: HIP's ``_make_param_encrypted`` passed
+  ``cipher=`` to a schema with no such field, so the value was silently dropped
+  and an AES-cipher ``ENCRYPTED`` parameter built through ``make`` packed
+  without its IV; and IPv6-Route's ``RPL.post_process``, which runs on every
+  ``Schema.pack`` and not only after a parse, assumed ``self.addresses`` was
+  still the concatenated ``bytes`` a parse leaves it as, and raised slicing the
+  ``list[bytes]`` a ``make``-built multi-address header actually holds there
+  (#556).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

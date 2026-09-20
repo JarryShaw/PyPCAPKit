@@ -1293,6 +1293,59 @@ class HIPUnitTests(unittest.TestCase):
             hmac=b'relh',
         ).hmac, b'relh')
 
+    def test_hip_make_param_encrypted_preserves_iv_on_pack(self) -> None:
+        # #556: ``_make_param_encrypted`` used to pass ``cipher=`` to
+        # ``Schema_EncryptedParameter``, a keyword the schema does not
+        # accept (the packing-time cipher lookup keys off ``__cipher__``,
+        # a packet-context key -- not a constructible field), so the value
+        # was dropped with an ``UnknownFieldWarning`` and the schema's own
+        # ``pre_unpack`` fallback then always treated the parameter as
+        # cipher-less, silently packing an AES-cipher ``ENCRYPTED``
+        # parameter without its IV. Building one through ``make`` and
+        # packing it must retain the IV.
+        import warnings
+
+        from pcapkit.const.hip.cipher import Cipher
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        proto = object.__new__(HIP)
+        iv = b'\x11' * 16
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            schema = proto._make_param_encrypted(
+                Parameter.ENCRYPTED,
+                version=2,
+                cipher=Cipher.AES_128_CBC,
+                iv=iv,
+                data=b'DATA',
+            )
+            packed = bytes(schema)
+        # constructing and packing must not have drawn an
+        # ``UnknownFieldWarning`` for an unrecognised ``cipher`` keyword, nor
+        # the ``pre_unpack`` fallback's "missing HIP_CIPHER parameter" one.
+        self.assertEqual(caught, [])
+
+        self.assertIn(iv, packed)
+        self.assertEqual(schema.cipher, Cipher.AES_128_CBC)
+
+        # a cipher that needs no IV (e.g. ``NULL_ENCRYPT``) still packs
+        # cleanly, with no IV octets and no "missing HIP_CIPHER" warning
+        # (the resolved cipher is known directly; there is nothing to
+        # infer from a sibling parameter this schema was never given).
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            schema_null = proto._make_param_encrypted(
+                Parameter.ENCRYPTED,
+                version=2,
+                cipher=Cipher.NULL_ENCRYPT,
+                data=b'DATA',
+            )
+            packed_null = bytes(schema_null)
+        self.assertEqual(caught, [])
+        self.assertEqual(packed_null, b'\x02\x81\x00\x08\x00\x00\x00\x00DATA\x00\x00\x00\x00')
+
     def test_hip_parameter_constructors_cover_data_model_and_default_paths(self) -> None:
         from pcapkit.const.hip.certificate import Certificate
         from pcapkit.const.hip.cipher import Cipher
