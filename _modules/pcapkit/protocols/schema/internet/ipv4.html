@@ -450,7 +450,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.classification_level</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassificationLevel</span> <span class="k">as</span> <span class="n">Enum_ClassificationLevel</span>
@@ -460,7 +459,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv4.ts_flag</span><span class="w"> </span><span class="kn">import</span> <span class="n">TSFlag</span> <span class="k">as</span> <span class="n">Enum_TSFlag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
                                          <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
@@ -568,6 +567,92 @@
 
 
 
+<div class="viewcode-block" id="quick_start_option_length">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.quick_start_option_length">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">quick_start_option_length</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[QSOption]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""On-the-wire length, in octets, of a resolved Quick-Start (``QS``) suboption.</span>
+
+<span class="sd">    The Quick-Start suboption schemas re-declare the option's own ``type`` and</span>
+<span class="sd">    ``length`` octets -- they inherit them from :class:`Option` -- so what</span>
+<span class="sd">    :func:`quick_start_data_selector` has to hand the nested</span>
+<span class="sd">    :class:`~pcapkit.corekit.fields.misc.SchemaField` is the length of the</span>
+<span class="sd">    *whole* option, not of the data after its header. Per</span>
+<span class="sd">    :rfc:`4782#section-3.1` -- figure 3 for a Quick-Start Request and figure 4</span>
+<span class="sd">    for a Report of Approved Rate -- that is eight octets for both functions,</span>
+<span class="sd">    which differ in what the fourth octet holds rather than in how many there</span>
+<span class="sd">    are: *"The second byte contains the length field, indicating an option</span>
+<span class="sd">    length of eight bytes"*, and *"For a Report of Approved Rate, the fourth</span>
+<span class="sd">    byte of the Quick-Start Option is not used"*. And</span>
+<span class="sd">    :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` rejects any other</span>
+<span class="sd">    value in the ``length`` field outright.</span>
+
+<span class="sd">    It is summed from the resolved schema's own fields rather than written as</span>
+<span class="sd">    that literal, for two reasons. The registry is open --</span>
+<span class="sd">    :class:`QSOption` is an :class:`~pcapkit.protocols.schema.schema.EnumSchema`,</span>
+<span class="sd">    so a caller may register a further function code with a schema of its own</span>
+<span class="sd">    width -- and a number written here has to be kept in step by hand with every</span>
+<span class="sd">    field the suboptions declare, which is precisely how #552 arose: the length</span>
+<span class="sd">    was ``5``, the width of a Quick-Start Request's ``ttl`` and ``nonce`` alone,</span>
+<span class="sd">    with the ``type``, ``length`` and ``flags`` octets in front of them</span>
+<span class="sd">    unaccounted for.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: Quick-Start suboption schema, as resolved from the ``func``</span>
+<span class="sd">            sub-field by :func:`quick_start_data_selector`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Length, in octets, that ``schema`` occupies on the wire.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``schema`` declares a field whose width is not</span>
+<span class="sd">            fixed. Every field of a Quick-Start suboption is fixed-width,</span>
+<span class="sd">            because the option is, and a variable-width one cannot be summed</span>
+<span class="sd">            here without a packet to size it against -- which is the one thing</span>
+<span class="sd">            a selector does not have for the schema it is about to return. It</span>
+<span class="sd">            fails rather than guessing, since guessing is the defect being</span>
+<span class="sd">            fixed.</span>
+
+<span class="sd">    """</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># NOTE: A forward match consumes nothing and contributes no octets to</span>
+        <span class="c1"># ``bytes(schema)`` either, c.f. the ``ForwardMatchField`` branches of</span>
+        <span class="c1"># :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` and</span>
+        <span class="c1"># :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
+        <span class="c1"># and the double-count #441/#446 fixed.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># NOTE: The only conditional field a Quick-Start suboption has is the</span>
+        <span class="c1"># ``length`` octet it inherits from :class:`Option`, whose test is false</span>
+        <span class="c1"># only for ``EOOL`` and ``NOP`` -- neither of which is a Quick-Start</span>
+        <span class="c1"># function -- so it is always on the wire and always counted.</span>
+        <span class="n">inner</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ConditionalField</span><span class="p">)</span> <span class="k">else</span> <span class="n">field</span>
+
+        <span class="c1"># NOTE: ``_length_callback`` rather than a ``length &lt; 0`` test, because a</span>
+        <span class="c1"># dynamically sized field does not report a negative width: it reports</span>
+        <span class="c1"># whatever its template says, and the templates fall back to a</span>
+        <span class="c1"># "reasonable default" of ``1024s`` -- measured on ``LSROption.remainder``,</span>
+        <span class="c1"># a ``PaddingField`` with a length callback, which reports 1024. So the</span>
+        <span class="c1"># callback's presence is the only reliable signal, and reaching for it is</span>
+        <span class="c1"># worth one private access. A :class:`~pcapkit.corekit.fields.misc.SwitchField`</span>
+        <span class="c1"># is named separately because it is the one field whose width is dynamic</span>
+        <span class="c1"># *without* a length callback: it carries a</span>
+        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.NoValueField` until its own selector</span>
+        <span class="c1"># resolves it, and so reports a width of zero rather than refusing to</span>
+        <span class="c1"># answer. That is exactly what :class:`_QSOption` -- the outer wrapper,</span>
+        <span class="c1"># which is not itself a suboption -- would hand back here.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="s1">'_length_callback'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">QS</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: '</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> is not of a fixed width'</span>
+            <span class="p">)</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+
 <div class="viewcode-block" id="quick_start_data_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">quick_start_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
@@ -584,6 +669,18 @@
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption`</span>
 <span class="sd">          instance.</span>
 
+<span class="sd">    Notes:</span>
+<span class="sd">        The length handed to the :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
+<span class="sd">        comes from :func:`quick_start_option_length`, i.e. from the suboption that</span>
+<span class="sd">        was just resolved. It used to be the literal ``5`` for both, which is not</span>
+<span class="sd">        the width of either: a well-formed eight-octet Quick-Start Request</span>
+<span class="sd">        ``1908002adeadbee0`` parsed with ``SchemaWarning: packet length &lt; 0: -3``</span>
+<span class="sd">        and decoded its ``nonce`` as **55** instead of 933982136, then left three</span>
+<span class="sd">        octets to be read as a further, fabricated option -- which made the</span>
+<span class="sd">        enclosing datagram fail with ``ProtocolError: IPv4: invalid format``. That</span>
+<span class="sd">        is silent corruption on the way to a misleading failure, and it was logged</span>
+<span class="sd">        in review twice before #552 filed it.</span>
+
 <span class="sd">    """</span>
     <span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">])</span>
     <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'func'</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
@@ -591,7 +688,7 @@
     <span class="n">schema</span> <span class="o">=</span> <span class="n">QSOption</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">quick_start_option_length</span><span class="p">(</span><span class="n">schema</span><span class="p">),</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 
@@ -744,6 +841,32 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If an entry of :attr:`ts_data` that the timestamp</span>
+<span class="sd">                flag makes an address is a :obj:`bool`, is not a valid IP</span>
+<span class="sd">                address, or is not IPv4 -- c.f.</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This runs on the **packing** path as well as the unpacking one --</span>
+<span class="sd">            :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`</span>
+<span class="sd">            calls it once the buffer is filled -- so the ``ts_data`` entries it</span>
+<span class="sd">            converts below are whatever the caller passed to the constructor,</span>
+<span class="sd">            not octets read off the wire. That is why those conversions go</span>
+<span class="sd">            through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`</span>
+<span class="sd">            rather than :func:`ipaddress.ip_address`: this schema is reachable</span>
+<span class="sd">            from public :meth:`IPv4.make</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.ipv4.IPv4.make&gt;`, which accepts a</span>
+<span class="sd">            caller-built option schema and packs it, and</span>
+<span class="sd">            :attr:`ts_data`'s :class:`~pcapkit.corekit.fields.numbers.UInt32Field`</span>
+<span class="sd">            item type takes a :obj:`bool` as the :class:`int` it is a subclass</span>
+<span class="sd">            of, so nothing downstream can question it. Measured before this</span>
+<span class="sd">            fix: ``ts_data=[True, 5]`` packed as ``0000000100000005`` and</span>
+<span class="sd">            reported ``IPv4Address('0.0.0.1')`` with no exception and no</span>
+<span class="sd">            warning. This was the fifth site of that defect -- #481, #500,</span>
+<span class="sd">            #539 and #540 are the first four -- and the reason it is the fifth</span>
+<span class="sd">            is that each of those fixed the sites it could see. See #552.</span>
+
 <span class="sd">        """</span>
         <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'flag'</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span><span class="p">:</span>
@@ -767,7 +890,8 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ts_data</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">ts_data</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
-                <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+                <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                    <span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid timestamp address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
@@ -782,7 +906,8 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ts_data</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">ts_data</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
-                <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
+                <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                    <span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid timestamp address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
@@ -794,10 +919,23 @@
 
             <span class="c1"># extract also the prespecified IP addresses</span>
             <span class="c1"># but set the timestamp to 0</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: Through ``parse_ip_address`` like the two conversions above,</span>
+            <span class="c1"># even though #540 and #552 both judged this site unable to launder a</span>
+            <span class="c1"># :obj:`bool` -- ``remainder`` is a</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.strings.PaddingField`, so what it</span>
+            <span class="c1"># holds is octets rather than anything the caller named. It is routed</span>
+            <span class="c1"># through anyway because a bare :func:`ipaddress.ip_address` here</span>
+            <span class="c1"># still raises a plain :exc:`ValueError` for a tail that is not a</span>
+            <span class="c1"># whole number of 8-octet pairs, which no ``except BaseError`` can</span>
+            <span class="c1"># catch, and because leaving one of this method's three conversions</span>
+            <span class="c1"># unguarded is exactly how #552 came to be the fifth site of #481.</span>
             <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
                 <span class="n">buf_ip</span> <span class="o">=</span> <span class="n">pad</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf_ip</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parse_ip_address</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
+                    <span class="n">buf_ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid prespecified address'</span><span class="p">,</span>
+                    <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: unknown timestmap flag: </span><span class="si">{</span><span class="n">ts_flag</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
@@ -813,7 +951,17 @@
         <span class="n">data</span><span class="p">:</span> <span class="s1">'list[int] | OrderedMultiDict[IPv4Address, int]'</span>
         <span class="n">timestamp</span><span class="p">:</span> <span class="s1">'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'TSFlags'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="c1"># NOTE: The keyword is ``ts_data``, the name of the field above, not the</span>
+        <span class="c1"># ``data`` this signature used to advertise. ``data`` is the *derived*</span>
+        <span class="c1"># attribute :meth:`post_process` writes and is declared three lines up;</span>
+        <span class="c1"># naming it here as a constructor argument too is what</span>
+        <span class="c1"># :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_ts` was written</span>
+        <span class="c1"># against, and because :meth:`Schema.__update__</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` answers an unknown</span>
+        <span class="c1"># field name with an</span>
+        <span class="c1"># :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` rather than an</span>
+        <span class="c1"># error, the timestamps were dropped in silence. See #552.</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">'TSFlags'</span><span class="p">,</span> <span class="n">ts_data</span><span class="p">:</span> <span class="s1">'list[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -1048,6 +1196,25 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for IPV4 quick start report of approved rate options."""</span>
 
+    <span class="c1">#: Not used. One octet, holding the place a Quick-Start Request fills with</span>
+    <span class="c1">#: ``QS TTL``: :rfc:`4782#section-3.1` says in as many words that *"for a</span>
+    <span class="c1">#: Report of Approved Rate, the fourth byte of the Quick-Start Option is not</span>
+    <span class="c1">#: used"*, and that *"bytes 5-8 contain a 30-bit QS Nonce and a 2-bit</span>
+    <span class="c1">#: Reserved field"* -- so the nonce begins at the fifth octet for both</span>
+    <span class="c1">#: functions, and figure 4 gives this option as ``Length=8`` like figure 3</span>
+    <span class="c1">#: gives its sibling. The field was missing, so the schema was seven octets</span>
+    <span class="c1">#: wide against the eight</span>
+    <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs` writes into</span>
+    <span class="c1">#: ``length`` and the eight</span>
+    <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` demands of it,</span>
+    <span class="c1">#: which meant a spec-correct Report of Approved Rate read off the wire</span>
+    <span class="c1">#: decoded its ``nonce`` one octet early -- measured, with the selector</span>
+    <span class="c1">#: length fixed and this field still absent: ``19088100deadbee0`` warned</span>
+    <span class="c1">#: ``packet length &lt; 0: -1`` and then died with a bare ``struct.error: bad</span>
+    <span class="c1">#: char in struct format``, the unconsumed octet having been read as another</span>
+    <span class="c1">#: option. Declared as padding rather than as data because :rfc:`4782` gives</span>
+    <span class="c1">#: it no meaning and no caller should be setting it. See #552.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: QS nonce.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'QSNonce'</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">'nonce'</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>

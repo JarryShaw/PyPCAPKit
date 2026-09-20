@@ -2116,6 +2116,16 @@
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid timestamp value: </span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">pointer</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
 
+        <span class="c1"># NOTE: ``ts_data``, the name of the field on</span>
+        <span class="c1"># :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, and not the</span>
+        <span class="c1"># ``data`` this used to pass. ``data`` is the attribute that schema's</span>
+        <span class="c1"># ``post_process`` *derives* from ``ts_data``, so naming it here dropped</span>
+        <span class="c1"># every timestamp: :meth:`Schema.__update__</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` warns</span>
+        <span class="c1"># ``UnknownFieldWarning`` for a name it does not know and carries on, which</span>
+        <span class="c1"># left ``ts_data`` bound to its class-level ``ListField`` -- and made the</span>
+        <span class="c1"># IPv4 Timestamp option unbuildable through ``make``, since</span>
+        <span class="c1"># ``post_process`` then iterated the field object itself. See #552.</span>
         <span class="k">return</span> <span class="n">Schema_TSOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
@@ -2124,7 +2134,7 @@
                 <span class="s1">'oflw'</span><span class="p">:</span> <span class="n">overflow</span><span class="p">,</span>
                 <span class="s1">'flag'</span><span class="p">:</span> <span class="n">flag</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">ts_list</span><span class="p">,</span>
+            <span class="n">ts_data</span><span class="o">=</span><span class="n">ts_list</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

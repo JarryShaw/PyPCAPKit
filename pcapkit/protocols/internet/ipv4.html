@@ -1959,7 +1959,33 @@ the option by itself.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If an entry of <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data" title="pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_data</span></code></a> that the timestamp
+    flag makes an address is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, is not a valid IP
+    address, or is not IPv4 – c.f.
+    <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="pcapkit.corekit.fields.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>.</p>
+</dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>This runs on the <strong>packing</strong> path as well as the unpacking one –
+<a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a>
+calls it once the buffer is filled – so the <code class="docutils literal notranslate"><span class="pre">ts_data</span></code> entries it
+converts below are whatever the caller passed to the constructor,
+not octets read off the wire. That is why those conversions go
+through <a class="reference internal" href="../../corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="pcapkit.corekit.fields.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a>
+rather than <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a>: this schema is reachable
+from public <a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4.make" title="pcapkit.protocols.internet.ipv4.IPv4.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.make</span></code></a>, which accepts a
+caller-built option schema and packs it, and
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data" title="pcapkit.protocols.schema.internet.ipv4.TSOption.ts_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ts_data</span></code></a>’s <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a>
+item type takes a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> as the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> it is a subclass
+of, so nothing downstream can question it. Measured before this
+fix: <code class="docutils literal notranslate"><span class="pre">ts_data=[True,</span> <span class="pre">5]</span></code> packed as <code class="docutils literal notranslate"><span class="pre">0000000100000005</span></code> and
+reported <code class="docutils literal notranslate"><span class="pre">IPv4Address('0.0.0.1')</span></code> with no exception and no
+warning. This was the fifth site of that defect – #481, #500,
+#539 and #540 are the first four – and the reason it is the fifth
+is that each of those fixed the sites it could see. See #552.</p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -2197,6 +2223,29 @@ written. See #534.</p>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a></p>
 <p>Header schema for IPV4 quick start report of approved rate options.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Not used. One octet, holding the place a Quick-Start Request fills with
+<code class="docutils literal notranslate"><span class="pre">QS</span> <span class="pre">TTL</span></code>: <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html#section-3.1"><strong>RFC 4782 Section 3.1</strong></a> says in as many words that <em>“for a
+Report of Approved Rate, the fourth byte of the Quick-Start Option is not
+used”</em>, and that <em>“bytes 5-8 contain a 30-bit QS Nonce and a 2-bit
+Reserved field”</em> – so the nonce begins at the fifth octet for both
+functions, and figure 4 gives this option as <code class="docutils literal notranslate"><span class="pre">Length=8</span></code> like figure 3
+gives its sibling. The field was missing, so the schema was seven octets
+wide against the eight
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_qs()</span></code></a> writes into
+<code class="docutils literal notranslate"><span class="pre">length</span></code> and the eight
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a> demands of it,
+which meant a spec-correct Report of Approved Rate read off the wire
+decoded its <code class="docutils literal notranslate"><span class="pre">nonce</span></code> one octet early – measured, with the selector
+length fixed and this field still absent: <code class="docutils literal notranslate"><span class="pre">19088100deadbee0</span></code> warned
+<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-1</span></code> and then died with a bare <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">bad</span>
+<span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>, the unconsumed octet having been read as another
+option. Declared as padding rather than as data because <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a> gives
+it no meaning and no caller should be setting it. See #552.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.nonce">
 <span class="sig-name descname"><span class="pre">nonce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSNonce" title="pcapkit.protocols.schema.internet.ipv4.QSNonce"><span class="pre">QSNonce</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">nonce&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.QuickStartReportOption.nonce" title="Link to this definition">¶</a></dt>
 <dd><p>QS nonce.</p>
@@ -2325,6 +2374,55 @@ written. See #534.</p>
 <section id="auxiliary-functions">
 <h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Link to this heading">¶</a></h3>
 <dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.quick_start_option_length">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">quick_start_option_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#quick_start_option_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_option_length" title="Link to this definition">¶</a></dt>
+<dd><p>On-the-wire length, in octets, of a resolved Quick-Start (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) suboption.</p>
+<p>The Quick-Start suboption schemas re-declare the option’s own <code class="docutils literal notranslate"><span class="pre">type</span></code> and
+<code class="docutils literal notranslate"><span class="pre">length</span></code> octets – they inherit them from <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.Option" title="pcapkit.protocols.schema.internet.ipv4.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a> – so what
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector" title="pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">quick_start_data_selector()</span></code></a> has to hand the nested
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> is the length of the
+<em>whole</em> option, not of the data after its header. Per
+<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html#section-3.1"><strong>RFC 4782 Section 3.1</strong></a> – figure 3 for a Quick-Start Request and figure 4
+for a Report of Approved Rate – that is eight octets for both functions,
+which differ in what the fourth octet holds rather than in how many there
+are: <em>“The second byte contains the length field, indicating an option
+length of eight bytes”</em>, and <em>“For a Report of Approved Rate, the fourth
+byte of the Quick-Start Option is not used”</em>. And
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_qs()</span></code></a> rejects any other
+value in the <code class="docutils literal notranslate"><span class="pre">length</span></code> field outright.</p>
+<p>It is summed from the resolved schema’s own fields rather than written as
+that literal, for two reasons. The registry is open –
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a> is an <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>,
+so a caller may register a further function code with a schema of its own
+width – and a number written here has to be kept in step by hand with every
+field the suboptions declare, which is precisely how #552 arose: the length
+was <code class="docutils literal notranslate"><span class="pre">5</span></code>, the width of a Quick-Start Request’s <code class="docutils literal notranslate"><span class="pre">ttl</span></code> and <code class="docutils literal notranslate"><span class="pre">nonce</span></code> alone,
+with the <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code> and <code class="docutils literal notranslate"><span class="pre">flags</span></code> octets in front of them
+unaccounted for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.QSOption" title="pcapkit.protocols.schema.internet.ipv4.QSOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSOption</span></code></a>]</span>) – Quick-Start suboption schema, as resolved from the <code class="docutils literal notranslate"><span class="pre">func</span></code>
+sub-field by <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector" title="pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">quick_start_data_selector()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Length, in octets, that <code class="docutils literal notranslate"><span class="pre">schema</span></code> occupies on the wire.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">schema</span></code> declares a field whose width is not
+    fixed. Every field of a Quick-Start suboption is fixed-width,
+    because the option is, and a variable-width one cannot be summed
+    here without a packet to size it against – which is the one thing
+    a selector does not have for the schema it is about to return. It
+    fails rather than guessing, since guessing is the defect being
+    fixed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.ipv4.</span></span><span class="sig-name descname"><span class="pre">quick_start_data_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/ipv4.html#quick_start_data_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector" title="Link to this definition">¶</a></dt>
 <dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4._QSOption.data" title="pcapkit.protocols.schema.internet.ipv4._QSOption.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_QSOption.data</span></code></a> field.</p>
@@ -2347,6 +2445,19 @@ instance.</p></li>
 </p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The length handed to the <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
+comes from <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv4.quick_start_option_length" title="pcapkit.protocols.schema.internet.ipv4.quick_start_option_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">quick_start_option_length()</span></code></a>, i.e. from the suboption that
+was just resolved. It used to be the literal <code class="docutils literal notranslate"><span class="pre">5</span></code> for both, which is not
+the width of either: a well-formed eight-octet Quick-Start Request
+<code class="docutils literal notranslate"><span class="pre">1908002adeadbee0</span></code> parsed with <code class="docutils literal notranslate"><span class="pre">SchemaWarning:</span> <span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-3</span></code>
+and decoded its <code class="docutils literal notranslate"><span class="pre">nonce</span></code> as <strong>55</strong> instead of 933982136, then left three
+octets to be read as a further, fabricated option – which made the
+enclosing datagram fail with <code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">IPv4:</span> <span class="pre">invalid</span> <span class="pre">format</span></code>. That
+is silent corruption on the way to a misleading failure, and it was logged
+in review twice before #552 filed it.</p>
+</div>
 </dd></dl>
 
 </section>
