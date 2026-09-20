@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields/ipaddress.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="IP Addresses: IP Interface: Internal Definitions: Type Variables:" />
-<meta name="description" content="IP Addresses: IP Interface: Internal Definitions: Type Variables:" />
+<meta property="og:description" content="IP Addresses: IP Interface: Construction Helpers: Internal Definitions: Type Variables:" />
+<meta name="description" content="IP Addresses: IP Interface: Construction Helpers: Internal Definitions: Type Variables:" />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Container Fields" href="collections.html"><link rel="prev" title="Text Fields" href="strings.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -680,6 +680,91 @@ written by <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress
 </dd></dl>
 
 </section>
+<section id="construction-helpers">
+<h2>Construction Helpers<a class="headerlink" href="#construction-helpers" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.parse_ip_address">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">parse_ip_address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/ipaddress.html#parse_ip_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a caller-supplied address on the <strong>construction</strong> path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Address as the caller gave it – an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> object,
+which is returned unchanged, or anything <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> accepts.</p></li>
+<li><p><strong>description</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Human-readable description of what <code class="docutils literal notranslate"><span class="pre">value</span></code> is, used to
+build the <code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code> message. Callers in a protocol
+should carry their usual context into it, e.g.
+<code class="docutils literal notranslate"><span class="pre">f'{self.alias}:</span> <span class="pre">[OptNo</span> <span class="pre">{type}]</span> <span class="pre">care-of</span> <span class="pre">address'</span></code>.</p></li>
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – IP version to demand, <code class="docutils literal notranslate"><span class="pre">4</span></code> or <code class="docutils literal notranslate"><span class="pre">6</span></code>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> to take
+whichever family <code class="docutils literal notranslate"><span class="pre">value</span></code> describes. Pass it where the wire format
+fixes the family, so that an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> is widened to the right
+one – <code class="docutils literal notranslate"><span class="pre">258</span></code> is <code class="docutils literal notranslate"><span class="pre">::102</span></code> for <code class="docutils literal notranslate"><span class="pre">version=6</span></code> but <code class="docutils literal notranslate"><span class="pre">0.0.1.2</span></code> for
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The converted address.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (c.f.
+    <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code>), is not a valid IP address, or is not of
+    <code class="docutils literal notranslate"><span class="pre">version</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>This is the sanctioned way for a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> method to turn a
+caller-supplied address into an <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a> object, and it exists
+because doing it with <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a> directly is what
+#508 turned out to be: a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> that has to know the address
+<em>family</em> before it can build the schema – to size an option whose
+length is the only thing on the wire that carries the family – must
+convert the argument itself, and that conversion happens <strong>before</strong> the
+schema, so it launders a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> into an
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a> that #500’s guard in
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> can then only see as a legitimate
+address. Seven such call sites took <code class="docutils literal notranslate"><span class="pre">True</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> without
+complaint as <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code> / <code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> – or <code class="docutils literal notranslate"><span class="pre">::1</span></code> / <code class="docutils literal notranslate"><span class="pre">::</span></code> where the
+wire format fixes the family as IPv6 – and six of them went on to pack
+those octets. The seventh,
+<a class="reference internal" href="../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr" title="pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP._make_mptcp_addaddr</span></code></a>, built an
+equally corrupt schema and is only stopped from packing it by an
+unrelated defect of its own.</p>
+<p>Routing every one of them through here rather than giving each its own
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> check is the whole point: #481 added exactly such a
+check to <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a>, and #491 was the
+same defect surviving at every site that had not been thought of. A
+guard that has to be remembered per call site is a guard that will be
+forgotten at the next one.</p>
+<p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rejection is the <strong>first</strong> statement here, ahead of any
+dispatch on the value’s type, for the placement reason #481 gives and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code> repeats.</p>
+<p>This raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code> and not
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, which is deliberate
+even though two sibling guards for the same mistake –
+<a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> from #481 and
+<a class="reference internal" href="../../protocols/internet/esp.html#pcapkit.protocols.internet.esp.SecurityAssociation" title="pcapkit.protocols.internet.esp.SecurityAssociation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP's</span> <span class="pre">SecurityAssociation</span></code></a> from #491 – raise
+the latter. The layer decides: this is a field-level conversion, so it
+answers with what <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a> answers with for
+the identical value, and a caller sees one exception whether the
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> reached the field through the schema or through a
+<code class="docutils literal notranslate"><span class="pre">_make_*</span></code>. The two protocol-level guards answer for the <em>option</em>,
+alongside siblings that are not about addresses at all –
+<code class="docutils literal notranslate"><span class="pre">_make_opt_mn_id</span></code> refuses a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> for all eight MN-ID subtypes,
+only one of which is address-typed – so neither can route through here
+without losing the subtype-aware message that is the point of it. Both
+exception classes derive from
+<a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> <em>and</em> <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>,
+so the difference is invisible to <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">BaseError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span>
+<span class="pre">ValueError</span></code>, and nothing in the library catches either one
+specifically.</p>
+</div>
+</dd></dl>
+
+</section>
 <section id="internal-definitions">
 <h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -870,6 +955,7 @@ an integer value and accept the current packet as its only argument.</p></li>
 <li><a class="reference internal" href="#">IP Address Fields</a><ul>
 <li><a class="reference internal" href="#ip-addresses">IP Addresses</a></li>
 <li><a class="reference internal" href="#ip-interface">IP Interface</a></li>
+<li><a class="reference internal" href="#construction-helpers">Construction Helpers</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>
 </ul>

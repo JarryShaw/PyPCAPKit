@@ -523,6 +523,7 @@
     <span class="n">UpdateNotificationACKStatus</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationACKStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.upn_reason</span><span class="w"> </span><span class="kn">import</span> <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Data_MH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> \
@@ -9890,8 +9891,16 @@
         <span class="k">if</span> <span class="n">address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">addr</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">address</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">))</span> <span class="k">else</span> <span class="n">address</span>
+            <span class="c1"># NOTE: Converted through ``parse_ip_address`` rather than with</span>
+            <span class="c1"># ``ipaddress.ip_address``, because the conversion happens *here* --</span>
+            <span class="c1"># the option length below is derived from the family, so it cannot</span>
+            <span class="c1"># wait for the schema -- and a bare conversion therefore turns a</span>
+            <span class="c1"># ``bool`` into a perfectly ordinary ``IPv4Address`` that the</span>
+            <span class="c1"># schema's own guard can no longer tell from a real address. Before</span>
+            <span class="c1"># this, ``address=True`` packed as ``23080001000000000001``, i.e. a</span>
+            <span class="c1"># care-of address of ``0.0.0.1`` (c.f. #508).</span>
+            <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid care-of address'</span><span class="p">)</span>
             <span class="n">length</span> <span class="o">=</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">20</span>
             <span class="n">address</span> <span class="o">=</span> <span class="n">addr</span>
 
@@ -10147,13 +10156,13 @@
         <span class="c1"># NOTE: The address is normalised rather than passed through, so that the</span>
         <span class="c1"># schema attribute holds the same type it would after a parse. The width is</span>
         <span class="c1"># then taken from the address itself rather than from ``code``, so that the</span>
-        <span class="c1"># two cannot be emitted disagreeing.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">addr</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>  <span class="c1"># type: IPv4Address | IPv6Address</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
-            <span class="n">addr</span> <span class="o">=</span> <span class="n">address</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">addr</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="c1"># two cannot be emitted disagreeing. Normalising *here*, ahead of the</span>
+        <span class="c1"># schema, is also why the conversion goes through ``parse_ip_address``:</span>
+        <span class="c1"># ``ipaddress.ip_address(True)`` is ``0.0.0.1``, and the schema's own</span>
+        <span class="c1"># guard cannot see that it was ever a ``bool``. Before this,</span>
+        <span class="c1"># ``address=True`` packed as ``2906010000000001`` (c.f. #508).</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+            <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_LMAAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -10364,9 +10373,13 @@
                 <span class="n">address</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_TargetCareofAddressSuboption'</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span><span class="o">.</span><span class="n">address</span>  <span class="c1"># type: Any</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">address</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'address'</span><span class="p">,</span> <span class="s1">'::'</span><span class="p">)</span>
-            <span class="n">addr</span> <span class="o">=</span> <span class="n">address</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">address</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)</span>
-            <span class="p">)</span> <span class="k">else</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+            <span class="c1"># NOTE: Through ``parse_ip_address`` because the sub-option length</span>
+            <span class="c1"># below is derived from the family here, ahead of the schema, so a</span>
+            <span class="c1"># bare ``ipaddress.ip_address`` would launder a ``bool`` past the</span>
+            <span class="c1"># schema's guard. Before this, ``address=True`` packed as</span>
+            <span class="c1"># ``0506000000000001`` (c.f. #508).</span>
+            <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid target care-of address'</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Schema_TargetCareofAddressSuboption</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span> <span class="k">if</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mi">18</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span>
 
@@ -10910,9 +10923,15 @@
             <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix_length</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
 
-        <span class="n">addr</span> <span class="o">=</span> <span class="n">prefix</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">prefix</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)</span>
-        <span class="p">)</span> <span class="k">else</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="c1"># NOTE: Through ``parse_ip_address`` because the ``V`` flag and the width</span>
+        <span class="c1"># are both derived from the family here, ahead of the schema, so a bare</span>
+        <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` past the schema's</span>
+        <span class="c1"># guard. Before this, ``prefix=True`` with an IPv4-valid</span>
+        <span class="c1"># ``prefix_length`` packed as ``3706801800000001``; the default</span>
+        <span class="c1"># ``prefix_length=64`` masked it behind the range check below, which is</span>
+        <span class="c1"># why #508's own sweep read this site as already guarded (c.f. #508).</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+            <span class="n">prefix</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid mobile network prefix'</span><span class="p">)</span>
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="mi">4</span>
 
         <span class="k">if</span> <span class="n">prefix_length</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">32</span> <span class="k">if</span> <span class="n">ipv4</span> <span class="k">else</span> <span class="mi">128</span><span class="p">):</span>
@@ -11199,9 +11218,14 @@
         <span class="k">if</span> <span class="n">address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Schema_LMAUserPlaneAddressOption</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">address</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
 
-        <span class="n">addr</span> <span class="o">=</span> <span class="n">address</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">address</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)</span>
-        <span class="p">)</span> <span class="k">else</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="c1"># NOTE: Through ``parse_ip_address`` because the option length below is</span>
+        <span class="c1"># derived from the family here, ahead of the schema, so a bare</span>
+        <span class="c1"># ``ipaddress.ip_address`` would launder a ``bool`` past the schema's</span>
+        <span class="c1"># guard. Before this, ``address=True`` packed as ``3b06000000000001``.</span>
+        <span class="c1"># ``None`` is handled above and stays an absent address, which is a</span>
+        <span class="c1"># legitimate value here and not what is being rejected (c.f. #508).</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+            <span class="n">address</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid LMA user-plane address'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_LMAUserPlaneAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>

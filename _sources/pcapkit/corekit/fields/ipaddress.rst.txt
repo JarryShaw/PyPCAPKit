@@ -25,6 +25,11 @@ IP Interface
    :members:
    :show-inheritance:
 
+Construction Helpers
+~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.corekit.fields.ipaddress.parse_ip_address
+
 Internal Definitions
 ~~~~~~~~~~~~~~~~~~~~
 

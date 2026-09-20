@@ -458,11 +458,12 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'IPv4AddressField'</span><span class="p">,</span> <span class="s1">'IPv6AddressField'</span><span class="p">,</span>
     <span class="s1">'IPv4InterfaceField'</span><span class="p">,</span> <span class="s1">'IPv6InterfaceField'</span><span class="p">,</span>
+    <span class="s1">'parse_ip_address'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -544,11 +545,123 @@
 <span class="sd">        wrong position does not fire, and that placement mistake has</span>
 <span class="sd">        already been made twice in this repository's history.</span>
 
+<span class="sd">        Guarding the field classes is necessary but not sufficient, because a</span>
+<span class="sd">        ``_make_*`` that must know the address family before it can build the</span>
+<span class="sd">        schema converts the argument itself and so never hands this module a</span>
+<span class="sd">        :obj:`bool` at all. :func:`parse_ip_address` is where those callers</span>
+<span class="sd">        reach this guard (c.f. #508).</span>
+
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: must not be a bool, not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> -- pass '</span>
             <span class="sa">f</span><span class="s1">'int(</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_ip_address">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress.parse_ip_address">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | bytes | int | str'</span><span class="p">,</span>
+                     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">version</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address | IPv6Address'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert a caller-supplied address on the **construction** path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Address as the caller gave it -- an :mod:`ipaddress` object,</span>
+<span class="sd">            which is returned unchanged, or anything :mod:`ipaddress` accepts.</span>
+<span class="sd">        description: Human-readable description of what ``value`` is, used to</span>
+<span class="sd">            build the :exc:`FieldValueError` message. Callers in a protocol</span>
+<span class="sd">            should carry their usual context into it, e.g.</span>
+<span class="sd">            ``f'{self.alias}: [OptNo {type}] care-of address'``.</span>
+<span class="sd">        version: IP version to demand, ``4`` or ``6``, or :obj:`None` to take</span>
+<span class="sd">            whichever family ``value`` describes. Pass it where the wire format</span>
+<span class="sd">            fixes the family, so that an :class:`int` is widened to the right</span>
+<span class="sd">            one -- ``258`` is ``::102`` for ``version=6`` but ``0.0.1.2`` for</span>
+<span class="sd">            :func:`ipaddress.ip_address`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The converted address.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            :func:`_reject_bool`), is not a valid IP address, or is not of</span>
+<span class="sd">            ``version``.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        This is the sanctioned way for a ``_make_*`` method to turn a</span>
+<span class="sd">        caller-supplied address into an :mod:`ipaddress` object, and it exists</span>
+<span class="sd">        because doing it with :func:`ipaddress.ip_address` directly is what</span>
+<span class="sd">        #508 turned out to be: a ``_make_*`` that has to know the address</span>
+<span class="sd">        *family* before it can build the schema -- to size an option whose</span>
+<span class="sd">        length is the only thing on the wire that carries the family -- must</span>
+<span class="sd">        convert the argument itself, and that conversion happens **before** the</span>
+<span class="sd">        schema, so it launders a :obj:`bool` into an</span>
+<span class="sd">        :class:`~ipaddress.IPv4Address` that #500's guard in</span>
+<span class="sd">        :meth:`_IPAddressField.pre_process` can then only see as a legitimate</span>
+<span class="sd">        address. Seven such call sites took ``True`` / ``False`` without</span>
+<span class="sd">        complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::`` where the</span>
+<span class="sd">        wire format fixes the family as IPv6 -- and six of them went on to pack</span>
+<span class="sd">        those octets. The seventh,</span>
+<span class="sd">        :meth:`TCP._make_mptcp_addaddr</span>
+<span class="sd">        &lt;pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr&gt;`, built an</span>
+<span class="sd">        equally corrupt schema and is only stopped from packing it by an</span>
+<span class="sd">        unrelated defect of its own.</span>
+
+<span class="sd">        Routing every one of them through here rather than giving each its own</span>
+<span class="sd">        :func:`isinstance` check is the whole point: #481 added exactly such a</span>
+<span class="sd">        check to :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;`, and #491 was the</span>
+<span class="sd">        same defect surviving at every site that had not been thought of. A</span>
+<span class="sd">        guard that has to be remembered per call site is a guard that will be</span>
+<span class="sd">        forgotten at the next one.</span>
+
+<span class="sd">        The :obj:`bool` rejection is the **first** statement here, ahead of any</span>
+<span class="sd">        dispatch on the value's type, for the placement reason #481 gives and</span>
+<span class="sd">        :func:`_reject_bool` repeats.</span>
+
+<span class="sd">        This raises :exc:`FieldValueError` and not</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate</span>
+<span class="sd">        even though two sibling guards for the same mistake --</span>
+<span class="sd">        :meth:`MH._make_opt_mn_id</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` from #481 and</span>
+<span class="sd">        :class:`ESP's SecurityAssociation</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.esp.SecurityAssociation&gt;` from #491 -- raise</span>
+<span class="sd">        the latter. The layer decides: this is a field-level conversion, so it</span>
+<span class="sd">        answers with what :meth:`_IPAddressField.pre_process` answers with for</span>
+<span class="sd">        the identical value, and a caller sees one exception whether the</span>
+<span class="sd">        :obj:`bool` reached the field through the schema or through a</span>
+<span class="sd">        ``_make_*``. The two protocol-level guards answer for the *option*,</span>
+<span class="sd">        alongside siblings that are not about addresses at all --</span>
+<span class="sd">        ``_make_opt_mn_id`` refuses a :obj:`bool` for all eight MN-ID subtypes,</span>
+<span class="sd">        only one of which is address-typed -- so neither can route through here</span>
+<span class="sd">        without losing the subtype-aware message that is the point of it. Both</span>
+<span class="sd">        exception classes derive from</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,</span>
+<span class="sd">        so the difference is invisible to ``except BaseError`` and ``except</span>
+<span class="sd">        ValueError``, and nothing in the library catches either one</span>
+<span class="sd">        specifically.</span>
+
+<span class="sd">    """</span>
+    <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># type: IPv4Address | IPv6Address</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">_reraise_as_field_value_error</span><span class="p">(</span><span class="n">description</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: Checked outside the ``with`` block above, and after it, because an</span>
+    <span class="c1"># :mod:`ipaddress` object taken from the branch that skips the conversion</span>
+    <span class="c1"># has not been version-checked at all -- ``IPv6Address(IPv4Address(...))``</span>
+    <span class="c1"># would have raised, but returning the object unchanged cannot.</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ip</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="n">version</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: IP version mismatch: </span><span class="si">{</span><span class="n">ip</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ip</span></div>
+
 
 
 <div class="viewcode-block" id="_IPField">

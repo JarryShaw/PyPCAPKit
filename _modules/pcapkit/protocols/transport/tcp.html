@@ -486,7 +486,6 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -496,6 +495,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.flags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Enum_Flags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.mp_tcp_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">Enum_MPTCPOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">Data_CC</span>
@@ -3560,7 +3560,18 @@
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">addr</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">port</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">addr_val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+            <span class="c1"># NOTE: Through ``parse_ip_address`` because the ``version`` sub-field</span>
+            <span class="c1"># and the option length below are both derived from the family here,</span>
+            <span class="c1"># ahead of the schema, so a bare ``ipaddress.ip_address`` would launder</span>
+            <span class="c1"># a ``bool`` into an ``IPv4Address`` that the schema's own guard can no</span>
+            <span class="c1"># longer tell from a real address -- ``addr=True`` reached</span>
+            <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``</span>
+            <span class="c1"># (c.f. #508). This option cannot be constructed end to end at all for</span>
+            <span class="c1"># an unrelated reason, ``KeyError: 'length'`` from</span>
+            <span class="c1"># pcapkit/protocols/schema/transport/tcp.py:790, which is why the</span>
+            <span class="c1"># corruption here was only ever visible on the schema the maker returns.</span>
+            <span class="n">addr_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>
 
         <span class="k">return</span> <span class="n">Schema_MPTCPAddAddress</span><span class="p">(</span>

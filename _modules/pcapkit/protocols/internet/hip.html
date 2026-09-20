@@ -496,6 +496,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">Enum_Parameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">HIP</span> <span class="k">as</span> <span class="n">Data_HIP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">AckDataParameter</span> <span class="k">as</span> <span class="n">Data_AckDataParameter</span>
@@ -3700,14 +3701,27 @@
                 <span class="n">preferred</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">preferred</span>
                 <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">locator</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># NOTE: Through ``parse_ip_address`` because the locator is packed</span>
+                <span class="c1"># to octets *here*, ahead of the schema, so a bare</span>
+                <span class="c1"># ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``</span>
+                <span class="c1"># and hand the schema's ``SwitchField`` plain bytes that its guard</span>
+                <span class="c1"># cannot question. Before this, ``ip=True`` packed a locator of</span>
+                <span class="c1"># ``::1`` with no error at all. The ``version=6`` argument is the</span>
+                <span class="c1"># *IP* version rather than the HIP one the message names, and it is</span>
+                <span class="c1"># what keeps the ``int`` widening this signature documents --</span>
+                <span class="c1"># ``0x102`` is ``::102``, not the ``0.0.1.2`` that</span>
+                <span class="c1"># ``ipaddress.ip_address`` would give (c.f. #508).</span>
+                <span class="n">ip_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                    <span class="n">ip</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid locator'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">spi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="mi">4</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">ip_val</span><span class="o">.</span><span class="n">packed</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="mi">5</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">Schema_LocatorData</span><span class="p">(</span>
                         <span class="n">spi</span><span class="o">=</span><span class="n">spi</span><span class="p">,</span>
-                        <span class="n">ip</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span><span class="p">,</span>
+                        <span class="n">ip</span><span class="o">=</span><span class="n">ip_val</span><span class="o">.</span><span class="n">packed</span><span class="p">,</span>
                     <span class="p">)</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">):</span>
