@@ -1,0 +1,31 @@
+1.0.0 -- 2023-05-09
+===================
+
+The 1.0 rewrite: parsing and construction are one declarative definition per
+protocol, and the extraction backend became pluggable. Roughly 55,000 lines
+changed across 617 files, released after 21 beta builds and a release candidate.
+
+* **Added** -- the schema and field layer, ``pcapkit.protocols.schema`` and
+  ``pcapkit.corekit.fields``. A protocol declares its wire format once, as
+  fields (numbers, strings, IP addresses, payloads, options, lists, switches),
+  and both parsing and construction follow from it.
+* **Added** -- PCAP-NG support [1]_: the protocol implementation covering every
+  block type, the generic and per-block options, name-resolution records and
+  decryption secrets, plus a matching extraction engine, toolkit functions and
+  ``pcapkit.protocols.schema.misc.pcapng``.
+* **Added** -- ``pcapkit.foundation.engines``, making the extraction backend a
+  registered, swappable component: the built-in PCAP and PCAP-NG engines
+  alongside DPKT, Scapy and PyShark, with engine registry APIs.
+* **Added** -- ``SchemaWarning``, ``DeprecatedFormatWarning`` and
+  ``RegistryWarning``; ``Protocol._get_payload`` for customised payload
+  retrieval; ``packet`` passed down the protocol chain so a layer can see its
+  parent's context, which is how IPv6 hands source and destination addresses to
+  the transport layer.
+* **Changed** -- flow tracing became the ``pcapkit.foundation.traceflow``
+  package, and reassembly gained data-model modules;
+  ``pcapkit.toolkit.default`` was renamed ``pcapkit.toolkit.pcap``;
+  ``pcapkit.foundation.engine`` became ``engines``; ``IPField`` was split into
+  ``IPAddressField`` and ``IPInterfaceField``; the option and parameter
+  registries for HIP and IPv4 warn on overwrite.
+
+.. [1] PCAP-NG is specified by ``draft-tuexen-opsawg-pcapng``, not by an RFC.

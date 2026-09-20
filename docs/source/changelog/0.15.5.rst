@@ -1,0 +1,5 @@
+0.15.5 -- 2020-10-11
+====================
+
+**Fixed** -- a fallback encoder was added so that data DictDumper cannot encode
+no longer raises out of the dumper (#65).

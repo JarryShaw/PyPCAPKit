@@ -1,0 +1,23 @@
+0.16.0 -- 2022-05-31
+====================
+
+A project-wide revision, and the last release of the pre-1.0 design.
+
+* **Changed** -- type annotations throughout, and linter compliance
+  (pylint, mypy, bandit, vermin) across every module.
+* **Changed** -- protocol classes were separated from their data models, which
+  moved to ``pcapkit.protocols.data``; a single ``Protocol`` class handles both
+  parsing and construction, and subclassing it to add a protocol is far less
+  work.
+* **Added** -- ``pcapkit.foundation.registry``, so protocols can be subscribed
+  by name; ``Protocol.analyze`` for analysing a payload directly, used by the
+  reassembly classes; ``pcapkit.corekit.multidict``, adapted from Werkzeug.
+* **Changed** -- reassembly became a package (IP, IPv4, IPv6, TCP) with revised
+  data models; PCAP and the auxiliary protocols moved under ``pcapkit.misc``.
+* **Removed** -- the ``validators`` module, several decorators from
+  ``pcapkit.utilities``, and multiprocessing support in ``Extractor``.
+* **Fixed** -- the DPKT toolkit (#101), IP reassembly, and missing ``id``
+  methods on subclassed protocols.
+
+The PyPCAPKit Enhancement Proposals discussion channel was opened with this
+release (#106).

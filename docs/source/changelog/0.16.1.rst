@@ -1,0 +1,6 @@
+0.16.1 -- 2022-06-07
+====================
+
+**Changed** -- warnings are raised through ``pcapkit.utilities.warnings``
+instead of ``warnings.warn`` directly, and a missing optional dependency now
+warns for the CLI and vendor extras too.

@@ -1,0 +1,8 @@
+0.15.1 -- 2020-06-18
+====================
+
+Maintenance release: the constant enumerations and the vendor crawlers that
+generate them were revised.
+
+*Also released:* ``0.15.1.post1`` (2020-06-19), a refresh of the constant
+enumerations.

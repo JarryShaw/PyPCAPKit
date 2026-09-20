@@ -1,0 +1,9 @@
+0.13.3 -- 2019-02-26
+====================
+
+**Fixed** -- numeric literals in the constant modules that were incompatible
+with Python 3.5.
+
+*Also released:* ``0.13.3.post1``, ``0.13.3.post2`` (through 2019-03-01);
+``post1`` declared official support for Python 3.5 and below, and ``post2``
+refreshed the dependencies.
