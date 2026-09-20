@@ -478,14 +478,14 @@
 <span class="sd">They are nonetheless distinct classes rather than one class bound at two</span>
 <span class="sd">EtherTypes, because 802.1ad *stacks* them: a Q-in-Q frame carries a service tag</span>
 <span class="sd">whose next EtherType is ``0x8100``, selecting a customer tag in turn. Both tags</span>
-<span class="sd">therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`</span>
+<span class="sd">therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.Protocol.info_name`</span>
 <span class="sd">-- ``s_tag`` against ``c_tag`` -- is what keeps them apart in the parsed</span>
 <span class="sd">:class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes</span>
 <span class="sd">would nest one ``c_tag`` inside another, leaving nothing in the output to say</span>
 <span class="sd">which of the two was the service tag.</span>
 
 <span class="sd">Two distinct EtherTypes also means two distinct</span>
-<span class="sd">:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the</span>
+<span class="sd">:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the</span>
 <span class="sd">project's rule for when protocols get separate modules: siblings that *share* an</span>
 <span class="sd">index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares</span>
 <span class="sd">:mod:`~pcapkit.protocols.link.arp` and</span>
@@ -531,10 +531,10 @@
 <span class="sd">    since the customer and service tags are byte-for-byte identical. What it</span>
 <span class="sd">    deliberately leaves to its subclasses is only how the tag *names* itself:</span>
 <span class="sd">    :attr:`name`, :attr:`alias` and</span>
-<span class="sd">    :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`.</span>
+<span class="sd">    :attr:`~pcapkit.protocols.protocol.Protocol.info_name`.</span>
 
 <span class="sd">    It is abstract for the same reason :class:`~pcapkit.protocols.internet.ip.IP`</span>
-<span class="sd">    is: :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` is declared</span>
+<span class="sd">    is: :attr:`~pcapkit.protocols.protocol.Protocol.name` is declared</span>
 <span class="sd">    abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and is not</span>
 <span class="sd">    defined here, so the class cannot be instantiated. Bind</span>
 <span class="sd">    :class:`C_Tag` or :class:`S_Tag`, never this class.</span>

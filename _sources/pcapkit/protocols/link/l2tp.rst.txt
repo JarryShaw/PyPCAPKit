@@ -36,7 +36,7 @@ and directly over IP as **protocol number 115**. That second route is why
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
 leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a
 different framing decision. It also means v3 is the first member of this family
-to have a real :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__`, and so
+to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`, and so
 the first that must have a module of its own under the project's one-module-per-index
 rule.
 
@@ -45,7 +45,7 @@ an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reser
 the value 1 "to permit detection of L2F packets should they arrive intermixed with
 L2TP packets". L2F is a separate protocol with its own header. It is therefore to
 be implemented as ``L2F``, the canonical name, carrying ``L2TPv1`` only as an
-alias in its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` -- the same
+alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` -- the same
 relationship HTTP/3 has to QUIC. c.f.
 :meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
 version-flavoured alias is spelled: canonical name first, alias second, since

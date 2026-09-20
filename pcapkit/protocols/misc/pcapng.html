@@ -4126,9 +4126,9 @@ such that we can be sure that the first block is the section header block.</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>If the object is initiated, i.e. <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._fnum</span></code>
-exists, and is of a packet block (EPB, ISB or Packet), returns the
-block index number of itself; else raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>.</p>
+<dd class="field-odd"><p>If the object is initiated, i.e. <code class="docutils literal notranslate"><span class="pre">self._fnum</span></code> exists, and is of a
+packet block (EPB, ISB or Packet), returns the block index number of
+itself; else raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
@@ -6453,8 +6453,8 @@ subclass instance.</p>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">secrets_type</span></code> is unknown, returns a
 <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.BytesField" title="pcapkit.corekit.fields.strings.BytesField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesField</span></code></a> instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">secret_type</span></code> is <code class="xref py py-attr docutils literal notranslate"><span class="pre">TLS_Key_Log</span></code>
-and/or <code class="xref py py-attr docutils literal notranslate"><span class="pre">WireGuard_Key_Log</span></code>,
+<li><p>If <code class="docutils literal notranslate"><span class="pre">secret_type</span></code> is <a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log" title="pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TLS_Key_Log</span></code></a>
+and/or <a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log" title="pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log"><code class="xref py py-attr docutils literal notranslate"><span class="pre">WireGuard_Key_Log</span></code></a>,
 returns a <a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField" title="pcapkit.corekit.fields.strings.StringField"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringField</span></code></a> instance.</p></li>
 <li><p>Otherwise, returns a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a>
 wrapped <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a>
@@ -6466,7 +6466,7 @@ subclass instance.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.secrets_type.Secrets_Type</span></code></p></li>
+<li><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.secrets_type.SecretsType</span></code></a></p></li>
 <li><p><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.DSBSecrets</span></code></a></p></li>
 </ul>
 </div>

@@ -538,13 +538,14 @@
 <span class="sd">    """</span>
     <span class="c1">#: Version number of corresponding protocol, as read off the header. Held on</span>
     <span class="c1">#: the instance rather than read back out of :attr:`self._info</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._info&gt;` because :attr:`name` and</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._info&gt;` because :attr:`name` and</span>
     <span class="c1">#: :attr:`alias` are both needed *during* :meth:`read` -- it is</span>
     <span class="c1">#: :meth:`self._decode_next_layer</span>
-    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase._decode_next_layer&gt;` that builds</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;` that builds</span>
     <span class="c1">#: the protocol chain out of :attr:`alias` -- and ``_info`` is not assigned</span>
-    <span class="c1">#: until :meth:`read` has returned. c.f. :attr:`ARP._acnm</span>
-    <span class="c1">#: &lt;pcapkit.protocols.link.arp.ARP._acnm&gt;`, which carries the same constraint.</span>
+    <span class="c1">#: until :meth:`read` has returned. c.f. ``ARP._acnm`` on</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.link.arp.ARP`, which carries the same</span>
+    <span class="c1">#: constraint.</span>
     <span class="n">_version</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="c1">##########################################################################</span>

@@ -476,13 +476,13 @@ knowable only to the caller.</p>
 <p>Rather than adding protocol specific keyword arguments to
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>, such information is passed
 as a <a class="reference internal" href="#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a> – a mapping of
-protocol index ID (c.f. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code>) to a
+protocol index ID (c.f. <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code></a>) to a
 <a class="reference internal" href="#pcapkit.corekit.context.ProtocolContext" title="pcapkit.corekit.context.ProtocolContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code></a> instance. The registry is
 handed to <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> once, and is then
 propagated down the protocol stack by
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code>,
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._import_next_layer</span></code></a>,
 so that a protocol nested arbitrarily deep can reach it through
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._get_context</span></code>.</p>
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._get_context" title="pcapkit.protocols.protocol.Protocol._get_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._get_context</span></code></a>.</p>
 <p>Decoding an ESP tunnel end to end:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Cipher</span><span class="p">,</span> <span class="n">ESPContext</span><span class="p">,</span>
@@ -526,7 +526,7 @@ only, and is safe in that respect.</p>
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/context.html#ProtocolContext.protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.context.ProtocolContext.protocol" title="Link to this definition">¶</a></dt>
 <dd><p>Index ID of the protocol(s) this context applies to.</p>
 <p>The returned names are matched against
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code>,
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code></a>,
 and are case insensitive.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

@@ -980,9 +980,9 @@ an unregistered payload is still labelled with the identifier it
 arrived with – as <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._import_next_layer</span></code></a>
 does for an unregistered transport type. Resolving it to
 <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> is
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code>’s job,
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._import_next_layer</span></code></a>’s job,
 which looks the PPID up through
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code> and so
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code></a> and so
 leaves <a class="reference internal" href="#pcapkit.protocols.transport.sctp.SCTP.__proto__" title="pcapkit.protocols.transport.sctp.SCTP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a> untouched.</p>
 </div>
 </dd></dl>

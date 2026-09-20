@@ -706,15 +706,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        * If ``secrets_type`` is unknown, returns a</span>
 <span class="sd">          :class:`~pcapkit.corekit.fields.strings.BytesField` instance.</span>
-<span class="sd">        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.TLS_Key_Log`</span>
-<span class="sd">          and/or :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.WireGuard_Key_Log`,</span>
+<span class="sd">        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log`</span>
+<span class="sd">          and/or :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log`,</span>
 <span class="sd">          returns a :class:`~pcapkit.corekit.fields.strings.StringField` instance.</span>
 <span class="sd">        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`</span>
 <span class="sd">          subclass instance.</span>
 
 <span class="sd">    See Also:</span>
-<span class="sd">        * :class:`pcapkit.const.pcapng.secrets_type.Secrets_Type`</span>
+<span class="sd">        * :class:`pcapkit.const.pcapng.secrets_type.SecretsType`</span>
 <span class="sd">        * :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`</span>
 
 <span class="sd">    """</span>

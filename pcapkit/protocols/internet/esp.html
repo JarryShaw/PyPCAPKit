@@ -749,7 +749,7 @@ not self consistent.</p>
 <dd><p>Report an ESP packet whose payload was not decrypted.</p>
 <p>The payload is surfaced as <a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>
 – which is what a next header of <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> resolves to – so that
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.payload</span></code>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.payload" title="pcapkit.protocols.protocol.Protocol.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.payload</span></code></a>
 and the protocol chain behave as they do for any other protocol, and
 the trailer fields are left <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> rather than guessed at.</p>
 <dl class="field-list simple">
@@ -1662,7 +1662,7 @@ than of the packet, so it is captured verbatim as <a class="reference internal" 
 and split by <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP.read" title="pcapkit.protocols.internet.esp.ESP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ESP.read</span></code></a>.</p>
 <p>This also means <a class="reference internal" href="#pcapkit.protocols.schema.internet.esp.ESP.payload" title="pcapkit.protocols.schema.internet.esp.ESP.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> is <strong>not</strong> the next layer’s data:
 the next layer lives inside the ciphertext, and is handed to
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code></a>
 explicitly once decrypted.</p>
 </div>
 <dl class="py attribute">

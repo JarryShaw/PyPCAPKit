@@ -346,7 +346,7 @@ Three follow-ups the above deliberately left alone:
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing,
   reached over UDP 1701. So the binding waits on a v3 dissector, which is also
   the first member of the family to carry an
-  :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` of its own -- 115
+  :meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own -- 115
   being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and
   what ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F
   [:rfc:`2341`], a separate protocol, not an earlier L2TP.
@@ -420,7 +420,7 @@ landed in full and the other two in part:
   ``pcapkit/toolkit/pcap.py:53`` filters only on the *DF* flag -- so a capture
   with no fragments at all still produces one "datagram" per frame. Parsing its
   payload is no longer part of that cost:
-  :meth:`~pcapkit.protocols.protocol.ProtocolBase.analyze` used to run eagerly on
+  :meth:`~pcapkit.protocols.protocol.Protocol.analyze` used to run eagerly on
   each one, 86% of the IP-reassembly cost plus a 133 ms garbage-collection bill,
   and :attr:`Datagram.packet
   <pcapkit.foundation.reassembly.data.ip.Datagram.packet>` is now a

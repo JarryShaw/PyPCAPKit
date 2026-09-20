@@ -1559,7 +1559,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sect</span> <span class="o">=</span> <span class="n">sct</span>
         <span class="c1">#: int: Block index number.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="n">num</span>
-        <span class="c1">#: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.</span>
+        <span class="c1">#: pcapkit.foundation.engines.pcapng.Context: Context of the PCAP-NG file.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="n">ctx</span>
         <span class="c1">#: collections.Counter: Counter for option types.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_opt</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>  <span class="c1"># type: Counter[Enum_OptionType]</span>
@@ -1595,9 +1595,9 @@
 <span class="sd">            self: :class:`PCAPNG` object or :obj:`None`.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            If the object is initiated, i.e. :attr:`self._fnum &lt;pcapkit.protocols.misc.pcapng.PCAPNG._fnum&gt;`</span>
-<span class="sd">            exists, and is of a packet block (EPB, ISB or Packet), returns the</span>
-<span class="sd">            block index number of itself; else raises :exc:`UnsupportedCall`.</span>
+<span class="sd">            If the object is initiated, i.e. ``self._fnum`` exists, and is of a</span>
+<span class="sd">            packet block (EPB, ISB or Packet), returns the block index number of</span>
+<span class="sd">            itself; else raises :exc:`UnsupportedCall`.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>

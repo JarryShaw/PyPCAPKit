@@ -574,6 +574,11 @@
         <span class="n">_flag_f</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: No output file, i.e., no output file is to be generated.</span>
         <span class="n">_flag_q</span><span class="p">:</span> <span class="s1">'bool'</span>
+        <span class="c1">#: Reassembly flag. It indicates if datagram reassembly is enabled.</span>
+        <span class="c1">#: Every engine reads it to decide whether to feed</span>
+        <span class="c1">#: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the</span>
+        <span class="c1">#: engines that cannot reassemble clear it on startup.</span>
+        <span class="n">_flag_r</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Trace flag. It indicates if the flow tracing is enabled.</span>
         <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Verbose flag. This is used to determine if the verbose callback</span>
@@ -1119,7 +1124,7 @@
 <span class="sd">        The method will parse the PCAP global header and save the parsed result</span>
 <span class="sd">        to its extraction context. Information such as PCAP version, data link</span>
 <span class="sd">        layer protocol type, nanosecond flag and byteorder will also be save</span>
-<span class="sd">        the current :class:`~pcapkit.foundation.engins.engine.Engine` instance</span>
+<span class="sd">        the current :class:`~pcapkit.foundation.engines.engine.Engine` instance</span>
 <span class="sd">        as well.</span>
 
 <span class="sd">        If TCP flow tracing is enabled, the nanosecond flag and byteorder will</span>
@@ -1261,7 +1266,7 @@
 <span class="sd">            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 <span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
-<span class="sd">            no_eof: if raise :exc:`EOFError` when EOF</span>
+<span class="sd">            no_eof: if not raise :exc:`EOFError` when reach EOF</span>
 
 <span class="sd">            context: caller supplied parsing context for protocols that need</span>
 <span class="sd">                information not carried on the wire, keyed by protocol index</span>

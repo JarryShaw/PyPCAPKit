@@ -466,13 +466,13 @@
 <span class="sd">Rather than adding protocol specific keyword arguments to</span>
 <span class="sd">:class:`~pcapkit.foundation.extraction.Extractor`, such information is</span>
 <span class="sd">passed as a :class:`ContextRegistry` -- a mapping of protocol index ID</span>
-<span class="sd">(c.f. :meth:`Protocol.id &lt;pcapkit.protocols.protocol.ProtocolBase.id&gt;`)</span>
+<span class="sd">(c.f. :meth:`Protocol.id &lt;pcapkit.protocols.protocol.Protocol.id&gt;`)</span>
 <span class="sd">to a :class:`ProtocolContext` instance. The registry is handed to</span>
 <span class="sd">:class:`~pcapkit.foundation.extraction.Extractor` once, and is then</span>
 <span class="sd">propagated down the protocol stack by</span>
-<span class="sd">:meth:`Protocol._import_next_layer &lt;pcapkit.protocols.protocol.ProtocolBase._import_next_layer&gt;`,</span>
+<span class="sd">:meth:`Protocol._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`,</span>
 <span class="sd">so that a protocol nested arbitrarily deep can reach it through</span>
-<span class="sd">:meth:`Protocol._get_context &lt;pcapkit.protocols.protocol.ProtocolBase._get_context&gt;`.</span>
+<span class="sd">:meth:`Protocol._get_context &lt;pcapkit.protocols.protocol.Protocol._get_context&gt;`.</span>
 
 <span class="sd">Example:</span>
 <span class="sd">    Decoding an ESP tunnel end to end::</span>
@@ -540,7 +540,7 @@
 <span class="w">        </span><span class="sd">"""Index ID of the protocol(s) this context applies to.</span>
 
 <span class="sd">        The returned names are matched against</span>
-<span class="sd">        :meth:`Protocol.id &lt;pcapkit.protocols.protocol.ProtocolBase.id&gt;`,</span>
+<span class="sd">        :meth:`Protocol.id &lt;pcapkit.protocols.protocol.Protocol.id&gt;`,</span>
 <span class="sd">        and are case insensitive.</span>
 
 <span class="sd">        """</span></div>

@@ -1073,7 +1073,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            A ``Pad1`` option occupies a single octet and carries no</span>
 <span class="sd">            ``Opt Data Len`` field, so its</span>
-<span class="sd">            :attr:`~pcapkit.protocols.data.internet.ipv6_opts.PadOption.length`</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.ipv6_opts.Option.length`</span>
 <span class="sd">            is ``1`` rather than ``len + 2``. That one-octet wire shape is</span>
 <span class="sd">            enforced by</span>
 <span class="sd">            :class:`~pcapkit.protocols.schema.internet.ipv6_opts.PadOption`</span>
@@ -1946,7 +1946,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`Data_PadOption.length</span>
-<span class="sd">            &lt;pcapkit.protocols.data.internet.ipv6_opts.PadOption.length&gt;` counts</span>
+<span class="sd">            &lt;pcapkit.protocols.data.internet.ipv6_opts.Option.length&gt;` counts</span>
 <span class="sd">            the *whole* option, whereas :attr:`Schema_PadOption.len</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len&gt;` is the</span>
 <span class="sd">            ``Opt Data Len`` field -- two octets fewer, and absent altogether for</span>

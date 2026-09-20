@@ -471,13 +471,23 @@ implements datagram reassembly of IP and TCP packets.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_BT</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._DT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._IT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT" title="pcapkit.foundation.reassembly.reassembly.pcapkit.foundation.reassembly.reassembly._BT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_BT</span></code></a>]</p>
-<p>Base flow tracing class.</p>
+<p>Base reassembly class.</p>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
-<p>Use keyword argument <code class="docutils literal notranslate"><span class="pre">protocol</span></code> to specify the protocol
-name at class definition:</p>
+<p>Registration is opt-in. Pass keyword argument <code class="docutils literal notranslate"><span class="pre">protocol</span></code> at class
+definition to register the reassembly under that protocol name:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyProtocol</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="s1">'my_protocol'</span><span class="p">):</span>
     <span class="o">...</span>
+</pre></div>
+</div>
+<p>Omit it and the subclass is <em>not</em> registered, which is how a class
+that is not meant to be selectable by name declines:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyMixin</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">):</span>  <span class="c1"># not registered</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Such a class can still be registered later, on demand:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Extractor</span><span class="o">.</span><span class="n">register_reassembly</span><span class="p">(</span><span class="s1">'my_mixin'</span><span class="p">,</span> <span class="n">MyMixin</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -518,6 +528,20 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.reas
 <p class="admonition-title">Note</p>
 <p>This property is also available as a class variable. Its
 value can be set by <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_type__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_type__</span></code></a> class attribute.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.registry">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">registry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><span class="pre">ReassemblyBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><span class="pre">ReassemblyBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.registry" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of protocol names to reassembly classes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This property is only available as a class variable, since it is
+defined on <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a>. It reads
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__reassembly__" title="pcapkit.foundation.extraction.Extractor.__reassembly__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__reassembly__</span></code></a>, the
+single table every reassembly registration lands in, so it is not a
+per-class mapping.</p>
 </div>
 </dd></dl>
 
@@ -788,17 +812,33 @@ to store reassembled datagrams.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__" title="Link to this definition">¶</a></dt>
 <dd><p>Initialise subclass.</p>
-<p>This method is to be used for registering the engine class to
+<p>This method is to be used for registering the reassembly class to
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> – Protocol name, default to class name.</p></li>
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Protocol name to register the subclass under, lowercased.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the default) skips registration entirely.</p></li>
 <li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If any unrecognised class keyword is given.</p>
+</dd>
 </dl>
+<p>Registration is <strong>opt-in</strong>: the subclass is registered if and only if
+<code class="docutils literal notranslate"><span class="pre">protocol</span></code> is given. This is what lets a subclass decline registration
+rather than having to inherit <a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.ReassemblyBase" title="pcapkit.foundation.reassembly.reassembly.ReassemblyBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyBase</span></code></a> to avoid it, and it
+matches <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
+has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__" title="pcapkit.foundation.reassembly.reassembly.Reassembly.__protocol_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__protocol_name__</span></code></a> is <em>not</em> an opt-in. It supplies the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code>
+the reassembly reports, which it does whether or not the class is
+registered; only the keyword decides registration.</p>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more details, please refer to
@@ -859,7 +899,7 @@ own <code class="xref py py-attr docutils literal notranslate"><span class="pre"
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This class is for internal use only. For customisation, please use
-<code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code> instead.</p>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> instead.</p>
 </div>
 </dd></dl>
 

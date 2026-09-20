@@ -24,7 +24,7 @@ Terminology
        Data structure for **IPv6 datagram reassembly**
        (:meth:`IPv6.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following, with ``ipv6_info`` the IPv6
-       :attr:`~pcapkit.protocols.protocol.ProtocolBase.info` and
+       :attr:`~pcapkit.protocols.protocol.Protocol.info` and
        ``ipv6_frag_info`` the Fragment header's:
 
        .. code-block:: python

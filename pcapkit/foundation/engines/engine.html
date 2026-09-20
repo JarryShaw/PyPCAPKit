@@ -471,10 +471,20 @@ all engine support functionality.</p>
 <p>Base class for engine support.</p>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
-<p>Use keyword argument <code class="docutils literal notranslate"><span class="pre">name</span></code> to specify the engine name at
-class definition:</p>
+<p>Registration is opt-in. Pass keyword argument <code class="docutils literal notranslate"><span class="pre">name</span></code> at class
+definition to register the engine under that name:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'my_engine'</span><span class="p">):</span>
     <span class="o">...</span>
+</pre></div>
+</div>
+<p>Omit it and the subclass is <em>not</em> registered, which is how a class
+that is not meant to be selectable by name declines:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyMixin</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>  <span class="c1"># not registered</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Such a class can still be registered later, on demand:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="s1">'my_mixin'</span><span class="p">,</span> <span class="n">MyMixin</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -507,6 +517,20 @@ value can be set by <a class="reference internal" href="#pcapkit.foundation.engi
 <p class="admonition-title">Note</p>
 <p>This property is also available as a class variable. Its
 value can be set by <a class="reference internal" href="#pcapkit.foundation.engines.engine.Engine.__engine_module__" title="pcapkit.foundation.engines.engine.Engine.__engine_module__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_module__</span></code></a> class attribute.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.engine.Engine.registry">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">registry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><span class="pre">EngineBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><span class="pre">EngineBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.engine.Engine.registry" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of engine names to engine classes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This property is only available as a class variable, since it is
+defined on <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineMeta" title="pcapkit.foundation.engines.engine.EngineMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineMeta</span></code></a>. It reads
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.__engine__" title="pcapkit.foundation.extraction.Extractor.__engine__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine__</span></code></a>, the
+single table every engine registration lands in, so it is not a
+per-class mapping.</p>
 </div>
 </dd></dl>
 
@@ -594,12 +618,51 @@ extraction process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Engine name, default to class name.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Engine name to register the subclass under, lowercased.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the default) skips registration entirely.</p></li>
 <li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If any unrecognised class keyword is given.</p>
+</dd>
 </dl>
+<p>Registration is <strong>opt-in</strong>: the subclass is registered if and only if
+<code class="docutils literal notranslate"><span class="pre">name</span></code> is given. This is what lets a subclass decline registration
+rather than having to inherit <a class="reference internal" href="#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> to avoid it, and it
+matches <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
+has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#pcapkit.foundation.engines.engine.Engine.__engine_name__" title="pcapkit.foundation.engines.engine.Engine.__engine_name__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__engine_name__</span></code></a> is <em>not</em> an opt-in. It supplies the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code>
+the engine reports, which it does whether or not the engine is
+registered; only the keyword decides registration.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>On Python 3.10 the ``name`` keyword cannot be passed at all.</strong>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__()</span></code> takes <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and
+<code class="docutils literal notranslate"><span class="pre">namespace</span></code> as positional-<em>or-keyword</em> parameters before 3.11, so a
+class keyword named <code class="docutils literal notranslate"><span class="pre">name</span></code> collides with one of them and the class
+statement raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> – <code class="docutils literal notranslate"><span class="pre">ABCMeta.__new__()</span> <span class="pre">got</span> <span class="pre">multiple</span>
+<span class="pre">values</span> <span class="pre">for</span> <span class="pre">argument</span> <span class="pre">'name'</span></code> – from the metaclass, before this method
+is reached. From 3.11 those parameters are positional-only and the
+keyword arrives here normally. Measured on 3.10.21, 3.11.15 and
+3.14.7.</p>
+<p>The consequence on 3.10 is that an engine cannot be registered at
+class definition; register it explicitly instead, which works on every
+version:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>     <span class="c1"># no keyword, so not registered</span>
+    <span class="o">...</span>
+
+<span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="s1">'my_engine'</span><span class="p">,</span> <span class="n">MyEngine</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The sibling hooks are unaffected, their keywords being <code class="docutils literal notranslate"><span class="pre">protocol</span></code>
+and <code class="docutils literal notranslate"><span class="pre">fmt</span></code>.</p>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For more details, please refer to

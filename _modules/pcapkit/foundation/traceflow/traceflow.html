@@ -460,7 +460,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
@@ -468,7 +468,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -527,7 +527,36 @@
 <span class="w">        </span><span class="sd">"""Protocol of current object."""</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__protocol_type__'</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_type__</span>
-        <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">Raw</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, ModuleDescriptor[TraceFlow] | Type[TraceFlow]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Mapping of protocol names to flow tracing classes.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Unlike :attr:`EnumSchema.registry</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.schema.EnumSchema.registry&gt;`, this is not</span>
+<span class="sd">            a per-class mapping: every flow tracing registration lands in the</span>
+<span class="sd">            single :attr:`Extractor.__traceflow__</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.__traceflow__&gt;` table, so</span>
+<span class="sd">            reading it through any subclass returns that same object. The</span>
+<span class="sd">            property exists so ``MyTraceFlow.registry`` is spelled the same way</span>
+<span class="sd">            here as it is for schemas.</span>
+
+<span class="sd">            Note also that :class:`EnumSchema` carries *two* ``registry``</span>
+<span class="sd">            properties, one on its metaclass and one on the class body, so it</span>
+<span class="sd">            answers on an instance as well. This one is on the metaclass only,</span>
+<span class="sd">            so it is available as a class attribute and **not** on an instance.</span>
+
+<span class="sd">            This is *not* :attr:`TraceFlow.__output__</span>
+<span class="sd">            &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.__output__&gt;`,</span>
+<span class="sd">            which is the separate output-dumper table this class also owns.</span>
+
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">Extractor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+        <span class="k">return</span> <span class="n">Extractor</span><span class="o">.</span><span class="n">__traceflow__</span></div>
 
 
 
@@ -863,13 +892,27 @@
 
 <span class="sd">    Example:</span>
 
-<span class="sd">        Use keyword argument ``protocol`` to specify the protocol</span>
-<span class="sd">        name at class definition:</span>
+<span class="sd">        Registration is opt-in. Pass keyword argument ``protocol`` at class</span>
+<span class="sd">        definition to register the flow tracing class under that protocol name:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
 <span class="sd">           class MyProtocol(TraceFlow, protocol='my_protocol'):</span>
 <span class="sd">               ...</span>
+
+<span class="sd">        Omit it and the subclass is *not* registered, which is how a class</span>
+<span class="sd">        that is not meant to be selectable by name declines:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class MyMixin(TraceFlow):  # not registered</span>
+<span class="sd">               ...</span>
+
+<span class="sd">        Such a class can still be registered later, on demand:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           Extractor.register_traceflow('my_mixin', MyMixin)</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        fout: output path</span>
@@ -886,24 +929,51 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialise subclass.</span>
 
-<span class="sd">        This method is to be used for registering the engine class to</span>
+<span class="sd">        This method is to be used for registering the flow tracing class to</span>
 <span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` class.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name: Protocol name, default to class name.</span>
+<span class="sd">            protocol: Protocol name to register the subclass under, lowercased.</span>
+<span class="sd">                :data:`None` (the default) skips registration entirely.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: If any unrecognised class keyword is given.</span>
+
+<span class="sd">        Registration is **opt-in**: the subclass is registered if and only if</span>
+<span class="sd">        ``protocol`` is given. This is what lets a subclass decline registration</span>
+<span class="sd">        rather than having to inherit :class:`TraceFlowBase` to avoid it, and it</span>
+<span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
+<span class="sd">        has guarded on its own ``code`` keyword all along.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            :attr:`__protocol_name__` is *not* an opt-in. It supplies the</span>
+<span class="sd">            :attr:`name &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowMeta.name&gt;`</span>
+<span class="sd">            the class reports, which it does whether or not the class is</span>
+<span class="sd">            registered; only the keyword decides registration.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For more details, please refer to</span>
 <span class="sd">            :meth:`pcapkit.foundation.extraction.Extractor.register_traceflow`.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'str'</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># NOTE: the keyword here is ``protocol``, but ``Engine`` spells the same</span>
+        <span class="c1"># idea ``name`` -- so guessing ``name=`` by analogy is the expected</span>
+        <span class="c1"># mistake, not a careless one. It used to land in ``**kwargs``, get</span>
+        <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, and leave</span>
+        <span class="c1"># the class registered under its own class name instead: no exception, no</span>
+        <span class="c1"># warning. See the sibling note in ``Engine.__init_subclass__``.</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
-        <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> \
+                <span class="n">Extractor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+            <span class="n">Extractor</span><span class="o">.</span><span class="n">register_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 </div>

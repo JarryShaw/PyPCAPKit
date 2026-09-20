@@ -489,7 +489,7 @@
 <span class="sd">        retains 19.1 MB. :data:`DETECT_CACHE_SIZE` therefore caps the entries</span>
 <span class="sd">        rather than the footprint, which matters because</span>
 <span class="sd">        :meth:`ProtocolBase.decode</span>
-<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.decode&gt;` is public and a caller</span>
+<span class="sd">        &lt;pcapkit.protocols.protocol.Protocol.decode&gt;` is public and a caller</span>
 <span class="sd">        may hand it a whole payload. Use :meth:`detect.cache_clear</span>
 <span class="sd">        &lt;functools.lru_cache.cache_clear&gt;` to release it in a long-running</span>
 <span class="sd">        process.</span>

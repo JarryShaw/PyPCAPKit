@@ -516,7 +516,7 @@ implemented) when submit</p></li>
 <dt id="term-reasm.ipv6.packet">reasm.ipv6.packet<a class="headerlink" href="#term-reasm.ipv6.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>IPv6 datagram reassembly</strong>
 (<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6.reassembly</span></code></a>)
 is as following, with <code class="docutils literal notranslate"><span class="pre">ipv6_info</span></code> the IPv6
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code> and
+<a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a> and
 <code class="docutils literal notranslate"><span class="pre">ipv6_frag_info</span></code> the Fragment header’s:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_info</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">length</span>
 <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv6_info</span><span class="o">.</span><span class="n">fragment</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>

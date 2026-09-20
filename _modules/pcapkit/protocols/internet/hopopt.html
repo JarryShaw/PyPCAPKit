@@ -1071,7 +1071,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            A ``Pad1`` option occupies a single octet and carries no</span>
 <span class="sd">            ``Opt Data Len`` field, so its</span>
-<span class="sd">            :attr:`~pcapkit.protocols.data.internet.hopopt.PadOption.length` is</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.hopopt.Option.length` is</span>
 <span class="sd">            ``1`` rather than ``len + 2``. That one-octet wire shape is enforced</span>
 <span class="sd">            by :class:`~pcapkit.protocols.schema.internet.hopopt.PadOption`</span>
 <span class="sd">            itself, which sizes both the length octet and the padding data from</span>
@@ -1943,7 +1943,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            :attr:`Data_PadOption.length</span>
-<span class="sd">            &lt;pcapkit.protocols.data.internet.hopopt.PadOption.length&gt;` counts the</span>
+<span class="sd">            &lt;pcapkit.protocols.data.internet.hopopt.Option.length&gt;` counts the</span>
 <span class="sd">            *whole* option, whereas :attr:`Schema_PadOption.len</span>
 <span class="sd">            &lt;pcapkit.protocols.schema.internet.hopopt.PadOption.len&gt;` is the</span>
 <span class="sd">            ``Opt Data Len`` field -- two octets fewer, and absent altogether for</span>

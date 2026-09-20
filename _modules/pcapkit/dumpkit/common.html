@@ -461,7 +461,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
@@ -470,6 +469,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'make_dumper'</span><span class="p">]</span>
@@ -507,10 +507,37 @@
 
 <span class="sd">    This class is a customised :class:`~dictdumper.dumper.Dumper` for the</span>
 <span class="sd">    :mod:`pcapkit.dumpkit` implementation, which is generally customised</span>
-<span class="sd">    for automatic registration to the</span>
+<span class="sd">    for opt-in registration to the</span>
 <span class="sd">    :class:`~pcapkit.foundation.extraction.Extractor` and</span>
 <span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` output</span>
 <span class="sd">    dumper registries.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        Registration is opt-in. Pass keyword argument ``fmt`` at class</span>
+<span class="sd">        definition to register the dumper under that output format:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class MyDumper(Dumper, fmt='my_format', ext='.mine'):</span>
+<span class="sd">               ...</span>
+
+<span class="sd">        Omit it and the subclass is *not* registered:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class MyMixin(Dumper):  # not registered</span>
+<span class="sd">               ...</span>
+
+<span class="sd">        Such a class can still be registered later, on demand. Note this hook</span>
+<span class="sd">        writes *both* output registries, so the equivalent manual call is the</span>
+<span class="sd">        module-level one that does the same, not either class' own method:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           from pcapkit.foundation.registry.foundation import register_dumper</span>
+
+<span class="sd">           register_dumper('my_mixin', MyMixin, '.mine')</span>
 
 <span class="sd">    """</span>
 
@@ -521,20 +548,36 @@
 <span class="w">        </span><span class="sd">"""Initialise subclass.</span>
 
 <span class="sd">        This method is used to register the subclass to the</span>
-<span class="sd">        :class:`~pcapkit.foundation.extraction.Extraction` and</span>
+<span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` and</span>
 <span class="sd">        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`</span>
 <span class="sd">        output dumper registries.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fmt: Output format to register.</span>
-<span class="sd">            ext: Output file extension.</span>
+<span class="sd">            fmt: Output format to register the subclass under, lowercased.</span>
+<span class="sd">                :data:`None` (the default) skips registration entirely.</span>
+<span class="sd">            ext: Output file extension; :data:`None` infers it from ``fmt``.</span>
+<span class="sd">                Only meaningful alongside ``fmt``.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        If the ``fmt`` is not provided, we will try to get it from the</span>
-<span class="sd">        :attr:`~dictdumper.dumper.Dumper.kind` property of the subclass.</span>
-<span class="sd">        And if the ``ext`` is not provided, we will infer it from the</span>
-<span class="sd">        ``fmt``.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: If ``ext`` is given without ``fmt``, or if any</span>
+<span class="sd">                unrecognised class keyword is given.</span>
+
+<span class="sd">        Registration is **opt-in**: the subclass is registered if and only if</span>
+<span class="sd">        ``fmt`` is given. This is what lets a subclass decline registration</span>
+<span class="sd">        rather than having to inherit :class:`DumperBase` to avoid it, and it</span>
+<span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
+<span class="sd">        has guarded on its own ``code`` keyword all along.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The previous behaviour inferred ``fmt`` from the subclass'</span>
+<span class="sd">            :attr:`~dictdumper.dumper.Dumper.kind` property, which it could</span>
+<span class="sd">            only read off an *instance* -- so it constructed one against a</span>
+<span class="sd">            :func:`tempfile.NamedTemporaryFile` while the ``class`` statement</span>
+<span class="sd">            was still executing. Guarding on ``fmt`` removes that: a class</span>
+<span class="sd">            definition no longer touches the filesystem.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            - :func:`pcapkit.foundation.registry.foundation.register_dumper`</span>
@@ -544,18 +587,32 @@
 <span class="sd">            - :meth:`pcapkit.foundation.traceflow.traceflow.TraceFlow.register_dumper`</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp</span><span class="p">:</span>
-                <span class="n">fmt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">kind</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="c1"># NOTE: as in the four sibling hooks, an unrecognised class keyword would</span>
+        <span class="c1"># otherwise land in ``**kwargs`` and be dropped by the bare</span>
+        <span class="c1"># ``super().__init_subclass__()`` below, silently skipping registration.</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: ``ext`` alone cannot register anything -- there is no format to</span>
+        <span class="c1"># register it against -- so it would silently do nothing. Say so instead.</span>
+        <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: ext=</span><span class="si">{</span><span class="n">ext</span><span class="si">!r}</span><span class="s1"> given without fmt'</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
+
+        <span class="n">fmt</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'.</span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">'</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">Extractor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
         <span class="n">Extractor</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlow</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.traceflow</span><span class="w"> </span><span class="kn">import</span> \
+            <span class="n">TraceFlow</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
         <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register_dumper</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
@@ -630,7 +687,7 @@
 <span class="sd">                This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.</span>
 <span class="sd">                It will be called when :meth:`dictdumper.dumper.Dumper.default` fails</span>
 <span class="sd">                to find a suitable function for dumping and it should pair with</span>
-<span class="sd">                :func:`pcapkit.dumpkit.common._append_fallback` for use.</span>
+<span class="sd">                ``_append_fallback`` for use.</span>
 
 <span class="sd">            """</span>
             <span class="k">return</span> <span class="s1">'fallback'</span>
@@ -647,7 +704,7 @@
 <span class="sd">                This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.</span>
 <span class="sd">                It will be called when :meth:`dictdumper.dumper.Dumper.default` fails</span>
 <span class="sd">                to find a suitable function for dumping and it should pair with</span>
-<span class="sd">                :func:`pcapkit.dumpkit.common.default` for use.</span>
+<span class="sd">                ``default`` for use.</span>
 
 <span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__slots__'</span><span class="p">):</span>

@@ -497,7 +497,7 @@ and directly over IP as <strong>protocol number 115</strong>. That second route 
 <a class="reference internal" href="../internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a>
 leaves 115 unbound today: the binding waits on an <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class, not on a
 different framing decision. It also means v3 is the first member of this family
-to have a real <code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code>, and so
+to have a real <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a>, and so
 the first that must have a module of its own under the project’s one-module-per-index
 rule.</p>
 <p><strong>L2F</strong> [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>] is reached when the version nibble reads <code class="docutils literal notranslate"><span class="pre">1</span></code>. It is <em>not</em>
@@ -505,7 +505,7 @@ an earlier version of L2TP: <span class="target" id="index-3"></span><a class="r
 the value 1 “to permit detection of L2F packets should they arrive intermixed with
 L2TP packets”. L2F is a separate protocol with its own header. It is therefore to
 be implemented as <code class="docutils literal notranslate"><span class="pre">L2F</span></code>, the canonical name, carrying <code class="docutils literal notranslate"><span class="pre">L2TPv1</span></code> only as an
-alias in its <code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code> – the same
+alias in its <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a> – the same
 relationship HTTP/3 has to QUIC. c.f.
 <a class="reference internal" href="../application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.id" title="pcapkit.protocols.application.httpv1.HTTP.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTPv1.id</span></code></a> for how a
 version-flavoured alias is spelled: canonical name first, alias second, since
@@ -532,8 +532,8 @@ deterministic switch on <code class="docutils literal notranslate"><span class="
 </ul>
 <p>It is abstract for the same mechanical reason
 <a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> is:
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> are both declared
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.name" title="pcapkit.protocols.protocol.Protocol.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> and
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> are both declared
 abstract by <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and neither is
 defined here, so the class cannot be instantiated. Bind a version, never this
 class.</p>

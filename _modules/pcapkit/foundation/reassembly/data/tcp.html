@@ -557,9 +557,9 @@
     <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Reassembled payload (application layer data).</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | tuple[bytes, ...]'</span>
-    <span class="c1">#: Parsed reassembled payload.</span>
     <span class="c1">#: Parsed TCP payload. Analysed on first read rather than at construction;</span>
-    <span class="c1">#: a :class:`Deferred` may be passed in its place.</span>
+    <span class="c1">#: a :class:`Deferred` may be passed in its place, and reading this</span>
+    <span class="c1">#: attribute then runs it and keeps the result.</span>
     <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[Protocol]'</span>
     <span class="c1">#: Sequence ranges on which two segments disagreed, i.e. where an arriving</span>
     <span class="c1">#: segment overlapped bytes already buffered but did not repeat them.</span>

@@ -24,7 +24,7 @@ Terminology
        Data structure for **IPv4 datagram reassembly**
        (:meth:`IPv4.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following, with ``ipv4`` the protocol instance
-       (``frame['IPv4']``) and ``ipv4_info`` its :attr:`~pcapkit.protocols.protocol.ProtocolBase.info`
+       (``frame['IPv4']``) and ``ipv4_info`` its :attr:`~pcapkit.protocols.protocol.Protocol.info`
        -- the header fields come off the latter, the raw octets off the former:
 
        .. code-block:: python

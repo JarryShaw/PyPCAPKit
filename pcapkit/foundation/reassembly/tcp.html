@@ -1050,9 +1050,9 @@ as it did while this was a <a class="reference external" href="https://docs.pyth
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.Datagram.packet">
 <span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.packet" title="Link to this definition">¶</a></dt>
-<dd><p>Parsed reassembled payload.
-Parsed TCP payload. Analysed on first read rather than at construction;
-a <code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> may be passed in its place.</p>
+<dd><p>Parsed TCP payload. Analysed on first read rather than at construction;
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code> may be passed in its place, and reading this
+attribute then runs it and keeps the result.</p>
 </dd></dl>
 
 <dl class="py attribute">

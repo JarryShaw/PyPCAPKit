@@ -676,7 +676,7 @@ header types.</p>
 </dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The lookup goes through <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code> rather than
+<p>The lookup goes through <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._lookup_next_layer" title="pcapkit.protocols.protocol.Protocol._lookup_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code></a> rather than
 subscripting the registry. <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Ethernet.__proto__</span></code></a> <em>is</em>
 <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>, a
 class-level <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>, so reading a missing key

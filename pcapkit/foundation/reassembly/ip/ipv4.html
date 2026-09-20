@@ -516,7 +516,7 @@ implemented) when submit</p></li>
 <dt id="term-reasm.ipv4.packet">reasm.ipv4.packet<a class="headerlink" href="#term-reasm.ipv4.packet" title="Link to this term">¶</a></dt><dd><p>Data structure for <strong>IPv4 datagram reassembly</strong>
 (<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.reassembly</span></code></a>)
 is as following, with <code class="docutils literal notranslate"><span class="pre">ipv4</span></code> the protocol instance
-(<code class="docutils literal notranslate"><span class="pre">frame['IPv4']</span></code>) and <code class="docutils literal notranslate"><span class="pre">ipv4_info</span></code> its <code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code>
+(<code class="docutils literal notranslate"><span class="pre">frame['IPv4']</span></code>) and <code class="docutils literal notranslate"><span class="pre">ipv4_info</span></code> its <a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.info" title="pcapkit.protocols.protocol.Protocol.info"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info</span></code></a>
 – the header fields come off the latter, the raw octets off the former:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
   <span class="n">bufid</span> <span class="o">=</span> <span class="p">(</span>

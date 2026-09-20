@@ -1089,6 +1089,39 @@ be included when <a class="reference internal" href="../corekit/infoclass.html#p
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._get_context">
+<span class="sig-name descname"><span class="pre">_get_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._get_context" title="Link to this definition">¶</a></dt>
+<dd><p>Get the caller supplied context for this protocol, if any.</p>
+<p>The lookup is keyed on <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.id</span></code>, so a
+protocol finds its own context without knowing how the caller spelled
+the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cls</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_CTX</span></code>, bound= ProtocolContext)] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Expected context class; when given, a context registered
+under this protocol’s name but of another type is ignored
+rather than returned for the implementation to trip over.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_CTX</span></code>, bound= ProtocolContext) | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The matching context, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the caller supplied
+none.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._data">
+<span class="sig-name descname"><span class="pre">_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._data" title="Link to this definition">¶</a></dt>
+<dd><p>Raw packet data.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._file">
 <span class="sig-name descname"><span class="pre">_file</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.14)"><span class="pre">IO</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._file" title="Link to this definition">¶</a></dt>
@@ -1136,7 +1169,7 @@ handed over by
 While parsing, it is republished as <code class="docutils literal notranslate"><span class="pre">__packet__</span></code> so that
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a> – and through it the
 schema – can see it; see the note below.</p></li>
-<li><p><strong>__context__</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[ContextRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext]</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable[ProtocolContext]]</span></code>) – Caller supplied parsing context (<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exctx</span></code>),
+<li><p><strong>__context__</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[ContextRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolContext]</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable[ProtocolContext]]</span></code>) – Caller supplied parsing context (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exctx" title="pcapkit.protocols.protocol.Protocol._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exctx</span></code></a>),
 c.f. <a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>. It is consumed here rather
 than being forwarded to <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.read</span></code></a>, and is
 propagated to nested layers by
@@ -1207,8 +1240,8 @@ attribute of the subclass.</p>
 try to find the corresponding class in the
 <a class="reference internal" href="index.html#module-pcapkit.protocols.schema" title="pcapkit.protocols.schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a> and <a class="reference internal" href="index.html#module-pcapkit.protocols.data" title="pcapkit.protocols.data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">data</span></code></a>
 modules respectively. If the class is not found, the default
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Schema_Raw</span></code> and
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Data_Raw</span></code> classes will be used.</p>
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.schema.misc.raw.Raw" title="pcapkit.protocols.schema.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> and
+<a class="reference internal" href="misc/raw.html#pcapkit.protocols.data.misc.raw.Raw" title="pcapkit.protocols.data.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> classes will be used.</p>
 </div>
 <p>This method also registers the subclass to the protocol registry,
 i.e., <a class="reference internal" href="index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a>.</p>
@@ -1345,6 +1378,17 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._exctx">
+<span class="sig-name descname"><span class="pre">_exctx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><span class="pre">ContextRegistry</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._exctx" title="Link to this definition">¶</a></dt>
+<dd><p>Caller supplied parsing context, c.f. <a class="reference internal" href="../corekit/context.html#module-pcapkit.corekit.context" title="pcapkit.corekit.context"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.context</span></code></a>.
+<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__init__</span></code></a> replaces this with a real
+<a class="reference internal" href="../corekit/context.html#pcapkit.corekit.context.ContextRegistry" title="pcapkit.corekit.context.ContextRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextRegistry</span></code></a>; the class level
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> is what an instance built without going through
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> – e.g. <code class="docutils literal notranslate"><span class="pre">object.__new__(SomeProtocol)</span></code> – sees, so that
+reading it is always safe.</p>
 </dd></dl>
 
 </dd></dl>

@@ -484,14 +484,14 @@
 <span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
 <span class="sd">leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a</span>
 <span class="sd">different framing decision. It also means v3 is the first member of this family</span>
-<span class="sd">to have a real :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__`.</span>
+<span class="sd">to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.</span>
 
 <span class="sd">**L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*</span>
 <span class="sd">an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves</span>
 <span class="sd">the value 1 "to permit detection of L2F packets should they arrive intermixed</span>
 <span class="sd">with L2TP packets". L2F is a separate protocol with its own header. It is</span>
 <span class="sd">therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``</span>
-<span class="sd">only as an alias in its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` --</span>
+<span class="sd">only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` --</span>
 <span class="sd">the same relationship HTTP/3 has to QUIC. c.f.</span>
 <span class="sd">:meth:`HTTPv1.id &lt;pcapkit.protocols.application.httpv1.HTTP.id&gt;` for how a</span>
 <span class="sd">version-flavoured alias is spelled: canonical name first, alias second, since</span>
@@ -538,8 +538,8 @@
 
 <span class="sd">    It is abstract for the same mechanical reason</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ip.IP` is:</span>
-<span class="sd">    :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` and</span>
-<span class="sd">    :meth:`~pcapkit.protocols.protocol.ProtocolBase.read` are both declared</span>
+<span class="sd">    :attr:`~pcapkit.protocols.protocol.Protocol.name` and</span>
+<span class="sd">    :meth:`~pcapkit.protocols.protocol.Protocol.read` are both declared</span>
 <span class="sd">    abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and neither is</span>
 <span class="sd">    defined here, so the class cannot be instantiated. Bind a version, never this</span>
 <span class="sd">    class.</span>
@@ -553,7 +553,7 @@
     <span class="c1">#: NOTE: Declared on the base, and so shared by every version, deliberately.</span>
     <span class="c1">#: This is the key the parsed datagram appears under, and a consumer wants</span>
     <span class="c1">#: ``udp.l2tp`` whichever version was on the wire -- the version is reported</span>
-    <span class="c1">#: by :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` instead. Left to</span>
+    <span class="c1">#: by :attr:`~pcapkit.protocols.protocol.Protocol.alias` instead. Left to</span>
     <span class="c1">#: the class-name default it would read ``l2tpv2``, ``l2tpv3`` and so on, and</span>
     <span class="c1">#: every consumer would have to know the version to find the data.</span>
     <span class="nd">@property</span>

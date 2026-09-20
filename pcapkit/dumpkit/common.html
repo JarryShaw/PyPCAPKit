@@ -490,32 +490,70 @@ classes.</p>
 <p>Base <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> object.</p>
 <p>This class is a customised <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> for the
 <a class="reference internal" href="index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> implementation, which is generally customised
-for automatic registration to the
+for opt-in registration to the
 <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> output
 dumper registries.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Registration is opt-in. Pass keyword argument <code class="docutils literal notranslate"><span class="pre">fmt</span></code> at class
+definition to register the dumper under that output format:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyDumper</span><span class="p">(</span><span class="n">Dumper</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">'my_format'</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">'.mine'</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Omit it and the subclass is <em>not</em> registered:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyMixin</span><span class="p">(</span><span class="n">Dumper</span><span class="p">):</span>  <span class="c1"># not registered</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Such a class can still be registered later, on demand. Note this hook
+writes <em>both</em> output registries, so the equivalent manual call is the
+module-level one that does the same, not either class’ own method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.foundation</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_dumper</span>
+
+<span class="n">register_dumper</span><span class="p">(</span><span class="s1">'my_mixin'</span><span class="p">,</span> <span class="n">MyMixin</span><span class="p">,</span> <span class="s1">'.mine'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.Dumper.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#Dumper.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.Dumper.__init_subclass__" title="Link to this definition">¶</a></dt>
 <dd><p>Initialise subclass.</p>
 <p>This method is used to register the subclass to the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Extraction</span></code> and
+<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
 <a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>
 output dumper registries.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fmt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Output format to register.</p></li>
-<li><p><strong>ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Output file extension.</p></li>
+<li><p><strong>fmt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Output format to register the subclass under, lowercased.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> (the default) skips registration entirely.</p></li>
+<li><p><strong>ext</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Output file extension; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> infers it from <code class="docutils literal notranslate"><span class="pre">fmt</span></code>.
+Only meaningful alongside <code class="docutils literal notranslate"><span class="pre">fmt</span></code>.</p></li>
 <li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ext</span></code> is given without <code class="docutils literal notranslate"><span class="pre">fmt</span></code>, or if any
+    unrecognised class keyword is given.</p>
+</dd>
 </dl>
-<p>If the <code class="docutils literal notranslate"><span class="pre">fmt</span></code> is not provided, we will try to get it from the
-<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property of the subclass.
-And if the <code class="docutils literal notranslate"><span class="pre">ext</span></code> is not provided, we will infer it from the
-<code class="docutils literal notranslate"><span class="pre">fmt</span></code>.</p>
+<p>Registration is <strong>opt-in</strong>: the subclass is registered if and only if
+<code class="docutils literal notranslate"><span class="pre">fmt</span></code> is given. This is what lets a subclass decline registration
+rather than having to inherit <a class="reference internal" href="#pcapkit.dumpkit.common.DumperBase" title="pcapkit.dumpkit.common.DumperBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DumperBase</span></code></a> to avoid it, and it
+matches <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.__init_subclass__</span></code></a>, which
+has guarded on its own <code class="docutils literal notranslate"><span class="pre">code</span></code> keyword all along.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The previous behaviour inferred <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the subclass’
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.kind" title="(in DictDumper)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> property, which it could
+only read off an <em>instance</em> – so it constructed one against a
+<a class="reference external" href="https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">tempfile.NamedTemporaryFile()</span></code></a> while the <code class="docutils literal notranslate"><span class="pre">class</span></code> statement
+was still executing. Guarding on <code class="docutils literal notranslate"><span class="pre">fmt</span></code> removes that: a class
+definition no longer touches the filesystem.</p>
+</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">

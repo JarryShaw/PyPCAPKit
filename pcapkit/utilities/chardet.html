@@ -465,7 +465,7 @@
 <p><a class="reference internal" href="#module-pcapkit.utilities.chardet" title="pcapkit.utilities.chardet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.chardet</span></code></a> wraps <a class="reference external" href="https://chardet.readthedocs.io">chardet</a> with a bounded cache, for
 turning the bytes of a text field into a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>. It is shared by
 <a class="reference internal" href="../corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField.post_process" title="pcapkit.corekit.fields.strings.StringField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">StringField.post_process</span></code></a> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.decode</span></code>,
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.decode" title="pcapkit.protocols.protocol.Protocol.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.decode</span></code></a>,
 which is why it lives here rather than beside either of them.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.utilities.chardet.detect">
@@ -485,7 +485,7 @@ but still keeps the argument, since a <a class="reference external" href="https:
 equality on a hash collision. Measured, feeding 20 distinct 1 MB values
 retains 19.1 MB. <a class="reference internal" href="#pcapkit.utilities.chardet.DETECT_CACHE_SIZE" title="pcapkit.utilities.chardet.DETECT_CACHE_SIZE"><code class="xref py py-data docutils literal notranslate"><span class="pre">DETECT_CACHE_SIZE</span></code></a> therefore caps the entries
 rather than the footprint, which matters because
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.decode</span></code> is public and a caller
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol.decode" title="pcapkit.protocols.protocol.Protocol.decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.decode</span></code></a> is public and a caller
 may hand it a whole payload. Use <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache.cache_clear" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detect.cache_clear</span></code></a> to release it in a long-running
 process.</p>
 <p>Two alternatives were tried and rejected. Keying on a <em>prefix</em> is

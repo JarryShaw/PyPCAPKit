@@ -778,7 +778,7 @@ rather than incidental: it references <span class="target" id="index-22"></span>
 <a class="reference internal" href="pcapkit/protocols/link/l2tpv2.html#pcapkit.protocols.link.l2tpv2.L2TPv2" title="pcapkit.protocols.link.l2tpv2.L2TPv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TPv2</span></code></a>, the <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> v2 framing,
 reached over UDP 1701. So the binding waits on a v3 dissector, which is also
 the first member of the family to carry an
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code> of its own – 115
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> of its own – 115
 being that index. <a class="reference internal" href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> records what v3 needs, and
 what <code class="docutils literal notranslate"><span class="pre">L2F</span></code> needs alongside it: the version nibble reading <code class="docutils literal notranslate"><span class="pre">1</span></code> selects L2F
 [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2341.html"><strong>RFC 2341</strong></a>], a separate protocol, not an earlier L2TP.</p></li>
@@ -850,7 +850,7 @@ extraction by itself, and the counterfactual that proposed it had left 330 of
 <code class="docutils literal notranslate"><span class="pre">pcapkit/toolkit/pcap.py:53</span></code> filters only on the <em>DF</em> flag – so a capture
 with no fragments at all still produces one “datagram” per frame. Parsing its
 payload is no longer part of that cost:
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code> used to run eagerly on
+<a class="reference internal" href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.analyze" title="pcapkit.protocols.protocol.Protocol.analyze"><code class="xref py py-meth docutils literal notranslate"><span class="pre">analyze()</span></code></a> used to run eagerly on
 each one, 86% of the IP-reassembly cost plus a 133 ms garbage-collection bill,
 and <a class="reference internal" href="pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a> is now a
 <a class="reference internal" href="pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.data.data.Deferred" title="pcapkit.foundation.reassembly.data.data.Deferred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Deferred</span></code></a> parsed on first

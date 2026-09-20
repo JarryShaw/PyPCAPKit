@@ -539,13 +539,13 @@ ethernet.s_tag.c_tag.tci.vid = 200     &lt;- customer tag, 802.1Q
 ethernet.s_tag.c_tag.type    = 0x0800
 </pre></div>
 </div>
-<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code> – <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> against
+<p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info_name" title="pcapkit.protocols.protocol.Protocol.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a> – <code class="docutils literal notranslate"><span class="pre">s_tag</span></code> against
 <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> – is what keeps the two apart in the parsed
 <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>. A single class bound at both EtherTypes
 would nest one <code class="docutils literal notranslate"><span class="pre">c_tag</span></code> inside another, leaving nothing in the output to say
 which of the two was the service tag.</p>
 <p>Two distinct EtherTypes also means two distinct
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code> values, which is the
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.__index__" title="pcapkit.protocols.protocol.Protocol.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> values, which is the
 project’s rule for when protocols get separate modules: siblings that <em>share</em> an
 index may share a module, as <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.InARP" title="pcapkit.protocols.link.arp.InARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">InARP</span></code></a> shares
 <a class="reference internal" href="arp.html#module-pcapkit.protocols.link.arp" title="pcapkit.protocols.link.arp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">arp</span></code></a> and
@@ -561,9 +561,9 @@ it is abstract and nothing dispatches to it – so its <code class="docutils lit
 since the customer and service tags are byte-for-byte identical. What it
 deliberately leaves to its subclasses is only how the tag <em>names</em> itself:
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code> and
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code>.</p>
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.info_name" title="pcapkit.protocols.protocol.Protocol.info_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info_name</span></code></a>.</p>
 <p>It is abstract for the same reason <a class="reference internal" href="../internet/ip.html#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>
-is: <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> is declared
+is: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.name" title="pcapkit.protocols.protocol.Protocol.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is declared
 abstract by <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and is not
 defined here, so the class cannot be instantiated. Bind
 <code class="xref py py-class docutils literal notranslate"><span class="pre">C_Tag</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">S_Tag</span></code>, never this class.</p>

@@ -550,7 +550,7 @@ subclasses)</p></td>
 </tr>
 <tr class="row-even"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.SCTP</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td rowspan="5"><p>Application Layer
+<tr class="row-odd"><td rowspan="6"><p>Application Layer
 (<a class="reference internal" href="pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>
 subclasses)</p></td>
 <td rowspan="2"><p>FTP Family</p></td>
@@ -565,18 +565,20 @@ subclasses)</p></td>
 </tr>
 <tr class="row-odd"><td colspan="3"><p><a class="reference internal" href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv2.HTTP</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td rowspan="5"><p>Miscellaneous Protocols</p></td>
+<tr class="row-even"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.NGAP" title="pcapkit.protocols.application.ngap.NGAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ngap.NGAP</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><p>Miscellaneous Protocols</p></td>
 <td rowspan="2"><p>PCAP Format</p></td>
 <td colspan="3"><p><a class="reference internal" href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header" title="pcapkit.protocols.misc.pcap.header.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.header.Header</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td colspan="3"><p><a class="reference internal" href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.frame.Frame</span></code></a></p></td>
+<tr class="row-even"><td colspan="3"><p><a class="reference internal" href="pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.frame.Frame</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p>PCAP-NG Format</p></td>
+<tr class="row-odd"><td><p>PCAP-NG Format</p></td>
 <td colspan="3"><p><a class="reference internal" href="pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw.Raw</span></code></a></p></td>
+<tr class="row-even"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw.Raw</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.null.NoPayload</span></code></a></p></td>
+<tr class="row-odd"><td colspan="4"><p><a class="reference internal" href="pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.null.NoPayload</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -930,7 +932,13 @@ module.</p>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'Packet'</span><span class="p">]):</span>
+<span class="c1"># NOTE: The ``name`` keyword is what registers the engine with the Extractor,</span>
+<span class="c1"># and it is the key ``Extractor(engine=...)`` will look it up under. It is</span>
+<span class="c1"># required: registration is opt-in, so omitting it defines a perfectly usable</span>
+<span class="c1"># class that is simply not selectable by name. Note that __engine_name__ is</span>
+<span class="c1"># *not* an opt-in -- it sets the name the engine reports about itself, which</span>
+<span class="c1"># it does whether or not the engine is registered.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'Packet'</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">):</span>
 
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'Scapy'</span>  <span class="c1"># friendly name of the engine</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'scapy'</span>  <span class="c1"># module name that the engine is based on</span>
@@ -1306,7 +1314,15 @@ example, where the comprehensive implementation can be found in the
 <span class="c1"># a subclass of the base class, i.e., Reassembly, and implement the core</span>
 <span class="c1"># methods, i.e., reassembly and submit, for reassembling the fragmented</span>
 <span class="c1"># packets and submitting the reassembled datagram, respectively.</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">]):</span>
+<span class="c1">#</span>
+<span class="c1"># The ``protocol`` keyword is what registers the class, and it is the key it</span>
+<span class="c1"># will be looked up under. It is required: registration is opt-in, so omitting</span>
+<span class="c1"># it defines a perfectly usable class that is simply not selectable by name.</span>
+<span class="c1"># Note that __protocol_name__ is *not* an opt-in -- it sets the name the class</span>
+<span class="c1"># reports about itself, registered or not. Note also that the keyword is</span>
+<span class="c1"># spelled ``protocol`` here and ``name`` on Engine above.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">],</span>
+                   <span class="n">protocol</span><span class="o">=</span><span class="s1">'ipv4'</span><span class="p">):</span>
 
     <span class="n">__protocol_name__</span> <span class="o">=</span> <span class="s1">'IPv4'</span>  <span class="c1"># name of the protocol</span>
     <span class="n">__protocol_type__</span> <span class="o">=</span> <span class="n">IPv4</span>  <span class="c1"># type of the protocol</span>

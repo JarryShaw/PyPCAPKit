@@ -802,7 +802,7 @@ attribute:</p>
 <p class="admonition-title">Note</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option occupies a single octet and carries no
 <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field, so its
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code>
+<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.Option.length" title="pcapkit.protocols.data.internet.ipv6_opts.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>
 is <code class="docutils literal notranslate"><span class="pre">1</span></code> rather than <code class="docutils literal notranslate"><span class="pre">len</span> <span class="pre">+</span> <span class="pre">2</span></code>. That one-octet wire shape is
 enforced by
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipv6_opts.PadOption" title="pcapkit.protocols.schema.internet.ipv6_opts.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>
@@ -1345,7 +1345,7 @@ padding octets <em>after</em> the two octets of the option header</p></li>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code> counts
+<p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_opts.Option.length" title="pcapkit.protocols.data.internet.ipv6_opts.Option.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data_PadOption.length</span></code></a> counts
 the <em>whole</em> option, whereas <code class="xref py py-attr docutils literal notranslate"><span class="pre">Schema_PadOption.len</span></code> is the
 <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code> field – two octets fewer, and absent altogether for
 a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code>. <code class="docutils literal notranslate"><span class="pre">opt</span></code> used to be ignored here, so re-making a parsed
