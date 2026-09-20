@@ -454,7 +454,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">IntError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'NumberField'</span><span class="p">,</span>
@@ -486,11 +486,27 @@
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
 <span class="sd">            an integer value and accept the current packet as its only argument.</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; :data:`None` defers to the</span>
+<span class="sd">            class-level ``__signed__``, which this class leaves unset and so</span>
+<span class="sd">            means unsigned.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        IntError: If no ``length`` is given and ``__length__`` fixes none either.</span>
+<span class="sd">        FieldValueError: If ``signed`` contradicts a sign already fixed by</span>
+<span class="sd">            ``__signed__`` -- never from this class, which fixes none.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        A subclass such as :class:`UInt32Field` fixes the sign through</span>
+<span class="sd">        ``__signed__``, so ``signed`` there is at best redundant. It used to be</span>
+<span class="sd">        discarded outright, in both directions, which meant</span>
+<span class="sd">        ``UInt32Field(signed=True)`` handed back an unsigned field whose values</span>
+<span class="sd">        only looked wrong once the high bit was set -- see GitHub issue #545. A</span>
+<span class="sd">        contradicting value is now rejected instead; omitting it, or passing the</span>
+<span class="sd">        sign the class already fixes, stays legal.</span>
 
 <span class="sd">    """</span>
 
@@ -504,7 +520,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int | Callable[[dict[str, Any]], int]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">'int | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'int | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="s1">'big'</span><span class="p">,</span>
                  <span class="n">bit_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -520,7 +536,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="o">=</span> <span class="n">signed</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span>
+        <span class="c1"># NOTE: ``__signed__`` fixes the sign for a subclass such as</span>
+        <span class="c1"># :class:`UInt32Field`, and used to *discard* the ``signed`` argument to</span>
+        <span class="c1"># do it -- in both directions, so ``UInt32Field(signed=True)`` returned</span>
+        <span class="c1"># an unsigned field and ``Int8Field(signed=False)`` a signed one, both</span>
+        <span class="c1"># without a word. ``None`` is what "not given" looks like, which is what</span>
+        <span class="c1"># lets a contradicting value be told apart from the default and rejected</span>
+        <span class="c1"># while leaving an agreeing one alone. See #545.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">signed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">signed</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">signed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">signed</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: field is fixed as '</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="s2">"signed"</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">"unsigned"</span><span class="si">}</span><span class="s1">, '</span>
+                <span class="sa">f</span><span class="s1">'but signed=</span><span class="si">{</span><span class="n">signed</span><span class="si">!r}</span><span class="s1"> was given'</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">byteorder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -528,7 +560,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__template__</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="n">signed</span><span class="p">)</span>
+            <span class="c1"># NOTE: ``self._signed``, not the ``signed`` argument. A subclass</span>
+            <span class="c1"># that fixes ``__signed__`` without also fixing ``__template__``</span>
+            <span class="c1"># would otherwise build its template from the argument and parse</span>
+            <span class="c1"># with the opposite sign to the one it declared.</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
 
 <div class="viewcode-block" id="NumberField.__call__">
@@ -657,11 +693,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`True` here, so a</span>
+<span class="sd">            contradicting :data:`False` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`False`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -679,11 +720,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`False` here, so a</span>
+<span class="sd">            contradicting :data:`True` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`True`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -701,11 +747,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`True` here, so a</span>
+<span class="sd">            contradicting :data:`False` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`False`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -723,11 +774,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`False` here, so a</span>
+<span class="sd">            contradicting :data:`True` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`True`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -745,11 +801,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`True` here, so a</span>
+<span class="sd">            contradicting :data:`False` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`False`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -767,11 +828,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`False` here, so a</span>
+<span class="sd">            contradicting :data:`True` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`True`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -789,11 +855,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`True` here, so a</span>
+<span class="sd">            contradicting :data:`False` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`False`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -811,11 +882,16 @@
 <span class="sd">    Args:</span>
 <span class="sd">        length: Field size (in bytes).</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; fixed as :data:`False` here, so a</span>
+<span class="sd">            contradicting :data:`True` is rejected rather than ignored.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FieldValueError: If ``signed`` is given as :data:`True`, contradicting</span>
+<span class="sd">            the sign this class fixes.</span>
 
 <span class="sd">    """</span>
 
@@ -834,7 +910,9 @@
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
 <span class="sd">            an integer value and accept the current packet as its only argument.</span>
 <span class="sd">        default: Field default value, if any.</span>
-<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        signed: Whether the field is signed; :data:`None` defers to the</span>
+<span class="sd">            class-level ``__signed__``, which this class leaves unset and so</span>
+<span class="sd">            means unsigned.</span>
 <span class="sd">        byteorder: Field byte order.</span>
 <span class="sd">        bit_length: Field bit length.</span>
 <span class="sd">        namespace: Field namespace (a :class:`enum.IntEnum` class).</span>
@@ -844,7 +922,8 @@
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">'StdlibEnum | AenumEnum | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'StdlibEnum | AenumEnum | NoValueType'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
+                 <span class="n">signed</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span> <span class="o">=</span> <span class="s1">'big'</span><span class="p">,</span>
                  <span class="n">bit_length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">namespace</span><span class="p">:</span> <span class="s1">'Optional[Type[StdlibEnum] | Type[AenumEnum]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
