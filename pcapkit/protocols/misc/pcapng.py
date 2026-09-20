@@ -9,7 +9,7 @@
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` only,
 which implements extractor for PCAP-NG file format [*]_.
 
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html
 
 """
 import base64

@@ -1,0 +1,11 @@
+0.15.0 -- 2020-06-07
+====================
+
+* **Changed** -- the parsing and construction logic was merged, so a protocol is
+  no longer implemented twice; TCP flow tracing and several interfaces were
+  revised.
+* **Added** -- full API documentation, published at
+  https://pypcapkit.jarryshaw.me.
+* **Fixed** -- the DictDumper dependency and the failures it caused (#37, #40).
+
+Preceded by ``0.15.0rc1`` (2020-06-06).

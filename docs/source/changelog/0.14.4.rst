@@ -1,0 +1,6 @@
+0.14.4 -- 2019-09-01
+====================
+
+* **Added** -- the vendor crawler scripts ship in the distribution.
+* **Changed** -- the CLI and vendor dependencies are separate extras in
+  ``setup.py``; constant enumerations regenerated.

@@ -1,0 +1,6 @@
+0.14.5 -- 2019-10-24
+====================
+
+* **Added** -- a CLI for the vendor crawlers.
+* **Changed** -- vendor imports are deferred, so the crawler dependencies are
+  not needed to import ``pcapkit``; dependencies revised.

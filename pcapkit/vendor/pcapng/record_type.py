@@ -30,8 +30,9 @@ class RecordType(Vendor):
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFF'
-    #: Link to registry.
-    LINK = 'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'
+    #: Link to registry. See :mod:`pcapkit.vendor.pcapng.block_type` for why this
+    #: is the ``-03`` revision in the immutable I-D archive; see #518.
+    LINK = 'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'
 
     def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records."""

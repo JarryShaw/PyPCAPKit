@@ -1,0 +1,7 @@
+0.13.0 -- 2018-12-08
+====================
+
+No library changes -- a licence and packaging metadata refresh.
+
+*Also released:* ``0.13.0.post1``, ``0.13.0.post2`` (through 2018-12-12);
+``post2`` fixed encoding errors in ``setup.py``.

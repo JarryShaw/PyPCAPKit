@@ -1,0 +1,5 @@
+0.16.2 -- 2022-08-03
+====================
+
+**Fixed** -- ``Info`` ``__init__`` generation for classes without annotations
+(#113); the IP reassembly algorithm (#82).
