@@ -463,6 +463,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">webbrowser</span>
@@ -618,6 +619,35 @@
                 <span class="k">break</span>
 
     <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1"> (+</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">) python-requests/</span><span class="si">{</span><span class="n">requests</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">'</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">stdin_is_interactive</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether there is somebody at a keyboard to be prompted.</span>
+
+<span class="sd">    :meth:`Vendor._request`'s last resort is to ask an operator to fetch the page</span>
+<span class="sd">    by hand, which needs a terminal: a process whose ``stdin`` is a pipe, a file,</span>
+<span class="sd">    or :file:`/dev/null` has nobody to open a browser for and nobody who could</span>
+<span class="sd">    ever save the file that path then waits for.</span>
+
+<span class="sd">    ``stdin`` can be absent rather than merely redirected, and it can stop being</span>
+<span class="sd">    usable while the process runs, so neither is allowed to propagate out of a</span>
+<span class="sd">    predicate: :data:`sys.stdin` is :obj:`None` under a GUI launcher such as</span>
+<span class="sd">    :program:`pythonw`, and one that has been closed raises :exc:`ValueError` from</span>
+<span class="sd">    :meth:`~io.IOBase.isatty` instead of answering. Every such case counts as</span>
+<span class="sd">    *not* interactive, which is the conservative answer -- it costs a crawler the</span>
+<span class="sd">    manual-intervention path it could not have used anyway.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether :data:`sys.stdin` is attached to a terminal.</span>
+
+<span class="sd">    """</span>
+    <span class="n">stdin</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s1">'stdin'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">stdin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="VendorMeta">
@@ -916,8 +946,21 @@
 <span class="sd">        you can manually load that page and save the HTML source at the location</span>
 <span class="sd">        it provides.</span>
 
+<span class="sd">        That last resort is only taken when somebody can actually act on it, i.e.</span>
+<span class="sd">        when :envvar:`PCAPKIT_CI_MODE` is unset *and*</span>
+<span class="sd">        :func:`stdin_is_interactive` finds a terminal. A non-interactive run --</span>
+<span class="sd">        under a pipe, in a container, from a scheduled job -- is failed with the</span>
+<span class="sd">        fetch error instead, the same way :envvar:`PCAPKIT_CI_MODE` fails it,</span>
+<span class="sd">        rather than printing instructions nobody will read. See #522.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            CSV data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            requests.RequestException: If the registry could not be fetched and</span>
+<span class="sd">                manual intervention is unavailable, i.e. under</span>
+<span class="sd">                :envvar:`PCAPKIT_CI_MODE`, with no interactive ``stdin``, or where</span>
+<span class="sd">                the prompt itself fails because ``stdin`` went away mid-wait.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            VendorRequestWarning: If connection failed with and/or without proxies.</span>
@@ -971,9 +1014,19 @@
                         <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">continue</span>
                     <span class="k">break</span>
-            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
+            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">CI_MODE</span><span class="p">:</span>
                     <span class="n">warn</span><span class="p">(</span><span class="s1">'Connection failed; exit on CI mode...'</span><span class="p">,</span>
+                         <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="k">raise</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">stdin_is_interactive</span><span class="p">():</span>
+                    <span class="c1"># NOTE: manual intervention needs an operator, and a process</span>
+                    <span class="c1"># with no terminal has none -- nobody to read the instructions</span>
+                    <span class="c1"># below, nobody to save the page, so the wait it ends in could</span>
+                    <span class="c1"># only ever time out the whole run. Fail exactly as CI_MODE</span>
+                    <span class="c1"># does rather than prompting into the void; see #522.</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">'Connection failed; exit as stdin is not interactive...'</span><span class="p">,</span>
                          <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
                     <span class="k">raise</span>
 
@@ -998,8 +1051,25 @@
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    </span><span class="si">{</span><span class="n">temp_file</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
                     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
                             <span class="nb">input</span><span class="p">(</span><span class="s1">'Press ENTER to continue...'</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                            <span class="c1"># NOTE: whatever stopped the prompt, ``input()`` is no</span>
+                            <span class="c1"># longer waiting -- and this loop only waits because</span>
+                            <span class="c1"># ``input()`` does, so the file it waits for can never</span>
+                            <span class="c1"># arrive. Discarding the exception, as this used to,</span>
+                            <span class="c1"># left a ``while True`` that printed three lines per</span>
+                            <span class="c1"># iteration at full speed: 26.7 million lines and 2.6 GB</span>
+                            <span class="c1"># measured in #522. The terminal this started on can</span>
+                            <span class="c1"># still go away mid-wait -- a closed ``stdin`` raises</span>
+                            <span class="c1"># :exc:`ValueError`, a dropped one :exc:`EOFError`, a</span>
+                            <span class="c1"># vanished :data:`sys.stdin` :exc:`RuntimeError` -- so the</span>
+                            <span class="c1"># check before the prompt does not make this redundant.</span>
+                            <span class="c1"># ``KeyboardInterrupt`` is not an :exc:`Exception` and so</span>
+                            <span class="c1"># still aborts as itself.</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Connection failed; cannot prompt for manual intervene (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s1">)...'</span><span class="p">,</span>
+                                 <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
                         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">temp_file</span><span class="p">):</span>
                             <span class="k">break</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s1">'File not found; please save the page source at'</span><span class="p">)</span>
