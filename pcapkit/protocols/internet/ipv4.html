@@ -1418,7 +1418,24 @@ attribute:</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructured option schema.</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">authorities</span></code> names a bit position that is not a
+    protection authority – a negative one, or one that <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1108.html"><strong>RFC 1108</strong></a>
+    reserves as a field termination indicator.</p>
+</dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1108.html"><strong>RFC 1108</strong></a> section 2.2 lays each protection authority octet out as
+seven authority bits followed by a <em>field termination indicator</em> in
+bit 0: <code class="docutils literal notranslate"><span class="pre">0</span></code> means another octet follows, <code class="docutils literal notranslate"><span class="pre">1</span></code> means this is the
+last. So the authority numbering skips every position that is a
+termination bit – 7, 15, 23 – which is what
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec" title="pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_sec()</span></code></a> encodes by looping over <code class="docutils literal notranslate"><span class="pre">range(7)</span></code> per
+octet, and the reason <code class="docutils literal notranslate"><span class="pre">Field_Termination_Indicator</span></code> is rejected
+here rather than written: the enumeration names it as structure, and
+a value written there would be dropped on the way back in. See #537.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1998,8 +2015,15 @@ the option by itself.</p>
 <p>Header schema for IPv4 stream identifier (<code class="docutils literal notranslate"><span class="pre">SID</span></code>) option.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv4.SIDOption.sid">
-<span class="sig-name descname"><span class="pre">sid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">sid&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SIDOption.sid" title="Link to this definition">¶</a></dt>
-<dd><p>Stream identifier.</p>
+<span class="sig-name descname"><span class="pre">sid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">sid&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv4.SIDOption.sid" title="Link to this definition">¶</a></dt>
+<dd><p>Stream identifier. Two octets, per <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> section 3.1, which gives the
+option as four octets in total: one of type, one of length, and a 16-bit
+stream identifier. This was a <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a>,
+which over-read a well-formed option by two octets on the way in – the
+<code class="docutils literal notranslate"><span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-2</span></code> the library warned about – and re-emitted it two
+octets too wide on the way out, against the <code class="docutils literal notranslate"><span class="pre">length=4</span></code> that
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid" title="pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_sid()</span></code></a> had always
+written. See #534.</p>
 </dd></dl>
 
 </dd></dl>

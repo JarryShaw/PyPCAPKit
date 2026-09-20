@@ -1920,6 +1920,22 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructured option schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``authorities`` names a bit position that is not a</span>
+<span class="sd">                protection authority -- a negative one, or one that :rfc:`1108`</span>
+<span class="sd">                reserves as a field termination indicator.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            :rfc:`1108` section 2.2 lays each protection authority octet out as</span>
+<span class="sd">            seven authority bits followed by a *field termination indicator* in</span>
+<span class="sd">            bit 0: ``0`` means another octet follows, ``1`` means this is the</span>
+<span class="sd">            last. So the authority numbering skips every position that is a</span>
+<span class="sd">            termination bit -- 7, 15, 23 -- which is what</span>
+<span class="sd">            :meth:`_read_opt_sec` encodes by looping over ``range(7)`` per</span>
+<span class="sd">            octet, and the reason ``Field_Termination_Indicator`` is rejected</span>
+<span class="sd">            here rather than written: the enumeration names it as structure, and</span>
+<span class="sd">            a value written there would be dropped on the way back in. See #537.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">level_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">level</span>
@@ -1930,12 +1946,39 @@
             <span class="n">authorities</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">authorities</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">authorities</span>
 
         <span class="k">if</span> <span class="n">authorities</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">auth</span> <span class="ow">in</span> <span class="n">authorities</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">auth</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid protection '</span>
+                                        <span class="sa">f</span><span class="s1">'authority: </span><span class="si">{</span><span class="n">auth</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">auth</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                    <span class="c1"># ``.name`` where there is one, rather than</span>
+                    <span class="c1"># ``Enum_ProtectionAuthority.get(auth)``: that call runs</span>
+                    <span class="c1"># ``_missing_`` for an unnamed index, which extends the</span>
+                    <span class="c1"># enumeration as a side effect. An error path is the last</span>
+                    <span class="c1"># place that should mutate a registry.</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid protection '</span>
+                                        <span class="sa">f</span><span class="s1">'authority: </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">auth</span><span class="p">,</span><span class="w"> </span><span class="s2">"name"</span><span class="p">,</span><span class="w"> </span><span class="n">auth</span><span class="p">)</span><span class="si">}</span><span class="s1"> is a field '</span>
+                                        <span class="sa">f</span><span class="s1">'termination indicator, not an authority'</span><span class="p">)</span>
+
+            <span class="c1"># ``max_auth`` is the highest bit *index*, so the octet count comes</span>
+            <span class="c1"># from the bit *count* one past it. Sizing from the index itself put</span>
+            <span class="c1"># a single ``GENSER`` (index 0) in a zero-octet bitmap and then</span>
+            <span class="c1"># indexed into it, raising a bare ``IndexError``; and it under-sized</span>
+            <span class="c1"># by an octet at every exact multiple of eight. See #537.</span>
             <span class="n">max_auth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">authorities</span><span class="p">)</span>
-            <span class="n">int_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">max_auth</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">int_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">max_auth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
 
             <span class="n">data_list</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">'0'</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">int_len</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)]</span>
             <span class="k">for</span> <span class="n">auth</span> <span class="ow">in</span> <span class="n">authorities</span><span class="p">:</span>
                 <span class="n">data_list</span><span class="p">[</span><span class="n">auth</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
+
+            <span class="c1"># Bit 0 of the *last* octet terminates the field. The intermediate</span>
+            <span class="c1"># octets keep the ``0`` they were initialised with, which is what</span>
+            <span class="c1"># says "another octet follows" -- so this single assignment is the</span>
+            <span class="c1"># whole of the indicator, and without it every option this method</span>
+            <span class="c1"># wrote was one its own reader warned about.</span>
+            <span class="n">data_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'1'</span>
+
             <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="sa">b</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_list</span><span class="p">),</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">int_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>

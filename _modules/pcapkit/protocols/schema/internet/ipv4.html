@@ -866,8 +866,15 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">SID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for IPv4 stream identifier (``SID``) option."""</span>
 
-    <span class="c1">#: Stream identifier.</span>
-    <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Stream identifier. Two octets, per :rfc:`791` section 3.1, which gives the</span>
+    <span class="c1">#: option as four octets in total: one of type, one of length, and a 16-bit</span>
+    <span class="c1">#: stream identifier. This was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,</span>
+    <span class="c1">#: which over-read a well-formed option by two octets on the way in -- the</span>
+    <span class="c1">#: ``packet length &lt; 0: -2`` the library warned about -- and re-emitted it two</span>
+    <span class="c1">#: octets too wide on the way out, against the ``length=4`` that</span>
+    <span class="c1">#: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid` had always</span>
+    <span class="c1">#: written. See #534.</span>
+    <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionNumber'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
