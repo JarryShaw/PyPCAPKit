@@ -669,12 +669,12 @@
 
 <span class="sd">    Example:</span>
 
-<span class="sd">        Registration is opt-in. Pass keyword argument ``name`` at class</span>
+<span class="sd">        Registration is opt-in. Pass keyword argument ``engine`` at class</span>
 <span class="sd">        definition to register the engine under that name:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
-<span class="sd">           class MyEngine(Engine, name='my_engine'):</span>
+<span class="sd">           class MyEngine(Engine, engine='my_engine'):</span>
 <span class="sd">               ...</span>
 
 <span class="sd">        Omit it and the subclass is *not* registered, which is how a class</span>
@@ -698,14 +698,14 @@
 
 <div class="viewcode-block" id="Engine.__init_subclass__">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.Engine.__init_subclass__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialise subclass.</span>
 
 <span class="sd">        This method is to be used for registering the engine class to</span>
 <span class="sd">        :class:`~pcapkit.foundation.extraction.Extractor` class.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name: Engine name to register the subclass under, lowercased.</span>
+<span class="sd">            engine: Engine name to register the subclass under, lowercased.</span>
 <span class="sd">                :data:`None` (the default) skips registration entirely.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -714,7 +714,7 @@
 <span class="sd">            UnsupportedCall: If any unrecognised class keyword is given.</span>
 
 <span class="sd">        Registration is **opt-in**: the subclass is registered if and only if</span>
-<span class="sd">        ``name`` is given. This is what lets a subclass decline registration</span>
+<span class="sd">        ``engine`` is given. This is what lets a subclass decline registration</span>
 <span class="sd">        rather than having to inherit :class:`EngineBase` to avoid it, and it</span>
 <span class="sd">        matches :meth:`EnumSchema.__init_subclass__</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__&gt;`, which</span>
@@ -726,28 +726,21 @@
 <span class="sd">            the engine reports, which it does whether or not the engine is</span>
 <span class="sd">            registered; only the keyword decides registration.</span>
 
-<span class="sd">        Warning:</span>
-<span class="sd">            **On Python 3.10 the ``name`` keyword cannot be passed at all.**</span>
-<span class="sd">            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and</span>
-<span class="sd">            ``namespace`` as positional-*or-keyword* parameters before 3.11, so a</span>
-<span class="sd">            class keyword named ``name`` collides with one of them and the class</span>
-<span class="sd">            statement raises :exc:`TypeError` -- ``ABCMeta.__new__() got multiple</span>
-<span class="sd">            values for argument 'name'`` -- from the metaclass, before this method</span>
-<span class="sd">            is reached. From 3.11 those parameters are positional-only and the</span>
-<span class="sd">            keyword arrives here normally. Measured on 3.10.21, 3.11.15 and</span>
-<span class="sd">            3.14.7.</span>
-
-<span class="sd">            The consequence on 3.10 is that an engine cannot be registered at</span>
-<span class="sd">            class definition; register it explicitly instead, which works on every</span>
-<span class="sd">            version::</span>
-
-<span class="sd">                class MyEngine(Engine):     # no keyword, so not registered</span>
-<span class="sd">                    ...</span>
-
-<span class="sd">                Extractor.register_engine('my_engine', MyEngine)</span>
-
-<span class="sd">            The sibling hooks are unaffected, their keywords being ``protocol``</span>
-<span class="sd">            and ``fmt``.</span>
+<span class="sd">        Note:</span>
+<span class="sd">            This keyword was ``name`` when opt-in registration landed, and was</span>
+<span class="sd">            renamed because ``name`` cannot be passed as a class keyword at all</span>
+<span class="sd">            on Python 3.10: :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``,</span>
+<span class="sd">            ``bases`` and ``namespace`` as positional-*or-keyword* parameters</span>
+<span class="sd">            before 3.11, so a class keyword by any of those four names collides</span>
+<span class="sd">            with one of them and the class statement raises :exc:`TypeError` from</span>
+<span class="sd">            the metaclass before this method is reached. ``engine`` is outside</span>
+<span class="sd">            that set, so the documented registration path now works on every</span>
+<span class="sd">            supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those</span>
+<span class="sd">            four are the whole of the :meth:`abc.ABCMeta.__new__` collision</span>
+<span class="sd">            surface. Separately, and for an unrelated reason that holds on every</span>
+<span class="sd">            version, ``metaclass`` is not usable as a class keyword either: a</span>
+<span class="sd">            ``class`` statement consumes it to choose the metaclass, so it never</span>
+<span class="sd">            reaches this method at all.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For more details, please refer to</span>
@@ -757,10 +750,15 @@
         <span class="c1"># NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then</span>
         <span class="c1"># dropped by the bare ``super().__init_subclass__()`` below, since</span>
         <span class="c1"># ``object.__init_subclass__`` takes none. Silently swallowing it is how</span>
-        <span class="c1"># ``class MyEngine(Engine, nmae='x')`` used to register under its class</span>
+        <span class="c1"># ``class MyEngine(Engine, engnie='x')`` used to register under its class</span>
         <span class="c1"># name instead -- no exception, no warning. Now that a missing keyword</span>
         <span class="c1"># means "do not register", the same typo would silently skip</span>
         <span class="c1"># registration altogether, which is quieter still. So reject it.</span>
+        <span class="c1">#</span>
+        <span class="c1"># One typo this cannot catch is ``name=``, and only on Python 3.10: it is</span>
+        <span class="c1"># one of the four names that collide with ``ABCMeta.__new__``, so it fails</span>
+        <span class="c1"># in the metaclass before reaching here. It is still loud, just as a</span>
+        <span class="c1"># ``TypeError`` rather than an ``UnsupportedCall``.</span>
         <span class="c1">#</span>
         <span class="c1"># ``args`` is checked alongside ``kwargs`` for completeness rather than</span>
         <span class="c1"># because a ``class`` statement can fill it -- class creation passes</span>
@@ -770,11 +768,11 @@
             <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> \
                 <span class="n">Extractor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-            <span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
+            <span class="n">Extractor</span><span class="o">.</span><span class="n">register_engine</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">cls</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 </div>

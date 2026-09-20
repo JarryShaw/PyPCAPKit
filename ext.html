@@ -932,13 +932,13 @@ module.</p>
     <span class="kn">from</span><span class="w"> </span><span class="nn">scapy.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
 
-<span class="c1"># NOTE: The ``name`` keyword is what registers the engine with the Extractor,</span>
+<span class="c1"># NOTE: The ``engine`` keyword is what registers the engine with the Extractor,</span>
 <span class="c1"># and it is the key ``Extractor(engine=...)`` will look it up under. It is</span>
 <span class="c1"># required: registration is opt-in, so omitting it defines a perfectly usable</span>
 <span class="c1"># class that is simply not selectable by name. Note that __engine_name__ is</span>
 <span class="c1"># *not* an opt-in -- it sets the name the engine reports about itself, which</span>
 <span class="c1"># it does whether or not the engine is registered.</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'Packet'</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyScapy</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'Packet'</span><span class="p">],</span> <span class="n">engine</span><span class="o">=</span><span class="s1">'scapy'</span><span class="p">):</span>
 
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'Scapy'</span>  <span class="c1"># friendly name of the engine</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'scapy'</span>  <span class="c1"># module name that the engine is based on</span>
@@ -1320,7 +1320,7 @@ example, where the comprehensive implementation can be found in the
 <span class="c1"># it defines a perfectly usable class that is simply not selectable by name.</span>
 <span class="c1"># Note that __protocol_name__ is *not* an opt-in -- it sets the name the class</span>
 <span class="c1"># reports about itself, registered or not. Note also that the keyword is</span>
-<span class="c1"># spelled ``protocol`` here and ``name`` on Engine above.</span>
+<span class="c1"># spelled ``protocol`` here and ``engine`` on Engine above.</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyReassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">],</span>
                    <span class="n">protocol</span><span class="o">=</span><span class="s1">'ipv4'</span><span class="p">):</span>
 

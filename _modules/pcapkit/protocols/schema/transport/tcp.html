@@ -1139,8 +1139,19 @@
 <span class="w">    </span><span class="sd">"""Header schema for Multipath TCP options in a generic representation."""</span>
 
     <span class="c1">#: Subtype and flags.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: The forward match is anchored at the option's first octet, not after the</span>
+    <span class="c1">#: option header: this schema is what :data:`Option.registry` dispatches to</span>
+    <span class="c1">#: for ``kind == Multipath_TCP`` and, unlike the other option schemas, it</span>
+    <span class="c1">#: does not inherit :class:`Option` and so consumes ``kind`` and ``length``</span>
+    <span class="c1">#: itself. :rfc:`8684` section 3 therefore puts ``kind`` in bits 0-7,</span>
+    <span class="c1">#: ``length`` in bits 8-15, and the subtype in bits 16-19 of this 3-octet</span>
+    <span class="c1">#: window -- which is why ``subtype`` reads from bit 16 and ``length`` has</span>
+    <span class="c1">#: to read from bit 8. It read from bit 1 until #553, straddling the low</span>
+    <span class="c1">#: seven bits of ``kind`` and the high bit of ``length``, so a 12-octet</span>
+    <span class="c1">#: MP_CAPABLE (``1e 0c 01``) decoded its length as 60.</span>
     <span class="n">test</span><span class="p">:</span> <span class="s1">'MPTCPSubtypeTest'</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">'length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="s1">'length'</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
         <span class="s1">'subtype'</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
     <span class="p">}))</span>
     <span class="c1">#: Subtype-specific data.</span>

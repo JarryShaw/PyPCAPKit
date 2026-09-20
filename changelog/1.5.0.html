@@ -600,7 +600,7 @@ holding different things – are now <code class="docutils literal notranslate">
 <code class="docutils literal notranslate"><span class="pre">examples/generators</span></code>.</p></li>
 <li><p><strong>Changed</strong> – subclass registration is <strong>opt-in</strong> for <code class="docutils literal notranslate"><span class="pre">Engine</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Reassembly</span></code>, <code class="docutils literal notranslate"><span class="pre">TraceFlow</span></code> and <code class="docutils literal notranslate"><span class="pre">dumpkit</span></code>’s <code class="docutils literal notranslate"><span class="pre">Dumper</span></code> (#514). Each
-registers if and only if its registry keyword is given – <code class="docutils literal notranslate"><span class="pre">name=</span></code> for
+registers if and only if its registry keyword is given – <code class="docutils literal notranslate"><span class="pre">engine=</span></code> for
 <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> for <code class="docutils literal notranslate"><span class="pre">Reassembly</span></code> and <code class="docutils literal notranslate"><span class="pre">TraceFlow</span></code>, <code class="docutils literal notranslate"><span class="pre">fmt=</span></code> for
 <code class="docutils literal notranslate"><span class="pre">Dumper</span></code>. Previously an absent keyword fell back to the class’ own name, so
 <em>every</em> subclass of the public class was registered, and declining meant
@@ -621,15 +621,17 @@ class-level <code class="docutils literal notranslate"><span class="pre">registr
 effect a <code class="docutils literal notranslate"><span class="pre">Dumper</span></code> subclass no longer touches the filesystem while its
 <code class="docutils literal notranslate"><span class="pre">class</span></code> statement runs: inferring <code class="docutils literal notranslate"><span class="pre">fmt</span></code> from the <code class="docutils literal notranslate"><span class="pre">kind</span></code> property meant
 instantiating the class against a <code class="docutils literal notranslate"><span class="pre">NamedTemporaryFile</span></code> mid-definition.
-<strong>One constraint specific to Python 3.10</strong>, where this matters because the
-keyword is now the only class-definition path: <code class="docutils literal notranslate"><span class="pre">Engine</span></code>’s keyword is literally
-<code class="docutils literal notranslate"><span class="pre">name</span></code>, and <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> collide with
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code>’s keyword is <code class="docutils literal notranslate"><span class="pre">engine=</span></code> rather than the <code class="docutils literal notranslate"><span class="pre">name=</span></code> this first
+shipped with, because <code class="docutils literal notranslate"><span class="pre">name</span></code> cannot be passed as a class keyword at all on
+Python 3.10: <code class="docutils literal notranslate"><span class="pre">mcls</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">bases</span></code> and <code class="docutils literal notranslate"><span class="pre">namespace</span></code> collide with
 <code class="docutils literal notranslate"><span class="pre">abc.ABCMeta.__new__</span></code>’s own parameters, which are positional-or-keyword
-before 3.11 and positional-only from 3.11. So on 3.10 a class statement passing
-<code class="docutils literal notranslate"><span class="pre">name=</span></code> raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> from the metaclass before the hook is reached,
-and an engine has to be registered with <code class="docutils literal notranslate"><span class="pre">Extractor.register_engine</span></code> instead
-– which works on every version. <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> and <code class="docutils literal notranslate"><span class="pre">fmt=</span></code> do not collide and
-are unaffected. Measured on 3.10.21, 3.11.15 and 3.14.7.</p></li>
+before 3.11 and positional-only from 3.11, so a class statement naming any of
+the four raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> from the metaclass before the hook is reached.
+Those four are the whole of the <code class="docutils literal notranslate"><span class="pre">ABCMeta.__new__</span></code> collision surface, measured
+on 3.10.21, 3.11.15 and 3.14.7; <code class="docutils literal notranslate"><span class="pre">engine=</span></code>, <code class="docutils literal notranslate"><span class="pre">protocol=</span></code> and <code class="docutils literal notranslate"><span class="pre">fmt=</span></code> are all outside it,
+so the documented registration path works on every supported version. There is
+no <code class="docutils literal notranslate"><span class="pre">name=</span></code> alias – a keyword that worked on some interpreters and not others
+is the trap being removed, not a compatibility measure.</p></li>
 <li><p><strong>Changed</strong> – extraction is around 46% faster on a 1,117-frame HTTP capture,
 with byte-identical output (#420). A reassembled datagram’s payload is now
 analysed on first read rather than eagerly, which cuts IP reassembly’s own
