@@ -211,15 +211,16 @@ EXPECTED_FAILURES = {
     # now in :meth:`IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire
     # <tests.protocols.internet.test_ipv4_unit.IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire>`.
 
-    # ``_make_opt_ts`` passes ``data=`` where the schema field is ``ts_data``.
-    # ``Schema.__init__`` only warns about an unknown field name and carries on,
-    # so the value is dropped and the attribute stays bound to the class-level
-    # descriptor -- which ``post_process`` then tries to iterate.
-    'ipv4-option/TS': Gap(
-        'CONSTRUCT', "'ListField' object is not iterable",
-        'pcapkit/protocols/internet/ipv4.py:1550 -- data= should be ts_data=, '
-        'dropped with UnknownFieldWarning and surfacing at '
-        'pcapkit/protocols/schema/internet/ipv4.py:262'),
+    # ``_make_opt_ts`` used to be recorded here too. It passed ``data=`` where the
+    # schema field is ``ts_data``; ``Schema.__update__`` only warns about an
+    # unknown field name and carries on, so the value was dropped and the
+    # attribute stayed bound to the class-level ``ListField`` descriptor -- which
+    # ``post_process`` then tried to iterate, ``'ListField' object is not
+    # iterable``. The IPv4 Timestamp option was unbuildable through ``make`` for
+    # as long as that stood. #552 passes ``ts_data=`` and corrects the
+    # ``TYPE_CHECKING`` ``__init__`` stub that advertised ``data`` and is what the
+    # maker was written against, so ``ipv4-option/TS`` round-trips and has no
+    # entry here any more.
 
     # -- Quick-Start, in all three protocols that carry it --------------------
 
@@ -227,34 +228,47 @@ EXPECTED_FAILURES = {
     # ``_QSOption.post_process``, which runs on the parse path. Since
     # ``__post_init__`` packs and then re-reads, construction fails.
     #
-    # There is a second, independent defect in the same option that this case
-    # never reaches, and it is the more serious of the two:
-    # ``quick_start_data_selector`` hands the nested schema a hardcoded
-    # ``SchemaField(length=5)`` where the schema needs eight octets
+    # There was a second, independent defect in the same option that these cases
+    # never reach, and it was the more serious of the two:
+    # ``quick_start_data_selector`` handed the nested schema a hardcoded
+    # ``SchemaField(length=5)`` where a Quick-Start Request needs eight octets
     # (type 1 + length 1 + flags 1 + ttl 1 + nonce 4). Measured on a
     # hand-built, well-formed 8-octet IPv4 Quick-Start option
-    # ``1908002adeadbee0``: it parses "successfully" with
-    # ``SchemaWarning: packet length < 0: -3`` and decodes ``nonce`` as **55**
+    # ``1908002adeadbee0``: it parsed "successfully" with
+    # ``SchemaWarning: packet length < 0: -3`` and decoded ``nonce`` as **55**
     # instead of 933982136 -- silent corruption rather than a failure -- and the
-    # three unconsumed octets are then read as a further, fabricated option,
-    # which makes the enclosing IPv4 packet unparseable. The identical
-    # ``SchemaField(length=5)`` is at hopopt.py:224 and ipv6_opts.py:224, with
-    # the same measured nonce of 55. Fixing the ``func`` defect alone will not
-    # make these cases pass.
+    # three unconsumed octets were then read as a further, fabricated option,
+    # which made the enclosing IPv4 datagram fail with ``ProtocolError: IPv4:
+    # invalid format``.
+    #
+    # #552 fixed IPv4's copy: the length now comes from
+    # ``quick_start_option_length(schema)``, i.e. from the suboption the selector
+    # resolved, and ``QuickStartReportOption`` gained the ``Not Used`` octet
+    # :rfc:`4782#section-3.1` gives it and it was missing -- it packed seven
+    # octets against the ``length=8`` that ``_make_opt_qs`` writes and
+    # ``_read_opt_qs`` demands, so a spec-correct Report of Approved Rate read off
+    # the wire decoded its nonce one octet early. ``ipv4-option/QS`` is still
+    # recorded below because the ``func`` defect is untouched and fails first.
+    #
+    # The identical ``SchemaField(length=5)`` is still at
+    # ``schema/internet/hopopt.py:255`` and ``schema/internet/ipv6_opts.py:255``,
+    # with the same measured nonce of 55; #552 was scoped to IPv4's copy. Note a
+    # fix there is not a copy of this one: :rfc:`4782#section-3.2` sets the IPv6
+    # option's ``length`` field to 6 rather than 8, since it excludes the common
+    # type and length octets the extension header already carries. Fixing
+    # the ``func`` defect alone will not make any of these three cases pass.
     'ipv4-option/QS': Gap(
         'CONSTRUCT', "no attribute 'func'",
         'pcapkit/protocols/internet/ipv4.py:1178 -- func is set only by '
-        'post_process; and separately '
-        'pcapkit/protocols/schema/internet/ipv4.py:128 -- SchemaField(length=5) '
-        'for an 8-octet option, which decodes nonce as 55'),
+        'post_process'),
     'hopopt-option/Quick_Start': Gap(
         'CONSTRUCT', "no attribute 'func'",
-        'pcapkit/protocols/internet/hopopt.py:869; and separately '
-        'pcapkit/protocols/schema/internet/hopopt.py:224 -- SchemaField(length=5)'),
+        'pcapkit/protocols/internet/hopopt.py:918; and separately '
+        'pcapkit/protocols/schema/internet/hopopt.py:255 -- SchemaField(length=5)'),
     'ipv6-opts-option/Quick_Start': Gap(
         'CONSTRUCT', "no attribute 'func'",
-        'pcapkit/protocols/internet/ipv6_opts.py:881; and separately '
-        'pcapkit/protocols/schema/internet/ipv6_opts.py:224 -- '
+        'pcapkit/protocols/internet/ipv6_opts.py:921; and separately '
+        'pcapkit/protocols/schema/internet/ipv6_opts.py:255 -- '
         'SchemaField(length=5)'),
 
     # -- The non-progress loop, now fully fixed -------------------------------
