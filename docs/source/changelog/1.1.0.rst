@@ -1,0 +1,12 @@
+1.1.0 -- 2023-07-09
+===================
+
+* **Changed** -- the schema and field classes were rebuilt on metaclasses, with
+  ``EnumSchema`` for enum-dispatched schemas, and every protocol schema was
+  revised onto them: IPv4, HOPOPT, IPv6-Opts, IPv6-Route, HIP, MH, TCP, HTTP/2
+  and PCAP-NG.
+* **Added** -- schema registration through the protocol registry APIs;
+  persistent additional and excluded fields on ``Info``; numeric and comparison
+  support on the PCAP-NG option code and application-layer port enumerations.
+
+*Also released:* ``1.1.0.post1`` through ``1.1.0.post3`` (through 2023-08-12).

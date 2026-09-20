@@ -1,0 +1,5 @@
+0.14.3 -- 2019-08-08
+====================
+
+**Fixed** -- reported bugs (#29, #30), and a Wikipedia block that broke a vendor
+crawler. Constant enumerations and the sample output were regenerated.

@@ -1,0 +1,5 @@
+0.15.4 -- 2020-08-28
+====================
+
+**Fixed** -- the missing ``stacklevel`` attribute on ``pcapkit.utilities`` (#58).
+Travis CI was set up.

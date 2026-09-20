@@ -1,0 +1,9 @@
+1.2.0 -- 2023-08-26
+===================
+
+* **Added** -- streaming input. ``pcapkit.corekit.io.SeekableReader`` buffers a
+  non-seekable stream so a capture can be read from ``stdin`` or a pipe, which
+  is what live ``tcpdump`` output needs (#156).
+* **Fixed** -- reassembly, broken since 0.16.3 (#155). ``Extractor`` now raises
+  an explicit unsupported-call error, and logs a notice, when reassembly or flow
+  tracing is requested where it cannot be provided.

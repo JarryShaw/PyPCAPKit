@@ -50,7 +50,7 @@ enumerations include:
      - Handover Initiate Flags [*]_
    * - :class:`MH_HandoverACKFlag <pcapkit.const.mh.handover_ack_flag.HandoverACKFlag>`
      - Handover Acknowledge Flags [*]_
-   * - :class:`MH_HandoverACKStatus <pcapkit.const.mh.handover_ack_status.HandoverACKStatus>`
+   * - :class:`MH_HandoverInitiateStatus <pcapkit.const.mh.handover_initiate_status.HandoverInitiateStatus>`
      - Handover Initiate Status Codes [*]_
    * - :class:`MH_HandoverACKStatus <pcapkit.const.mh.handover_ack_status.HandoverACKStatus>`
      - Handover Acknowledge Status Codes [*]_

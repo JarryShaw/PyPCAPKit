@@ -51,7 +51,7 @@ enumerations include:
      - Handover Initiate Flags [*]_
    * - :class:`MH_HandoverACKFlag <pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag>`
      - Handover Acknowledge Flags [*]_
-   * - :class:`MH_HandoverACKStatus <pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus>`
+   * - :class:`MH_HandoverInitiateStatus <pcapkit.vendor.mh.handover_initiate_status.HandoverInitiateStatus>`
      - Handover Initiate Status Codes [*]_
    * - :class:`MH_HandoverACKStatus <pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus>`
      - Handover Acknowledge Status Codes [*]_
@@ -168,6 +168,8 @@ from pcapkit.vendor.mh.handoff_type import HandoffType as MH_HandoffType
 from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
 from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
 from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
+from pcapkit.vendor.mh.handover_initiate_status import \
+    HandoverInitiateStatus as MH_HandoverInitiateStatus
 from pcapkit.vendor.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
 from pcapkit.vendor.mh.lla_code import LLACode as MH_LLACode
 from pcapkit.vendor.mh.lma_mag_suboption import \
@@ -193,7 +195,7 @@ __all__ = [
     'MH_BindingUpdateFlag', 'MH_BindingACKFlag', 'MH_DSMIPv6HomeAddress',
     'MH_BindingRevocation', 'MH_RevocationTrigger', 'MH_RevocationStatusCode',
     'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
-    'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
+    'MH_HandoverACKFlag', 'MH_HandoverInitiateStatus', 'MH_HandoverACKStatus',
     'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
     'MH_MNGroupID', 'MH_DSMIP6TLSPacket', 'MH_ANISuboption', 'MH_OperatorID',
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
