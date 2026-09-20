@@ -30,7 +30,7 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
 
     Important:
         The lookup goes through :meth:`ProtocolBase._lookup_next_layer
-        <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` rather than
+        <pcapkit.protocols.protocol.Protocol._lookup_next_layer>` rather than
         subscripting the registry. :attr:`Ethernet.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>` *is*
         :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, a

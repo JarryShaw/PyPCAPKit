@@ -71,7 +71,7 @@ def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | T
     :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.
 
     Arguments:
-        engine: engine name
+        name: engine name
         module: module name or module descriptor or an
             :class:`~pcapkit.foundation.engines.engine.Engine` subclass
         class\_: class name

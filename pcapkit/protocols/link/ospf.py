@@ -90,13 +90,14 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
     """
     #: Version number of corresponding protocol, as read off the header. Held on
     #: the instance rather than read back out of :attr:`self._info
-    #: <pcapkit.protocols.protocol.ProtocolBase._info>` because :attr:`name` and
+    #: <pcapkit.protocols.protocol.Protocol._info>` because :attr:`name` and
     #: :attr:`alias` are both needed *during* :meth:`read` -- it is
     #: :meth:`self._decode_next_layer
-    #: <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>` that builds
+    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` that builds
     #: the protocol chain out of :attr:`alias` -- and ``_info`` is not assigned
-    #: until :meth:`read` has returned. c.f. :attr:`ARP._acnm
-    #: <pcapkit.protocols.link.arp.ARP._acnm>`, which carries the same constraint.
+    #: until :meth:`read` has returned. c.f. ``ARP._acnm`` on
+    #: :class:`~pcapkit.protocols.link.arp.ARP`, which carries the same
+    #: constraint.
     _version: 'int'
 
     ##########################################################################

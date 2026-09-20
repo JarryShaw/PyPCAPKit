@@ -83,6 +83,8 @@ The following table shows all available protocol classes in :mod:`pcapkit`:
 |                                                                  | HTTP Family    | :class:`pcapkit.protocols.application.httpv1.HTTP`                                  |
 +                                                                  +                +-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.application.httpv2.HTTP`                                  |
++                                                                  +----------------+-----------------------+-------------------------------------------------------------+
+|                                                                  | :class:`pcapkit.protocols.application.ngap.NGAP`                                                     |
 +------------------------------------------------------------------+----------------+-----------------------+-------------------------------------------------------------+
 |                                                                  |                | :class:`pcapkit.protocols.misc.pcap.header.Header`                                  |
 +                                                                  + PCAP Format    +-----------------------+-------------------------------------------------------------+

@@ -9,8 +9,6 @@ import importlib
 import logging
 import os
 import pkgutil
-import sys
-import typing
 from typing import TYPE_CHECKING
 
 # NB: a private module of ``sphinx-autodoc-typehints``, used deliberately -- see
@@ -30,7 +28,7 @@ os.environ['PCAPKIT_SPHINX'] = '1'
 import pcapkit
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional
+    from typing import Any, Dict, Optional
     from sphinx.application import Sphinx
 
 logger = logging.getLogger('pcapkit-sphinx')
@@ -335,56 +333,32 @@ def claim_attribute_signature(app: 'Sphinx', what: str, name: str,  # pylint: di
     return None
 
 
-def remove_module_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
-                            obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
-    if what == "module" and "pcapkit" in name:
-        module = sys.modules.get(name)
-        if module is not None:
-            logger.info('reloading module: %s', name)
-            typing.TYPE_CHECKING = True
-            importlib.reload(module)
-            logger.info('reloaded module: %s', name)
-        #lines.clear()
-
-
-def process_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
-                      obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
-    if what == "module" and "pcapkit" in name:
-        module = importlib.import_module(name)
-        typing.TYPE_CHECKING = True
-        importlib.reload(module)
-
-
-def process_fields(app: 'Sphinx', what: str, name: str, obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> 'None':
-    if what == 'attribute' \
-        and name.startswith('pcapkit.protocols.schema') \
-        and type(obj).__module__.startswith('pcapkit.corekit.fields'):
-
-        print(name, obj)
-        #lines.append(':param packet: Packet data.',)
-
-
-def source_read(app: 'Sphinx', docname: str, source_text: str) -> 'None':  # pylint: disable=unused-argument
-    print(docname, source_text)
+# NB: four handlers used to sit here -- ``remove_module_docstring``,
+# ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
+# ``app.connect`` call commented out in ``setup`` below, so none of them had run
+# for as long as they had been in the file. They are deleted rather than restored,
+# because restoring them would either duplicate work now done properly or make the
+# build unusable:
+#
+#   ``remove_module_docstring`` and ``process_docstring`` were two attempts at the
+#   same thing -- flipping :data:`typing.TYPE_CHECKING` and reloading each module
+#   so autodoc could see the ``if TYPE_CHECKING:`` names. ``bind_type_checking_names``
+#   above now solves that, per module and without mutating a global mid-build.
+#
+#   ``process_fields`` only ever printed; the ``lines.append`` that was its point
+#   was itself commented out.
+#
+#   ``source_read`` printed every document's entire source text, which on this
+#   project is several thousand pages of build log.
+#
+# If the ``TYPE_CHECKING`` behaviour is ever wanted again, ``bind_type_checking_names``
+# is where it belongs, not a reload hook.
 
 
 def setup(app: 'Sphinx') -> None:
-    #app.connect('autodoc-process-docstring', process_docstring, 0)
-    #app.connect("autodoc-process-docstring", remove_module_docstring)
     app.connect('builder-inited', bind_type_checking_names)
     app.connect('autodoc-skip-member', maybe_skip_member)
     # NB: below ``sphinx_autodoc_typehints``, which connects at the default 500 and
     # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
     # after the extensions in ``extensions`` have been set up.
     app.connect('autodoc-process-signature', claim_attribute_signature, priority=400)
-    #app.connect('source-read', source_read)
-    #app.connect('autodoc-process-docstring', process_fields)
-
-    # typing.TYPE_CHECKING = True
-    # for name, module in sys.modules.copy().items():
-    #     if 'pcapkit' not in name:
-    #         continue
-
-    #     logger.info('reloading module: %s', name)
-    #     importlib.reload(module)
-    #     logger.info('reloaded module: %s', name)

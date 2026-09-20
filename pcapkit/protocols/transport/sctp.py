@@ -813,10 +813,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             does for an unregistered transport type. Resolving it to
             :class:`~pcapkit.protocols.misc.raw.Raw` is
             :meth:`ProtocolBase._import_next_layer
-            <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`'s job,
+            <pcapkit.protocols.protocol.Protocol._import_next_layer>`'s job,
             which looks the PPID up through
             :meth:`ProtocolBase._lookup_next_layer
-            <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` and so
+            <pcapkit.protocols.protocol.Protocol._lookup_next_layer>` and so
             leaves :attr:`self.__proto__ <SCTP.__proto__>` untouched.
 
         """

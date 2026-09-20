@@ -1067,7 +1067,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         self._sect = sct
         #: int: Block index number.
         self._fnum = num
-        #: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.
+        #: pcapkit.foundation.engines.pcapng.Context: Context of the PCAP-NG file.
         self._ctx = ctx
         #: collections.Counter: Counter for option types.
         self._opt = collections.Counter()  # type: Counter[Enum_OptionType]
@@ -1100,9 +1100,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self: :class:`PCAPNG` object or :obj:`None`.
 
         Returns:
-            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcapng.PCAPNG._fnum>`
-            exists, and is of a packet block (EPB, ISB or Packet), returns the
-            block index number of itself; else raises :exc:`UnsupportedCall`.
+            If the object is initiated, i.e. ``self._fnum`` exists, and is of a
+            packet block (EPB, ISB or Packet), returns the block index number of
+            itself; else raises :exc:`UnsupportedCall`.
 
         Raises:
             UnsupportedCall: This protocol has no registry entry.

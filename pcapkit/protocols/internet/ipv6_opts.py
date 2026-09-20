@@ -599,7 +599,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         Note:
             A ``Pad1`` option occupies a single octet and carries no
             ``Opt Data Len`` field, so its
-            :attr:`~pcapkit.protocols.data.internet.ipv6_opts.PadOption.length`
+            :attr:`~pcapkit.protocols.data.internet.ipv6_opts.Option.length`
             is ``1`` rather than ``len + 2``. That one-octet wire shape is
             enforced by
             :class:`~pcapkit.protocols.schema.internet.ipv6_opts.PadOption`
@@ -1424,7 +1424,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Note:
             :attr:`Data_PadOption.length
-            <pcapkit.protocols.data.internet.ipv6_opts.PadOption.length>` counts
+            <pcapkit.protocols.data.internet.ipv6_opts.Option.length>` counts
             the *whole* option, whereas :attr:`Schema_PadOption.len
             <pcapkit.protocols.schema.internet.ipv6_opts.PadOption.len>` is the
             ``Opt Data Len`` field -- two octets fewer, and absent altogether for

@@ -492,7 +492,7 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
     :data:`pcapkit.protocols.internet.mh.MH.__message__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+        code: :class:`~pcapkit.protocols.internet.mh.MH`
             data type code as in :class:`~pcapkit.const.mh.packet.Packet`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
@@ -517,7 +517,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
     :data:`pcapkit.protocols.internet.mh.MH.__option__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+        code: :class:`~pcapkit.protocols.internet.mh.MH`
             data type code as in :class:`~pcapkit.const.mh.option.Option`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
@@ -542,7 +542,7 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
     :data:`pcapkit.protocols.internet.mh.MH.__extension__` registry.
 
     Args:
-        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+        code: :class:`~pcapkit.protocols.internet.mh.MH`
             data type code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.

@@ -68,7 +68,7 @@ class Dumper(DumperBase):
         """Initialise subclass.
 
         This method is used to register the subclass to the
-        :class:`~pcapkit.foundation.extraction.Extraction` and
+        :class:`~pcapkit.foundation.extraction.Extractor` and
         :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
         output dumper registries.
 
@@ -173,7 +173,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
                 It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
                 to find a suitable function for dumping and it should pair with
-                :func:`pcapkit.dumpkit.common._append_fallback` for use.
+                ``_append_fallback`` for use.
 
             """
             return 'fallback'
@@ -190,7 +190,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
                 It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
                 to find a suitable function for dumping and it should pair with
-                :func:`pcapkit.dumpkit.common.default` for use.
+                ``default`` for use.
 
             """
             if hasattr(value, '__slots__'):

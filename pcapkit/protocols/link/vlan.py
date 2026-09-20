@@ -32,14 +32,14 @@ same four octets and share every byte of parsing and construction code.
 They are nonetheless distinct classes rather than one class bound at two
 EtherTypes, because 802.1ad *stacks* them: a Q-in-Q frame carries a service tag
 whose next EtherType is ``0x8100``, selecting a customer tag in turn. Both tags
-therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`
+therefore appear in one frame, and :attr:`~pcapkit.protocols.protocol.Protocol.info_name`
 -- ``s_tag`` against ``c_tag`` -- is what keeps them apart in the parsed
 :class:`~pcapkit.corekit.infoclass.Info`. A single class bound at both EtherTypes
 would nest one ``c_tag`` inside another, leaving nothing in the output to say
 which of the two was the service tag.
 
 Two distinct EtherTypes also means two distinct
-:meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__` values, which is the
+:meth:`~pcapkit.protocols.protocol.Protocol.__index__` values, which is the
 project's rule for when protocols get separate modules: siblings that *share* an
 index may share a module, as :class:`~pcapkit.protocols.link.arp.InARP` shares
 :mod:`~pcapkit.protocols.link.arp` and
@@ -83,10 +83,10 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],  # pylint: disable=abstract-method
     since the customer and service tags are byte-for-byte identical. What it
     deliberately leaves to its subclasses is only how the tag *names* itself:
     :attr:`name`, :attr:`alias` and
-    :attr:`~pcapkit.protocols.protocol.ProtocolBase.info_name`.
+    :attr:`~pcapkit.protocols.protocol.Protocol.info_name`.
 
     It is abstract for the same reason :class:`~pcapkit.protocols.internet.ip.IP`
-    is: :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` is declared
+    is: :attr:`~pcapkit.protocols.protocol.Protocol.name` is declared
     abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and is not
     defined here, so the class cannot be instantiated. Bind
     :class:`C_Tag` or :class:`S_Tag`, never this class.

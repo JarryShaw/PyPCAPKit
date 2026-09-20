@@ -221,10 +221,11 @@ class Known(NamedTuple):
 #: that work. The corrections are recorded in the issue thread; nothing here
 #: is a claim that the docstring is right.
 KNOWN_DEFECTS = (
-    Known(Finding('pcapkit/foundation/registry/foundation.py',
-                  'register_extractor_engine', 'engine'),
-          "documents 'engine' where the parameter is 'name'; owned by the "
-          'registry docstring change'),
+    # NOTE: the ``register_extractor_engine`` entry that used to head this tuple
+    # is gone because the defect is fixed -- it documented 'engine' where the
+    # parameter is 'name', which is #546's item 2. The remaining 34 register_*
+    # functions in that file were checked at the same time and none of them
+    # carries the same defect, so there is nothing left to record here for it.
     Known(Finding('pcapkit/protocols/internet/ipv4.py',
                   '_make_ipv4_options', 'option'),
           "documents 'option' where the parameter is 'options'; ipv4.py is "

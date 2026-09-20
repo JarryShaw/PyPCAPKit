@@ -20,13 +20,13 @@ knowable only to the caller.
 Rather than adding protocol specific keyword arguments to
 :class:`~pcapkit.foundation.extraction.Extractor`, such information is
 passed as a :class:`ContextRegistry` -- a mapping of protocol index ID
-(c.f. :meth:`Protocol.id <pcapkit.protocols.protocol.ProtocolBase.id>`)
+(c.f. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`)
 to a :class:`ProtocolContext` instance. The registry is handed to
 :class:`~pcapkit.foundation.extraction.Extractor` once, and is then
 propagated down the protocol stack by
-:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>`,
+:meth:`Protocol._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`,
 so that a protocol nested arbitrarily deep can reach it through
-:meth:`Protocol._get_context <pcapkit.protocols.protocol.ProtocolBase._get_context>`.
+:meth:`Protocol._get_context <pcapkit.protocols.protocol.Protocol._get_context>`.
 
 Example:
     Decoding an ESP tunnel end to end::
@@ -90,7 +90,7 @@ class ProtocolContext(metaclass=abc.ABCMeta):
         """Index ID of the protocol(s) this context applies to.
 
         The returned names are matched against
-        :meth:`Protocol.id <pcapkit.protocols.protocol.ProtocolBase.id>`,
+        :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`,
         and are case insensitive.
 
         """

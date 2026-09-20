@@ -62,6 +62,7 @@ extracts parametres from a PCAP file.
    .. autoattribute:: _flag_d
    .. autoattribute:: _flag_e
    .. autoattribute:: _flag_q
+   .. autoattribute:: _flag_r
    .. autoattribute:: _flag_t
    .. autoattribute:: _flag_v
    .. autoattribute:: _flag_n
@@ -79,6 +80,7 @@ extracts parametres from a PCAP file.
 
    .. autoattribute:: _exlyr
    .. autoattribute:: _exptl
+   .. autoattribute:: _exctx
 
    .. automethod:: __iter__
    .. automethod:: __next__

@@ -237,15 +237,15 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     Returns:
         * If ``secrets_type`` is unknown, returns a
           :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
-        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.TLS_Key_Log`
-          and/or :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.WireGuard_Key_Log`,
+        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log`
+          and/or :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log`,
           returns a :class:`~pcapkit.corekit.fields.strings.StringField` instance.
         * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
           wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
           subclass instance.
 
     See Also:
-        * :class:`pcapkit.const.pcapng.secrets_type.Secrets_Type`
+        * :class:`pcapkit.const.pcapng.secrets_type.SecretsType`
         * :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
 
     """

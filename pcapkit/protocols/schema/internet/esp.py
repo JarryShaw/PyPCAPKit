@@ -29,7 +29,7 @@ class ESP(Schema):
 
         This also means :attr:`payload` is **not** the next layer's data:
         the next layer lives inside the ciphertext, and is handed to
-        :meth:`Protocol._decode_next_layer <pcapkit.protocols.protocol.ProtocolBase._decode_next_layer>`
+        :meth:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
         explicitly once decrypted.
 
     """

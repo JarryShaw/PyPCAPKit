@@ -126,6 +126,11 @@ class Extractor(Generic[_P]):
         _flag_f: 'bool'
         #: No output file, i.e., no output file is to be generated.
         _flag_q: 'bool'
+        #: Reassembly flag. It indicates if datagram reassembly is enabled.
+        #: Every engine reads it to decide whether to feed
+        #: :attr:`~pcapkit.foundation.extraction.Extractor._reasm`, and the
+        #: engines that cannot reassemble clear it on startup.
+        _flag_r: 'bool'
         #: Trace flag. It indicates if the flow tracing is enabled.
         _flag_t: 'bool'
         #: Verbose flag. This is used to determine if the verbose callback
@@ -648,7 +653,7 @@ class Extractor(Generic[_P]):
         The method will parse the PCAP global header and save the parsed result
         to its extraction context. Information such as PCAP version, data link
         layer protocol type, nanosecond flag and byteorder will also be save
-        the current :class:`~pcapkit.foundation.engins.engine.Engine` instance
+        the current :class:`~pcapkit.foundation.engines.engine.Engine` instance
         as well.
 
         If TCP flow tracing is enabled, the nanosecond flag and byteorder will
@@ -784,7 +789,7 @@ class Extractor(Generic[_P]):
             buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
             buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
-            no_eof: if raise :exc:`EOFError` when EOF
+            no_eof: if not raise :exc:`EOFError` when reach EOF
 
             context: caller supplied parsing context for protocols that need
                 information not carried on the wire, keyed by protocol index

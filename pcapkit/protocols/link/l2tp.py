@@ -38,14 +38,14 @@ and directly over IP as **protocol number 115**. That second route is why
 :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
 leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a
 different framing decision. It also means v3 is the first member of this family
-to have a real :meth:`~pcapkit.protocols.protocol.ProtocolBase.__index__`.
+to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
 
 **L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*
 an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves
 the value 1 "to permit detection of L2F packets should they arrive intermixed
 with L2TP packets". L2F is a separate protocol with its own header. It is
 therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``
-only as an alias in its :meth:`~pcapkit.protocols.protocol.ProtocolBase.id` --
+only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` --
 the same relationship HTTP/3 has to QUIC. c.f.
 :meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
 version-flavoured alias is spelled: canonical name first, alias second, since
@@ -90,8 +90,8 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
 
     It is abstract for the same mechanical reason
     :class:`~pcapkit.protocols.internet.ip.IP` is:
-    :attr:`~pcapkit.protocols.protocol.ProtocolBase.name` and
-    :meth:`~pcapkit.protocols.protocol.ProtocolBase.read` are both declared
+    :attr:`~pcapkit.protocols.protocol.Protocol.name` and
+    :meth:`~pcapkit.protocols.protocol.Protocol.read` are both declared
     abstract by :class:`~pcapkit.protocols.protocol.ProtocolBase` and neither is
     defined here, so the class cannot be instantiated. Bind a version, never this
     class.
@@ -105,7 +105,7 @@ class L2TP(Link[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-metho
     #: NOTE: Declared on the base, and so shared by every version, deliberately.
     #: This is the key the parsed datagram appears under, and a consumer wants
     #: ``udp.l2tp`` whichever version was on the wire -- the version is reported
-    #: by :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` instead. Left to
+    #: by :attr:`~pcapkit.protocols.protocol.Protocol.alias` instead. Left to
     #: the class-name default it would read ``l2tpv2``, ``l2tpv3`` and so on, and
     #: every consumer would have to know the version to find the data.
     @property
