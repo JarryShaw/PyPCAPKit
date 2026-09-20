@@ -37,9 +37,9 @@ from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
                                           StructError, UnsupportedCall)
 from pcapkit.utilities.warnings import RegistryWarning, warn

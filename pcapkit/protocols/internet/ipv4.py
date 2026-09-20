@@ -1392,6 +1392,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Returns:
             Constructured option schema.
 
+        Raises:
+            ProtocolError: If ``authorities`` names a bit position that is not a
+                protection authority -- a negative one, or one that :rfc:`1108`
+                reserves as a field termination indicator.
+
+        Notes:
+            :rfc:`1108` section 2.2 lays each protection authority octet out as
+            seven authority bits followed by a *field termination indicator* in
+            bit 0: ``0`` means another octet follows, ``1`` means this is the
+            last. So the authority numbering skips every position that is a
+            termination bit -- 7, 15, 23 -- which is what
+            :meth:`_read_opt_sec` encodes by looping over ``range(7)`` per
+            octet, and the reason ``Field_Termination_Indicator`` is rejected
+            here rather than written: the enumeration names it as structure, and
+            a value written there would be dropped on the way back in. See #537.
+
         """
         if option is not None:
             level_val = option.level
@@ -1402,12 +1418,39 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             authorities = [] if authorities is None else authorities
 
         if authorities:
+            for auth in authorities:
+                if auth < 0:
+                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid protection '
+                                        f'authority: {auth}')
+                if auth % 8 == 7:
+                    # ``.name`` where there is one, rather than
+                    # ``Enum_ProtectionAuthority.get(auth)``: that call runs
+                    # ``_missing_`` for an unnamed index, which extends the
+                    # enumeration as a side effect. An error path is the last
+                    # place that should mutate a registry.
+                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid protection '
+                                        f'authority: {getattr(auth, "name", auth)} is a field '
+                                        f'termination indicator, not an authority')
+
+            # ``max_auth`` is the highest bit *index*, so the octet count comes
+            # from the bit *count* one past it. Sizing from the index itself put
+            # a single ``GENSER`` (index 0) in a zero-octet bitmap and then
+            # indexed into it, raising a bare ``IndexError``; and it under-sized
+            # by an octet at every exact multiple of eight. See #537.
             max_auth = max(authorities)
-            int_len = math.ceil(max_auth / 8)
+            int_len = math.ceil((max_auth + 1) / 8)
 
             data_list = [b'0' for _ in range(int_len * 8)]
             for auth in authorities:
                 data_list[auth] = b'1'
+
+            # Bit 0 of the *last* octet terminates the field. The intermediate
+            # octets keep the ``0`` they were initialised with, which is what
+            # says "another octet follows" -- so this single assignment is the
+            # whole of the indicator, and without it every option this method
+            # wrote was one its own reader warned about.
+            data_list[-1] = b'1'
+
             data = int(b''.join(data_list), base=2).to_bytes(int_len, 'big', signed=False)
         else:
             data = b''

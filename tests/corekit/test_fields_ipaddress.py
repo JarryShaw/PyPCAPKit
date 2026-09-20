@@ -265,6 +265,307 @@ class IPAddressFieldTests(unittest.TestCase):
         with self.assertRaises(BaseError):
             proto.make(src=True, dst=False).pack()
 
+    def test_parse_ip_address_rejects_a_bool_before_converting_it(self) -> None:
+        """:func:`parse_ip_address` is where the construction path meets #500's guard.
+
+        Guarding the field classes is necessary but not sufficient. A ``_make_*``
+        that has to know the address *family* before it can build the schema --
+        because the option length is the only thing on the wire that carries the
+        family -- must convert its argument itself, and that conversion runs
+        *before* the schema. A bare :func:`ipaddress.ip_address` therefore turns
+        ``True`` into an ordinary :class:`~ipaddress.IPv4Address` that
+        :meth:`_IPAddressField.pre_process` can only see as a legitimate address,
+        which is what #508 turned out to be. This function is the one place those
+        callers convert, so it is the one place the guard has to hold.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        # the bool rejection holds for every family the callers ask for, since
+        # the version argument selects a *different* stdlib constructor
+        for version in (None, 4, 6):
+            for value in (True, False):
+                with self.subTest(version=version, value=value):
+                    with self.assertRaises(FieldValueError) as context:
+                        parse_ip_address(value, 'invalid address', version)
+                    self.assertIsInstance(context.exception, BaseError)
+                    self.assertIn('invalid address', str(context.exception))
+                    self.assertIn('must not be a bool', str(context.exception))
+                    self.assertIn(f'int({value!r})', str(context.exception))
+
+        # the escape hatch the message points at, and the widening that makes the
+        # version argument necessary: 1 is 0.0.0.1 unqualified but ::1 for IPv6
+        self.assertEqual(parse_ip_address(int(True), 'x'), ipaddress.IPv4Address('0.0.0.1'))
+        self.assertEqual(parse_ip_address(int(True), 'x', 6), ipaddress.IPv6Address('::1'))
+        self.assertEqual(parse_ip_address(0x102, 'x', 6), ipaddress.IPv6Address('::102'))
+        self.assertEqual(parse_ip_address(0x102, 'x'), ipaddress.IPv4Address('0.0.1.2'))
+
+        # every other accepted form is passed through untouched
+        self.assertEqual(parse_ip_address('198.51.100.7', 'x'),
+                         ipaddress.IPv4Address('198.51.100.7'))
+        self.assertEqual(parse_ip_address(b'\xc6\x33\x64\x07', 'x'),
+                         ipaddress.IPv4Address('198.51.100.7'))
+        self.assertEqual(parse_ip_address(ipaddress.IPv6Address('2001:db8::1'), 'x'),
+                         ipaddress.IPv6Address('2001:db8::1'))
+
+    def test_parse_ip_address_version_check_survives_the_passthrough_branch(self) -> None:
+        """An already-converted address skips the conversion, so it needs its own check.
+
+        ``IPv6Address(IPv4Address(...))`` would have raised, but returning an
+        :mod:`ipaddress` object unchanged cannot -- so the version check has to
+        sit after the branch rather than inside the conversion it guards.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        with self.assertRaises(FieldValueError) as context:
+            parse_ip_address(ipaddress.IPv4Address('198.51.100.7'), 'invalid locator', 6)
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('IP version mismatch: 4 != 6', str(context.exception))
+
+        with self.assertRaises(FieldValueError) as context:
+            parse_ip_address('2001:db8::1', 'invalid locator', 4)
+        self.assertIsInstance(context.exception, BaseError)
+
+    def test_parse_ip_address_malformed_value_raises_in_library_error(self) -> None:
+        """A malformed value must not leak :mod:`ipaddress`'s bare :exc:`ValueError`.
+
+        The construction-path callers used to let it out verbatim -- e.g.
+        ``MH._make_opt_bid(address='nonsense')`` raised a plain
+        :exc:`ValueError`, which ``except BaseError`` cannot catch.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        for value in ('nonsense', b'\x00' * 3, None, 1 << 200, -1):
+            with self.subTest(value=value):
+                with self.assertRaises(FieldValueError) as context:
+                    parse_ip_address(value, 'invalid address')  # type: ignore[arg-type]
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('invalid address', str(context.exception))
+
+    def test_parse_ip_address_pins_the_family_when_version_is_given(self) -> None:
+        """``version=4`` and ``version=6`` each select a *different* stdlib constructor.
+
+        Worth stating on its own because **no caller passes ``version=4`` today** --
+        only the HIP locator passes a version at all, and it passes ``6`` -- so
+        nothing else in the suite pins what ``version=4`` does. An unexercised
+        parameter is one that can be broken without a failure, and the widening it
+        controls is the whole reason the parameter exists.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+
+        # the same int is a different address in each family
+        self.assertEqual(parse_ip_address(0x102, 'x', 4), ipaddress.IPv4Address('0.0.1.2'))
+        self.assertEqual(parse_ip_address(0x102, 'x', 6), ipaddress.IPv6Address('::102'))
+        self.assertEqual(parse_ip_address(0x102, 'x'), ipaddress.IPv4Address('0.0.1.2'))
+
+        # every other accepted form, with the family pinned
+        for version, text, packed in [
+            (4, '198.51.100.7', b'\xc6\x33\x64\x07'),
+            (6, '2001:db8::1', bytes.fromhex('20010db8' + '00' * 10 + '0001')),
+        ]:
+            with self.subTest(version=version):
+                expected = ipaddress.ip_address(text)
+                self.assertEqual(parse_ip_address(text, 'x', version), expected)
+                self.assertEqual(parse_ip_address(packed, 'x', version), expected)
+                self.assertEqual(parse_ip_address(expected, 'x', version), expected)
+                self.assertEqual(parse_ip_address(int(expected), 'x', version), expected)
+
+    def test_parse_ip_address_version_mismatch_is_reported_both_ways_round(self) -> None:
+        """A ``version=4`` demand must refuse an IPv6 value, not only the reverse.
+
+        The passthrough branch returns the object untouched, so the check after it
+        is the only thing that can catch either direction -- and a check written for
+        one direction only would still pass a test that exercises one direction only.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        cases = [
+            (ipaddress.IPv6Address('2001:db8::1'), 4, 'IP version mismatch: 6 != 4'),
+            (ipaddress.IPv4Address('198.51.100.7'), 6, 'IP version mismatch: 4 != 6'),
+        ]
+        for value, version, message in cases:
+            with self.subTest(value=value, version=version):
+                with self.assertRaises(FieldValueError) as context:
+                    parse_ip_address(value, 'invalid locator', version)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn(message, str(context.exception))
+                self.assertIn('invalid locator', str(context.exception))
+
+        # a *string* of the wrong family fails inside the conversion instead, so it
+        # carries ipaddress's own wording rather than the version-mismatch wording,
+        # and is still an in-library error
+        for value, version in [('2001:db8::1', 4), ('198.51.100.7', 6)]:
+            with self.subTest(value=value, version=version):
+                with self.assertRaises(FieldValueError) as context:
+                    parse_ip_address(value, 'invalid locator', version)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('invalid locator', str(context.exception))
+
+    def test_parse_ip_address_rejects_an_out_of_range_int_for_the_pinned_family(self) -> None:
+        """``version`` narrows what an :class:`int` may be, and the error stays in-library.
+
+        ``2**32`` is a perfectly good IPv6 address and not an IPv4 one, so the bound
+        moves with ``version`` -- and :class:`ipaddress.AddressValueError`, a bare
+        :exc:`ValueError`, must not escape either way.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        self.assertEqual(parse_ip_address(1 << 32, 'x', 6),
+                         ipaddress.IPv6Address('::1:0:0'))
+
+        for value, version in [(1 << 32, 4), (1 << 128, 6), (-1, 4), (-1, 6)]:
+            with self.subTest(value=value, version=version):
+                with self.assertRaises(FieldValueError) as context:
+                    parse_ip_address(value, 'invalid address', version)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('invalid address', str(context.exception))
+
+    def test_parse_ip_address_returns_an_ipaddress_object_unchanged(self) -> None:
+        """The passthrough branch returns the *same object*, not a copy of it.
+
+        The makers assign the result straight into the schema attribute, so this is
+        what lets ``address=IPv6Address(...)`` round-trip identically rather than
+        through a re-conversion that could normalise it.
+        """
+        from pcapkit.corekit.fields.ipaddress import parse_ip_address
+
+        for value in (ipaddress.IPv4Address('198.51.100.7'),
+                      ipaddress.IPv6Address('2001:db8::1')):
+            with self.subTest(value=value):
+                self.assertIs(parse_ip_address(value, 'x'), value)
+                self.assertIs(parse_ip_address(value, 'x', value.version), value)
+
+        # and a 16-octet bytes value is IPv6 without being told so
+        self.assertEqual(parse_ip_address(bytes.fromhex('20010db8' + '00' * 10 + '0001'), 'x'),
+                         ipaddress.IPv6Address('2001:db8::1'))
+
+    def test_both_bool_guards_stay_catchable_as_value_error_and_as_base_error(self) -> None:
+        """The two exception classes used for this mistake are interchangeable to callers.
+
+        #508's seven sites answer with :exc:`FieldValueError`, because the rejection
+        happens in a field-level conversion; the two older hand-rolled guards for
+        the same mistake -- ``MH._make_opt_mn_id`` from #481 and ESP's
+        ``SecurityAssociation`` from #491 -- answer with
+        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, because they answer for
+        the option rather than for a field. That inconsistency is deliberate and
+        safe *only* because both classes derive from
+        :exc:`~pcapkit.utilities.exceptions.BaseError` and from :exc:`ValueError`,
+        so neither documented handler can tell them apart. This pins that, since it
+        is the whole basis for leaving the two alone.
+
+        It also pins the compatibility half of #508's two deliberate behaviour
+        changes: ``_make_opt_bid(address='nonsense')`` and the HIP locator's
+        wrong-family case used to raise a **bare** :exc:`ValueError`, so they were
+        catchable by ``except ValueError`` and not by ``except BaseError``. They are
+        now catchable by both -- a widening, not a break.
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import (BaseError, FieldValueError,
+                                                  ProtocolError)
+
+        mh = object.__new__(MH)
+        hip = object.__new__(HIP)
+
+        cases = [
+            # (label, callable, expected class)
+            ('mh bid, malformed address -- was a bare ValueError',
+             lambda: mh._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
+                                      bid=1, address='nonsense'),
+             FieldValueError),
+            ('hip locator, IPv4 into a v6-only locator -- was AddressValueError',
+             lambda: hip._make_param_locator_set(  # type: ignore[arg-type]
+                 Parameter.LOCATOR_SET, version=2,
+                 locator_set=[{'ip': ipaddress.IPv4Address('198.51.100.7')}]),
+             FieldValueError),
+            ('mh bid, bool -- #508 site',
+             lambda: mh._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
+                                      bid=1, address=True),
+             FieldValueError),
+            ('mh mn_id, bool -- #481 guard, kept as ProtocolError',
+             lambda: mh._make_opt_mn_id(  # type: ignore[arg-type]
+                 Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address,
+                 identifier=True),
+             ProtocolError),
+        ]
+
+        for label, make, expected in cases:
+            with self.subTest(case=label):
+                with self.assertRaises(expected) as context:
+                    make()
+                # the two handlers the library documents both work, either way round
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIsInstance(context.exception, ValueError)
+
+        # stated as the property rather than only per case, so a future change to
+        # either class's bases fails here rather than at some caller
+        for cls in (FieldValueError, ProtocolError):
+            with self.subTest(cls=cls.__name__):
+                self.assertTrue(issubclass(cls, BaseError))
+                self.assertTrue(issubclass(cls, ValueError))
+
+    def test_switch_backed_address_makers_reject_a_bool(self) -> None:
+        """#508's remaining sites, for the two protocols outside :mod:`~pcapkit.protocols.internet.mh`.
+
+        ``HIP``'s locator and ``TCP``'s Multipath ``ADD_ADDR`` address are both
+        backed by a :class:`~pcapkit.corekit.fields.misc.SwitchField`, and both
+        makers derive the wire form from the address family before the schema
+        exists. Measured before the fix: ``ip=True`` packed a locator of ``::1``
+        with no error at all, and ``addr=True`` gave
+        ``MPTCPAddAddress(test={'version': 4}, address=IPv4Address('0.0.0.1'))``.
+
+        The five ``mh`` sites are covered next to the rest of that module, in
+        ``MHUnitTests.test_mh_length_derived_addresses_reject_a_bool``.
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        hip = object.__new__(HIP)
+        tcp = object.__new__(TCP)
+
+        for value in (True, False):
+            with self.subTest(site='hip.Locator.value', value=value):
+                with self.assertRaises(FieldValueError) as context:
+                    hip._make_param_locator_set(  # type: ignore[arg-type]
+                        Parameter.LOCATOR_SET, version=2, locator_set=[{'ip': value}])
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('must not be a bool', str(context.exception))
+
+            with self.subTest(site='tcp.MPTCPAddAddress.address', value=value):
+                with self.assertRaises(FieldValueError) as context:
+                    tcp._make_mptcp_addaddr(  # type: ignore[arg-type]
+                        MPTCPOption.ADD_ADDR, addr_id=1, addr=value)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('must not be a bool', str(context.exception))
+
+        # the same two sites still take every legitimate value they took before
+        self.assertEqual(
+            hip._make_param_locator_set(  # type: ignore[arg-type]
+                Parameter.LOCATOR_SET, version=2,
+                locator_set=[{'ip': '2001:db8::1'}]).pack().hex(),
+            '00c10004000004000000000020010db800000000000000000000000100000000')
+        self.assertEqual(
+            tcp._make_mptcp_addaddr(  # type: ignore[arg-type]
+                MPTCPOption.ADD_ADDR, addr_id=1, addr='192.0.2.1').address,
+            ipaddress.IPv4Address('192.0.2.1'))
+        # int(True) is 1, and 1 is ::1 for an IPv6-only locator -- the escape
+        # hatch works and still widens to the family the wire format fixes
+        self.assertEqual(
+            hip._make_param_locator_set(  # type: ignore[arg-type]
+                Parameter.LOCATOR_SET, version=2,
+                locator_set=[{'ip': int(True)}]).pack().hex(),
+            '00c1000400000400000000000000000000000000000000000000000100000000')
+
     def test_ipv4_interface_post_process_rejects_a_non_contiguous_netmask(self) -> None:
         """``IPv4InterfaceField.post_process`` builds
         ``ipaddress.ip_interface(f'{ip}/{mask}')`` from wire bytes whose

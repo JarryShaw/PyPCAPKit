@@ -50,6 +50,7 @@ from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.packet import Packet as Enum_Packet
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
 from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckDataParameter
@@ -3067,14 +3068,27 @@ class HIP(Internet[Data_HIP, Schema_HIP],
                 preferred = locator.preferred
                 lifetime = math.floor(locator.lifetime.total_seconds())
             else:
+                # NOTE: Through ``parse_ip_address`` because the locator is packed
+                # to octets *here*, ahead of the schema, so a bare
+                # ``ipaddress.IPv6Address`` would launder a ``bool`` into ``::1``
+                # and hand the schema's ``SwitchField`` plain bytes that its guard
+                # cannot question. Before this, ``ip=True`` packed a locator of
+                # ``::1`` with no error at all. The ``version=6`` argument is the
+                # *IP* version rather than the HIP one the message names, and it is
+                # what keeps the ``int`` widening this signature documents --
+                # ``0x102`` is ``::102``, not the ``0.0.1.2`` that
+                # ``ipaddress.ip_address`` would give (c.f. #508).
+                ip_val = parse_ip_address(
+                    ip, f'HIPv{version}: [ParamNo {code}] invalid locator', version=6)
+
                 if spi is None:
                     length = 4
-                    data = ipaddress.IPv6Address(ip).packed
+                    data = ip_val.packed
                 else:
                     length = 5
                     data = Schema_LocatorData(
                         spi=spi,
-                        ip=ipaddress.IPv6Address(ip).packed,
+                        ip=ip_val.packed,
                     )
 
                 if isinstance(lifetime, timedelta):

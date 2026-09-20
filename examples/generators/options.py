@@ -466,8 +466,12 @@ def _ipv4_overrides() -> 'dict[Any, dict[str, Any]]':
     from pcapkit.const.ipv4.option_number import OptionNumber
     from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
     return {
-        # A single authority whose value is 0 makes ``_make_opt_sec`` compute a
-        # zero-octet bitmap and then index into it; two keeps it non-empty.
+        # Two authorities rather than one because two bits set in the bitmap say
+        # more than one does, not because one is unrepresentable: it used to be,
+        # a single ``GENSER`` (value 0) making ``_make_opt_sec`` size a
+        # zero-octet bitmap and then index into it for a bare ``IndexError``, and
+        # #537 fixed that arithmetic. So this is a coverage choice now and no
+        # longer routes around anything.
         OptionNumber.SEC: {'authorities': [ProtectionAuthority.GENSER,
                                            ProtectionAuthority.NSA]},
         # ``counts=10``, the default, needs 43 option octets, which overflows
