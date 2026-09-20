@@ -1,0 +1,8 @@
+1.1.1 -- 2023-08-15
+===================
+
+**Fixed** -- ``AppType`` enumeration lookups; ``typing.TypeAlias`` compatibility
+on older interpreters; the output file name chosen by flow tracing; dumping of
+``Schema`` objects through a custom dumper.
+
+*Also released:* ``1.1.1.post1``, ``1.1.1.post2`` (through 2023-08-23).

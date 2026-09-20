@@ -18,6 +18,12 @@ __all__ = [
     'register_dumper',
     'register_extractor_dumper', 'register_traceflow_dumper',
 
+    'register_reassembly_ipv4_callback', 'register_reassembly_ipv6_callback',
+    'register_reassembly_tcp_callback',
+    'register_traceflow_tcp_callback',
+
+    'register_extractor_reassembly', 'register_extractor_traceflow',
+
     'register_protocol',
 
     'register_linktype',

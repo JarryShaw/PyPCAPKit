@@ -1,0 +1,6 @@
+1.2.1 -- 2023-08-27
+===================
+
+**Fixed** -- bugs in the ``SeekableReader`` introduced one day earlier in 1.2.0.
+
+*Also released:* ``1.2.1.post1`` through ``1.2.1.post3`` (through 2023-09-09).

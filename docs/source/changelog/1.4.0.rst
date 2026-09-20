@@ -1,0 +1,14 @@
+1.4.0 -- 2026-08-21
+===================
+
+The first release in nearly two years to carry code changes, and the first with
+a test suite.
+
+* **Added** -- a unit-test suite under ``tests/``, covering ``pcapkit.corekit``,
+  the extraction engines, reassembly and flow tracing, the protocol schemas, the
+  CLI and the utility modules.
+* **Fixed** -- PCAP-NG option dispatch regressions; the fallback name generated
+  by the ``linktype`` vendor crawler.
+* **Changed** -- CI tests current Python versions again; every GitHub Actions
+  job carries an explicit permissions block; the conda and cron release tooling
+  was repaired, and Anaconda uploads use the official upload action.
