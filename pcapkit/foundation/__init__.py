@@ -21,8 +21,10 @@ __all__ = [
     'Extractor',
 
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly',
+    'ReassemblyManager',
 
     'TCP_TraceFlow',
+    'TraceFlowManager',
 
     'register_protocol',
     'register_linktype',
@@ -42,4 +44,7 @@ __all__ = [
     'register_extractor_engine',
     'register_dumper',
     'register_extractor_dumper', 'register_traceflow_dumper',
+    'register_extractor_reassembly', 'register_extractor_traceflow',
+    'register_reassembly_ipv4_callback', 'register_reassembly_ipv6_callback',
+    'register_reassembly_tcp_callback', 'register_traceflow_tcp_callback',
 ]

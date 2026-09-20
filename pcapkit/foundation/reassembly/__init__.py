@@ -24,6 +24,7 @@ from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',   # IP Reassembly
     'TCP_Reassembly',                       # TCP Reassembly
+    'ReassemblyManager',                    # Reassembly Manager, defined below
 ]
 
 from typing import TYPE_CHECKING
