@@ -88,7 +88,7 @@ __all__ = [
     'MH_BindingUpdateFlag', 'MH_BindingACKFlag', 'MH_DSMIPv6HomeAddress',
     'MH_BindingRevocation', 'MH_RevocationTrigger', 'MH_RevocationStatusCode',
     'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
-    'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
+    'MH_HandoverACKFlag', 'MH_HandoverInitiateStatus', 'MH_HandoverACKStatus',
     'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
     'MH_MNGroupID', 'MH_DSMIP6TLSPacket', 'MH_ANISuboption', 'MH_OperatorID',
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',

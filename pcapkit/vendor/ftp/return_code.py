@@ -218,6 +218,17 @@ class ReturnCode(Vendor):
         for item in content:
             line = item.find_all('td')
 
+            # NOTE: MediaWiki renders a trailing ``|-`` row separator in the
+            # wikitext as an empty ``<tr class="mw-empty-elt">``, which revision
+            # 1354125851 of the article carries at the end of this table. It has
+            # no cells at all, so reading ``line[0]`` raised ``IndexError`` and
+            # took the whole crawler down. Skipping cell-less rows is the fix
+            # rather than indexing defensively further down, because a row that
+            # cannot supply both a code and an explanation has nothing to
+            # contribute either way; see #518.
+            if len(line) < 2:
+                continue
+
             code = ' '.join(line[0].stripped_strings)
             if len(code) != 3:
                 continue

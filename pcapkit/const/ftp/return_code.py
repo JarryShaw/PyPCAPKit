@@ -159,7 +159,7 @@ class ReturnCode(IntEnum):
     #: Entering Long Passive Mode (long address, port).
     CODE_228: 'ReturnCode' = 228, 'Entering Long Passive Mode.'
 
-    #: Entering Extended Passive Mode (|||port|).
+    #: Entering Extended Passive Mode ( |||port| ).
     CODE_229: 'ReturnCode' = 229, 'Entering Extended Passive Mode.'
 
     #: User logged in, proceed.
@@ -189,6 +189,10 @@ class ReturnCode(IntEnum):
     #: data needs to be exchanged.
     CODE_334: 'ReturnCode' = 334, 'Server accepts the security mechanism specified by the client; some security data needs to be exchanged.'
 
+    #: Server accepts the security data given by the client; more security data
+    #: needs to be exchanged.
+    CODE_335: 'ReturnCode' = 335, 'Server accepts the security data given by the client; more security data needs to be exchanged.'
+
     #: Username okay, password okay. Challenge is ". . . . ".
     CODE_336: 'ReturnCode' = 336, 'Username okay, password okay.'
 
@@ -211,14 +215,13 @@ class ReturnCode(IntEnum):
     #: Requested host unavailable.
     CODE_434: 'ReturnCode' = 434, 'Requested host unavailable.'
 
-    #: Requested file action not taken.
+    #: Requested file action not taken. File unavailable (e.g., file busy).
     CODE_450: 'ReturnCode' = 450, 'Requested file action not taken.'
 
     #: Requested action aborted. Local error in processing.
     CODE_451: 'ReturnCode' = 451, 'Requested action aborted.'
 
-    #: Requested action not taken. Insufficient storage space in system. File
-    #: unavailable (e.g., file busy).
+    #: Requested action not taken. Insufficient storage space in system.
     CODE_452: 'ReturnCode' = 452, 'Requested action not taken.'
 
     #: Syntax error in parameters or arguments.

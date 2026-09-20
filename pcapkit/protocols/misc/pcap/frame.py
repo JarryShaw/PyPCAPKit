@@ -129,7 +129,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
 
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-            module: module descriptor or a
+            protocol: module descriptor or a
                 :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
         """

@@ -1,0 +1,11 @@
+1.0.3 -- 2023-06-29
+===================
+
+* **Added** -- the IANA service name and transport protocol port number registry
+  as the ``AppType`` enumeration [:rfc:`6335`], wired into TCP and UDP parsing
+  so ports resolve to service names; a generated enumeration for the TCP header
+  flags; an undefined-command member for FTP commands.
+* **Changed** -- registry management was redesigned; the MPTCP and PCAP-NG
+  option enumerations were revised.
+
+*Also released:* ``1.0.3.post1`` through ``1.0.3.post3`` (through 2023-07-04).

@@ -211,7 +211,7 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`PCAPNG.block` field.
 
     Args:
-        pkt: Packet data.
+        packet: Packet data.
 
     Returns:
         Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
@@ -232,7 +232,7 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`DecryptionSecretsBlock.secrets_data` field.
 
     Args:
-        pkt: Packet data.
+        packet: Packet data.
 
     Returns:
         * If ``secrets_type`` is unknown, returns a

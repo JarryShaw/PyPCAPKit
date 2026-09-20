@@ -22,7 +22,7 @@ __all__ = ['FilterType']
 
 #: Filter type registry.
 DATA = {
-    # TODO: https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#section-4.2-28.2.1
+    # TODO: https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#section-4.2-28.2.1
 }  # type: dict[int, str]
 
 

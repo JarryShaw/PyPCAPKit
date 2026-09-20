@@ -21,6 +21,9 @@ from pcapkit.protocols.schema.application import *
 from pcapkit.protocols.schema.misc import *
 
 __all__ = [
+    # Base classes for header schemas
+    'Schema', 'EnumSchema', 'schema_final',
+
     # Link Layer Protocols
     'ARP',
     'Ethernet',
@@ -30,6 +33,7 @@ __all__ = [
 
     # Internet Layer Protocols
     'AH',
+    'ESP',
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
     'HIP_EdDSACurveHostIdentity', 'HIP_HostIdentity',
@@ -49,6 +53,13 @@ __all__ = [
     'HIP_EchoRequestUnsignedParameter', 'HIP_EchoResponseUnsignedParameter', 'HIP_RelayFromParameter',
     'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
     'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
+    'HOPOPT',
+    'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
+    'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
+    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartRequestOption',
+    'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
+    'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
+    'HOPOPT_IPDFFOption',
     'IPv4',
     'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
     'IPv4_SECOption', 'IPv4_LSROption', 'IPv4_TSOption',

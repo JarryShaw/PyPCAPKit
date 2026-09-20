@@ -130,7 +130,6 @@ class FrameType(EnumSchema[Enum_Frame]):
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
             packet: Unpacked data.
 
         Returns:
