@@ -124,6 +124,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )
 
+    #: Static dictionary cache for imported protocol modules.
+    _MODULE_CACHE: 'dict[str, Type[ProtocolBase]]' = {}
+
     #: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
     #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class level
@@ -1307,7 +1310,11 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """
         protocol = ProtocolBase._lookup_registry(registry, proto)
         if isinstance(protocol, ModuleDescriptor):
-            klass = protocol.klass
+            key = f'{protocol.module}.{protocol.name}'
+            if key not in ProtocolBase._MODULE_CACHE:
+                ProtocolBase._MODULE_CACHE[key] = protocol.klass
+            klass = ProtocolBase._MODULE_CACHE[key]
+            
             # a descriptor can also come back from the default factory, and that
             # one has no key to memoise under -- writing it back would recreate
             # the insertion-on-miss this exists to avoid
@@ -1375,9 +1382,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             length = len(file_)
 
         if length == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+            if 'pcapkit.protocols.misc.null.NoPayload' not in ProtocolBase._MODULE_CACHE:
+                from pcapkit.protocols.misc.null import NoPayload  # isort: skip # pylint: disable=import-outside-toplevel
+                ProtocolBase._MODULE_CACHE['pcapkit.protocols.misc.null.NoPayload'] = NoPayload
+            protocol = ProtocolBase._MODULE_CACHE['pcapkit.protocols.misc.null.NoPayload']
         elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+            if 'pcapkit.protocols.misc.raw.Raw' not in ProtocolBase._MODULE_CACHE:
+                from pcapkit.protocols.misc.raw import Raw  # isort: skip # pylint: disable=import-outside-toplevel
+                ProtocolBase._MODULE_CACHE['pcapkit.protocols.misc.raw.Raw'] = Raw
+            protocol = ProtocolBase._MODULE_CACHE['pcapkit.protocols.misc.raw.Raw']
         else:
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
