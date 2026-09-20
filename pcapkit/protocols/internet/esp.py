@@ -170,10 +170,10 @@ import os
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.esp.cipher import Cipher
-from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.const.esp.integrity import Integrity
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.context import ProtocolContext
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.protocols.data.internet.esp import ESP as Data_ESP
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.schema.internet.esp import ESP as Schema_ESP
