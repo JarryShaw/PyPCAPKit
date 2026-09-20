@@ -22,6 +22,7 @@ from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
 
 __all__ = [
     'TCP_TraceFlow',
+    'TraceFlowManager',                     # TraceFlow Manager, defined below
 ]
 
 

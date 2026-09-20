@@ -364,8 +364,15 @@ class RROption(Option, code=Enum_OptionNumber.RR):
 class SIDOption(Option, code=Enum_OptionNumber.SID):
     """Header schema for IPv4 stream identifier (``SID``) option."""
 
-    #: Stream identifier.
-    sid: 'int' = UInt32Field()
+    #: Stream identifier. Two octets, per :rfc:`791` section 3.1, which gives the
+    #: option as four octets in total: one of type, one of length, and a 16-bit
+    #: stream identifier. This was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`,
+    #: which over-read a well-formed option by two octets on the way in -- the
+    #: ``packet length < 0: -2`` the library warned about -- and re-emitted it two
+    #: octets too wide on the way out, against the ``length=4`` that
+    #: :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid` had always
+    #: written. See #534.
+    sid: 'int' = UInt16Field()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', sid: 'int') -> 'None': ...
