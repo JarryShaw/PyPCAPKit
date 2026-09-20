@@ -9,9 +9,7 @@ from pcapkit.utilities.compat import StrEnum
 __all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
-
-    from typing import Any
+    from typing import Any, Callable, Optional
 
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
