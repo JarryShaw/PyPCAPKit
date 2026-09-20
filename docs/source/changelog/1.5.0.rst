@@ -282,6 +282,21 @@ pull requests between #326 and #509.
   (#413), ambiguous cross-references and five autodoc signature failures (#416),
   and ``Extractor``'s documented exception plus 40 phantom or stale ``Args:``
   labels (#501).
+* **Fixed** -- which exception a malformed TCP SACK option raised depended on
+  unrelated process state: a clean interpreter raised ``ProtocolError`` as
+  documented, but a process that had already popped
+  ``pcapkit.corekit.fields.misc`` from ``sys.modules`` -- which the ``#439``
+  ABC-cache regression tests do in every case's ``setUp``/``tearDown`` --
+  raised ``FieldValueError`` instead, from a different layer entirely, before
+  the documented check was even reached (#525). The cause was
+  ``ListField.unpack`` resolving ``SchemaField`` through a function-local
+  import re-run on every call; a module popped and reimported mid-process comes
+  back as a second, distinct class, so ``isinstance`` against it silently
+  misclassified the field and billed each item by its declared length instead
+  of by what it actually consumed. **Any caller relying on the
+  previously-observed** ``FieldValueError`` **for this case now gets**
+  ``ProtocolError`` **instead, deterministically**, matching the method's own
+  docstring. Fixed by importing at module level instead.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
