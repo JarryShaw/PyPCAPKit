@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 import aenum
 
 from pcapkit.corekit.fields.field import Field, NoValue
-from pcapkit.utilities.exceptions import IntError
+from pcapkit.utilities.exceptions import FieldValueError, IntError
 
 __all__ = [
     'NumberField',
@@ -38,11 +38,27 @@ class NumberField(Field[int], Generic[_T]):
         length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; :data:`None` defers to the
+            class-level ``__signed__``, which this class leaves unset and so
+            means unsigned.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        IntError: If no ``length`` is given and ``__length__`` fixes none either.
+        FieldValueError: If ``signed`` contradicts a sign already fixed by
+            ``__signed__`` -- never from this class, which fixes none.
+
+    Notes:
+        A subclass such as :class:`UInt32Field` fixes the sign through
+        ``__signed__``, so ``signed`` there is at best redundant. It used to be
+        discarded outright, in both directions, which meant
+        ``UInt32Field(signed=True)`` handed back an unsigned field whose values
+        only looked wrong once the high bit was set -- see GitHub issue #545. A
+        contradicting value is now rejected instead; omitting it, or passing the
+        sign the class already fixes, stays legal.
 
     """
 
@@ -56,7 +72,7 @@ class NumberField(Field[int], Generic[_T]):
         return self._bit_length
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
-                 default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
+                 default: 'int | NoValueType' = NoValue, signed: 'Optional[bool]' = None,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
@@ -72,7 +88,23 @@ class NumberField(Field[int], Generic[_T]):
         else:
             self._bit_length, self._bit_mask = -1, -1
 
-        self._signed = signed if self.__signed__ is None else self.__signed__
+        # NOTE: ``__signed__`` fixes the sign for a subclass such as
+        # :class:`UInt32Field`, and used to *discard* the ``signed`` argument to
+        # do it -- in both directions, so ``UInt32Field(signed=True)`` returned
+        # an unsigned field and ``Int8Field(signed=False)`` a signed one, both
+        # without a word. ``None`` is what "not given" looks like, which is what
+        # lets a contradicting value be told apart from the default and rejected
+        # while leaving an agreeing one alone. See #545.
+        if self.__signed__ is None:
+            self._signed = False if signed is None else bool(signed)
+        elif signed is None or bool(signed) == self.__signed__:
+            self._signed = self.__signed__
+        else:
+            raise FieldValueError(
+                f'{type(self).__name__}: field is fixed as '
+                f'{"signed" if self.__signed__ else "unsigned"}, '
+                f'but signed={signed!r} was given'
+            )
         self._byteorder = byteorder
         self._need_process = False
 
@@ -80,7 +112,11 @@ class NumberField(Field[int], Generic[_T]):
         if self.__template__ is not None:
             struct_fmt = self.__template__
         else:
-            struct_fmt = self.build_template(self._length, signed)
+            # NOTE: ``self._signed``, not the ``signed`` argument. A subclass
+            # that fixes ``__signed__`` without also fixing ``__template__``
+            # would otherwise build its template from the argument and parse
+            # with the opposite sign to the one it declared.
+            struct_fmt = self.build_template(self._length, self._signed)
         self._template = f'{endian}{struct_fmt}'
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
@@ -194,11 +230,16 @@ class Int32Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`True` here, so a
+            contradicting :data:`False` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`False`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -213,11 +254,16 @@ class UInt32Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`False` here, so a
+            contradicting :data:`True` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`True`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -232,11 +278,16 @@ class Int16Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`True` here, so a
+            contradicting :data:`False` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`False`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -251,11 +302,16 @@ class UInt16Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`False` here, so a
+            contradicting :data:`True` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`True`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -270,11 +326,16 @@ class Int64Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`True` here, so a
+            contradicting :data:`False` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`False`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -289,11 +350,16 @@ class UInt64Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`False` here, so a
+            contradicting :data:`True` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`True`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -308,11 +374,16 @@ class Int8Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`True` here, so a
+            contradicting :data:`False` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`False`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -327,11 +398,16 @@ class UInt8Field(NumberField):
     Args:
         length: Field size (in bytes).
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; fixed as :data:`False` here, so a
+            contradicting :data:`True` is rejected rather than ignored.
         byteorder: Field byte order.
         bit_length: Field bit length.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
+
+    Raises:
+        FieldValueError: If ``signed`` is given as :data:`True`, contradicting
+            the sign this class fixes.
 
     """
 
@@ -347,7 +423,9 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: Field default value, if any.
-        signed: Whether the field is signed.
+        signed: Whether the field is signed; :data:`None` defers to the
+            class-level ``__signed__``, which this class leaves unset and so
+            means unsigned.
         byteorder: Field byte order.
         bit_length: Field bit length.
         namespace: Field namespace (a :class:`enum.IntEnum` class).
@@ -357,7 +435,8 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue, signed: 'bool' = False,
+                 default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue,
+                 signed: 'Optional[bool]' = None,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None,
