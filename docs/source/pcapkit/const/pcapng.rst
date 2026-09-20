@@ -120,10 +120,10 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.filter_type.
 
    <br />
 
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block-flags
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-enhanced-packet-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
+.. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block

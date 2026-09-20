@@ -534,7 +534,7 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__extension__
-def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]',
+def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]', *,
                           schema: 'Optional[Type[Schema_MH_CGAExtension]]' = None) -> 'None':
     """Register a CGA extension parser.
 

@@ -1,0 +1,4 @@
+0.14.2 -- 2019-03-28
+====================
+
+**Fixed** -- the exception classes, and the TCP reassembly algorithm.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import unittest
 from unittest import mock
 
@@ -8,6 +9,28 @@ from tests._support import purge_modules
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: Public ``register_*`` helpers that take a schema class. Listed so the signature
+#: contract test cannot pass vacuously should discovery ever stop finding them; the
+#: test loops over whatever it discovers, so a newly added sibling is covered
+#: without this tuple having to be updated.
+SCHEMA_REGISTRARS = (
+    'register_hip_parameter',
+    'register_hopopt_option',
+    'register_http_frame',
+    'register_ipv4_option',
+    'register_ipv6_opts_option',
+    'register_ipv6_route_routing',
+    'register_mh_extension',
+    'register_mh_message',
+    'register_mh_option',
+    'register_pcapng_block',
+    'register_pcapng_option',
+    'register_pcapng_record',
+    'register_pcapng_secrets',
+    'register_tcp_mp_option',
+    'register_tcp_option',
+)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -206,6 +229,68 @@ class ProtocolRegistryTests(unittest.TestCase):
                     register.assert_called_once_with(code, parser)
             finally:
                 delattr(owner, attr)
+
+    def test_schema_registrars_share_one_signature_contract(self) -> None:
+        """Every schema-taking ``register_*`` helper exposes the same call shape.
+
+        ``code`` and ``meth`` are positional, ``schema`` is keyword-only. See #516,
+        where :func:`~pcapkit.foundation.registry.protocols.register_mh_extension`
+        was missing the ``*`` that its fourteen siblings carry and so accepted
+        ``schema`` positionally.
+
+        """
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import BaseError
+
+        siblings = {}
+        for name in registry.__all__:
+            if not name.startswith('register_'):
+                continue
+            signature = inspect.signature(getattr(registry, name))
+            if 'schema' in signature.parameters:
+                siblings[name] = signature
+
+        for name in SCHEMA_REGISTRARS:
+            self.assertIn(name, siblings)
+
+        sentinel = object()
+        for name, signature in sorted(siblings.items()):
+            with self.subTest(func=name):
+                parameters = signature.parameters
+
+                schema = parameters['schema']
+                self.assertIs(schema.kind, inspect.Parameter.KEYWORD_ONLY)
+                self.assertIsNone(schema.default)
+
+                for positional in ('code', 'meth'):
+                    parameter = parameters[positional]
+                    self.assertIn(parameter.kind, (inspect.Parameter.POSITIONAL_ONLY,
+                                                   inspect.Parameter.POSITIONAL_OR_KEYWORD))
+                    self.assertIs(parameter.default, inspect.Parameter.empty)
+
+                # Binding is the contract stated behaviourally: ``code`` and ``meth``
+                # take positionally, ``schema`` only by keyword. Nothing is called,
+                # so this stays free of registry side effects.
+                signature.bind(sentinel, sentinel)
+                signature.bind(sentinel, sentinel, schema=sentinel)
+                with self.assertRaises(TypeError):
+                    signature.bind(sentinel, sentinel, sentinel)
+
+                # The assertions above describe :mod:`inspect`'s model of the
+                # signature; this one is the function itself refusing the
+                # positional form. A keyword-only parameter is rejected while
+                # the interpreter binds arguments, before the body runs, so no
+                # registry state is touched even though this is a real call.
+                with self.assertRaises(TypeError) as caught:
+                    getattr(registry, name)(sentinel, sentinel, sentinel)
+
+                # ``RegistryError`` derives from ``TypeError``, so a bare
+                # ``assertRaises(TypeError)`` would also be satisfied by a body
+                # that accepted a third positional and then rejected its value
+                # -- exactly the #516 behaviour this test exists to forbid.
+                # Pin the interpreter's arity error, not a library one.
+                self.assertNotIsInstance(caught.exception, BaseError)
+                self.assertRegex(str(caught.exception), 'positional argument')
 
 
 if __name__ == '__main__':
