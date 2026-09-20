@@ -904,6 +904,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ProtocolError: If length is **NOT** multiply of ``8`` plus ``2``.
 
         """
+        if (schema.length - 2) % 8 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
+
         data = Data_SACK(
             kind=schema.kind,
             length=schema.length,
@@ -2976,8 +2979,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             dsn: data sequence number
             **kwargs: arbitrary keyword arguments
 
-            Returns:
-                Constructed option schema.
+        Returns:
+            Constructed option schema.
 
         """
         if opt is not None:
@@ -3003,8 +3006,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             key: option receiver's key
             **kwargs: arbitrary keyword arguments
 
-            Returns:
-                Constructed option schema.
+        Returns:
+            Constructed option schema.
 
         """
         if opt is not None:
