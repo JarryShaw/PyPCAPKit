@@ -40,7 +40,6 @@ Octets      Bits        Name                    Description
 """
 import collections
 import datetime
-import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
@@ -50,6 +49,7 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
@@ -2894,7 +2894,18 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             addr_val = opt.addr
             port = opt.port
         else:
-            addr_val = ipaddress.ip_address(addr)
+            # NOTE: Through ``parse_ip_address`` because the ``version`` sub-field
+            # and the option length below are both derived from the family here,
+            # ahead of the schema, so a bare ``ipaddress.ip_address`` would launder
+            # a ``bool`` into an ``IPv4Address`` that the schema's own guard can no
+            # longer tell from a real address -- ``addr=True`` reached
+            # ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``
+            # (c.f. #508). This option cannot be constructed end to end at all for
+            # an unrelated reason, ``KeyError: 'length'`` from
+            # pcapkit/protocols/schema/transport/tcp.py:790, which is why the
+            # corruption here was only ever visible on the schema the maker returns.
+            addr_val = parse_ip_address(
+                addr, f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid address')
         version = addr_val.version
 
         return Schema_MPTCPAddAddress(

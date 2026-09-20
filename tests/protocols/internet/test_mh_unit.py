@@ -2543,6 +2543,280 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(data.ipv4, ipv4)
                 self.assertEqual(data.prefix, ipaddress.ip_address(prefix))
 
+    def test_mh_length_derived_addresses_reject_a_bool(self) -> None:
+        """A :obj:`bool` address must not be silently sized and emitted. See #508.
+
+        These are exactly the options of the test above, and the defect is a
+        consequence of what that test pins: because the option length is derived
+        from the address family, the maker has to convert the argument *itself*,
+        ahead of the schema. A bare :func:`ipaddress.ip_address` therefore turned
+        ``True`` into ``0.0.0.1`` and ``False`` into ``0.0.0.0``, sized the option
+        as IPv4, and packed it with no exception and no warning -- so #500's guard
+        in :meth:`~pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process`
+        never saw a :obj:`bool` at all. Measured before the fix:
+
+        .. code-block:: text
+
+           _make_opt_bid(address=True)     -> 23080001000000000001
+           _make_opt_lmaa(address=True)    -> 2906010000000001
+           _make_opt_lma_up(address=True)  -> 3b06000000000001
+           _make_fid_suboption(address=True, Target_Care_of_Address)
+                                          -> 0506000000000001
+           _make_opt_dmnp(prefix=True, prefix_length=24)
+                                          -> 3706801800000001
+
+        ``_make_opt_dmnp`` is the reason the sweep in #508 undercounted this: at
+        its default ``prefix_length=64`` the bool is converted to an IPv4 address
+        and then rejected by the *prefix length* range check, which reads as a
+        guard but is not one. An IPv4-valid prefix length exposes it.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        proto = object.__new__(MH)
+
+        sites = [
+            ('bid', lambda value: proto._make_opt_bid(  # type: ignore[arg-type]
+                Option.Binding_Identifier, bid=1, address=value)),
+            ('lmaa', lambda value: proto._make_opt_lmaa(  # type: ignore[arg-type]
+                Option.Local_Mobility_Anchor_Address_Option, address=value)),
+            ('lma_up', lambda value: proto._make_opt_lma_up(  # type: ignore[arg-type]
+                Option.LMA_User_Plane_Address, address=value)),
+            ('tcoa', lambda value: proto._make_fid_suboption(  # type: ignore[arg-type]
+                FlowIDSuboption.Target_Care_of_Address, address=value)),
+            ('dmnp', lambda value: proto._make_opt_dmnp(  # type: ignore[arg-type]
+                Option.Delegated_Mobile_Network_Prefix, prefix_length=24, prefix=value)),
+        ]
+
+        for name, make in sites:
+            for value in (True, False):
+                with self.subTest(option=name, value=value):
+                    with self.assertRaises(FieldValueError) as context:
+                        make(value)
+                    self.assertIsInstance(context.exception, BaseError)
+                    self.assertIn('must not be a bool', str(context.exception))
+                    self.assertIn(f'int({value!r})', str(context.exception))
+
+        # the escape hatch the message points at: int(True) is 1, which is a
+        # legitimate -- if unusual -- IPv4 address, and still sizes as one
+        schema = proto._make_opt_lmaa(  # type: ignore[arg-type]
+            Option.Local_Mobility_Anchor_Address_Option, address=int(True))
+        self.assertEqual(schema.length, 6)
+        self.assertEqual(schema.address, ipaddress.ip_address('0.0.0.1'))
+
+        # and a malformed address is now an in-library error rather than
+        # ipaddress's own bare ValueError, which ``except BaseError`` cannot catch
+        with self.assertRaises(FieldValueError) as context:
+            proto._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
+                                bid=1, address='nonsense')
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('does not appear to be an IPv4 or IPv6 address',
+                      str(context.exception))
+
+    def test_mh_bool_is_still_a_valid_value_for_an_integer_field(self) -> None:
+        """#508 must not spread to fields where a :obj:`bool` legitimately means 0/1.
+
+        ``NonceIndicesOption.home`` is a
+        :class:`~pcapkit.corekit.fields.numbers.UInt16Field` at
+        ``pcapkit/protocols/schema/internet/mh.py:670`` -- a nonce *index* rather
+        than an address -- so ``home=True`` packing as ``1`` is correct, not a
+        defect. ``BindingRevocationMessage.code`` makes the same point through a
+        :class:`~pcapkit.corekit.fields.misc.SwitchField`, which is why the guard
+        for #508 is not a blanket rejection there.
+        """
+        from pcapkit.const.mh.binding_revocation import BindingRevocation
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        self.assertEqual(
+            proto._make_opt_ni(Option.Nonce_Indices, home=True).pack(),  # type: ignore[arg-type]
+            bytes.fromhex('040400010000'))
+        self.assertEqual(
+            proto._make_opt_ni(Option.Nonce_Indices, home=True).pack(),  # type: ignore[arg-type]
+            proto._make_opt_ni(Option.Nonce_Indices, home=1).pack())  # type: ignore[arg-type]
+        self.assertEqual(
+            proto._make_opt_ni(Option.Nonce_Indices, home=False).pack(),  # type: ignore[arg-type]
+            bytes.fromhex('040400000000'))
+
+        # the same, through a SwitchField whose branches are EnumFields
+        self.assertEqual(
+            proto._make_msg_brm(  # type: ignore[arg-type]
+                br_type=BindingRevocation.Binding_Revocation_Indication,
+                code=True, seq=1).pack(),
+            proto._make_msg_brm(  # type: ignore[arg-type]
+                br_type=BindingRevocation.Binding_Revocation_Indication,
+                code=1, seq=1).pack())
+        self.assertEqual(
+            proto._make_msg_brm(  # type: ignore[arg-type]
+                br_type=BindingRevocation.Binding_Revocation_Indication,
+                code=True, seq=1).pack(),
+            bytes.fromhex('010100010000'))
+
+    def test_mh_dmnp_prefix_length_range_check_survives_the_bool_guard(self) -> None:
+        """The prefix-length range check needs a test that does not depend on #508.
+
+        Before #508's fix, the only thing reaching this check with an IPv4 address
+        was ``prefix=True`` at the default ``prefix_length=64``: the bool was
+        laundered into ``0.0.0.1``, and ``64 > 32`` then raised -- which is exactly
+        why #508's own sweep read this site as already guarded. It was not; the
+        ``ProtocolError`` was about the *prefix length*, not the prefix.
+
+        Now that the bool is refused earlier, that accident no longer exercises the
+        range check at all, so this test reaches it with a real address instead.
+        Without it, the fix silently drops coverage of a branch that was only ever
+        covered by the defect it removes.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+
+        # an IPv4 prefix caps at /32 and an IPv6 one at /128
+        for prefix, prefix_length in (('198.51.100.0', 33), ('198.51.100.0', 64),
+                                      ('2001:db8:3::', 129)):
+            with self.subTest(prefix=prefix, prefix_length=prefix_length):
+                with self.assertRaises(ProtocolError) as context:
+                    proto._make_opt_dmnp(  # type: ignore[arg-type]
+                        Option.Delegated_Mobile_Network_Prefix,
+                        prefix_length=prefix_length, prefix=prefix)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn(f'invalid prefix length: {prefix_length}',
+                              str(context.exception))
+
+        # and the boundary values either side are accepted
+        for prefix, prefix_length, length in (('198.51.100.0', 32, 6),
+                                              ('2001:db8:3::', 128, 18)):
+            with self.subTest(prefix=prefix, prefix_length=prefix_length):
+                schema = proto._make_opt_dmnp(  # type: ignore[arg-type]
+                    Option.Delegated_Mobile_Network_Prefix,
+                    prefix_length=prefix_length, prefix=prefix)
+                self.assertEqual(schema.length, length)
+
+    def test_mh_bid_rejects_an_out_of_range_binding_priority(self) -> None:
+        """``BID-PRI`` is a 7-bit field, so ``0x80`` cannot be packed.
+
+        In the same maker as #508's care-of-address conversion, and immediately
+        above it, so it is worth pinning that the new conversion did not move the
+        check out from under a valid input.
+        """
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+
+        with self.assertRaises(ProtocolError) as context:
+            proto._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
+                                bid=1, bid_pri=0x80)
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('invalid binding priority: 128', str(context.exception))
+
+        # 0x7F is the largest value that fits, and it still takes an address
+        schema = proto._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
+                                     bid=1, bid_pri=0x7F, address='198.51.100.7')
+        self.assertEqual(schema.flags['BID_PRI'], 0x7F)
+        self.assertEqual(schema.length, 8)
+
+    def test_mh_lmaa_rejects_a_bytes_address_of_the_wrong_width(self) -> None:
+        """A ``bytes`` address must be 4 or 16 octets before the conversion sees it.
+
+        This check sits directly above #508's conversion and is the reason a short
+        ``bytes`` value gets a ``ProtocolError`` naming the address rather than
+        whatever :mod:`ipaddress` would have said about it.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.option import Option
+        from pcapkit.protocols.internet.mh import MH
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(MH)
+
+        for address in (b'\x00' * 3, b'\x00' * 5, b'\x00' * 15, b''):
+            with self.subTest(address=address):
+                with self.assertRaises(ProtocolError) as context:
+                    proto._make_opt_lmaa(  # type: ignore[arg-type]
+                        Option.Local_Mobility_Anchor_Address_Option, address=address)
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('invalid address', str(context.exception))
+
+        # the two accepted widths pick the family, and so the option length
+        for address, length, expected in (
+            (b'\xc6\x33\x64\x07', 6, ipaddress.IPv4Address('198.51.100.7')),
+            (bytes.fromhex('20010db8' + '00' * 10 + '0001'), 18,
+             ipaddress.IPv6Address('2001:db8::1')),
+        ):
+            with self.subTest(address=address):
+                schema = proto._make_opt_lmaa(  # type: ignore[arg-type]
+                    Option.Local_Mobility_Anchor_Address_Option, address=address)
+                self.assertEqual(schema.length, length)
+                self.assertEqual(schema.address, expected)
+
+    def test_mh_target_careof_address_suboption_round_trips_both_families(self) -> None:
+        """The sub-option length is derived from the family, so both widths need pinning.
+
+        ``_make_fid_suboption`` is one of #508's seven sites and the only one reached
+        through the sub-option dispatcher rather than an option maker, so its
+        legitimate output is worth asserting byte for byte alongside the bool
+        rejection.
+        """
+        import ipaddress
+
+        from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+
+        # type, length, the two reserved octets, then the address
+        for address, length, packed in (
+            ('198.51.100.7', 6, '05060000' 'c6336407'),
+            ('2001:db8::1', 18, '05120000' '20010db8' + '00' * 10 + '0001'),
+        ):
+            with self.subTest(address=address):
+                schema = proto._make_fid_suboption(  # type: ignore[arg-type]
+                    FlowIDSuboption.Target_Care_of_Address, address=address)
+                self.assertEqual(schema.length, length)
+                self.assertEqual(schema.address, ipaddress.ip_address(address))
+                self.assertEqual(schema.pack().hex(), packed)
+
+        # the documented default is an IPv6 unspecified address
+        default = proto._make_fid_suboption(  # type: ignore[arg-type]
+            FlowIDSuboption.Target_Care_of_Address)
+        self.assertEqual(default.length, 18)
+        self.assertEqual(default.address, ipaddress.IPv6Address('::'))
+
+    def test_mh_fid_suboption_takes_an_unassigned_suboption_from_its_data_model(self) -> None:
+        """The ``option is not None`` path of the unassigned sub-option branch.
+
+        The same maker that carries #508's target care-of conversion ends in a
+        catch-all for sub-option types the library does not model, and that
+        catch-all's data-model path was unexercised.
+        """
+        from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
+        from pcapkit.protocols.data.internet.mh import \
+            UnassignedFlowIdentificationSuboption as Data_Unassigned
+        from pcapkit.protocols.internet.mh import MH
+
+        proto = object.__new__(MH)
+        code = FlowIDSuboption(200)
+
+        schema = proto._make_fid_suboption(  # type: ignore[arg-type]
+            code, Data_Unassigned(type=code, length=3, data=b'\xde\xad\xbe'))
+        self.assertEqual(schema.length, 3)
+        self.assertEqual(schema.data, b'\xde\xad\xbe')
+
+        # and the keyword path, for contrast
+        self.assertEqual(
+            proto._make_fid_suboption(code, data=b'\xde\xad\xbe').pack(),  # type: ignore[arg-type]
+            schema.pack())
+
     def test_mh_mn_id_option_length_matches_packed_octets(self) -> None:
         """The MN-ID option's declared length must count what actually gets packed.
 
