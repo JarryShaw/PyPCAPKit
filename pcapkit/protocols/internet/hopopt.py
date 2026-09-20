@@ -453,7 +453,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
     def _hopopt_option_length(schema_len: 'int') -> 'int':
         """Compute a HOPOPT option's whole-option length from its on-the-wire ``Opt Data Len``.
 
-        Per :rfc:`8200#section-4.3`, an option's ``Opt Data Len`` field
+        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
         (what each ``Schema_*Option.len`` here holds) counts *"the length of
         the Option Data field of this option, in octets"* -- i.e. it
         excludes the Option Type and Opt Data Len fields themselves, so the
@@ -465,6 +465,24 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         read-side half of it into one helper is so a future fix to this
         arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
         precisely the mismatch #398 fixed.
+
+        Section 4.2 is the citation because it is what defines the TLV option
+        format, and it is where the sentence quoted above actually appears.
+        This cited :rfc:`8200#section-4.3` until #530, which is a subtler
+        error than the one #517 fixed in the IPv6-Opts sibling: Section 4.3
+        is not the wrong *header* -- it is the Hop-by-Hop Options header,
+        which is exactly what this class implements -- but it is the wrong
+        place for this arithmetic. It defines no ``Opt Data Len`` at all,
+        deferring the option encoding to Section 4.2 (*"one or more
+        TLV-encoded options, as described in Section 4.2"*), and its own only
+        length field is ``Hdr Ext Len``, *"the length of the Hop-by-Hop
+        Options header in 8-octet units, not including the first 8 octets"* --
+        the whole header in 8-octet units, which is a different quantity from
+        one option's ``Opt Data Len`` in octets. So a reader who followed the
+        old citation found the right header and no such sentence. Section
+        4.3 stays the right reference for the header itself and is still
+        cited as such below, at the ``Note:`` on the whole extension header
+        having to be a multiple of 8 octets.
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
