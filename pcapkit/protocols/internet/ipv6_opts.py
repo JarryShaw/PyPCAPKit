@@ -464,7 +464,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
     def _ipv6_opts_option_length(schema_len: 'int') -> 'int':
         """Compute an IPv6-Opts option's whole-option length from its on-the-wire ``Opt Data Len``.
 
-        Per :rfc:`8200#section-4.3`, an option's ``Opt Data Len`` field
+        Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field
         (what each ``Schema_*Option.len`` here holds) counts *"the length of
         the Option Data field of this option, in octets"* -- i.e. it
         excludes the Option Type and Opt Data Len fields themselves, so the
@@ -476,6 +476,15 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         read-side half of it into one helper is so a future fix to this
         arithmetic only has to happen once. Do NOT drop the ``+ 2``: that is
         precisely the mismatch #398 fixed.
+
+        Section 4.2 is the citation because it is what defines the TLV option
+        format, and it is where the sentence quoted above actually appears.
+        IPv6-Opts itself is the Destination Options header of
+        :rfc:`8200#section-4.6`, which carries those TLVs but says nothing
+        about their internal length arithmetic. This cited
+        :rfc:`8200#section-4.3` until #517 -- that is the Hop-by-Hop Options
+        header, which is a different header and not the one this class
+        implements.
 
         Note that only the *stored-length* read-side call sites are
         collected here -- most ``_make_opt_*`` methods recompute the wire
