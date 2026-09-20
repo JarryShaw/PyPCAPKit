@@ -667,12 +667,28 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             data = self.__dict__.get(self.__map__.get(field.name, field.name))
 
             if isinstance(field, PayloadField):
+                # NOTE: ``ProtocolBase``, not ``Protocol``. The two were one class
+                # until the metaclass revision split them, which renamed the base to
+                # ``ProtocolBase`` and kept ``Protocol`` as a thin subclass that adds
+                # auto-registration for externally defined engines. Every module under
+                # ``pcapkit.protocols.schema`` was updated to import the base under the
+                # old name; this one was missed, because its import is a runtime import
+                # inside a method rather than a ``TYPE_CHECKING`` one at module level.
+                # No protocol in the library subclasses ``Protocol``, so the branch
+                # below had been unreachable ever since: handing a payload field any
+                # protocol instance -- which is exactly what :meth:`ProtocolBase._make_payload
+                # <pcapkit.protocols.protocol.ProtocolBase._make_payload>` returns, and
+                # what ``make``'s own ``bytes | Protocol | Schema`` signature advertises
+                # -- fell through to the ``ProtocolUnbound`` below instead of being
+                # packed. That is what stopped ``from_data`` reconstructing any parsed
+                # packet. An external ``Protocol`` subclass is still a ``ProtocolBase``,
+                # so nothing that worked before is affected. See #506.
                 from pcapkit.protocols.protocol import \
-                    Protocol  # pylint: disable=import-outside-toplevel
+                    ProtocolBase  # pylint: disable=import-outside-toplevel
 
                 if data is None:
                     self.__buffer__[field.name] = b''
-                elif isinstance(data, Protocol):
+                elif isinstance(data, ProtocolBase):
                     self.__buffer__[field.name] = bytes(data)
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
