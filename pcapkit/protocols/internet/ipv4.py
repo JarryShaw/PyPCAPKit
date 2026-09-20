@@ -1255,12 +1255,23 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 # force alignment to 32-bit boundary
                 if data_len % 4:
                     pad_len = 4 - (data_len % 4)
+                    # NOTE: The terminator goes in as an EOOL option *schema*, the
+                    # way the padding above goes in as a NOP schema. What used to be
+                    # appended was ``Enum_OptionNumber.EOOL`` itself -- the wire code
+                    # rather than an option -- and the enclosing ``options`` field
+                    # takes only schemas and :obj:`bytes`, so packing the header
+                    # failed with ``FieldValueError: Field options has invalid
+                    # value``. Any option whose length is not already a multiple of
+                    # four reaches this branch, so that made the packet unpackable
+                    # whether it was built by hand or rebuilt from a parsed one. See
+                    # #506.
                     pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
+                    end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
                     total_length += pad_len
 
                     for _ in range(pad_len - 1):
                         options_list.append(pad_opt)
-                    options_list.append(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
+                    options_list.append(end_opt)
             return options_list, total_length
 
         options_list = []
@@ -1286,12 +1297,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             # force alignment to 32-bit boundary
             if data_len % 4:
                 pad_len = 4 - (data_len % 4)
+                # NOTE: An EOOL option schema rather than the bare wire code, for the
+                # reason spelled out in the list branch above. This is the branch the
+                # ``from_data`` path takes, since a parsed packet hands its options
+                # back as a container. See #506.
                 pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
+                end_opt = self._make_opt_eool(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
                 total_length += pad_len
 
                 for _ in range(pad_len - 1):
                     options_list.append(pad_opt)
-                options_list.append(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
+                options_list.append(end_opt)
         return options_list, total_length
 
     def _make_opt_unassigned(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_UnassignedOption]' = None, *,
