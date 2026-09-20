@@ -77,6 +77,7 @@ from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as Enum_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as Enum_UpdateNotificationReason
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.data.internet.mh import \
@@ -8873,8 +8874,16 @@ class MH(Internet[Data_MH, Schema_MH],
         if address is None:
             length = 4
         else:
-            addr = ipaddress.ip_address(address) if not isinstance(
-                address, (ipaddress.IPv4Address, ipaddress.IPv6Address)) else address
+            # NOTE: Converted through ``parse_ip_address`` rather than with
+            # ``ipaddress.ip_address``, because the conversion happens *here* --
+            # the option length below is derived from the family, so it cannot
+            # wait for the schema -- and a bare conversion therefore turns a
+            # ``bool`` into a perfectly ordinary ``IPv4Address`` that the
+            # schema's own guard can no longer tell from a real address. Before
+            # this, ``address=True`` packed as ``23080001000000000001``, i.e. a
+            # care-of address of ``0.0.0.1`` (c.f. #508).
+            addr = parse_ip_address(
+                address, f'{self.alias}: [OptNo {type}] invalid care-of address')
             length = 8 if addr.version == 4 else 20
             address = addr
 
@@ -9112,13 +9121,13 @@ class MH(Internet[Data_MH, Schema_MH],
         # NOTE: The address is normalised rather than passed through, so that the
         # schema attribute holds the same type it would after a parse. The width is
         # then taken from the address itself rather than from ``code``, so that the
-        # two cannot be emitted disagreeing.
-        if isinstance(address, bytes):
-            addr = ipaddress.ip_address(address)  # type: IPv4Address | IPv6Address
-        elif isinstance(address, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-            addr = address
-        else:
-            addr = ipaddress.ip_address(address)
+        # two cannot be emitted disagreeing. Normalising *here*, ahead of the
+        # schema, is also why the conversion goes through ``parse_ip_address``:
+        # ``ipaddress.ip_address(True)`` is ``0.0.0.1``, and the schema's own
+        # guard cannot see that it was ever a ``bool``. Before this,
+        # ``address=True`` packed as ``2906010000000001`` (c.f. #508).
+        addr = parse_ip_address(
+            address, f'{self.alias}: [OptNo {type}] invalid address')
 
         return Schema_LMAAddressOption(
             type=type,
@@ -9314,9 +9323,13 @@ class MH(Internet[Data_MH, Schema_MH],
                 address = cast('Data_TargetCareofAddressSuboption', option).address  # type: Any
             else:
                 address = kwargs.get('address', '::')
-            addr = address if isinstance(
-                address, (ipaddress.IPv4Address, ipaddress.IPv6Address)
-            ) else ipaddress.ip_address(address)
+            # NOTE: Through ``parse_ip_address`` because the sub-option length
+            # below is derived from the family here, ahead of the schema, so a
+            # bare ``ipaddress.ip_address`` would launder a ``bool`` past the
+            # schema's guard. Before this, ``address=True`` packed as
+            # ``0506000000000001`` (c.f. #508).
+            addr = parse_ip_address(
+                address, f'{self.alias}: [OptNo {code}] invalid target care-of address')
             return Schema_TargetCareofAddressSuboption(
                 type=code, length=6 if addr.version == 4 else 18, address=addr)
 
@@ -9821,9 +9834,15 @@ class MH(Internet[Data_MH, Schema_MH],
             prefix_length = option.prefix_length
             prefix = option.prefix
 
-        addr = prefix if isinstance(
-            prefix, (ipaddress.IPv4Address, ipaddress.IPv6Address)
-        ) else ipaddress.ip_address(prefix)
+        # NOTE: Through ``parse_ip_address`` because the ``V`` flag and the width
+        # are both derived from the family here, ahead of the schema, so a bare
+        # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
+        # guard. Before this, ``prefix=True`` with an IPv4-valid
+        # ``prefix_length`` packed as ``3706801800000001``; the default
+        # ``prefix_length=64`` masked it behind the range check below, which is
+        # why #508's own sweep read this site as already guarded (c.f. #508).
+        addr = parse_ip_address(
+            prefix, f'{self.alias}: [OptNo {type}] invalid mobile network prefix')
         ipv4 = addr.version == 4
 
         if prefix_length > (32 if ipv4 else 128):
@@ -10092,9 +10111,14 @@ class MH(Internet[Data_MH, Schema_MH],
         if address is None:
             return Schema_LMAUserPlaneAddressOption(type=type, length=2, address=b'')
 
-        addr = address if isinstance(
-            address, (ipaddress.IPv4Address, ipaddress.IPv6Address)
-        ) else ipaddress.ip_address(address)
+        # NOTE: Through ``parse_ip_address`` because the option length below is
+        # derived from the family here, ahead of the schema, so a bare
+        # ``ipaddress.ip_address`` would launder a ``bool`` past the schema's
+        # guard. Before this, ``address=True`` packed as ``3b06000000000001``.
+        # ``None`` is handled above and stays an absent address, which is a
+        # legitimate value here and not what is being rejected (c.f. #508).
+        addr = parse_ip_address(
+            address, f'{self.alias}: [OptNo {type}] invalid LMA user-plane address')
 
         return Schema_LMAUserPlaneAddressOption(
             type=type,
