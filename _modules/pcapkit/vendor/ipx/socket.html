@@ -424,23 +424,234 @@
 <span class="c1">###############################################################################</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">bs4</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.vendor.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vendor</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span>
-
 <span class="c1">###############################################################################</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 <span class="c1">###############################################################################</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Socket'</span><span class="p">]</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># NOTE: this crawler no longer crawls, and the registry below is maintained by</span>
+<span class="c1"># hand; see #507.</span>
+<span class="c1">#</span>
+<span class="c1"># It used to scrape the well-known-socket table out of</span>
+<span class="c1"># https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number,</span>
+<span class="c1"># and two separate things broke that. Wikipedia now answers ``requests``'</span>
+<span class="c1"># default ``python-requests/&lt;version&gt;`` User-Agent with HTTP 403 (measured</span>
+<span class="c1"># 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent,</span>
+<span class="c1"># 200 and 114117 bytes for a descriptive one), so ``Vendor._request`` could not</span>
+<span class="c1"># fetch the page at all. And the table itself was deleted from the article on</span>
+<span class="c1"># 2026-08-25, in revision 1371327031 ("deleted some irrelevant technical</span>
+<span class="c1"># tables"), leaving the page with a single ``wikitable`` -- the IPX header</span>
+<span class="c1"># format one -- so that ``find_all('table', class_='wikitable')[3]`` raises</span>
+<span class="c1"># ``IndexError`` even once the fetch is fixed.</span>
+<span class="c1">#</span>
+<span class="c1"># Pointing ``LINK`` at the last revision that still carries the table</span>
+<span class="c1"># (``oldid=1368657333``) would have worked, but it buys none of what a crawler</span>
+<span class="c1"># is for: a network fetch pinned to a frozen snapshot is all of the fragility</span>
+<span class="c1"># with none of the freshness, and it would still be selecting the table by</span>
+<span class="c1"># index out of a document that nothing stops from changing shape again. The</span>
+<span class="c1"># registry itself is closed, which is what settles it -- IPX socket numbers</span>
+<span class="c1"># were Novell's to assign, and Novell's own documentation still ends the list</span>
+<span class="c1"># with "software developers writing NetWare applications can contact Novell to</span>
+<span class="c1"># reserve well-known sockets". There is no longer a Novell to contact, and IPX</span>
+<span class="c1"># will not gain new socket numbers, so there is nothing for a crawler to pick</span>
+<span class="c1"># up on its next run.</span>
+<span class="c1">#</span>
+<span class="c1"># The table below is therefore transcribed from that last revision that carried</span>
+<span class="c1"># it, row for row, and each entry names the primary source for the assignment</span>
+<span class="c1"># where one exists.</span>
+<span class="c1">###############################################################################</span>
+
+<span class="c1">#: Socket number registry, transcribed from the last revision of the Wikipedia</span>
+<span class="c1">#: article that still carried the table (2026-08-10),</span>
+<span class="c1">#: https://en.wikipedia.org/w/index.php?title=Internetwork_Packet_Exchange&amp;oldid=1368657333</span>
+<span class="c1">#:</span>
+<span class="c1">#: Maps a socket number to the enumeration name it takes and the comment</span>
+<span class="c1">#: rendered above it. Names go through :meth:`~Vendor.rename`, so the generated</span>
+<span class="c1">#: member is the :meth:`~Vendor.safe_name` of the first element.</span>
+<span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># NOTE: 0x0000 was never listed as a well-known socket in the scraped</span>
+    <span class="c1"># registry table, but it is the IPX protocol's own default for the</span>
+    <span class="c1"># ``dst``/``src`` socket field (an ordinary "unspecified socket"), so it</span>
+    <span class="c1"># must be present regardless of what the registry says; see #492, #503.</span>
+    <span class="c1">#</span>
+    <span class="c1"># That is a statement about the *scraped table*, not about the number being</span>
+    <span class="c1"># unsourced. XSIS 028112 Appendix D (cited under RANGES below) reserves it</span>
+    <span class="c1"># in the primary standard: "The socket numbers zero and all ones are</span>
+    <span class="c1"># reserved to mean unknown and all, respectively." The same sentence</span>
+    <span class="c1"># reserves all-ones -- 0xFFFF, to mean "all" -- and this table has no entry</span>
+    <span class="c1"># for that; ``_missing_`` resolves 0xFFFF through the "Dynamically Assigned"</span>
+    <span class="c1"># range instead. Adding it would change the generated file, so it is left as</span>
+    <span class="c1"># a follow-up rather than done here.</span>
+    <span class="mh">0x0000</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Unspecified'</span><span class="p">,</span> <span class="s2">"Unspecified socket; this is IPX's own default for the dst/src socket field."</span><span class="p">),</span>
+
+    <span class="c1"># Sockets in the "Registered by Xerox" range below. These are formally</span>
+    <span class="c1"># XNS/IDP well-known sockets that IPX inherited, and the *values* have both</span>
+    <span class="c1"># a live registry and a primary standard behind them:</span>
+    <span class="c1">#</span>
+    <span class="c1"># * IANA, "Xerox Network System (XNS) Protocol Types", sub-registry</span>
+    <span class="c1">#   "Assigned well-known socket numbers" --</span>
+    <span class="c1">#   https://www.iana.org/assignments/xns-protocol-types -- lists 1 Routing</span>
+    <span class="c1">#   Information, 2 Echo and 3 Router Error, each referenced to "Xerox System</span>
+    <span class="c1">#   Integration Standard: Internet Transport Protocols. XSIS 028112,</span>
+    <span class="c1">#   December 1981". IANA publishes the registry but does not own it: its</span>
+    <span class="c1">#   registration procedure reads "Not assigned by IANA".</span>
+    <span class="c1"># * That standard itself, Appendix D, "Assigned well-known socket numbers",</span>
+    <span class="c1">#   scanned at http://www.bitsavers.org/pdf/xerox/xns/standards/XSIS_028112-Internet_Transport_Protocols_198112.pdf</span>
+    <span class="c1">#   -- the same three functions, under a column headed "Well-Known Socket</span>
+    <span class="c1">#   (octal)".</span>
+    <span class="c1">#</span>
+    <span class="c1"># The *names* are a different matter, and are the archived revision's own.</span>
+    <span class="c1"># Both sources call socket 3 "Router Error" rather than "Error Handling</span>
+    <span class="c1"># Packet", and neither appends "Packet" to any of the three. That suffix</span>
+    <span class="c1"># looks like the adjacent packet-type registry bleeding in -- XSIS Appendix</span>
+    <span class="c1"># E, "Assigned internet packet types", and the second table on the same IANA</span>
+    <span class="c1"># page, which do use 1 Routing Information / 2 Echo / 3 Error as *packet*</span>
+    <span class="c1"># types. The names are kept as transcribed anyway, for the same reason</span>
+    <span class="c1"># ``LLC_4`` is kept below: changing one renames a public member.</span>
+    <span class="mh">0x0001</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Routing Information Packet'</span><span class="p">,</span> <span class="s1">'Routing Information Packet'</span><span class="p">),</span>
+    <span class="mh">0x0002</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Echo Protocol Packet'</span><span class="p">,</span> <span class="s1">'Echo Protocol Packet'</span><span class="p">),</span>
+    <span class="mh">0x0003</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Error Handling Packet'</span><span class="p">,</span> <span class="s1">'Error Handling Packet'</span><span class="p">),</span>
+
+    <span class="c1"># Novell, *IPX Addressing*, "Table 2. NetWare Socket Numbers and</span>
+    <span class="c1"># Processes", https://www.novell.com/documentation/nw6p/ipx_enu/data/hvvqznoa.html</span>
+    <span class="c1"># -- still live. That page is also the citation the article itself used.</span>
+    <span class="c1">#</span>
+    <span class="c1"># NOTE: Table 2 has **seven** rows and only five of them are below. In full</span>
+    <span class="c1"># it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456</span>
+    <span class="c1"># Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have</span>
+    <span class="c1"># never been in this enumeration, and 0x9004 is independently reserved by</span>
+    <span class="c1"># :rfc:`1634` line 552 -- "The socket number 0x9004 is a Novell reserved</span>
+    <span class="c1"># socket number for exclusive use with IPX WAN protocol exchange" -- and by</span>
+    <span class="c1"># the two RFCs it obsoletes: :rfc:`1551` line 532 word for word, and</span>
+    <span class="c1"># :rfc:`1362` line 253 with "information exchange" for "protocol exchange".</span>
+    <span class="c1"># So they are known omissions with good sourcing, not rows nobody noticed.</span>
+    <span class="c1"># Adding them would add members to the generated file and so give up the</span>
+    <span class="c1"># byte-identity proof this change rests on, which makes them a follow-up</span>
+    <span class="c1"># rather than part of #507.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Two of the five below also depart from Novell's own wording: Novell writes</span>
+    <span class="c1"># "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and</span>
+    <span class="c1"># "Diagnostic Packet". Those are the archived revision's strings, kept for</span>
+    <span class="c1"># the same member-renaming reason as everything else here.</span>
+    <span class="mh">0x0451</span><span class="p">:</span> <span class="p">(</span><span class="s1">'NetWare Core Protocol'</span><span class="p">,</span> <span class="s1">'NetWare Core Protocol, NCP – used by Novell NetWare servers'</span><span class="p">),</span>
+    <span class="mh">0x0452</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Service Advertising Protocol'</span><span class="p">,</span> <span class="s1">'Service Advertising Protocol, SAP'</span><span class="p">),</span>
+    <span class="mh">0x0453</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Routing Information Protocol'</span><span class="p">,</span> <span class="s1">'Routing Information Protocol, RIP'</span><span class="p">),</span>
+    <span class="mh">0x0455</span><span class="p">:</span> <span class="p">(</span><span class="s1">'NetBIOS'</span><span class="p">,</span> <span class="s1">'NetBIOS'</span><span class="p">),</span>
+    <span class="mh">0x0456</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Diagnostic Packet'</span><span class="p">,</span> <span class="s1">'Diagnostic Packet'</span><span class="p">),</span>
+
+    <span class="c1"># These two are the only rows the archived revision alone supplies: absent</span>
+    <span class="c1"># from Novell's Table 2, absent from the Xerox registry above, and absent</span>
+    <span class="c1"># from every RFC swept. The sweep covered RFCs 1132, 1362, 1377, 1551, 1552,</span>
+    <span class="c1"># 1553, 1634, 1791, 1973 and 2043, looking for the five codes 0x0001, 0x0002,</span>
+    <span class="c1"># 0x0003, 0x0457 and 0x4003, and found 0 hits. (The first three of those five</span>
+    <span class="c1"># turned out to be sourced after all, just not from an RFC -- see the Xerox</span>
+    <span class="c1"># note above.)</span>
+    <span class="c1">#</span>
+    <span class="c1"># "0 hits" is a claim about those five codes and nothing more. Three of the</span>
+    <span class="c1"># ten RFCs do assign an IPX socket, 0x9004, which this table lacks; see the</span>
+    <span class="c1"># note on Novell's Table 2 above.</span>
+    <span class="c1">#</span>
+    <span class="c1"># 0x4003 is the weaker of the two: it falls inside Novell's own</span>
+    <span class="c1"># 0x4000-0x7FFF *dynamic* range, which is assigned to workstations on</span>
+    <span class="c1"># demand, so a fixed well-known name for it is inherently low-confidence.</span>
+    <span class="mh">0x0457</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Serialization Packet'</span><span class="p">,</span> <span class="s1">'Serialization Packet, used for NCP as well'</span><span class="p">),</span>
+    <span class="mh">0x4003</span><span class="p">:</span> <span class="p">(</span><span class="s1">'Used by Novell NetWare Client'</span><span class="p">,</span> <span class="s1">'Used by Novell NetWare Client'</span><span class="p">),</span>
+
+    <span class="c1"># NOTE: :rfc:`1132`, "A Standard for the Transmission of 802.2 Packets over</span>
+    <span class="c1"># IPX Networks", reserves this one -- "The IPX socket 0x8060 has been</span>
+    <span class="c1"># reserved by Novell for the implementation of this protocol."</span>
+    <span class="c1">#</span>
+    <span class="c1"># The archived table renders the row as ``LLC[4]``, where ``[4]`` is</span>
+    <span class="c1"># Wikipedia's own footnote marker for its citation of that RFC rather than</span>
+    <span class="c1"># any part of the protocol name -- the cell markup is an ``&lt;a&gt;`` reading</span>
+    <span class="c1"># "LLC" followed by ``&lt;sup id="cite_ref-RFC1132_4-1"&gt;``. The spaces in</span>
+    <span class="c1"># ``LLC [ 4 ]`` are not in the page at all: they are an artefact of the</span>
+    <span class="c1"># scrape, which joined the cell's strings with a space and so picked up the</span>
+    <span class="c1"># ``&lt;span class="cite-bracket"&gt;`` wrappers around the ``[`` and ``]`` as</span>
+    <span class="c1"># separate tokens. The value is right and the explanation of it was not.</span>
+    <span class="c1"># Both the name and the comment are kept verbatim so that</span>
+    <span class="c1"># regenerating the constant file stays a no-op against the last scraped</span>
+    <span class="c1"># output: renaming the member would break</span>
+    <span class="c1"># :attr:`pcapkit.const.ipx.socket.Socket.LLC_4` for anyone using it, which</span>
+    <span class="c1"># is a call for the maintainer rather than for #507.</span>
+    <span class="mh">0x8060</span><span class="p">:</span> <span class="p">(</span><span class="s1">'LLC_4'</span><span class="p">,</span> <span class="s1">'LLC [ 4 ]'</span><span class="p">),</span>
+
+    <span class="c1"># :rfc:`1791`, "TCP And UDP Over IPX Networks With Fixed Path MTU" -- "The</span>
+    <span class="c1"># IPX socket number 0x9091 is reserved for the TCP", "UDP must send and</span>
+    <span class="c1"># receive the packets on IPX/IPXF socket 0x9092", and "IPXF fragments are</span>
+    <span class="c1"># received by IPXF on the IPX socket 0x9093".</span>
+    <span class="c1">#</span>
+    <span class="c1"># NOTE: the name ``TCP over IPXF`` is wrong, and it is the archived</span>
+    <span class="c1"># revision's wording rather than the RFC's. RFC 1791 reserves 0x9091 for TCP</span>
+    <span class="c1"># over plain **IPX**: the section that assigns it is s3, "Running TCP Over</span>
+    <span class="c1"># IPX", which opens "Unlike UDP, TCP runs directly over IPX", and the same</span>
+    <span class="c1"># section ends "Hence, running TCP over IPXF is not recommended." So the</span>
+    <span class="c1"># member name describes the one arrangement the cited RFC advises against.</span>
+    <span class="c1"># Only the name is wrong; 0x9091 is the right value for TCP. It is kept for</span>
+    <span class="c1"># the member-renaming reason set out above, and is the strongest candidate in</span>
+    <span class="c1"># this table for a rename with a deprecated alias.</span>
+    <span class="c1">#</span>
+    <span class="c1"># ``UDP over IPXF`` for 0x9092, by contrast, is accurate: "UDP must run on</span>
+    <span class="c1"># IPXF rather than directly on IPX", and the socket is named as</span>
+    <span class="c1"># "IPX/IPXF socket 0x9092".</span>
+    <span class="c1">#</span>
+    <span class="c1"># One more scruple about wording: "reserved" is the RFC's own word for</span>
+    <span class="c1"># 0x9091 only. For 0x9092 and 0x9093 it says packets "must" be sent and</span>
+    <span class="c1"># received on them, which amounts to the same reservation in practice but is</span>
+    <span class="c1"># an inference rather than a quote.</span>
+    <span class="mh">0x9091</span><span class="p">:</span> <span class="p">(</span><span class="s1">'TCP over IPXF'</span><span class="p">,</span> <span class="s1">'TCP over IPXF'</span><span class="p">),</span>
+    <span class="mh">0x9092</span><span class="p">:</span> <span class="p">(</span><span class="s1">'UDP over IPXF'</span><span class="p">,</span> <span class="s1">'UDP over IPXF'</span><span class="p">),</span>
+    <span class="mh">0x9093</span><span class="p">:</span> <span class="p">(</span><span class="s1">'IPXF'</span><span class="p">,</span> <span class="s1">'IPXF, IPX Fragmentation Protocol'</span><span class="p">),</span>
+<span class="p">}</span>  <span class="c1"># type: dict[int, tuple[str, str]]</span>
+
+<span class="c1">#: Socket number ranges, transcribed from the same revision as</span>
+<span class="c1">#: :data:`~pcapkit.vendor.ipx.socket.DATA`, as ``(start, stop, name)``.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Three of the five have a primary source, and it is not the archived</span>
+<span class="c1">#: revision. Xerox, *Internet Transport Protocols*, XSIS 028112, December 1981,</span>
+<span class="c1">#: Appendix D: "The socket numbers zero and all ones are reserved to mean</span>
+<span class="c1">#: unknown and all, respectively. Well-known socket numbers have the range 1 to</span>
+<span class="c1">#: 3000 decimal. All other socket numbers are ephemeral, that is, they may be</span>
+<span class="c1">#: dynamically assigned and reused." Its table then gives "Experimental 40-77"</span>
+<span class="c1">#: under a column header that the scan OCRs as ``goctalf`` and which reads</span>
+<span class="c1">#: "Well-Known Socket (octal)".</span>
+<span class="c1">#:</span>
+<span class="c1">#: That reproduces the first three ranges exactly, and the arithmetic confirms</span>
+<span class="c1">#: the radix without having to trust that OCR: 3000 decimal is 0x0BB8, 3001 is</span>
+<span class="c1">#: 0x0BB9, and octal 40-77 is 0x0020-0x003F -- all three as transcribed. Read as</span>
+<span class="c1">#: decimal instead, 40-77 would be 0x0028-0x004D, which is not what the table</span>
+<span class="c1">#: says. So the octal reading is settled by the numbers themselves.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Novell's *IPX Addressing* bears on the last two, and in opposite directions.</span>
+<span class="c1">#: ``(0x8000, 0xFFFF)`` matches it exactly -- "Socket numbers between 0x8000 and</span>
+<span class="c1">#: 0xFFFF are well-known sockets; these are assigned by Novell to specific</span>
+<span class="c1">#: processes." ``(0x4000, 0x4FFF)`` is *contradicted*, not merely rounded: the</span>
+<span class="c1">#: preceding sentence reads "Socket numbers between 0x4000 and 0x7FFF are</span>
+<span class="c1">#: dynamic sockets", so the upper bound is 0x7FFF. The transcribed 0x4FFF is</span>
+<span class="c1">#: kept because widening it would change the generated ``_missing_``; the</span>
+<span class="c1">#: archived table is what is wrong here, and this range is masked by</span>
+<span class="c1">#: ``(0x0BB9, 0xFFFF)`` in any case (see the note below), so the bound has no</span>
+<span class="c1">#: observable effect today.</span>
+<span class="n">RANGES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># NOTE: order is significant, and is the order the rows appeared in. The</span>
+    <span class="c1"># generated ``_missing_`` tests these in sequence and returns on the first</span>
+    <span class="c1"># match, so the wide ranges here mask the narrow ones that follow them --</span>
+    <span class="c1"># reordering the list silently changes which name an unlisted socket gets.</span>
+    <span class="p">(</span><span class="mh">0x0001</span><span class="p">,</span> <span class="mh">0x0BB8</span><span class="p">,</span> <span class="s1">'Registered by Xerox'</span><span class="p">),</span>
+    <span class="p">(</span><span class="mh">0x0020</span><span class="p">,</span> <span class="mh">0x003F</span><span class="p">,</span> <span class="s1">'Experimental'</span><span class="p">),</span>
+    <span class="p">(</span><span class="mh">0x0BB9</span><span class="p">,</span> <span class="mh">0xFFFF</span><span class="p">,</span> <span class="s1">'Dynamically Assigned'</span><span class="p">),</span>
+    <span class="p">(</span><span class="mh">0x4000</span><span class="p">,</span> <span class="mh">0x4FFF</span><span class="p">,</span> <span class="s1">'Dynamically Assigned Socket Numbers'</span><span class="p">),</span>
+    <span class="p">(</span><span class="mh">0x8000</span><span class="p">,</span> <span class="mh">0xFFFF</span><span class="p">,</span> <span class="s1">'Statically Assigned Socket Numbers'</span><span class="p">),</span>
+<span class="p">]</span>  <span class="c1"># type: list[tuple[int, int, str]]</span>
 
 
 <div class="viewcode-block" id="Socket">
@@ -450,10 +661,17 @@
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">'isinstance(value, int) and 0x0000 &lt;= value &lt;= 0xFFFF'</span>
-    <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'BeautifulSoup'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+<span class="w">        </span><span class="sd">"""Fetch registry data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Registry data (:data:`~pcapkit.vendor.ipx.socket.DATA`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">DATA</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Count field records.</span>
 
 <span class="sd">        Args:</span>
@@ -463,78 +681,35 @@
 <span class="sd">            Field recordings.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BeautifulSoup'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
-<span class="w">        </span><span class="sd">"""Fetch HTML source.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            text: Context from :attr:`~Vendor.LINK`.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Parsed HTML source.</span>
-
-<span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">'html5lib'</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">'BeautifulSoup'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
-<span class="w">        </span><span class="sd">"""Process HTML source.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'dict[int, tuple[str, str]]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Process registry data.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: Parsed HTML source.</span>
+<span class="sd">            data: Registry data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Enumeration fields and missing fields.</span>
 
 <span class="sd">        """</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'table'</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">'wikitable'</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">bs4</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">Tag</span><span class="p">),</span> <span class="n">table</span><span class="o">.</span><span class="n">tbody</span><span class="p">)</span>
-        <span class="nb">next</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># header</span>
-
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
 
-        <span class="c1"># NOTE: 0x0000 is not listed as a well-known socket in the Wikipedia</span>
-        <span class="c1"># registry table scraped below, but it is the IPX protocol's own</span>
-        <span class="c1"># default for the ``dst``/``src`` socket field (an ordinary</span>
-        <span class="c1"># "unspecified socket"), so it must be present regardless of what the</span>
-        <span class="c1"># scraped table contains; see #492.</span>
-        <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="s2">"Unspecified socket; this is IPX's own default for the dst/src socket field."</span><span class="p">)</span>
-        <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="se">\n</span><span class="s1">    Unspecified = 0x0000'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pval</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'0x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1">'</span>
+            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pval</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">'td'</span><span class="p">)</span>
+            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">pval</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
-            <span class="n">pval</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
-            <span class="n">dscp</span> <span class="o">=</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
-
-            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\W*,|\(|\)\W*'</span><span class="p">,</span> <span class="n">dscp</span><span class="p">))))</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">dscp</span><span class="p">,</span> <span class="s1">''</span>
-            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-
-            <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">', </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">desc</span> <span class="k">else</span> <span class="s1">''</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">tmp1</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pval</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">pval</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
-
-                <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">"</span>
-                <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span>
-
-                <span class="c1"># if len(pres) &gt; 74:</span>
-                <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
-
-                <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
-                <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">pval</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'–'</span><span class="p">)</span>
-
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>
+        <span class="c1"># NOTE: the range names are emitted raw, spaces and all, rather than</span>
+        <span class="c1"># through ``safe_name``, because that is what the scrape did and what</span>
+        <span class="c1"># the shipped constant file contains; sanitising them here would rename</span>
+        <span class="c1"># every member ``_missing_`` extends the enumeration with; see #507.</span>
+        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">RANGES</span><span class="p">:</span>
+            <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">:</span><span class="s1">04X</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
+            <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

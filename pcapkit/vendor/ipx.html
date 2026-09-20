@@ -465,6 +465,16 @@ which is automatically generating <a class="reference internal" href="../const/i
 <span id="socket-types"></span><h2>Socket Types<a class="headerlink" href="#module-pcapkit.vendor.ipx.socket" title="Link to this heading">¶</a></h2>
 <p>This module contains the vendor crawler for <strong>Socket Types</strong>,
 which is automatically generating <a class="reference internal" href="../const/ipx.html#pcapkit.const.ipx.socket.Socket" title="pcapkit.const.ipx.socket.Socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket.Socket</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This crawler no longer crawls. The table it used to scrape was deleted from
+the Wikipedia article on 2026-08-25, and the registry itself is closed, so
+the data is now maintained by hand in the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> and <code class="docutils literal notranslate"><span class="pre">RANGES</span></code> mappings of
+<a class="reference internal" href="#module-pcapkit.vendor.ipx.socket" title="pcapkit.vendor.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.ipx.socket</span></code></a>, and the class defines no <code class="docutils literal notranslate"><span class="pre">LINK</span></code>. The
+footnote below points at the last revision that still carried the table –
+what the hand-maintained registry was transcribed from, not a page the
+crawler fetches. See #507.</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.socket.</span></span><span class="sig-name descname"><span class="pre">Socket</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Link to this definition">¶</a></dt>
@@ -474,12 +484,6 @@ which is automatically generating <a class="reference internal" href="../const/i
 <dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.FLAG">
 <span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Link to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span></span><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Link to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
@@ -492,7 +496,7 @@ which is automatically generating <a class="reference internal" href="../const/i
 </aside>
 <aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number">https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number</a></p>
+<p><a class="reference external" href="https://en.wikipedia.org/w/index.php?title=Internetwork_Packet_Exchange&amp;oldid=1368657333">https://en.wikipedia.org/w/index.php?title=Internetwork_Packet_Exchange&amp;oldid=1368657333</a></p>
 </aside>
 </aside>
 </section>
