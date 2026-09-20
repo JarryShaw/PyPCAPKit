@@ -41,8 +41,8 @@ from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IP
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_SourceRoute
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType
-from pcapkit.protocols.schema.internet.ipv6_route import ipv6_route_data_length
-from pcapkit.protocols.schema.internet.ipv6_route import ipv6_route_header_length
+from pcapkit.protocols.schema.internet.ipv6_route import (ipv6_route_data_length,
+                                                          ipv6_route_header_length)
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
