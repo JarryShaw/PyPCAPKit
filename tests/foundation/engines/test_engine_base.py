@@ -64,7 +64,7 @@ class EngineBaseTests(unittest.TestCase):
         self.assertEqual(named.module, 'instance.module')
 
     def test_engine_subclass_registration_is_opt_in(self) -> None:
-        """Registration happens if and only if ``name`` is given.
+        """Registration happens if and only if ``engine`` is given.
 
         This is the #514 opt-in contract. Before it, ``__init_subclass__`` fell
         back to ``cls.name`` when the keyword was absent, so *every* subclass of
@@ -77,30 +77,27 @@ class EngineBaseTests(unittest.TestCase):
         ``'defaultengine'``. A class attribute is not a registry key, and now it
         registers nothing.
 
-        Note on the version guard below, which predates this change: it is
-        *not* about ``Engine`` being generic. ``Engine``'s registry keyword is
-        literally ``name``, and ``mcls``/``name``/``bases``/``namespace`` collide
-        with :meth:`abc.ABCMeta.__new__`'s own parameters, which are
-        positional-or-keyword on Python 3.10 and positional-only from 3.11. So on
-        3.10 ``class MyEngine(Engine, name='x')`` -- the documented way to
-        register an engine -- raises :exc:`TypeError` from the metaclass before
-        ``__init_subclass__`` runs. Measured against this tree on 3.10.21. A
-        non-colliding keyword needs no guard, which is why the sibling test above
-        has none.
+        No version guard, and that is the point of the rename. The keyword was
+        ``name`` when opt-in registration landed, which made this half of the test
+        unrunnable on Python 3.10 -- ``mcls``/``name``/``bases``/``namespace``
+        collide with :meth:`abc.ABCMeta.__new__`'s own parameters, which are
+        positional-or-keyword before 3.11 and positional-only from 3.11, so the
+        class statement failed in the metaclass before ``__init_subclass__`` ran.
+        ``engine`` is outside that set, so this now runs everywhere. Verified on
+        3.10.21 and 3.14.7.
 
         """
         from pcapkit.foundation.engines.engine import Engine
 
-        if sys.version_info >= (3, 11):
-            with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
-                class Explicit(Engine[str], name='ExplicitEngine'):
-                    def run(self) -> None:
-                        pass
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
+            class Explicit(Engine[str], engine='ExplicitEngine'):
+                def run(self) -> None:
+                    pass
 
-                    def read_frame(self) -> str:
-                        return 'frame'
+                def read_frame(self) -> str:
+                    return 'frame'
 
-            register.assert_called_once_with('explicitengine', Explicit)
+        register.assert_called_once_with('explicitengine', Explicit)
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
             class Default(Engine[str]):
@@ -121,7 +118,7 @@ class EngineBaseTests(unittest.TestCase):
     def test_engine_subclass_rejects_unrecognised_keyword(self) -> None:
         """A misspelled class keyword raises instead of being swallowed.
 
-        ``Engine`` spells the registry key ``name`` while ``Reassembly`` and
+        ``Engine`` spells the registry key ``engine`` while ``Reassembly`` and
         ``TraceFlow`` spell the same idea ``protocol``, so guessing the wrong one
         is the expected mistake. It used to land in ``**kwargs``, get dropped by
         the bare ``super().__init_subclass__()``, and leave the class registered
@@ -132,6 +129,13 @@ class EngineBaseTests(unittest.TestCase):
         names that collide with :meth:`abc.ABCMeta.__new__` on Python 3.10, so
         the guard is reached on every supported version. Verified against this
         tree on 3.10.21, where it raises ``UnsupportedCall`` as it does on 3.14.
+
+        ``name`` is now an unrecognised keyword here too, and is checked
+        separately below because it is the one typo whose exception *type* is
+        version-dependent: on 3.10 the metaclass collision fires before the
+        guard, so it is a :exc:`TypeError` rather than an
+        :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`. Loud either way,
+        which is why the rename did not need to chase it.
 
         """
         from pcapkit.foundation.engines.engine import Engine
@@ -149,9 +153,21 @@ class EngineBaseTests(unittest.TestCase):
         register.assert_not_called()
         self.assertIn('protocol', str(caught.exception))
 
-    @unittest.skipIf(sys.version_info < (3, 11),
-                     "Engine's registry keyword is literally `name`, which collides "
-                     'with ABCMeta.__new__ on 3.10 -- see the note in the docstring')
+        # ``name=`` is no longer the registry keyword, so it is a typo now. It is
+        # the one whose exception type is version-dependent: the metaclass
+        # collision fires before the guard on 3.10.
+        expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
+            with self.assertRaises(expected):
+                class Collides(Engine[str], name='no-longer-the-keyword'):
+                    def run(self) -> None:
+                        pass
+
+                    def read_frame(self) -> str:
+                        return 'frame'
+
+        register.assert_not_called()
+
     def test_registration_is_not_inherited_by_a_subclass(self) -> None:
         """A subclass of a *registered* class does not inherit its registration.
 
@@ -169,11 +185,14 @@ class EngineBaseTests(unittest.TestCase):
         ``HTTP``, ``L2TP`` and ``IP`` can be open to inheritance without the
         anti-re-registration guarantee being weakened.
 
+        Runs on every supported version since the keyword became ``engine``;
+        it was skipped below 3.11 while the keyword was ``name``.
+
         """
         from pcapkit.foundation.engines.engine import Engine
 
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
-            class Parent(Engine[str], name='ParentEngine'):
+            class Parent(Engine[str], engine='ParentEngine'):
                 def run(self) -> None:
                     pass
 
@@ -192,7 +211,7 @@ class EngineBaseTests(unittest.TestCase):
 
         # ... and inheritance is still open to a subclass that asks to register
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
-            class DerivedOptIn(Parent, name='DerivedEngine'):
+            class DerivedOptIn(Parent, engine='DerivedEngine'):
                 pass
 
         register.assert_called_once_with('derivedengine', DerivedOptIn)

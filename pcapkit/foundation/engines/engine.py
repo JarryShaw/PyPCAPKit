@@ -215,12 +215,12 @@ class Engine(EngineBase[_T], Generic[_T]):
 
     Example:
 
-        Registration is opt-in. Pass keyword argument ``name`` at class
+        Registration is opt-in. Pass keyword argument ``engine`` at class
         definition to register the engine under that name:
 
         .. code-block:: python
 
-           class MyEngine(Engine, name='my_engine'):
+           class MyEngine(Engine, engine='my_engine'):
                ...
 
         Omit it and the subclass is *not* registered, which is how a class
@@ -242,14 +242,14 @@ class Engine(EngineBase[_T], Generic[_T]):
 
     """
 
-    def __init_subclass__(cls, /, name: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, engine: 'Optional[str]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialise subclass.
 
         This method is to be used for registering the engine class to
         :class:`~pcapkit.foundation.extraction.Extractor` class.
 
         Args:
-            name: Engine name to register the subclass under, lowercased.
+            engine: Engine name to register the subclass under, lowercased.
                 :data:`None` (the default) skips registration entirely.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
@@ -258,7 +258,7 @@ class Engine(EngineBase[_T], Generic[_T]):
             UnsupportedCall: If any unrecognised class keyword is given.
 
         Registration is **opt-in**: the subclass is registered if and only if
-        ``name`` is given. This is what lets a subclass decline registration
+        ``engine`` is given. This is what lets a subclass decline registration
         rather than having to inherit :class:`EngineBase` to avoid it, and it
         matches :meth:`EnumSchema.__init_subclass__
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`, which
@@ -270,28 +270,21 @@ class Engine(EngineBase[_T], Generic[_T]):
             the engine reports, which it does whether or not the engine is
             registered; only the keyword decides registration.
 
-        Warning:
-            **On Python 3.10 the ``name`` keyword cannot be passed at all.**
-            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and
-            ``namespace`` as positional-*or-keyword* parameters before 3.11, so a
-            class keyword named ``name`` collides with one of them and the class
-            statement raises :exc:`TypeError` -- ``ABCMeta.__new__() got multiple
-            values for argument 'name'`` -- from the metaclass, before this method
-            is reached. From 3.11 those parameters are positional-only and the
-            keyword arrives here normally. Measured on 3.10.21, 3.11.15 and
-            3.14.7.
-
-            The consequence on 3.10 is that an engine cannot be registered at
-            class definition; register it explicitly instead, which works on every
-            version::
-
-                class MyEngine(Engine):     # no keyword, so not registered
-                    ...
-
-                Extractor.register_engine('my_engine', MyEngine)
-
-            The sibling hooks are unaffected, their keywords being ``protocol``
-            and ``fmt``.
+        Note:
+            This keyword was ``name`` when opt-in registration landed, and was
+            renamed because ``name`` cannot be passed as a class keyword at all
+            on Python 3.10: :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``,
+            ``bases`` and ``namespace`` as positional-*or-keyword* parameters
+            before 3.11, so a class keyword by any of those four names collides
+            with one of them and the class statement raises :exc:`TypeError` from
+            the metaclass before this method is reached. ``engine`` is outside
+            that set, so the documented registration path now works on every
+            supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
+            four are the whole of the :meth:`abc.ABCMeta.__new__` collision
+            surface. Separately, and for an unrelated reason that holds on every
+            version, ``metaclass`` is not usable as a class keyword either: a
+            ``class`` statement consumes it to choose the metaclass, so it never
+            reaches this method at all.
 
         See Also:
             For more details, please refer to
@@ -301,10 +294,15 @@ class Engine(EngineBase[_T], Generic[_T]):
         # NOTE: an unrecognised class keyword lands in ``**kwargs`` and is then
         # dropped by the bare ``super().__init_subclass__()`` below, since
         # ``object.__init_subclass__`` takes none. Silently swallowing it is how
-        # ``class MyEngine(Engine, nmae='x')`` used to register under its class
+        # ``class MyEngine(Engine, engnie='x')`` used to register under its class
         # name instead -- no exception, no warning. Now that a missing keyword
         # means "do not register", the same typo would silently skip
         # registration altogether, which is quieter still. So reject it.
+        #
+        # One typo this cannot catch is ``name=``, and only on Python 3.10: it is
+        # one of the four names that collide with ``ABCMeta.__new__``, so it fails
+        # in the metaclass before reaching here. It is still loud, just as a
+        # ``TypeError`` rather than an ``UnsupportedCall``.
         #
         # ``args`` is checked alongside ``kwargs`` for completeness rather than
         # because a ``class`` statement can fill it -- class creation passes
@@ -314,10 +312,10 @@ class Engine(EngineBase[_T], Generic[_T]):
             unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
             raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
 
-        if name is not None:
+        if engine is not None:
             from pcapkit.foundation.extraction import \
                 Extractor  # pylint: disable=import-outside-toplevel
 
-            Extractor.register_engine(name.lower(), cls)
+            Extractor.register_engine(engine.lower(), cls)
 
         return super().__init_subclass__()
