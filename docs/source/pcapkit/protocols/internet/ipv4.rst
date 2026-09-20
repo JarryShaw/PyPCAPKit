@@ -209,6 +209,8 @@ Type Stubs
 Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
+.. autofunction:: pcapkit.protocols.schema.internet.ipv4.quick_start_option_length
+
 .. autofunction:: pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector
 
 Data Models

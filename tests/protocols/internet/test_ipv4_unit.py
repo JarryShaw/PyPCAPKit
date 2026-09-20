@@ -750,6 +750,246 @@ class IPv4UnitTests(unittest.TestCase):
         self.assertEqual(rebuilt[0] & 0x0F, 6)
         self.assertEqual(int.from_bytes(rebuilt[2:4], 'big'), 24)
 
+    def test_ipv4_timestamp_option_refuses_a_bool_as_an_address(self) -> None:
+        """``TSOption`` will not turn a ``bool`` into an address. C.f. #552.
+
+        :meth:`TSOption.post_process
+        <pcapkit.protocols.schema.internet.ipv4.TSOption.post_process>` runs on the
+        **packing** path as well as the unpacking one, so the ``ts_data`` entries it
+        reads as addresses under the ``IP with Timestamp`` and ``Prespecified IP
+        with Timestamp`` flags are whatever the caller passed. It converted them
+        with a bare :func:`ipaddress.ip_address`, which takes any :class:`int`
+        below ``2**32`` -- and :obj:`bool` is an :class:`int` subclass, so
+        ``ts_data=[True, 5]`` became ``IPv4Address('0.0.0.1')`` with no exception
+        and no warning. The measured pack was
+        ``440c050100000001000000050000000000000000``.
+
+        Nothing downstream could have caught it either: the field's item type is a
+        :class:`~pcapkit.corekit.fields.numbers.UInt32Field`, which packs ``True``
+        as the ``1`` it is, so #500's guard in
+        :meth:`_IPAddressField.pre_process
+        <pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process>` is never
+        reached. This was the fifth site of that defect -- #481, #500, #539 and
+        #540 are the first four -- and the fix is the same one #539 used for its
+        seven: route the conversion through
+        :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.
+
+        Both halves are asserted, because a guard that rejects everything is not a
+        fix: a real address still has to pack, and still has to come back out of
+        ``data`` and ``timestamp`` as an address.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.const.ipv4.ts_flag import TSFlag
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.schema.internet.ipv4 import TSOption
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        def option(ts_data: 'list[int]', flag: 'TSFlag') -> 'TSOption':
+            return TSOption(type=OptionNumber.TS, length=12, pointer=13,
+                            flags={'oflw': 0, 'flag': flag}, ts_data=ts_data)
+
+        addressed = (TSFlag.IP_with_Timestamp, TSFlag.Prespecified_IP_with_Timestamp)
+        for flag in addressed:
+            for value in (True, False):
+                with self.subTest(flag=flag, value=value):
+                    with self.assertRaises(FieldValueError) as caught:
+                        option([value, 5], flag).pack()
+                    message = str(caught.exception)
+                    self.assertIn('must not be a bool', message)
+                    self.assertIn(f'[OptNo {OptionNumber.TS}]', message)
+
+        # Reachable through the public construction API, which is what makes this
+        # a defect rather than an internal curiosity: ``make`` takes a
+        # caller-built option schema and packs it.
+        with self.assertRaises(FieldValueError):
+            IPv4(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                 options=[option([True, 5], TSFlag.IP_with_Timestamp)], payload=b'')
+
+        # The control. A real address packs, and reads back as an address.
+        real = option([int(ip_address('192.0.2.1')), 5], TSFlag.IP_with_Timestamp)
+        self.assertEqual(real.pack().hex(), '440c0d01c000020100000005')
+        self.assertEqual(real.data[ip_address('192.0.2.1')], 5)
+        self.assertEqual(real.timestamp[ip_address('192.0.2.1')],
+                         datetime.timedelta(milliseconds=5))
+
+        # And the third conversion in the same method, the one that reads the
+        # prespecified addresses out of the option's padding.
+        prespecified = option([int(ip_address('192.0.2.2')), 6],
+                              TSFlag.Prespecified_IP_with_Timestamp)
+        prespecified.remainder = ip_address('192.0.2.3').packed + bytes(4)
+        prespecified.pack()
+        self.assertEqual(prespecified.data[ip_address('192.0.2.2')], 6)
+        self.assertEqual(prespecified.data[ip_address('192.0.2.3')], 0)
+
+    def test_ipv4_quick_start_option_is_eight_octets_wide_on_the_wire(self) -> None:
+        """Both Quick-Start suboptions survive the round trip whole. C.f. #552.
+
+        :func:`~pcapkit.protocols.schema.internet.ipv4.quick_start_data_selector`
+        sized the nested suboption schema with a hardcoded
+        ``SchemaField(length=5)``, which is the width of a Quick-Start Request's
+        ``ttl`` and ``nonce`` alone -- the ``type``, ``length`` and ``flags``
+        octets in front of them, which the suboption schema re-declares, were
+        unaccounted for. :rfc:`4782#section-3.1` gives the option as eight octets
+        for both functions -- *"the second byte contains the length field,
+        indicating an option length of eight bytes"*, with figure 3 for a Request
+        and figure 4 for a Report -- and
+        :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs` rejects any
+        other ``length`` outright.
+
+        So the reader consumed five, warned ``SchemaWarning: packet length < 0:
+        -3``, resynchronised on the second octet of the nonce and decoded it as
+        **55** rather than 933982136 -- silent corruption -- and then read the
+        three octets it had not consumed as a further, fabricated option, which
+        made the whole datagram fail with ``ProtocolError: IPv4: invalid format``.
+
+        ``QuickStartReportOption`` was one octet short as well, missing the ``Not
+        Used`` octet that :rfc:`4782#section-3.1` puts where a Request has ``QS
+        TTL`` -- *"for a Report of Approved Rate, the fourth byte of the
+        Quick-Start Option is not used"*, and *"bytes 5-8 contain a 30-bit QS
+        Nonce and a 2-bit Reserved field"*, so the nonce starts at the fifth
+        octet either way. It therefore packed seven octets against the
+        ``length=8`` that ``_make_opt_qs`` writes into it, and a spec-correct
+        Report read off the wire decoded its nonce one octet early. Both
+        functions are asserted here for that reason, since fixing only the
+        selector leaves the Report failing on a bare ``struct.error`` -- measured
+        on ``19088100deadbee0`` in exactly that state.
+
+        This starts from wire octets, like
+        :meth:`test_ipv4_sid_option_is_four_octets_wide_on_the_wire` and for the
+        same reason: the selector's length is only consulted while *parsing*, so a
+        construct-then-reconstruct comparison would have agreed with itself.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.schema.internet import ipv4 as ipv4_schema
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        self.assertEqual(
+            ipv4_schema.quick_start_option_length(ipv4_schema.QuickStartRequestOption), 8)
+        self.assertEqual(
+            ipv4_schema.quick_start_option_length(ipv4_schema.QuickStartReportOption), 8)
+
+        # A variable-width field cannot be sized without a packet, which a
+        # selector does not have for the schema it is about to return, so the
+        # helper says so rather than guessing. Both shapes of variable width are
+        # asserted, since they are detected differently: ``LSROption.route`` is a
+        # ``ListField`` with a length *callback*, while ``_QSOption.data`` is a
+        # ``SwitchField``, which has none and reports a width of zero until its own
+        # selector resolves it -- a silent nought is the one answer worse than a
+        # wrong one here. ``_QSOption`` also carries the ``ForwardMatchField`` that
+        # the sum has to skip, since a forward match consumes nothing. Neither
+        # class is a Quick-Start suboption, and asking about either registers
+        # nothing and mutates nothing.
+        for schema, field in ((ipv4_schema.LSROption, 'route'),
+                              (ipv4_schema._QSOption, 'data')):
+            with self.subTest(schema=schema.__name__):
+                with self.assertRaises(FieldValueError) as caught:
+                    ipv4_schema.quick_start_option_length(schema)
+                self.assertIn(f'{field!r} is not of a fixed width', str(caught.exception))
+
+        for label, option in (('request', bytes.fromhex('1908012adeadbee0')),
+                              ('report', bytes.fromhex('19088100deadbee0'))):
+            with self.subTest(option=label):
+                header = bytes.fromhex('47000000 00000000 00060000 '
+                                       '7f000001 7f000002') + option
+                header = header[:2] + len(header).to_bytes(2, 'big') + header[4:]
+                self.assertEqual(len(header), 28)
+
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    parsed = IPv4(header, len(header))
+                messages = [str(entry.message) for entry in caught]
+
+                # The under-read was the library naming its own defect.
+                self.assertEqual([entry for entry in messages
+                                  if 'packet length < 0' in entry], [], messages)
+
+                # One option, not the Quick-Start plus a fabricated tail.
+                self.assertEqual(
+                    [code for code, _ in parsed.info.options.items(multi=True)],
+                    [OptionNumber.QS],
+                )
+
+                qs = parsed.info.options[OptionNumber.QS]
+                self.assertEqual(qs.length, 8)
+                self.assertEqual(qs.nonce, 933982136)
+                self.assertEqual(qs.rate, 80)
+
+                # And the option rebuilds to exactly the octets it was read from.
+                proto = object.__new__(IPv4)
+                self.assertEqual(proto._make_opt_qs(OptionNumber.QS, qs).pack(), option)
+
+    def test_ipv4_timestamp_option_is_buildable_through_make(self) -> None:
+        """``make`` keeps the timestamps it is given. C.f. #552.
+
+        ``_make_opt_ts`` passed ``data=`` to
+        :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption`, whose field is
+        ``ts_data`` -- ``data`` is the attribute its ``post_process`` *derives*.
+        :meth:`Schema.__update__
+        <pcapkit.protocols.schema.schema.Schema.__update__>` answers a name it does
+        not know with an
+        :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` and carries on, so
+        every timestamp was dropped in silence and ``ts_data`` stayed bound to its
+        class-level ``ListField``, which ``post_process`` then tried to iterate:
+        ``TypeError: 'ListField' object is not iterable``. The IPv4 Timestamp
+        option was unbuildable through ``make`` for as long as that stood, which is
+        what the ``ipv4-option/TS`` entry of
+        :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`
+        recorded.
+
+        The absence of the warning is asserted as well as the presence of the
+        timestamps, because the warning is the whole reason the defect was silent:
+        a future rename that reintroduces it would otherwise only show up as a
+        value that happens to be missing.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.const.ipv4.ts_flag import TSFlag
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.utilities.warnings import UnknownFieldWarning
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            datagram = IPv4(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                            options=[(OptionNumber.TS, {
+                                'counts': 2,
+                                'timestamp': [datetime.timedelta(seconds=1), 2000],
+                            })], payload=b'')
+        self.assertEqual(
+            [str(entry.message) for entry in caught
+             if issubclass(entry.category, UnknownFieldWarning)], [],
+            [str(entry.message) for entry in caught],
+        )
+
+        ts = datagram.info.options[OptionNumber.TS]
+        self.assertEqual(ts.flag, TSFlag.Timestamp_Only)
+        self.assertEqual(ts.timestamp, (datetime.timedelta(seconds=1),
+                                        datetime.timedelta(seconds=2)))
+
+        raw = bytes(datagram)
+        self.assertEqual(raw[20:].hex(), '440c0d00000003e8000007d0')
+
+        # Parsed back, and rebuilt from what was parsed, to the same octets.
+        again = IPv4(raw, len(raw))
+        self.assertEqual(again.info.options[OptionNumber.TS].timestamp, ts.timestamp)
+        self.assertEqual(bytes(IPv4.from_data(again.info)), raw)
+
+        # The other shape the maker accepts, which reaches the addressed branch of
+        # ``post_process`` rather than the timestamp-only one.
+        with_ip = IPv4(src='127.0.0.1', dst='127.0.0.2', ttl=64, id=1,
+                       options=[(OptionNumber.TS, {
+                           'counts': 1,
+                           'timestamp': {
+                               ip_address('192.0.2.1'): datetime.timedelta(seconds=3),
+                           },
+                       })], payload=b'')
+        addressed = with_ip.info.options[OptionNumber.TS]
+        self.assertEqual(addressed.flag, TSFlag.IP_with_Timestamp)
+        self.assertEqual(addressed.timestamp[ip_address('192.0.2.1')],
+                         datetime.timedelta(seconds=3))
+
     def test_ipv4_properties_read_and_make_cover_packet_paths(self) -> None:
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.reg.transtype import TransType
