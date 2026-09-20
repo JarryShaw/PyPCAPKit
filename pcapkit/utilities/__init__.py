@@ -19,4 +19,5 @@ from pcapkit.utilities.logging import configure, ensure_output, get_logger, logg
 from pcapkit.utilities.warnings import warn
 
 __all__ = ['logger', 'get_logger', 'configure', 'reset', 'ensure_output',
-           'warn', 'stacklevel', 'detect']
+           'warn', 'stacklevel', 'detect',
+           'beholder', 'prepare', 'seekset']

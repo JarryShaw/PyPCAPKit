@@ -106,10 +106,14 @@ __all__ = [
 
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',        # Protocol Numbers
 
+    'Header', 'Frame',                                      # PCAP Headers
+    'PCAPNG',                                               # PCAPNG Format
+
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
 
-    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
+    'ARP', 'C_Tag', 'DRARP', 'Ethernet', 'InARP', 'L2TP',   # Link Layer
+    'L2TPv2', 'OSPF', 'RARP', 'S_Tag', 'VLAN',
 
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
@@ -118,8 +122,11 @@ __all__ = [
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer
 
     'FTP', 'FTP_DATA',                                      # Application Layer
-    'HTTP', 'NGAP',
+    'HTTP', 'HTTPv1', 'HTTPv2', 'NGAP',
+
+    'Data',                                                 # Protocol Data
+    'Schema',                                               # Protocol Schema
 ]
 
 #: version number
-__version__ = '1.5.0b3'
+__version__ = '1.5.0b4'

@@ -30,10 +30,18 @@ leave the cycle closed -- the generator constructing and reconstructing the same
 wrong octets, which match each other and so match the assertion. Those are
 pinned as tests of their own rather than as entries, since an entry would have to
 record ``'OK'`` as a failure:
-:meth:`OptionRoundTripTests.test_a_parsed_sid_option_re_emits_two_octets_too_wide`
-for IPv4's ``SID`` option width, tracked as #534, and
 :meth:`OptionRoundTripTests.test_a_single_hip_parameter_cannot_be_constructed`
 for the HIP header arithmetic the generator's ``HIP_COPIES`` routes around.
+
+IPv4's ``SID`` option width was the other one, tracked as #534 and pinned here by
+a ``test_a_parsed_sid_option_re_emits_two_octets_too_wide`` that no longer exists:
+``SIDOption.sid`` has been narrowed to a 16-bit field, so a four-octet option read
+off the wire now re-emits as the same four octets. The assertion that says so is
+:meth:`IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire
+<tests.protocols.internet.test_ipv4_unit.IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire>`,
+in the IPv4 unit suite beside the rest of that option's coverage rather than here
+-- what kept it in this module was the ``EXPECTED_FAILURES`` entry it stood in
+for, and with the defect fixed there is nothing for it to stand in for.
 
 Why the table is asserted in both directions
 --------------------------------------------
@@ -65,7 +73,6 @@ import importlib.util
 import sys
 import types
 import unittest
-import warnings
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests._support import purge_modules, time_limit
@@ -186,23 +193,23 @@ EXPECTED_FAILURES = {
     # and they could not have been routed around, their length being
     # ``3 + counts * 4`` and so never a multiple of four for any argument.
     #
-    # ``SID`` reached that same branch for a second reason of its own, and #506
-    # fixes only the padding half of it. Its cycle now closes, because the
-    # generator constructs and reconstructs the *same* six octets either side of
-    # the trip -- but six is not what the wire holds. ``SIDOption.sid`` is a
-    # ``UInt32Field`` at pcapkit/protocols/schema/internet/ipv4.py:368 where RFC
-    # 791's Stream ID is 16 bits, so ``_make_opt_sid`` packs ``880400000037``
-    # where the option is ``88040037``, and a genuine 4-octet option read off the
-    # wire does not survive being re-emitted.
+    # ``SID`` reached that same branch for a second reason of its own, which #506
+    # did not address and #534 now has: ``SIDOption.sid`` was a ``UInt32Field``
+    # where RFC 791 section 3.1 gives the Stream ID 16 bits, so the option
+    # re-emitted as ``880400000037`` where the wire holds ``88040037``. Six not
+    # being a multiple of four, it then reached the padding branch above and grew
+    # a ``NOP`` and an ``EOOL``. The field is now ``UInt16Field``, the option
+    # re-emits as the four octets it was read as, and the padding branch is not
+    # reached at all.
     #
-    # That asymmetry cannot be recorded as a ``Gap``, because the status such an
-    # entry would have to name is ``'OK'`` -- the one value
+    # Neither state was expressible here. The cycle closed either way, because
+    # the generator constructs and reconstructs through the same
+    # ``_make_opt_sid`` and so compared six octets against six -- and a ``Gap``
+    # naming ``'OK'`` is the one entry
     # :meth:`test_round_trip_is_identity_or_a_recorded_gap` reads as "no entry
-    # needed". So it is pinned as an assertion instead, by
-    # :meth:`OptionRoundTripTests.test_a_parsed_sid_option_re_emits_two_octets_too_wide`,
-    # which is the record this table would otherwise have carried and which is
-    # what turns red when the field is narrowed. It is tracked as #534, so that
-    # dropping the entry from this table does not drop the defect with it.
+    # needed". Which is why the width is asserted against *wire* octets instead,
+    # now in :meth:`IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire
+    # <tests.protocols.internet.test_ipv4_unit.IPv4UnitTests.test_ipv4_sid_option_is_four_octets_wide_on_the_wire>`.
 
     # ``_make_opt_ts`` passes ``data=`` where the schema field is ``ts_data``.
     # ``Schema.__init__`` only warns about an unknown field name and carries on,
@@ -708,91 +715,6 @@ class OptionRoundTripTests(unittest.TestCase):
         reparsed = HIP(paired, len(paired), extension=True)
         again = bytes(HIP(parameters=reparsed.info.parameters, extension=True, **base))
         self.assertEqual(paired, again)
-
-    def test_a_parsed_sid_option_re_emits_two_octets_too_wide(self) -> None:
-        """RFC 791's four-octet Stream ID option comes back six octets wide.
-
-        Tracked as #534. This is the record that ``ipv4-option/SID`` used to
-        carry in :data:`EXPECTED_FAILURES`, kept here because it can no longer be
-        carried there, and filed as an issue as well so that the defect is
-        tracked somewhere a passing test suite cannot hide it.
-
-        #506 fixed the option-padding defect that made the ``SID`` case
-        fail to construct at all, and with that gone the generator's cycle
-        closes and the case reports ``'OK'`` -- so a ``Gap`` for it would have to
-        record ``'OK'`` as a failure status, which is the one value
-        :meth:`test_round_trip_is_identity_or_a_recorded_gap` reads as "this case
-        needs no entry".
-
-        The cycle closes for a reason that is worth being precise about: the
-        generator constructs the option and reconstructs it through the *same*
-        ``_make_opt_sid``, so both halves emit the same six octets and match each
-        other. It is only against the wire that the width shows, which is why
-        this test starts from wire octets rather than from the generator's case.
-
-        ``SIDOption.sid`` is a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
-        at ``pcapkit/protocols/schema/internet/ipv4.py:368``, where RFC 791
-        section 3.1 gives the Stream ID two octets inside a four-octet option --
-        which is also what ``_make_opt_sid`` itself writes into ``length``. So
-        the field over-reads a well-formed option by exactly two octets on the
-        way in, and over-writes it by two on the way out.
-
-        Narrowing that field to
-        :class:`~pcapkit.corekit.fields.numbers.UInt16Field` makes every
-        assertion below wrong at once -- measured: the option re-emits as
-        ``88040037``, the datagram stays 24 octets, and the padding branch is not
-        reached at all. That is the intended fix, and deleting this test is how
-        it gets recorded, exactly as deleting an :data:`EXPECTED_FAILURES` entry
-        would have been.
-
-        """
-        from pcapkit.const.ipv4.option_number import OptionNumber
-        from pcapkit.protocols.internet.ipv4 import IPv4
-
-        # A minimal IPv4 header, ihl=6, carrying one well-formed SID option:
-        # kind 136, length 4, and the two-octet stream id 0x0037.
-        option = bytes.fromhex('88040037')
-        header = bytes.fromhex('46000018 00000000 00060000 '
-                               '7f000001 7f000002') + option
-        self.assertEqual(len(header), 24)
-
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            parsed = IPv4(header, len(header))
-
-        # The over-read, named by the library itself: a four-octet option minus a
-        # six-octet schema is the -2 in this warning.
-        self.assertIn('packet length < 0: -2',
-                      [str(entry.message) for entry in caught])
-
-        # The value still survives the trip in, and the option still declares the
-        # four octets it occupies -- so nothing here is a parsing failure.
-        sid = parsed.info.options[OptionNumber.SID]
-        self.assertEqual(sid.sid, 0x37)
-        self.assertEqual(sid.length, 4)
-
-        # Out again, the same option is six octets: two of stream id have become
-        # four, and the declared length no longer describes it.
-        proto = object.__new__(IPv4)
-        self.assertEqual(proto._make_opt_sid(OptionNumber.SID, sid).pack(),
-                         bytes.fromhex('880400000037'))
-
-        # Six is not a multiple of four, so the option area now reaches the
-        # padding branch that #506 fixed. That branch is no longer fatal, which
-        # is what lets the defect below through instead of stopping at it.
-        options, total_length = proto._make_ipv4_options(parsed.info.options)
-        self.assertEqual([type(entry).__name__ for entry in options],
-                         ['SIDOption', 'NOPOption', 'EOOLOption'])
-        self.assertEqual(total_length, 8)
-
-        # And so the rebuilt datagram is four octets longer than the one it was
-        # read from, with ihl and total length grown to match.
-        rebuilt = bytes(IPv4.from_data(parsed.info))
-        self.assertNotEqual(rebuilt, header)
-        self.assertEqual(rebuilt[20:], bytes.fromhex('8804000000370100'))
-        self.assertEqual(len(rebuilt), 28)
-        self.assertEqual(rebuilt[0] & 0x0F, 7)
-        self.assertEqual(int.from_bytes(rebuilt[2:4], 'big'), 28)
 
     def test_recorded_gaps_are_a_minority(self) -> None:
         """Most of the option space round-trips, and the rest is accounted for.

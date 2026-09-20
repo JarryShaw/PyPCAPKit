@@ -12,11 +12,12 @@ from pcapkit.utilities.exceptions import FieldValueError
 __all__ = [
     'IPv4AddressField', 'IPv6AddressField',
     'IPv4InterfaceField', 'IPv6InterfaceField',
+    'parse_ip_address',
 ]
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, Iterator
+    from typing import Any, Callable, Iterator, Optional
 
     from typing_extensions import Literal, Self
 
@@ -98,11 +99,120 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         wrong position does not fire, and that placement mistake has
         already been made twice in this repository's history.
 
+        Guarding the field classes is necessary but not sufficient, because a
+        ``_make_*`` that must know the address family before it can build the
+        schema converts the argument itself and so never hands this module a
+        :obj:`bool` at all. :func:`parse_ip_address` is where those callers
+        reach this guard (c.f. #508).
+
     """
     if isinstance(value, bool):
         raise FieldValueError(
             f'{description}: must not be a bool, not {value!r} -- pass '
             f'int({value!r}) if the numeric value is what is wanted')
+
+
+def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
+                     description: str,
+                     version: 'Optional[int]' = None) -> 'IPv4Address | IPv6Address':
+    """Convert a caller-supplied address on the **construction** path.
+
+    Args:
+        value: Address as the caller gave it -- an :mod:`ipaddress` object,
+            which is returned unchanged, or anything :mod:`ipaddress` accepts.
+        description: Human-readable description of what ``value`` is, used to
+            build the :exc:`FieldValueError` message. Callers in a protocol
+            should carry their usual context into it, e.g.
+            ``f'{self.alias}: [OptNo {type}] care-of address'``.
+        version: IP version to demand, ``4`` or ``6``, or :obj:`None` to take
+            whichever family ``value`` describes. Pass it where the wire format
+            fixes the family, so that an :class:`int` is widened to the right
+            one -- ``258`` is ``::102`` for ``version=6`` but ``0.0.1.2`` for
+            :func:`ipaddress.ip_address`.
+
+    Returns:
+        The converted address.
+
+    Raises:
+        FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+            :func:`_reject_bool`), is not a valid IP address, or is not of
+            ``version``.
+
+    Notes:
+        This is the sanctioned way for a ``_make_*`` method to turn a
+        caller-supplied address into an :mod:`ipaddress` object, and it exists
+        because doing it with :func:`ipaddress.ip_address` directly is what
+        #508 turned out to be: a ``_make_*`` that has to know the address
+        *family* before it can build the schema -- to size an option whose
+        length is the only thing on the wire that carries the family -- must
+        convert the argument itself, and that conversion happens **before** the
+        schema, so it launders a :obj:`bool` into an
+        :class:`~ipaddress.IPv4Address` that #500's guard in
+        :meth:`_IPAddressField.pre_process` can then only see as a legitimate
+        address. Seven such call sites took ``True`` / ``False`` without
+        complaint as ``0.0.0.1`` / ``0.0.0.0`` -- or ``::1`` / ``::`` where the
+        wire format fixes the family as IPv6 -- and six of them went on to pack
+        those octets. The seventh,
+        :meth:`TCP._make_mptcp_addaddr
+        <pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr>`, built an
+        equally corrupt schema and is only stopped from packing it by an
+        unrelated defect of its own.
+
+        Routing every one of them through here rather than giving each its own
+        :func:`isinstance` check is the whole point: #481 added exactly such a
+        check to :meth:`MH._make_opt_mn_id
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`, and #491 was the
+        same defect surviving at every site that had not been thought of. A
+        guard that has to be remembered per call site is a guard that will be
+        forgotten at the next one.
+
+        The :obj:`bool` rejection is the **first** statement here, ahead of any
+        dispatch on the value's type, for the placement reason #481 gives and
+        :func:`_reject_bool` repeats.
+
+        This raises :exc:`FieldValueError` and not
+        :exc:`~pcapkit.utilities.exceptions.ProtocolError`, which is deliberate
+        even though two sibling guards for the same mistake --
+        :meth:`MH._make_opt_mn_id
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` from #481 and
+        :class:`ESP's SecurityAssociation
+        <pcapkit.protocols.internet.esp.SecurityAssociation>` from #491 -- raise
+        the latter. The layer decides: this is a field-level conversion, so it
+        answers with what :meth:`_IPAddressField.pre_process` answers with for
+        the identical value, and a caller sees one exception whether the
+        :obj:`bool` reached the field through the schema or through a
+        ``_make_*``. The two protocol-level guards answer for the *option*,
+        alongside siblings that are not about addresses at all --
+        ``_make_opt_mn_id`` refuses a :obj:`bool` for all eight MN-ID subtypes,
+        only one of which is address-typed -- so neither can route through here
+        without losing the subtype-aware message that is the point of it. Both
+        exception classes derive from
+        :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,
+        so the difference is invisible to ``except BaseError`` and ``except
+        ValueError``, and nothing in the library catches either one
+        specifically.
+
+    """
+    _reject_bool(value, description)
+
+    if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+        ip = value  # type: IPv4Address | IPv6Address
+    else:
+        with _reraise_as_field_value_error(description):
+            if version == 4:
+                ip = ipaddress.IPv4Address(value)
+            elif version == 6:
+                ip = ipaddress.IPv6Address(value)
+            else:
+                ip = ipaddress.ip_address(value)
+
+    # NOTE: Checked outside the ``with`` block above, and after it, because an
+    # :mod:`ipaddress` object taken from the branch that skips the conversion
+    # has not been version-checked at all -- ``IPv6Address(IPv4Address(...))``
+    # would have raised, but returning the object unchanged cannot.
+    if version is not None and ip.version != version:
+        raise FieldValueError(f'{description}: IP version mismatch: {ip.version} != {version}')
+    return ip
 
 
 class _IPField(Field[_T], Generic[_T]):
