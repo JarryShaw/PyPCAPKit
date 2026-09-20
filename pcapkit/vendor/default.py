@@ -17,6 +17,7 @@ import importlib.metadata
 import inspect
 import os
 import re
+import sys
 import tempfile
 import textwrap
 import webbrowser
@@ -169,6 +170,35 @@ def get_user_agent() -> 'str':
                 break
 
     return f'{name}/{__version__} (+{url}) python-requests/{requests.__version__}'
+
+
+def stdin_is_interactive() -> 'bool':
+    """Whether there is somebody at a keyboard to be prompted.
+
+    :meth:`Vendor._request`'s last resort is to ask an operator to fetch the page
+    by hand, which needs a terminal: a process whose ``stdin`` is a pipe, a file,
+    or :file:`/dev/null` has nobody to open a browser for and nobody who could
+    ever save the file that path then waits for.
+
+    ``stdin`` can be absent rather than merely redirected, and it can stop being
+    usable while the process runs, so neither is allowed to propagate out of a
+    predicate: :data:`sys.stdin` is :obj:`None` under a GUI launcher such as
+    :program:`pythonw`, and one that has been closed raises :exc:`ValueError` from
+    :meth:`~io.IOBase.isatty` instead of answering. Every such case counts as
+    *not* interactive, which is the conservative answer -- it costs a crawler the
+    manual-intervention path it could not have used anyway.
+
+    Returns:
+        Whether :data:`sys.stdin` is attached to a terminal.
+
+    """
+    stdin = getattr(sys, 'stdin', None)
+    if stdin is None:
+        return False
+    try:
+        return bool(stdin.isatty())
+    except (AttributeError, ValueError, OSError):
+        return False
 
 
 class VendorMeta(abc.ABCMeta):
@@ -439,8 +469,21 @@ class Vendor(metaclass=VendorMeta):
         you can manually load that page and save the HTML source at the location
         it provides.
 
+        That last resort is only taken when somebody can actually act on it, i.e.
+        when :envvar:`PCAPKIT_CI_MODE` is unset *and*
+        :func:`stdin_is_interactive` finds a terminal. A non-interactive run --
+        under a pipe, in a container, from a scheduled job -- is failed with the
+        fetch error instead, the same way :envvar:`PCAPKIT_CI_MODE` fails it,
+        rather than printing instructions nobody will read. See #522.
+
         Returns:
             CSV data.
+
+        Raises:
+            requests.RequestException: If the registry could not be fetched and
+                manual intervention is unavailable, i.e. under
+                :envvar:`PCAPKIT_CI_MODE`, with no interactive ``stdin``, or where
+                the prompt itself fails because ``stdin`` went away mid-wait.
 
         Warns:
             VendorRequestWarning: If connection failed with and/or without proxies.
@@ -494,9 +537,19 @@ class Vendor(metaclass=VendorMeta):
                         counter += 1
                         continue
                     break
-            except requests.RequestException:
+            except requests.RequestException as error:
                 if CI_MODE:
                     warn('Connection failed; exit on CI mode...',
+                         VendorRequestWarning, stacklevel=2)
+                    raise
+
+                if not stdin_is_interactive():
+                    # NOTE: manual intervention needs an operator, and a process
+                    # with no terminal has none -- nobody to read the instructions
+                    # below, nobody to save the page, so the wait it ends in could
+                    # only ever time out the whole run. Fail exactly as CI_MODE
+                    # does rather than prompting into the void; see #522.
+                    warn('Connection failed; exit as stdin is not interactive...',
                          VendorRequestWarning, stacklevel=2)
                     raise
 
@@ -521,8 +574,25 @@ class Vendor(metaclass=VendorMeta):
                         print(f'    {temp_file}')
 
                     while True:
-                        with contextlib.suppress(Exception):
+                        try:
                             input('Press ENTER to continue...')  # nosec
+                        except Exception as exc:
+                            # NOTE: whatever stopped the prompt, ``input()`` is no
+                            # longer waiting -- and this loop only waits because
+                            # ``input()`` does, so the file it waits for can never
+                            # arrive. Discarding the exception, as this used to,
+                            # left a ``while True`` that printed three lines per
+                            # iteration at full speed: 26.7 million lines and 2.6 GB
+                            # measured in #522. The terminal this started on can
+                            # still go away mid-wait -- a closed ``stdin`` raises
+                            # :exc:`ValueError`, a dropped one :exc:`EOFError`, a
+                            # vanished :data:`sys.stdin` :exc:`RuntimeError` -- so the
+                            # check before the prompt does not make this redundant.
+                            # ``KeyboardInterrupt`` is not an :exc:`Exception` and so
+                            # still aborts as itself.
+                            warn(f'Connection failed; cannot prompt for manual intervene ({exc})...',
+                                 VendorRequestWarning, stacklevel=2)
+                            raise error from exc
                         if os.path.isfile(temp_file):
                             break
                         print('File not found; please save the page source at')
