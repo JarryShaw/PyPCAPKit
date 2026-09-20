@@ -1,0 +1,8 @@
+1.0.1 -- 2023-05-14
+===================
+
+**Changed** -- ``Info`` and ``Schema`` subclasses are finalised when the class is
+created rather than on each instantiation, which is a straight runtime saving on
+parsing.
+
+*Also released:* ``1.0.1.post1`` through ``1.0.1.post3`` (through 2023-05-27).

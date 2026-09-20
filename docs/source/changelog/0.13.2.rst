@@ -1,0 +1,4 @@
+0.13.2 -- 2019-01-24
+====================
+
+Maintenance release: the ``tbtrim`` dependency was updated.

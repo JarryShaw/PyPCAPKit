@@ -1,0 +1,7 @@
+0.15.2 -- 2020-06-27
+====================
+
+* **Added** -- a register interface on the protocol classes, and the same on
+  ``pcapkit.foundation.analysis``, so both can be extended without patching the
+  library.
+* **Fixed** -- flow tracing output format and content consistency.

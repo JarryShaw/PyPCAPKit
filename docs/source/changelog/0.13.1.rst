@@ -1,0 +1,8 @@
+0.13.1 -- 2019-01-23
+====================
+
+* **Added** -- ``tbtrim`` is used to trim PyPCAPKit's own frames out of
+  tracebacks through a custom ``excepthook``, so a traceback points at the
+  caller's code.
+* **Fixed** -- compatibility issues, with a new ``pcapkit.utilities.compat``
+  module.
