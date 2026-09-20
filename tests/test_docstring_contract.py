@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Every ``Args:`` name and ``Raises:`` clause, checked against the code itself.
+"""Every ``Args:`` name, ``Raises:`` clause, and quoted RFC sentence, checked.
 
 GitHub issue #501 fixed one wrong exception name and forty stale ``Args:``
 labels by hand. Issue #519 then showed the class was not exhausted -- more
@@ -16,9 +16,10 @@ docstring against the real signature and the real ``raise`` statements, so a
 docstring written tomorrow is checked tomorrow rather than being a snapshot of
 what was wrong in 2026.
 
-Three properties are asserted, and the split between them is deliberate --
+Four properties are asserted, and the split between them is deliberate --
 each is sound on its own, and the softer judgements are recorded rather than
-asserted:
+asserted. The first three derive their answer from the code; the fourth cannot,
+and says so:
 
 :meth:`DocstringParameterTests.test_documented_parameters_exist`
     A documented name that is not a parameter *and* has no ``**kwargs`` to
@@ -37,6 +38,13 @@ asserted:
     deliberately conservative -- see :func:`_reachable` -- because a false
     positive here would make the suite fail on a correct docstring, which is
     worse than missing one.
+
+:meth:`DocstringCitationTests.test_quoted_rfc_sentences_cite_their_own_section`
+    A docstring that quotes a sentence from :rfc:`8200` verbatim and attributes
+    it to a section that does not contain it. Issues #517 and #530 were both
+    exactly this, in sibling files, and neither was catchable by anything here
+    before -- see :data:`RFC8200_QUOTED_SENTENCES` for what this can and cannot
+    prove.
 
 Why a documented name may legitimately be absent from the signature, which is
 the trap this module has to avoid: this project documents keyword arguments
@@ -93,11 +101,18 @@ an entry for ``pcapkit/vendor/ipx/socket.py``'s ``process``, which documented
 ``data`` where the parameter was ``soup``. Rebasing this change onto
 ``c8fd97bcd`` picked up #511, which retired the HTML scrape and renamed that
 parameter to ``data`` as a side effect -- so the defect was gone, and this test
-failed on exactly that subtest and nothing else. The entry was removed. Worth
-knowing that the failure is reported through :meth:`~unittest.TestCase.subTest`,
-and ``pytest-subtests`` is not a dependency here, so pytest prints the parent
-test as ``PASSED`` while exiting non-zero: read the exit code, not the summary
-line.
+failed on exactly that subtest and nothing else. The entry was removed.
+
+It then happened a second time, to the sibling ``pcapkit/vendor/ipx/packet.py``,
+and that entry's removal is in this change's diff. ``a8912b46f`` (#524) renamed
+that ``process``'s parameter to ``data`` so its docstring became correct, and
+``48c6f07f8`` (#535) added this list four commits later without re-running
+against the newer base -- so ``main`` was red on that subtest from the moment
+the guard itself landed. The guard was right both times; what failed was
+re-running it after a rebase. Worth knowing that the failure is reported through
+:meth:`~unittest.TestCase.subTest`, and ``pytest-subtests`` is not a dependency
+here, so pytest prints the parent test as ``PASSED`` while exiting non-zero:
+read the exit code, not the summary line.
 
 Everything here reads :file:`pcapkit/` source and imports nothing but the
 standard library, so it reads no capture under :file:`examples/captures/` and
@@ -108,6 +123,7 @@ from __future__ import annotations
 
 import ast
 import pathlib
+import re
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -136,6 +152,47 @@ OTHER_SECTIONS = frozenset({
     'References', 'Return', 'Returns', 'See Also', 'Todo', 'Warning',
     'Warnings', 'Warns', 'Yield', 'Yields',
 })
+
+#: Sentences this package quotes verbatim from :rfc:`8200`, each mapped to the
+#: section that actually contains it. Keys are lowercased and whitespace is
+#: normalised before matching, because every one of these quotes is line-wrapped
+#: across a docstring and the leading ``Length of`` is routinely lowercased to
+#: fit the sentence it is embedded in.
+#:
+#: **What this proves and what it does not.** The section numbers here are not
+#: derived from anything in this repository -- they were read out of
+#: :rfc:`8200` itself, whose text is not vendored here and is not fetched by the
+#: suite. So this table is a recorded reading, and
+#: :meth:`DocstringCitationTests.test_quoted_rfc_sentences_cite_their_own_section`
+#: does not verify the RFC. What it verifies is the *pairing*: that wherever one
+#: of these sentences is quoted, the citation introducing it names the section
+#: the sentence came from. That is the invariant #517 and #530 both broke, and
+#: it is checked at every site rather than pinned at the two that are currently
+#: wrong, so the next copy-paste of one of these paragraphs into a third module
+#: is checked when it lands rather than being read past.
+#:
+#: Verified against https://www.rfc-editor.org/rfc/rfc8200.txt on 2026-09-20:
+#: ``Opt Data Len`` is defined only in Section 4.2, which is also where Pad1 and
+#: PadN live; Section 4.3 (Hop-by-Hop Options) and Section 4.6 (Destination
+#: Options) each define a ``Hdr Ext Len`` in 8-octet units and defer TLV
+#: encoding to Section 4.2 with the words quoted below; Section 4.4 (Routing)
+#: defines the third ``Hdr Ext Len``.
+#:
+#: Values are *sets* of acceptable sections rather than one section, because a
+#: sentence can honestly belong to more than one: the TLV deferral below is
+#: worded identically in Section 4.3 and Section 4.6 (rfc8200.txt lines 722 and
+#: 1268), so a docstring citing either is right and a checker demanding one
+#: would fail a correct citation in the sibling header.
+RFC8200_QUOTED_SENTENCES = {
+    'the length of the option data field of this option, in octets':
+        frozenset({'4.2'}),
+    'one or more tlv-encoded options, as described in section 4.2':
+        frozenset({'4.3', '4.6'}),
+    'the length of the hop-by-hop options header in 8-octet units, '
+    'not including the first 8 octets': frozenset({'4.3'}),
+    'the length of the routing header in 8-octet units, '
+    'not including the first 8 octets': frozenset({'4.4'}),
+}
 
 
 class Finding(NamedTuple):
@@ -172,12 +229,6 @@ KNOWN_DEFECTS = (
                   '_make_ipv4_options', 'option'),
           "documents 'option' where the parameter is 'options'; ipv4.py is "
           'owned by another change'),
-    Known(Finding('pcapkit/vendor/ipx/packet.py', 'process', 'data'),
-          "documents 'data' where the parameter is 'soup'; pcapkit/vendor is "
-          'generated-adjacent and owned elsewhere. Note the sibling '
-          'pcapkit/vendor/ipx/socket.py carried the identical defect and no '
-          'longer does, so that umbrella covers the file rather than the '
-          'directory -- see the module docstring'),
     Known(Finding('pcapkit/vendor/mh/binding_ack_flag.py', 'context', 'soup'),
           "documents 'soup: Parsed HTML source.' where the parameter is 'data' "
           "and holds CSV rows. Nothing was renamed here despite the "
@@ -452,6 +503,67 @@ def unreachable_exceptions() -> 'list[Finding]':
             if not _reachable(node, exception)]
 
 
+def docstrings() -> 'Iterator[tuple[str, str, str]]':
+    """Every docstring under :file:`pcapkit/`, with the name of what it documents.
+
+    Wider than :func:`functions`, which yields only function docstrings, because
+    a quoted RFC sentence is just as likely to sit in a module or class docstring
+    as in a method's -- :class:`~pcapkit.protocols.schema.schema.Schema`
+    subclasses carry their wire-format prose at class level. Kept separate rather
+    than widening :func:`functions` because the ``Args:`` and ``Raises:`` checks
+    are about signatures and ``raise`` statements, neither of which a module or
+    class docstring has, so feeding them these nodes would be meaningless.
+
+    """
+    for path in sorted(PACKAGE.rglob('*.py')):
+        try:
+            tree = ast.parse(path.read_text(encoding='utf-8'), str(path))
+        except (SyntaxError, UnicodeDecodeError):  # pragma: no cover
+            continue
+        relative = path.relative_to(ROOT).as_posix()
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                                     ast.AsyncFunctionDef)):
+                continue
+            doc = ast.get_docstring(node, clean=False)
+            if doc:
+                yield relative, getattr(node, 'name', '<module>'), doc
+
+
+def misattributed_quotes() -> 'list[Finding]':
+    """Quoted :rfc:`8200` sentences whose introducing citation names another section.
+
+    "Introducing" is the nearest ``8200#section-`` citation *before* the quote in
+    the same docstring, which is how these paragraphs are actually written --
+    ``Per :rfc:`8200#section-4.2`, an option's ``Opt Data Len`` field ... counts
+    *"the length of the Option Data field of this option, in octets"*``. Taking
+    the nearest preceding one rather than asking whether the right section is
+    cited *anywhere* in the docstring is what gives the check teeth: both #517
+    and #530 cited the correct section elsewhere in the same paragraph while
+    attributing the quote to the wrong one, so an "is it mentioned" test would
+    have passed on both defects.
+
+    A docstring that quotes one of these sentences with no preceding citation at
+    all is reported too -- an unattributed verbatim quote is the same defect with
+    the citation missing rather than wrong.
+
+    """
+    defects = []  # type: list[Finding]
+    for module, name, doc in docstrings():
+        flat = ' '.join(doc.split()).lower()
+        for sentence, sections in RFC8200_QUOTED_SENTENCES.items():
+            start = flat.find(sentence)
+            if start < 0:
+                continue
+            cited = re.findall(r'8200#section-([0-9]+(?:\.[0-9]+)*)', flat[:start])
+            if cited and cited[-1] in sections:
+                continue
+            defects.append(Finding(module, name, '%s attributed to %s, not %s'
+                                   % (sentence[:40], cited[-1] if cited else 'nothing',
+                                      '/'.join(sorted(sections)))))
+    return defects
+
+
 class DocstringParameterTests(unittest.TestCase):
     """``Args:`` entries against the real signatures."""
 
@@ -566,6 +678,64 @@ class DocstringRaisesTests(unittest.TestCase):
                                      'raise is commented out'
                                      % (relative, number, node.name, exception))
         self.assertEqual(stale, [], '\n'.join(['stale clause(s):'] + stale))
+
+
+class DocstringCitationTests(unittest.TestCase):
+    """Verbatim RFC quotes against the section they are attributed to."""
+
+    def test_quoted_rfc_sentences_cite_their_own_section(self) -> 'None':
+        """No docstring attributes an :rfc:`8200` sentence to the wrong section.
+
+        This is the class of defect #517 and #530 were both instances of, in
+        sibling files, six weeks apart -- and the reason it needed a check rather
+        than a second careful reading is that the two look nothing alike at the
+        point of the mistake. #517's ``ipv6_opts.py`` cited Section 4.3 for a
+        Section 4.2 sentence while implementing the Section 4.6 header, so the
+        cited section was unrelated to the file. #530's ``hopopt.py`` cited
+        Section 4.3 for the same Section 4.2 sentence while implementing the
+        Section 4.3 header, so the cited section was the *right* one for the
+        class and the wrong one for the quote. A reviewer who learned to look
+        for "cites a header it does not implement" catches the first and reads
+        straight past the second.
+
+        What makes the assertion safe is that it is keyed on the quote, not on
+        the file: the only docstrings it can fail are ones that reproduce a
+        sentence from :rfc:`8200` word for word, where there is a fact of the
+        matter about which section that sentence is in and no judgement to make.
+        Prose that paraphrases the RFC, or cites a section without quoting it, is
+        not matched and cannot be failed -- see :data:`RFC8200_QUOTED_SENTENCES`
+        for why the section numbers are a recorded reading rather than a
+        derivation, and what that costs.
+
+        """
+        unexpected = misattributed_quotes()
+        self.assertEqual(unexpected, [], '\n'.join(
+            ['%d quoted RFC sentence(s) attributed to the wrong section:'
+             % len(unexpected)]
+            + ['  %s  %s(): %s' % finding for finding in unexpected]))
+
+    def test_the_quoted_sentences_are_still_quoted_somewhere(self) -> 'None':
+        """Every :data:`RFC8200_QUOTED_SENTENCES` key still appears in the package.
+
+        Without this, the table above decays into a lie the moment one of these
+        paragraphs is reworded: the entry stops matching anything, the pairing
+        check silently covers one site fewer, and nothing fails. The same
+        rot-guard reasoning as
+        :meth:`DocstringParameterTests.test_known_defects_are_still_defects`,
+        pointed the other way -- there an entry must keep reproducing, here a
+        key must keep matching.
+
+        A deliberate rewording is meant to fail this and have its entry removed
+        or updated, which is a one-line edit made with the reason fresh.
+
+        """
+        quoted = [' '.join(doc.split()).lower() for _, _, doc in docstrings()]
+        for sentence in RFC8200_QUOTED_SENTENCES:
+            with self.subTest(sentence=sentence[:60]):
+                self.assertTrue(any(sentence in doc for doc in quoted),
+                                'no docstring quotes this any more, so its entry '
+                                'in RFC8200_QUOTED_SENTENCES checks nothing -- '
+                                'update or remove it')
 
 
 if __name__ == '__main__':
