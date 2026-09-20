@@ -1,0 +1,6 @@
+1.2.2 -- 2023-09-14
+===================
+
+**Fixed** -- extraction failing outright (#166).
+
+*Also released:* ``1.2.2.post1``, ``1.2.2.post2`` (through 2023-10-04).

@@ -24,6 +24,48 @@ if TYPE_CHECKING:
 
     from bs4.element import Tag
 
+###############################################################################
+# NOTE: on the registry URL, which this module and its two siblings
+# (:mod:`~pcapkit.vendor.pcapng.option_type`,
+# :mod:`~pcapkit.vendor.pcapng.record_type`) share. Why all three read ``-03`` is
+# stated for readers in the note in ``docs/source/pcapkit/vendor/pcapng.rst``,
+# which renders; what follows is the measurement detail behind it. See #518.
+#
+# The dead ``-02`` URL,
+# https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html, serves a
+# 77968-byte HTML error page rather than a clean refusal, so ``Vendor._request``
+# rejects it on ``page.ok`` and retries MAX_RETRY times against a page that will
+# never come back. On ``-02`` the registries are ASCII art inside ``<pre>`` and
+# the only HTML ``<table>`` is the running-header one, so
+# ``soup.select('table#table-9')`` below finds nothing and raises ``IndexError``.
+# Measured across every published revision, ``-03`` is the only one that
+# reproduces all three committed constant files byte for byte.
+#
+# Two renderings of ``-03`` were compared, and both reproduce the three constant
+# files byte-identically, so the choice is about exposure rather than data:
+#
+#   * https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html
+#     -- 254640 bytes, 11 ``<table>`` (the header one plus ``table-1``..``-10``),
+#     ``Last-Modified: Thu, 24 Jun 2021 01:24:12 GMT``. This is the immutable
+#     I-D archive: a static file, frozen at publication.
+#   * https://datatracker.ietf.org/doc/html/draft-tuexen-opsawg-pcapng-03
+#     -- 272271 bytes, 13 ``<table>``, no ``Last-Modified``. Rendered per
+#     request, and the extra ~17 KB is datatracker chrome: a version selector, a
+#     "Compare versions" control and a metadata table, plus ten more ``<link>``
+#     and two more ``<nav>``.
+#
+# The archive wins. Selecting tables by id out of a document that gains three
+# unrelated ``<table>`` elements from a navigation template, which can change
+# whenever the service is redeployed, is gratuitous risk for no gain.
+#
+# NOTE: the draft has since moved to the OPSAWG working group as
+# ``draft-ietf-opsawg-pcapng``, currently at ``-05``. Tracking it is a separate
+# change, not a URL swap: the newer revisions alter the registries, and from
+# ``draft-ietf-opsawg-pcapng-03`` onwards ``process()`` below dies with
+# ``ValueError: invalid literal for int() with base 16: '0x0A0D0AXX'`` on a
+# wildcard row it has no handling for.
+###############################################################################
+
 
 class BlockType(Vendor):
     """Block Types"""
@@ -31,7 +73,7 @@ class BlockType(Vendor):
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFFFFFF'
     #: Link to registry.
-    LINK = 'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'
+    LINK = 'https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html'
 
     def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records."""

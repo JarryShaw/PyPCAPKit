@@ -307,6 +307,7 @@ Type Stubs
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.transport.tcp.Flags
+   :no-index:
    :members:
    :show-inheritance:
 

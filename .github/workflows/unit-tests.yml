@@ -155,6 +155,47 @@ jobs:
       - name: Run full test suite
         run: python -m pytest -q
 
+  # ``CHANGELOG.md`` is generated from the newest entry under
+  # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
+  # the moment an entry is edited without regenerating it. That is worth its own
+  # job rather than leaving it to review, because ``Create Release`` feeds the file
+  # to the GitHub Release body: a drifted copy is not merely wrong in the tree, it
+  # is published.
+  #
+  # Deliberately *not* gated on ``gate-only``, unlike the three jobs above, and
+  # that is the point of putting it here at all. ``create-release.yml`` calls this
+  # workflow as its release gate, so an ungated job runs on the release path and
+  # the release body cannot be built from a file that has drifted. The matrix is
+  # skipped per caller because it is expensive and already ran for the commit;
+  # this is neither expensive nor covered elsewhere on that path.
+  #
+  # ``tests/project/test_changelog_md.py`` asserts the same identity, so the
+  # matrix covers it too -- but that test ``skipTest``s when either file is
+  # absent, and reports a mismatch as two 17 KB strings. ``--check`` cannot skip,
+  # exits 1 when the file is missing, and prints a unified diff.
+  changelog:
+    name: Changelog drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      # No install step: the generator imports argparse, difflib, pathlib, re, sys
+      # and typing and nothing else, so it runs against a bare interpreter.
+      # Verified with ``python -S``.
+      - name: Check CHANGELOG.md is in step with its source entry
+        shell: bash
+        run: |
+          if ! python util/changelog_md.py --check; then
+            echo "::error title=CHANGELOG.md has drifted::CHANGELOG.md is generated from the newest entry under docs/source/changelog/ and no longer matches it. Regenerate it with 'python util/changelog_md.py' and commit the result. The unified diff above shows what moved."
+            exit 1
+          fi
+
   # The verdict a shipping workflow asks for: the full suite, fixtures and
   # all, on one interpreter. It is deliberately not the matrix -- the matrix
   # has already run against this very commit, from this workflow's own push or

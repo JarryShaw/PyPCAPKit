@@ -100,7 +100,7 @@ dependencies = [
 homepage = "https://jarryshaw.github.io/PyPCAPKit/"
 documentation = "https://jarryshaw.github.io/PyPCAPKit/"
 repository = "https://github.com/JarryShaw/PyPCAPKit"
-changelog = "https://github.com/JarryShaw/PyPCAPKit/releases"
+changelog = "https://jarryshaw.github.io/PyPCAPKit/changelog.html"
 
 [project.scripts]
 pcapkit-cli = "pcapkit.__main__:main"
