@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import pathlib
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -177,7 +178,89 @@ class TraceFlowBaseTests(unittest.TestCase):
                 def submit(self) -> tuple[DummyIndex, ...]:
                     return ()
 
-        register.assert_called_once_with('defaulttrace', Default)
+        # #514: registration is opt-in. Before it, the absent keyword fell back to
+        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- and this registered
+        # under ``'defaulttrace'``. A class attribute is not a registry key.
+        register.assert_not_called()
+        self.assertEqual(Default.name, 'DefaultTrace')
+
+    def test_traceflow_subclass_rejects_unrecognised_keyword(self) -> None:
+        """A misspelled class keyword raises instead of being swallowed.
+
+        It used to land in ``**kwargs``, get dropped by the bare
+        ``super().__init_subclass__()``, and leave the class registered under its
+        own class name -- no exception, no warning.
+
+        The keyword used here is deliberately *not* ``name``; see the sibling
+        test in ``tests/foundation/reassembly/test_reassembly_base.py`` for why
+        four class keyword names collide with :meth:`abc.ABCMeta.__new__` on
+        Python 3.10. The colliding case is pinned separately below.
+
+        """
+        from pcapkit.corekit.infoclass import Info, info_final
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        @info_final
+        class DummyPacket(Info):
+            index: int
+
+        @info_final
+        class DummyIndex(Info):
+            index: tuple[int, ...]
+
+        @info_final
+        class DummyBuffer(Info):
+            index: list[int]
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_traceflow') as register:
+            with self.assertRaises(UnsupportedCall) as caught:
+                class Typo(TraceFlow[str, DummyBuffer, DummyIndex, DummyPacket],
+                           traceflow='wrong-keyword-for-traceflow'):
+                    def dump(self, packet: DummyPacket) -> None:
+                        self.trace(packet)
+
+                    def trace(self, packet: DummyPacket, *, output: bool = False):
+                        return object() if output else 'flow'
+
+                    def submit(self) -> tuple[DummyIndex, ...]:
+                        return ()
+
+        register.assert_not_called()
+        self.assertIn('traceflow', str(caught.exception))
+
+        # ``name=`` is the mistake a user actually makes, by analogy with
+        # ``Engine``, and it is one of the four colliding names -- so which
+        # exception surfaces is version-dependent. Pinned rather than skipped.
+        expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_traceflow') as register:
+            with self.assertRaises(expected):
+                class Collides(TraceFlow[str, DummyBuffer, DummyIndex, DummyPacket],
+                               name='collides-with-ABCMeta-on-3.10'):
+                    def dump(self, packet: DummyPacket) -> None:
+                        self.trace(packet)
+
+                    def trace(self, packet: DummyPacket, *, output: bool = False):
+                        return object() if output else 'flow'
+
+                    def submit(self) -> tuple[DummyIndex, ...]:
+                        return ()
+
+        register.assert_not_called()
+
+    def test_traceflow_registry_property_reads_the_extractor_table(self) -> None:
+        """``TraceFlow.registry`` is a class-level accessor, as on ``EnumSchema``.
+
+        Note it is the *flow tracing* registry, not
+        :attr:`TraceFlow.__output__`, which is the separate output-dumper table
+        this same class owns.
+
+        """
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+
+        self.assertIs(TraceFlow.registry, Extractor.__traceflow__)
+        self.assertIsNot(TraceFlow.registry, TraceFlow.__output__)
 
 
 if __name__ == '__main__':

@@ -39,6 +39,19 @@ implements datagram reassembly of IP and TCP packets.
          This property is also available as a class variable. Its
          value can be set by :attr:`__protocol_type__` class attribute.
 
+   .. property:: registry
+      :type: dict[str, ModuleDescriptor[ReassemblyBase] | Type[ReassemblyBase]]
+
+      Mapping of protocol names to reassembly classes.
+
+      .. note::
+
+         This property is only available as a class variable, since it is
+         defined on :class:`ReassemblyMeta`. It reads
+         :attr:`~pcapkit.foundation.extraction.Extractor.__reassembly__`, the
+         single table every reassembly registration lands in, so it is not a
+         per-class mapping.
+
    .. autoproperty:: count
    .. autoproperty:: datagram
    .. autoproperty:: timeout
