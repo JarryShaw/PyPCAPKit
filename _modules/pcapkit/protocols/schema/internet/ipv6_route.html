@@ -679,7 +679,24 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">buffer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addresses</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="c1"># NOTE: ``self.addresses`` is still a ``list[bytes]`` -- one</span>
+            <span class="c1"># already-compressed address per item -- when this schema was</span>
+            <span class="c1"># built via ``make`` (see</span>
+            <span class="c1"># :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`)</span>
+            <span class="c1"># rather than parsed off the wire. There is nothing to decode in</span>
+            <span class="c1"># that case: the caller supplied each address already</span>
+            <span class="c1"># compressed, and :meth:`Schema.pack</span>
+            <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`'s own</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.collections.ListField` handling</span>
+            <span class="c1"># packs that list directly. The SRH prefix-decompression below</span>
+            <span class="c1"># only makes sense against the raw octets a real parse hands</span>
+            <span class="c1"># here -- treating the list as ``bytes`` (as a bare ``cast``</span>
+            <span class="c1"># used to, without a runtime check) raised trying to slice and</span>
+            <span class="c1"># re-join it. See #556.</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
         <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[IPv6Address]'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'dst'</span><span class="p">))</span>
         <span class="n">dst</span> <span class="o">=</span> <span class="n">dst_val</span><span class="o">.</span><span class="n">packed</span> <span class="k">if</span> <span class="n">dst_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 

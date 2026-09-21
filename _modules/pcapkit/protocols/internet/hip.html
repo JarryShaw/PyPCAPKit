@@ -4193,13 +4193,26 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">iv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] IV length must be 16 bytes for AES cipher'</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Schema_EncryptedParameter</span><span class="p">(</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_EncryptedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">iv</span> <span class="ow">or</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="n">cipher</span><span class="o">=</span><span class="n">cipher_id</span><span class="p">,</span>
             <span class="n">iv</span><span class="o">=</span><span class="n">iv</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="c1"># NOTE: ``cipher`` is not a schema field -- ``ENCRYPTED``'s own wire</span>
+        <span class="c1"># format carries no cipher ID of its own, only the preceding</span>
+        <span class="c1"># ``HIP_CIPHER`` parameter does -- so passing it as a constructor</span>
+        <span class="c1"># keyword (as this used to) drew an ``UnknownFieldWarning`` and was</span>
+        <span class="c1"># dropped, leaving ``pre_unpack`` to fall back to its own sibling</span>
+        <span class="c1"># lookup, which a standalone ``make`` call gives no ``options`` to</span>
+        <span class="c1"># search and which then always treated the parameter as cipher-less</span>
+        <span class="c1"># and silently packed the ``ENCRYPTED`` parameter without its IV.</span>
+        <span class="c1"># Setting the already-resolved ``cipher_id`` as a plain attribute</span>
+        <span class="c1"># instead reaches ``pack()``'s packet context via</span>
+        <span class="c1"># ``packet.update(self.__dict__)``, where ``pre_unpack`` now honours</span>
+        <span class="c1"># it ahead of that lookup. See #556.</span>
+        <span class="n">schema</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">cipher_id</span>
+        <span class="k">return</span> <span class="n">schema</span></div>
 
 
 <div class="viewcode-block" id="HIP._make_param_host_id">

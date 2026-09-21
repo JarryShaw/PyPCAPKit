@@ -4556,6 +4556,17 @@ parameter by itself.</p>
 <dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – packet data</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">packet</span></code> already carries a resolved <code class="docutils literal notranslate"><span class="pre">cipher</span></code> – as it
+does when this schema was built via
+<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_encrypted" title="pcapkit.protocols.internet.hip.HIP._make_param_encrypted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP._make_param_encrypted</span></code></a>, which
+sets it as a plain attribute so <code class="docutils literal notranslate"><span class="pre">pack()</span></code>’s own
+<code class="docutils literal notranslate"><span class="pre">packet.update(self.__dict__)</span></code> carries it in here – that value
+is trusted over the <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code> sibling lookup below, which a
+parameter packed on its own has no <code class="docutils literal notranslate"><span class="pre">options</span></code> list for. See
+#556.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -4578,7 +4589,11 @@ parameter by itself.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.EncryptedParameter.cipher">
 <span class="sig-name descname"><span class="pre">cipher</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.cipher.Cipher" title="pcapkit.const.hip.cipher.Cipher"><span class="pre">Cipher</span></a></span><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.EncryptedParameter.cipher" title="Link to this definition">¶</a></dt>
-<dd><p>Cipher ID.</p>
+<dd><p>Cipher ID. Not a schema field – set as a plain attribute, either
+by <a class="reference internal" href="#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process" title="pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> after unpacking, or by
+<a class="reference internal" href="#pcapkit.protocols.internet.hip.HIP._make_param_encrypted" title="pcapkit.protocols.internet.hip.HIP._make_param_encrypted"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HIP._make_param_encrypted</span></code></a> before
+packing – so it is documented here rather than accepted by
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code>. See #556.</p>
 </dd></dl>
 
 </dd></dl>

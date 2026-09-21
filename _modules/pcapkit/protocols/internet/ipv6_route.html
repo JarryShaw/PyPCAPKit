@@ -1083,12 +1083,12 @@
         <span class="c1"># count. It is left as-is here: RPL addresses are variable-length</span>
         <span class="c1"># (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is</span>
         <span class="c1"># not obviously the right invariant even under correct units, and</span>
-        <span class="c1"># this module's RPL construction already fails before ever reaching</span>
-        <span class="c1"># this method, from an unrelated defect (``RPL.post_process`` in</span>
-        <span class="c1"># pcapkit/protocols/schema/internet/ipv6_route.py assumes ``bytes``</span>
-        <span class="c1"># on a path ``Schema.pack`` also runs, per #476/#480) -- so there is</span>
-        <span class="c1"># no working round trip here to validate a replacement against.</span>
-        <span class="c1"># Flagged for follow-up rather than guessed at.</span>
+        <span class="c1"># nothing here has been checked against a real RPL capture. Flagged</span>
+        <span class="c1"># for follow-up rather than guessed at. (The round trip through</span>
+        <span class="c1"># ``RPL.post_process`` this note used to say was broken -- it</span>
+        <span class="c1"># treated a ``make``-built ``list[bytes]`` as ``bytes`` and raised</span>
+        <span class="c1"># on pack -- was fixed by #556; that no longer blocks validating a</span>
+        <span class="c1"># replacement here, but the replacement itself is still unwritten.)</span>
         <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 

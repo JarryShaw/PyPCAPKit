@@ -1150,7 +1150,22 @@
 <span class="sd">        Args:</span>
 <span class="sd">            packet: packet data</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            When ``packet`` already carries a resolved ``cipher`` -- as it</span>
+<span class="sd">            does when this schema was built via</span>
+<span class="sd">            :meth:`HIP._make_param_encrypted</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.hip.HIP._make_param_encrypted&gt;`, which</span>
+<span class="sd">            sets it as a plain attribute so ``pack()``'s own</span>
+<span class="sd">            ``packet.update(self.__dict__)`` carries it in here -- that value</span>
+<span class="sd">            is trusted over the ``HIP_CIPHER`` sibling lookup below, which a</span>
+<span class="sd">            parameter packed on its own has no ``options`` list for. See</span>
+<span class="sd">            #556.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="s1">'cipher'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+            <span class="n">packet</span><span class="p">[</span><span class="s1">'__cipher__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'cipher'</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="s1">'options'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
             <span class="n">cipher_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'list[Data_HIPCipherParameter]'</span><span class="p">,</span>
                             <span class="n">packet</span><span class="p">[</span><span class="s1">'options'</span><span class="p">]</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_CIPHER</span><span class="p">))</span>
@@ -1202,10 +1217,15 @@
 
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Cipher ID.</span>
+        <span class="c1">#: Cipher ID. Not a schema field -- set as a plain attribute, either</span>
+        <span class="c1">#: by :meth:`post_process` after unpacking, or by</span>
+        <span class="c1">#: :meth:`HIP._make_param_encrypted</span>
+        <span class="c1">#: &lt;pcapkit.protocols.internet.hip.HIP._make_param_encrypted&gt;` before</span>
+        <span class="c1">#: packing -- so it is documented here rather than accepted by</span>
+        <span class="c1">#: ``__init__``. See #556.</span>
         <span class="n">cipher</span><span class="p">:</span> <span class="s1">'Enum_Cipher'</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">cipher</span><span class="p">:</span> <span class="s1">'Enum_Cipher'</span><span class="p">,</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">iv</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 

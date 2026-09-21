@@ -743,6 +743,15 @@ at <code class="docutils literal notranslate"><span class="pre">Tree</span></cod
 (#413), ambiguous cross-references and five autodoc signature failures (#416),
 and <code class="docutils literal notranslate"><span class="pre">Extractor</span></code>’s documented exception plus 40 phantom or stale <code class="docutils literal notranslate"><span class="pre">Args:</span></code>
 labels (#501).</p></li>
+<li><p><strong>Fixed</strong> – two dropped-keyword/wrong-cast defects flagged in review during
+this release and never filed until now: HIP’s <code class="docutils literal notranslate"><span class="pre">_make_param_encrypted</span></code> passed
+<code class="docutils literal notranslate"><span class="pre">cipher=</span></code> to a schema with no such field, so the value was silently dropped
+and an AES-cipher <code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code> parameter built through <code class="docutils literal notranslate"><span class="pre">make</span></code> packed
+without its IV; and IPv6-Route’s <code class="docutils literal notranslate"><span class="pre">RPL.post_process</span></code>, which runs on every
+<code class="docutils literal notranslate"><span class="pre">Schema.pack</span></code> and not only after a parse, assumed <code class="docutils literal notranslate"><span class="pre">self.addresses</span></code> was
+still the concatenated <code class="docutils literal notranslate"><span class="pre">bytes</span></code> a parse leaves it as, and raised slicing the
+<code class="docutils literal notranslate"><span class="pre">list[bytes]</span></code> a <code class="docutils literal notranslate"><span class="pre">make</span></code>-built multi-address header actually holds there
+(#556).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so
