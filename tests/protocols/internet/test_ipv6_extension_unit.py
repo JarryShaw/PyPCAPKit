@@ -377,6 +377,86 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         )
         self.assertEqual(rpl_from_data.cmpr_i, 1)
 
+    def test_ipv6_route_make_dst_rejects_a_bool(self) -> None:
+        """A :obj:`bool` destination address must not be silently converted. See #540.
+
+        ``IPv6_Route.make``'s ``dst`` is converted to an :class:`~ipaddress.IPv6Address`
+        ahead of dispatching to the per-type constructor, via a bare
+        ``ipaddress.ip_address`` before this fix -- so ``dst=True`` converted to
+        ``::1`` with no exception at all. This is the most reachable of the four
+        #540 sites, being on the public ``make`` entry point rather than a private
+        helper.
+        """
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        proto = object.__new__(IPv6_Route)
+
+        with self.assertRaises(FieldValueError) as context:
+            proto.make(dst=True, data={'ip': ['2001:db8::1']})  # type: ignore[arg-type]
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('must not be a bool', str(context.exception))
+        self.assertIn('int(True)', str(context.exception))
+
+        # a real destination still converts and dispatches normally -- default
+        # ``type`` is Source Route, whose constructor accepts but ignores ``dst``,
+        # so this exercises exactly the conversion above without depending on any
+        # other routing type's own behaviour
+        schema = proto.make(dst='2001:db8::ffff', data={'ip': ['2001:db8::1']})
+        self.assertEqual(str(schema.data.ip[0]), '2001:db8::1')
+
+    def test_ipv6_route_rpl_source_addresses_reject_a_bool(self) -> None:
+        """A :obj:`bool` entry in ``ip`` must not corrupt the RPL compression metadata. See #540.
+
+        Worse than a plain packed-address defect: because ``cmpr_i``/``cmpr_e`` are
+        *derived* from the (previously unguarded) converted addresses, a bool
+        corrupted the compression metadata alongside the address list. Measured
+        before the fix:
+
+        .. code-block:: text
+
+           _make_data_type_rpl(ip=[True])                          -> cmpr_i=0  cmpr_e=0  addresses=['00000001']
+           _make_data_type_rpl(dst=2001:db8::1, ip=[True])          -> cmpr_i=16 cmpr_e=0  addresses=['00000001']
+
+        Both the ``dst is None`` branch and the ``dst`` branch (which separately
+        converts the ``cmpr_i``-prefix items and the last, ``cmpr_e``-suffix item)
+        are checked here, since each is its own call site of the same bare
+        conversion.
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        proto = object.__new__(IPv6_Route)
+
+        sites = [
+            ('dst=None', lambda: proto._make_data_type_rpl(
+                Routing.RPL_Source_Route_Header, ip=[True])),
+            ('dst given, bool is the only (cmpr_e) address', lambda: proto._make_data_type_rpl(
+                Routing.RPL_Source_Route_Header, dst=ip_address('2001:db8::1'), ip=[True])),
+            ('dst given, bool is a cmpr_i-prefix address', lambda: proto._make_data_type_rpl(
+                Routing.RPL_Source_Route_Header, dst=ip_address('2001:db8::1'),
+                ip=[True, '2001:db8::2'])),
+        ]
+
+        for name, make in sites:
+            with self.subTest(site=name):
+                with self.assertRaises(FieldValueError) as context:
+                    make()
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('must not be a bool', str(context.exception))
+                self.assertIn('int(True)', str(context.exception))
+
+        # real addresses still compress and pack normally, with the metadata this
+        # defect would have corrupted intact
+        rpl = proto._make_data_type_rpl(
+            Routing.RPL_Source_Route_Header,
+            dst=ip_address('2001:db8::ffff'),
+            ip=['2001:db8::1', '2001:db8::2'],
+        )
+        self.assertGreaterEqual(rpl.cmpr_i, 0)
+        self.assertGreaterEqual(rpl.cmpr_e, 0)
+
     def test_ipv6_route_read_data_type_errors_report_real_routing_type(self) -> None:
         """Regression test for GH-442.
 
@@ -1452,6 +1532,48 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with_dst = route_schema.RPL(cmpr_i=8, cmpr_e=8, pad={'pad_len': 0}, addresses=suffixes)
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
+
+    def test_ipv6_route_rpl_packs_a_multi_address_list(self) -> None:
+        """Regression test for GH-556.
+
+        ``RPL.post_process`` runs on every ``Schema.pack``, not only after a
+        real parse, and a schema built through ``make`` (see
+        ``IPv6_Route._make_data_type_rpl``) still holds ``self.addresses``
+        as the ``list[bytes]`` the caller passed in -- one already-
+        compressed address per item -- rather than the concatenated
+        ``bytes`` a parse produces. ``post_process`` used to assume the
+        latter unconditionally, so packing sliced and re-joined the *list*
+        as though it were that concatenated buffer and raised. Merely
+        constructing the schema does not exercise this: the defect is only
+        reachable through an actual pack.
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+
+        first = ip_address('2001:db8::1')
+        second = ip_address('2001:db8::2')
+
+        # Directly at the schema level: ``addresses`` is a ``list[bytes]``,
+        # exactly as ``_make_data_type_rpl`` hands it to the constructor.
+        rpl_schema = route_schema.RPL(
+            cmpr_i=0, cmpr_e=0, pad={'pad_len': 0},
+            addresses=[first.packed, second.packed],
+        )
+        packed = bytes(rpl_schema)
+        self.assertIn(first.packed, packed)
+        self.assertIn(second.packed, packed)
+
+        # And through the public ``make`` entry point, which is what
+        # actually builds a multi-address RPL routing header end to end.
+        proto = object.__new__(IPv6_Route)
+        header = proto.make(
+            type=Routing.RPL_Source_Route_Header,
+            data={'ip': [first, second]},
+        )
+        header_packed = bytes(header)
+        self.assertIn(first.packed, header_packed)
+        self.assertIn(second.packed, header_packed)
 
     def _assert_padding_options_parse_from_the_wire(self, protocol_cls: type) -> None:
         """A ``Pad1`` option must consume exactly one octet, wherever it sits.

@@ -7,7 +7,7 @@ import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.utilities.compat import final
-from pcapkit.utilities.exceptions import NoDefaultValue
+from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
 
 __all__ = ['Field']
 
@@ -32,6 +32,30 @@ class NoValueType:
 
 #: NoValueType: Default value for :attr:`FieldBase.default`.
 NoValue = NoValueType()
+
+#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform
+#: for a field whose declared length outruns its buffer.
+#:
+#: This is libpcap's own ``MAXIMUM_SNAPLEN`` -- the point past which libpcap
+#: itself treats a capture's declared snapshot length as corrupt or
+#: byte-order-swapped rather than real -- and it is the same figure this
+#: package's own PCAP writer defaults ``snaplen`` to
+#: (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). No single field
+#: within one captured packet is legitimately larger than the largest packet
+#: libpcap itself is willing to believe, so nothing this library parses
+#: should ever declare a length past it.
+#:
+#: The bound is deliberately *not* "any declared length beyond what the
+#: buffer holds": :meth:`ListField.unpack <pcapkit.corekit.fields.collections.
+#: ListField.unpack>` and :meth:`OptionField.unpack <pcapkit.corekit.fields.
+#: collections.OptionField.unpack>` depend on reading a short, sometimes
+#: empty, tail past a truncated area and having it decode as zero -- that is
+#: how an over-long ``ihl``, or a capture cut short by the snapshot length,
+#: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see
+#: #431). Every such read is of a fixed-width, few-octet field, always far
+#: under this ceiling, so it is untouched; only a length past it -- which no
+#: fixed-width field ever legitimately is -- gets refused.
+_MAX_ZERO_PAD_LENGTH = 0x40_000
 
 
 class FieldMeta(abc.ABCMeta, Generic[_T]):
@@ -233,6 +257,10 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         Returns:
             Unpacked field value.
 
+        Raises:
+            FieldValueError: If ``buffer`` holds fewer octets than :attr:`length`
+                declares, and ``length`` is past :data:`_MAX_ZERO_PAD_LENGTH`.
+
         """
         # NOTE: ``length`` recomputes struct.calcsize() on every read, so the
         # three reads this method used to make were three calcsize() calls for
@@ -241,6 +269,25 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         if not isinstance(buffer, bytes):
             buffer = buffer.read(length)
+
+        # NOTE: ``length`` is frequently wire-derived -- resolved by a
+        # ``_length_callback`` against the very packet being parsed, per
+        # :meth:`Field.__call__` below, or by a schema's own selector building a
+        # field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s
+        # ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --
+        # and is thus attacker-controlled: a corrupt or hostile capture can
+        # declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a
+        # length short of what ``buffer`` holds is provably bogus: ``rjust()``
+        # cannot recover data that was never in the buffer, only zero-pad for
+        # it, and no field this large is legitimate to begin with. Honouring it
+        # would allocate and zero-fill up to ``length`` octets on nothing but
+        # the packet's own say-so. C.f. #554.
+        if length > _MAX_ZERO_PAD_LENGTH and len(buffer) < length:
+            raise FieldValueError(
+                f'Field {self.name} declares a length of {length} octet(s), '
+                f'but only {len(buffer)} octet(s) are available.'
+            )
+
         value = struct.unpack(self.template, buffer[:length].rjust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 

@@ -678,18 +678,28 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         self._info = self.unpack(length, **kwargs)
 
     def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
-                          data: 'Optional[Type[_PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+                          data: 'Optional[Type[_PT]]' = None,
+                          code: 'Any' = None,
+                          *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
             schema: Schema class.
             data: Data class.
+            code: Next-layer dispatch registration key(s). :data:`None` (the
+                default) skips registration entirely -- see below.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
+        Raises:
+            UnsupportedCall: If any unrecognised class keyword is given.
+
         This method is called when a subclass of :class:`Protocol` is defined.
         It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
-        attribute of the subclass.
+        attribute of the subclass, and, if ``code`` is given, to register the
+        subclass into the next-layer dispatch registry (or registries) that
+        ``code`` names -- e.g. :attr:`Link.__proto__
+        <pcapkit.protocols.link.link.Link.__proto__>`.
 
         Notes:
             When ``schema`` and/or ``data`` is not specified, the method will first
@@ -699,7 +709,57 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             :class:`~pcapkit.protocols.schema.misc.raw.Raw` and
             :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
 
+        Dispatch registration is **opt-in**, exactly like the ``name=``/``protocol=``/
+        ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,
+        :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,
+        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and
+        :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a
+        deliberate, documented way for a subclass to decline registration, not
+        an oversight -- it is exactly what every built-in protocol class does
+        today, since the built-in dispatch tables (e.g. ``Link.__proto__``)
+        are populated by literal assignment in each layer module, not by this
+        hook, so leaving ``code`` unset here changes nothing about them. A
+        subclass that declines can still be registered later, on demand, via
+        the owning class's :meth:`register` classmethod or the matching
+        ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.
+
+        ``code`` accepts:
+
+        * a single enum member, whose *type* determines the destination
+          registry (or registries) -- e.g. any
+          :class:`~pcapkit.const.reg.ethertype.EtherType` member always means
+          :class:`~pcapkit.protocols.link.link.Link`, and any
+          :class:`~pcapkit.const.reg.linktype.LinkType` member means *both*
+          :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
+          :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`;
+        * a :class:`dict` mapping a destination class to a key, for a key
+          that cannot name its own destination -- a raw :class:`int` port,
+          for instance, is ambiguous between
+          :class:`~pcapkit.protocols.transport.tcp.TCP` and
+          :class:`~pcapkit.protocols.transport.udp.UDP`, and *must* use this
+          form;
+        * an iterable mixing either of the above, to register the same class
+          into several registries from a single declaration -- e.g. a
+          :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both
+          by its IP protocol number and by a UDP port.
+
+        The explicit mapping form is accepted even for a key whose type could
+        be inferred: being more explicit than required is never an error.
+
+        Inference refuses rather than guesses: an enum member whose type
+        names no known destination raises
+        :exc:`~pcapkit.utilities.exceptions.RegistryError` instead of
+        silently doing nothing or picking an arbitrary registry.
+
+        See Also:
+            :func:`pcapkit.foundation.registry.protocols.register_protocol_code`
+            implements the resolution described above.
+
         """
+        if args or kwargs:
+            unexpected = ', '.join([*map(repr, args), *sorted(kwargs)])
+            raise UnsupportedCall(f'{cls.__name__}: unexpected class keyword(s): {unexpected}')
+
         super().__init_subclass__()
 
         if schema is None:
@@ -709,6 +769,12 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         cls.__schema__ = schema
         cls.__data__ = data
+
+        if code is not None:
+            from pcapkit.foundation.registry.protocols import \
+                register_protocol_code  # pylint: disable=import-outside-toplevel
+
+            register_protocol_code(cls, code)
 
     def __repr__(self) -> 'str':
         """Returns representation of parsed protocol data.
@@ -1410,12 +1476,18 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
     """Abstract base class for all protocol family."""
 
     def __init_subclass__(cls, /, schema: 'Optional[Type[_ST]]' = None,
-                          data: 'Optional[Type[_PT]]' = None, *args: 'Any', **kwargs: 'Any') -> 'None':
+                          data: 'Optional[Type[_PT]]' = None,
+                          code: 'Any' = None,
+                          *args: 'Any', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
             schema: Schema class.
             data: Data class.
+            code: Next-layer dispatch registration key(s). :data:`None` (the
+                default) skips registration entirely. See
+                :meth:`ProtocolBase.__init_subclass__` for the accepted
+                shapes and the enum-type inference rule.
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1432,7 +1504,11 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
             :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.
 
         This method also registers the subclass to the protocol registry,
-        i.e., :attr:`pcapkit.protocols.__proto__`.
+        i.e., :attr:`pcapkit.protocols.__proto__`. That registration is
+        unconditional -- it is the name-keyed identity registry, unrelated to
+        the ``code`` keyword -- whereas ``code``'s next-layer dispatch
+        registration is opt-in; see
+        :meth:`ProtocolBase.__init_subclass__` for the latter.
 
         See Also:
             For more information on the registry, please refer to
@@ -1442,4 +1518,4 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
         from pcapkit.foundation.registry.protocols import register_protocol
         register_protocol(cls)
 
-        return super().__init_subclass__(schema, data, *args, **kwargs)
+        return super().__init_subclass__(schema, data, code, *args, **kwargs)
