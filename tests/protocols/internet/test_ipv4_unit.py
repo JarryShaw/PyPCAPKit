@@ -2011,9 +2011,9 @@ class IPv4UnitTests(unittest.TestCase):
         option that *does* start, declares more data than the capture actually
         holds, and runs out partway through, the shape of a datagram cut short
         by the snapshot length rather than one with no options at all. A
-        candidate fix for #554 (PR #571) turns that into an unwrapped
-        ``FieldValueError`` while the rest of the suite stays green, because
-        nothing exercises it. See
+        candidate fix for #554 (PR #571) turned that into an unwrapped
+        ``FieldValueError`` while the rest of the suite stayed green, because
+        nothing exercised it. See
         ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
         for the same case on TCP, where the shortfall is simpler to reach.
 
@@ -2030,19 +2030,25 @@ class IPv4UnitTests(unittest.TestCase):
         though, which the TCP case does not need. Unlike TCP,
         :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options` sums
         each option's self-*declared* ``length`` -- not what it actually
-        consumed -- and raises ``IPv4: invalid format`` if that sum exceeds
-        the declared option area; declaring exactly 8 would make the single
-        option's own ``length=12`` trip that check before the accommodation
-        under test is ever reached. Declaring 16 leaves headroom, at the cost
-        of a second effect: once the option loop's 16-octet budget outlives
-        the 8 octets its one real option consumed, the loop reads one further,
-        fully exhausted phantom option, decodes it as end-of-option-list (the
-        same mechanism the test above pins), and the #431 machinery in
-        :meth:`~pcapkit.corekit.fields.collections.OptionField.unpack`
-        rewinds and hands the same 8 octets to the schema a second time as
-        padding. That is why ``bytes(proto.__header__)`` does not round-trip
-        to ``raw`` here and is not asserted -- immaterial to what this test
-        pins, which is solely the ``data`` field's short-read reconstruction.
+        consumed -- and raises ``IPv4: invalid format`` once its loop over the
+        parsed options finishes, if that sum exceeds the declared option
+        area. Declaring exactly 8 does not skip the accommodation -- the short
+        ``data`` field is still read and left-padded as above -- it just trips
+        that check afterwards, discarding the result before the test can
+        assert on it. Declaring 16 leaves headroom, at the cost of a second
+        effect: once the option loop's 16-octet budget outlives the 8 octets
+        its one real option consumed, the loop reads one further, fully
+        exhausted phantom option, decodes it as end-of-option-list (the same
+        mechanism the test above pins), and :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` hands the same 8
+        octets to the schema a second time as padding, via the
+        ``option_padding`` rewind that #371 added -- code that predates #431
+        and lives outside :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>`. That is why
+        ``bytes(proto.__header__)`` does not round-trip to ``raw`` here and is
+        not asserted -- immaterial to what this test pins: the option's
+        declared ``length``, the full parsed options list, and the ``data``
+        field's short-read reconstruction.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -2050,7 +2056,7 @@ class IPv4UnitTests(unittest.TestCase):
         from tests._support import time_limit
 
         custom = OptionNumber.get(31)
-        trailing = bytes([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])
+        trailing = bytes.fromhex('aabbccddeeff')
         raw = (bytes.fromhex('4900001c00010000400600000a0000010a000002') +
                bytes([custom, 12]) + trailing)
         with time_limit(5):
