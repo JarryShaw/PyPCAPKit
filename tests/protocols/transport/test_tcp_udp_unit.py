@@ -901,10 +901,17 @@ class TCPUDPUnitTests(unittest.TestCase):
         )
         self.assertEqual(proto._read_mode_mp(unknown, options=options).data, b'\x0a\x01')
 
+        # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without the
+        # receiver's key and 20 octets with it (#567); these three cases used
+        # 20/32/12 respectively, the pre-#567 (wrong) split, and so were
+        # exercising -- and pinning -- the very defect #567 fixes rather than
+        # correct behaviour. Updated to 12/20, with the third case's length
+        # moved to 32, which is not an MP_CAPABLE length under either the old
+        # or the new split, so it stays a genuine rejection.
         capable_no_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 1, 'ext': 0, 'hsa': 1}, skey=1, rkey=2),
-            20,
+            12,
             MPTCPOption.MP_CAPABLE,
         )
         capable = proto._read_mode_mp(capable_no_receiver, options=options)
@@ -915,7 +922,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         capable_with_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 0, 'ext': 1, 'hsa': 0}, skey=1, rkey=2),
-            32,
+            20,
             MPTCPOption.MP_CAPABLE,
         )
         self.assertEqual(proto._read_mode_mp(capable_with_receiver, options=options).rkey, 2)
@@ -923,7 +930,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             proto._read_mode_mp(mark(
                 MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                              flags={'req': 0, 'ext': 0, 'hsa': 0}, skey=1, rkey=None),
-                12,
+                32,
                 MPTCPOption.MP_CAPABLE,
             ), options=options)
 
@@ -1256,6 +1263,70 @@ class TCPUDPUnitTests(unittest.TestCase):
         mss = next(opt for code, opt in proto.info.options.items(multi=True)
                    if code == Option.Maximum_Segment_Size)
         self.assertEqual(mss.mss, 1460)
+
+    def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
+        """An option declaring more data than its option area holds is tolerated. C.f. #431, #572.
+
+        :meth:`test_an_option_area_longer_than_the_segment_still_parses` above
+        pins the *empty*-tail half of the #431 accommodation: an option area
+        that runs out before it starts, so the type byte decodes as 0 and the
+        loop reads end-of-option-list. Nothing pinned the other half -- an
+        option that *does* start, declares more data than its own option area
+        actually holds, and runs out partway through its ``data`` field,
+        rather than one with no options at all. A candidate fix for #554 (PR
+        #571) turned that into an unwrapped ``FieldValueError`` while the rest
+        of the suite stayed green, because nothing exercised it.
+
+        The segment below sets a data offset of 7 -- 8 octets of option area
+        -- for a reserved option kind (``0x4f``, which resolves to
+        ``Option.Reserved_79``) declaring ``length=12``, which asks
+        :class:`~pcapkit.protocols.schema.transport.tcp.UnassignedOption`'s
+        ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
+        10 octets here) for more than the 6 octets actually behind it.
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        left-pads the short read with zero octets rather than raising, so the
+        option parses with its declared ``length`` intact and a ``data`` value
+        of four zero octets followed by the six real ones. That is reachable
+        here because :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
+        sizes each parsed option by ``len(schema)`` -- what it actually
+        consumed (8 octets) -- rather than by its self-reported ``length``, so
+        its own ``TCP: invalid format`` threshold never sees the shortfall --
+        unlike IPv4's equivalent check, which sums the *declared* lengths
+        instead and does see it (see
+        ``IPv4UnitTests.test_a_truncated_option_still_parses_its_declared_length``).
+        ``length=32`` (30 octets of data wanted, still only 6 available) is
+        checked alongside 12 because the pad width tracks ``length - 2``: 32
+        yields 24 zero octets where 12 yields 4, pinning that the padding
+        scales with the declared length rather than being a fixed 4.
+
+        """
+        import struct
+
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.transport.tcp import TCP
+        from tests._support import time_limit
+
+        def segment(data_offset: 'int', options: 'bytes') -> 'bytes':
+            return struct.pack('!HHIIBBHHH', 1, 2, 0, 0, data_offset << 4,
+                               0x10, 0, 0, 0) + options
+
+        custom = Option.get(0x4f)
+        trailing = bytes.fromhex('aabbccddeeff')
+        for declared_length, zeroes in ((12, 4), (32, 24)):
+            with self.subTest(declared_length=declared_length):
+                raw = segment(7, bytes([custom, declared_length]) + trailing)
+                with time_limit(5):
+                    proto = TCP(raw, len(raw))
+
+                self.assertEqual(proto.info.hdr_len, 28)
+                self.assertEqual(
+                    [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+                    [(custom, declared_length)],
+                )
+                unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
+                                   if code == custom)
+                self.assertEqual(unassigned.data, b'\x00' * zeroes + trailing)
+                self.assertEqual(bytes(proto.__header__), raw)
 
     def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
         """Parsing must not write to the shared ``TCP.__option__``.

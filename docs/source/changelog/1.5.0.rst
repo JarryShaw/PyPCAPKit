@@ -79,6 +79,13 @@ pull requests between #326 and #509.
   covering every supported Python version (#410), and registry round-trip
   coverage that records the entries which cannot close the cycle rather than
   skipping them (#440, #504).
+* **Added** -- coverage for the untested half of the #431 accommodation: a TCP
+  or IPv4 option whose declared length asks for more data than the capture
+  actually holds, pinning that it still parses, with the short read left-padded
+  rather than rejected. The one test #431 left behind only covers an option
+  area with no data behind it at all; a candidate fix for #554 turned the
+  untested half into an unwrapped ``FieldValueError`` while the rest of the
+  suite stayed green (#571, #572).
 * **Changed** -- ``pcapkit`` no longer configures logging at import. It
   installs a ``NullHandler`` and sets no level, so verbosity is inherited from
   the application instead of being seized by whichever library was imported
@@ -390,6 +397,29 @@ pull requests between #326 and #509.
   still the concatenated ``bytes`` a parse leaves it as, and raised slicing the
   ``list[bytes]`` a ``make``-built multi-address header actually holds there
   (#556).
+* **Fixed** -- two more defects #541 exposed rather than caused, both since it let
+  construction reach code that had never run before. ``MPTCP.subtype`` was still
+  ``typing.TYPE_CHECKING``-only, an annotation rather than a field, so
+  ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])`` raised
+  ``AttributeError: ... has no attribute 'subtype'`` for every subtype but
+  ``MP_JOIN``: the convenience constructor builds a schema in memory and reads it
+  straight back through ``_read_mptcp_*`` with no byte round trip, so
+  ``_MPTCP.post_process`` -- the only code that ever set ``subtype`` -- never ran.
+  Fixed on the construction path (``TCP._make_mode_mp``) rather than by adding a
+  third real field the way ``kind``/``length`` got in #541: unlike those two,
+  ``subtype`` is already packed as 4 bits of each subtype's own ``test``
+  bitfield, and a second, independent field for the same bits would either
+  double-encode them or need a "derive, don't pack" field kind this library does
+  not have (#566). Separately, ``_make_mptcp_capable`` wrote
+  ``length=20 if rkey is None else 32`` where :rfc:`8684` section 3.1 gives 12 and
+  20, and ``MPTCPCapable.rkey``'s own condition (``pkt['length'] != 32``) dropped
+  the receiver's key for exactly the length the maker used to mean "key present"
+  -- so a spec-correct, key-absent MP_CAPABLE could not be built at all, and a
+  key-present one silently lost its key on the wire. Both, and the matching guard
+  in ``_read_mptcp_capable``, now agree on 12/20. **This changes MP_CAPABLE's
+  packed output**: a 20-octet, key-present option built or parsed under the old
+  code becomes 12 octets with no key, or 20 octets with the key actually present,
+  depending on which the caller meant (#567).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

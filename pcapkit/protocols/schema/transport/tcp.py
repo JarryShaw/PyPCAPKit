@@ -645,6 +645,23 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
     #: MPTCP length.
     length: 'int' = UInt8Field()
 
+    # NOTE: ``subtype`` stays an annotation rather than becoming a third real
+    # field alongside ``kind``/``length`` above -- deliberately, and the
+    # difference from those two is why. ``kind`` and ``length`` are each the
+    # *sole* source of their own octet: nothing else in the schema packs them,
+    # so declaring them as real fields was the only way to get them onto the
+    # wire at all. ``subtype`` is not like that: every concrete subclass
+    # already encodes it as 4 bits of its own ``test`` :class:`BitField` (e.g.
+    # ``MPTCPCapable.test['subtype']``), which is what actually gets packed.
+    # A real ``Field`` for ``subtype`` on top of that would either pack the
+    # same 4 bits twice under two names, or need a "derive, don't pack" kind
+    # of field that this library's :mod:`~pcapkit.corekit.fields` does not
+    # have. So this attribute is populated by the *construction* path instead
+    # -- :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp` sets it
+    # right after building the subtype-specific schema, mirroring exactly what
+    # :meth:`_MPTCP.post_process` already does for real unpacking. C.f. #566,
+    # the third and last ``TYPE_CHECKING``-only attribute this class had; the
+    # other two (``kind``, ``length``) were fixed in #541.
     if TYPE_CHECKING:
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
@@ -684,9 +701,14 @@ class MPTCPCapable(MPTCP, code=Enum_MPTCPOption.MP_CAPABLE):
     #: Option sender's key.
     skey: 'int' = UInt64Field()
     #: Option receiver's key.
+    #:
+    #: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key
+    #: and 20 octets with it, so the field is present only for the latter --
+    #: not, as it read until #567, for every length *except* 32, which is not
+    #: an MP_CAPABLE length either RFC form uses.
     rkey: 'int' = ConditionalField(
         UInt64Field(),
-        lambda pkt: pkt['length'] != 32,
+        lambda pkt: pkt['length'] == 20,
     )
 
     if TYPE_CHECKING:
