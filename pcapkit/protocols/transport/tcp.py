@@ -543,12 +543,22 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Constructed packet data.
 
         """
-        if options is not None:
-            options_value, total_length = self._make_tcp_options(options)
-        else:
-            options_value, total_length = [], 0
-
-        offset = math.ceil((20 + total_length) / 4)
+        # NOTE: the connection control flags are resolved *before* the options are
+        # built, because option makers reached from ``_make_tcp_options`` read
+        # :attr:`self._flags` -- ``_make_mptcp_join`` branches on it to pick between
+        # the three MP_JOIN layouts of :rfc:`8684` section 3.2 (figure 5 for SYN,
+        # figure 6 for SYN/ACK, figure 7 for ACK). This block used to sit *after* the
+        # ``_make_tcp_options`` call below, so on a fresh instance MP_JOIN construction
+        # died with ``AttributeError: 'TCP' object has no attribute '_flags'``, and on
+        # an instance that had already parsed a segment it silently built the option
+        # for *that* segment's flags instead: measured pre-fix, a parsed MP_JOIN-SYN
+        # instance asked to ``pack`` an MP_JOIN-ACK segment emitted an ACK header
+        # carrying the 12-octet SYN option, dropping the caller's 20-octet HMAC. That
+        # second outcome is why initialising ``_flags`` to zero is not the fix -- it
+        # would leave the stale read intact and turn the fresh case into a spurious
+        # ``invalid flags combination``. Nothing between here and the old assignment
+        # site reads ``self._flags`` or depends on the option build, so hoisting the
+        # whole block is behaviour-preserving for every other option. C.f. #587.
         flags = {
             'cwr': int(cwr),
             'ece': int(ece),
@@ -560,11 +570,33 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'fin': int(fin),
         }  # type: Schema_Flags
 
-        _flag = cast('Enum_Flags', 0)
+        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``.
+        # :func:`typing.cast` is a runtime no-op, so the accumulator used to stay the
+        # plain :class:`int` ``0`` whenever no flag was set, and ``Enum_Flags.SYN in
+        # self._flags`` then raised ``TypeError: argument of type 'int' is not a
+        # container or iterable`` instead of reaching ``_make_mptcp_join``'s own
+        # ``ProtocolError: ... invalid flags combination``. That branch was unreachable
+        # before the hoist above -- construction died on the missing attribute first --
+        # so this keeps the newly reachable no-SYN-no-ACK case raising the library's
+        # documented error rather than a bare Python one. :class:`Enum_Flags` is an
+        # :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that
+        # still compares equal to ``0`` and still ORs as before. The read path keeps its
+        # ``cast`` at the top of ``read``: it cannot reach these branches, because
+        # ``mptcp_data_selector`` rejects a flagless MP_JOIN before ``_read_mptcp_join``
+        # runs, and changing it would alter the ``connection`` value reported for every
+        # flagless parsed segment. C.f. #587.
+        _flag = Enum_Flags(0)
         for key, val in flags.items():
             if val == 1:
                 _flag |= Enum_Flags.get(key.upper())
         self._flags = _flag
+
+        if options is not None:
+            options_value, total_length = self._make_tcp_options(options)
+        else:
+            options_value, total_length = [], 0
+
+        offset = math.ceil((20 + total_length) / 4)
 
         return Schema_TCP(
             srcport=self._make_port(srcport, Enum_TransportProtocol.tcp),

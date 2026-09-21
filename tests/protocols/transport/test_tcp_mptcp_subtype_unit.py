@@ -71,9 +71,18 @@ Coverage
 
 Every case here goes through the *public* ``TCP`` convenience constructor, not
 ``_make_mptcp_*`` directly, because that in-memory, no-byte-round-trip path is exactly what
-exposed the defect. ``MP_JOIN`` is left out: it fails independently with
-``AttributeError: 'TCP' object has no attribute '_flags'`` (``_make_mptcp_join`` reads
-``self._flags``, which only the parse path ever sets), which is not this issue.
+exposed the defect.
+
+``MP_JOIN`` used to be left out, because it failed independently with ``AttributeError:
+'TCP' object has no attribute '_flags'`` -- ``_make_mptcp_join`` reads ``self._flags`` to
+pick between the three layouts of :rfc:`8684` section 3.2, and ``TCP.make`` assigned that
+attribute only *after* it had built the options. That is a statement-ordering defect, not
+this one, and #587 has since fixed it by hoisting the flag resolution above the option
+build; the ``subtype`` assertion this module exists for is made for MP_JOIN below, once per
+layout, since which layout gets built is exactly what the flags decide. The ordering defect
+itself, the three layouts' octets, and the silent wrong-layout outcome that ruled out
+fixing it with a zero-valued default are covered in
+:mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`.
 
 ``MP_FASTCLOSE`` *is* covered, as of #576. When this module was written it was left out: fixing
 ``subtype`` got its construction past the ``AttributeError`` and into a second, independent
@@ -88,6 +97,10 @@ only the ``subtype`` question this module is about.
 from __future__ import annotations
 
 import unittest
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 #: Header fields shared by every constructed TCP segment in this module, matching
 #: :data:`examples.generators.options.TCP_BASE` so these cases build through exactly the
@@ -101,11 +114,15 @@ TCP_BASE = {
 }
 
 
-def build_mptcp_option(subtype: 'object', **kwargs: 'object') -> 'object':
+def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]]' = None,
+                       **kwargs: 'object') -> 'object':
     """Build a whole TCP segment carrying one Multipath TCP option, through the public API.
 
     Args:
         subtype: MPTCP subtype to construct.
+        header: Overrides merged over :data:`TCP_BASE`, for the one subtype whose layout
+            depends on the segment's own flags. Every other case leaves it :data:`None`
+            and gets ``TCP_BASE`` unchanged, which is SYN-only.
         **kwargs: forwarded to the matching ``_make_mptcp_*`` maker as the option's own
             arguments.
 
@@ -135,7 +152,9 @@ def build_mptcp_option(subtype: 'object', **kwargs: 'object') -> 'object':
 
     args = dict(kwargs)
     args['subtype'] = subtype
-    return TCP(options=[(Enum_Option.Multipath_TCP, args)], **TCP_BASE)  # type: ignore[arg-type]
+    base = dict(TCP_BASE)
+    base.update(header or {})
+    return TCP(options=[(Enum_Option.Multipath_TCP, args)], **base)  # type: ignore[arg-type]
 
 
 class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
@@ -212,6 +231,44 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
         data = tcp.info.options[Enum_Option.Multipath_TCP]
 
         self.assertEqual(data.subtype, Enum_MPTCPOption.MP_FAIL)
+
+    def test_mp_join_subtype_round_trips_in_all_three_layouts(self) -> None:
+        """``MP_JOIN`` built through ``TCP()`` reports its own subtype, whichever form.
+
+        This module used to exclude MP_JOIN altogether: ``_make_mptcp_join`` reads
+        ``self._flags`` to choose between the three layouts of :rfc:`8684` section 3.2,
+        and ``TCP.make`` assigned that attribute only after it had already built the
+        options, so every one of these raised ``AttributeError: 'TCP' object has no
+        attribute '_flags'`` before ``subtype`` could come into it. #587 hoists the flag
+        resolution above the option build.
+
+        All three forms are exercised rather than just the SYN one ``TCP_BASE`` selects,
+        because the flags are what pick the layout: a regression that reached only one
+        maker would otherwise pass here. What is asserted is this module's question --
+        ``subtype`` survives in-memory construction -- and not the layouts' octets, which
+        belong to
+        :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`.
+
+        """
+        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
+        from pcapkit.const.tcp.option import Option as Enum_Option
+
+        cases = (
+            ('figure 5, SYN', {'syn': True, 'ack': False},
+             {'backup': False, 'addr_id': 1, 'token': 7, 'nonce': 9}),
+            ('figure 6, SYN/ACK', {'syn': True, 'ack': True},
+             {'backup': False, 'addr_id': 2, 'hmac': bytes(8), 'nonce': 11}),
+            ('figure 7, ACK', {'syn': False, 'ack': True},
+             {'hmac': bytes(20)}),
+        )
+
+        for label, header, option in cases:
+            with self.subTest(layout=label):
+                tcp = build_mptcp_option(Enum_MPTCPOption.MP_JOIN, header=header,
+                                         **option)
+                data = tcp.info.options[Enum_Option.Multipath_TCP]  # type: ignore[attr-defined]
+
+                self.assertEqual(data.subtype, Enum_MPTCPOption.MP_JOIN)
 
     def test_mp_fastclose_builds_and_reports_its_subtype(self) -> None:
         """``MP_FASTCLOSE`` builds through ``TCP()`` and reports its ``subtype``.

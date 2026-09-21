@@ -173,15 +173,25 @@ EXPECTED_FAILURES = {
     # :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`
     # against RFC 8684 rather than against the cycle.
 
-    # ``_make_mptcp_join`` branches on ``self._flags``, which only the parse
-    # path ever sets, so the constructor cannot be called at all. Independent of
-    # #576 and left in place: ``TCP._make`` assigns ``_flags`` *after* it has
-    # already built the options, so this is a statement-ordering defect rather
-    # than a length one.
-    'tcp-mptcp/MP_JOIN': Gap(
-        'CONSTRUCT', "no attribute '_flags'",
-        'pcapkit/protocols/transport/tcp.py:2675 -- _make_mptcp_join reads '
-        'self._flags, which exists only while parsing'),
+    # MP_JOIN was the last of the eight MPTCP subtypes with a registered maker to
+    # keep an entry here, recording ``CONSTRUCT`` with ``"no attribute '_flags'"``
+    # against ``_make_mptcp_join``. Its entry is gone with #587, which was a
+    # statement-ordering defect rather than a length one and so deliberately
+    # outlived #576/#585: ``_make_mptcp_join`` branches on ``self._flags`` to
+    # choose between the three MP_JOIN layouts of RFC 8684 section 3.2, and
+    # ``TCP.make`` assigned that attribute *after* it had already built the
+    # options. #587 hoists the flag resolution above the ``_make_tcp_options``
+    # call, leaving only the ``offset`` computation -- which genuinely needs the
+    # options' ``total_length`` -- after it.
+    #
+    # The cycle closes for whichever layout this suite's flags select, the SYN
+    # form of figure 5, since ``examples.generators.options``' ``TCP_BASE`` sets
+    # ``syn`` and leaves ``ack`` clear. The other two forms, and the silent
+    # wrong-layout outcome that made a zero-valued default the wrong fix, are
+    # covered per layout in
+    # :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`
+    # -- this suite can only ever exercise one MP_JOIN form, there being one
+    # case per registry code.
 
     # -- IPv4, whose option padding is now fixed ------------------------------
 
