@@ -325,7 +325,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=header)
 
-        rpl_schema = route_schema.RPL(cmpr_i=0, cmpr_e=0, pad={'pad_len': 0}, addresses=[])
+        rpl_schema = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
+                                      pad={'pad_len': 0}, addresses=[])
         object.__setattr__(rpl_schema, 'ip', (ip_address('2001:db8::3'),))
         rpl_header = types.SimpleNamespace(next=TransType.TCP, length=16,
                                            type=Routing.RPL_Source_Route_Header, seg_left=1)
@@ -362,20 +363,20 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             Routing.RPL_Source_Route_Header,
             ip=['2001:db8::8'],
         )
-        self.assertEqual(rpl_plain.cmpr_i, 0)
+        self.assertEqual(rpl_plain.cmpr['cmpr_i'], 0)
         rpl_compressed = proto._make_data_type_rpl(
             Routing.RPL_Source_Route_Header,
             dst=ip_address('2001:db8::ffff'),
             ip=['2001:db8::1', '2001:db8::2'],
         )
-        self.assertGreaterEqual(rpl_compressed.cmpr_i, 0)
+        self.assertGreaterEqual(rpl_compressed.cmpr['cmpr_i'], 0)
         rpl_from_data = proto._make_data_type_rpl(
             Routing.RPL_Source_Route_Header,
             route_data.RPL(next=TransType.TCP, length=16, type=Routing.RPL_Source_Route_Header,
                            seg_left=1, cmpr_i=1, cmpr_e=2, pad=0,
                            ip=(ip_address('2001:db8::9'),)),
         )
-        self.assertEqual(rpl_from_data.cmpr_i, 1)
+        self.assertEqual(rpl_from_data.cmpr['cmpr_i'], 1)
 
     def test_ipv6_route_make_dst_rejects_a_bool(self) -> None:
         """A :obj:`bool` destination address must not be silently converted. See #540.
@@ -454,8 +455,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             dst=ip_address('2001:db8::ffff'),
             ip=['2001:db8::1', '2001:db8::2'],
         )
-        self.assertGreaterEqual(rpl.cmpr_i, 0)
-        self.assertGreaterEqual(rpl.cmpr_e, 0)
+        self.assertGreaterEqual(rpl.cmpr['cmpr_i'], 0)
+        self.assertGreaterEqual(rpl.cmpr['cmpr_e'], 0)
 
     def test_ipv6_route_read_data_type_errors_report_real_routing_type(self) -> None:
         """Regression test for GH-442.
@@ -487,7 +488,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             proto._read_data_type_2(route_schema.Type2(ip='2001:db8::2'), header=header)
         self.assertEqual(str(type2_ctx.exception), expected)
 
-        rpl_schema = route_schema.RPL(cmpr_i=0, cmpr_e=0, pad={'pad_len': 0}, addresses=[])
+        rpl_schema = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
+                                      pad={'pad_len': 0}, addresses=[])
         with self.assertRaises(ProtocolError) as rpl_ctx:
             proto._read_data_type_rpl(rpl_schema, header=header)
         self.assertEqual(str(rpl_ctx.exception), expected)
@@ -610,8 +612,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                 ip_address('2001:db8::2').packed,
             ],
         )
-        self.assertGreaterEqual(rpl_bytes.cmpr_i, 0)
-        self.assertGreaterEqual(rpl_bytes.cmpr_e, 0)
+        self.assertGreaterEqual(rpl_bytes.cmpr['cmpr_i'], 0)
+        self.assertGreaterEqual(rpl_bytes.cmpr['cmpr_e'], 0)
 
         with mock.patch.object(Internet, '__post_init__', return_value=None) as post_init:
             post_proto = object.__new__(IPv6_Route)
@@ -1519,17 +1521,19 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         first = ip_address('2001:db8::1')
         second = ip_address('2001:db8::2')
-        full = route_schema.RPL(cmpr_i=0, cmpr_e=0, pad={'pad_len': 0},
+        full = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0},
                                 addresses=first.packed + second.packed)
         full.post_process({})
         self.assertEqual([str(item) for item in full.ip], ['2001:db8::1', '2001:db8::2'])
 
         suffixes = first.packed[8:] + second.packed[8:]
-        compressed = route_schema.RPL(cmpr_i=8, cmpr_e=8, pad={'pad_len': 0}, addresses=suffixes)
+        compressed = route_schema.RPL(cmpr={'cmpr_i': 8, 'cmpr_e': 8},
+                                      pad={'pad_len': 0}, addresses=suffixes)
         compressed.post_process({})
         self.assertEqual(compressed.ip, [first.packed[8:], second.packed[8:]])
 
-        with_dst = route_schema.RPL(cmpr_i=8, cmpr_e=8, pad={'pad_len': 0}, addresses=suffixes)
+        with_dst = route_schema.RPL(cmpr={'cmpr_i': 8, 'cmpr_e': 8},
+                                    pad={'pad_len': 0}, addresses=suffixes)
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
 
@@ -1557,7 +1561,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # Directly at the schema level: ``addresses`` is a ``list[bytes]``,
         # exactly as ``_make_data_type_rpl`` hands it to the constructor.
         rpl_schema = route_schema.RPL(
-            cmpr_i=0, cmpr_e=0, pad={'pad_len': 0},
+            cmpr={'cmpr_i': 0, 'cmpr_e': 0}, pad={'pad_len': 0},
             addresses=[first.packed, second.packed],
         )
         packed = bytes(rpl_schema)
@@ -1574,6 +1578,244 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         header_packed = bytes(header)
         self.assertIn(first.packed, header_packed)
         self.assertIn(second.packed, header_packed)
+
+    def test_ipv6_route_rpl_fixed_area_is_four_octets(self) -> None:
+        """A built RPL header must be exactly as wide as its own ``Hdr Ext Len``.
+
+        See #564. :rfc:`6554#section-3` ("Format of the RPL Routing Header")
+        draws the routing-data fixed area as a single 32-bit word --
+        ``CmprI`` and ``CmprE`` are each a *"4-bit unsigned integer"*, ``Pad``
+        likewise, and ``Reserved`` takes the remaining 20 bits -- so it is
+        **4** octets. The schema declared it as two ``UInt8Field`` plus a
+        3-octet ``BitField``, which is **5**, and so built a header one octet
+        narrower than the ``Hdr Ext Len`` computed from that inflated data
+        area declared. Measured before the fix, for the two addresses the
+        round-trip table uses::
+
+            len(bytes(made))  == 41      # 4 + (5 + 32)
+            made.length       == 5       # ceil((37 - 4) / 8)
+            8 + 8 * 5         == 48      # what that Hdr Ext Len declares
+
+        Note RFC 6554 carries no numbered figure captions at all, so the
+        citation is to Section 3 and never to a "Figure N".
+
+        The assertions below are deliberately split. The ``make`` ones go
+        through the public entry point and are blind to how the schema spells
+        its fields, so they fail on the pre-fix tree with those exact numbers
+        rather than with a constructor error; the schema-level one pins the
+        nibble placement, which is the thing a reader of the RFC diagram would
+        check.
+
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+
+        # The fixed area alone, with no addresses and no padding.
+        bare = route_schema.RPL(cmpr={'cmpr_i': 0, 'cmpr_e': 0},
+                                pad={'pad_len': 0}, addresses=[])
+        self.assertEqual(len(bytes(bare)), 4)
+
+        # CmprI is the high nibble of the first octet, CmprE the low one; Pad
+        # is the high nibble of the second, and Reserved is the 20 bits after
+        # it. The three trailing octets are the ``padding`` field that
+        # ``pad_len`` sizes, not part of the fixed area.
+        nibbles = route_schema.RPL(cmpr={'cmpr_i': 1, 'cmpr_e': 2},
+                                   pad={'pad_len': 3}, addresses=[])
+        self.assertEqual(bytes(nibbles)[:4], b'\x12\x30\x00\x00')
+
+        proto = object.__new__(IPv6_Route)
+        addresses = [ip_address('2001:db8::1'), ip_address('2001:db8::2'),
+                     ip_address('2001:db8::3')]
+
+        # (address count, expected total octets, expected Hdr Ext Len)
+        for count, expected_octets, expected_hdr_ext_len in (
+            (1, 24, 2),
+            (2, 40, 4),
+            (3, 56, 6),
+        ):
+            with self.subTest(addresses=count):
+                made = proto.make(type=Routing.RPL_Source_Route_Header,
+                                  data={'ip': addresses[:count]}, seg_left=count)
+                raw = bytes(made)
+                self.assertEqual(len(raw), expected_octets)
+                self.assertEqual(made.length, expected_hdr_ext_len)
+                # the invariant the issue is named after: the header is as wide
+                # as 'Hdr Ext Len' says, per :rfc:`6554#section-3` -- "Length of
+                # the Routing header in 8-octet units, not including the first 8
+                # octets".
+                self.assertEqual(8 + 8 * made.length, len(raw))
+                self.assertEqual(raw[1], expected_hdr_ext_len)
+
+    def test_ipv6_route_rpl_length_guard_follows_rfc6554_address_arithmetic(self) -> None:
+        """The reader's length guard must judge ``Hdr Ext Len`` in 8-octet units.
+
+        See #564; the guard is the defect #489 flagged and deliberately left,
+        for want of a working RPL round trip to validate a replacement
+        against. It read ``if header.length % 16 != 0``, which is wrong twice
+        over: ``header.length`` is ``Hdr Ext Len``, *"the length of the
+        Routing header in 8-octet units"* (:rfc:`6554#section-3`), not an
+        octet count; and a fixed multiple-of-16 bound assumes 16-octet
+        addresses, which an SRH only carries when ``CmprI`` and ``CmprE`` are
+        both 0. Together those rejected every realistic header -- the bound
+        admitted only ``Hdr Ext Len`` of 0, 16, 32 ..., i.e. nothing under
+        136 octets.
+
+        :rfc:`6554#section-4.2` gives the arithmetic that *is* available::
+
+            n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1
+
+        so the invariant is that this division closes: non-negative, and
+        whole.
+
+        Every case here is a **hand-built wire form**, parsed through the
+        public constructor. That matters for the same reason it did in #489: a
+        construct-then-parse round trip can pass on two mistakes cancelling
+        out, whereas octets written out by hand from the RFC diagram cannot
+        agree with a wrong reader.
+
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        first = ip_address('2001:db8::1')
+        second = ip_address('2001:db8::2')
+
+        # Uncompressed: Hdr Ext Len 4, CmprI/CmprE/Pad all 0, two full
+        # addresses. 8 + 8*4 == 40 octets. The old '% 16' bound rejected this.
+        uncompressed = (bytes([0x11, 0x04, 0x03, 0x02]) + b'\x00\x00\x00\x00'
+                        + first.packed + second.packed)
+        self.assertEqual(len(uncompressed), 40)
+        info = IPv6_Route(io.BytesIO(uncompressed), len(uncompressed), extension=True).info
+        self.assertEqual(info.length, 40)
+        self.assertEqual(info.cmpr_i, 0)
+        self.assertEqual(info.cmpr_e, 0)
+        self.assertEqual(info.pad, 0)
+        self.assertEqual([str(item) for item in info.ip], ['2001:db8::1', '2001:db8::2'])
+
+        # Compressed: CmprI = CmprE = 4, so every element is 12 octets. Three
+        # of them is 36, plus Pad of 4 makes 40 == 8 * 5, so Hdr Ext Len is 5
+        # and the header is 8 + 40 == 48 octets. RFC 6554 s4.2 closes:
+        # (5*8 - 4 - (16-4)) / (16-4) == 24 / 12 == 2, so n == 3.
+        suffixes = b''.join(addr[4:] for addr in (
+            first.packed, second.packed, ip_address('2001:db8::3').packed))
+        self.assertEqual(len(suffixes), 36)
+        compressed = (bytes([0x11, 0x05, 0x03, 0x03]) + bytes([0x44, 0x40, 0x00, 0x00])
+                      + suffixes + bytes(4))
+        self.assertEqual(len(compressed), 48)
+        info = IPv6_Route(io.BytesIO(compressed), len(compressed), extension=True).info
+        self.assertEqual(info.length, 48)
+        self.assertEqual((info.cmpr_i, info.cmpr_e, info.pad), (4, 4, 4))
+        # All THREE elements, not two. ``post_process`` used to subtract
+        # ``pad_len`` a second time from a buffer whose own length callback had
+        # already taken it off, losing one address per ``16 - CmprI`` octets of
+        # padding -- invisible for as long as the guard rejected every padded
+        # header before this point could be reached.
+        self.assertEqual(len(info.ip), 3)
+        self.assertEqual(list(info.ip), [first.packed[4:], second.packed[4:],
+                                         ip_address('2001:db8::3').packed[4:]])
+
+        # And a header whose arithmetic does not close is still rejected, with
+        # the in-library exception and the message the round-trip table matches
+        # on: Pad of 0 leaves 40 - 12 == 28 octets, which is not a whole number
+        # of 12-octet elements.
+        malformed = (bytes([0x11, 0x05, 0x03, 0x03]) + bytes([0x44, 0x00, 0x00, 0x00])
+                     + suffixes + bytes(4))
+        with self.assertRaises(ProtocolError) as ctx:
+            IPv6_Route(io.BytesIO(malformed), len(malformed), extension=True)
+        self.assertEqual(str(ctx.exception),
+                         f'IPv6-Route: [TypeNo {Routing.RPL_Source_Route_Header}] invalid format')
+
+        # CmprI is 4 bits, so the divisor ``16 - CmprI`` bottoms out at 1 and
+        # can never be zero. Before #564 ``cmpr_i`` was a whole octet, so a
+        # hostile packet could set it to 16 and make ``post_process`` divide by
+        # zero; the field width now rules that out structurally.
+        max_cmpr = (bytes([0x11, 0x01, 0x03, 0x02]) + bytes([0xff, 0x00, 0x00, 0x00])
+                    + bytes(8))
+        self.assertEqual(len(max_cmpr), 16)
+        info = IPv6_Route(io.BytesIO(max_cmpr), len(max_cmpr), extension=True).info
+        self.assertEqual((info.cmpr_i, info.cmpr_e), (15, 15))
+
+    def test_ipv6_route_rpl_pad_is_zero_when_nothing_is_elided(self) -> None:
+        """``Pad`` must be 0 when ``CmprI`` and ``CmprE`` are, not a full 8 octets.
+
+        See #564. :rfc:`6554#section-3` is explicit: *"Note that when CmprI
+        and CmprE are both 0, Pad MUST carry a value of 0."* The compressing
+        branch of ``_make_data_type_rpl`` computed ``8 - length % 8`` without
+        the outer ``% 8``, so an address vector that was already 8-octet
+        aligned got a full 8 octets of padding rather than none -- ``8 - 0``
+        is 8. That is reachable through the public API whenever ``dst`` shares
+        no prefix with the addresses, which is exactly the case that forces
+        ``CmprI`` and ``CmprE`` to 0.
+
+        ``_make_data_type_none`` in the same module already spelled the idiom
+        with the outer modulo; this branch did not.
+
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        proto = object.__new__(IPv6_Route)
+
+        # 'fe80::1' shares no leading octet with either address, so the common
+        # prefix is empty and nothing can be elided.
+        schema = proto._make_data_type_rpl(
+            Routing.RPL_Source_Route_Header,
+            dst=ip_address('fe80::1'),
+            ip=[ip_address('2001:db8::1'), ip_address('2001:db8::2')],
+        )
+        # ``pad`` is spelled the same before and after #564, so this assertion
+        # is the measurement rather than a consequence of the reshaped schema:
+        # it reads 8 on the pre-fix tree.
+        self.assertEqual(schema.pad['pad_len'], 0)
+        self.assertEqual(schema.cmpr['cmpr_i'], 0)
+        self.assertEqual(schema.cmpr['cmpr_e'], 0)
+
+        # and the header that comes out is the same 40 octets the uncompressed
+        # build produces, rather than 8 longer.
+        made = proto.make(type=Routing.RPL_Source_Route_Header,
+                          dst=ip_address('fe80::1'),
+                          data={'ip': [ip_address('2001:db8::1'), ip_address('2001:db8::2')]},
+                          seg_left=2)
+        self.assertEqual(len(bytes(made)), 40)
+        self.assertEqual(8 + 8 * made.length, len(bytes(made)))
+
+    def test_ipv6_route_rpl_construction_path_decodes_its_own_addresses(self) -> None:
+        """Constructing an RPL header must not raise ``AttributeError``.
+
+        See #564. :meth:`Protocol.__post_init__` packs and then unpacks, and
+        ``IPv6_Route.read`` hands ``_read_data_type_rpl`` the schema ``make``
+        just built rather than a freshly parsed one. On that path
+        ``RPL.post_process`` sees ``addresses`` as the ``list[bytes]`` the
+        constructor was handed (the #556 case) and returned early without
+        setting ``ip`` -- so the reader raised a bare, out-of-library
+        ``AttributeError: 'RPL' object has no attribute 'ip'``.
+
+        It was masked for as long as the ``% 16`` guard rejected every
+        constructed header first, which is why it only became reachable once
+        that guard was corrected in the same pass.
+
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+
+        first = ip_address('2001:db8::1')
+        second = ip_address('2001:db8::2')
+
+        built = IPv6_Route(type=Routing.RPL_Source_Route_Header,
+                           data={'ip': [first, second]}, seg_left=2, payload=b'')
+        self.assertEqual([str(item) for item in built.info.ip],
+                         ['2001:db8::1', '2001:db8::2'])
+        self.assertEqual(built.info.length, 40)
+
+        # and the octets it built parse back to the same thing, then rebuild
+        # byte-for-byte -- the cycle the round-trip table drives.
+        raw = built.data
+        parsed = IPv6_Route(io.BytesIO(raw), len(raw), extension=True).info
+        again = bytes(IPv6_Route(type=parsed.type, data=parsed, next=parsed.next,
+                                seg_left=parsed.seg_left, payload=b''))
+        self.assertEqual(raw, again)
 
     def _assert_padding_options_parse_from_the_wire(self, protocol_cls: type) -> None:
         """A ``Pad1`` option must consume exactly one octet, wherever it sits.

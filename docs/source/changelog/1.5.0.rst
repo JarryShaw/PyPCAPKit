@@ -420,6 +420,39 @@ pull requests between #326 and #509.
   packed output**: a 20-octet, key-present option built or parsed under the old
   code becomes 12 octets with no key, or 20 octets with the key actually present,
   depending on which the caller meant (#567).
+* **Fixed** -- IPv6-Route's RPL routing data was five octets wide at the front
+  where :rfc:`6554` section 3 gives four, and three further defects sat
+  stacked behind it. ``CmprI``, ``CmprE`` and ``Pad`` are each a 4-bit field,
+  sharing one 32-bit word with a 20-bit ``Reserved``, but the schema declared
+  ``cmpr_i`` and ``cmpr_e`` as whole octets -- so a constructed two-address
+  header packed to 41 octets while the ``Hdr Ext Len`` of 5 derived from that
+  inflated data area declared 48. Correcting the width is a **wire-format
+  change**, and it reshapes the schema: ``RPL(cmpr_i=..., cmpr_e=...)`` is now
+  ``RPL(cmpr={'cmpr_i': ..., 'cmpr_e': ...})``, beside the
+  ``pad={'pad_len': ...}`` that was already there. Behind it, the reader's
+  ``header.length % 16`` guard read ``Hdr Ext Len`` as an octet count and
+  assumed 16-octet addresses, which an SRH only carries when ``CmprI`` and
+  ``CmprE`` are both 0 -- the unit confusion #487 fixed for Source Route and
+  Type 2, flagged and deliberately left by #489 for want of a working RPL
+  round trip to validate a replacement against. It is replaced by section
+  4.2's own address-count arithmetic,
+  ``n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1``, which
+  the reader now requires to close -- non-negative and whole.
+  ``RPL.post_process`` subtracted ``pad_len`` a second time from a buffer
+  whose own length callback had already taken it off, losing one address per
+  ``16 - CmprI`` octets of padding, and set ``ip`` only when it had parsed
+  octets -- so once the guard stopped rejecting every constructed header,
+  ``IPv6_Route(type=..., data={'ip': [...]})`` raised a bare
+  ``AttributeError: 'RPL' object has no attribute 'ip'`` from the reader. And
+  ``_make_data_type_rpl`` computed ``Pad`` as ``8 - length % 8`` without the
+  outer ``% 8``, so an already-aligned address vector was handed a full 8
+  octets of padding where section 3 requires that when ``CmprI`` and ``CmprE``
+  are both 0, ``Pad`` MUST carry a value of 0. The narrower ``cmpr_i`` also
+  removes a latent divide-by-zero: a whole octet could hold 16, making
+  ``16 - CmprI`` zero, where a 4-bit field tops out at 15.
+  ``ipv6-route-type/RPL_Source_Route_Header`` round-trips now and its
+  ``EXPECTED_FAILURES`` entry is deleted; as with the guard it replaces, none
+  of this has been checked against a real RPL capture (#564).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
