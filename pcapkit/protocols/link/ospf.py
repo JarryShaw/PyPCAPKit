@@ -42,6 +42,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as Data_CrytographicAuthentication
@@ -325,8 +326,29 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         Returns:
             ID bytes.
 
+        Raises:
+            FieldValueError: If ``id`` is a :obj:`bool` (c.f.
+                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+
+        Notes:
+            Latent rather than live: nothing in this module calls this
+            method today (:meth:`make` builds ``router_id``/``area_id``
+            straight from its own arguments), so the only caller is a unit
+            test. It is routed through :func:`parse_ip_address` anyway, so
+            that it does not resurface the defect the moment a caller
+            reaches it -- the same kind of omission is how #481's single-site
+            fix survived to become #491 and then #508 (c.f. #540).
+
+            The description below uses :attr:`self.__class__.__name__
+            <type.__name__>` rather than :attr:`self.alias
+            <pcapkit.protocols.protocol.Protocol.alias>`, because ``alias``
+            here reads ``self._version``, which :meth:`read` only assigns
+            from the wire -- unavailable to a construction-only instance that
+            never went through :meth:`read`.
+
         """
-        return ipaddress.ip_address(id).packed
+        return cast('IPv4Address', parse_ip_address(
+            id, f'{self.__class__.__name__}: invalid ID', version=4)).packed
 
     def _read_encrypt_auth(self, schema: 'Schema_CrytographicAuthentication') -> 'Data_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,

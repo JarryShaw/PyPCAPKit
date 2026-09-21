@@ -146,34 +146,53 @@ EXPECTED_FAILURES = {
         'negative below 40 kbps, and the option it emits at rate=0 does not '
         'parse back'),
 
-    # Four lambdas read ``pkt['length']`` while packing, but the enclosing
-    # ``_make_mptcp_*`` never puts a ``length`` in the packet, so the key is
-    # simply absent on the construction path.
+    # #541 declared real ``kind``/``length`` fields on ``MPTCP``, which is what
+    # gets these seven far enough to construct and pack -- they used to fail
+    # here with ``KeyError: 'length'`` (four of them) or
+    # ``AttributeError: ... no attribute 'kind'`` (three), and #541's fix closed
+    # both. The next field the construction path never sets is ``subtype``:
+    # ``MPTCP.subtype`` is still ``TYPE_CHECKING``-only, an annotation rather
+    # than a field, and the only thing that ever sets it is
+    # ``_MPTCP.post_process``, which runs on a real byte-level unpack -- not on
+    # the schema a ``_make_mptcp_*`` maker returns in memory, which is what
+    # ``TCP``'s convenience constructor (``TCP(options=[(code, kwargs)])``)
+    # reads straight back through ``_read_mptcp_*`` with no round trip in
+    # between. Filed as #566, which also has the fix for the pattern itself
+    # (whether ``subtype`` should become a real field the way ``kind``/
+    # ``length`` did, or be set some other way) rather than a per-case patch
+    # here.
     'tcp-mptcp/MP_CAPABLE': Gap(
-        'CONSTRUCT', "KeyError: 'length'",
-        'pcapkit/protocols/schema/transport/tcp.py:658'),
+        'CONSTRUCT', "'MPTCPCapable' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566); and '
+        "separately, pcapkit/protocols/transport/tcp.py:2669's "
+        '`length=20 if rkey is None else 32` is RFC 8684 section 3.1\'s 12/20 '
+        'swapped, so once #566 is fixed this case would still pack the wrong '
+        'length rather than round-trip (#567)'),
     'tcp-mptcp/ADD_ADDR': Gap(
-        'CONSTRUCT', "KeyError: 'length'",
-        'pcapkit/protocols/schema/transport/tcp.py:790'),
+        'CONSTRUCT', "'MPTCPAddAddress' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
     'tcp-mptcp/REMOVE_ADDR': Gap(
-        'CONSTRUCT', "KeyError: 'length'",
-        'pcapkit/protocols/schema/transport/tcp.py:807'),
+        'CONSTRUCT', "'MPTCPRemoveAddress' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
     'tcp-mptcp/MP_PRIO': Gap(
-        'CONSTRUCT', "KeyError: 'length'",
-        'pcapkit/protocols/schema/transport/tcp.py:827'),
-
-    # ``_read_tcp_options`` reads ``schema.kind`` off every option schema, but
-    # the nested Multipath TCP subtype schemas do not declare one -- the field
-    # belongs to the enclosing option.
+        'CONSTRUCT', "'MPTCPPriority' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
     'tcp-mptcp/DSS': Gap(
-        'CONSTRUCT', "no attribute 'kind'",
-        'pcapkit/protocols/transport/tcp.py:668 -- MPTCPDSS declares no kind'),
+        'CONSTRUCT', "'MPTCPDSS' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
     'tcp-mptcp/MP_FAIL': Gap(
-        'CONSTRUCT', "no attribute 'kind'",
-        'pcapkit/protocols/transport/tcp.py:668 -- MPTCPFallback declares no kind'),
+        'CONSTRUCT', "'MPTCPFallback' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
     'tcp-mptcp/MP_FASTCLOSE': Gap(
-        'CONSTRUCT', "no attribute 'kind'",
-        'pcapkit/protocols/transport/tcp.py:668 -- MPTCPFastclose declares no kind'),
+        'CONSTRUCT', "'MPTCPFastclose' object has no attribute 'subtype'",
+        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
+        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
 
     # ``_make_mptcp_join`` branches on ``self._flags``, which only the parse
     # path ever sets, so the constructor cannot be called at all.
@@ -322,14 +341,31 @@ EXPECTED_FAILURES = {
     # offset. Both cases round-trip now; entries deleted rather than left
     # behind, per the note at the top of this table.
 
-    # RPL fails earlier still: ``post_process`` assumes ``addresses`` is bytes,
-    # which is true after unpacking and false while packing, where it is still
-    # the list the constructor was handed. Unrelated to #487 (see #476/#480);
-    # still open.
+    # RPL used to fail in ``post_process``, which assumed ``addresses`` was
+    # bytes -- true after unpacking, false while packing, where it is still the
+    # list the constructor was handed. That was fixed by #556, and fixing it
+    # exposed the defect immediately behind it: the reader's own length guard.
+    # ``header.length`` is ``Hdr Ext Len``, in 8-octet units rather than octets,
+    # so ``% 16`` cannot be the right invariant -- the same unit confusion #487
+    # fixed for Source Route and Type 2. Behind *that* is a third defect (#564):
+    # the fixed area -- ``cmpr_i`` + ``cmpr_e`` + ``pad`` -- packs to 5 octets,
+    # one wider than the 4 RFC 6554 specifies and this method's own docstring
+    # diagram draws, so the header the guard is judging is not well-formed
+    # either way (measured: it constructs to 41 octets against the 48 its own
+    # ``Hdr Ext Len`` of 5 declares). None of the three is fixed here: RPL
+    # addresses are also variable-length under ``cmpr_i``/``cmpr_e``, so no
+    # fixed bound is obviously correct even once the units and the field
+    # widths are both right, and nothing has been checked against a real RPL
+    # capture. Unrelated to #487 (see #476/#480); still open.
     'ipv6-route-type/RPL_Source_Route_Header': Gap(
-        'CONSTRUCT', 'does not appear to be an IPv4 or IPv6 address',
-        'pcapkit/protocols/schema/internet/ipv6_route.py:156 -- post_process '
-        'assumes bytes; it runs on the pack path too, from schema.py:647'),
+        'CONSTRUCT', 'IPv6-Route: [TypeNo 3] invalid format',
+        'pcapkit/protocols/internet/ipv6_route.py:612 -- the guard rejects '
+        'the header, and the header is not well-formed to begin with: the '
+        '5-octet cmpr_i/cmpr_e/pad fixed area is one octet wider than the 4 '
+        'RFC 6554 specifies (echoed in the docstring above), so Hdr Ext Len '
+        'is computed from a mis-sized data area (#564); % 16 additionally '
+        'treats Hdr Ext Len as octets rather than 8-octet units, the same '
+        'confusion #487 fixed for Source Route and Type 2'),
 
     # -- Mobility Header ------------------------------------------------------
     #
