@@ -41,11 +41,12 @@ import ipaddress
 import re
 import sys
 import textwrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.arp.hardware import Hardware as Enum_Hardware
 from pcapkit.const.arp.operation import Operation as Enum_Operation
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.protocols.data.link.arp import ARP as Data_ARP
 from pcapkit.protocols.data.link.arp import Address as Data_Address
 from pcapkit.protocols.data.link.arp import Type as Data_Type
@@ -395,11 +396,35 @@ class ARP(Link[Data_ARP, Schema_ARP],
             object; otherwise, returns a raw :data:`str` representing the
             protocol address.
 
+        Raises:
+            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.
+                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+
+        Notes:
+            Through :func:`parse_ip_address` rather than
+            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`
+            directly, because :obj:`bool` is an :class:`int` subclass that
+            either constructor accepts without complaint. Before this,
+            ``addr=True`` packed as ``00000001`` (IPv4) or ``::1`` (IPv6) with
+            no exception and no warning at all (c.f. #508, #540).
+
+            The description below uses :attr:`self.__class__.__name__
+            <type.__name__>` rather than :attr:`self.alias
+            <pcapkit.protocols.protocol.Protocol.alias>`, even though the
+            latter is this project's usual choice: :attr:`alias` here reads
+            ``self._acnm``, which :meth:`read` only assigns once the operation
+            code is known, and this method runs from :meth:`make` -- before
+            :meth:`read` has ever executed on a construction-only instance.
+            Using :attr:`alias` would turn every call into an
+            :exc:`AttributeError`, bool or not.
+
         """
         if ptype == Enum_EtherType.Internet_Protocol_version_4:
-            return ipaddress.IPv4Address(addr).packed
+            return cast('IPv4Address', parse_ip_address(
+                addr, f'{self.__class__.__name__}: invalid protocol address', version=4)).packed
         if ptype == Enum_EtherType.Internet_Protocol_version_6:
-            return ipaddress.IPv6Address(addr).packed
+            return cast('IPv6Address', parse_ip_address(
+                addr, f'{self.__class__.__name__}: invalid protocol address', version=6)).packed
 
         if isinstance(addr, str):
             return addr.encode()

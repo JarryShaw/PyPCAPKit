@@ -23,13 +23,13 @@ Octets      Bits        Name                    Description
 
 """
 import collections
-import ipaddress
 import math
 import os.path as os_path
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import parse_ip_address
 from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
@@ -286,6 +286,10 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Returns:
             Constructed packet data.
 
+        Raises:
+            FieldValueError: If ``dst`` is a :obj:`bool` (c.f.
+                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+
         """
         next_val = cast('Enum_TransType',
                         self._make_index(next, next_default, namespace=next_namespace,
@@ -311,7 +315,13 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             else:
                 meth = name[1]
 
-            dst_val = cast('IPv6Address', ipaddress.ip_address(dst)) if dst is not None else None
+            # NOTE: Through ``parse_ip_address`` rather than
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an
+            # ``int`` subclass the latter accepts without complaint. Before
+            # this, ``dst=True`` converted to ``::1`` with no exception at
+            # all (c.f. #508, #540).
+            dst_val = cast('IPv6Address', parse_ip_address(
+                dst, f'{self.alias}: invalid destination address', version=6)) if dst is not None else None
             if isinstance(data, dict):
                 data_val = meth(type_val, dst=dst_val, **data)
             else:
@@ -718,6 +728,10 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Returns:
             Constructed route data schema.
 
+        Raises:
+            FieldValueError: If an entry of ``ip`` is a :obj:`bool` (c.f.
+                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+
         """
         if route is not None:
             cmpr_i = route.cmpr_i
@@ -729,12 +743,22 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         else:
             ip = [] if ip is None else ip
 
+            # NOTE: Through ``parse_ip_address`` rather than
+            # ``ipaddress.ip_address`` directly, because ``bool`` is an
+            # ``int`` subclass the latter accepts without complaint -- and
+            # here the laundered value would not just pack wrong, it would
+            # feed ``cmpr_i``/``cmpr_e`` below, corrupting the compression
+            # metadata alongside the address list. Before this,
+            # ``ip=[True]`` packed with ``cmpr_e=0`` and an address of
+            # ``00000001`` instead of raising (c.f. #508, #540).
+            descr = f'{self.alias}: invalid RPL source address'
+
             if dst is None:
                 pad = 0
                 cmpr_i = 0
                 cmpr_e = 0
                 ip_val = [
-                    cast('IPv6Address', ipaddress.ip_address(addr)).packed for addr in ip
+                    cast('IPv6Address', parse_ip_address(addr, descr, version=6)).packed for addr in ip
                 ]
             else:
                 test_list = [dst.packed]  # type: list[bytes]
@@ -742,7 +766,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                     if isinstance(item, bytes):
                         test_list.append(item)
                     else:
-                        test_list.append(cast('IPv6Address', ipaddress.ip_address(item)).packed)
+                        test_list.append(cast('IPv6Address', parse_ip_address(item, descr, version=6)).packed)
                 prefix_i = os_path.commonprefix(test_list)
                 cmpr_i = len(prefix_i)
 
@@ -750,7 +774,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                 if isinstance(ip[-1], bytes):
                     test_list.append(ip[-1])
                 else:
-                    test_list.append(cast('IPv6Address', ipaddress.ip_address(ip[-1])).packed)
+                    test_list.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed)
                 prefix_e = os_path.commonprefix(test_list)
                 cmpr_e = len(prefix_e)
 
@@ -761,11 +785,11 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                     if isinstance(item, bytes):
                         ip_val.append(item[cmpr_i:])
                     else:
-                        ip_val.append(cast('IPv6Address', ipaddress.ip_address(item)).packed[cmpr_i:])
+                        ip_val.append(cast('IPv6Address', parse_ip_address(item, descr, version=6)).packed[cmpr_i:])
                 if isinstance(ip[-1], bytes):
                     ip_val.append(ip[-1][cmpr_e:])
                 else:
-                    ip_val.append(cast('IPv6Address', ipaddress.ip_address(ip[-1])).packed[cmpr_e:])
+                    ip_val.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed[cmpr_e:])
 
         return Schema_RPL(
             cmpr_i=cmpr_i,

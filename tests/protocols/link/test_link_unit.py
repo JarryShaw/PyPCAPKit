@@ -256,6 +256,42 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(schema.tha, b'112233445566')
         self.assertEqual(schema.tpa, b'\xc6\x33\x64\x02')
 
+    def test_arp_proto_resolve_rejects_a_bool(self) -> None:
+        """A :obj:`bool` protocol address must not be silently packed. See #540.
+
+        ``bool`` is an :class:`int` subclass, so before this fix
+        ``ipaddress.IPv4Address(True)``/``ipaddress.IPv6Address(True)`` converted
+        without complaint. Measured before the fix:
+
+        .. code-block:: text
+
+           ARP._make_proto_resolve(True, IPv4) -> 00000001  (i.e. 0.0.0.1)
+           OSPF._make_id_numbers(True)         -> 00000001  (i.e. 0.0.0.1)
+
+        Both IPv4 and IPv6 branches share the same guard, so both are checked here.
+        """
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.protocols.link.arp import ARP
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        proto = object.__new__(ARP)
+
+        for ptype in (EtherType.Internet_Protocol_version_4, EtherType.Internet_Protocol_version_6):
+            with self.subTest(ptype=ptype):
+                with self.assertRaises(FieldValueError) as context:
+                    proto._make_proto_resolve(True, ptype)  # type: ignore[arg-type]
+                self.assertIsInstance(context.exception, BaseError)
+                self.assertIn('must not be a bool', str(context.exception))
+                self.assertIn('int(True)', str(context.exception))
+
+        # the fix must not disturb a real address on either family
+        self.assertEqual(
+            proto._make_proto_resolve('198.51.100.9', EtherType.Internet_Protocol_version_4),
+            b'\xc6\x33\x64\x09')
+        self.assertEqual(
+            proto._make_proto_resolve('2001:db8::9', EtherType.Internet_Protocol_version_6),
+            b'\x20\x01\x0d\xb8' + b'\x00' * 11 + b'\x09')
+
     def test_vlan_make_data_preserves_tci_and_type(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.vlan.priority_level import PriorityLevel
@@ -859,6 +895,34 @@ class LinkProtocolUnitTests(unittest.TestCase):
             maker.make(auth_type=Authentication.No_Authentication, auth_data=crypto_data_model)
         with self.assertRaises(ProtocolError):
             maker._make_encrypt_auth(object())
+
+    def test_ospf_id_numbers_rejects_a_bool(self) -> None:
+        """A :obj:`bool` router/area ID must not be silently packed. See #540.
+
+        Latent rather than live: nothing in this module calls ``_make_id_numbers``
+        today -- ``OSPF.make`` builds ``router_id``/``area_id`` from its own
+        arguments rather than through this helper -- so only a unit test (this one,
+        and the pre-existing one above) reaches it. It is fixed alongside the three
+        live sites anyway, so that it does not resurface the moment a future caller
+        reaches it. Measured before the fix:
+
+        .. code-block:: text
+
+           OSPF._make_id_numbers(True) -> 00000001  (i.e. 0.0.0.1)
+        """
+        from pcapkit.protocols.link.ospf import OSPF
+        from pcapkit.utilities.exceptions import BaseError, FieldValueError
+
+        proto = object.__new__(OSPF)
+
+        with self.assertRaises(FieldValueError) as context:
+            proto._make_id_numbers(True)  # type: ignore[arg-type]
+        self.assertIsInstance(context.exception, BaseError)
+        self.assertIn('must not be a bool', str(context.exception))
+        self.assertIn('int(True)', str(context.exception))
+
+        # a real ID still converts normally
+        self.assertEqual(proto._make_id_numbers('192.0.2.6'), b'\xc0\x00\x02\x06')
 
 
 if __name__ == '__main__':
