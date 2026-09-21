@@ -299,6 +299,16 @@ pull requests between #326 and #509.
   (#413), ambiguous cross-references and five autodoc signature failures (#416),
   and ``Extractor``'s documented exception plus 40 phantom or stale ``Args:``
   labels (#501).
+* **Fixed** -- ``FieldBase.unpack`` zero-padded straight up to a field's
+  declared ``length`` with ``rjust()``, regardless of how little data
+  ``buffer`` actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a
+  bogus inner length was enough to force a multi-gigabyte allocation, since
+  ``length`` is frequently wire-derived and so attacker-controlled. A declared
+  length past 262144 octets -- libpcap's own ``MAXIMUM_SNAPLEN``, and this
+  package's own default ``snaplen`` -- that the buffer cannot back now raises
+  ``FieldValueError`` instead of padding for it; the option and list loops'
+  own tolerance for a short read past a truncated area (#431) is far under
+  that ceiling and is untouched (#554).
 * **Fixed** -- ``TCP._make_mptcp_addaddr`` could not build an ``ADD_ADDR``
   option end to end: its ``kind=``/``length=`` arguments were rejected with
   ``UnknownFieldWarning`` and silently dropped, and ``.pack()`` then raised
