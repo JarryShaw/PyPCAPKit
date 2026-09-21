@@ -336,6 +336,14 @@ pull requests between #326 and #509.
   (#413), ambiguous cross-references and five autodoc signature failures (#416),
   and ``Extractor``'s documented exception plus 40 phantom or stale ``Args:``
   labels (#501).
+* **Fixed** -- two more gaps the #514 keyword audit turned up, neither
+  previously covered by a test: ``StreamEOFError``'s docstring did not say
+  that ``@prepare`` always raises it with ``quiet=True`` -- the same
+  end-of-stream convention ``StructError`` follows via its own ``eof=True`` --
+  so nothing pinned that silence against a future regression; and
+  ``register_extractor_engine``'s real keyword, ``name``, was not itself
+  under test, only its already-corrected docstring, so a future rename could
+  put the two out of step again exactly as quietly as before.
 * **Fixed** -- ``FieldBase.unpack`` zero-padded straight up to a field's
   declared ``length`` with ``rjust()``, regardless of how little data
   ``buffer`` actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a

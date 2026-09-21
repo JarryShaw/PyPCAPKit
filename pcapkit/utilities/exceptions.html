@@ -865,6 +865,15 @@ subclasses <a class="reference external" href="https://docs.python.org/3/builtin
 that wants to be more specific can catch this instead.</p>
 <p>A <em>declared</em> zero length – a nested schema legitimately sized to have
 nothing to read – is a different situation and does not raise this.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="functools.html#pcapkit.utilities.decorators.prepare" title="pcapkit.utilities.decorators.prepare"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare()</span></code></a> always raises this with
+<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>: reaching end of stream is the frame reader’s ordinary
+way of finding out there is nothing left to parse, not a fault to
+log – the same convention
+<a class="reference internal" href="#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a> follows for the
+same situation via its own <code class="docutils literal notranslate"><span class="pre">eof=True</span></code>.</p>
+</div>
 </dd></dl>
 
 </section>

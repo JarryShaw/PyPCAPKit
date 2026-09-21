@@ -797,6 +797,14 @@ at <code class="docutils literal notranslate"><span class="pre">Tree</span></cod
 (#413), ambiguous cross-references and five autodoc signature failures (#416),
 and <code class="docutils literal notranslate"><span class="pre">Extractor</span></code>’s documented exception plus 40 phantom or stale <code class="docutils literal notranslate"><span class="pre">Args:</span></code>
 labels (#501).</p></li>
+<li><p><strong>Fixed</strong> – two more gaps the #514 keyword audit turned up, neither
+previously covered by a test: <code class="docutils literal notranslate"><span class="pre">StreamEOFError</span></code>’s docstring did not say
+that <code class="docutils literal notranslate"><span class="pre">&#64;prepare</span></code> always raises it with <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> – the same
+end-of-stream convention <code class="docutils literal notranslate"><span class="pre">StructError</span></code> follows via its own <code class="docutils literal notranslate"><span class="pre">eof=True</span></code> –
+so nothing pinned that silence against a future regression; and
+<code class="docutils literal notranslate"><span class="pre">register_extractor_engine</span></code>’s real keyword, <code class="docutils literal notranslate"><span class="pre">name</span></code>, was not itself
+under test, only its already-corrected docstring, so a future rename could
+put the two out of step again exactly as quietly as before.</p></li>
 <li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code> zero-padded straight up to a field’s
 declared <code class="docutils literal notranslate"><span class="pre">length</span></code> with <code class="docutils literal notranslate"><span class="pre">rjust()</span></code>, regardless of how little data
 <code class="docutils literal notranslate"><span class="pre">buffer</span></code> actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a

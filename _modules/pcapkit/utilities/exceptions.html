@@ -1005,6 +1005,14 @@
 <span class="sd">    A *declared* zero length -- a nested schema legitimately sized to have</span>
 <span class="sd">    nothing to read -- is a different situation and does not raise this.</span>
 
+<span class="sd">    Note:</span>
+<span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` always raises this with</span>
+<span class="sd">        ``quiet=True``: reaching end of stream is the frame reader's ordinary</span>
+<span class="sd">        way of finding out there is nothing left to parse, not a fault to</span>
+<span class="sd">        log -- the same convention</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.StructError` follows for the</span>
+<span class="sd">        same situation via its own ``eof=True``.</span>
+
 <span class="sd">    """</span></div>
 
 
