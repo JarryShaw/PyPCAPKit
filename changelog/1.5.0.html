@@ -540,6 +540,13 @@ fresh clone can rebuild every fixture (#340), a Dockerised engine benchmark
 covering every supported Python version (#410), and registry round-trip
 coverage that records the entries which cannot close the cycle rather than
 skipping them (#440, #504).</p></li>
+<li><p><strong>Added</strong> – coverage for the untested half of the #431 accommodation: a TCP
+or IPv4 option whose declared length asks for more data than the capture
+actually holds, pinning that it still parses, with the short read left-padded
+rather than rejected. The one test #431 left behind only covers an option
+area with no data behind it at all; a candidate fix for #554 turned the
+untested half into an unwrapped <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> while the rest of the
+suite stayed green (#571, #572).</p></li>
 <li><p><strong>Changed</strong> – <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> no longer configures logging at import. It
 installs a <code class="docutils literal notranslate"><span class="pre">NullHandler</span></code> and sets no level, so verbosity is inherited from
 the application instead of being seized by whichever library was imported
@@ -632,6 +639,36 @@ on 3.10.21, 3.11.15 and 3.14.7; <code class="docutils literal notranslate"><span
 so the documented registration path works on every supported version. There is
 no <code class="docutils literal notranslate"><span class="pre">name=</span></code> alias – a keyword that worked on some interpreters and not others
 is the trap being removed, not a compatibility measure.</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">Protocol</span></code>/<code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> gain a <code class="docutils literal notranslate"><span class="pre">code=</span></code> class keyword for
+the next-layer dispatch registries – <code class="docutils literal notranslate"><span class="pre">Link.__proto__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Internet.__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">TCP.__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP.__proto__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SCTP.__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">Frame.__proto__</span></code> and <code class="docutils literal notranslate"><span class="pre">PCAPNG.__proto__</span></code> – the same
+opt-in treatment #514 gave <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, <code class="docutils literal notranslate"><span class="pre">Reassembly</span></code>, <code class="docutils literal notranslate"><span class="pre">TraceFlow</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Dumper</span></code> above, extended to the one family that needed a registration key
+invented rather than merely un-guarded. Omitting <code class="docutils literal notranslate"><span class="pre">code</span></code> leaves a subclass
+unregistered, exactly as before this keyword existed: the built-in dispatch
+tables are still populated by literal assignment in each layer module, not by
+<code class="docutils literal notranslate"><span class="pre">__init_subclass__</span></code>, so nothing the library ships moves. <code class="docutils literal notranslate"><span class="pre">code</span></code> accepts a
+bare enum member, whose <em>type</em> infers the destination – <code class="docutils literal notranslate"><span class="pre">EtherType</span></code> means
+<code class="docutils literal notranslate"><span class="pre">Link</span></code>, <code class="docutils literal notranslate"><span class="pre">TransType</span></code> means <code class="docutils literal notranslate"><span class="pre">Internet</span></code>, <code class="docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code>
+means <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, and <code class="docutils literal notranslate"><span class="pre">LinkType</span></code> means <em>both</em> <code class="docutils literal notranslate"><span class="pre">Frame</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code>,
+deterministically, mirroring what <code class="docutils literal notranslate"><span class="pre">register_linktype</span></code> already does by
+hand – or a <code class="docutils literal notranslate"><span class="pre">{destination:</span> <span class="pre">key}</span></code> mapping, required for a raw <code class="docutils literal notranslate"><span class="pre">int</span></code> such
+as a TCP/UDP port number, which cannot say by itself which transport it
+belongs to. Either form may appear in an iterable, so one declaration can
+register a class into several registries at once, e.g. a <code class="docutils literal notranslate"><span class="pre">L2TP</span></code> subclass
+reachable both by IP protocol number and by a UDP port. The explicit
+mapping form is accepted even for a key whose type could be inferred –
+being more explicit than required is never an error. Inference refuses
+rather than guesses: an enum member whose type names no known destination
+raises <code class="docutils literal notranslate"><span class="pre">RegistryError</span></code> instead of silently doing nothing or picking an
+arbitrary registry, and an unrecognised class keyword raises
+<code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>, matching the other four families. Backed by the new
+<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_protocol_code</span></code>, which can
+also be called directly to register a class that declined at class-definition
+time. This is the mechanism #548 (<code class="docutils literal notranslate"><span class="pre">TransType.L2TP</span></code> registered nowhere)
+needs and does not yet use – fixing it is now a one-declaration change, left
+for its own issue rather than folded in here.</p></li>
 <li><p><strong>Changed</strong> – extraction is around 46% faster on a 1,117-frame HTTP capture,
 with byte-identical output (#420). A reassembled datagram’s payload is now
 analysed on first read rather than eagerly, which cuts IP reassembly’s own
@@ -703,6 +740,23 @@ promised: a malformed IP field value raised a bare <code class="docutils literal
 and <code class="docutils literal notranslate"><span class="pre">&#64;prepare</span></code> discarded extra arguments silently and treated a <em>declared</em>
 zero length as end of stream, which is now distinguished from a genuinely
 exhausted one and raises <code class="docutils literal notranslate"><span class="pre">StreamEOFError</span></code> (#454, #458).</p></li>
+<li><p><strong>Fixed</strong> – the last four call sites where a <code class="docutils literal notranslate"><span class="pre">_make_*</span></code> method converts an
+address itself, ahead of the schema, so the same <code class="docutils literal notranslate"><span class="pre">bool</span></code>-as-<code class="docutils literal notranslate"><span class="pre">int</span></code> mistake
+reached them too, unguarded by the schema-layer fix above:
+<code class="docutils literal notranslate"><span class="pre">ARP._make_proto_resolve</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6_Route._make_data_type_rpl</span></code> (which also
+derives its RPL compression lengths from the laundered value, corrupting the
+address list alongside the exception it should have raised), the <code class="docutils literal notranslate"><span class="pre">dst</span></code>
+parameter of <code class="docutils literal notranslate"><span class="pre">IPv6_Route.make</span></code>, and the latent <code class="docutils literal notranslate"><span class="pre">OSPF._make_id_numbers</span></code>,
+which nothing calls yet but would have inherited the defect regardless. All
+four now go through <code class="docutils literal notranslate"><span class="pre">parse_ip_address</span></code>, the helper #539 and #552 route
+their own sites through, completing the programme #481 and #508 started.
+Pinning <code class="docutils literal notranslate"><span class="pre">version=6</span></code> on the two <code class="docutils literal notranslate"><span class="pre">IPv6_Route</span></code> sites is a second, smaller
+behaviour change beyond bool rejection: both previously converted a plain
+integer through the bare, family-inferring <code class="docutils literal notranslate"><span class="pre">ipaddress.ip_address</span></code>, which
+let <code class="docutils literal notranslate"><span class="pre">ip=[258]</span></code> pack a 4-octet IPv4 address (<code class="docutils literal notranslate"><span class="pre">0.0.1.2</span></code>) inside an
+IPv6-only header; it now packs the 16-octet IPv6 form (<code class="docutils literal notranslate"><span class="pre">::102</span></code>) instead,
+which is what an IPv6-only header should hold regardless of what an integer
+argument happens to fit as an IPv4 address (#540).</p></li>
 <li><p><strong>Fixed</strong> – the engine adapters, which were quietly wrong rather than loud.
 The <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> toolkit split TCP and IPv4 headers at their fixed struct size
 instead of their real length, so option octets overwrote payload in the
@@ -743,6 +797,50 @@ at <code class="docutils literal notranslate"><span class="pre">Tree</span></cod
 (#413), ambiguous cross-references and five autodoc signature failures (#416),
 and <code class="docutils literal notranslate"><span class="pre">Extractor</span></code>’s documented exception plus 40 phantom or stale <code class="docutils literal notranslate"><span class="pre">Args:</span></code>
 labels (#501).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code> zero-padded straight up to a field’s
+declared <code class="docutils literal notranslate"><span class="pre">length</span></code> with <code class="docutils literal notranslate"><span class="pre">rjust()</span></code>, regardless of how little data
+<code class="docutils literal notranslate"><span class="pre">buffer</span></code> actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a
+bogus inner length was enough to force a multi-gigabyte allocation, since
+<code class="docutils literal notranslate"><span class="pre">length</span></code> is frequently wire-derived and so attacker-controlled. A declared
+length past 262144 octets – libpcap’s own <code class="docutils literal notranslate"><span class="pre">MAXIMUM_SNAPLEN</span></code>, and this
+package’s own default <code class="docutils literal notranslate"><span class="pre">snaplen</span></code> – that the buffer cannot back now raises
+<code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> instead of padding for it; the option and list loops’
+own tolerance for a short read past a truncated area (#431) is far under
+that ceiling and is untouched (#554).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">TCP._make_mptcp_addaddr</span></code> could not build an <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code>
+option end to end: its <code class="docutils literal notranslate"><span class="pre">kind=</span></code>/<code class="docutils literal notranslate"><span class="pre">length=</span></code> arguments were rejected with
+<code class="docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code> and silently dropped, and <code class="docutils literal notranslate"><span class="pre">.pack()</span></code> then raised
+<code class="docutils literal notranslate"><span class="pre">KeyError:</span> <span class="pre">'length'</span></code> from <code class="docutils literal notranslate"><span class="pre">port</span></code>’s own condition,
+<code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">in</span> <span class="pre">(10,</span> <span class="pre">22)</span></code>. The cause was one layer up – <code class="docutils literal notranslate"><span class="pre">MPTCP</span></code>, the
+base class every Multipath TCP subtype schema inherits, declared <code class="docutils literal notranslate"><span class="pre">kind</span></code> and
+<code class="docutils literal notranslate"><span class="pre">length</span></code> only under <code class="docutils literal notranslate"><span class="pre">typing.TYPE_CHECKING</span></code> rather than as real fields,
+unlike <code class="docutils literal notranslate"><span class="pre">Option</span></code>, which every non-Multipath TCP option schema inherits
+instead. That silently dropped <code class="docutils literal notranslate"><span class="pre">kind=</span></code>/<code class="docutils literal notranslate"><span class="pre">length=</span></code> for every
+<code class="docutils literal notranslate"><span class="pre">_make_mptcp_*</span></code> constructor, not only <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code>’s, so <code class="docutils literal notranslate"><span class="pre">MPTCP</span></code> now
+declares both for real, the same way <code class="docutils literal notranslate"><span class="pre">Option</span></code> already did (#541). The same
+missing fields broke parsing too: with no <code class="docutils literal notranslate"><span class="pre">kind</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> fields ahead of
+it, a Multipath TCP subtype schema’s own leading field read the <code class="docutils literal notranslate"><span class="pre">kind</span></code>
+octet itself rather than the octet meant for it, an off-by-two in field
+alignment rather than a wire-format change – a correct sender’s octets were
+always right, only this library’s reading of them was shifted. Spec-correct
+<code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code> and <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> options failed to parse with
+<code class="docutils literal notranslate"><span class="pre">FieldError:</span> <span class="pre">TCP:</span> <span class="pre">[OptNo</span> <span class="pre">30]</span> <span class="pre">3</span> <span class="pre">invalid</span> <span class="pre">IP</span> <span class="pre">version</span></code> and
+<code class="docutils literal notranslate"><span class="pre">KeyError:</span> <span class="pre">'length'</span></code> respectively; both parse correctly now.</p></li>
+<li><p><strong>Fixed</strong> – which exception a malformed TCP SACK option raised depended on
+unrelated process state: a clean interpreter raised <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> as
+documented, but a process that had already popped
+<code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.misc</span></code> from <code class="docutils literal notranslate"><span class="pre">sys.modules</span></code> – which the <code class="docutils literal notranslate"><span class="pre">#439</span></code>
+ABC-cache regression tests do in every case’s <code class="docutils literal notranslate"><span class="pre">setUp</span></code>/<code class="docutils literal notranslate"><span class="pre">tearDown</span></code> –
+raised <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> instead, from a different layer entirely, before
+the documented check was even reached (#525). The cause was
+<code class="docutils literal notranslate"><span class="pre">ListField.unpack</span></code> resolving <code class="docutils literal notranslate"><span class="pre">SchemaField</span></code> through a function-local
+import re-run on every call; a module popped and reimported mid-process comes
+back as a second, distinct class, so <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against it silently
+misclassified the field and billed each item by its declared length instead
+of by what it actually consumed. <strong>Any caller relying on the
+previously-observed</strong> <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> <strong>for this case now gets</strong>
+<code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> <strong>instead, deterministically</strong>, matching the method’s own
+docstring. Fixed by importing at module level instead.</p></li>
 <li><p><strong>Fixed</strong> – two dropped-keyword/wrong-cast defects flagged in review during
 this release and never filed until now: HIP’s <code class="docutils literal notranslate"><span class="pre">_make_param_encrypted</span></code> passed
 <code class="docutils literal notranslate"><span class="pre">cipher=</span></code> to a schema with no such field, so the value was silently dropped

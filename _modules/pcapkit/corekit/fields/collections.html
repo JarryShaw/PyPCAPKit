@@ -452,6 +452,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumberField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
@@ -596,7 +597,34 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaField</span>
+        <span class="c1"># NOTE: ``SchemaField`` used to be imported here, inside the method body,</span>
+        <span class="c1"># rather than at module level -- there is no cyclic import to dodge by</span>
+        <span class="c1"># doing so; :mod:`pcapkit.corekit.fields.misc` does not import this</span>
+        <span class="c1"># module. A local ``from ... import`` re-resolves against</span>
+        <span class="c1"># :data:`sys.modules` on *every* call, and normally that is a cheap</span>
+        <span class="c1"># dict lookup returning the same cached module -- except when something</span>
+        <span class="c1"># has popped :mod:`pcapkit.corekit.fields.misc` out of</span>
+        <span class="c1"># :data:`sys.modules` since this ``ListField`` was built (the ``#439``</span>
+        <span class="c1"># regression tests do exactly that, to get a clean ABC-cache state</span>
+        <span class="c1"># between cases). The next call re-executes the module from scratch and</span>
+        <span class="c1"># mints a *second*, distinct ``SchemaField`` class, while</span>
+        <span class="c1"># ``self._item_type`` -- built long before, from the first one -- is</span>
+        <span class="c1"># still an instance of the original. ``isinstance`` against the new</span>
+        <span class="c1"># class then reports :data:`False` for an item that plainly is a</span>
+        <span class="c1"># ``SchemaField``, ``is_schema`` goes the wrong way, and this method's</span>
+        <span class="c1"># other branch bills each item by its *declared* length unconditionally</span>
+        <span class="c1"># instead of by what it actually consumed -- which is what let a</span>
+        <span class="c1"># malformed TCP SACK option's length check raise</span>
+        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead</span>
+        <span class="c1"># of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from</span>
+        <span class="c1"># :meth:`TCP._read_mode_sack</span>
+        <span class="c1"># &lt;pcapkit.protocols.transport.tcp.TCP._read_mode_sack&gt;`, depending on</span>
+        <span class="c1"># unrelated things that ran earlier in the same process. C.f. #525.</span>
+        <span class="c1"># Importing at module level, once, for the life of this module object,</span>
+        <span class="c1"># closes that off: ``SchemaField`` then stays whatever class this</span>
+        <span class="c1"># module resolved at its own import time, regardless of what happens to</span>
+        <span class="c1"># :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`</span>
+        <span class="c1"># afterwards.</span>
         <span class="n">is_schema</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_type</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">)</span>
 
         <span class="c1"># NOTE: The item-typed branch below sizes each item by ``field.length``,</span>

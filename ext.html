@@ -730,6 +730,32 @@ comprehensive implementation can be found in the
 <span class="n">register_ethertype</span><span class="p">(</span><span class="n">EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">,</span> <span class="n">MyIPv4</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Registering after the fact, as above, is one option. The other is passing
+<code class="docutils literal notranslate"><span class="pre">code=</span></code> at class definition, which is <strong>opt-in</strong> – a class that omits it
+stays unregistered, exactly as if no <code class="docutils literal notranslate"><span class="pre">register_*</span></code> call had been made
+either:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyIPv4</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">IPv4Data</span><span class="p">,</span> <span class="n">IPv4Schema</span><span class="p">],</span>
+             <span class="n">schema</span><span class="o">=</span><span class="n">IPv4Schema</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">IPv4Data</span><span class="p">,</span>
+             <span class="n">code</span><span class="o">=</span><span class="n">EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>The key’s own type decides which registry it goes to – an
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a> member always means
+<a class="reference internal" href="pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>, a
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> member always means
+<a class="reference internal" href="pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>, and so on – so a
+raw <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, such as a TCP or UDP port, cannot say which registry it
+belongs to and must be given explicitly: <code class="docutils literal notranslate"><span class="pre">code={TCP:</span> <span class="pre">21}</span></code>. Either form
+may appear in an iterable to register one class into several registries
+at once. See
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__</span></code> for the full
+rule, and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol_code()</span></code> for
+what runs underneath it.</p>
+</div>
 </section>
 </section>
 <section id="extending-existing-protocol">
@@ -917,7 +943,7 @@ which is why both exist. See
 <p>The following code snippet shows how to create a new engine class:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post230)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
+<p>Following is a PoC implementation of a new engine based on <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post238)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy</span></code></a>. For documentation
 purposes, we use the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> engine as an example,
 where the comprehensive implementation can be found in the <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#module-pcapkit.foundation.engines.scapy" title="pcapkit.foundation.engines.scapy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.scapy</span></code></a>
 module.</p>

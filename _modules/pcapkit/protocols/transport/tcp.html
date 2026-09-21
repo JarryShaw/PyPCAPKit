@@ -3566,10 +3566,16 @@
             <span class="c1"># a ``bool`` into an ``IPv4Address`` that the schema's own guard can no</span>
             <span class="c1"># longer tell from a real address -- ``addr=True`` reached</span>
             <span class="c1"># ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``</span>
-            <span class="c1"># (c.f. #508). This option cannot be constructed end to end at all for</span>
-            <span class="c1"># an unrelated reason, ``KeyError: 'length'`` from</span>
-            <span class="c1"># pcapkit/protocols/schema/transport/tcp.py:790, which is why the</span>
-            <span class="c1"># corruption here was only ever visible on the schema the maker returns.</span>
+            <span class="c1"># (c.f. #508). Until #541, this option could not be constructed end to</span>
+            <span class="c1"># end at all for an unrelated reason -- ``KeyError: 'length'`` from the</span>
+            <span class="c1"># ``port`` field's condition at</span>
+            <span class="c1"># pcapkit/protocols/schema/transport/tcp.py:819, since</span>
+            <span class="c1"># ``Schema_MPTCPAddAddress`` (like every ``MPTCP`` subtype schema)</span>
+            <span class="c1"># declared no ``kind``/``length`` fields of its own for ``kind=``/</span>
+            <span class="c1"># ``length=`` below to land in -- which is why the corruption here was</span>
+            <span class="c1"># only ever visible on the schema the maker returns. #541 gave</span>
+            <span class="c1"># ``MPTCP`` real ``kind``/``length`` fields, so both now land and this</span>
+            <span class="c1"># constructs and packs correctly.</span>
             <span class="n">addr_val</span> <span class="o">=</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] invalid address'</span><span class="p">)</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">addr_val</span><span class="o">.</span><span class="n">version</span>

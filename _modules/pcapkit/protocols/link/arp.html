@@ -487,11 +487,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.arp.hardware</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hardware</span> <span class="k">as</span> <span class="n">Enum_Hardware</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.arp.operation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Operation</span> <span class="k">as</span> <span class="n">Enum_Operation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Data_ARP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Address</span> <span class="k">as</span> <span class="n">Data_Address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Data_Type</span>
@@ -867,11 +868,35 @@
 <span class="sd">            object; otherwise, returns a raw :data:`str` representing the</span>
 <span class="sd">            protocol address.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Through :func:`parse_ip_address` rather than</span>
+<span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`</span>
+<span class="sd">            directly, because :obj:`bool` is an :class:`int` subclass that</span>
+<span class="sd">            either constructor accepts without complaint. Before this,</span>
+<span class="sd">            ``addr=True`` packed as ``00000001`` (IPv4) or ``::1`` (IPv6) with</span>
+<span class="sd">            no exception and no warning at all (c.f. #508, #540).</span>
+
+<span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
+<span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.alias&gt;`, even though the</span>
+<span class="sd">            latter is this project's usual choice: :attr:`alias` here reads</span>
+<span class="sd">            ``self._acnm``, which :meth:`read` only assigns once the operation</span>
+<span class="sd">            code is known, and this method runs from :meth:`make` -- before</span>
+<span class="sd">            :meth:`read` has ever executed on a construction-only instance.</span>
+<span class="sd">            Using :attr:`alias` would turn every call into an</span>
+<span class="sd">            :exc:`AttributeError`, bool or not.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>

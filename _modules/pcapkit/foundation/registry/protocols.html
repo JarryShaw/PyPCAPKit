@@ -453,10 +453,19 @@
 <span class="sd">This module provides the protocol registries for :mod:`pcapkit`.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportProtocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> \
+    <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">Enum_PayloadProtocolIdentifier</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>
@@ -495,7 +504,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.hip.parameter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">HIP_Parameter</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
@@ -550,6 +559,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'register_protocol'</span><span class="p">,</span>
+    <span class="s1">'register_protocol_code'</span><span class="p">,</span>
 
     <span class="s1">'register_linktype'</span><span class="p">,</span>
     <span class="s1">'register_pcap'</span><span class="p">,</span> <span class="s1">'register_pcapng'</span><span class="p">,</span>
@@ -598,6 +608,127 @@
     <span class="n">protocol_registry</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">protocol</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
+
+
+<span class="c1">#: Enum type -&gt; the class(es) owning the :attr:`ProtocolBase.__proto__</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__proto__&gt;` dispatch registry</span>
+<span class="c1">#: keyed by that enum type -- the "registry-of-registries" that lets</span>
+<span class="c1">#: ``code=`` infer a destination from a key's own type, per GH-514. This is</span>
+<span class="c1">#: not an invention: it is exactly the targeting</span>
+<span class="c1">#: :func:`register_ethertype`, :func:`register_transtype`,</span>
+<span class="c1">#: :func:`register_linktype` and :func:`register_sctp` already hard-code by</span>
+<span class="c1">#: hand, moved into one table so :func:`register_protocol_code` can consult</span>
+<span class="c1">#: it. ``LinkType`` naming two classes is deliberate, not ambiguous --</span>
+<span class="c1">#: :func:`register_linktype` already fans out to both.</span>
+<span class="n">_CODE_DESTINATIONS</span><span class="p">:</span> <span class="s1">'dict[type, tuple[Type[Protocol], ...]]'</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">Enum_EtherType</span><span class="p">:</span> <span class="p">(</span><span class="n">Link</span><span class="p">,),</span>
+    <span class="n">Enum_TransType</span><span class="p">:</span> <span class="p">(</span><span class="n">Internet</span><span class="p">,),</span>
+    <span class="n">Enum_PayloadProtocolIdentifier</span><span class="p">:</span> <span class="p">(</span><span class="n">SCTP</span><span class="p">,),</span>
+    <span class="n">Enum_LinkType</span><span class="p">:</span> <span class="p">(</span><span class="n">Frame</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[Type[Protocol], Any]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Flatten a ``code=`` argument into ``(destination, key)`` pairs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: See :func:`register_protocol_code`.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        One ``(destination, key)`` pair per registration the caller asked</span>
+<span class="sd">        for -- possibly several, e.g. a single :class:`~pcapkit.const.reg.\</span>
+<span class="sd">linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If a value has no destination it can name or infer;</span>
+<span class="sd">            see :func:`register_protocol_code`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">yield from</span> <span class="n">code</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
+        <span class="n">destinations</span> <span class="o">=</span> <span class="n">_CODE_DESTINATIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">destinations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'no destination registry is known for enum type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> '</span>
+                <span class="sa">f</span><span class="s1">'(key </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">); pass an explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">SomeClass: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">destination</span> <span class="ow">in</span> <span class="n">destinations</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">destination</span><span class="p">,</span> <span class="n">code</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'code must be an enum member, a </span><span class="se">{{</span><span class="s1">destination: key</span><span class="se">}}</span><span class="s1"> mapping, or an '</span>
+                            <span class="sa">f</span><span class="s1">'iterable thereof, not </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="n">_iter_code_targets</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'raw key </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="s1"> has no destination registry it can infer; pass an '</span>
+                        <span class="sa">f</span><span class="s1">'explicit destination, e.g. code=</span><span class="se">{{</span><span class="s1">TCP: </span><span class="si">{</span><span class="n">code</span><span class="si">!r}</span><span class="se">}}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">register_protocol_code</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Register ``protocol`` into the next-layer dispatch registry (or</span>
+<span class="sd">    registries) named by ``code``.</span>
+
+<span class="sd">    This is what backs the ``code`` keyword of</span>
+<span class="sd">    :meth:`ProtocolBase.__init_subclass__</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.__init_subclass__&gt;`; it can also</span>
+<span class="sd">    be called directly to register a class that declined at class-definition</span>
+<span class="sd">    time.</span>
+
+<span class="sd">    ``code`` is normalised into a flat sequence of targets, where each item</span>
+<span class="sd">    is either:</span>
+
+<span class="sd">    * an enum member, whose *type* is looked up in a small table mapping</span>
+<span class="sd">      enum type to the class(es) owning the matching ``__proto__`` --</span>
+<span class="sd">      :class:`~pcapkit.const.reg.ethertype.EtherType` to</span>
+<span class="sd">      :class:`~pcapkit.protocols.link.link.Link`,</span>
+<span class="sd">      :class:`~pcapkit.const.reg.transtype.TransType` to</span>
+<span class="sd">      :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
+<span class="sd">      :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`</span>
+<span class="sd">      to :class:`~pcapkit.protocols.transport.sctp.SCTP`, and</span>
+<span class="sd">      :class:`~pcapkit.const.reg.linktype.LinkType` to *both*</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**</span>
+<span class="sd">      :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or</span>
+<span class="sd">    * a :class:`dict` mapping an explicit destination class to a key -- the</span>
+<span class="sd">      only form accepted for a bare :class:`int`, since e.g. a port number</span>
+<span class="sd">      does not say by itself whether it means</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.tcp.TCP` or</span>
+<span class="sd">      :class:`~pcapkit.protocols.transport.udp.UDP`;</span>
+
+<span class="sd">    or an iterable of either, to register ``protocol`` into several</span>
+<span class="sd">    registries from one call -- e.g. a</span>
+<span class="sd">    :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both by its</span>
+<span class="sd">    IP protocol number and by a UDP port:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       register_protocol_code(L2TPv2, [TransType.L2TP, {UDP: 1701}])</span>
+
+<span class="sd">    The explicit mapping form is accepted for any key, even one whose type</span>
+<span class="sd">    could be inferred -- being more explicit than required is never an</span>
+<span class="sd">    error.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class to register.</span>
+<span class="sd">        code: Registration key(s); see above.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RegistryError: If a bare :class:`int` (or any other non-enum, non-</span>
+<span class="sd">            mapping value) is given without an explicit destination, or if</span>
+<span class="sd">            an enum member's type names no known destination registry --</span>
+<span class="sd">            inference refuses rather than guesses.</span>
+
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_iter_code_targets</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+        <span class="n">destination</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> into </span><span class="si">%s</span><span class="s1">.__proto__: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                     <span class="n">destination</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
 
 <span class="c1">###############################################################################</span>

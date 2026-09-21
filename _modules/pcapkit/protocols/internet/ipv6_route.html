@@ -469,13 +469,13 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">os_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">Enum_Routing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Data_RPL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Data_IPv6_Route</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Data_SourceRoute</span>
@@ -742,6 +742,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``dst`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+
 <span class="sd">        """</span>
         <span class="n">next_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_TransType'</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">next</span><span class="p">,</span> <span class="n">next_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">next_namespace</span><span class="p">,</span>
@@ -767,7 +771,13 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">dst</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
+            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an</span>
+            <span class="c1"># ``int`` subclass the latter accepts without complaint. Before</span>
+            <span class="c1"># this, ``dst=True`` converted to ``::1`` with no exception at</span>
+            <span class="c1"># all (c.f. #508, #540).</span>
+            <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+                <span class="n">dst</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid destination address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span> <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">dst_val</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1210,6 +1220,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed route data schema.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If an entry of ``ip`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">route</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">cmpr_i</span>
@@ -1221,12 +1235,22 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ip</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ip</span>
 
+            <span class="c1"># NOTE: Through ``parse_ip_address`` rather than</span>
+            <span class="c1"># ``ipaddress.ip_address`` directly, because ``bool`` is an</span>
+            <span class="c1"># ``int`` subclass the latter accepts without complaint -- and</span>
+            <span class="c1"># here the laundered value would not just pack wrong, it would</span>
+            <span class="c1"># feed ``cmpr_i``/``cmpr_e`` below, corrupting the compression</span>
+            <span class="c1"># metadata alongside the address list. Before this,</span>
+            <span class="c1"># ``ip=[True]`` packed with ``cmpr_e=0`` and an address of</span>
+            <span class="c1"># ``00000001`` instead of raising (c.f. #508, #540).</span>
+            <span class="n">descr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid RPL source address'</span>
+
             <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">pad</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">cmpr_i</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">ip</span>
+                    <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span> <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">ip</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dst</span><span class="o">.</span><span class="n">packed</span><span class="p">]</span>  <span class="c1"># type: list[bytes]</span>
@@ -1234,7 +1258,7 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                         <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
+                        <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
                 <span class="n">prefix_i</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_i</span><span class="p">)</span>
 
@@ -1242,7 +1266,7 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
+                    <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">)</span>
                 <span class="n">prefix_e</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_e</span><span class="p">)</span>
 
@@ -1253,11 +1277,11 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                         <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
+                        <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_i</span><span class="p">:])</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
                     <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">cmpr_e</span><span class="p">:])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_e</span><span class="p">:])</span>
+                    <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_e</span><span class="p">:])</span>
 
         <span class="k">return</span> <span class="n">Schema_RPL</span><span class="p">(</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">cmpr_i</span><span class="p">,</span>

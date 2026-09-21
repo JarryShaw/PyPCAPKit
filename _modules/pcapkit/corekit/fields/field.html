@@ -453,7 +453,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDefaultValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">NoDefaultValue</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Field'</span><span class="p">]</span>
 
@@ -481,6 +481,30 @@
 
 <span class="c1">#: NoValueType: Default value for :attr:`FieldBase.default`.</span>
 <span class="n">NoValue</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
+
+<span class="c1">#: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform</span>
+<span class="c1">#: for a field whose declared length outruns its buffer.</span>
+<span class="c1">#:</span>
+<span class="c1">#: This is libpcap's own ``MAXIMUM_SNAPLEN`` -- the point past which libpcap</span>
+<span class="c1">#: itself treats a capture's declared snapshot length as corrupt or</span>
+<span class="c1">#: byte-order-swapped rather than real -- and it is the same figure this</span>
+<span class="c1">#: package's own PCAP writer defaults ``snaplen`` to</span>
+<span class="c1">#: (:meth:`pcapkit.protocols.misc.pcap.header.Header.make`). No single field</span>
+<span class="c1">#: within one captured packet is legitimately larger than the largest packet</span>
+<span class="c1">#: libpcap itself is willing to believe, so nothing this library parses</span>
+<span class="c1">#: should ever declare a length past it.</span>
+<span class="c1">#:</span>
+<span class="c1">#: The bound is deliberately *not* "any declared length beyond what the</span>
+<span class="c1">#: buffer holds": :meth:`ListField.unpack &lt;pcapkit.corekit.fields.collections.</span>
+<span class="c1">#: ListField.unpack&gt;` and :meth:`OptionField.unpack &lt;pcapkit.corekit.fields.</span>
+<span class="c1">#: collections.OptionField.unpack&gt;` depend on reading a short, sometimes</span>
+<span class="c1">#: empty, tail past a truncated area and having it decode as zero -- that is</span>
+<span class="c1">#: how an over-long ``ihl``, or a capture cut short by the snapshot length,</span>
+<span class="c1">#: reads as end-of-option-list or ``Pad1`` instead of wedging or raising (see</span>
+<span class="c1">#: #431). Every such read is of a fixed-width, few-octet field, always far</span>
+<span class="c1">#: under this ceiling, so it is untouched; only a length past it -- which no</span>
+<span class="c1">#: fixed-width field ever legitimately is -- gets refused.</span>
+<span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="o">=</span> <span class="mh">0x40_000</span>
 
 
 <div class="viewcode-block" id="FieldMeta">
@@ -707,6 +731,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked field value.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``buffer`` holds fewer octets than :attr:`length`</span>
+<span class="sd">                declares, and ``length`` is past :data:`_MAX_ZERO_PAD_LENGTH`.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``length`` recomputes struct.calcsize() on every read, so the</span>
         <span class="c1"># three reads this method used to make were three calcsize() calls for</span>
@@ -715,6 +743,25 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: ``length`` is frequently wire-derived -- resolved by a</span>
+        <span class="c1"># ``_length_callback`` against the very packet being parsed, per</span>
+        <span class="c1"># :meth:`Field.__call__` below, or by a schema's own selector building a</span>
+        <span class="c1"># field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s</span>
+        <span class="c1"># ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --</span>
+        <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
+        <span class="c1"># declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a</span>
+        <span class="c1"># length short of what ``buffer`` holds is provably bogus: ``rjust()``</span>
+        <span class="c1"># cannot recover data that was never in the buffer, only zero-pad for</span>
+        <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
+        <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
+        <span class="c1"># the packet's own say-so. C.f. #554.</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> declares a length of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s), '</span>
+                <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
+            <span class="p">)</span>
+
         <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">buffer</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 </div>

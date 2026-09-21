@@ -1129,18 +1129,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[_ST]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Type[_PT]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Type[_PT]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialisation for subclasses.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Schema class.</span>
 <span class="sd">            data: Data class.</span>
+<span class="sd">            code: Next-layer dispatch registration key(s). :data:`None` (the</span>
+<span class="sd">                default) skips registration entirely -- see below.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: If any unrecognised class keyword is given.</span>
+
 <span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
 <span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
-<span class="sd">        attribute of the subclass.</span>
+<span class="sd">        attribute of the subclass, and, if ``code`` is given, to register the</span>
+<span class="sd">        subclass into the next-layer dispatch registry (or registries) that</span>
+<span class="sd">        ``code`` names -- e.g. :attr:`Link.__proto__</span>
+<span class="sd">        &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            When ``schema`` and/or ``data`` is not specified, the method will first</span>
@@ -1150,7 +1160,57 @@
 <span class="sd">            :class:`~pcapkit.protocols.schema.misc.raw.Raw` and</span>
 <span class="sd">            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.</span>
 
+<span class="sd">        Dispatch registration is **opt-in**, exactly like the ``name=``/``protocol=``/</span>
+<span class="sd">        ``fmt=`` keywords of :class:`~pcapkit.foundation.engines.engine.Engine`,</span>
+<span class="sd">        :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,</span>
+<span class="sd">        :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and</span>
+<span class="sd">        :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a</span>
+<span class="sd">        deliberate, documented way for a subclass to decline registration, not</span>
+<span class="sd">        an oversight -- it is exactly what every built-in protocol class does</span>
+<span class="sd">        today, since the built-in dispatch tables (e.g. ``Link.__proto__``)</span>
+<span class="sd">        are populated by literal assignment in each layer module, not by this</span>
+<span class="sd">        hook, so leaving ``code`` unset here changes nothing about them. A</span>
+<span class="sd">        subclass that declines can still be registered later, on demand, via</span>
+<span class="sd">        the owning class's :meth:`register` classmethod or the matching</span>
+<span class="sd">        ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.</span>
+
+<span class="sd">        ``code`` accepts:</span>
+
+<span class="sd">        * a single enum member, whose *type* determines the destination</span>
+<span class="sd">          registry (or registries) -- e.g. any</span>
+<span class="sd">          :class:`~pcapkit.const.reg.ethertype.EtherType` member always means</span>
+<span class="sd">          :class:`~pcapkit.protocols.link.link.Link`, and any</span>
+<span class="sd">          :class:`~pcapkit.const.reg.linktype.LinkType` member means *both*</span>
+<span class="sd">          :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**</span>
+<span class="sd">          :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`;</span>
+<span class="sd">        * a :class:`dict` mapping a destination class to a key, for a key</span>
+<span class="sd">          that cannot name its own destination -- a raw :class:`int` port,</span>
+<span class="sd">          for instance, is ambiguous between</span>
+<span class="sd">          :class:`~pcapkit.protocols.transport.tcp.TCP` and</span>
+<span class="sd">          :class:`~pcapkit.protocols.transport.udp.UDP`, and *must* use this</span>
+<span class="sd">          form;</span>
+<span class="sd">        * an iterable mixing either of the above, to register the same class</span>
+<span class="sd">          into several registries from a single declaration -- e.g. a</span>
+<span class="sd">          :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both</span>
+<span class="sd">          by its IP protocol number and by a UDP port.</span>
+
+<span class="sd">        The explicit mapping form is accepted even for a key whose type could</span>
+<span class="sd">        be inferred: being more explicit than required is never an error.</span>
+
+<span class="sd">        Inference refuses rather than guesses: an enum member whose type</span>
+<span class="sd">        names no known destination raises</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.RegistryError` instead of</span>
+<span class="sd">        silently doing nothing or picking an arbitrary registry.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :func:`pcapkit.foundation.registry.protocols.register_protocol_code`</span>
+<span class="sd">            implements the resolution described above.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">unexpected</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">args</span><span class="p">),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)])</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: unexpected class keyword(s): </span><span class="si">{</span><span class="n">unexpected</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1160,6 +1220,12 @@
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols</span><span class="w"> </span><span class="kn">import</span> \
+                <span class="n">register_protocol_code</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+            <span class="n">register_protocol_code</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Returns representation of parsed protocol data.</span>
@@ -1866,12 +1932,18 @@
 <div class="viewcode-block" id="Protocol.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init_subclass__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[_ST]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Type[_PT]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">'Optional[Type[_PT]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Initialisation for subclasses.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Schema class.</span>
 <span class="sd">            data: Data class.</span>
+<span class="sd">            code: Next-layer dispatch registration key(s). :data:`None` (the</span>
+<span class="sd">                default) skips registration entirely. See</span>
+<span class="sd">                :meth:`ProtocolBase.__init_subclass__` for the accepted</span>
+<span class="sd">                shapes and the enum-type inference rule.</span>
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -1888,7 +1960,11 @@
 <span class="sd">            :class:`~pcapkit.protocols.data.misc.raw.Raw` classes will be used.</span>
 
 <span class="sd">        This method also registers the subclass to the protocol registry,</span>
-<span class="sd">        i.e., :attr:`pcapkit.protocols.__proto__`.</span>
+<span class="sd">        i.e., :attr:`pcapkit.protocols.__proto__`. That registration is</span>
+<span class="sd">        unconditional -- it is the name-keyed identity registry, unrelated to</span>
+<span class="sd">        the ``code`` keyword -- whereas ``code``'s next-layer dispatch</span>
+<span class="sd">        registration is opt-in; see</span>
+<span class="sd">        :meth:`ProtocolBase.__init_subclass__` for the latter.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For more information on the registry, please refer to</span>
@@ -1898,7 +1974,7 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.registry.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_protocol</span>
         <span class="n">register_protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

@@ -1189,11 +1189,31 @@
 
     <span class="n">__enum__</span><span class="p">:</span> <span class="s1">'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">MPTCPUnknown</span><span class="p">)</span>
 
+    <span class="c1"># NOTE: ``_MPTCP.data`` (a :class:`~pcapkit.corekit.fields.misc.SwitchField`,</span>
+    <span class="c1"># via :func:`mptcp_data_selector`) hands each subtype schema below the</span>
+    <span class="c1"># *whole* option -- ``kind``, ``length`` and all -- starting at the same</span>
+    <span class="c1"># first octet ``_MPTCP.test`` peeked and rewound past, rather than the</span>
+    <span class="c1"># bytes left over after some outer field already consumed a header. So</span>
+    <span class="c1"># unlike :class:`MPTCP`'s siblings that inherit :class:`Option`, which</span>
+    <span class="c1"># declares ``kind``/``length`` for exactly this reason, this base class</span>
+    <span class="c1"># has to declare its own -- unconditionally, since every Multipath TCP</span>
+    <span class="c1"># subtype carries an explicit length octet (no EOOL/NOP-style exception</span>
+    <span class="c1"># applies here). Every subclass's own leading field starts at the third</span>
+    <span class="c1"># octet as a result, which is where its ``test`` (subtype/flags) field</span>
+    <span class="c1"># expects to read from.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Before this, both directions were broken: packing rejected ``kind=``/</span>
+    <span class="c1"># ``length=`` from the ``_make_mptcp_*`` makers with ``UnknownFieldWarning``</span>
+    <span class="c1"># and then ``KeyError: 'length'`` the moment a sibling field's condition</span>
+    <span class="c1"># (e.g. ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read</span>
+    <span class="c1"># ``pkt['length']``; unpacking silently misread the ``kind`` octet as the</span>
+    <span class="c1"># subtype/flags octet, since nothing had consumed it first. C.f. #541.</span>
+    <span class="c1">#: Option kind.</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
+    <span class="c1">#: MPTCP length.</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Option kind.</span>
-        <span class="n">kind</span><span class="p">:</span> <span class="s1">'Enum_Option'</span>
-        <span class="c1">#: MPTCP length.</span>
-        <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
         <span class="c1">#: MPTCP subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span></div>
 

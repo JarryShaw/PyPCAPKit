@@ -488,6 +488,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.authentication</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">Enum_Authentication</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ospf.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.ospf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">Data_OSPF</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.ospf</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Data_CrytographicAuthentication</span>
@@ -785,8 +786,29 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            ID bytes.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``id`` is a :obj:`bool` (c.f.</span>
+<span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Latent rather than live: nothing in this module calls this</span>
+<span class="sd">            method today (:meth:`make` builds ``router_id``/``area_id``</span>
+<span class="sd">            straight from its own arguments), so the only caller is a unit</span>
+<span class="sd">            test. It is routed through :func:`parse_ip_address` anyway, so</span>
+<span class="sd">            that it does not resurface the defect the moment a caller</span>
+<span class="sd">            reaches it -- the same kind of omission is how #481's single-site</span>
+<span class="sd">            fix survived to become #491 and then #508 (c.f. #540).</span>
+
+<span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
+<span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.Protocol.alias&gt;`, because ``alias``</span>
+<span class="sd">            here reads ``self._version``, which :meth:`read` only assigns</span>
+<span class="sd">            from the wire -- unavailable to a construction-only instance that</span>
+<span class="sd">            never went through :meth:`read`.</span>
+
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
+            <span class="nb">id</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid ID'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
 
 <div class="viewcode-block" id="OSPF._read_encrypt_auth">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>
