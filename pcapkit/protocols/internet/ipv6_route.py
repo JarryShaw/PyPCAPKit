@@ -613,12 +613,12 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         # count. It is left as-is here: RPL addresses are variable-length
         # (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is
         # not obviously the right invariant even under correct units, and
-        # this module's RPL construction already fails before ever reaching
-        # this method, from an unrelated defect (``RPL.post_process`` in
-        # pcapkit/protocols/schema/internet/ipv6_route.py assumes ``bytes``
-        # on a path ``Schema.pack`` also runs, per #476/#480) -- so there is
-        # no working round trip here to validate a replacement against.
-        # Flagged for follow-up rather than guessed at.
+        # nothing here has been checked against a real RPL capture. Flagged
+        # for follow-up rather than guessed at. (The round trip through
+        # ``RPL.post_process`` this note used to say was broken -- it
+        # treated a ``make``-built ``list[bytes]`` as ``bytes`` and raised
+        # on pack -- was fixed by #556; that no longer blocks validating a
+        # replacement here, but the replacement itself is still unwritten.)
         if header.length % 16 != 0:
             raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
