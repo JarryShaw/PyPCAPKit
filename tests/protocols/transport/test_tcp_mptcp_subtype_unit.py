@@ -73,11 +73,16 @@ Every case here goes through the *public* ``TCP`` convenience constructor, not
 ``_make_mptcp_*`` directly, because that in-memory, no-byte-round-trip path is exactly what
 exposed the defect. ``MP_JOIN`` is left out: it fails independently with
 ``AttributeError: 'TCP' object has no attribute '_flags'`` (``_make_mptcp_join`` reads
-``self._flags``, which only the parse path ever sets), which is not this issue. ``MP_FASTCLOSE``
-is also left out, for a reason this fix does not touch: fixing ``subtype`` gets its
-construction *past* the ``AttributeError`` this module would otherwise still see and into a
-second, independent defect (its declared length agrees with neither its own maker nor its own
-parser) tracked as GitHub issue #576.
+``self._flags``, which only the parse path ever sets), which is not this issue.
+
+``MP_FASTCLOSE`` *is* covered, as of #576. When this module was written it was left out: fixing
+``subtype`` got its construction past the ``AttributeError`` and into a second, independent
+defect -- its declared length agreed with neither its own schema nor its own parser -- so the
+case here could only assert the *shape of the exception* that defect raised. #576 has since
+corrected all three sites, so the assertion is made directly. The length arithmetic itself is
+covered per option in
+:mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`; what stays here is
+only the ``subtype`` question this module is about.
 
 """
 from __future__ import annotations
@@ -208,27 +213,31 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
 
         self.assertEqual(data.subtype, Enum_MPTCPOption.MP_FAIL)
 
-    def test_mp_fastclose_still_fails_but_no_longer_on_subtype(self) -> None:
-        """``MP_FASTCLOSE`` no longer raises the ``subtype`` ``AttributeError`` this fixes.
+    def test_mp_fastclose_builds_and_reports_its_subtype(self) -> None:
+        """``MP_FASTCLOSE`` builds through ``TCP()`` and reports its ``subtype``.
 
-        It still cannot be built through ``TCP()`` -- #576, not this issue -- so this pins
-        that the *remaining* failure is the length mismatch, not a regression back to the
-        defect this module is otherwise about.
+        This was ``test_mp_fastclose_still_fails_but_no_longer_on_subtype`` when #579
+        landed: it pinned that MP_FASTCLOSE no longer raised the ``subtype``
+        ``AttributeError`` that #566 was about, while still raising ``ProtocolError:
+        TCP: [OptNo 30] invalid format`` from the *other* defect it named -- the
+        length disagreement filed as #576.
+
+        #576 has since fixed that disagreement at all three sites (the parser's guard,
+        which required 16; the schema, which packed 11; and the maker, which already
+        declared the RFC's 12), so the construction now succeeds and the assertion this
+        module exists for -- that ``subtype`` survives construction -- can be made
+        directly instead of through the shape of an exception.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
-        from pcapkit.utilities.exceptions import ProtocolError
+        from pcapkit.const.tcp.option import Option as Enum_Option
 
-        with self.assertRaises(ProtocolError) as ctx:
-            build_mptcp_option(Enum_MPTCPOption.MP_FASTCLOSE, key=9)
+        tcp = build_mptcp_option(Enum_MPTCPOption.MP_FASTCLOSE, key=9)
+        data = tcp.info.options[Enum_Option.Multipath_TCP]
 
-        # NOTE: bare 'invalid format' occurs at some 205 sites across 13 modules (see
-        # Gap.fragment's docstring in test_option_roundtrip_unit.py), so it does not pin
-        # anything on its own. The alias plus the bracketed option-number code this message
-        # actually carries -- 'TCP: [OptNo 30] invalid format' -- narrows it to the one option
-        # that can print 30 (Multipath_TCP).
-        self.assertIn('TCP: [OptNo 30] invalid format', str(ctx.exception))
-        self.assertNotIn('subtype', str(ctx.exception))
+        self.assertEqual(data.subtype, Enum_MPTCPOption.MP_FASTCLOSE)
+        self.assertEqual(data.length, 12)
+        self.assertEqual(data.rkey, 9)
 
 
 if __name__ == '__main__':

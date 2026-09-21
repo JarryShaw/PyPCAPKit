@@ -12,10 +12,10 @@ from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
-from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
-                                         SchemaField, SwitchField)
-from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
-                                            UInt32Field, UInt64Field)
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
+                                         PayloadField, SchemaField, SwitchField)
+from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, UInt32Field,
+                                            UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldError
@@ -231,6 +231,90 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
     if pkt['test']['version'] == 6:
         return IPv6AddressField()
     raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid IP version')
+
+
+def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`MPTCPDSS.ack` field.
+
+    :rfc:`8684` section 3.3 figure 9 gives the Data ACK as "4 or 8 octets,
+    depending on flags": present only when ``A`` is set, and 8 octets wide only
+    when ``a`` is *also* set -- "a = Data ACK is 8 octets (if not set, Data ACK
+    is 4 octets)".
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``A`` is clear, a :class:`~pcapkit.corekit.fields.misc.NoValueField`
+          instance -- the field is absent from the wire.
+        * If ``A`` is set and ``a`` is set, a
+          :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance.
+        * If ``A`` is set and ``a`` is clear, a
+          :class:`~pcapkit.corekit.fields.numbers.UInt32Field` instance.
+
+    Note:
+        This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector
+        rather than a :class:`~pcapkit.corekit.fields.misc.ConditionalField`
+        wrapping ``NumberField(length=lambda pkt: ...)``, which is what it was
+        until #576, for two independent reasons.
+
+        The width lambda read ``8 if pkt['flags']['a'] else 0`` -- **0**, not 4 --
+        so an unextended Data ACK packed no octets at all while the ``length``
+        octet still counted 4 for it. That is the defect #576 records: the option
+        went onto the wire 4 (or 8, with ``dsn`` too) octets shorter than it
+        declared, and the ``ack`` value the caller supplied was simply not
+        present.
+
+        Correcting the lambda to ``8 if ... else 4`` would not have worked,
+        because :class:`~pcapkit.corekit.fields.numbers.NumberField` cannot pack
+        a callable length at all: it calls ``build_template`` once at
+        ``__init__`` with the placeholder length ``-1``, which latches
+        ``_need_process = True``, and nothing clears that flag when
+        ``__call__`` later resolves the real length and rebuilds the template as
+        ``>I``/``>Q``. ``pre_process`` then hands :func:`struct.pack` bytes for
+        an integer template and it raises ``struct.error: required argument is
+        not an integer``. Measured on the 8-octet form, which the old lambda did
+        reach: ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that. Fixing
+        that belongs to :mod:`pcapkit.corekit.fields.numbers`; selecting between
+        two fields that each fix ``__template__`` at class level sidesteps it
+        entirely and is the pattern :func:`mptcp_add_address_selector` already
+        uses here.
+
+    """
+    if not pkt['flags']['A']:
+        return NoValueField()
+    return UInt64Field() if pkt['flags']['a'] else UInt32Field()
+
+
+def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`MPTCPDSS.dsn` field.
+
+    :rfc:`8684` section 3.3 figure 9 gives the Data Sequence Number as "4 or 8
+    octets, depending on flags": present only when ``M`` is set, and 8 octets
+    wide only when ``m`` is *also* set -- "m = Data Sequence Number is 8 octets
+    (if not set, DSN is 4 octets)".
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``M`` is clear, a :class:`~pcapkit.corekit.fields.misc.NoValueField`
+          instance -- the field is absent from the wire.
+        * If ``M`` is set and ``m`` is set, a
+          :class:`~pcapkit.corekit.fields.numbers.UInt64Field` instance.
+        * If ``M`` is set and ``m`` is clear, a
+          :class:`~pcapkit.corekit.fields.numbers.UInt32Field` instance.
+
+    Note:
+        Identical in shape to :func:`mptcp_dss_ack_selector`, and it replaces the
+        identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']
+        else 0, ...)``. See that function's note for why the ``0`` was wrong and
+        why a corrected lambda would not have packed either. C.f. #576.
+
+    """
+    if not pkt['flags']['M']:
+        return NoValueField()
+    return UInt64Field() if pkt['flags']['m'] else UInt32Field()
 
 
 class PortEnumField(EnumField):
@@ -793,14 +877,20 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
         'A': (7, 1),
     })
     #: Data ACK.
-    ack: 'int' = ConditionalField(
-        NumberField(length=lambda pkt: 8 if pkt['flags']['a'] else 0, signed=False),
-        lambda pkt: pkt['flags']['A'],
+    #:
+    #: 4 octets when ``A`` is set, 8 when ``a`` is set as well, absent otherwise --
+    #: :rfc:`8684` section 3.3 figure 9. Both the presence test and the width live
+    #: in :func:`mptcp_dss_ack_selector`, whose note records what this field
+    #: declared until #576 and why a narrower fix would not have packed.
+    ack: 'int' = SwitchField(
+        selector=mptcp_dss_ack_selector,
     )
     #: Data sequence number.
-    dsn: 'int' = ConditionalField(
-        NumberField(length=lambda pkt: 8 if pkt['flags']['m'] else 0, signed=False),
-        lambda pkt: pkt['flags']['M'],
+    #:
+    #: 4 octets when ``M`` is set, 8 when ``m`` is set as well, absent otherwise --
+    #: :rfc:`8684` section 3.3 figure 9. C.f. :func:`mptcp_dss_dsn_selector`.
+    dsn: 'int' = SwitchField(
+        selector=mptcp_dss_dsn_selector,
     )
     #: Subflow sequence number.
     ssn: 'int' = ConditionalField(
@@ -907,6 +997,18 @@ class MPTCPFastclose(MPTCP, code=Enum_MPTCPOption.MP_FASTCLOSE):
     test: 'MPTCPSubtype' = BitField(length=1, namespace={
         'subtype': (0, 4),
     })
+    #: Reserved.
+    #:
+    #: :rfc:`8684` section 3.5 figure 14 spends a whole 32-bit row on
+    #: ``Kind``/``Length``/``Subtype``/``(reserved)``, i.e. the subtype's 4 bits
+    #: are followed by **12** reserved bits, not 4 -- so the subtype-and-reserved
+    #: part is 2 octets and the option is 12 octets in total. Until #576 this
+    #: field did not exist and ``test`` was the only octet between ``length`` and
+    #: ``key``, so the schema packed **11** octets against a ``length`` of 12.
+    #: Declared the same way :class:`MPTCPJoinACK` declares its own reserved
+    #: octet, for the same reason: a wider ``test`` would make the reserved bits
+    #: look like part of the subtype namespace.
+    reserved: 'bytes' = PaddingField(length=1)
     #: Option receiver's key.
     key: 'int' = UInt64Field()
 

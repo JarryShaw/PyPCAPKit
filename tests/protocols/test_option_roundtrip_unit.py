@@ -159,22 +159,25 @@ EXPECTED_FAILURES = {
     # the seven (MP_CAPABLE, ADD_ADDR, REMOVE_ADDR, MP_PRIO, DSS, MP_FAIL) now
     # read ``'OK'`` and so have no entry below any more.
     #
-    # MP_FASTCLOSE does not: fixing ``subtype`` got it *past* the
-    # ``AttributeError`` this table used to record and into a second,
-    # unrelated defect that #566/#567 do not touch and #576 tracks -- see that
-    # entry for the detail.
-    'tcp-mptcp/MP_FASTCLOSE': Gap(
-        'CONSTRUCT', 'TCP: [OptNo 30] invalid format',
-        'pcapkit/protocols/transport/tcp.py:1893 -- _read_mptcp_fastclose '
-        'requires schema.length == 16, which agrees with neither the maker '
-        '(_make_mptcp_fastclose at pcapkit/protocols/transport/tcp.py:3054, '
-        'length=12, which is the RFC 8684 section 3.7 value) nor the schema '
-        '(MPTCPFastclose.test at '
-        'pcapkit/protocols/schema/transport/tcp.py:907, which packs an '
-        '11-octet option against the declared 12) (#576)'),
+    # MP_FASTCLOSE joined them in #576, and its entry is gone with them. Fixing
+    # ``subtype`` in #566 had got it *past* the ``AttributeError`` this table
+    # used to record and into a second, unrelated defect: three sites disagreed
+    # on its length, and the maker's *correct* value (12, from :rfc:`8684`
+    # section 3.5 figure 14 -- section 3.5 is Fast Close; the entry that used to
+    # sit here cited 3.7, which is Fallback) failed the parser's wrong check of
+    # 16, while the schema packed only 11 for want of a reserved octet. All
+    # three read 12 now. Note that REMOVE_ADDR, MP_PRIO and DSS in the list
+    # above read ``'OK'`` throughout that period *without* being correct -- this
+    # suite only checks the cycle is self-consistent, which a wrong length can
+    # be, so #576 covers them per option in
+    # :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`
+    # against RFC 8684 rather than against the cycle.
 
     # ``_make_mptcp_join`` branches on ``self._flags``, which only the parse
-    # path ever sets, so the constructor cannot be called at all.
+    # path ever sets, so the constructor cannot be called at all. Independent of
+    # #576 and left in place: ``TCP._make`` assigns ``_flags`` *after* it has
+    # already built the options, so this is a statement-ordering defect rather
+    # than a length one.
     'tcp-mptcp/MP_JOIN': Gap(
         'CONSTRUCT', "no attribute '_flags'",
         'pcapkit/protocols/transport/tcp.py:2675 -- _make_mptcp_join reads '
