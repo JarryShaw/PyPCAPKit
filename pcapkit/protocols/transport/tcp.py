@@ -1534,7 +1534,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_join_syn(self, schema: 'Schema_MPTCPJoinSYN', *, options: 'Option') -> 'Data_MPTCPJoinSYN':  # pylint: disable=unused-argument
         """Read Join Connection option for Initial SYN.
 
-        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:
+        Structure of ``MP_JOIN-SYN`` [:rfc:`8684`, section 3.2, figure 5]:
 
         .. code-block:: text
 
@@ -1577,7 +1577,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_join_synack(self, schema: 'Schema_MPTCPJoinSYNACK', options: 'Option') -> 'Data_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Responding SYN/ACK.
 
-        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:
+        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`8684`, section 3.2, figure 6]:
 
         .. code-block:: text
 
@@ -1601,10 +1601,25 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If length is **NOT** ``20``.
+            ProtocolError: If length is **NOT** ``16``.
+
+        Note:
+            The accepted length is ``16``, which is what the figure above -- and
+            :rfc:`8684` section 3.2 figure 6, which it reproduces -- states, and
+            what :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK`
+            actually packs and unpacks: ``Kind`` (1) + ``Length`` (1) +
+            subtype/flags (1) + ``Address ID`` (1) + the truncated HMAC (8) + the
+            random number (4).
+
+            This guard required ``20`` until #576 -- a value that appears in
+            neither the figure nor the schema, and that contradicted this method's
+            own docstring. Together with ``_make_join_synack``'s ``length=12`` it
+            made the SYN/ACK form unusable in both directions at once: the maker
+            could not produce a length this guard accepted, and a spec-correct
+            16-octet option off the wire was rejected as an invalid format.
 
         """
-        if schema.length != 20:
+        if schema.length != 16:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
         data = Data_MPTCPJoinSYNACK(
@@ -1622,7 +1637,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_join_ack(self, schema: 'Schema_MPTCPJoinACK', *, options: 'Option') -> 'Data_MPTCPJoinACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Third ACK.
 
-        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:
+        Structure of ``MP_JOIN-ACK`` [:rfc:`8684`, section 3.2, figure 7]:
 
         .. code-block:: text
 
@@ -1664,7 +1679,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_dss(self, schema: 'Schema_MPTCPDSS', *, options: 'Option') -> 'Data_MPTCPDSS':  # pylint: disable=unused-argument
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
 
-        Structure of ``DSS`` [:rfc:`6824`]:
+        Structure of ``DSS`` [:rfc:`8684`, section 3.3, figure 9]:
 
         .. code-block:: text
 
@@ -1752,7 +1767,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_remove(self, schema: 'Schema_MPTCPRemoveAddress', *, options: 'Option') -> 'Data_MPTCPRemoveAddress':  # pylint: disable=unused-argument
         """Read Remove Address option.
 
-        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:
+        Structure of ``REMOVE_ADDR`` [:rfc:`8684`, section 3.4.2, figure 13]:
 
         .. code-block:: text
 
@@ -1773,6 +1788,22 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Raises:
             ProtocolError: If the length is smaller than **3**.
 
+        Note:
+            ``Length = 3 + n``, per the figure above: the 3 is ``Kind`` (1) +
+            ``Length`` (1) + subtype-and-reserved (1), and each of the *n* Address
+            IDs is one further octet.
+            :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id`
+            sizes its list as ``pkt['length'] - 3`` from exactly this, which is why
+            ``_make_mptcp_remove``'s constant ``length=4`` (fixed in #576) also
+            mis-sized the parse rather than only the pack.
+
+            The guard permits ``3``, i.e. ``n = 0``, which the figure does not
+            describe -- it shows one Address ID plus "n-1 Address IDs, if
+            required". Left as it stands: tightening it to reject an empty list is
+            a behaviour change beyond #576's scope, and a zero-ID REMOVE_ADDR now
+            at least round-trips honestly instead of declaring an octet it never
+            packed.
+
         """
         if schema.length < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
@@ -1789,7 +1820,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_prio(self, schema: 'Schema_MPTCPPriority', *, options: 'Option') -> 'Data_MPTCPPriority':  # pylint: disable=unused-argument
         """Read Change Subflow Priority option.
 
-        Structure of ``MP_PRIO`` [RFC 6824]:
+        Structure of ``MP_PRIO`` [:rfc:`6824`, section 3.3.8, figure 11]:
 
         .. code-block:: text
 
@@ -1807,7 +1838,25 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If the length is smaller than **3**.
+            ProtocolError: If the length is neither **3** nor **4**.
+
+        Note:
+            The figure above is :rfc:`6824`'s, deliberately, because it is the one
+            with an Address ID in it and this method accepts both forms.
+            :rfc:`8684` section 3.3.8 figure 11 draws MP_PRIO as **3** octets and
+            nothing more -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B``
+            (1) -- since section 5 of that document "specifies the removal of the
+            AddrID field [RFC6824] in the MP_PRIO option", closing a theoretical
+            attack in which a subflow could be forced into backup mode. The
+            4-octet :rfc:`6824` form is therefore legacy, and the guard stays
+            permissive so that traffic carrying it still parses.
+
+            ``_make_mptcp_prio`` declared a constant ``length=4`` until #576,
+            which meant the construction side could only ever emit the legacy
+            form -- and emitted it with an all-zero phantom Address ID when the
+            caller supplied none, because
+            :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPPriority`'s
+            ``addr_id`` is conditional on that very length being 4.
 
         """
         if schema.length not in (3, 4):
@@ -1865,7 +1914,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     def _read_mptcp_fastclose(self, schema: 'Schema_MPTCPFastclose', options: 'Option') -> 'Data_MPTCPFastclose':  # pylint: disable=unused-argument
         """Read Fast Close option.
 
-        Structure of ``MP_FASTCLOSE`` [RFC 6824]:
+        Structure of ``MP_FASTCLOSE`` [:rfc:`8684`, section 3.5, figure 14]:
 
         .. code-block:: text
 
@@ -1887,10 +1936,27 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If the length is **NOT** 16.
+            ProtocolError: If the length is **NOT** 12.
+
+        Note:
+            The figure above is :rfc:`8684` section 3.5 figure 14, and the option
+            it draws is **12** octets: ``Kind`` (1) + ``Length`` (1) +
+            subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
+            option receiver's key (64 bits, 8). Note that section 3.5 is Fast
+            Close; section 3.7 is Fallback (MP_FAIL), which #576's own text cited
+            here by mistake.
+
+            Three sites disagreed on this number before #576, all three now
+            reading 12: this guard required ``16``, an octet count nothing in the
+            RFC produces for MP_FASTCLOSE; ``_make_mptcp_fastclose`` declared the
+            correct 12 but the schema packed only **11**, missing the reserved
+            octet entirely. The net effect was that constructing an MP_FASTCLOSE
+            through :class:`TCP` raised ``ProtocolError`` from this very guard --
+            the maker's *correct* length failing the parser's wrong check -- which
+            is why ``tcp-mptcp/MP_FASTCLOSE`` sat in ``EXPECTED_FAILURES``.
 
         """
-        if schema.length != 16:
+        if schema.length != 12:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
         data = Data_MPTCPFastclose(
@@ -2782,12 +2848,25 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             backup = opt.backup
             addr_id = opt.addr_id
-            nonce = opt.nonce
+            # NOTE: ``hmac`` used to be missing from this branch entirely, while
+            # ``nonce = opt.nonce`` appeared on two consecutive lines -- so
+            # reconstructing a parsed MP_JOIN-SYN/ACK silently substituted the
+            # ``bytes(8)`` default for the truncated HMAC that was actually on
+            # the wire, and the HMAC is the whole point of this form of the
+            # option. C.f. #576.
+            hmac = opt.hmac
             nonce = opt.nonce
 
         return Schema_MPTCPJoinSYNACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=12,
+            # NOTE: :rfc:`8684` section 3.2 figure 6 gives ``Length = 16`` for the
+            # SYN/ACK form: ``Kind`` (1) + ``Length`` (1) + subtype/flags (1) +
+            # ``Address ID`` (1) + the truncated HMAC (64 bits, 8) + the random
+            # number (32 bits, 4). This read ``12`` -- ``_make_join_syn``'s own
+            # correct length for the *SYN* form of figure 5, which carries a
+            # 4-octet token where this one carries an 8-octet HMAC -- copied
+            # across without recomputing. C.f. #576.
+            length=16,
             test={
                 'subtype': subtype.value,
                 'backup': backup,
@@ -2817,7 +2896,13 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_MPTCPJoinACK(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=8,
+            # NOTE: :rfc:`8684` section 3.2 figure 7 gives ``Length = 24`` for the
+            # ACK form: ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved (2,
+            # being 4 subtype bits and 12 reserved) + the full HMAC (160 bits,
+            # 20). This read ``8``, a third of the truth -- and
+            # ``_read_join_ack``'s guard already required 24, so nothing this
+            # maker produced could be parsed back. C.f. #576.
+            length=24,
             test={
                 'subtype': subtype.value,
             },
@@ -2870,17 +2955,35 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_MPTCPDSS(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
+            # NOTE: this arithmetic is correct against :rfc:`8684` section 3.3
+            # figure 9 and is deliberately left as it stands -- #576 filed it as
+            # one of six wrong lengths, and re-deriving it from the figure found
+            # it right. Read it as a base plus a widening increment rather than
+            # as one term per field: 4 for ``Kind``/``Length``/subtype/flags, then
+            # ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 to make
+            # it 8; ``M`` contributes 12 (a 4-octet DSN, the 4-octet Subflow
+            # Sequence Number, the 2-octet Data-Level Length and the 2-octet
+            # Checksum) and ``m`` a further 4 to widen the DSN to 8. All flags set
+            # gives 4 + 4 + 4 + 12 + 4 = 28, which is the maximum the section
+            # states in prose. What was wrong was the *schema* it describes:
+            # ``MPTCPDSS.ack`` and ``.dsn`` packed 0 octets rather than 4 in the
+            # unextended case, so the option came out 4 or 8 octets short of this
+            # length and produced ``packet length < 0`` on the way back in.
             length=4 + (4 if flag_A else 0) + (4 if flag_a else 0) + (12 if flag_M else 0) + (4 if flag_m else 0),
             test={
                 'subtype': subtype.value,
             },
+            # NOTE: ``'A': flag_A`` used to appear twice in this literal, once at
+            # the top and once at the bottom. Harmless -- the same value under the
+            # same key, so the second simply won -- but it made the set of flags
+            # being written hard to read against figure 9's ``F|m|M|a|A``. C.f.
+            # #576.
             flags={
                 'F': data_fin,
                 'A': flag_A,
-                'm': flag_m,
-                'M': flag_M,
                 'a': flag_a,
-                'A': flag_A,
+                'M': flag_M,
+                'm': flag_m,
             },
             ack=ack,
             dsn=dsn,
@@ -2967,7 +3070,18 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_MPTCPRemoveAddress(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=4,
+            # NOTE: :rfc:`8684` section 3.4.2 figure 13 gives ``Length = 3 + n``,
+            # where the 3 is ``Kind`` (1) + ``Length`` (1) + subtype-and-reserved
+            # (1) and each of the *n* Address IDs is one further octet. This read
+            # a constant ``4``, which is right for exactly one list length -- and
+            # ``examples.generators.options``' own fixture passes ``addr_id=[1]``,
+            # so the round-trip suite exercised only that one. Measured before the
+            # fix: ``addr_id=[1, 2]`` packed 5 octets declaring 4, and
+            # ``addr_id=[]`` packed 3 declaring 4. This is the field
+            # ``MPTCPRemoveAddress.addr_id`` sizes itself from, as
+            # ``pkt['length'] - 3``, so the constant also mis-sized the parse.
+            # C.f. #576.
+            length=3 + len(addr_id_list),
             test={
                 'subtype': subtype.value,
             },
@@ -2992,11 +3106,29 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         """
         if opt is not None:
+            # NOTE: ``backup`` used to be missing from this branch, so
+            # reconstructing a parsed MP_PRIO always wrote ``B=0`` regardless of
+            # what was on the wire -- and the ``B`` flag is the entire payload of
+            # this option. The same shape as ``_make_join_synack``'s dropped
+            # ``hmac`` above. C.f. #576.
+            backup = opt.backup
             addr_id = opt.addr_id
 
         return Schema_MPTCPPriority(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=4,
+            # NOTE: :rfc:`8684` section 3.3.8 figure 11 gives MP_PRIO as **3**
+            # octets -- ``Kind`` (1) + ``Length`` (1) + subtype/reserved/``B`` (1)
+            # -- with no Address ID at all: section 5 records that this document
+            # "specifies the removal of the AddrID field [RFC6824] in the MP_PRIO
+            # option". The 4-octet form is :rfc:`6824`'s, which this schema and
+            # ``_read_mptcp_prio`` both still accept, so the length has to follow
+            # whether an Address ID was actually given rather than being a
+            # constant. It read a constant ``4``, and because
+            # ``MPTCPPriority.addr_id`` is conditional on ``pkt['length'] == 4``,
+            # that constant *satisfied its own predicate*: with ``addr_id=None``
+            # the option packed ``1e045000``, a phantom all-zero Address ID octet
+            # that no caller asked for. C.f. #576.
+            length=3 if addr_id is None else 4,
             test={
                 'subtype': subtype.value,
                 'backup': backup,
