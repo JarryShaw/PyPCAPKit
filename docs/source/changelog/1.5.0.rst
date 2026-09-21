@@ -420,6 +420,31 @@ pull requests between #326 and #509.
   packed output**: a 20-octet, key-present option built or parsed under the old
   code becomes 12 octets with no key, or 20 octets with the key actually present,
   depending on which the caller meant (#567).
+* **Changed** -- ``ModuleDescriptor.klass`` reads an already-imported module out of
+  ``sys.modules`` rather than re-entering ``importlib.import_module``, which
+  matters because next layer dispatch resolves a descriptor there on a per-frame
+  path. A registry *hit* holding a ``ModuleDescriptor`` is resolved once and
+  written back, but a *miss* deliberately is not -- recording a miss in a
+  class-level ``collections.defaultdict`` is the defect #425/#428 fixed at this
+  layer and #560 fixed at the schema layer -- so every unrecognised frame resolved
+  the same fallback descriptor again: 48 of the 52 ``ModuleDescriptor.klass``
+  resolutions an extraction of ``many_interfaces.pcapng`` performs, and 4 of the 7
+  on ``ipv4.pcap``. ``import_module`` keeps real per-call work for a module
+  ``sys.modules`` already holds, so that resolution now costs ~117 ns rather than
+  ~436 ns and the whole miss path ~526 ns rather than ~883 ns, on CPython 3.14.7.
+  **The scale is worth stating plainly: this is not measurable in** ``extract()``
+  **wall clock.** 48 avoided calls is ~17 us against a ~37 ms extraction, two
+  orders of magnitude inside this host's run-to-run variance, and the "~40% of
+  cumulative time" reading that prompted the work was an artifact of
+  ``_import_next_layer`` being a recursive-descent dispatcher -- its *self* time is
+  0.58%, while ``aenum.extend_enum`` is 16.7%. What the change is taken for is its
+  shape rather than its speed: nothing memoises the resolved class, anywhere, so
+  ``sys.modules`` stays the only module cache in play and its invalidation is the
+  interpreter's. A memo of the class would serve the pre-reload class after an
+  ``importlib.reload`` forever, and an instance of it fails ``isinstance`` against
+  the live one. Proposed by ``@Ts-Boom`` in #563, whose profiling found the miss
+  path; the implementation differs because that one added a second,
+  never-invalidated cache of resolved classes (#574).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
