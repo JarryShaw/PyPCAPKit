@@ -950,11 +950,19 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_JOIN,
             ), options=options)
 
+        # NOTE: :rfc:`8684` section 3.2 figure 6 gives MP_JOIN-SYN/ACK as 16
+        # octets -- kind (1) + length (1) + subtype/flags (1) + addr_id (1) +
+        # the truncated HMAC (8) + the nonce (4) -- which is also exactly what
+        # MPTCPJoinSYNACK packs. These two cases used 20 (accept) and 19
+        # (reject), the pre-#576 guard's own wrong constant, and so pinned the
+        # defect rather than the RFC. The rejection case is now 20: the value the
+        # guard used to *require*, which no MP_JOIN form produces, so it stays a
+        # genuine rejection rather than an off-by-one near the correct length.
         proto._flags = {Flags.SYN, Flags.ACK}
         join_synack = mark(
             MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
                             addr_id=1, hmac=b'12345678', nonce=3),
-            20,
+            16,
             MPTCPOption.MP_JOIN,
         )
         self.assertEqual(proto._read_mode_mp(join_synack, options=options).hmac, b'12345678')
@@ -962,7 +970,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             proto._read_mode_mp(mark(
                 MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
                                 addr_id=1, hmac=b'12345678', nonce=3),
-                19,
+                20,
                 MPTCPOption.MP_JOIN,
             ), options=options)
 
@@ -1009,9 +1017,15 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.ADD_ADDR,
             ), options=options)
 
+        # NOTE: length 5, not 4: :rfc:`8684` section 3.4.2 figure 13 gives
+        # ``Length = 3 + n``, so a two-Address-ID REMOVE_ADDR is 5 octets. The
+        # reader only requires ``>= 3`` and does not cross-check the list against
+        # the length, so 4 passed -- but it enshrined the very constant #576
+        # removed from ``_make_mptcp_remove``, which is worth not leaving in a
+        # test as though it were correct.
         remove = mark(
             MPTCPRemoveAddress(test={'subtype': MPTCPOption.REMOVE_ADDR.value}, addr_id=[1, 2]),
-            4,
+            5,
             MPTCPOption.REMOVE_ADDR,
         )
         self.assertEqual(proto._read_mode_mp(remove, options=options).addr_id, (1, 2))
@@ -1053,16 +1067,23 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_FAIL,
             ), options=options)
 
+        # NOTE: :rfc:`8684` section 3.5 figure 14 gives MP_FASTCLOSE as 12 octets
+        # -- kind (1) + length (1) + subtype-and-reserved (2) + the receiver's key
+        # (8) -- which is what MPTCPFastclose packs since #576 added its missing
+        # reserved octet. These two cases used 16 (accept) and 15 (reject), the
+        # pre-#576 guard's own wrong constant. The rejection case is now 16, the
+        # value the guard used to require and that the RFC never produces for this
+        # option.
         fastclose = mark(
             MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value}, key=123),
-            16,
+            12,
             MPTCPOption.MP_FASTCLOSE,
         )
         self.assertEqual(proto._read_mode_mp(fastclose, options=options).rkey, 123)
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(mark(
                 MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value}, key=123),
-                15,
+                16,
                 MPTCPOption.MP_FASTCLOSE,
             ), options=options)
 
