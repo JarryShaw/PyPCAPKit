@@ -79,6 +79,13 @@ pull requests between #326 and #509.
   covering every supported Python version (#410), and registry round-trip
   coverage that records the entries which cannot close the cycle rather than
   skipping them (#440, #504).
+* **Added** -- coverage for the untested half of the #431 accommodation: a TCP
+  or IPv4 option whose declared length asks for more data than the capture
+  actually holds, pinning that it still parses, with the short read left-padded
+  rather than rejected. The one test #431 left behind only covers an option
+  area with no data behind it at all; a candidate fix for #554 turned the
+  untested half into an unwrapped ``FieldValueError`` while the rest of the
+  suite stayed green (#571, #572).
 * **Changed** -- ``pcapkit`` no longer configures logging at import. It
   installs a ``NullHandler`` and sets no level, so verbosity is inherited from
   the application instead of being seized by whichever library was imported
