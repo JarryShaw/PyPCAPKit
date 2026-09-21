@@ -159,22 +159,25 @@ EXPECTED_FAILURES = {
     # the seven (MP_CAPABLE, ADD_ADDR, REMOVE_ADDR, MP_PRIO, DSS, MP_FAIL) now
     # read ``'OK'`` and so have no entry below any more.
     #
-    # MP_FASTCLOSE does not: fixing ``subtype`` got it *past* the
-    # ``AttributeError`` this table used to record and into a second,
-    # unrelated defect that #566/#567 do not touch and #576 tracks -- see that
-    # entry for the detail.
-    'tcp-mptcp/MP_FASTCLOSE': Gap(
-        'CONSTRUCT', 'TCP: [OptNo 30] invalid format',
-        'pcapkit/protocols/transport/tcp.py:1893 -- _read_mptcp_fastclose '
-        'requires schema.length == 16, which agrees with neither the maker '
-        '(_make_mptcp_fastclose at pcapkit/protocols/transport/tcp.py:3054, '
-        'length=12, which is the RFC 8684 section 3.7 value) nor the schema '
-        '(MPTCPFastclose.test at '
-        'pcapkit/protocols/schema/transport/tcp.py:907, which packs an '
-        '11-octet option against the declared 12) (#576)'),
+    # MP_FASTCLOSE joined them in #576, and its entry is gone with them. Fixing
+    # ``subtype`` in #566 had got it *past* the ``AttributeError`` this table
+    # used to record and into a second, unrelated defect: three sites disagreed
+    # on its length, and the maker's *correct* value (12, from :rfc:`8684`
+    # section 3.5 figure 14 -- section 3.5 is Fast Close; the entry that used to
+    # sit here cited 3.7, which is Fallback) failed the parser's wrong check of
+    # 16, while the schema packed only 11 for want of a reserved octet. All
+    # three read 12 now. Note that REMOVE_ADDR, MP_PRIO and DSS in the list
+    # above read ``'OK'`` throughout that period *without* being correct -- this
+    # suite only checks the cycle is self-consistent, which a wrong length can
+    # be, so #576 covers them per option in
+    # :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`
+    # against RFC 8684 rather than against the cycle.
 
     # ``_make_mptcp_join`` branches on ``self._flags``, which only the parse
-    # path ever sets, so the constructor cannot be called at all.
+    # path ever sets, so the constructor cannot be called at all. Independent of
+    # #576 and left in place: ``TCP._make`` assigns ``_flags`` *after* it has
+    # already built the options, so this is a statement-ordering defect rather
+    # than a length one.
     'tcp-mptcp/MP_JOIN': Gap(
         'CONSTRUCT', "no attribute '_flags'",
         'pcapkit/protocols/transport/tcp.py:2675 -- _make_mptcp_join reads '
@@ -320,31 +323,36 @@ EXPECTED_FAILURES = {
     # offset. Both cases round-trip now; entries deleted rather than left
     # behind, per the note at the top of this table.
 
-    # RPL used to fail in ``post_process``, which assumed ``addresses`` was
-    # bytes -- true after unpacking, false while packing, where it is still the
-    # list the constructor was handed. That was fixed by #556, and fixing it
-    # exposed the defect immediately behind it: the reader's own length guard.
-    # ``header.length`` is ``Hdr Ext Len``, in 8-octet units rather than octets,
-    # so ``% 16`` cannot be the right invariant -- the same unit confusion #487
-    # fixed for Source Route and Type 2. Behind *that* is a third defect (#564):
-    # the fixed area -- ``cmpr_i`` + ``cmpr_e`` + ``pad`` -- packs to 5 octets,
-    # one wider than the 4 RFC 6554 specifies and this method's own docstring
-    # diagram draws, so the header the guard is judging is not well-formed
-    # either way (measured: it constructs to 41 octets against the 48 its own
-    # ``Hdr Ext Len`` of 5 declares). None of the three is fixed here: RPL
-    # addresses are also variable-length under ``cmpr_i``/``cmpr_e``, so no
-    # fixed bound is obviously correct even once the units and the field
-    # widths are both right, and nothing has been checked against a real RPL
-    # capture. Unrelated to #487 (see #476/#480); still open.
-    'ipv6-route-type/RPL_Source_Route_Header': Gap(
-        'CONSTRUCT', 'IPv6-Route: [TypeNo 3] invalid format',
-        'pcapkit/protocols/internet/ipv6_route.py:612 -- the guard rejects '
-        'the header, and the header is not well-formed to begin with: the '
-        '5-octet cmpr_i/cmpr_e/pad fixed area is one octet wider than the 4 '
-        'RFC 6554 specifies (echoed in the docstring above), so Hdr Ext Len '
-        'is computed from a mis-sized data area (#564); % 16 additionally '
-        'treats Hdr Ext Len as octets rather than 8-octet units, the same '
-        'confusion #487 fixed for Source Route and Type 2'),
+    # ``RPL_Source_Route_Header`` used to be recorded here too, behind a stack
+    # of four defects that had to come off in order -- which is why it outlived
+    # #487 by several rounds:
+    #
+    #   1. ``post_process`` assumed ``addresses`` was bytes -- true after
+    #      unpacking, false while packing, where it is still the list the
+    #      constructor was handed. Fixed by #556, which unmasked the rest.
+    #   2. The reader's length guard read ``header.length`` (``Hdr Ext Len``,
+    #      in 8-octet units) as an octet count and assumed 16-octet addresses,
+    #      which an SRH only carries when ``CmprI`` and ``CmprE`` are both 0 --
+    #      the same unit confusion #487 fixed for Source Route and Type 2,
+    #      flagged but deliberately left by #489 for want of a working round
+    #      trip to validate a replacement against.
+    #   3. Behind that, the schema's fixed area -- ``cmpr_i`` + ``cmpr_e`` +
+    #      ``pad`` -- packed to 5 octets where :rfc:`6554#section-3` gives 4,
+    #      ``CmprI``/``CmprE``/``Pad`` being 4-bit fields sharing one 32-bit
+    #      word with a 20-bit ``Reserved``. Measured before the fix: a
+    #      constructed header of 41 octets against the 48 its own ``Hdr Ext
+    #      Len`` of 5 declared.
+    #   4. And behind *that*, once the guard stopped rejecting every
+    #      constructed header, ``_read_data_type_rpl`` raised a bare
+    #      ``AttributeError`` on the construction path, because
+    #      ``post_process`` set ``ip`` only when it had parsed octets.
+    #
+    # #564 took all four off together -- the guard could not be validated
+    # against a header whose width was still wrong -- replacing the ``% 16``
+    # bound with :rfc:`6554#section-4.2`'s own address-count arithmetic. The
+    # case round-trips now; entry deleted rather than left behind, per the note
+    # at the top of this table. The caveat #489 recorded does survive: none of
+    # it has been checked against a real RPL capture.
 
     # -- Mobility Header ------------------------------------------------------
     #

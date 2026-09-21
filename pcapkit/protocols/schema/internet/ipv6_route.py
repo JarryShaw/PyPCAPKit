@@ -31,6 +31,12 @@ if TYPE_CHECKING:
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
+    class CmprInfo(TypedDict):
+        """Prefix-compression counts, two nibbles of a single octet."""
+
+        cmpr_i: int
+        cmpr_e: int
+
     class PadInfo(TypedDict):
         """Padding length and reserved."""
 
@@ -180,10 +186,23 @@ class Type2(RoutingType, code=Enum_Routing.Type_2_Routing_Header):
 class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
     """Header schema for IPv6-Route RPL routing data."""
 
-    #: CmprI.
-    cmpr_i: 'int' = UInt8Field()
-    #: CmprE.
-    cmpr_e: 'int' = UInt8Field()
+    #: CmprI and CmprE -- two 4-bit counts sharing one octet.
+    #:
+    #: NOTE: :rfc:`6554#section-3` gives ``CmprI`` and ``CmprE`` as *"4-bit
+    #: unsigned integer"*, i.e. the high and low nibble of a single octet, so
+    #: they cannot be two :class:`~pcapkit.corekit.fields.numbers.UInt8Field`
+    #: as they were before #564. Together with :attr:`pad` below -- ``Pad``
+    #: (4 bits) plus ``Reserved`` (20 bits) -- this is the one 32-bit word the
+    #: diagram in :rfc:`6554#section-3` draws, and the same word
+    #: :meth:`IPv6_Route._read_data_type_rpl
+    #: <pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl>`'s
+    #: own docstring already drew correctly. The split between the two fields
+    #: falls on the octet boundary between ``CmprE`` and ``Pad``, so neither
+    #: straddles an octet.
+    cmpr: 'CmprInfo' = BitField(length=1, namespace={
+        'cmpr_i': (0, 4),
+        'cmpr_e': (4, 4),
+    })
     #: Padding length and reserved.
     pad: 'PadInfo' = BitField(length=3, namespace={
         'pad_len': (0, 4),
@@ -221,38 +240,80 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             # here -- treating the list as ``bytes`` (as a bare ``cast``
             # used to, without a runtime check) raised trying to slice and
             # re-join it. See #556.
+            #
+            # NOTE: ``ip`` still has to be *set*, though, rather than merely
+            # left alone. :meth:`Protocol.__post_init__
+            # <pcapkit.protocols.protocol.Protocol.__post_init__>` packs and
+            # then unpacks, and :meth:`IPv6_Route.read
+            # <pcapkit.protocols.internet.ipv6_route.IPv6_Route.read>` hands
+            # :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
+            # *this* schema on that path, not a re-parsed one -- so returning
+            # early without ``ip`` raised a bare ``AttributeError: 'RPL'
+            # object has no attribute 'ip'`` from the reader. That was masked
+            # for as long as the reader's ``% 16`` guard rejected every
+            # constructed header first; fixing the guard alongside #564
+            # exposed it, so it is fixed in the same pass. Each item is one
+            # whole element of ``Addresses[1..n]``, so a full-width (16-octet)
+            # item is decoded the way the parse path below decodes an
+            # uncompressed one, and a compressed suffix is left as
+            # :obj:`bytes` -- which is exactly what that path does too. The
+            # :func:`isinstance` test keeps anything that is not :obj:`bytes`
+            # passing through untouched, as it did when this branch returned
+            # without setting ``ip`` at all, rather than failing here on a
+            # :func:`len` the item may not support.
+            self.ip = [
+                cast('IPv6Address', ipaddress.ip_address(item))
+                if isinstance(item, bytes) and len(item) == 16 else item
+                for item in buffer
+            ]
             return self
 
         dst_val = cast('Optional[IPv6Address]', packet.get('dst'))
         dst = dst_val.packed if dst_val is not None else None
 
-        ilen = 16 - self.cmpr_i
-        elen = 16 - self.cmpr_e
+        cmpr_i = self.cmpr['cmpr_i']
+        cmpr_e = self.cmpr['cmpr_e']
+
+        ilen = 16 - cmpr_i
+        elen = 16 - cmpr_e
         addr = []  # type: list[IPv6Address | bytes]
         counter = 0
 
         # Addresses[1..n-1]
-        for _ in range((len(buffer) - self.pad['pad_len'] - elen) // ilen):
+        #
+        # NOTE: ``buffer`` is ``self.addresses``, whose own ``length`` callback
+        # above already subtracted ``pad_len`` -- the trailing padding octets
+        # are read by :attr:`padding`, not by this field. Subtracting
+        # ``pad_len`` a *second* time here dropped one address for every
+        # ``ilen`` octets of padding, so a padded (i.e. compressed) header
+        # parsed one address short; measured with ``cmpr_i=cmpr_e=4`` and three
+        # addresses, which yields ``pad_len=4`` and walked one element instead
+        # of two. Only reachable once the ``% 16`` guard in
+        # :meth:`IPv6_Route._read_data_type_rpl
+        # <pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl>`
+        # stopped rejecting every such header, which is why it is fixed in the
+        # same pass as #564.
+        for _ in range((len(buffer) - elen) // ilen):
             buf = buffer[counter:counter + ilen]
             if dst is None:
-                if self.cmpr_i == 0:
+                if cmpr_i == 0:
                     addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
                 else:
                     addr.append(buf)
             else:
-                buf = dst[:self.cmpr_i] + buf
+                buf = dst[:cmpr_i] + buf
                 addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
             counter += ilen
 
         # Addresses[n]
         buf = buffer[counter:counter + elen]
         if dst is None:
-            if self.cmpr_e == 0:
+            if cmpr_e == 0:
                 addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
             else:
                 addr.append(buf)
         else:
-            buf = dst[:self.cmpr_e] + buf
+            buf = dst[:cmpr_e] + buf
             addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
 
         self.ip = addr
@@ -262,5 +323,5 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
         #: Addresses (SRH prefix compression decoded).
         ip: 'list[IPv6Address | bytes]'
 
-        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'PadInfo',
+        def __init__(self, cmpr: 'CmprInfo', pad: 'PadInfo',
                      addresses: 'list[bytes]') -> 'None': ...

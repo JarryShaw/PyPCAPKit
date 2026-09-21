@@ -368,6 +368,8 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector
 
 Data Models
 -----------

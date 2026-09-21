@@ -606,20 +606,37 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         """
-        # NOTE: this guard has the same surface shape as the Source Route and
-        # Type 2 unit confusion #487 fixed above -- ``header.length`` is
-        # ``Hdr Ext Len`` in 8-octet units, not octets, and ``% 16`` reads
-        # like a leftover assumption that it was already a total octet
-        # count. It is left as-is here: RPL addresses are variable-length
-        # (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is
-        # not obviously the right invariant even under correct units, and
-        # nothing here has been checked against a real RPL capture. Flagged
-        # for follow-up rather than guessed at. (The round trip through
-        # ``RPL.post_process`` this note used to say was broken -- it
-        # treated a ``make``-built ``list[bytes]`` as ``bytes`` and raised
-        # on pack -- was fixed by #556; that no longer blocks validating a
-        # replacement here, but the replacement itself is still unwritten.)
-        if header.length % 16 != 0:
+        # NOTE: the ``% 16`` bound that stood here had the same surface shape
+        # as the Source Route and Type 2 unit confusion #487 fixed above --
+        # ``header.length`` is ``Hdr Ext Len``, in the 8-octet units
+        # :rfc:`6554#section-3` specifies, not octets -- and it additionally
+        # assumed 16-octet addresses, which an SRH only carries when ``CmprI``
+        # and ``CmprE`` are both 0. #489 called it out but deliberately left
+        # it alone, because ``RPL.post_process`` raised on every pack back
+        # then so there was no round trip to validate a replacement against.
+        # #556 removed that blocker and #564 the mis-sized fixed area behind
+        # it, so the replacement is written here rather than guessed at.
+        #
+        # :rfc:`6554#section-4.2` derives the address count from the same
+        # fields this reader has to hand:
+        #
+        #     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1
+        #
+        # so the invariant actually available is that the division closes --
+        # non-negative, and whole. ``16 - cmpr_i`` cannot be zero: ``CmprI``
+        # is a *"4-bit unsigned integer"* per :rfc:`6554#section-3`, hence at
+        # most 15. Note this is a well-formedness check the library needs in
+        # order to walk ``Addresses[1..n]`` at all; :rfc:`6554#section-4.2`
+        # itself specifies no malformed-header drop condition, only
+        # ``Segments Left > n``, so nothing stricter is imposed here. Still
+        # not checked against a real RPL capture, which is the caveat the
+        # ``% 16`` bound carried too.
+        cmpr_i = schema.cmpr['cmpr_i']
+        cmpr_e = schema.cmpr['cmpr_e']
+        pad_len = schema.pad['pad_len']
+
+        remainder = header.length * 8 - pad_len - (16 - cmpr_e)
+        if remainder < 0 or remainder % (16 - cmpr_i) != 0:
             raise ProtocolError(f'{self.alias}: [TypeNo {header.type}] invalid format')
 
         ipv6_route = Data_RPL(
@@ -627,9 +644,9 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             length=ipv6_route_header_length(header.length),
             type=header.type,
             seg_left=header.seg_left,
-            cmpr_i=schema.cmpr_i,
-            cmpr_e=schema.cmpr_e,
-            pad=schema.pad['pad_len'],
+            cmpr_i=cmpr_i,
+            cmpr_e=cmpr_e,
+            pad=pad_len,
             ip=tuple(schema.ip),
         )
         return ipv6_route
@@ -778,7 +795,16 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                 prefix_e = os_path.commonprefix(test_list)
                 cmpr_e = len(prefix_e)
 
-                pad = 8 - ((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e)) % 8
+                # NOTE: the outer ``% 8`` is what keeps a vector that is
+                # already 8-octet aligned from being handed a *full* 8 octets
+                # of padding -- ``8 - 0`` is 8, not 0. That is reachable
+                # whenever ``dst`` shares no prefix with the addresses, which
+                # makes ``cmpr_i`` and ``cmpr_e`` both 0 and the vector a
+                # multiple of 16, and it contradicts :rfc:`6554#section-3`:
+                # *"Note that when CmprI and CmprE are both 0, Pad MUST carry
+                # a value of 0."* ``_make_data_type_none`` above already
+                # spells the idiom this way; this branch did not.
+                pad = (8 - ((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e)) % 8) % 8
 
                 ip_val = []
                 for item in ip[:-1]:
@@ -792,8 +818,10 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                     ip_val.append(cast('IPv6Address', parse_ip_address(ip[-1], descr, version=6)).packed[cmpr_e:])
 
         return Schema_RPL(
-            cmpr_i=cmpr_i,
-            cmpr_e=cmpr_e,
+            cmpr={
+                'cmpr_i': cmpr_i,
+                'cmpr_e': cmpr_e,
+            },
             pad={
                 'pad_len': pad,
             },
