@@ -5,6 +5,52 @@ import unittest
 from tests._support import purge_modules
 
 
+class BytesFieldTests(unittest.TestCase):
+    """Packing and parsing of :class:`~pcapkit.corekit.fields.strings.BytesField`."""
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+        from pcapkit.corekit.fields.strings import BytesField
+
+        self.BytesField = BytesField
+
+    def test_unpack_rejects_a_short_dynamic_buffer(self) -> None:
+        """A packet-derived length must not cause a short value to be zero-padded."""
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        packet = {'length': 64}
+        field = self.BytesField(length=lambda pkt: pkt['length'])(packet)
+
+        with self.assertRaisesRegex(FieldValueError, r'requires 64 octets.*only 1'):
+            field.unpack(b'X', packet)
+
+    def test_unpack_rejects_a_short_dynamic_stream(self) -> None:
+        """The same length check applies when a field reads from a stream."""
+        import io
+
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        packet = {'length': 64}
+        field = self.BytesField(length=lambda pkt: pkt['length'])(packet)
+
+        with self.assertRaisesRegex(FieldValueError, r'requires 64 octets.*only 1'):
+            field.unpack(io.BytesIO(b'X'), packet)
+
+    def test_unpack_preserves_complete_and_trailing_data(self) -> None:
+        """Complete values still parse, and bytes after the field remain ignored."""
+        field = self.BytesField(length=4)
+
+        self.assertEqual(field.unpack(b'data', {}), b'data')
+        self.assertEqual(field.unpack(b'dataextra', {}), b'data')
+
+    def test_unpack_preserves_fixed_length_short_input_compatibility(self) -> None:
+        """Fixed-width fields retain their historical short-input padding."""
+        field = self.BytesField(length=4)
+
+        self.assertEqual(field.unpack(b'X', {}), b'\x00\x00\x00X')
+
+
 class BitFieldTests(unittest.TestCase):
     """Packing and parsing of :class:`~pcapkit.corekit.fields.strings.BitField`."""
 

@@ -7,7 +7,7 @@ import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.utilities.compat import final
-from pcapkit.utilities.exceptions import NoDefaultValue
+from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
 
 __all__ = ['Field']
 
@@ -233,6 +233,10 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         Returns:
             Unpacked field value.
 
+        Raises:
+            FieldValueError: If ``buffer`` contains fewer octets than a
+                dynamically sized field declares.
+
         """
         # NOTE: ``length`` recomputes struct.calcsize() on every read, so the
         # three reads this method used to make were three calcsize() calls for
@@ -241,6 +245,17 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         if not isinstance(buffer, bytes):
             buffer = buffer.read(length)
+        buffer_length = len(buffer)
+        # Fixed-width fields have historically left-padded a short read, and
+        # callers rely on that while producing their own field-relative errors.
+        # A callable length is different: it can be derived from the packet being
+        # parsed, so padding to it must not allocate bytes that never arrived.
+        if buffer_length < length and getattr(self, '_length_callback', None) is not None:
+            raise FieldValueError(
+                f'Field {self.name} requires {length} octets, but only '
+                f'{buffer_length} are available.'
+            )
+
         value = struct.unpack(self.template, buffer[:length].rjust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 
