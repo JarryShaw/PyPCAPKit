@@ -27,6 +27,7 @@ __all__ = [
     'TraceFlowManager',
 
     'register_protocol',
+    'register_protocol_code',
     'register_linktype',
     'register_pcap', 'register_pcapng',
     'register_ethertype',

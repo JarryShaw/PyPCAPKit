@@ -227,6 +227,35 @@ The following code snippet shows how to create a new protocol class:
    # register protocol class
    register_ethertype(EtherType.Internet_Protocol_version_4, MyIPv4)
 
+.. note::
+
+   Registering after the fact, as above, is one option. The other is passing
+   ``code=`` at class definition, which is **opt-in** -- a class that omits it
+   stays unregistered, exactly as if no ``register_*`` call had been made
+   either:
+
+   .. code-block:: python
+
+      class MyIPv4(Internet[IPv4Data, IPv4Schema],
+                   schema=IPv4Schema, data=IPv4Data,
+                   code=EtherType.Internet_Protocol_version_4):
+          ...
+
+   The key's own type decides which registry it goes to -- an
+   :class:`~pcapkit.const.reg.ethertype.EtherType` member always means
+   :class:`~pcapkit.protocols.link.link.Link`, a
+   :class:`~pcapkit.const.reg.transtype.TransType` member always means
+   :class:`~pcapkit.protocols.internet.internet.Internet`, and so on -- so a
+   raw :class:`int`, such as a TCP or UDP port, cannot say which registry it
+   belongs to and must be given explicitly: ``code={TCP: 21}``. Either form
+   may appear in an iterable to register one class into several registries
+   at once. See
+   :meth:`ProtocolBase.__init_subclass__
+   <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>` for the full
+   rule, and
+   :func:`~pcapkit.foundation.registry.protocols.register_protocol_code` for
+   what runs underneath it.
+
 Extending Existing Protocol
 ---------------------------
 

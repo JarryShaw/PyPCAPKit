@@ -171,6 +171,36 @@ pull requests between #326 and #509.
   so the documented registration path works on every supported version. There is
   no ``name=`` alias -- a keyword that worked on some interpreters and not others
   is the trap being removed, not a compatibility measure.
+* **Added** -- ``Protocol``/``ProtocolBase`` gain a ``code=`` class keyword for
+  the next-layer dispatch registries -- ``Link.__proto__``,
+  ``Internet.__proto__``, ``TCP.__proto__``, ``UDP.__proto__``,
+  ``SCTP.__proto__``, ``Frame.__proto__`` and ``PCAPNG.__proto__`` -- the same
+  opt-in treatment #514 gave ``Engine``, ``Reassembly``, ``TraceFlow`` and
+  ``Dumper`` above, extended to the one family that needed a registration key
+  invented rather than merely un-guarded. Omitting ``code`` leaves a subclass
+  unregistered, exactly as before this keyword existed: the built-in dispatch
+  tables are still populated by literal assignment in each layer module, not by
+  ``__init_subclass__``, so nothing the library ships moves. ``code`` accepts a
+  bare enum member, whose *type* infers the destination -- ``EtherType`` means
+  ``Link``, ``TransType`` means ``Internet``, ``PayloadProtocolIdentifier``
+  means ``SCTP``, and ``LinkType`` means *both* ``Frame`` **and** ``PCAPNG``,
+  deterministically, mirroring what ``register_linktype`` already does by
+  hand -- or a ``{destination: key}`` mapping, required for a raw ``int`` such
+  as a TCP/UDP port number, which cannot say by itself which transport it
+  belongs to. Either form may appear in an iterable, so one declaration can
+  register a class into several registries at once, e.g. a ``L2TP`` subclass
+  reachable both by IP protocol number and by a UDP port. The explicit
+  mapping form is accepted even for a key whose type could be inferred --
+  being more explicit than required is never an error. Inference refuses
+  rather than guesses: an enum member whose type names no known destination
+  raises ``RegistryError`` instead of silently doing nothing or picking an
+  arbitrary registry, and an unrecognised class keyword raises
+  ``UnsupportedCall``, matching the other four families. Backed by the new
+  ``pcapkit.foundation.registry.protocols.register_protocol_code``, which can
+  also be called directly to register a class that declined at class-definition
+  time. This is the mechanism #548 (``TransType.L2TP`` registered nowhere)
+  needs and does not yet use -- fixing it is now a one-declaration change, left
+  for its own issue rather than folded in here.
 * **Changed** -- extraction is around 46% faster on a 1,117-frame HTTP capture,
   with byte-identical output (#420). A reassembled datagram's payload is now
   analysed on first read rather than eagerly, which cuts IP reassembly's own

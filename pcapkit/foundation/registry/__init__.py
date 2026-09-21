@@ -25,6 +25,7 @@ __all__ = [
     'register_extractor_reassembly', 'register_extractor_traceflow',
 
     'register_protocol',
+    'register_protocol_code',
 
     'register_linktype',
     'register_pcap', 'register_pcapng',

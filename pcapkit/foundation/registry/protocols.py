@@ -7,10 +7,19 @@
 This module provides the protocol registries for :mod:`pcapkit`.
 
 """
+import collections.abc
+import enum
 from typing import TYPE_CHECKING, cast, overload
+
+import aenum
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.const.reg.apptype import TransportProtocol
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.const.sctp.payload_protocol_identifier import \
+    PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
@@ -49,7 +58,7 @@ from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Iterator, Optional, Type
 
     from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
     from pcapkit.const.http.frame import Frame as HTTP_Frame
@@ -104,6 +113,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'register_protocol',
+    'register_protocol_code',
 
     'register_linktype',
     'register_pcap', 'register_pcapng',
@@ -149,6 +159,127 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 
     protocol_registry[protocol.__name__.upper()] = protocol
     logger.debug('registered protocol: %s', protocol.__name__)
+
+
+#: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
+#: <pcapkit.protocols.protocol.ProtocolBase.__proto__>` dispatch registry
+#: keyed by that enum type -- the "registry-of-registries" that lets
+#: ``code=`` infer a destination from a key's own type, per GH-514. This is
+#: not an invention: it is exactly the targeting
+#: :func:`register_ethertype`, :func:`register_transtype`,
+#: :func:`register_linktype` and :func:`register_sctp` already hard-code by
+#: hand, moved into one table so :func:`register_protocol_code` can consult
+#: it. ``LinkType`` naming two classes is deliberate, not ambiguous --
+#: :func:`register_linktype` already fans out to both.
+_CODE_DESTINATIONS: 'dict[type, tuple[Type[Protocol], ...]]' = {
+    Enum_EtherType: (Link,),
+    Enum_TransType: (Internet,),
+    Enum_PayloadProtocolIdentifier: (SCTP,),
+    Enum_LinkType: (Frame, PCAPNG),
+}
+
+
+def _iter_code_targets(code: 'Any') -> 'Iterator[tuple[Type[Protocol], Any]]':
+    """Flatten a ``code=`` argument into ``(destination, key)`` pairs.
+
+    Args:
+        code: See :func:`register_protocol_code`.
+
+    Yields:
+        One ``(destination, key)`` pair per registration the caller asked
+        for -- possibly several, e.g. a single :class:`~pcapkit.const.reg.\
+linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.
+
+    Raises:
+        RegistryError: If a value has no destination it can name or infer;
+            see :func:`register_protocol_code`.
+
+    """
+    if isinstance(code, dict):
+        yield from code.items()
+        return
+
+    if isinstance(code, (enum.Enum, aenum.Enum)):
+        destinations = _CODE_DESTINATIONS.get(type(code))
+        if destinations is None:
+            raise RegistryError(
+                f'no destination registry is known for enum type {type(code).__name__!r} '
+                f'(key {code!r}); pass an explicit destination, e.g. code={{SomeClass: {code!r}}}')
+        for destination in destinations:
+            yield destination, code
+        return
+
+    if isinstance(code, (str, bytes)):
+        raise RegistryError(f'code must be an enum member, a {{destination: key}} mapping, or an '
+                            f'iterable thereof, not {code!r}')
+
+    if isinstance(code, collections.abc.Iterable):
+        for item in code:
+            yield from _iter_code_targets(item)
+        return
+
+    raise RegistryError(f'raw key {code!r} has no destination registry it can infer; pass an '
+                        f'explicit destination, e.g. code={{TCP: {code!r}}}')
+
+
+def register_protocol_code(protocol: 'Type[Protocol]', code: 'Any') -> 'None':
+    r"""Register ``protocol`` into the next-layer dispatch registry (or
+    registries) named by ``code``.
+
+    This is what backs the ``code`` keyword of
+    :meth:`ProtocolBase.__init_subclass__
+    <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`; it can also
+    be called directly to register a class that declined at class-definition
+    time.
+
+    ``code`` is normalised into a flat sequence of targets, where each item
+    is either:
+
+    * an enum member, whose *type* is looked up in a small table mapping
+      enum type to the class(es) owning the matching ``__proto__`` --
+      :class:`~pcapkit.const.reg.ethertype.EtherType` to
+      :class:`~pcapkit.protocols.link.link.Link`,
+      :class:`~pcapkit.const.reg.transtype.TransType` to
+      :class:`~pcapkit.protocols.internet.internet.Internet`,
+      :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+      to :class:`~pcapkit.protocols.transport.sctp.SCTP`, and
+      :class:`~pcapkit.const.reg.linktype.LinkType` to *both*
+      :class:`~pcapkit.protocols.misc.pcap.frame.Frame` **and**
+      :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`; or
+    * a :class:`dict` mapping an explicit destination class to a key -- the
+      only form accepted for a bare :class:`int`, since e.g. a port number
+      does not say by itself whether it means
+      :class:`~pcapkit.protocols.transport.tcp.TCP` or
+      :class:`~pcapkit.protocols.transport.udp.UDP`;
+
+    or an iterable of either, to register ``protocol`` into several
+    registries from one call -- e.g. a
+    :class:`~pcapkit.protocols.link.l2tp.L2TP` subclass reachable both by its
+    IP protocol number and by a UDP port:
+
+    .. code-block:: python
+
+       register_protocol_code(L2TPv2, [TransType.L2TP, {UDP: 1701}])
+
+    The explicit mapping form is accepted for any key, even one whose type
+    could be inferred -- being more explicit than required is never an
+    error.
+
+    Args:
+        protocol: Protocol class to register.
+        code: Registration key(s); see above.
+
+    Raises:
+        RegistryError: If a bare :class:`int` (or any other non-enum, non-
+            mapping value) is given without an explicit destination, or if
+            an enum member's type names no known destination registry --
+            inference refuses rather than guesses.
+
+    """
+    for destination, key in _iter_code_targets(code):
+        destination.register(key, protocol)
+        logger.debug('registered %s into %s.__proto__: %s', protocol.__name__,
+                     destination.__name__, key)
 
 
 ###############################################################################
