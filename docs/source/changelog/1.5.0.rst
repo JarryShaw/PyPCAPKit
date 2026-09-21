@@ -242,6 +242,23 @@ pull requests between #326 and #509.
   and ``@prepare`` discarded extra arguments silently and treated a *declared*
   zero length as end of stream, which is now distinguished from a genuinely
   exhausted one and raises ``StreamEOFError`` (#454, #458).
+* **Fixed** -- the last four call sites where a ``_make_*`` method converts an
+  address itself, ahead of the schema, so the same ``bool``-as-``int`` mistake
+  reached them too, unguarded by the schema-layer fix above:
+  ``ARP._make_proto_resolve``, ``IPv6_Route._make_data_type_rpl`` (which also
+  derives its RPL compression lengths from the laundered value, corrupting the
+  address list alongside the exception it should have raised), the ``dst``
+  parameter of ``IPv6_Route.make``, and the latent ``OSPF._make_id_numbers``,
+  which nothing calls yet but would have inherited the defect regardless. All
+  four now go through ``parse_ip_address``, the helper #539 and #552 route
+  their own sites through, completing the programme #481 and #508 started.
+  Pinning ``version=6`` on the two ``IPv6_Route`` sites is a second, smaller
+  behaviour change beyond bool rejection: both previously converted a plain
+  integer through the bare, family-inferring ``ipaddress.ip_address``, which
+  let ``ip=[258]`` pack a 4-octet IPv4 address (``0.0.1.2``) inside an
+  IPv6-only header; it now packs the 16-octet IPv6 form (``::102``) instead,
+  which is what an IPv6-only header should hold regardless of what an integer
+  argument happens to fit as an IPv4 address (#540).
 * **Fixed** -- the engine adapters, which were quietly wrong rather than loud.
   The ``dpkt`` toolkit split TCP and IPv4 headers at their fixed struct size
   instead of their real length, so option octets overwrote payload in the
