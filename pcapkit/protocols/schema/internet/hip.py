@@ -613,7 +613,22 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         Args:
             packet: packet data
 
+        Notes:
+            When ``packet`` already carries a resolved ``cipher`` -- as it
+            does when this schema was built via
+            :meth:`HIP._make_param_encrypted
+            <pcapkit.protocols.internet.hip.HIP._make_param_encrypted>`, which
+            sets it as a plain attribute so ``pack()``'s own
+            ``packet.update(self.__dict__)`` carries it in here -- that value
+            is trusted over the ``HIP_CIPHER`` sibling lookup below, which a
+            parameter packed on its own has no ``options`` list for. See
+            #556.
+
         """
+        if 'cipher' in packet:
+            packet['__cipher__'] = packet.pop('cipher')
+            return
+
         if 'options' in packet:
             cipher_list = cast('list[Data_HIPCipherParameter]',
                             packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
@@ -661,10 +676,15 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         return self
 
     if TYPE_CHECKING:
-        #: Cipher ID.
+        #: Cipher ID. Not a schema field -- set as a plain attribute, either
+        #: by :meth:`post_process` after unpacking, or by
+        #: :meth:`HIP._make_param_encrypted
+        #: <pcapkit.protocols.internet.hip.HIP._make_param_encrypted>` before
+        #: packing -- so it is documented here rather than accepted by
+        #: ``__init__``. See #556.
         cipher: 'Enum_Cipher'
 
-        def __init__(self, type: 'Enum_Parameter', len: 'int', cipher: 'Enum_Cipher',
+        def __init__(self, type: 'Enum_Parameter', len: 'int',
                      iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...
 
 

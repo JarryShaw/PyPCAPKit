@@ -1453,6 +1453,48 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         with_dst.post_process({'dst': ip_address('2001:db8::ffff')})
         self.assertEqual([str(item) for item in with_dst.ip], ['2001:db8::1', '2001:db8::2'])
 
+    def test_ipv6_route_rpl_packs_a_multi_address_list(self) -> None:
+        """Regression test for GH-556.
+
+        ``RPL.post_process`` runs on every ``Schema.pack``, not only after a
+        real parse, and a schema built through ``make`` (see
+        ``IPv6_Route._make_data_type_rpl``) still holds ``self.addresses``
+        as the ``list[bytes]`` the caller passed in -- one already-
+        compressed address per item -- rather than the concatenated
+        ``bytes`` a parse produces. ``post_process`` used to assume the
+        latter unconditionally, so packing sliced and re-joined the *list*
+        as though it were that concatenated buffer and raised. Merely
+        constructing the schema does not exercise this: the defect is only
+        reachable through an actual pack.
+        """
+        from pcapkit.const.ipv6.routing import Routing
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+        from pcapkit.protocols.schema.internet import ipv6_route as route_schema
+
+        first = ip_address('2001:db8::1')
+        second = ip_address('2001:db8::2')
+
+        # Directly at the schema level: ``addresses`` is a ``list[bytes]``,
+        # exactly as ``_make_data_type_rpl`` hands it to the constructor.
+        rpl_schema = route_schema.RPL(
+            cmpr_i=0, cmpr_e=0, pad={'pad_len': 0},
+            addresses=[first.packed, second.packed],
+        )
+        packed = bytes(rpl_schema)
+        self.assertIn(first.packed, packed)
+        self.assertIn(second.packed, packed)
+
+        # And through the public ``make`` entry point, which is what
+        # actually builds a multi-address RPL routing header end to end.
+        proto = object.__new__(IPv6_Route)
+        header = proto.make(
+            type=Routing.RPL_Source_Route_Header,
+            data={'ip': [first, second]},
+        )
+        header_packed = bytes(header)
+        self.assertIn(first.packed, header_packed)
+        self.assertIn(second.packed, header_packed)
+
     def _assert_padding_options_parse_from_the_wire(self, protocol_cls: type) -> None:
         """A ``Pad1`` option must consume exactly one octet, wherever it sits.
 
