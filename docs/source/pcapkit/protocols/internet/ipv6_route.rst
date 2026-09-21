@@ -85,6 +85,10 @@ Header Schemas
 Type Stubs
 ~~~~~~~~~~
 
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.CmprInfo
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.PadInfo
    :members:
    :show-inheritance:
