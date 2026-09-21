@@ -431,6 +431,14 @@ class StreamEOFError(BaseError, EOFError):
     A *declared* zero length -- a nested schema legitimately sized to have
     nothing to read -- is a different situation and does not raise this.
 
+    Note:
+        :func:`~pcapkit.utilities.decorators.prepare` always raises this with
+        ``quiet=True``: reaching end of stream is the frame reader's ordinary
+        way of finding out there is nothing left to parse, not a fault to
+        log -- the same convention
+        :exc:`~pcapkit.utilities.exceptions.StructError` follows for the
+        same situation via its own ``eof=True``.
+
     """
 
 

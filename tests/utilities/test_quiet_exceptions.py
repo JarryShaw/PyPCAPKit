@@ -17,6 +17,7 @@ unchanged.
 """
 from __future__ import annotations
 
+import io
 import os
 import sys
 import traceback
@@ -56,6 +57,7 @@ class QuietExceptionTests(unittest.TestCase):
         modules = bootstrap(devmode=False)
         self.exceptions = modules['exceptions']
         self.multidict = modules['multidict']
+        self.decorators = modules['decorators']
         self.logger = modules['logging'].logger
 
     def tearDown(self) -> None:
@@ -132,6 +134,62 @@ class QuietExceptionTests(unittest.TestCase):
         self.assertFalse(hasattr(sys, 'tracebacklimit'))
         self.assertEqual(_unrelated_failure(), before)
         self.assertGreater(before, 1)
+
+    def test_prepare_raises_stream_eof_error_quietly(self) -> None:
+        """End of stream is control flow, so ``prepare`` raises it silently.
+
+        :func:`~pcapkit.utilities.decorators.prepare` passes ``quiet=True``
+        when a *measured* -- as opposed to caller-declared -- read length comes
+        back zero, because that is how the frame reader learns a capture is
+        exhausted rather than a fault worth a log record. It is the same
+        convention :exc:`~pcapkit.utilities.exceptions.StructError` follows via
+        its own ``eof=True``.
+
+        Dropping the ``quiet=True`` would put one ``CRITICAL`` record on
+        :data:`sys.stderr` for every capture parsed to completion, which is the
+        #362 defect this module exists for -- and would also set
+        :data:`sys.tracebacklimit` to ``0`` process-wide.
+
+        """
+        class DemoSchema:
+            @classmethod
+            def pre_unpack(cls, packet):
+                return None
+
+            def post_process(self, packet):
+                return packet
+
+            @classmethod
+            @self.decorators.prepare
+            def unpack(cls, data, length=None, packet=None):
+                return cls()
+
+        if hasattr(sys, 'tracebacklimit'):
+            del sys.tracebacklimit
+
+        with capture(self.logger) as recorder:
+            with self.assertRaises(self.exceptions.StreamEOFError) as caught:
+                DemoSchema.unpack(io.BytesIO(b''), None, None)
+
+        self.assertEqual(recorder.messages, [])
+        self.assertEqual(str(caught.exception), 'prepare: end of stream')
+        self.assertFalse(hasattr(sys, 'tracebacklimit'))
+
+    def test_loud_stream_eof_error_still_logs(self) -> None:
+        """The control for the test above: ``quiet`` is what silences it.
+
+        Without this, ``recorder.messages == []`` would also pass if
+        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` had simply stopped
+        logging altogether.
+
+        """
+        if hasattr(sys, 'tracebacklimit'):
+            del sys.tracebacklimit
+
+        with capture(self.logger) as recorder:
+            self.exceptions.StreamEOFError('boom')
+
+        self.assertEqual(recorder.messages, [('CRITICAL', 'StreamEOFError: boom')])
 
     def test_loud_error_still_limits_the_traceback(self) -> None:
         """The feature a loud error provides is unchanged."""
