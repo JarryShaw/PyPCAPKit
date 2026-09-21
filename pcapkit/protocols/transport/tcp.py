@@ -1483,10 +1483,15 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Parsed option data.
 
         Raises:
-            ProtocolError: If length is **NOT** ``20`` or ``32``.
+            ProtocolError: If length is **NOT** ``12`` or ``20``.
 
         """
-        if schema.length not in (20, 32):
+        # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without
+        # the receiver's key and 20 octets with it -- this guard, and the
+        # ``rkey=`` below, read ``(20, 32)``/``32`` until #567, which is what
+        # made a spec-correct 12-octet MP_CAPABLE unparseable and read a
+        # spec-correct 20-octet one (with the key) as having none.
+        if schema.length not in (12, 20):
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
         data = Data_MPTCPCapable(
@@ -1500,7 +1505,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 hsa=bool(schema.flags['hsa']),
             ),
             skey=schema.skey,
-            rkey=schema.rkey if schema.length == 32 else None,
+            rkey=schema.rkey if schema.length == 20 else None,
         )
         return data
 
@@ -2601,6 +2606,15 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             meth = name[1]
 
         schema = meth(subtype_val, opt, **kwargs)
+        # NOTE: ``Schema_MPTCP.subtype`` is not a packable field (see the
+        # comment on :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`),
+        # so nothing above set it -- ``subtype`` only ever went into ``test``,
+        # the bitfield each concrete maker actually packs. Real unpacking gets
+        # it from :meth:`~pcapkit.protocols.schema.transport.tcp._MPTCP.post_process`;
+        # this is that same assignment for the construction path, so a schema
+        # built via ``TCP(options=[(Enum_Option.Multipath_TCP, ...)])`` has
+        # ``.subtype`` set exactly as one built by parsing bytes does. C.f. #566.
+        schema.subtype = subtype_val
         return schema
 
     def _make_mptcp_unknown(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPUnknown]' = None, *,
@@ -2666,7 +2680,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         return Schema_MPTCPCapable(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
-            length=20 if rkey is None else 32,
+            # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets
+            # without the receiver's key and 20 octets with it. This read
+            # ``20 if rkey is None else 32`` until #567 -- both branches
+            # wrong, and the no-key branch writing the value that RFC 8684
+            # assigns to the *other* case.
+            length=12 if rkey is None else 20,
             test={
                 'subtype': subtype.value,
                 'version': version,

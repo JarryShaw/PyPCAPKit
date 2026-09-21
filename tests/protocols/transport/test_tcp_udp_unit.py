@@ -901,10 +901,17 @@ class TCPUDPUnitTests(unittest.TestCase):
         )
         self.assertEqual(proto._read_mode_mp(unknown, options=options).data, b'\x0a\x01')
 
+        # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without the
+        # receiver's key and 20 octets with it (#567); these three cases used
+        # 20/32/12 respectively, the pre-#567 (wrong) split, and so were
+        # exercising -- and pinning -- the very defect #567 fixes rather than
+        # correct behaviour. Updated to 12/20, with the third case's length
+        # moved to 32, which is not an MP_CAPABLE length under either the old
+        # or the new split, so it stays a genuine rejection.
         capable_no_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 1, 'ext': 0, 'hsa': 1}, skey=1, rkey=2),
-            20,
+            12,
             MPTCPOption.MP_CAPABLE,
         )
         capable = proto._read_mode_mp(capable_no_receiver, options=options)
@@ -915,7 +922,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         capable_with_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 0, 'ext': 1, 'hsa': 0}, skey=1, rkey=2),
-            32,
+            20,
             MPTCPOption.MP_CAPABLE,
         )
         self.assertEqual(proto._read_mode_mp(capable_with_receiver, options=options).rkey, 2)
@@ -923,7 +930,7 @@ class TCPUDPUnitTests(unittest.TestCase):
             proto._read_mode_mp(mark(
                 MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                              flags={'req': 0, 'ext': 0, 'hsa': 0}, skey=1, rkey=None),
-                12,
+                32,
                 MPTCPOption.MP_CAPABLE,
             ), options=options)
 
