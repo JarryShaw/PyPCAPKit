@@ -272,6 +272,23 @@ pull requests between #326 and #509.
   and ``@prepare`` discarded extra arguments silently and treated a *declared*
   zero length as end of stream, which is now distinguished from a genuinely
   exhausted one and raises ``StreamEOFError`` (#454, #458).
+* **Fixed** -- the last four call sites where a ``_make_*`` method converts an
+  address itself, ahead of the schema, so the same ``bool``-as-``int`` mistake
+  reached them too, unguarded by the schema-layer fix above:
+  ``ARP._make_proto_resolve``, ``IPv6_Route._make_data_type_rpl`` (which also
+  derives its RPL compression lengths from the laundered value, corrupting the
+  address list alongside the exception it should have raised), the ``dst``
+  parameter of ``IPv6_Route.make``, and the latent ``OSPF._make_id_numbers``,
+  which nothing calls yet but would have inherited the defect regardless. All
+  four now go through ``parse_ip_address``, the helper #539 and #552 route
+  their own sites through, completing the programme #481 and #508 started.
+  Pinning ``version=6`` on the two ``IPv6_Route`` sites is a second, smaller
+  behaviour change beyond bool rejection: both previously converted a plain
+  integer through the bare, family-inferring ``ipaddress.ip_address``, which
+  let ``ip=[258]`` pack a 4-octet IPv4 address (``0.0.1.2``) inside an
+  IPv6-only header; it now packs the 16-octet IPv6 form (``::102``) instead,
+  which is what an IPv6-only header should hold regardless of what an integer
+  argument happens to fit as an IPv4 address (#540).
 * **Fixed** -- the engine adapters, which were quietly wrong rather than loud.
   The ``dpkt`` toolkit split TCP and IPv4 headers at their fixed struct size
   instead of their real length, so option octets overwrote payload in the
@@ -312,6 +329,59 @@ pull requests between #326 and #509.
   (#413), ambiguous cross-references and five autodoc signature failures (#416),
   and ``Extractor``'s documented exception plus 40 phantom or stale ``Args:``
   labels (#501).
+* **Fixed** -- ``FieldBase.unpack`` zero-padded straight up to a field's
+  declared ``length`` with ``rjust()``, regardless of how little data
+  ``buffer`` actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a
+  bogus inner length was enough to force a multi-gigabyte allocation, since
+  ``length`` is frequently wire-derived and so attacker-controlled. A declared
+  length past 262144 octets -- libpcap's own ``MAXIMUM_SNAPLEN``, and this
+  package's own default ``snaplen`` -- that the buffer cannot back now raises
+  ``FieldValueError`` instead of padding for it; the option and list loops'
+  own tolerance for a short read past a truncated area (#431) is far under
+  that ceiling and is untouched (#554).
+* **Fixed** -- ``TCP._make_mptcp_addaddr`` could not build an ``ADD_ADDR``
+  option end to end: its ``kind=``/``length=`` arguments were rejected with
+  ``UnknownFieldWarning`` and silently dropped, and ``.pack()`` then raised
+  ``KeyError: 'length'`` from ``port``'s own condition,
+  ``pkt['length'] in (10, 22)``. The cause was one layer up -- ``MPTCP``, the
+  base class every Multipath TCP subtype schema inherits, declared ``kind`` and
+  ``length`` only under ``typing.TYPE_CHECKING`` rather than as real fields,
+  unlike ``Option``, which every non-Multipath TCP option schema inherits
+  instead. That silently dropped ``kind=``/``length=`` for every
+  ``_make_mptcp_*`` constructor, not only ``ADD_ADDR``'s, so ``MPTCP`` now
+  declares both for real, the same way ``Option`` already did (#541). The same
+  missing fields broke parsing too: with no ``kind``/``length`` fields ahead of
+  it, a Multipath TCP subtype schema's own leading field read the ``kind``
+  octet itself rather than the octet meant for it, an off-by-two in field
+  alignment rather than a wire-format change -- a correct sender's octets were
+  always right, only this library's reading of them was shifted. Spec-correct
+  ``ADD_ADDR`` and ``MP_PRIO`` options failed to parse with
+  ``FieldError: TCP: [OptNo 30] 3 invalid IP version`` and
+  ``KeyError: 'length'`` respectively; both parse correctly now.
+* **Fixed** -- which exception a malformed TCP SACK option raised depended on
+  unrelated process state: a clean interpreter raised ``ProtocolError`` as
+  documented, but a process that had already popped
+  ``pcapkit.corekit.fields.misc`` from ``sys.modules`` -- which the ``#439``
+  ABC-cache regression tests do in every case's ``setUp``/``tearDown`` --
+  raised ``FieldValueError`` instead, from a different layer entirely, before
+  the documented check was even reached (#525). The cause was
+  ``ListField.unpack`` resolving ``SchemaField`` through a function-local
+  import re-run on every call; a module popped and reimported mid-process comes
+  back as a second, distinct class, so ``isinstance`` against it silently
+  misclassified the field and billed each item by its declared length instead
+  of by what it actually consumed. **Any caller relying on the
+  previously-observed** ``FieldValueError`` **for this case now gets**
+  ``ProtocolError`` **instead, deterministically**, matching the method's own
+  docstring. Fixed by importing at module level instead.
+* **Fixed** -- two dropped-keyword/wrong-cast defects flagged in review during
+  this release and never filed until now: HIP's ``_make_param_encrypted`` passed
+  ``cipher=`` to a schema with no such field, so the value was silently dropped
+  and an AES-cipher ``ENCRYPTED`` parameter built through ``make`` packed
+  without its IV; and IPv6-Route's ``RPL.post_process``, which runs on every
+  ``Schema.pack`` and not only after a parse, assumed ``self.addresses`` was
+  still the concatenated ``bytes`` a parse leaves it as, and raised slicing the
+  ``list[bytes]`` a ``make``-built multi-address header actually holds there
+  (#556).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

@@ -205,7 +205,24 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
             Revised schema.
 
         """
-        buffer = cast('bytes', self.addresses)
+        buffer = self.addresses
+        if not isinstance(buffer, bytes):
+            # NOTE: ``self.addresses`` is still a ``list[bytes]`` -- one
+            # already-compressed address per item -- when this schema was
+            # built via ``make`` (see
+            # :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`)
+            # rather than parsed off the wire. There is nothing to decode in
+            # that case: the caller supplied each address already
+            # compressed, and :meth:`Schema.pack
+            # <pcapkit.protocols.schema.schema.Schema.pack>`'s own
+            # :class:`~pcapkit.corekit.fields.collections.ListField` handling
+            # packs that list directly. The SRH prefix-decompression below
+            # only makes sense against the raw octets a real parse hands
+            # here -- treating the list as ``bytes`` (as a bare ``cast``
+            # used to, without a runtime check) raised trying to slice and
+            # re-join it. See #556.
+            return self
+
         dst_val = cast('Optional[IPv6Address]', packet.get('dst'))
         dst = dst_val.packed if dst_val is not None else None
 

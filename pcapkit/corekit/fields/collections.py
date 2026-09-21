@@ -6,6 +6,7 @@ import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import FieldBase
+from pcapkit.corekit.fields.misc import SchemaField
 from pcapkit.corekit.fields.numbers import NumberField
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.utilities.compat import List
@@ -140,7 +141,34 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         if self._item_type is None:
             return file.read(length)
 
-        from pcapkit.corekit.fields.misc import SchemaField
+        # NOTE: ``SchemaField`` used to be imported here, inside the method body,
+        # rather than at module level -- there is no cyclic import to dodge by
+        # doing so; :mod:`pcapkit.corekit.fields.misc` does not import this
+        # module. A local ``from ... import`` re-resolves against
+        # :data:`sys.modules` on *every* call, and normally that is a cheap
+        # dict lookup returning the same cached module -- except when something
+        # has popped :mod:`pcapkit.corekit.fields.misc` out of
+        # :data:`sys.modules` since this ``ListField`` was built (the ``#439``
+        # regression tests do exactly that, to get a clean ABC-cache state
+        # between cases). The next call re-executes the module from scratch and
+        # mints a *second*, distinct ``SchemaField`` class, while
+        # ``self._item_type`` -- built long before, from the first one -- is
+        # still an instance of the original. ``isinstance`` against the new
+        # class then reports :data:`False` for an item that plainly is a
+        # ``SchemaField``, ``is_schema`` goes the wrong way, and this method's
+        # other branch bills each item by its *declared* length unconditionally
+        # instead of by what it actually consumed -- which is what let a
+        # malformed TCP SACK option's length check raise
+        # :exc:`~pcapkit.utilities.exceptions.FieldValueError` from here instead
+        # of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
+        # :meth:`TCP._read_mode_sack
+        # <pcapkit.protocols.transport.tcp.TCP._read_mode_sack>`, depending on
+        # unrelated things that ran earlier in the same process. C.f. #525.
+        # Importing at module level, once, for the life of this module object,
+        # closes that off: ``SchemaField`` then stays whatever class this
+        # module resolved at its own import time, regardless of what happens to
+        # :mod:`pcapkit.corekit.fields.misc`'s entry in :data:`sys.modules`
+        # afterwards.
         is_schema = isinstance(self._item_type, SchemaField)
 
         # NOTE: The item-typed branch below sizes each item by ``field.length``,
