@@ -40,7 +40,9 @@ The entries are written in a deliberately small reStructuredText subset, so the
 conversion is six mechanical rules rather than a document converter:
 
   1. the setext version heading becomes an ATX ``##`` heading;
-  2. ``:rfc:`NNNN``` becomes a Markdown link to the RFC on the IETF datatracker;
+  2. ``:rfc:`NNNN``` -- and ``:rfc:`NNNN#section-3```, the anchored spelling
+     Sphinx accepts too -- become Markdown links to the RFC on the IETF
+     datatracker;
   3. ``double backtick`` literals become single-backtick code spans;
   4. ``*`` bullets become ``-`` bullets;
   5. ``[n]_`` / ``.. [n]`` footnotes become GitHub's ``[^n]`` / ``[^n]:``;
@@ -94,6 +96,27 @@ which is a larger change than the insurance is worth.
 Every pattern was measured against all 37 committed entries and matches none of
 them, so the guard costs nothing until an entry actually leaves the subset.
 
+Where a complaint points
+------------------------
+
+A complaint cites a line of the **entry file**, because that is the only frame a
+reader can act on, and the guard is the message on a gate that blocks merges.
+
+It is not the frame the guard finds the construct in. Rule 6 joins a wrapped
+bullet onto one line, so the converted body is a fraction of the file's length
+and a number counted in it is not a location at all: measured on the 1.5.0
+entry, the body is 55 lines against the file's 580, and four roles written on
+source lines 467 and 468 all reported as ``line 46``. The bound alone settles it
+-- a number that cannot exceed 55 cannot name a line in a 580-line file.
+
+So :func:`convert_traced` returns a *source map* alongside the Markdown, saying
+which line of the entry each stretch of output came from, and :func:`residual`
+resolves every hit through it. That is also what separates the hits: several
+constructs joined onto one output line become several complaints at their own
+source lines, in file order, rather than several copies of one wrong number.
+Masking a code span preserves its length for the same reason -- so that an offset
+in the masked text is still an offset in the Markdown.
+
 Usage
 -----
 
@@ -137,6 +160,22 @@ OUTPUT = ROOT / 'CHANGELOG.md'
 #: URL instead.
 RFC_URL = 'https://datatracker.ietf.org/doc/html/rfc'
 
+#: Sphinx's ``:rfc:`` role, in both spellings it accepts: a bare number, and a
+#: number with a section anchor -- ``:rfc:`6554#section-3```, which is what
+#: anyone writing about a specific section reaches for. Only the anchor shapes
+#: :func:`rfc_link` can name are matched; a stranger one falls through to
+#: :func:`residual` and is reported, rather than being carried into a link whose
+#: text nobody checked.
+_RFC_ROLE = re.compile(r':rfc:`(\d+)(?:#([\w.-]+))?`')
+
+#: Anchor prefixes Sphinx renders as words rather than as part of the target,
+#: from ``sphinx.roles._format_rfc_target`` (read from Sphinx 9.1.0, the version
+#: this repository builds its documentation with): ``#section-3`` is titled
+#: ``Section 3``, and an anchor of any other shape is left exactly as written.
+#: Kept level with Sphinx so the Markdown link and the rendered documentation say
+#: the same thing about the same page, which is the whole point of rule 2.
+_RFC_ANCHORS = frozenset({'appendix', 'page', 'section'})
+
 #: Where the full rendered history lives. Must match ``[project.urls].changelog``
 #: in ``pyproject.toml`` -- ``MANIFEST.in`` prunes ``docs/``, so in a source
 #: distribution this is the only route from the shipped entry to the rest of the
@@ -160,14 +199,31 @@ TRAILER = (
 #: markup: the 1.5.0 entry says ``a Sphinx-only ``:mod:`` role``, which converts
 #: to the code span ```:mod:``` and must not be read as a role that escaped rule
 #: 2. Deliberately cannot match across a newline, so masking leaves every line
-#: break -- and therefore every reported line number -- where it was.
+#: break where it was.
 _CODE_SPAN = re.compile(r'`[^`\n]*`')
 
-#: Stands in for a masked code span. A *marker* rather than nothing, because the
-#: difference between a leftover role and prose about a role is precisely whether
-#: a code span follows the ``:name:`` or encloses it: ``:mod:`pcapkit.const``` is
-#: a role that escaped rule 2, and ```:mod:``` is a sentence mentioning one.
+#: Stands in for one character of a masked code span. A *marker* rather than
+#: nothing, because the difference between a leftover role and prose about a role
+#: is precisely whether a code span follows the ``:name:`` or encloses it:
+#: ``:mod:`pcapkit.const``` is a role that escaped rule 2, and ```:mod:``` is a
+#: sentence mentioning one.
+#:
+#: A span is masked character for character rather than collapsed to one marker,
+#: so that a match offset in the masked text is also an offset in the Markdown --
+#: which is what lets :func:`residual` resolve a hit through the source map. No
+#: pattern below counts markers, so the runs change nothing about what matches.
 _SPAN = '\x00'
+
+#: A run of markers, rendered back as one code span when a complaint quotes what
+#: it matched.
+_SPAN_RUN = re.compile(_SPAN + '+')
+
+#: A ``double backtick`` literal rule 3 did not reach -- because it holds a
+#: backtick, or is empty, or its closing pair was on the next source line. Whole
+#: literal where one line holds both pairs, lone pair otherwise, so one leftover
+#: literal is one complaint rather than two. Checked before masking: masking
+#: would eat ``````` as an empty code span and hide exactly this case.
+_LITERAL = re.compile(r'``[^\n]*?``|``')
 
 #: reStructuredText that should be gone by the time conversion finishes. Checked
 #: against the masked text, and each one means a rule did not fire. Every pattern
@@ -213,7 +269,9 @@ class ResidualMarkupError(RuntimeError):
     Deliberately fatal. The six rules cover the subset the entries are written
     in; anything outside it would otherwise be copied through as literal text and
     render as itself in a release body, which is a silent defect in a published
-    artefact. Failing here instead names the construct and the line.
+    artefact. Failing here instead names the construct, and the line of the entry
+    file it was written on -- see "Where a complaint points" in the module
+    docstring for why that is not the line the guard found it on.
 
     """
 
@@ -285,6 +343,37 @@ def newest(index: pathlib.Path = INDEX) -> tuple[str, pathlib.Path]:
     return entry.stem, entry
 
 
+def rfc_link(number: str, anchor: str = '') -> str:
+    """Render one ``:rfc:`` role as a Markdown link.
+
+    The link text follows Sphinx's own ``:rfc:`` role rather than being invented
+    here, so an entry reads the same in the generated Markdown as it does in the
+    rendered documentation: ``:rfc:`6554#section-3``` is *RFC 6554 Section 3* in
+    both, pointing at the same anchor on the same page.
+
+    Args:
+        number: The RFC number, as written in the role.
+        anchor: The fragment after ``#``, if the role carried one.
+
+    Returns:
+        A Markdown inline link.
+
+    """
+    if not anchor:
+        return f'[RFC {number}]({RFC_URL}{number})'
+
+    # ``section-3`` -> ``Section 3``, as ``sphinx.roles._format_rfc_target`` does.
+    # An anchor whose prefix Sphinx does not know is shown as written, there as
+    # here, and a prefix with nothing after it -- ``#section`` -- keeps the word
+    # alone rather than gaining a trailing space.
+    kind, _, remaining = anchor.partition('-')
+    if kind in _RFC_ANCHORS:
+        title = f'RFC {number} {kind.title()}' + (f' {remaining}' if remaining else '')
+    else:
+        title = f'RFC {number}#{anchor}'
+    return f'[{title}]({RFC_URL}{number}#{anchor})'
+
+
 def convert(rst: str) -> str:
     """Apply the six rules to one per-version entry.
 
@@ -295,8 +384,30 @@ def convert(rst: str) -> str:
         The entry as Markdown, ending in a single newline.
 
     """
+    return convert_traced(rst)[0]
+
+
+def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
+    """Apply the six rules, and record where each piece of the output came from.
+
+    What :func:`convert` returns, plus the bookkeeping :func:`residual` needs to
+    report a location in *rst* rather than in its own much shorter output. Rules 1
+    to 5 rewrite a line in place, so every character of an output line came from
+    one source line and the map has one entry per line; rule 6 then joins lines,
+    which is what makes the map necessary at all.
+
+    Args:
+        rst: The entry's reStructuredText.
+
+    Returns:
+        The entry as Markdown, ending in a single newline, and its *source map*:
+        ``(offset, line)`` pairs in ascending *offset* order, each saying that the
+        Markdown from *offset* onwards was written on 1-based *line* of *rst*.
+
+    """
     lines = rst.rstrip('\n').split('\n')
     out = []  # type: list[str]
+    origin = []  # type: list[int]
 
     index = 0
     while index < len(lines):
@@ -304,14 +415,17 @@ def convert(rst: str) -> str:
 
         # 1. setext heading -> ATX. Only ``=`` is used in these files, and only
         #    for the version heading, so the underline can be consumed outright.
+        #    The heading is attributed to the title, not to the underline that
+        #    followed it, because the title is what a reader would look for.
         if (index + 1 < len(lines) and line and set(lines[index + 1]) == {'='}
                 and len(lines[index + 1]) == len(line)):
             out.append(f'## {line}')
+            origin.append(index + 1)
             index += 2
             continue
 
-        # 2. the one role these entries use.
-        line = re.sub(r':rfc:`(\d+)`', lambda match: f'[RFC {match[1]}]({RFC_URL}{match[1]})', line)
+        # 2. the one role these entries use, in both spellings Sphinx accepts.
+        line = _RFC_ROLE.sub(lambda match: rfc_link(match[1], match[2] or ''), line)
         # 3. literals.
         line = re.sub(r'``([^`]+)``', r'`\1`', line)
         # 4. bullets, at any indent.
@@ -321,12 +435,16 @@ def convert(rst: str) -> str:
         line = re.sub(r'\[(\d+)\]_', r'[^\1]', line)
 
         out.append(line)
+        origin.append(index + 1)
         index += 1
 
-    return unwrap(out).rstrip('\n') + '\n'
+    markdown, sources = unwrap(out, origin)
+    # ``rstrip`` only ever drops trailing newlines, which no map entry points
+    # past: the last entry is the last non-blank line's own offset.
+    return markdown.rstrip('\n') + '\n', sources
 
 
-def unwrap(lines: Sequence[str]) -> str:
+def unwrap(lines: Sequence[str], origin: Sequence[int]) -> tuple[str, list[tuple[int, int]]]:
     """Rule 6: collapse each paragraph and each bullet onto a single line.
 
     A block ends at a blank line, at the next bullet, at a heading, or at a
@@ -334,68 +452,127 @@ def unwrap(lines: Sequence[str]) -> str:
     no literal blocks, no tables, no definition lists -- so joining a block's
     lines with a single space is lossless.
 
+    Joining is also what costs the output its line numbers, so each line's source
+    is carried alongside it and comes back as the source map described in
+    :func:`convert_traced`.
+
     Args:
         lines: The entry's lines, with rules 1 to 5 already applied.
+        origin: The 1-based source line each of *lines* came from, in step with it.
 
     Returns:
-        The lines with each block joined onto one line.
+        The lines with each block joined onto one line, and the source map.
 
     """
-    blocks = []  # type: list[str]
-    current = []  # type: list[str]
+    rows = []  # type: list[list[tuple[str, int]]]
+    current = []  # type: list[tuple[str, int]]
 
     def flush() -> None:
         if current:
-            blocks.append(' '.join(item.strip() for item in current))
+            rows.append(current.copy())
             current.clear()
 
-    for line in lines:
+    for line, source in zip(lines, origin):
         if not line.strip():
             flush()
-            blocks.append('')
+            # One blank row per run: the flush cycle can leave several behind, and
+            # a run of blank lines is one paragraph break however long it is -- and
+            # a run before the first block is no break at all, where the ``\n{3,}``
+            # substitution this replaces left an empty first line behind.
+            if rows and rows[-1]:
+                rows.append([])
             continue
         if re.match(r'^\s*- ', line) or line.startswith('## ') \
                 or re.match(r'^\[\^\d+\]: ', line):
             flush()
-            current.append(line)
+            current.append((line, source))
             continue
-        current.append(line)
+        current.append((line, source))
     flush()
 
-    # Collapse the runs of blank lines the flush cycle can leave behind.
-    return re.sub(r'\n{3,}', '\n\n', '\n'.join(blocks))
+    out = []  # type: list[str]
+    sources = []  # type: list[tuple[int, int]]
+    offset = 0
+
+    for index, row in enumerate(rows):
+        if index:
+            out.append('\n')
+            offset += 1
+        for position, (line, source) in enumerate(row):
+            text = (' ' if position else '') + line.strip()
+            # The joining space belongs to neither line, and is attributed to the
+            # one after it. Nothing can match starting there in any case -- the
+            # line-anchored patterns only ever match at the start of a row, where
+            # there is no joining space -- but it is the kind of off-by-one that is
+            # invisible until it is written down.
+            sources.append((offset, source))
+            out.append(text)
+            offset += len(text)
+
+    return ''.join(out), sources
 
 
-def residual(markdown: str) -> list[str]:
+def residual(markdown: str,
+             sources: Optional[Sequence[tuple[int, int]]] = None) -> list[str]:
     """Report reStructuredText left in *markdown* that the six rules did not convert.
 
-    See the module docstring for the guarded set, and for the two constructs left
-    deliberately unguarded.
+    See the module docstring for the guarded set, for the two constructs left
+    deliberately unguarded, and for why a complaint's line number belongs to the
+    entry file rather than to *markdown*.
 
     Args:
         markdown: One converted entry, as :func:`convert` returned it. The
             generated file's trailer is not part of this and does not need to be:
             :func:`render` checks the body before appending it.
+        sources: The source map :func:`convert_traced` returned beside *markdown*.
+            With one, each complaint cites the line of the entry the construct was
+            written on -- the line a reader can open. Without one there is nothing
+            to map through, so the complaints count lines of *markdown* and say
+            so, rather than passing an unusable number off as a location.
 
     Returns:
-        One human-readable complaint per leftover construct, empty when clean.
+        One human-readable complaint per leftover construct, in source order,
+        empty when clean.
 
     """
-    problems = []  # type: list[str]
+    offsets = [offset for offset, _ in sources] if sources is not None else []
 
-    # Checked before code spans are masked: masking would eat ``````` as an empty
-    # code span and hide exactly the case this looks for.
-    for number, line in enumerate(markdown.split('\n'), 1):
-        if '``' in line:
-            problems.append(f'line {number}: an unconverted `` literal: {line.strip()[:70]!r}')
+    def locate(offset: int) -> int:
+        """The 1-based line *offset* should be reported against."""
+        if sources is None:
+            return markdown.count('\n', 0, offset) + 1
+        # A linear scan: the map holds one entry per line of one changelog entry,
+        # and a clean entry has nothing to locate, so a search is not worth an
+        # import. ``offsets`` ascends, so the last entry at or before *offset*
+        # owns it. The first row is never blank, so entry zero sits at offset zero
+        # and the loop always fires; the default is for a map that is empty.
+        line = 1
+        for index, start in enumerate(offsets):
+            if start > offset:
+                break
+            line = sources[index][1]
+        return line
 
-    masked = _CODE_SPAN.sub(_SPAN, markdown)
+    frame = 'line' if sources is not None else 'converted line'
+    problems = []  # type: list[tuple[int, str]]
+
+    def report(offset: int, label: str, found: str) -> None:
+        line = locate(offset)
+        problems.append((line, f'{frame} {line}: {label}: {found!r}'))
+
+    # Checked before code spans are masked; see :data:`_LITERAL`.
+    for match in _LITERAL.finditer(markdown):
+        report(match.start(), 'an unconverted `` literal', match.group(0)[:70])
+
+    masked = _CODE_SPAN.sub(lambda match: _SPAN * len(match.group(0)), markdown)
     for pattern, label in _RESIDUAL:
         for match in pattern.finditer(masked):
-            number = masked.count('\n', 0, match.start()) + 1
-            found = match.group(0).replace(_SPAN, '`...`')
-            problems.append(f'line {number}: {label}: {found!r}')
-    return problems
+            report(match.start(), label, _SPAN_RUN.sub('`...`', match.group(0)))
+
+    # In source order, so a reader walks the entry once rather than once per
+    # pattern; :func:`sorted` is stable, so hits sharing a line keep the order the
+    # patterns found them in.
+    return [complaint for _, complaint in sorted(problems, key=lambda item: item[0])]
 
 
 def render(index: pathlib.Path = INDEX) -> str:
@@ -413,9 +590,11 @@ def render(index: pathlib.Path = INDEX) -> str:
 
     """
     _, entry = newest(index)
-    body = convert(entry.read_text(encoding='utf-8'))
+    body, sources = convert_traced(entry.read_text(encoding='utf-8'))
 
-    problems = residual(body)
+    # With the map, every complaint cites a line of *entry* -- the file named in
+    # the message -- so the reader can open one at the number they were given.
+    problems = residual(body, sources)
     if problems:
         raise ResidualMarkupError(
             f'{entry} uses reStructuredText the six conversion rules do not cover, '

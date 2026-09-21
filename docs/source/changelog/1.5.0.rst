@@ -567,6 +567,23 @@ pull requests between #326 and #509.
   -- the shape in which ``OSPF`` once shipped reachable from no table. 23 claims
   verified, no gaps; a companion case injects a gap and confirms the audit
   reports it, so the guard cannot rot into a permanently green no-op (#548).
+* **Fixed** -- both halves of what the ``Changelog drift`` gate told an author,
+  in ``util/changelog_md.py``. ``ResidualMarkupError`` named the entry file but
+  numbered its lines against the *converted* body, which rule 6 joins onto one
+  line per block: measured on this entry, the body is 55 lines against the file's
+  580, so a reported number could not reach most of the file at all, and four
+  roles written on two source lines were all reported as ``line 46``. The
+  conversion now carries a source map -- which line of the entry each stretch of
+  output came from -- so every complaint cites a line of the file the message
+  names, one complaint per construct rather than one per joined line, in the
+  entry's own order (#588). Rule 2 separately accepted only the bare-number
+  spelling of Sphinx's ``:rfc:`` role, so a citation of :rfc:`6554#section-3`
+  fell past the rule that exists for it and was reported as a role the rules do
+  not cover; both spellings now convert, with the anchor carried into the link
+  target and the link text taken from Sphinx's own so that the Markdown and the
+  rendered history say the same thing about the same page (#592). Regenerating
+  ``CHANGELOG.md`` is byte-identical over all 37 committed entries, so the fix
+  changes what the gate *says* and nothing about what it emits.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

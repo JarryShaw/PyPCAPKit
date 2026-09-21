@@ -18,6 +18,12 @@ are: which entry counts as "newest" (the toctree's first line, not a sort of the
 version strings), and ``--check``, which is what a CI gate calls and is worthless
 if it cannot fail.
 
+One class covers the guard's *message* rather than its verdict, because the guard
+is what blocks a merge and the message is all the author gets. Its assertions are
+deliberately about the entry file rather than about the wording: a cited line is
+read back out of the entry and has to hold the construct it was cited for, which
+is the one property a line number in a diagnostic exists to have.
+
 Almost everything here builds its own two-file changelog tree in a temporary
 directory rather than reading the repository's. That keeps the rule tests honest
 -- each entry is written to exercise one rule, instead of hoping the real
@@ -92,6 +98,27 @@ Preamble.
 """
 
 
+def padded_entry(*tail: str, padding: int = 60) -> str:
+    """An entry whose single bullet wraps over *padding* source lines, then *tail*.
+
+    Rule 6 joins the lot onto one output line, so the converted body is a handful
+    of lines while the entry file is dozens of them. That gap is the whole of
+    #588: a line number counted in the body cannot reach most of the file, so a
+    construct written in *tail* is at a line the body does not have.
+
+    """
+    lines = [
+        '9.9.9 -- 2026-01-02',
+        '===================',
+        '',
+        '* **Added** -- a bullet whose prose wraps over many source lines, so that',
+    ]
+    lines += [f'  padding line {number} of the wrapped bullet.'
+              for number in range(1, padding + 1)]
+    lines += [f'  {line}' for line in tail]
+    return '\n'.join(lines) + '\n'
+
+
 class ChangelogTreeMixin:
     """Builds a throwaway changelog tree for one test."""
 
@@ -130,6 +157,52 @@ class ConversionRuleTests(ChangelogTreeMixin, unittest.TestCase):
 
         self.assertIn('[RFC 4303](https://datatracker.ietf.org/doc/html/rfc4303)', markdown)
         self.assertNotIn(':rfc:', markdown)
+
+    def test_rule_2_rfc_role_with_a_section_anchor_becomes_a_deep_link(self) -> None:
+        # #592: ``(\d+)`` between the backticks accepted digits and nothing else,
+        # so the anchored spelling Sphinx also accepts fell past rule 2 and was
+        # rejected by the guard -- which reported the *role* as uncovered when only
+        # the spelling ever was. The fragment has to reach the target, or the link
+        # lands at the top of a 100-page RFC.
+        markdown = self.convert(ENTRY.replace(':rfc:`4303`', ':rfc:`4303#section-2.1`'))
+
+        self.assertIn(
+            '[RFC 4303 Section 2.1](https://datatracker.ietf.org/doc/html/rfc4303#section-2.1)',
+            markdown,
+        )
+        self.assertNotIn(':rfc:', markdown)
+
+    def test_rule_2_anchor_titles_follow_sphinx(self) -> None:
+        # The link text is Sphinx's, not one invented here, so an entry reads the
+        # same in CHANGELOG.md as in the rendered history. Measured against
+        # ``sphinx.roles._format_rfc_target``: it titles three anchor prefixes and
+        # leaves every other anchor as written.
+        base = 'https://datatracker.ietf.org/doc/html/rfc'
+        cases = {
+            '6554#section-3': f'[RFC 6554 Section 3]({base}6554#section-3)',
+            '8200#section-4.5': f'[RFC 8200 Section 4.5]({base}8200#section-4.5)',
+            '6275#appendix-B': f'[RFC 6275 Appendix B]({base}6275#appendix-B)',
+            '793#page-5': f'[RFC 793 Page 5]({base}793#page-5)',
+            '9293#introduction': f'[RFC 9293#introduction]({base}9293#introduction)',
+            '9293#section': f'[RFC 9293 Section]({base}9293#section)',
+            '4303': f'[RFC 4303]({base}4303)',
+        }
+
+        for target, expected in cases.items():
+            self.assertEqual(self.convert(f':rfc:`{target}`\n').strip(), expected,
+                             f'rule 2 mis-rendered :rfc:`{target}`')
+
+    def test_rule_2_leaves_an_anchor_it_cannot_read_to_the_guard(self) -> None:
+        # The widened pattern is deliberately not "anything between the backticks".
+        # An anchor it cannot read has to reach the guard and be reported, rather
+        # than being carried into a link whose text nobody checked.
+        markdown = self.convert(ENTRY + '\nSee :rfc:`6554#section 3` for more.\n')
+
+        self.assertIn(':rfc:', markdown)
+        self.assertTrue(
+            any('role' in problem for problem in changelog_md.residual(markdown)),
+            'an unreadable anchor was neither converted nor reported',
+        )
 
     def test_rule_3_double_backtick_literal_becomes_a_code_span(self) -> None:
         markdown = self.convert()
@@ -172,6 +245,22 @@ class ConversionRuleTests(ChangelogTreeMixin, unittest.TestCase):
                     line[0].isupper() or line.startswith('---'),
                     f'{line[:50]!r} looks like a wrapped continuation line',
                 )
+
+    def test_rule_6_collapses_blank_runs_and_drops_a_leading_one(self) -> None:
+        # Carrying the source map through rule 6 means the blank rows are counted
+        # structurally rather than collapsed afterwards by a ``\n{3,}`` substitution
+        # over the joined text. Same answer between blocks -- a run of blank lines
+        # is one paragraph break however long it is -- and a better one before the
+        # first block, where the substitution used to leave two empty lines.
+        markdown = self.convert(
+            '\n\n9.9.9 -- 2026-01-02\n===================\n\n\n\n'
+            'One paragraph.\n\n\nAnother.\n'
+        )
+
+        self.assertEqual(
+            markdown,
+            '## 9.9.9 -- 2026-01-02\n\nOne paragraph.\n\nAnother.\n',
+        )
 
 
 class NewestEntryTests(ChangelogTreeMixin, unittest.TestCase):
@@ -344,6 +433,14 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
 
         self.assertEqual(changelog_md.residual(markdown), [])
 
+    def test_an_rfc_role_with_an_anchor_is_not_a_leftover(self) -> None:
+        # The gate-level half of #592: rule 2 covers the ``:rfc:`` role, so an entry
+        # citing a section of an RFC must pass rather than be refused as markup the
+        # rules do not cover. #590's entry was rewritten to work around this.
+        markdown = self.convert(ENTRY.replace(':rfc:`4303`', ':rfc:`4303#section-2.1`'))
+
+        self.assertEqual(changelog_md.residual(markdown), [])
+
     def test_the_real_entries_are_all_within_the_subset(self) -> None:
         directory = changelog_md.INDEX.parent / 'changelog'
         if not directory.is_dir():
@@ -355,6 +452,163 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
                     changelog_md.residual(changelog_md.convert(
                         entry.read_text(encoding='utf-8'))),
                     [],
+                )
+
+
+class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
+    """Where the guard says a leftover construct is -- #588.
+
+    The guard blocks merges, so its message is the whole of the author's
+    experience of it. These do not check the wording; they check that a cited line
+    read back out of the entry holds the construct it was cited for, which the
+    numbers counted against the converted body could not do.
+
+    No ``subTest`` here on purpose: this pytest has no ``pytest-subtests``, so a
+    failing subtest leaves its parent reported as passed.
+
+    """
+
+    def complaints(self, entry: str) -> list[str]:
+        """Render *entry*, which must be refused, and return the cited complaints."""
+        index = self.make_tree(entry=entry)
+
+        with self.assertRaises(changelog_md.ResidualMarkupError) as error:
+            changelog_md.render(index)
+
+        return [line.strip() for line in str(error.exception).split('\n')
+                if line.strip().startswith('line ')]
+
+    def cited(self, complaints: list[str]) -> list[int]:
+        """The line numbers *complaints* point at."""
+        numbers = []
+        for complaint in complaints:
+            found = re.match(r'line (\d+):', complaint)
+            self.assertIsNotNone(found, f'{complaint!r} cites no line')
+            assert found is not None
+            numbers.append(int(found.group(1)))
+        return numbers
+
+    def test_a_cited_line_holds_the_construct_it_was_cited_for(self) -> None:
+        entry = padded_entry('and then :data:`sys.modules` at the very end.')
+
+        number, = self.cited(self.complaints(entry))
+
+        self.assertIn(':data:`sys.modules`', entry.split('\n')[number - 1],
+                      f'line {number} of the entry does not hold the cited construct')
+
+    def test_a_cited_line_can_lie_past_the_end_of_the_converted_body(self) -> None:
+        # The bound that made the old numbers provably wrong: they were counted in
+        # the body, so they could never reach a construct written below it.
+        entry = padded_entry('and then :data:`sys.modules` at the very end.')
+        body = changelog_md.convert(entry)
+
+        number, = self.cited(self.complaints(entry))
+
+        self.assertGreater(
+            number, len(body.split('\n')),
+            'the cited line is inside the converted body, so it is a body line '
+            'number rather than a line of the entry the message names',
+        )
+        self.assertLessEqual(number, len(entry.split('\n')))
+
+    def test_constructs_joined_onto_one_line_keep_their_own_lines(self) -> None:
+        entry = padded_entry(
+            'first :data:`sys.modules`,',
+            'then :func:`importlib.import_module`,',
+            'and last :class:`dict`.',
+        )
+        joined = [line for line in changelog_md.convert(entry).split('\n')
+                  if ':data:' in line]
+        self.assertEqual(len(joined), 1, 'the three roles were meant to be joined')
+        self.assertIn(':class:', joined[0], 'the three roles were meant to be joined')
+
+        numbers = self.cited(self.complaints(entry))
+
+        self.assertEqual(len(set(numbers)), 3,
+                         f'three constructs on three source lines cited {numbers}')
+        for number, role in zip(numbers, (':data:', ':func:', ':class:')):
+            self.assertIn(role, entry.split('\n')[number - 1],
+                          f'line {number} does not hold {role}')
+
+    def test_complaints_arrive_in_the_entrys_order(self) -> None:
+        # Separate paragraphs, so the two are on different lines in either frame.
+        # What changes is the order: the patterns are listed with the hyperlink
+        # before the substitution, and a reader walks the file, not the pattern list.
+        entry = ENTRY + (
+            '\nA |substitution| reference.\n'
+            '\nA `link <https://example.invalid/>`_ reference.\n'
+        )
+
+        numbers = self.cited(self.complaints(entry))
+
+        self.assertEqual(len(numbers), 2, 'expected one substitution and one link')
+        self.assertEqual(numbers, sorted(numbers), 'complaints are out of order')
+        self.assertIn('|substitution|', entry.split('\n')[numbers[0] - 1])
+        self.assertIn('`link <https://example.invalid/>`_', entry.split('\n')[numbers[1] - 1])
+
+    def test_an_unreached_double_backtick_literal_is_located_too(self) -> None:
+        # Rule 3's ``[^`]+`` cannot cross a backtick, so a literal holding one is
+        # copied through and only the guard catches it. That branch of the guard had
+        # no test of its own.
+        entry = padded_entry('an ``a`b`` literal rule 3 cannot reach.')
+
+        complaints = self.complaints(entry)
+        number, = self.cited(complaints)
+
+        self.assertIn('`` literal', complaints[0])
+        self.assertIn('``a`b``', entry.split('\n')[number - 1])
+
+    def test_two_unreached_literals_are_two_located_complaints(self) -> None:
+        # One complaint per literal rather than per output line: rule 6 joins these
+        # two source lines into one, and "one of these is wrong" is not a location.
+        #
+        # Two lines rather than one because rule 3 pairs the nearest backticks it
+        # can: given two unconvertible literals side by side on a single line, it
+        # bridges the closing pair of the first to the opening pair of the second.
+        # It runs before rule 6 joins, so separate source lines are out of its reach.
+        entry = padded_entry('an ``a`b`` literal,', 'and a ``c`d`` literal.')
+
+        complaints = self.complaints(entry)
+        numbers = self.cited(complaints)
+
+        self.assertEqual(len(complaints), 2, complaints)
+        self.assertEqual(len(set(numbers)), 2, numbers)
+        self.assertIn('``a`b``', entry.split('\n')[numbers[0] - 1])
+        self.assertIn('``c`d``', entry.split('\n')[numbers[1] - 1])
+
+    def test_residual_without_a_source_map_says_which_frame_it_counted(self) -> None:
+        # ``residual`` is callable on a bare string, and then there is nothing to map
+        # through. It has to admit that rather than pass a body line number off as a
+        # line of an entry -- which is precisely what #588 was.
+        markdown = changelog_md.convert(ENTRY + '\nSee :mod:`pcapkit.const` for more.\n')
+
+        unmapped = changelog_md.residual(markdown)
+        mapped = changelog_md.residual(
+            *changelog_md.convert_traced(ENTRY + '\nSee :mod:`pcapkit.const` for more.\n'))
+
+        self.assertEqual(len(unmapped), 1)
+        self.assertTrue(unmapped[0].startswith('converted line '), unmapped[0])
+        self.assertEqual(len(mapped), 1)
+        self.assertTrue(mapped[0].startswith('line '), mapped[0])
+
+    def test_the_real_entries_map_every_offset_to_a_line_they_have(self) -> None:
+        directory = changelog_md.INDEX.parent / 'changelog'
+        if not directory.is_dir():
+            self.skipTest(f'{directory} is absent (docs/ is pruned from a source tarball)')
+
+        for entry in sorted(directory.glob('*.rst')):
+            text = entry.read_text(encoding='utf-8')
+            body, sources = changelog_md.convert_traced(text)
+            count = len(text.split('\n'))
+
+            offsets = [offset for offset, _ in sources]
+            self.assertEqual(offsets, sorted(offsets), f'{entry.name}: map is unordered')
+            self.assertTrue(sources, f'{entry.name}: no map at all')
+            for offset, line in sources:
+                self.assertTrue(
+                    0 <= offset < len(body) and 1 <= line <= count,
+                    f'{entry.name}: ({offset}, {line}) is outside a {len(body)}-character '
+                    f'body of a {count}-line entry',
                 )
 
 
