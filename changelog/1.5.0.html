@@ -653,6 +653,16 @@ tuple-registered handler pair written to the documented
 <code class="docutils literal notranslate"><span class="pre">OptionParser</span></code>/<code class="docutils literal notranslate"><span class="pre">OptionConstructor</span></code> signature now works where it could
 previously never be called at all, and a pair written with an explicit leading
 <code class="docutils literal notranslate"><span class="pre">self</span></code> – the only shape that used to work – now does not.</p></li>
+<li><p><strong>Fixed</strong> – the identical defect one layer up, in the schema layer’s own
+<code class="docutils literal notranslate"><span class="pre">EnumSchema.registry</span></code>: <code class="docutils literal notranslate"><span class="pre">Option.registry[code]</span></code> for an unregistered
+<code class="docutils literal notranslate"><span class="pre">code</span></code> inserted the default schema under that code, so a single lookup
+made an unassigned TCP option number, e.g. <code class="docutils literal notranslate"><span class="pre">156</span></code>, read back as registered
+for the rest of the process. <code class="docutils literal notranslate"><span class="pre">EnumSchema.__enum__</span></code> is now built (or, when a
+subclass seeds it manually in its own class body – <code class="docutils literal notranslate"><span class="pre">PCAPNG.Option</span></code>’s
+namespaced mapping, <code class="docutils literal notranslate"><span class="pre">TCP.MPTCP</span></code>’s plain one) as a retention-safe mapping
+that still returns the registered default on a miss, it just stops recording
+it; <code class="docutils literal notranslate"><span class="pre">.registry</span></code> keeps returning the same object it always did, so nothing
+that held a reference to it is affected (#555).</p></li>
 <li><p><strong>Fixed</strong> – on Python 3.10 and older, no <code class="docutils literal notranslate"><span class="pre">Schema</span></code> subclass got its own
 <code class="docutils literal notranslate"><span class="pre">_abc_impl</span></code>: all of them fell through to <code class="docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code>’s, so a
 single <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> or <code class="docutils literal notranslate"><span class="pre">issubclass</span></code> answer poisoned every later question

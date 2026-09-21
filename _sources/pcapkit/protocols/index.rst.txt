@@ -223,6 +223,12 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.schema._EnumRegistry
+   :no-members:
+   :show-inheritance:
+
+   .. automethod:: __missing__
+
 Type Variables
 ~~~~~~~~~~~~~~
 

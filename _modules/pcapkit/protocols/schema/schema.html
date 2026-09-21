@@ -1413,6 +1413,43 @@
 
 
 
+<div class="viewcode-block" id="_EnumRegistry">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema._EnumRegistry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">_EnumRegistry</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A registry :class:`collections.defaultdict` that never inserts a miss.</span>
+
+<span class="sd">    :attr:`EnumSchema.registry` (and its class-level twin,</span>
+<span class="sd">    :attr:`EnumMeta.registry`) is read with a bare ``registry[code]`` at dozens</span>
+<span class="sd">    of call sites across the schema layer, e.g. ``Option.registry[type]``. A</span>
+<span class="sd">    plain :class:`collections.defaultdict` inserts whatever</span>
+<span class="sd">    :attr:`~collections.defaultdict.default_factory` returns the *first time*</span>
+<span class="sd">    an unregistered ``code`` is looked up -- and since the registry lives on</span>
+<span class="sd">    the *class*, that insertion is permanent and shared by every instance of</span>
+<span class="sd">    every subclass in the process. Parsing one packet carrying an unrecognised</span>
+<span class="sd">    code is therefore enough to grow the registry for the remainder of the</span>
+<span class="sd">    process, and to make a later, entirely legitimate</span>
+<span class="sd">    :meth:`EnumSchema.register` call report an overwrite that never happened.</span>
+
+<span class="sd">    This is the schema-layer instance of the defect :meth:`ProtocolBase.\</span>
+<span class="sd">    _lookup_registry &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;`</span>
+<span class="sd">    fixed for the protocol-layer ``__proto__`` family in GitHub issues #421 and</span>
+<span class="sd">    #425/#428; see GitHub issue #555. The fallback itself is deliberate -- it</span>
+<span class="sd">    is how an unknown option, chunk or block falls back to its</span>
+<span class="sd">    ``Unknown*``/``Unassigned*`` schema -- so this subclass keeps returning it,</span>
+<span class="sd">    it just stops recording it.</span>
+
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="_EnumRegistry.__missing__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema._EnumRegistry.__missing__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__missing__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">()</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="EnumMeta">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_ET</span><span class="p">]):</span>
@@ -1434,7 +1471,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'DefaultDict[_ET, Type[EnumSchema]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Mapping of enumeration numbers to schemas."""</span>
+<span class="w">        </span><span class="sd">"""Mapping of enumeration numbers to schemas.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            The returned mapping is a :class:`_EnumRegistry`, not a plain</span>
+<span class="sd">            :class:`collections.defaultdict`: indexing it with an</span>
+<span class="sd">            unregistered ``code`` still returns :attr:`EnumSchema.__default__`'s</span>
+<span class="sd">            schema, but does **not** insert that code. See :class:`_EnumRegistry`</span>
+<span class="sd">            for why that distinction matters.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span></div>
 
 
@@ -1502,6 +1548,12 @@
 <span class="sd">            This property is also available as a class</span>
 <span class="sd">            attribute.</span>
 
+<span class="sd">        Important:</span>
+<span class="sd">            See :attr:`EnumMeta.registry`: the returned mapping is a</span>
+<span class="sd">            :class:`_EnumRegistry`, so looking up an unregistered ``code``</span>
+<span class="sd">            returns the default schema without recording ``code`` as if it</span>
+<span class="sd">            had been registered.</span>
+
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__enum__</span>
 
@@ -1522,16 +1574,32 @@
 
 <span class="sd">        Notes:</span>
 <span class="sd">            If :attr:`__enum__` is not yet defined at function call,</span>
-<span class="sd">            it will automatically be defined as a :class:`collections.defaultdict`</span>
+<span class="sd">            it will automatically be defined as a :class:`_EnumRegistry`</span>
 <span class="sd">            object, with the default value set to :attr:`__default__`.</span>
 
 <span class="sd">            If intended to customise the :attr:`__enum__` mapping,</span>
 <span class="sd">            it is possible to override the :meth:`__init_subclass__` method and</span>
-<span class="sd">            define :attr:`__enum__` manually.</span>
+<span class="sd">            define :attr:`__enum__` manually. Such a manual definition may use</span>
+<span class="sd">            a plain :class:`collections.defaultdict` -- e.g. to seed a</span>
+<span class="sd">            namespaced or nested mapping such as</span>
+<span class="sd">            :class:`pcapkit.protocols.schema.misc.pcapng.Option`'s -- so it is</span>
+<span class="sd">            swapped for the retention-safe :class:`_EnumRegistry` below, before</span>
+<span class="sd">            anything else can hold a reference to the original object.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__enum__'</span><span class="p">):</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">'__enum__'</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__enum__'</span><span class="p">],</span> <span class="n">_EnumRegistry</span><span class="p">):</span>
+            <span class="c1"># ``cls`` set its own ``__enum__`` in the class body, as a plain</span>
+            <span class="c1"># ``collections.defaultdict`` -- swap it for the retention-safe</span>
+            <span class="c1"># variant now, while ``cls`` is still being constructed and no</span>
+            <span class="c1"># external code has had a chance to capture a reference to the</span>
+            <span class="c1"># original dict. Every later access, through :attr:`registry` or</span>
+            <span class="c1"># otherwise, then sees the same safe object -- so identity across</span>
+            <span class="c1"># repeated ``.registry`` reads (see ``EnumMeta.registry``) is</span>
+            <span class="c1"># preserved, and nothing but the retention behaviour changes.</span>
+            <span class="n">manual</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__enum__'</span><span class="p">]</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">manual</span><span class="p">,</span> <span class="s1">'default_factory'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">manual</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>

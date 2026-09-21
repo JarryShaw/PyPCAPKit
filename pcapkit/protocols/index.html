@@ -987,6 +987,13 @@ by default is a <code class="docutils literal notranslate"><span class="pre">lam
 <p>This property is also available as a class
 attribute.</p>
 </div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>See <code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code>: the returned mapping is a
+<a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a>, so looking up an unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code>
+returns the default schema without recording <code class="docutils literal notranslate"><span class="pre">code</span></code> as if it
+had been registered.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1023,11 +1030,16 @@ not given, the subclass will not be registered.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>If <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> is not yet defined at function call,
-it will automatically be defined as a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
+it will automatically be defined as a <a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a>
 object, with the default value set to <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a>.</p>
 <p>If intended to customise the <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping,
 it is possible to override the <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> method and
-define <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually.</p>
+define <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually. Such a manual definition may use
+a plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> – e.g. to seed a
+namespaced or nested mapping such as
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option" title="pcapkit.protocols.schema.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.Option</span></code></a>’s – so it is
+swapped for the retention-safe <a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> below, before
+anything else can hold a reference to the original object.</p>
 </div>
 </dd></dl>
 
@@ -1134,6 +1146,44 @@ cost as well as caching already generated attributes.</p>
 proxy (similar to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#property" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">property</span></code></a>, but on class variables) to the
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.__enum__</span></code></a> mapping.</p></li>
 </ul>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema._EnumRegistry">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.schema.</span></span><span class="sig-name descname"><span class="pre">_EnumRegistry</span></span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#_EnumRegistry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaultdict</span></code></a></p>
+<p>A registry <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> that never inserts a miss.</p>
+<p><a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.registry" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumSchema.registry</span></code></a> (and its class-level twin,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">EnumMeta.registry</span></code>) is read with a bare <code class="docutils literal notranslate"><span class="pre">registry[code]</span></code> at dozens
+of call sites across the schema layer, e.g. <code class="docutils literal notranslate"><span class="pre">Option.registry[type]</span></code>. A
+plain <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> inserts whatever
+<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict.default_factory" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default_factory</span></code></a> returns the <em>first time</em>
+an unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> is looked up – and since the registry lives on
+the <em>class</em>, that insertion is permanent and shared by every instance of
+every subclass in the process. Parsing one packet carrying an unrecognised
+code is therefore enough to grow the registry for the remainder of the
+process, and to make a later, entirely legitimate
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumSchema.register()</span></code></a> call report an overwrite that never happened.</p>
+<p>This is the schema-layer instance of the defect <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.</span>&#160;&#160;&#160; <span class="pre">_lookup_registry</span></code>
+fixed for the protocol-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in GitHub issues #421 and
+#425/#428; see GitHub issue #555. The fallback itself is deliberate – it
+is how an unknown option, chunk or block falls back to its
+<code class="docutils literal notranslate"><span class="pre">Unknown*</span></code>/<code class="docutils literal notranslate"><span class="pre">Unassigned*</span></code> schema – so this subclass keeps returning it,
+it just stops recording it.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema._EnumRegistry.__missing__">
+<span class="sig-name descname"><span class="pre">__missing__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#_EnumRegistry.__missing__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema._EnumRegistry.__missing__" title="Link to this definition">¶</a></dt>
+<dd><p>__missing__(key) # Called by __getitem__ for missing key; pseudo-code:
+if self.default_factory is None: raise KeyError((key,))
+self[key] = value = self.default_factory()
+return value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
