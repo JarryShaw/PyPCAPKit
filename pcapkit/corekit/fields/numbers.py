@@ -131,6 +131,12 @@ class NumberField(Field[int], Generic[_T]):
         This method will return a new instance of :class:`NumberField` instead of
         updating the current instance.
 
+        Notes:
+            Rebuilding the template here is what applies a callable ``length``,
+            and :meth:`build_template` recomputes ``self._need_process`` as it
+            goes, so the flag and the template always describe the same width.
+            They did not always: see GitHub issue #591.
+
         """
         new_self = super().__call__(packet)
 
@@ -154,18 +160,40 @@ class NumberField(Field[int], Generic[_T]):
         Returns:
             Template for field.
 
+        Notes:
+            ``self._need_process`` is **assigned** here rather than only ever
+            raised, so that it always describes the ``length`` this template
+            was built for. It used to be
+            set :data:`True` in the fall-through branch and never put back,
+            which made it a latch: a callable ``length`` is a placeholder of
+            ``-1`` at construction, ``-1`` takes the fall-through branch, and
+            the flag then survived the rebuild in :meth:`__call__` that
+            resolved the real width. :meth:`pre_process` consequently handed
+            :obj:`bytes` to a template that had become ``>Q`` -- or ``>I``,
+            ``>H``, ``>B`` -- and :func:`struct.pack` refused it. See GitHub
+            issue #591.
+
+            Assigning it is what tells a placeholder apart from a width that
+            genuinely needs byte packing, without having to remember that a
+            placeholder was ever in play: the answer for ``-1`` is
+            :data:`True`, the answer for ``8`` is :data:`False`, and whichever
+            width is in force now is the one that decides. A callable
+            resolving to, say, ``3`` still takes the fall-through branch and
+            still gets :data:`True`, because for ``3`` that is the correct
+            answer rather than a leftover one.
+
         """
         if length == 8:       # unpack to 8-byte integer (long long)
-            struct_fmt = 'q' if signed else 'Q'
+            struct_fmt, need_process = 'q' if signed else 'Q', False
         elif length == 4:     # unpack to 4-byte integer (int / long)
-            struct_fmt = 'i' if signed else 'I'
+            struct_fmt, need_process = 'i' if signed else 'I', False
         elif length == 2:     # unpack to 2-byte integer (short)
-            struct_fmt = 'h' if signed else 'H'
+            struct_fmt, need_process = 'h' if signed else 'H', False
         elif length == 1:     # unpack to 1-byte integer (char)
-            struct_fmt = 'b' if signed else 'B'
+            struct_fmt, need_process = 'b' if signed else 'B', False
         else:                 # do not unpack
-            struct_fmt = f'{length}s'
-            self._need_process = True
+            struct_fmt, need_process = f'{length}s', True
+        self._need_process = need_process
         return struct_fmt
 
     def pre_process(self, value: 'int', packet: 'dict[str, Any]') -> 'int | bytes':  # pylint: disable=unused-argument
@@ -187,20 +215,29 @@ class NumberField(Field[int], Generic[_T]):
             its signed range afterwards, so that e.g. a PCAP-NG section length
             of ``-1`` (section length not specified) can be written out.
 
+            A field packed without having been resolved -- so with ``_length``
+            still negative -- has its width derived from the value instead, and
+            that rebuild can land on a width :func:`struct` has a native
+            integer code for. The flag is therefore consulted **after** the
+            rebuild rather than before it, since deciding first and rebuilding
+            second is how the template and the value being returned came to
+            disagree in the first place. C.f. #591.
+
         """
         value = value & self._bit_mask
         if self._signed and value > self._bit_mask >> 1:
             value -= self._bit_mask + 1
-        if not self._need_process:
-            return value
 
-        if self._length < 0:
+        if self._need_process and self._length < 0:
             self._length = math.ceil(value.bit_length() // 8)
 
             endian = '>' if self._byteorder == 'big' else '<'
             struct_fmt = self.build_template(self._length, self._signed)
 
             self._template = f'{endian}{struct_fmt}'
+
+        if not self._need_process:
+            return value
 
         return value.to_bytes(
             self._length, self._byteorder, signed=self._signed
