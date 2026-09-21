@@ -1257,6 +1257,71 @@ class TCPUDPUnitTests(unittest.TestCase):
                    if code == Option.Maximum_Segment_Size)
         self.assertEqual(mss.mss, 1460)
 
+    def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
+        """A capture cut short mid-option is tolerated, not just mid-header. C.f. #431, #572.
+
+        :meth:`test_an_option_area_longer_than_the_segment_still_parses` above
+        pins the *empty*-tail half of the #431 accommodation: an option area
+        that runs out before it starts, so the type byte decodes as 0 and the
+        loop reads end-of-option-list. Nothing pinned the other half -- an
+        option that *does* start, declares more data than the capture actually
+        holds, and runs out partway through, the shape of a segment cut short
+        by the snapshot length rather than one with no options at all. A
+        candidate fix for #554 (PR #571) turned that into an unwrapped
+        ``FieldValueError`` while the rest of the suite stayed green, because
+        nothing exercised it.
+
+        The segment below sets a data offset of 7 -- 8 octets of option area
+        -- for an unassigned option kind (``0x4f``) declaring ``length=12``,
+        which asks
+        :class:`~pcapkit.protocols.schema.transport.tcp.UnassignedOption`'s
+        ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
+        10 octets here) for more than the 6 octets actually behind it.
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        left-pads the short read with zero octets rather than raising, so the
+        option parses with its declared ``length`` intact and a ``data`` value
+        of four zero octets followed by the six real ones. That is reachable
+        here because :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` sizes this
+        option's schema by what it actually consumed (8 octets) rather than by
+        its self-reported ``length``, so the separate ``TCP: invalid format``
+        threshold in :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
+        never sees the shortfall -- unlike IPv4's equivalent check, which sums
+        the *declared* lengths instead and does see it (see
+        ``IPv4UnitTests.test_a_truncated_option_still_parses_its_declared_length``).
+        ``length=32`` (30 octets of data wanted, still only 6 available) is
+        checked alongside 12, since the fix under discussion would reject both
+        identically.
+
+        """
+        import struct
+
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.transport.tcp import TCP
+        from tests._support import time_limit
+
+        def segment(data_offset: 'int', options: 'bytes') -> 'bytes':
+            return struct.pack('!HHIIBBHHH', 1, 2, 0, 0, data_offset << 4,
+                               0x10, 0, 0, 0) + options
+
+        custom = Option.get(0x4f)
+        trailing = bytes([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])
+        for declared_length, zeroes in ((12, 4), (32, 24)):
+            with self.subTest(declared_length=declared_length):
+                raw = segment(7, bytes([custom, declared_length]) + trailing)
+                with time_limit(5):
+                    proto = TCP(raw, len(raw))
+
+                self.assertEqual(proto.info.hdr_len, 28)
+                self.assertEqual(
+                    [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+                    [(custom, declared_length)],
+                )
+                unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
+                                   if code == custom)
+                self.assertEqual(unassigned.data, b'\x00' * zeroes + trailing)
+                self.assertEqual(bytes(proto.__header__), raw)
+
     def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
         """Parsing must not write to the shared ``TCP.__option__``.
 

@@ -2002,6 +2002,69 @@ class IPv4UnitTests(unittest.TestCase):
             [(OptionNumber.EOOL, 1)],
         )
 
+    def test_a_truncated_option_still_parses_its_declared_length(self) -> None:
+        """A capture cut short mid-option is tolerated, not just mid-header. C.f. #431, #572.
+
+        :meth:`test_an_option_area_longer_than_the_datagram_still_parses` above
+        pins the *empty*-tail half of the #431 accommodation: an option area
+        that runs out before it starts. Nothing pinned the other half -- an
+        option that *does* start, declares more data than the capture actually
+        holds, and runs out partway through, the shape of a datagram cut short
+        by the snapshot length rather than one with no options at all. A
+        candidate fix for #554 (PR #571) turns that into an unwrapped
+        ``FieldValueError`` while the rest of the suite stays green, because
+        nothing exercises it. See
+        ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
+        for the same case on TCP, where the shortfall is simpler to reach.
+
+        The header below sets ``ihl`` to 9 -- 16 declared octets of options --
+        for an unassigned option (code 31) declaring ``length=12``, which asks
+        :class:`~pcapkit.protocols.schema.internet.ipv4.UnassignedOption`'s
+        ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
+        10 octets here) for more than the 6 octets actually behind it, and
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        left-pads the short read with zero octets rather than raising -- the
+        same accommodation as the TCP case, reached the same way.
+
+        ``ihl`` has to declare *more* than the 8 octets actually present,
+        though, which the TCP case does not need. Unlike TCP,
+        :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options` sums
+        each option's self-*declared* ``length`` -- not what it actually
+        consumed -- and raises ``IPv4: invalid format`` if that sum exceeds
+        the declared option area; declaring exactly 8 would make the single
+        option's own ``length=12`` trip that check before the accommodation
+        under test is ever reached. Declaring 16 leaves headroom, at the cost
+        of a second effect: once the option loop's 16-octet budget outlives
+        the 8 octets its one real option consumed, the loop reads one further,
+        fully exhausted phantom option, decodes it as end-of-option-list (the
+        same mechanism the test above pins), and the #431 machinery in
+        :meth:`~pcapkit.corekit.fields.collections.OptionField.unpack`
+        rewinds and hands the same 8 octets to the schema a second time as
+        padding. That is why ``bytes(proto.__header__)`` does not round-trip
+        to ``raw`` here and is not asserted -- immaterial to what this test
+        pins, which is solely the ``data`` field's short-read reconstruction.
+
+        """
+        from pcapkit.const.ipv4.option_number import OptionNumber
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from tests._support import time_limit
+
+        custom = OptionNumber.get(31)
+        trailing = bytes([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])
+        raw = (bytes.fromhex('4900001c00010000400600000a0000010a000002') +
+               bytes([custom, 12]) + trailing)
+        with time_limit(5):
+            proto = IPv4(raw, len(raw))
+
+        self.assertEqual(proto.info.hdr_len, 36)
+        self.assertEqual(
+            [(code, opt.length) for code, opt in proto.info.options.items(multi=True)],
+            [(custom, 12), (OptionNumber.EOOL, 1)],
+        )
+        unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
+                           if code == custom)
+        self.assertEqual(unassigned.data, b'\x00\x00\x00\x00' + trailing)
+
 
 if __name__ == '__main__':
     unittest.main()
