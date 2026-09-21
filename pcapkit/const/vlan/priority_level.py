@@ -48,12 +48,19 @@ class PriorityLevel(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return PriorityLevel(key)
+            try:
+                return PriorityLevel(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return PriorityLevel(default)
         if key not in PriorityLevel._member_map_:  # pylint: disable=no-member
             return extend_enum(PriorityLevel, key, default)
         return PriorityLevel[key]  # type: ignore[misc]

@@ -33,12 +33,19 @@ class CGASec(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return CGASec(key)
+            try:
+                return CGASec(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return CGASec(default)
         if key not in CGASec._member_map_:  # pylint: disable=no-member
             return extend_enum(CGASec, key, default)
         return CGASec[key]  # type: ignore[misc]

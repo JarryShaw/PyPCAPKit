@@ -36,12 +36,19 @@ class TaggerID(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return TaggerID(key)
+            try:
+                return TaggerID(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return TaggerID(default)
         if key not in TaggerID._member_map_:  # pylint: disable=no-member
             return extend_enum(TaggerID, key, default)
         return TaggerID[key]  # type: ignore[misc]

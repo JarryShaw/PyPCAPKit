@@ -42,12 +42,19 @@ class ACKStatusCode(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return ACKStatusCode(key)
+            try:
+                return ACKStatusCode(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return ACKStatusCode(default)
         if key not in ACKStatusCode._member_map_:  # pylint: disable=no-member
             return extend_enum(ACKStatusCode, key, default)
         return ACKStatusCode[key]  # type: ignore[misc]

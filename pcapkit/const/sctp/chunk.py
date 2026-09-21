@@ -115,12 +115,19 @@ class Chunk(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Chunk(key)
+            try:
+                return Chunk(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Chunk(default)
         if key not in Chunk._member_map_:  # pylint: disable=no-member
             return extend_enum(Chunk, key, default)
         return Chunk[key]  # type: ignore[misc]

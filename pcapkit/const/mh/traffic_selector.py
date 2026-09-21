@@ -33,12 +33,19 @@ class TrafficSelector(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return TrafficSelector(key)
+            try:
+                return TrafficSelector(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return TrafficSelector(default)
         if key not in TrafficSelector._member_map_:  # pylint: disable=no-member
             return extend_enum(TrafficSelector, key, default)
         return TrafficSelector[key]  # type: ignore[misc]

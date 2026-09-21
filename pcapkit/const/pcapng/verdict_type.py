@@ -30,12 +30,19 @@ class VerdictType(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return VerdictType(key)
+            try:
+                return VerdictType(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return VerdictType(default)
         if key not in VerdictType._member_map_:  # pylint: disable=no-member
             return extend_enum(VerdictType, key, default)
         return VerdictType[key]  # type: ignore[misc]

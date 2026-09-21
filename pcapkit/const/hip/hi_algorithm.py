@@ -57,12 +57,19 @@ class HIAlgorithm(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return HIAlgorithm(key)
+            try:
+                return HIAlgorithm(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return HIAlgorithm(default)
         if key not in HIAlgorithm._member_map_:  # pylint: disable=no-member
             return extend_enum(HIAlgorithm, key, default)
         return HIAlgorithm[key]  # type: ignore[misc]

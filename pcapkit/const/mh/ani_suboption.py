@@ -48,12 +48,19 @@ class ANISuboption(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return ANISuboption(key)
+            try:
+                return ANISuboption(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return ANISuboption(default)
         if key not in ANISuboption._member_map_:  # pylint: disable=no-member
             return extend_enum(ANISuboption, key, default)
         return ANISuboption[key]  # type: ignore[misc]

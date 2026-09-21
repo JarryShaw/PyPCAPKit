@@ -252,12 +252,19 @@ class StatusCode(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return StatusCode(key)
+            try:
+                return StatusCode(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return StatusCode(default)
         if key not in StatusCode._member_map_:  # pylint: disable=no-member
             extend_enum(StatusCode, key, default)
         return StatusCode[key]  # type: ignore[misc]

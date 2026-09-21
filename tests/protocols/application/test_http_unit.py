@@ -375,6 +375,126 @@ class HTTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_http_header(b'BAD nope nope\r\nHost: example')
 
+    def test_method_get_is_case_insensitive(self) -> None:
+        """``Method.get`` tested the raw key and registered the upper-cased one,
+        so a mixed-case method raised ``TypeError`` -- #583, item 1.
+
+        The same mismatch as #582 in :mod:`pcapkit.const.ftp.command`. Resolving
+        to the existing member matters beyond not crashing: a duplicate
+        registered alongside ``GET`` would carry neither its ``safe`` nor its
+        ``idempotent`` attribute.
+        """
+        from pcapkit.const.http.method import Method
+
+        for key in ('GET', 'Get', 'get', 'gEt'):
+            with self.subTest(key=key):
+                self.assertIs(Method.get(key), Method.GET)
+
+        self.assertIs(Method('Get'), Method.GET)
+        self.assertTrue(Method.get('Get').safe)
+        self.assertEqual([name for name in Method._member_map_
+                          if name.upper() == 'GET'], ['GET'])
+
+        unknown = Method.get('frob')
+        self.assertEqual(unknown._name_, 'FROB')
+        self.assertIs(Method.get('FROB'), unknown)
+
+    def test_httpv1_method_regex_is_anchored(self) -> None:
+        """``_RE_METHOD`` was unanchored and :func:`re.match` anchors only at the
+        start, so it prefix-matched ``b'Get'`` down to ``b'G'`` -- #583, item 2.
+
+        Method tokens are case-sensitive per :rfc:`9110#section-9.1`, so ``Get``
+        is not ``GET`` and must not be accepted as one.
+        """
+        import re
+
+        from pcapkit.protocols.application.httpv1 import _RE_METHOD
+
+        for probe, expected in ((b'GET', b'GET'),
+                                (b'POST', b'POST'),
+                                (b'BASELINE-CONTROL', b'BASELINE-CONTROL'),
+                                (b'Get', None),
+                                (b'get', None),
+                                (b'GET ', None)):
+            with self.subTest(probe=probe):
+                match = re.match(_RE_METHOD, probe)
+                self.assertEqual(match.group('method') if match else None, expected)
+
+    def test_httpv1_read_header_uses_the_captured_method(self) -> None:
+        """``httpv1.py`` handed the whole ``para1`` to ``Method.get`` rather than
+        the captured group, so a prefix match let a bad token through -- #583.
+
+        Both halves are asserted together because either alone still gives a
+        wrong answer: normalising ``Method.get`` alone would parse ``b'Get'`` as
+        ``GET`` off a one-character match, and passing the captured group alone
+        would parse it as a method named ``G``.
+        """
+        from pcapkit.const.http.method import Method
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(HTTPv1)
+
+        header, _ = proto._read_http_header(b'GET /index.html HTTP/1.1\r\nHost: example.test')
+        self.assertIs(header.method, Method.GET)
+        self.assertEqual(header.uri, '/index.html')
+
+        # A mixed- or lower-case token is not a registered method and no longer
+        # masquerades as a prefix of one; it is a malformed request line.
+        for raw in (b'Get / HTTP/1.1\r\nHost: example.test',
+                    b'get / HTTP/1.1\r\nHost: example.test'):
+            with self.subTest(raw=raw):
+                with self.assertRaises(ProtocolError):
+                    proto._read_http_header(raw)
+
+        # No case-variant member was registered on the way through.
+        self.assertEqual([name for name in Method._member_map_
+                          if name.upper() == 'GET'], ['GET'])
+
+        # The response path is untouched.
+        response, _ = proto._read_http_header(b'HTTP/1.1 404 Not Found\r\nServer: example')
+        self.assertEqual(response.status, 404)
+
+    def test_httpv1_status_regex_is_anchored(self) -> None:
+        """``_RE_STATUS`` carried the same unanchored-prefix defect as
+        ``_RE_METHOD``, and it escaped as the wrong exception type.
+
+        Found while auditing ``_RE_METHOD``'s siblings for #583. The pattern is
+        only a guard -- the value comes from ``int(para2)`` on the *raw* token --
+        so a prefix match let a malformed status past the guard and then out of
+        ``int()`` as a bare ``ValueError``, where ``_read_http_header`` documents
+        ``ProtocolError``. :rfc:`9112#section-4` gives ``status-code = 3DIGIT``,
+        exactly three, so anchoring is what the grammar says.
+
+        The citation is RFC 9112, not RFC 9110: the production belongs to
+        HTTP/1.1's ``status-line = HTTP-version SP status-code SP
+        [ reason-phrase ]``, and :rfc:`9110#section-15` covers what the codes
+        *mean* plus the IANA registry. RFC 9112 section 4 says so itself --
+        "HTTP's core status codes are defined in Section 15 of [HTTP]". A
+        cross-review caught the first draft citing 9110 for the grammar.
+
+        Measured before the fix:
+        ``b'HTTP/1.1 200x OK'`` -> ``ValueError: invalid literal for int() with
+        base 10: b'200x'``, and ``b'HTTP/1.1 2000 OK'`` -> ``ValueError: 2000 is
+        not a valid StatusCode``.
+        """
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(HTTPv1)
+
+        good, _ = proto._read_http_header(b'HTTP/1.1 200 OK\r\nServer: example')
+        self.assertEqual(good.status, 200)
+
+        for raw in (b'HTTP/1.1 200x OK\r\nServer: example',
+                    b'HTTP/1.1 2000 OK\r\nServer: example',
+                    b'HTTP/1.1 20 OK\r\nServer: example'):
+            with self.subTest(raw=raw):
+                # ProtocolError, not ValueError: a malformed start line is a
+                # protocol error, which is what the method documents.
+                with self.assertRaises(ProtocolError):
+                    proto._read_http_header(raw)
+
     def test_httpv1_response_construction_and_missing_request_uri_error(self) -> None:
         from pcapkit.const.http.status_code import StatusCode
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
