@@ -354,6 +354,55 @@ pull requests between #326 and #509.
   ``FieldValueError`` instead of padding for it; the option and list loops'
   own tolerance for a short read past a truncated area (#431) is far under
   that ceiling and is untouched (#554).
+* **Fixed** -- that ceiling bounds one field, and a packet holds many, so the
+  *sum* of a parse's zero padding was still unbounded: a declared length just
+  under 262144 octets is honoured however often it is declared. 200 minimal
+  PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each declaring a
+  ``secrets_length`` of 262,142 against two supplied octets -- retained 50.0 MiB,
+  an amplification of 10,922x per block, with the per-field guard never firing
+  because every individual field was within it. ``FieldBase.unpack`` now keeps a
+  running per-context ledger of octets supplied against octets synthesised, and
+  raises ``FieldValueError`` once the total of shortfalls *past 65,536 octets*
+  passes ``262144 + 16 * supplied``. The same 200 blocks now retain 0.2 MiB,
+  54.6x rather than 10,922x.
+  A shortfall of 65,536 octets or fewer is padded unconditionally and charged to
+  nothing, and that band is the load-bearing part rather than a concession. 65,536
+  is the whole span of a 16-bit wire length -- how an IP header, an IPv6 payload,
+  a TCP or IPv4 option and a PCAP-NG option all declare their size -- so no
+  shortfall a capture cut short by its snapshot length can produce is subject to
+  the budget at all, on the first frame or the ten-thousandth. Without that band,
+  a running budget alone made the *same* legitimate 54-octet frame declaring an
+  IPv4 total length of 65,535 parse to one result on 37 of 40 identical calls and
+  to another on calls 26, 33 and 39, since whether it fit depended on what had
+  been parsed before it; a guard whose answer moves with history is worse than the
+  amplification it bounds. The worst legitimate single shortfall measured anywhere
+  was 65,495 octets, from exactly that frame, and the worst from a truncated
+  PCAP-NG option was 64,750.
+  **What this does not close, measured rather than assumed**: the 16-bit band is
+  deliberately untouched, so a length declared by a 16-bit wire field can still be
+  repeated without limit. A crafted 80,048-octet PCAP-NG file of 2,000 Enhanced
+  Packet Blocks, each carrying one option declaring 65,535 octets against four
+  real ones, parses end to end through ``Extractor(store=True)`` and retains
+  125.00 MiB of synthesised zeros for 216.88 MiB of RSS -- 1,637x its own size,
+  linear in the block count -- both before this change and after it. That is not
+  an oversight in the bound: parsing a bare 40-octet IPv4 header declaring a total
+  length of 65,535, which is what a legitimate capture of offload-sized segments
+  truncated to its snapshot length looks like, amplifies by **the same 1,637x**.
+  The two are not separable by any budget at this layer. Separating them needs the
+  frame's own ``incl_len``/``orig_len`` -- a crafted block claims nothing was
+  truncated while declaring more than it holds, and a snapshot-truncated frame
+  says so on the wire -- which is knowable at the protocol layer and not here.
+  Nor is the budget scoped per file: nothing in the package resets the ledger, so
+  as shipped the bound is over everything a context has parsed rather than over
+  one ``Extractor`` run. That is still proportionate to the octets that context
+  was genuinely given, and tightening it is a one-line change at whichever layer
+  owns a run.
+  Verified against every capture in ``examples/captures/``, every one of them
+  truncated at some 8,700 offsets, 190 snapshot-length rewrites, and the synthetic
+  offload shapes above. The comparison is of the instrumented padding and
+  supplied-octet tallies *and* of each parse's outcome -- frame count, or
+  exception type and message -- so a cut that changed from parsing to crashing
+  would show rather than be swallowed; every one is identical to before (#573).
 * **Fixed** -- ``TCP._make_mptcp_addaddr`` could not build an ``ADD_ADDR``
   option end to end: its ``kind=``/``length=`` arguments were rejected with
   ``UnknownFieldWarning`` and silently dropped, and ``.pack()`` then raised
