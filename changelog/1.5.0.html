@@ -850,6 +850,29 @@ without its IV; and IPv6-Route’s <code class="docutils literal notranslate"><s
 still the concatenated <code class="docutils literal notranslate"><span class="pre">bytes</span></code> a parse leaves it as, and raised slicing the
 <code class="docutils literal notranslate"><span class="pre">list[bytes]</span></code> a <code class="docutils literal notranslate"><span class="pre">make</span></code>-built multi-address header actually holds there
 (#556).</p></li>
+<li><p><strong>Fixed</strong> – two more defects #541 exposed rather than caused, both since it let
+construction reach code that had never run before. <code class="docutils literal notranslate"><span class="pre">MPTCP.subtype</span></code> was still
+<code class="docutils literal notranslate"><span class="pre">typing.TYPE_CHECKING</span></code>-only, an annotation rather than a field, so
+<code class="docutils literal notranslate"><span class="pre">TCP(options=[(Enum_Option.Multipath_TCP,</span> <span class="pre">...)])</span></code> raised
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">...</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'subtype'</span></code> for every subtype but
+<code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code>: the convenience constructor builds a schema in memory and reads it
+straight back through <code class="docutils literal notranslate"><span class="pre">_read_mptcp_*</span></code> with no byte round trip, so
+<code class="docutils literal notranslate"><span class="pre">_MPTCP.post_process</span></code> – the only code that ever set <code class="docutils literal notranslate"><span class="pre">subtype</span></code> – never ran.
+Fixed on the construction path (<code class="docutils literal notranslate"><span class="pre">TCP._make_mode_mp</span></code>) rather than by adding a
+third real field the way <code class="docutils literal notranslate"><span class="pre">kind</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> got in #541: unlike those two,
+<code class="docutils literal notranslate"><span class="pre">subtype</span></code> is already packed as 4 bits of each subtype’s own <code class="docutils literal notranslate"><span class="pre">test</span></code>
+bitfield, and a second, independent field for the same bits would either
+double-encode them or need a “derive, don’t pack” field kind this library does
+not have (#566). Separately, <code class="docutils literal notranslate"><span class="pre">_make_mptcp_capable</span></code> wrote
+<code class="docutils literal notranslate"><span class="pre">length=20</span> <span class="pre">if</span> <span class="pre">rkey</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">32</span></code> where <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives 12 and
+20, and <code class="docutils literal notranslate"><span class="pre">MPTCPCapable.rkey</span></code>’s own condition (<code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">!=</span> <span class="pre">32</span></code>) dropped
+the receiver’s key for exactly the length the maker used to mean “key present”
+– so a spec-correct, key-absent MP_CAPABLE could not be built at all, and a
+key-present one silently lost its key on the wire. Both, and the matching guard
+in <code class="docutils literal notranslate"><span class="pre">_read_mptcp_capable</span></code>, now agree on 12/20. <strong>This changes MP_CAPABLE’s
+packed output</strong>: a 20-octet, key-present option built or parsed under the old
+code becomes 12 octets with no key, or 20 octets with the key actually present,
+depending on which the caller meant (#567).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

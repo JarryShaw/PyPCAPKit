@@ -1213,6 +1213,23 @@
     <span class="c1">#: MPTCP length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
 
+    <span class="c1"># NOTE: ``subtype`` stays an annotation rather than becoming a third real</span>
+    <span class="c1"># field alongside ``kind``/``length`` above -- deliberately, and the</span>
+    <span class="c1"># difference from those two is why. ``kind`` and ``length`` are each the</span>
+    <span class="c1"># *sole* source of their own octet: nothing else in the schema packs them,</span>
+    <span class="c1"># so declaring them as real fields was the only way to get them onto the</span>
+    <span class="c1"># wire at all. ``subtype`` is not like that: every concrete subclass</span>
+    <span class="c1"># already encodes it as 4 bits of its own ``test`` :class:`BitField` (e.g.</span>
+    <span class="c1"># ``MPTCPCapable.test['subtype']``), which is what actually gets packed.</span>
+    <span class="c1"># A real ``Field`` for ``subtype`` on top of that would either pack the</span>
+    <span class="c1"># same 4 bits twice under two names, or need a "derive, don't pack" kind</span>
+    <span class="c1"># of field that this library's :mod:`~pcapkit.corekit.fields` does not</span>
+    <span class="c1"># have. So this attribute is populated by the *construction* path instead</span>
+    <span class="c1"># -- :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp` sets it</span>
+    <span class="c1"># right after building the subtype-specific schema, mirroring exactly what</span>
+    <span class="c1"># :meth:`_MPTCP.post_process` already does for real unpacking. C.f. #566,</span>
+    <span class="c1"># the third and last ``TYPE_CHECKING``-only attribute this class had; the</span>
+    <span class="c1"># other two (``kind``, ``length``) were fixed in #541.</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: MPTCP subtype.</span>
         <span class="n">subtype</span><span class="p">:</span> <span class="s1">'Enum_MPTCPOption'</span></div>
@@ -1258,9 +1275,14 @@
     <span class="c1">#: Option sender's key.</span>
     <span class="n">skey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
     <span class="c1">#: Option receiver's key.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without this key</span>
+    <span class="c1">#: and 20 octets with it, so the field is present only for the latter --</span>
+    <span class="c1">#: not, as it read until #567, for every length *except* 32, which is not</span>
+    <span class="c1">#: an MP_CAPABLE length either RFC form uses.</span>
     <span class="n">rkey</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt64Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">20</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

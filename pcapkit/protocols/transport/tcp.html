@@ -1681,7 +1681,7 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If length is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">20</span></code> or <code class="docutils literal notranslate"><span class="pre">32</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If length is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">12</span></code> or <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3435,6 +3435,10 @@ then be a method that can parse the option by itself.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey">
 <span class="sig-name descname"><span class="pre">rkey</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">rkey&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey" title="Link to this definition">¶</a></dt>
 <dd><p>Option receiver’s key.</p>
+<p><span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives MP_CAPABLE as 12 octets without this key
+and 20 octets with it, so the field is present only for the latter –
+not, as it read until #567, for every length <em>except</em> 32, which is not
+an MP_CAPABLE length either RFC form uses.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4799,7 +4803,7 @@ instance.</p></li>
 <aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p>The NS bit is read off the wire but is <strong>not</strong> surfaced in
-<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Flags" title="pcapkit.protocols.data.transport.tcp.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a>. <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3540.html"><strong>RFC 3540</strong></a> was
+<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Flags" title="pcapkit.protocols.data.transport.tcp.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a>. <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3540.html"><strong>RFC 3540</strong></a> was
 reclassified as Historic, so the field is left unexposed; the row is kept
 because the bit is part of the header as the RFC defines it.</p>
 </aside>
