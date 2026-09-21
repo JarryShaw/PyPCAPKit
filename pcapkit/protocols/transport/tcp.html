@@ -1713,7 +1713,7 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss">
 <span class="sig-name descname"><span class="pre">_read_mptcp_dss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_dss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss" title="Link to this definition">¶</a></dt>
 <dd><p>Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">DSS</span></code> [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">DSS</span></code> [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.3, figure 9]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+----------------------+
@@ -1788,7 +1788,7 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">
 <span class="sig-name descname"><span class="pre">_read_mptcp_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove" title="Link to this definition">¶</a></dt>
 <dd><p>Read Remove Address option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.4.2, figure 13]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-------+---------------+
@@ -1814,13 +1814,29 @@ enumeration:</p>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is smaller than <strong>3</strong>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">Length</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">+</span> <span class="pre">n</span></code>, per the figure above: the 3 is <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) +
+<code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype-and-reserved (1), and each of the <em>n</em> Address
+IDs is one further octet.
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id" title="pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">addr_id</span></code></a>
+sizes its list as <code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">-</span> <span class="pre">3</span></code> from exactly this, which is why
+<code class="docutils literal notranslate"><span class="pre">_make_mptcp_remove</span></code>’s constant <code class="docutils literal notranslate"><span class="pre">length=4</span></code> (fixed in #576) also
+mis-sized the parse rather than only the pack.</p>
+<p>The guard permits <code class="docutils literal notranslate"><span class="pre">3</span></code>, i.e. <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">0</span></code>, which the figure does not
+describe – it shows one Address ID plus “n-1 Address IDs, if
+required”. Left as it stands: tightening it to reject an empty list is
+a behaviour change beyond #576’s scope, and a zero-ID REMOVE_ADDR now
+at least round-trips honestly instead of declaring an octet it never
+packed.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">
 <span class="sig-name descname"><span class="pre">_read_mptcp_prio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_prio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio" title="Link to this definition">¶</a></dt>
 <dd><p>Read Change Subflow Priority option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [RFC 6824]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>, section 3.3.8, figure 11]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                      1                   2                   3
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+--------------+
@@ -1842,16 +1858,34 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is smaller than <strong>3</strong>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is neither <strong>3</strong> nor <strong>4</strong>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The figure above is <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>’s, deliberately, because it is the one
+with an Address ID in it and this method accepts both forms.
+<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3.8 figure 11 draws MP_PRIO as <strong>3</strong> octets and
+nothing more – <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) + subtype/reserved/<code class="docutils literal notranslate"><span class="pre">B</span></code>
+(1) – since section 5 of that document “specifies the removal of the
+AddrID field [RFC6824] in the MP_PRIO option”, closing a theoretical
+attack in which a subflow could be forced into backup mode. The
+4-octet <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a> form is therefore legacy, and the guard stays
+permissive so that traffic carrying it still parses.</p>
+<p><code class="docutils literal notranslate"><span class="pre">_make_mptcp_prio</span></code> declared a constant <code class="docutils literal notranslate"><span class="pre">length=4</span></code> until #576,
+which meant the construction side could only ever emit the legacy
+form – and emitted it with an all-zero phantom Address ID when the
+caller supplied none, because
+<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPPriority" title="pcapkit.protocols.schema.transport.tcp.MPTCPPriority"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPPriority</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">addr_id</span></code> is conditional on that very length being 4.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">
 <span class="sig-name descname"><span class="pre">_read_mptcp_fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_fail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail" title="Link to this definition">¶</a></dt>
 <dd><p>Read Fallback option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+----------------------+
@@ -1886,7 +1920,7 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">
 <span class="sig-name descname"><span class="pre">_read_mptcp_fastclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_mptcp_fastclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose" title="Link to this definition">¶</a></dt>
 <dd><p>Read Fast Close option.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [RFC 6824]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.5, figure 14]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----------------------+
@@ -1912,16 +1946,33 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is <strong>NOT</strong> 16.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the length is <strong>NOT</strong> 12.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The figure above is <span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14, and the option
+it draws is <strong>12</strong> octets: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) +
+subtype-and-reserved (2, being 4 subtype bits and 12 reserved) + the
+option receiver’s key (64 bits, 8). Note that section 3.5 is Fast
+Close; section 3.7 is Fallback (MP_FAIL), which #576’s own text cited
+here by mistake.</p>
+<p>Three sites disagreed on this number before #576, all three now
+reading 12: this guard required <code class="docutils literal notranslate"><span class="pre">16</span></code>, an octet count nothing in the
+RFC produces for MP_FASTCLOSE; <code class="docutils literal notranslate"><span class="pre">_make_mptcp_fastclose</span></code> declared the
+correct 12 but the schema packed only <strong>11</strong>, missing the reserved
+octet entirely. The net effect was that constructing an MP_FASTCLOSE
+through <a class="reference internal" href="#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> raised <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> from this very guard –
+the maker’s <em>correct</em> length failing the parser’s wrong check – which
+is why <code class="docutils literal notranslate"><span class="pre">tcp-mptcp/MP_FASTCLOSE</span></code> sat in <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_syn">
 <span class="sig-name descname"><span class="pre">_read_join_syn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_syn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_syn" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Initial SYN.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 5]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+---------------+
@@ -1956,7 +2007,7 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_synack">
 <span class="sig-name descname"><span class="pre">_read_join_synack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_synack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_synack" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Responding SYN/ACK.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 6]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----+-+---------------+
@@ -1984,16 +2035,31 @@ enumeration:</p>
 <dd class="field-odd"><p>Parsed option data.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If length is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If length is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The accepted length is <code class="docutils literal notranslate"><span class="pre">16</span></code>, which is what the figure above – and
+<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2 figure 6, which it reproduces – states, and
+what <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinSYNACK</span></code></a>
+actually packs and unpacks: <code class="docutils literal notranslate"><span class="pre">Kind</span></code> (1) + <code class="docutils literal notranslate"><span class="pre">Length</span></code> (1) +
+subtype/flags (1) + <code class="docutils literal notranslate"><span class="pre">Address</span> <span class="pre">ID</span></code> (1) + the truncated HMAC (8) + the
+random number (4).</p>
+<p>This guard required <code class="docutils literal notranslate"><span class="pre">20</span></code> until #576 – a value that appears in
+neither the figure nor the schema, and that contradicted this method’s
+own docstring. Together with <code class="docutils literal notranslate"><span class="pre">_make_join_synack</span></code>’s <code class="docutils literal notranslate"><span class="pre">length=12</span></code> it
+made the SYN/ACK form unusable in both directions at once: the maker
+could not produce a length this guard accepted, and a spec-correct
+16-octet option off the wire was rejected as an invalid format.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP._read_join_ack">
 <span class="sig-name descname"><span class="pre">_read_join_ack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#TCP._read_join_ack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP._read_join_ack" title="Link to this definition">¶</a></dt>
 <dd><p>Read Join Connection option for Third ACK.</p>
-<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]:</p>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>, section 3.2, figure 7]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +---------------+---------------+-------+-----------------------+
@@ -3435,7 +3501,7 @@ then be a method that can parse the option by itself.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey">
 <span class="sig-name descname"><span class="pre">rkey</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">rkey&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPCapable.rkey" title="Link to this definition">¶</a></dt>
 <dd><p>Option receiver’s key.</p>
-<p><span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives MP_CAPABLE as 12 octets without this key
+<p><span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives MP_CAPABLE as 12 octets without this key
 and 20 octets with it, so the field is present only for the latter –
 not, as it read until #567, for every length <em>except</em> 32, which is not
 an MP_CAPABLE length either RFC form uses.</p>
@@ -3556,14 +3622,20 @@ an MP_CAPABLE length either RFC form uses.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">ack&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">ack&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack" title="Link to this definition">¶</a></dt>
 <dd><p>Data ACK.</p>
+<p>4 octets when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">a</span></code> is set as well, absent otherwise –
+<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. Both the presence test and the width live
+in <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, whose note records what this field
+declared until #576 and why a narrower fix would not have packed.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn">
-<span class="sig-name descname"><span class="pre">dsn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">dsn&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dsn</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">dsn&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn" title="Link to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
+<p>4 octets when <code class="docutils literal notranslate"><span class="pre">M</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">m</span></code> is set as well, absent otherwise –
+<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. C.f. <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_dsn_selector()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3683,6 +3755,21 @@ an MP_CAPABLE length either RFC form uses.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.test">
 <span class="sig-name descname"><span class="pre">test</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype" title="pcapkit.protocols.schema.transport.tcp.MPTCPSubtype"><span class="pre">MPTCPSubtype</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;BitField</span> <span class="pre">test&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.test" title="Link to this definition">¶</a></dt>
 <dd><p>Subtype.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.reserved">
+<span class="sig-name descname"><span class="pre">reserved</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PaddingField</span> <span class="pre">reserved&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MPTCPFastclose.reserved" title="Link to this definition">¶</a></dt>
+<dd><p>Reserved.</p>
+<p><span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.5 figure 14 spends a whole 32-bit row on
+<code class="docutils literal notranslate"><span class="pre">Kind</span></code>/<code class="docutils literal notranslate"><span class="pre">Length</span></code>/<code class="docutils literal notranslate"><span class="pre">Subtype</span></code>/<code class="docutils literal notranslate"><span class="pre">(reserved)</span></code>, i.e. the subtype’s 4 bits
+are followed by <strong>12</strong> reserved bits, not 4 – so the subtype-and-reserved
+part is 2 octets and the option is 12 octets in total. Until #576 this
+field did not exist and <code class="docutils literal notranslate"><span class="pre">test</span></code> was the only octet between <code class="docutils literal notranslate"><span class="pre">length</span></code> and
+<code class="docutils literal notranslate"><span class="pre">key</span></code>, so the schema packed <strong>11</strong> octets against a <code class="docutils literal notranslate"><span class="pre">length</span></code> of 12.
+Declared the same way <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK" title="pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK"><code class="xref py py-class docutils literal notranslate"><span class="pre">MPTCPJoinACK</span></code></a> declares its own reserved
+octet, for the same reason: a wider <code class="docutils literal notranslate"><span class="pre">test</span></code> would make the reserved bits
+look like part of the subtype namespace.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4066,6 +4153,98 @@ instance.</p></li>
 </p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_dss_ack_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#mptcp_dss_ack_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="Link to this definition">¶</a></dt>
+<dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ack"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ack</span></code></a> field.</p>
+<p><span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data ACK as “4 or 8 octets,
+depending on flags”: present only when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, and 8 octets wide only
+when <code class="docutils literal notranslate"><span class="pre">a</span></code> is <em>also</em> set – “a = Data ACK is 8 octets (if not set, Data ACK
+is 4 octets)”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">A</span></code> is clear, a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a>
+instance – the field is absent from the wire.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">A</span></code> is set and <code class="docutils literal notranslate"><span class="pre">a</span></code> is set, a
+<a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field" title="pcapkit.corekit.fields.numbers.UInt64Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt64Field</span></code></a> instance.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">A</span></code> is set and <code class="docutils literal notranslate"><span class="pre">a</span></code> is clear, a
+<a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a> instance.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField" title="pcapkit.corekit.fields.misc.SwitchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SwitchField</span></code></a> selector
+rather than a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>
+wrapping <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">...)</span></code>, which is what it was
+until #576, for two independent reasons.</p>
+<p>The width lambda read <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['a']</span> <span class="pre">else</span> <span class="pre">0</span></code> – <strong>0</strong>, not 4 –
+so an unextended Data ACK packed no octets at all while the <code class="docutils literal notranslate"><span class="pre">length</span></code>
+octet still counted 4 for it. That is the defect #576 records: the option
+went onto the wire 4 (or 8, with <code class="docutils literal notranslate"><span class="pre">dsn</span></code> too) octets shorter than it
+declared, and the <code class="docutils literal notranslate"><span class="pre">ack</span></code> value the caller supplied was simply not
+present.</p>
+<p>Correcting the lambda to <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">else</span> <span class="pre">4</span></code> would not have worked,
+because <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> cannot pack
+a callable length at all: it calls <code class="docutils literal notranslate"><span class="pre">build_template</span></code> once at
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> with the placeholder length <code class="docutils literal notranslate"><span class="pre">-1</span></code>, which latches
+<code class="docutils literal notranslate"><span class="pre">_need_process</span> <span class="pre">=</span> <span class="pre">True</span></code>, and nothing clears that flag when
+<code class="docutils literal notranslate"><span class="pre">__call__</span></code> later resolves the real length and rebuilds the template as
+<code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>/<code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code>. <code class="docutils literal notranslate"><span class="pre">pre_process</span></code> then hands <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> bytes for
+an integer template and it raises <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span>
+<span class="pre">not</span> <span class="pre">an</span> <span class="pre">integer</span></code>. Measured on the 8-octet form, which the old lambda did
+reach: <code class="docutils literal notranslate"><span class="pre">_make_mptcp_dss(DSS,</span> <span class="pre">ack=1</span> <span class="pre">&lt;&lt;</span> <span class="pre">40)</span></code> raised exactly that. Fixing
+that belongs to <a class="reference internal" href="../../corekit/fields/numbers.html#module-pcapkit.corekit.fields.numbers" title="pcapkit.corekit.fields.numbers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code></a>; selecting between
+two fields that each fix <code class="docutils literal notranslate"><span class="pre">__template__</span></code> at class level sidesteps it
+entirely and is the pattern <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_add_address_selector()</span></code></a> already
+uses here.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_dss_dsn_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/transport/tcp.html#mptcp_dss_dsn_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_dsn_selector" title="Link to this definition">¶</a></dt>
+<dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dsn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dsn</span></code></a> field.</p>
+<p><span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9 gives the Data Sequence Number as “4 or 8
+octets, depending on flags”: present only when <code class="docutils literal notranslate"><span class="pre">M</span></code> is set, and 8 octets
+wide only when <code class="docutils literal notranslate"><span class="pre">m</span></code> is <em>also</em> set – “m = Data Sequence Number is 8 octets
+(if not set, DSN is 4 octets)”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase" title="pcapkit.corekit.fields.field.FieldBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldBase</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">M</span></code> is clear, a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a>
+instance – the field is absent from the wire.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">M</span></code> is set and <code class="docutils literal notranslate"><span class="pre">m</span></code> is set, a
+<a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt64Field" title="pcapkit.corekit.fields.numbers.UInt64Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt64Field</span></code></a> instance.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">M</span></code> is set and <code class="docutils literal notranslate"><span class="pre">m</span></code> is clear, a
+<a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.UInt32Field" title="pcapkit.corekit.fields.numbers.UInt32Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">UInt32Field</span></code></a> instance.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Identical in shape to <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, and it replaces the
+identical defect: <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['m']</span>
+<span class="pre">else</span> <span class="pre">0,</span> <span class="pre">...)</span></code>. See that function’s note for why the <code class="docutils literal notranslate"><span class="pre">0</span></code> was wrong and
+why a corrected lambda would not have packed either. C.f. #576.</p>
+</div>
 </dd></dl>
 
 </section>
@@ -4803,7 +4982,7 @@ instance.</p></li>
 <aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p>The NS bit is read off the wire but is <strong>not</strong> surfaced in
-<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Flags" title="pcapkit.protocols.data.transport.tcp.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a>. <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3540.html"><strong>RFC 3540</strong></a> was
+<a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Flags" title="pcapkit.protocols.data.transport.tcp.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a>. <span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3540.html"><strong>RFC 3540</strong></a> was
 reclassified as Historic, so the field is left unexposed; the row is kept
 because the bit is part of the header as the RFC defines it.</p>
 </aside>
