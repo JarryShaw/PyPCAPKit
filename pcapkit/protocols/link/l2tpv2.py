@@ -58,7 +58,7 @@ from pcapkit.protocols.data.link.l2tp import L2TP as Data_L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as Data_Flags
 from pcapkit.protocols.link.l2tp import L2TP
 from pcapkit.protocols.schema.link.l2tp import L2TP as Schema_L2TP
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -88,11 +88,20 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
     The protocol is dispatched from :attr:`UDP.__proto__
     <pcapkit.protocols.transport.udp.UDP.__proto__>` at port 1701.
 
+    Only the :rfc:`2661` framing is read: :meth:`read` refuses a datagram whose
+    version nibble is not ``2``, so a v3 datagram arriving on port 1701
+    (:rfc:`3931` §4.1.2 shares the port) degrades to
+    :class:`~pcapkit.protocols.misc.raw.Raw` instead of being reported as v2.
+
     Note:
         IANA protocol number 115 (``L2TP``) is deliberately left unbound. It
         references :rfc:`3931`, i.e. **L2TPv3**, whose session and control
         message headers are a different shape -- so the binding waits on an
-        ``L2TPv3`` class rather than on this one.
+        ``L2TPv3`` class rather than on this one. Binding *this* class there was
+        proposed in GitHub issue #548 and does not work: over IP the v3 session
+        header carries no version nibble at all, so this class cannot recognise
+        that the datagram is not its own. See
+        :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.
 
         As with :class:`~pcapkit.protocols.link.ospf.OSPF`, the class subclasses
         :class:`~pcapkit.protocols.link.link.Link` and so reports
@@ -123,6 +132,13 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         Always ``2``: :rfc:`2661` fixes the version nibble, and a datagram
         carrying any other value is a different protocol reached through a
         different class. c.f. :class:`~pcapkit.protocols.link.l2tp.L2TP`.
+
+        This is enforced rather than merely asserted -- :meth:`read` refuses a
+        datagram whose nibble is not ``2``, so this hard-coded answer cannot
+        disagree with
+        :attr:`info.version <pcapkit.protocols.data.link.l2tp.L2TP.version>`
+        on the same octets. It did before that guard landed, reporting ``2``
+        here and ``3`` there.
 
         """
         return 2
@@ -170,6 +186,22 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         """
         schema = self.__header__
         _flag = schema.flags
+
+        # NOTE: :rfc:`2661` §3.1 fixes ``Ver`` at 2 and reserves 1 "to permit
+        # detection of L2F packets should they arrive intermixed with L2TP
+        # packets", while :rfc:`3931` uses 3 -- so a datagram carrying any other
+        # nibble is a different protocol, exactly as ``version`` documents.
+        # Refuse it rather than parse it: every field after this word has a
+        # different meaning (or no meaning) in another version, so continuing
+        # reports a tunnel and session ID assembled out of octets that are
+        # neither. Reported as GitHub issue #548, where an :rfc:`3931` §4.1.1
+        # L2TPv3-over-IP datagram yielded ``version=4``, ``tunnelid=0x5678`` and
+        # ``sessionid=0xff03`` -- read out of the top half of a Session ID and
+        # the first two octets of the PPP frame behind it. This is also what
+        # makes the hard-coded ``Literal[2]`` of ``version`` true, instead of
+        # disagreeing with ``info.version`` on the same datagram.
+        if _flag['version'] != 2:
+            raise ProtocolError(f'{self.alias}: invalid version: {_flag["version"]}')
 
         flags = Data_Flags(
             type=Enum_Type(_flag['type']),

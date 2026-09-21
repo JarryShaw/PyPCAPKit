@@ -251,12 +251,20 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         reg_udp.assert_called_once_with(54323, FakeProtocol)
 
     def test_iterable_mixes_inferred_and_explicit_targets(self) -> None:
-        """The L2TPv2 shape: one class, an inferred entry and an explicit one.
+        """The L2TPv3 shape: one class, an inferred entry and an explicit one.
 
-        ``L2TPv2`` is a ``Link``-layer class reachable both by an IP protocol
-        number (inferred: ``TransType`` -> ``Internet``) and by a UDP port
-        (explicit, since a bare port cannot say TCP or UDP) -- see GH-514's
-        design thread and the adjacent GH-548.
+        An ``L2TPv3`` class -- which this package does not implement yet -- would
+        be a ``Link``-layer class reachable both by an IP protocol number
+        (inferred: ``TransType`` -> ``Internet``, :rfc:`3931` §4.1.1) and by a
+        UDP port (explicit, since a bare port cannot say TCP or UDP,
+        :rfc:`3931` §4.1.2) -- see #514's design thread.
+
+        Deliberately *not* ``L2TPv2``, which this docstring named until #548 was
+        settled: v2 answers on port 1701 only, and registering it at
+        ``TransType.L2TP`` points the :rfc:`2661` parser at a v3-over-IP header.
+        The mechanism under test is unchanged either way -- the class here is a
+        stand-in and nothing is really registered -- but the example should not
+        recommend a binding the library refuses.
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code

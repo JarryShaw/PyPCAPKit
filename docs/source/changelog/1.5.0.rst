@@ -205,9 +205,13 @@ pull requests between #326 and #509.
   ``UnsupportedCall``, matching the other four families. Backed by the new
   ``pcapkit.foundation.registry.protocols.register_protocol_code``, which can
   also be called directly to register a class that declined at class-definition
-  time. This is the mechanism #548 (``TransType.L2TP`` registered nowhere)
-  needs and does not yet use -- fixing it is now a one-declaration change, left
-  for its own issue rather than folded in here.
+  time. This was written up as the mechanism #548 (``TransType.L2TP``
+  registered nowhere) needs, with fixing that issue described here as "now a
+  one-declaration change". Investigating #548 found otherwise -- 115 is an
+  :rfc:`3931` L2TPv3-over-IP header with no class to dispatch to, so the
+  declaration would have pointed the :rfc:`2661` parser at it. See the
+  corresponding **Fixed** entry below; the mechanism itself is unaffected, and
+  its worked example now names ``L2TPv3`` rather than ``L2TPv2``.
 * **Changed** -- extraction is around 46% faster on a 1,117-frame HTTP capture,
   with byte-identical output (#420). A reassembled datagram's payload is now
   analysed on first read rather than eagerly, which cuts IP reassembly's own
@@ -527,6 +531,42 @@ pull requests between #326 and #509.
   the live one. Proposed by ``@Ts-Boom`` in #563, whose profiling found the miss
   path; the implementation differs because that one added a second,
   never-invalidated cache of resolved classes (#574).
+* **Fixed** -- ``L2TPv2`` parsed any version nibble, so an L2TPv3 datagram was
+  reported as v2 with a tunnel and session ID read out of v3's Control
+  Connection ID. :rfc:`2661` §3.1 fixes ``Ver`` at 2 and reserves 1 for L2F, and
+  ``L2TPv2.version`` already documented that "a datagram carrying any other
+  value is a different protocol reached through a different class" -- but nothing
+  enforced it, so the hard-coded ``Literal[2]`` property and ``info.version``
+  disagreed on the same octets, answering 2 and 3. ``read`` now raises
+  ``ProtocolError``, which degrades the payload to ``Raw`` through the existing
+  ``beholder`` path with the reason recorded. **This affects real captures**:
+  :rfc:`3931` §4.1.2 puts L2TPv3 on port 1701 too, the port ``UDP.__proto__``
+  already binds, so ``Ethernet:IPv4:UDP:L2TPv2:Raw`` with invented field values
+  becomes ``Ethernet:IPv4:UDP:Raw`` with the octets preserved.
+
+  This is the resolution of #548, which reported ``TransType.L2TP`` (115) as
+  registered nowhere and proposed binding ``L2TPv2`` there. That binding is
+  wrong rather than merely awkward: :rfc:`3931` §4.1.1 gives 115 to *L2TPv3 over
+  IP*, whose session header is "free of any restrictions imposed by coexistence
+  with L2TPv2 and L2F" and carries **no version nibble at all**, so a v2 parser
+  cannot even detect that the datagram is not its own. Measured, it produced
+  ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03`` from the top half
+  of a Session ID and two octets of the PPP frame behind it. 115 is a missing
+  *class*, not a missing registration, and stays unbound until an ``L2TPv3``
+  class exists; no dissector was invented here to fill it. The reasoning is now
+  recorded in ``pcapkit.protocols.link.l2tp`` rather than only in a test, and
+  ``register_protocol_code``'s worked example -- which named ``L2TPv2`` at 115 --
+  names ``L2TPv3`` instead (#548).
+* **Added** -- ``tests/protocols/test_dispatch_reachability_unit.py``, the
+  coverage #548 asked for: every ``ProtocolBase`` descendant whose ``__index__``
+  returns an enum member is checked to be reachable under that code in the
+  registry its enum *type* designates, read from the same
+  ``_CODE_DESTINATIONS`` table backing ``code=`` so the two cannot drift. Where
+  ``test_dispatch_registry_unit.py`` walks the 38 entries that exist and checks
+  each parses, this walks the classes and catches one nothing registered at all
+  -- the shape in which ``OSPF`` once shipped reachable from no table. 23 claims
+  verified, no gaps; a companion case injects a gap and confirms the audit
+  reports it, so the guard cannot rot into a permanently green no-op (#548).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

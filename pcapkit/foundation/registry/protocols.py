@@ -164,7 +164,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 #: Enum type -> the class(es) owning the :attr:`ProtocolBase.__proto__
 #: <pcapkit.protocols.protocol.ProtocolBase.__proto__>` dispatch registry
 #: keyed by that enum type -- the "registry-of-registries" that lets
-#: ``code=`` infer a destination from a key's own type, per GH-514. This is
+#: ``code=`` infer a destination from a key's own type, per #514. This is
 #: not an invention: it is exactly the targeting
 #: :func:`register_ethertype`, :func:`register_transtype`,
 #: :func:`register_linktype` and :func:`register_sctp` already hard-code by
@@ -259,11 +259,22 @@ def register_protocol_code(protocol: 'Type[Protocol]', code: 'Any') -> 'None':
 
     .. code-block:: python
 
-       register_protocol_code(L2TPv2, [TransType.L2TP, {UDP: 1701}])
+       register_protocol_code(L2TPv3, [TransType.L2TP, {UDP: 1701}])
 
     The explicit mapping form is accepted for any key, even one whose type
     could be inferred -- being more explicit than required is never an
     error.
+
+    Note:
+        That example names ``L2TPv3``, which this package does not implement
+        yet, rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is
+        v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it
+        directly over IP on protocol 115 and §4.1.2 puts it over UDP on port
+        1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.L2TPv2>` answers on
+        port 1701 only, and registering *it* at ``TransType.L2TP`` would point
+        the :rfc:`2661` parser at a v3-over-IP header -- see
+        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue #548 for
+        what that produced when measured.
 
     Args:
         protocol: Protocol class to register.
