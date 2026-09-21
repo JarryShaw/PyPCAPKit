@@ -928,6 +928,37 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         return self
 
 
+class _EnumRegistry(collections.defaultdict):
+    """A registry :class:`collections.defaultdict` that never inserts a miss.
+
+    :attr:`EnumSchema.registry` (and its class-level twin,
+    :attr:`EnumMeta.registry`) is read with a bare ``registry[code]`` at dozens
+    of call sites across the schema layer, e.g. ``Option.registry[type]``. A
+    plain :class:`collections.defaultdict` inserts whatever
+    :attr:`~collections.defaultdict.default_factory` returns the *first time*
+    an unregistered ``code`` is looked up -- and since the registry lives on
+    the *class*, that insertion is permanent and shared by every instance of
+    every subclass in the process. Parsing one packet carrying an unrecognised
+    code is therefore enough to grow the registry for the remainder of the
+    process, and to make a later, entirely legitimate
+    :meth:`EnumSchema.register` call report an overwrite that never happened.
+
+    This is the schema-layer instance of the defect :meth:`ProtocolBase.\
+    _lookup_registry <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>`
+    fixed for the protocol-layer ``__proto__`` family in GitHub issues #421 and
+    #425/#428; see GitHub issue #555. The fallback itself is deliberate -- it
+    is how an unknown option, chunk or block falls back to its
+    ``Unknown*``/``Unassigned*`` schema -- so this subclass keeps returning it,
+    it just stops recording it.
+
+    """
+
+    def __missing__(self, key: 'Any') -> 'Any':
+        if self.default_factory is None:
+            raise KeyError(key)
+        return self.default_factory()
+
+
 class EnumMeta(SchemaMeta, Generic[_ET]):
     """Meta class to add dynamic support for :class:`EnumSchema`.
 
@@ -947,7 +978,16 @@ class EnumMeta(SchemaMeta, Generic[_ET]):
 
     @property
     def registry(cls) -> 'DefaultDict[_ET, Type[EnumSchema]]':
-        """Mapping of enumeration numbers to schemas."""
+        """Mapping of enumeration numbers to schemas.
+
+        Important:
+            The returned mapping is a :class:`_EnumRegistry`, not a plain
+            :class:`collections.defaultdict`: indexing it with an
+            unregistered ``code`` still returns :attr:`EnumSchema.__default__`'s
+            schema, but does **not** insert that code. See :class:`_EnumRegistry`
+            for why that distinction matters.
+
+        """
         return cls.__enum__
 
 
@@ -1012,6 +1052,12 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             This property is also available as a class
             attribute.
 
+        Important:
+            See :attr:`EnumMeta.registry`: the returned mapping is a
+            :class:`_EnumRegistry`, so looking up an unregistered ``code``
+            returns the default schema without recording ``code`` as if it
+            had been registered.
+
         """
         return self.__enum__
 
@@ -1030,16 +1076,32 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
 
         Notes:
             If :attr:`__enum__` is not yet defined at function call,
-            it will automatically be defined as a :class:`collections.defaultdict`
+            it will automatically be defined as a :class:`_EnumRegistry`
             object, with the default value set to :attr:`__default__`.
 
             If intended to customise the :attr:`__enum__` mapping,
             it is possible to override the :meth:`__init_subclass__` method and
-            define :attr:`__enum__` manually.
+            define :attr:`__enum__` manually. Such a manual definition may use
+            a plain :class:`collections.defaultdict` -- e.g. to seed a
+            namespaced or nested mapping such as
+            :class:`pcapkit.protocols.schema.misc.pcapng.Option`'s -- so it is
+            swapped for the retention-safe :class:`_EnumRegistry` below, before
+            anything else can hold a reference to the original object.
 
         """
         if not hasattr(cls, '__enum__'):
-            cls.__enum__ = collections.defaultdict(cls.__default__)
+            cls.__enum__ = _EnumRegistry(cls.__default__)
+        elif '__enum__' in cls.__dict__ and not isinstance(cls.__dict__['__enum__'], _EnumRegistry):
+            # ``cls`` set its own ``__enum__`` in the class body, as a plain
+            # ``collections.defaultdict`` -- swap it for the retention-safe
+            # variant now, while ``cls`` is still being constructed and no
+            # external code has had a chance to capture a reference to the
+            # original dict. Every later access, through :attr:`registry` or
+            # otherwise, then sees the same safe object -- so identity across
+            # repeated ``.registry`` reads (see ``EnumMeta.registry``) is
+            # preserved, and nothing but the retention behaviour changes.
+            manual = cls.__dict__['__enum__']
+            cls.__enum__ = _EnumRegistry(getattr(manual, 'default_factory', None), manual)
 
         if code is not None:
             if isinstance(code, collections.abc.Iterable):
