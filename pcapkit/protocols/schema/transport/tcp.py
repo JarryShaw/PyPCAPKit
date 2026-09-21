@@ -621,11 +621,31 @@ class MPTCP(EnumSchema[Enum_MPTCPOption]):
 
     __enum__: 'DefaultDict[Enum_MPTCPOption, Type[MPTCP]]' = collections.defaultdict(lambda: MPTCPUnknown)
 
+    # NOTE: ``_MPTCP.data`` (a :class:`~pcapkit.corekit.fields.misc.SwitchField`,
+    # via :func:`mptcp_data_selector`) hands each subtype schema below the
+    # *whole* option -- ``kind``, ``length`` and all -- starting at the same
+    # first octet ``_MPTCP.test`` peeked and rewound past, rather than the
+    # bytes left over after some outer field already consumed a header. So
+    # unlike :class:`MPTCP`'s siblings that inherit :class:`Option`, which
+    # declares ``kind``/``length`` for exactly this reason, this base class
+    # has to declare its own -- unconditionally, since every Multipath TCP
+    # subtype carries an explicit length octet (no EOOL/NOP-style exception
+    # applies here). Every subclass's own leading field starts at the third
+    # octet as a result, which is where its ``test`` (subtype/flags) field
+    # expects to read from.
+    #
+    # Before this, both directions were broken: packing rejected ``kind=``/
+    # ``length=`` from the ``_make_mptcp_*`` makers with ``UnknownFieldWarning``
+    # and then ``KeyError: 'length'`` the moment a sibling field's condition
+    # (e.g. ``MPTCPAddAddress.port``, ``MPTCPCapable.rkey``) read
+    # ``pkt['length']``; unpacking silently misread the ``kind`` octet as the
+    # subtype/flags octet, since nothing had consumed it first. C.f. #541.
+    #: Option kind.
+    kind: 'Enum_Option' = EnumField(length=1, namespace=Enum_Option)
+    #: MPTCP length.
+    length: 'int' = UInt8Field()
+
     if TYPE_CHECKING:
-        #: Option kind.
-        kind: 'Enum_Option'
-        #: MPTCP length.
-        length: 'int'
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
 

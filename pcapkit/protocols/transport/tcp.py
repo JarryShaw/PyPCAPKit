@@ -2900,10 +2900,16 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # a ``bool`` into an ``IPv4Address`` that the schema's own guard can no
             # longer tell from a real address -- ``addr=True`` reached
             # ``mptcp_add_address_selector`` as ``0.0.0.1`` with ``version=4``
-            # (c.f. #508). This option cannot be constructed end to end at all for
-            # an unrelated reason, ``KeyError: 'length'`` from
-            # pcapkit/protocols/schema/transport/tcp.py:790, which is why the
-            # corruption here was only ever visible on the schema the maker returns.
+            # (c.f. #508). Until #541, this option could not be constructed end to
+            # end at all for an unrelated reason -- ``KeyError: 'length'`` from the
+            # ``port`` field's condition at
+            # pcapkit/protocols/schema/transport/tcp.py:819, since
+            # ``Schema_MPTCPAddAddress`` (like every ``MPTCP`` subtype schema)
+            # declared no ``kind``/``length`` fields of its own for ``kind=``/
+            # ``length=`` below to land in -- which is why the corruption here was
+            # only ever visible on the schema the maker returns. #541 gave
+            # ``MPTCP`` real ``kind``/``length`` fields, so both now land and this
+            # constructs and packs correctly.
             addr_val = parse_ip_address(
                 addr, f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] invalid address')
         version = addr_val.version
