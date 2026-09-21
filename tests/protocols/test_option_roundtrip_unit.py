@@ -322,14 +322,31 @@ EXPECTED_FAILURES = {
     # offset. Both cases round-trip now; entries deleted rather than left
     # behind, per the note at the top of this table.
 
-    # RPL fails earlier still: ``post_process`` assumes ``addresses`` is bytes,
-    # which is true after unpacking and false while packing, where it is still
-    # the list the constructor was handed. Unrelated to #487 (see #476/#480);
-    # still open.
+    # RPL used to fail in ``post_process``, which assumed ``addresses`` was
+    # bytes -- true after unpacking, false while packing, where it is still the
+    # list the constructor was handed. That was fixed by #556, and fixing it
+    # exposed the defect immediately behind it: the reader's own length guard.
+    # ``header.length`` is ``Hdr Ext Len``, in 8-octet units rather than octets,
+    # so ``% 16`` cannot be the right invariant -- the same unit confusion #487
+    # fixed for Source Route and Type 2. Behind *that* is a third defect (#564):
+    # the fixed area -- ``cmpr_i`` + ``cmpr_e`` + ``pad`` -- packs to 5 octets,
+    # one wider than the 4 RFC 6554 specifies and this method's own docstring
+    # diagram draws, so the header the guard is judging is not well-formed
+    # either way (measured: it constructs to 41 octets against the 48 its own
+    # ``Hdr Ext Len`` of 5 declares). None of the three is fixed here: RPL
+    # addresses are also variable-length under ``cmpr_i``/``cmpr_e``, so no
+    # fixed bound is obviously correct even once the units and the field
+    # widths are both right, and nothing has been checked against a real RPL
+    # capture. Unrelated to #487 (see #476/#480); still open.
     'ipv6-route-type/RPL_Source_Route_Header': Gap(
-        'CONSTRUCT', 'does not appear to be an IPv4 or IPv6 address',
-        'pcapkit/protocols/schema/internet/ipv6_route.py:156 -- post_process '
-        'assumes bytes; it runs on the pack path too, from schema.py:647'),
+        'CONSTRUCT', 'IPv6-Route: [TypeNo 3] invalid format',
+        'pcapkit/protocols/internet/ipv6_route.py:612 -- the guard rejects '
+        'the header, and the header is not well-formed to begin with: the '
+        '5-octet cmpr_i/cmpr_e/pad fixed area is one octet wider than the 4 '
+        'RFC 6554 specifies (echoed in the docstring above), so Hdr Ext Len '
+        'is computed from a mis-sized data area (#564); % 16 additionally '
+        'treats Hdr Ext Len as octets rather than 8-octet units, the same '
+        'confusion #487 fixed for Source Route and Type 2'),
 
     # -- Mobility Header ------------------------------------------------------
     #
