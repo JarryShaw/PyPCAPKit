@@ -146,53 +146,32 @@ EXPECTED_FAILURES = {
         'negative below 40 kbps, and the option it emits at rate=0 does not '
         'parse back'),
 
-    # #541 declared real ``kind``/``length`` fields on ``MPTCP``, which is what
-    # gets these seven far enough to construct and pack -- they used to fail
-    # here with ``KeyError: 'length'`` (four of them) or
-    # ``AttributeError: ... no attribute 'kind'`` (three), and #541's fix closed
-    # both. The next field the construction path never sets is ``subtype``:
-    # ``MPTCP.subtype`` is still ``TYPE_CHECKING``-only, an annotation rather
-    # than a field, and the only thing that ever sets it is
-    # ``_MPTCP.post_process``, which runs on a real byte-level unpack -- not on
-    # the schema a ``_make_mptcp_*`` maker returns in memory, which is what
-    # ``TCP``'s convenience constructor (``TCP(options=[(code, kwargs)])``)
-    # reads straight back through ``_read_mptcp_*`` with no round trip in
-    # between. Filed as #566, which also has the fix for the pattern itself
-    # (whether ``subtype`` should become a real field the way ``kind``/
-    # ``length`` did, or be set some other way) rather than a per-case patch
-    # here.
-    'tcp-mptcp/MP_CAPABLE': Gap(
-        'CONSTRUCT', "'MPTCPCapable' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566); and '
-        "separately, pcapkit/protocols/transport/tcp.py:2669's "
-        '`length=20 if rkey is None else 32` is RFC 8684 section 3.1\'s 12/20 '
-        'swapped, so once #566 is fixed this case would still pack the wrong '
-        'length rather than round-trip (#567)'),
-    'tcp-mptcp/ADD_ADDR': Gap(
-        'CONSTRUCT', "'MPTCPAddAddress' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
-    'tcp-mptcp/REMOVE_ADDR': Gap(
-        'CONSTRUCT', "'MPTCPRemoveAddress' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
-    'tcp-mptcp/MP_PRIO': Gap(
-        'CONSTRUCT', "'MPTCPPriority' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
-    'tcp-mptcp/DSS': Gap(
-        'CONSTRUCT', "'MPTCPDSS' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
-    'tcp-mptcp/MP_FAIL': Gap(
-        'CONSTRUCT', "'MPTCPFallback' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
+    # #541 declared real ``kind``/``length`` fields on ``MPTCP``, which got six
+    # of these seven far enough to construct and pack, and #566/#567 closed
+    # the rest of the chain: #566 gave ``MPTCP.subtype`` the same treatment
+    # (it was ``TYPE_CHECKING``-only, an annotation rather than a field, and
+    # the only thing that ever set it was ``_MPTCP.post_process``, which runs
+    # on a real byte-level unpack -- not on the schema a ``_make_mptcp_*``
+    # maker returns in memory, which is what ``TCP``'s convenience
+    # constructor, ``TCP(options=[(code, kwargs)])``, reads straight back
+    # through ``_read_mptcp_*`` with no round trip in between); #567 fixed
+    # MP_CAPABLE's own ``length``/``rkey`` arithmetic on top of that. Six of
+    # the seven (MP_CAPABLE, ADD_ADDR, REMOVE_ADDR, MP_PRIO, DSS, MP_FAIL) now
+    # read ``'OK'`` and so have no entry below any more.
+    #
+    # MP_FASTCLOSE does not: fixing ``subtype`` got it *past* the
+    # ``AttributeError`` this table used to record and into a second,
+    # unrelated defect that #566/#567 do not touch and #576 tracks -- see that
+    # entry for the detail.
     'tcp-mptcp/MP_FASTCLOSE': Gap(
-        'CONSTRUCT', "'MPTCPFastclose' object has no attribute 'subtype'",
-        'pcapkit/protocols/schema/transport/tcp.py:650 -- MPTCP.subtype is '
-        'TYPE_CHECKING-only, set only by _MPTCP.post_process (#566)'),
+        'CONSTRUCT', 'TCP: [OptNo 30] invalid format',
+        'pcapkit/protocols/transport/tcp.py:1893 -- _read_mptcp_fastclose '
+        'requires schema.length == 16, which agrees with neither the maker '
+        '(_make_mptcp_fastclose at pcapkit/protocols/transport/tcp.py:3054, '
+        'length=12, which is the RFC 8684 section 3.7 value) nor the schema '
+        '(MPTCPFastclose.test at '
+        'pcapkit/protocols/schema/transport/tcp.py:907, which packs an '
+        '11-octet option against the declared 12) (#576)'),
 
     # ``_make_mptcp_join`` branches on ``self._flags``, which only the parse
     # path ever sets, so the constructor cannot be called at all.
