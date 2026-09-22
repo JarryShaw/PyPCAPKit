@@ -242,10 +242,10 @@ class TCPMPTCPCapablePublicConstructorUnitTests(unittest.TestCase):
     #: Header fields shared by every constructed TCP segment in this class, matching
     #: :data:`examples.generators.options.TCP_BASE`.
     TCP_BASE = {
-        'srcport': 50000, 'dstport': 80, 'seq': 1, 'ack': 0,
-        'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack_flag': False,
+        'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
+        'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
         'psh': False, 'rst': False, 'syn': True, 'fin': False,
-        'window': 8192, 'checksum': b'\x00\x00', 'urgent_pointer': 0,
+        'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
         'payload': b'',
     }
 

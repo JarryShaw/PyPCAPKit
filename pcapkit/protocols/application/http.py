@@ -41,6 +41,18 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         #: Saved subclass protocol data (only for HTTP base class).
         _http: 'HTTP[_PT, _ST]'
 
+    #: This class is a version dispatcher rather than a protocol with a header of
+    #: its own, so its construction keywords cannot be enumerated: :meth:`make`
+    #: declares only ``version`` and forwards everything else to
+    #: :meth:`HTTPv1.make <pcapkit.protocols.application.httpv1.HTTP.make>` or
+    #: :meth:`HTTPv2.make <pcapkit.protocols.application.httpv2.HTTP.make>`
+    #: according to that value -- so the set of names that is correct here depends
+    #: on an argument. :obj:`None` therefore opts out of the construction keyword
+    #: check that :meth:`ProtocolBase.__init__
+    #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` performs (#617); the
+    #: two versioned classes are checked normally when constructed directly.
+    __keywords__ = None
+
     ##########################################################################
     # Properties.
     ##########################################################################

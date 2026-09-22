@@ -48,16 +48,25 @@ class ProtocolBaseUnitTests(unittest.TestCase):
             def length(self) -> int:
                 return 2
 
-            def read(self, length: int | None = None, **kwargs: object) -> DummyData:
-                data = DummyData(value=kwargs.get('value', 0))
-                self._next = kwargs.get('next_protocol')
+            # NOTE: ``value`` and ``next_protocol`` are declared parameters rather
+            # than names read out of ``**kwargs``, and ``make`` declares the
+            # un-prefixed parse limits, because since #617 a construction keyword
+            # no signature declares is refused rather than dropped. Both spellings
+            # are faithful to what the library does -- ``IPv4.make`` really does
+            # take a ``protocol`` -- and declaring them is the pattern #617 asks
+            # for, as against naming them in ``__keywords__``.
+            def read(self, length: int | None = None, *, value: int = 0,
+                     next_protocol: object = None, **kwargs: object) -> DummyData:
+                data = DummyData(value=value)
+                self._next = next_protocol
                 if self._next is None:
                     from pcapkit.protocols.misc.null import NoPayload
                     self._next = NoPayload()
                 self._protos = ProtoChain(self.__class__, self.alias, basis=self._next.protochain)
                 return data
 
-            def make(self, packet: bytes = b'ab', **kwargs: object) -> DummySchema:
+            def make(self, packet: bytes = b'ab', layer: object = None,
+                     protocol: object = None, **kwargs: object) -> DummySchema:
                 return DummySchema(payload=packet)
 
             @classmethod

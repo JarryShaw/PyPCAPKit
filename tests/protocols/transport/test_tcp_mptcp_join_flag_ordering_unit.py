@@ -143,13 +143,20 @@ import unittest
 #: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` actually declares.
 #:
 #: Deliberately *not* a copy of :data:`examples.generators.options.TCP_BASE`, which the
-#: sibling modules in this directory reuse. That mapping passes ``'seq': 1`` and
-#: ``'ack_flag': False``, neither of which is a parameter of ``make`` -- both are
-#: swallowed by its ``**kwargs`` -- while its ``'ack': 0`` binds to ``ack``, the
-#: *acknowledgement flag*, not to ``ack_no``. Measured: ``TCP(**TCP_BASE).info.seq`` is
-#: ``0``, not the ``1`` the mapping reads as. Harmless where those modules use it, since
-#: they assert nothing about the sequence number, but this module dispatches on the ACK
-#: flag and must not leave which-``ack``-is-which to inference.
+#: sibling modules in this directory reuse -- and, unlike them, this dict omits
+#: ``syn``/``ack`` altogether, since every case here passes those two explicitly to
+#: select a layout, where a shared constant could not. Until #617, those sibling
+#: modules' own copies of that mapping additionally passed ``'seq': 1`` and
+#: ``'ack_flag': False``, neither of which was a parameter of ``make`` -- both were
+#: silently swallowed by its ``**kwargs`` -- while their ``'ack': 0`` bound to ``ack``,
+#: the *acknowledgement flag*, not to ``ack_no``. Measured pre-#617:
+#: ``TCP(**TCP_BASE).info.seq`` read back ``0``, not the ``1`` the mapping appeared to
+#: set. That was harmless where those modules used it, since none of them asserted
+#: anything about the sequence number -- but #617 turns any keyword ``make`` does not
+#: declare into ``UnsupportedCall`` instead of a silent no-op, so those mappings have
+#: since been corrected to ``seq_no``/``ack_no``/``ack`` rather than merely tolerated.
+#: This module dispatches on the ACK flag and always has, so it could never have
+#: afforded to leave which-``ack``-is-which to inference, #617 or not.
 TCP_HEADER = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
     'ns': False, 'cwr': False, 'ece': False, 'urg': False,
@@ -279,18 +286,30 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
     """
 
     def test_the_issue_reproduction_constructs(self) -> None:
-        """#587's reproduction, verbatim, returns an instance instead of raising.
+        """#587's reproduction returns an instance instead of raising.
 
-        Kept exactly as the issue filed it -- including ``seq=0, ack=0``, which are not
-        ``make``'s parameter names for the sequence and acknowledgement numbers -- so
-        that the case a reader can paste from the issue is the case pinned here.
+        This used to keep ``seq=0, ack=0`` exactly as the issue filed it, since neither
+        is ``make``'s parameter name for the sequence and acknowledgement numbers and a
+        reader pasting the issue's own text would hit precisely this call. #617 removes
+        that option: ``seq`` is not declared by ``make``'s (or ``read``'s, ``pack``'s,
+        ``unpack``'s, ``__post_init__``'s, or ``__init__``'s) signature at all -- the
+        parameter is ``seq_no`` -- so where it used to be silently absorbed by ``make``'s
+        trailing ``**kwargs`` and leave the sequence number at its default, it now raises
+        :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, for a reason that has
+        nothing to do with what this test is pinning. ``ack=0`` needed no change: ``ack``
+        *is* a real parameter -- the connection flag, not the acknowledgement number --
+        and ``0`` is an accepted falsy value for it, which is exactly why the issue's
+        original text could leave it alone too. So only ``seq`` is renamed to ``seq_no``
+        here; everything else, including the value ``0``, is unchanged, and the case
+        still returns an instance rather than raising ``AttributeError: 'TCP' object has
+        no attribute '_flags'``, which is what #587 is about.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
         from pcapkit.const.tcp.option import Option as Enum_Option
         from pcapkit.protocols.transport.tcp import TCP
 
-        tcp = TCP(srcport=1, dstport=2, seq=0, ack=0, syn=True,
+        tcp = TCP(srcport=1, dstport=2, seq_no=0, ack=0, syn=True,
                   options=[(Enum_Option.Multipath_TCP,
                             {'subtype': Enum_MPTCPOption.MP_JOIN, 'backup': False,
                              'addr_id': 1, 'token': 7, 'nonce': 9})])
