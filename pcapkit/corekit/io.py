@@ -131,7 +131,10 @@ class SeekableReader(io.BufferedReader):
 
         if self._buffer_cur > self._buffer_size:
             if buf_len >= self._buffer_size:
-                self._buffer_view[:] = buf[-self._buffer_size:]
+                # NOTE: the last ``_buffer_size`` octets, counted from the front rather
+                # than as ``buf[-self._buffer_size:]``, which for a buffer of no size at
+                # all is ``buf[-0:]`` -- the whole of ``buf``, not none of it.
+                self._buffer_view[:] = buf[buf_len - self._buffer_size:]
             else:
                 self._buffer_view[:-buf_len] = self._buffer_view[old_ptr - (self._buffer_size - buf_len):old_ptr]
                 self._buffer_view[-buf_len:] = buf
@@ -316,22 +319,62 @@ class SeekableReader(io.BufferedReader):
         not specified). The current stream position isn't changed. This resizing can extend or
         reduce the current file size. In case of extension, the contents of the new file area
         depend on the platform (on most systems, additional bytes are zero-filled). The new file
-        size is returned."""
+        size is returned.
+
+        Note:
+            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what this
+            resizes is the buffer, not the stream behind it. The buffer is a sliding window over a
+            stream that cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its
+            content occupies ``[0:_buffer_cur]``, and everything past that is padding never read.
+
+            Two consequences for which octets survive. An extension appends its zero octets at
+            the **tail**, the new area being by definition the region past the old end. A
+            reduction below the content keeps the **most recent** ``size`` octets and advances
+            ``_buffer_set`` past the ones it drops, because what this holds is lookback: the
+            octets it can still answer for are the ones just read, and the stream is already
+            beyond them. Padding is never kept in preference to content either way.
+
+            Advancing ``_buffer_set`` is what keeps ``_buffer_set + _buffer_cur`` equal to how far
+            the stream has actually been consumed, which :meth:`seek` relies on to decide whether
+            it may read ahead to fill a gap. A reduction that shrank the window without moving its
+            base would leave that sum short of the stream, and the next forward :meth:`seek` would
+            splice in octets from the wrong absolute offset without complaining.
+
+            Octets dropped by a reduction are gone for good, since the stream cannot be rewound to
+            re-supply them. A position left among them is then before the window, which
+            :meth:`seek` refuses as it refuses any other.
+
+        """
         if size is None:
-            size = 0
+            # NOTE: an unspecified size means the current position, per
+            # :meth:`io.IOBase.truncate`. The buffer is indexed relative to
+            # ``_buffer_set``, and the position may sit before it once a saved
+            # buffer has been rewound, in which case nothing is kept.
+            size = max(self._tell - self._buffer_set, 0)
         if size < 0:
             raise TruncateError(f'negative size value {size}')
+
+        # NOTE: the position isn't changed by a truncation, but rebuilding the buffer
+        # resets it, so it is read here and put back below -- moved down by whatever
+        # the window's base moved up, so that it still denotes the same octet.
+        buffer_pos = self._buffer.tell()
         self._buffer_view.release()
 
-        temp = self._buffer.getvalue()
-        if size > self._buffer_size:
-            self._buffer = io.BytesIO(temp.rjust(size, b'\x00'))
-        else:
-            # keep the last ``size`` bytes
-            self._buffer = io.BytesIO(temp[-size:] if size else b'')
+        # NOTE: only ``[0:_buffer_cur]`` is content. Slicing the buffer itself would
+        # keep padding that was never read and count it as though it were data.
+        temp = self._buffer.getvalue()[:self._buffer_cur]
+        dropped = max(len(temp) - size, 0)
+
+        self._buffer = io.BytesIO(temp[dropped:].ljust(size, b'\x00'))
         self._buffer_view = self._buffer.getbuffer()
+        self._buffer.seek(max(buffer_pos - dropped, 0), io.SEEK_SET)
 
         self._buffer_size = size
+        # NOTE: ``_buffer_set + _buffer_cur`` is unchanged by construction -- the base
+        # gains exactly what the content pointer loses -- so the stream's consumption
+        # point still reads correctly out of the pair.
+        self._buffer_set += dropped
+        self._buffer_cur = len(temp) - dropped
         return self._buffer_size
 
     def writeable(self) -> 'bool':
@@ -372,7 +415,15 @@ class SeekableReader(io.BufferedReader):
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.read(size)
             else:
-                buf = self._buffer.read(min(size, self._buffer_cur - 1))
+                # NOTE: ``_buffer_cur`` counts the octets written into the buffer, so what
+                # is available from here is the run between the current position and the end
+                # of that content. That count less one is neither: at the start of the
+                # buffer it is one octet short, and the shortfall is then made up from the
+                # stream -- past the octet that was skipped, losing it -- while further in
+                # it reaches beyond the content and hands the padding behind it back as
+                # data, which is also what an uncapped read does.
+                buf_rem = self._buffer_set + self._buffer_cur - self._tell
+                buf = self._buffer.read(buf_rem if size < 0 else min(size, buf_rem))
 
             size_rem = -1
             if size < 0 or (size_rem := size - len(buf)) > 0:
