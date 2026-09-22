@@ -65,15 +65,21 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
 
         This is the #431 mechanism the option and list loops depend on: a
         type or progress-check field reading past a truncated area gets a
-        short buffer and must still decode -- as zero, on the missing
-        high-order octets -- rather than raise, or every capture cut short
+        short buffer and must still decode -- as zero, on the octets that
+        were never read -- rather than raise, or every capture cut short
         by its snapshot length would start failing to parse instead of
         reporting the tail as padding. This field is nowhere near
         :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_LENGTH`, so the
         shortfall must still be padded exactly as before #554.
+
+        The zeros land on the *tail*, which is where the unread octets were:
+        a short read has lost the end of the buffer, not the start of it.
+        Before #604 they were placed at the front instead, which corrupted
+        the value rather than merely padding it -- see
+        :class:`FieldBaseShortReadPaddingSideTests` below.
         """
         field = self.BytesField(length=4)
-        self.assertEqual(field.unpack(b'\x01\x02\x03', {}), b'\x00\x01\x02\x03')
+        self.assertEqual(field.unpack(b'\x01\x02\x03', {}), b'\x01\x02\x03\x00')
 
     def test_small_field_over_an_entirely_empty_buffer_still_zero_pads(self) -> None:
         """The extreme case: nothing at all left to read.
@@ -97,11 +103,12 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         field = self.BytesField(length=self.ceiling)
         result = field.unpack(b'A', {})
 
-        # rjust() right-justifies: the one real octet ends up at the end, with
-        # the padding -- not the data -- at the front.
+        # ljust() left-justifies: the one real octet stays where it was read,
+        # at the front, and the padding fills the tail that was never read.
+        # Before #604 this was the other way round.
         self.assertEqual(len(result), self.ceiling)
-        self.assertEqual(result[-1:], b'A')
-        self.assertEqual(result[:-1], b'\x00' * (self.ceiling - 1))
+        self.assertEqual(result[:1], b'A')
+        self.assertEqual(result[1:], b'\x00' * (self.ceiling - 1))
 
     def test_field_one_past_the_ceiling_with_insufficient_buffer_is_rejected(self) -> None:
         """Boundary: one octet past the ceiling, with data missing, is rejected.
@@ -500,7 +507,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         with time_limit(5):
             self.assertEqual(self.BytesField(length=1).unpack(b'', {}), b'\x00')
             self.assertEqual(self.BytesField(length=4).unpack(b'\x01\x02\x03', {}),
-                             b'\x00\x01\x02\x03')
+                             b'\x01\x02\x03\x00')
 
     def test_the_refusal_message_names_the_padding_the_ledger_and_the_allowance(self) -> None:
         declared = self.ceiling - 2
@@ -533,3 +540,318 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
                 self.assertEqual(self.BytesField(length=size).unpack(buffer, {}), buffer)
             self.assertEqual(ledger[1], 0)
             self.assertEqual(ledger[0], 500 * size)
+
+
+class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
+    """Which *side* the short-read zero padding goes on, for both byte orders.
+
+    The two classes above are about *how much* padding
+    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>` will
+    synthesise (#554, #573). This one is about where it lands, which is a
+    different defect with a different symptom: it corrupts values rather than
+    exhausting memory, and it does so silently -- no exception, no warning, just
+    a plausible integer that is wrong.
+
+    Before #604 the padding was applied with ``rjust()``, which places the zeros
+    at the *front* of the buffer. That asserts that the octets which were never
+    read were the *leading* ones. A short read asserts the opposite: the buffer
+    ran out, so what is missing is whatever came *after* what was read. The zeros
+    therefore belong at the end, which is ``ljust()``.
+
+    The correction is **not** byte-order-conditional, and that is the point worth
+    pinning. ``rjust()`` is wrong for a big-endian field exactly as it is for a
+    little-endian one; the two merely fail in opposite directions:
+
+    * little-endian, one octet of a four-octet ``120`` (``0x78``) --
+      ``rjust()`` gives ``00 00 00 78`` read little-endian, i.e. 2,013,265,920,
+      inflating the value by ``2 ** 24``. ``ljust()`` gives ``78 00 00 00``,
+      i.e. 120.
+    * big-endian, three octets of a four-octet ``0x01020304`` --
+      ``rjust()`` gives ``00 01 02 03``, i.e. ``0x10203``, scaling the value
+      *down* by 256. ``ljust()`` gives ``01 02 03 00``, i.e. ``0x1020300``.
+
+    The big-endian direction is the dangerous one. An inflated length is loud: it
+    overruns, or asks for an allocation nothing will grant. A length scaled
+    *down* by a factor of 256 is a smaller, entirely plausible number that passes
+    a sanity check and truncates real data instead. That asymmetry is why the
+    little-endian symptom is the one that got reported and the big-endian one sat
+    unnoticed -- and why a big-endian field must be tested with a value whose
+    high octets are *not* zero. Given a small big-endian value such as 120, whose
+    wire form is ``00 00 00 78``, ``rjust()`` restores exactly the leading zeros
+    that were lost and answers correctly by accident.
+
+    Every case here is also checked at more than one width, because a single
+    width cannot distinguish "pads on the correct side" from "happens to agree
+    for four octets", and the widths are what a regression would most plausibly
+    get selectively wrong.
+
+    What this must **not** change is *whether* a truncated capture parses. The
+    short-read accommodation is deliberate (#431), the budget above is built
+    around preserving it, and third-party PR #571 was declined for breaking it.
+    So the cases that the option and list loops depend on -- above all a read
+    against an entirely empty buffer, which pads to all zeros either way -- are
+    asserted here too, unchanged.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+        from pcapkit.corekit.fields.numbers import (Int32Field, UInt16Field, UInt32Field,
+                                                    UInt64Field)
+        from pcapkit.corekit.fields.strings import BytesField
+
+        self.BytesField = BytesField
+        self.Int32Field = Int32Field
+        self.UInt16Field = UInt16Field
+        self.UInt32Field = UInt32Field
+        self.UInt64Field = UInt64Field
+
+    def truncate(self, value: int, width: int, byteorder: str, kept: int) -> bytes:
+        """The first ``kept`` octets of ``value`` as it appears on the wire.
+
+        Args:
+            value: The value the capture actually held.
+            width: Field width, in octets.
+            byteorder: ``'big'`` or ``'little'``.
+            kept: How many octets of the field were captured.
+
+        Returns:
+            The octets a short read would be handed.
+
+        Truncation cuts the *end* of a buffer, so this is a prefix of the wire
+        form -- which is what makes the missing octets the trailing ones whatever
+        the byte order is.
+
+        """
+        return value.to_bytes(width, byteorder)[:kept]  # type: ignore[arg-type]
+
+    def expected(self, value: int, width: int, byteorder: str, kept: int) -> int:
+        """What a short read of ``kept`` octets should report.
+
+        The unread octets are unknown and assumed zero, so the answer is the
+        truncated wire form zero-filled back to ``width`` and decoded. Derived
+        from the wire form rather than written out, so it states the property
+        under test instead of restating the implementation's arithmetic.
+        """
+        wire = self.truncate(value, width, byteorder, kept).ljust(width, b'\x00')
+        return int.from_bytes(wire, byteorder)  # type: ignore[arg-type]
+
+    def test_the_issue_s_little_endian_figure(self) -> None:
+        """Exactly the case #604 reports, pinned as a literal.
+
+        One octet of a four-octet little-endian 120. ``rjust()`` answered
+        2,013,265,920 -- wrong by seven orders of magnitude, with no exception
+        and no warning. The literals are written out rather than computed so that
+        this test states the issue's own measured figures and cannot drift with a
+        helper.
+        """
+        field = self.UInt32Field(byteorder='little')
+
+        self.assertEqual(field.unpack(b'\x78', {}), 120)
+        self.assertNotEqual(field.unpack(b'\x78', {}), 2013265920)
+
+    def test_the_issue_s_big_endian_figure(self) -> None:
+        """The other half of #604, which the issue title understated.
+
+        Three octets of a four-octet big-endian ``0x01020304``. ``rjust()``
+        answered ``0x10203``, scaling the value down by 256 -- the direction that
+        passes a sanity check, which is why it went unnoticed. ``ljust()``
+        answers ``0x1020300``: the three octets that were read, in place, with
+        the one that was not assumed zero.
+        """
+        field = self.UInt32Field(byteorder='big')
+
+        self.assertEqual(field.unpack(b'\x01\x02\x03', {}), 0x1020300)
+        self.assertNotEqual(field.unpack(b'\x01\x02\x03', {}), 0x10203)
+
+    def test_a_short_read_is_value_preserving_at_every_width_and_order(self) -> None:
+        """The property, rather than a table of expected numbers.
+
+        For every width, both byte orders, and every possible shortfall, a short
+        read must report the octets it was given *in the positions they occupy on
+        the wire*, with the octets it was not given assumed zero. That is one
+        statement covering 2-, 4- and 8-octet fields at every truncation point,
+        and it is the statement ``rjust()`` violates.
+
+        The value is chosen so that no octet is zero and every octet differs, so
+        a padding side that is wrong -- or a width read with the wrong endianness
+        -- cannot coincide with the right answer.
+        """
+        cases = [
+            (2, self.UInt16Field, 0x0102),
+            (4, self.UInt32Field, 0x01020304),
+            (8, self.UInt64Field, 0x0102030405060708),
+        ]
+
+        for width, cls, value in cases:
+            for byteorder in ('big', 'little'):
+                field = cls(byteorder=byteorder)  # type: ignore[call-arg]
+                for kept in range(width + 1):
+                    buffer = self.truncate(value, width, byteorder, kept)
+                    with self.subTest(width=width, byteorder=byteorder, kept=kept):
+                        self.assertEqual(
+                            field.unpack(buffer, {}),
+                            self.expected(value, width, byteorder, kept),
+                        )
+
+    def test_a_full_read_is_untouched_at_every_width_and_order(self) -> None:
+        """The regression guard: nothing about a complete field may move.
+
+        The padding side is only ever consulted when the buffer falls short, so a
+        field that got all its octets must answer exactly as it did before #604 --
+        for a big-endian field especially, since that is the one whose short-read
+        behaviour this change alters and whose full-read behaviour must not.
+        """
+        cases = [
+            (2, self.UInt16Field, 0x0102),
+            (4, self.UInt32Field, 0x01020304),
+            (8, self.UInt64Field, 0x0102030405060708),
+        ]
+
+        for width, cls, value in cases:
+            for byteorder in ('big', 'little'):
+                field = cls(byteorder=byteorder)  # type: ignore[call-arg]
+                wire = value.to_bytes(width, byteorder)  # type: ignore[arg-type]
+                with self.subTest(width=width, byteorder=byteorder):
+                    self.assertEqual(field.unpack(wire, {}), value)
+                    # and trailing octets beyond the field are not this field's
+                    self.assertEqual(field.unpack(wire + b'\xff\xff', {}), value)
+
+    def test_a_little_endian_short_read_is_never_inflated(self) -> None:
+        """The little-endian failure direction, stated as an inequality.
+
+        ``rjust()`` on a little-endian field moves every octet read into a
+        *higher* position than it occupies on the wire, so the reported value
+        exceeds the truth -- by ``2 ** 24`` in the reported case. Whatever the
+        width or shortfall, a short read can only ever drop information, so it
+        must never report more than the value actually held.
+        """
+        for width, cls, value in ((2, self.UInt16Field, 0x0102),
+                                  (4, self.UInt32Field, 0x01020304),
+                                  (8, self.UInt64Field, 0x0102030405060708)):
+            field = cls(byteorder='little')  # type: ignore[call-arg]
+            for kept in range(width):
+                buffer = self.truncate(value, width, 'little', kept)
+                with self.subTest(width=width, kept=kept):
+                    self.assertLessEqual(field.unpack(buffer, {}), value)
+
+    def test_a_big_endian_short_read_keeps_the_octets_it_read_in_place(self) -> None:
+        """The big-endian failure direction: the octets must not slide down.
+
+        ``rjust()`` shifted every octet read towards the low end, dividing the
+        value by 256 per missing octet -- so ``0x01020304`` truncated to three
+        octets read as ``0x10203`` rather than ``0x1020300``. Asserting the
+        leading octets survive at full magnitude is what catches that: the value
+        read must still be at least the truth with the unread octets zeroed,
+        which for a big-endian field means the most significant ones are intact.
+        """
+        for width, cls, value in ((2, self.UInt16Field, 0x0102),
+                                  (4, self.UInt32Field, 0x01020304),
+                                  (8, self.UInt64Field, 0x0102030405060708)):
+            field = cls(byteorder='big')  # type: ignore[call-arg]
+            for kept in range(1, width):
+                buffer = self.truncate(value, width, 'big', kept)
+                read = field.unpack(buffer, {})
+                with self.subTest(width=width, kept=kept):
+                    # the octets read are the high ones and keep their magnitude
+                    self.assertEqual(read >> (8 * (width - kept)),
+                                     value >> (8 * (width - kept)))
+                    # which the rjust() answer, scaled down by the shortfall,
+                    # was not
+                    self.assertNotEqual(read, value >> (8 * (width - kept)))
+
+    def test_a_signed_field_pads_on_the_same_side(self) -> None:
+        """Signedness is orthogonal to the padding side, and must stay so.
+
+        The sign lives in the most significant octet, so on a big-endian field it
+        is read first and survives a short read; on a little-endian one it is the
+        last octet and is exactly what a truncated capture loses. Under
+        ``rjust()`` a truncated little-endian negative value silently became a
+        small positive one, because the octet carrying the sign was synthesised
+        as zero *and* the octets that were read were moved into its place.
+        """
+        value = -2  # 0xfffffffe
+        for byteorder in ('big', 'little'):
+            field = self.Int32Field(byteorder=byteorder)  # type: ignore[call-arg]
+            wire = value.to_bytes(4, byteorder, signed=True)  # type: ignore[arg-type]
+
+            with self.subTest(byteorder=byteorder, kept=4):
+                self.assertEqual(field.unpack(wire, {}), value)
+
+            for kept in range(1, 4):
+                expected = int.from_bytes(
+                    wire[:kept].ljust(4, b'\x00'), byteorder, signed=True  # type: ignore[arg-type]
+                )
+                with self.subTest(byteorder=byteorder, kept=kept):
+                    self.assertEqual(field.unpack(wire[:kept], {}), expected)
+
+    def test_a_byte_string_field_keeps_its_octets_at_the_front(self) -> None:
+        """A truncated blob loses its tail, so the zeros go on the tail.
+
+        :class:`~pcapkit.corekit.fields.strings.BytesField` unpacks through the
+        same line with an ``Ns`` template, so the padding side decides where the
+        real octets sit in the value handed to the caller. ``rjust()`` returned
+        ``b'\\x00\\x01\\x02\\x03'`` for three octets of a four-octet field,
+        which claims a leading zero octet that was never on the wire and hides
+        the fact that the tail is what is missing.
+        """
+        for width in (2, 4, 8):
+            data = bytes(range(1, width + 1))
+            for kept in range(width + 1):
+                field = self.BytesField(length=width)
+                with self.subTest(width=width, kept=kept):
+                    self.assertEqual(field.unpack(data[:kept], {}),
+                                     data[:kept] + b'\x00' * (width - kept))
+
+    def test_an_entirely_empty_buffer_still_reads_as_zero(self) -> None:
+        """The #431 invariant, which this change must not disturb.
+
+        ``OptionField.unpack`` and ``ListField.unpack`` read a fixed-width,
+        few-octet field past the end of a truncated option area and need it to
+        decode as ``0`` -- that is how an over-long ``ihl`` or a capture cut
+        short by its snapshot length reads as end-of-option-list or ``Pad1``
+        rather than raising. With nothing at all in the buffer the whole field is
+        padding, so both ``rjust()`` and ``ljust()`` produce all zeros and the
+        answer is the same before and after #604. Asserted explicitly, because it
+        is the property a fix to the padding side could most easily have broken
+        and the one that declined #571.
+        """
+        for byteorder in ('big', 'little'):
+            for cls in (self.UInt16Field, self.UInt32Field, self.UInt64Field):
+                field = cls(byteorder=byteorder)  # type: ignore[call-arg]
+                with self.subTest(byteorder=byteorder, field=cls.__name__):
+                    self.assertEqual(field.unpack(b'', {}), 0)
+
+        for width in (1, 4, 16):
+            with self.subTest(bytes_width=width):
+                self.assertEqual(self.BytesField(length=width).unpack(b'', {}),
+                                 b'\x00' * width)
+
+    def test_a_short_read_round_trips_back_to_the_padded_wire_form(self) -> None:
+        """``pack`` of what ``unpack`` reported must reproduce the padded buffer.
+
+        :meth:`FieldBase.pack <pcapkit.corekit.fields.field.FieldBase.pack>`
+        writes the field's full width, so the only wire form a short read's value
+        can legitimately correspond to is the octets that were read followed by
+        the zeros that were synthesised for the ones that were not. Under
+        ``rjust()`` it did not: the value packed back to the *padding* in front of
+        the data, so an unpack/pack cycle moved the real octets. This is the
+        cheapest statement that the reported value and the buffer agree about
+        which octets were missing.
+        """
+        cases = [
+            (2, self.UInt16Field, 0x0102),
+            (4, self.UInt32Field, 0x01020304),
+            (8, self.UInt64Field, 0x0102030405060708),
+        ]
+
+        for width, cls, value in cases:
+            for byteorder in ('big', 'little'):
+                field = cls(byteorder=byteorder)  # type: ignore[call-arg]
+                for kept in range(width + 1):
+                    buffer = self.truncate(value, width, byteorder, kept)
+                    read = field.unpack(buffer, {})
+                    with self.subTest(width=width, byteorder=byteorder, kept=kept):
+                        self.assertEqual(field.pack(read, {}),
+                                         buffer.ljust(width, b'\x00'))

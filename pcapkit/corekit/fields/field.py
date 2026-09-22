@@ -424,8 +424,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --
         # and is thus attacker-controlled: a corrupt or hostile capture can
         # declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a
-        # length short of what ``buffer`` holds is provably bogus: ``rjust()``
-        # cannot recover data that was never in the buffer, only zero-pad for
+        # length short of what ``buffer`` holds is provably bogus: the padding
+        # cannot recover data that was never in the buffer, only zero-fill for
         # it, and no field this large is legitimate to begin with. Honouring it
         # would allocate and zero-fill up to ``length`` octets on nothing but
         # the packet's own say-so. C.f. #554.
@@ -503,7 +503,28 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 )
             ledger[1] += padding
 
-        value = struct.unpack(self.template, buffer[:length].rjust(length, b'\x00'))[0]
+        # NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*
+        # octets of the field -- the buffer ran out, so what is missing is
+        # whatever came after what was read -- so the zeros belong at the end,
+        # where the unread octets were. ``rjust()`` instead put them at the
+        # front, which asserts that the octets never read were the *leading*
+        # ones, and that is wrong for every byte order rather than only for
+        # little-endian ones. Measured on the tree that padded with ``rjust()``:
+        # one octet of a four-octet little-endian 120 (``0x78``) read as
+        # 2,013,265,920, and three octets of a four-octet big-endian
+        # ``0x01020304`` read as ``0x10203``. ``ljust()`` answers 120 and
+        # ``0x1020300``. The big-endian error is the more dangerous of the two --
+        # it scales the value *down*, so it passes a sanity check far more easily
+        # than the inflated little-endian one, which is why the defect went
+        # unnoticed there. See #604.
+        #
+        # This changes what a truncated field *reports*, which is the point, and
+        # not *whether* a truncated capture parses, which must not change: the
+        # accommodation itself is deliberate (#431) and the budget above is built
+        # around preserving it. An entirely empty buffer pads to all zeros either
+        # way, so the end-of-option-list and ``Pad1`` reads the option and list
+        # loops depend on are unaffected.
+        value = struct.unpack(self.template, buffer[:length].ljust(length, b'\x00'))[0]
         return self.post_process(value, packet)
 
 

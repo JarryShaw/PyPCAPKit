@@ -2023,8 +2023,11 @@ class IPv4UnitTests(unittest.TestCase):
         ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
         10 octets here) for more than the 6 octets actually behind it, and
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
-        left-pads the short read with zero octets rather than raising -- the
-        same accommodation as the TCP case, reached the same way.
+        pads the short read with zero octets rather than raising -- the
+        same accommodation as the TCP case, reached the same way. The zeros go
+        on the *tail*, where the octets that were never read would have been;
+        before #604 they were placed at the front, which for a numeric field
+        corrupted the value outright.
 
         ``ihl`` has to declare *more* than the 8 octets actually present,
         though, which the TCP case does not need. Unlike TCP,
@@ -2033,7 +2036,7 @@ class IPv4UnitTests(unittest.TestCase):
         consumed -- and raises ``IPv4: invalid format`` once its loop over the
         parsed options finishes, if that sum exceeds the declared option
         area. Declaring exactly 8 does not skip the accommodation -- the short
-        ``data`` field is still read and left-padded as above -- it just trips
+        ``data`` field is still read and tail-padded as above -- it just trips
         that check afterwards, discarding the result before the test can
         assert on it. Declaring 16 leaves headroom, at the cost of a second
         effect: once the option loop's 16-octet budget outlives the 8 octets
@@ -2069,7 +2072,12 @@ class IPv4UnitTests(unittest.TestCase):
         )
         unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
                            if code == custom)
-        self.assertEqual(unassigned.data, b'\x00\x00\x00\x00' + trailing)
+        # the six octets actually behind the option come first, where they were
+        # read, and the four synthesised for the ones that were not follow them.
+        # Before #604 they arrived the other way round. See #604 and
+        # ``FieldBaseShortReadPaddingSideTests`` in
+        # ``tests/corekit/test_fields_field.py``.
+        self.assertEqual(unassigned.data, trailing + b'\x00\x00\x00\x00')
 
 
 if __name__ == '__main__':
