@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import _pyio
 import io
 import os
 import tempfile
@@ -53,10 +54,10 @@ class SeekableReaderTests(unittest.TestCase):
             if os.path.exists(path):
                 os.unlink(path)
 
-    def test_truncate_rejects_negative_sizes(self) -> None:
+    def test_truncate_buffer_rejects_negative_sizes(self) -> None:
         reader = self.SeekableReader(io.BytesIO(b'abcdef'), buffer_size=4)
         with self.assertRaises(self.exceptions.TruncateError):
-            reader.truncate(-1)
+            reader._truncate_buffer(-1)
         self._close_reader(reader)
 
     def test_write_operations_raise_unsupported_operation(self) -> None:
@@ -65,6 +66,124 @@ class SeekableReaderTests(unittest.TestCase):
             reader.write(b'x')
         with self.assertRaises(self.exceptions.UnsupportedOperation):
             reader.writelines([b'x'])
+        self._close_reader(reader)
+
+    def test_truncate_refuses_on_a_stream_that_reports_itself_unwritable(self) -> None:
+        """Issue #645: ``truncate`` is gated on ``writable()``, and this reader is not writable.
+
+        :meth:`io.IOBase.writable` documents the gate for both methods it guards -- "If
+        :data:`False`, :meth:`write` and :meth:`truncate` will raise :exc:`OSError`" -- and
+        :meth:`~pcapkit.corekit.io.SeekableReader.writable` returns :data:`False` here. Two of
+        the three writability-gated methods already honoured that: ``write`` and ``writelines``
+        raise. ``truncate`` returned its new size instead, so a caller that checked
+        ``writable()`` first -- which is exactly what the contract invites -- got a surprise
+        either way round.
+
+        Every form is asserted, since the omitted-size form takes a different path through the
+        method than an explicit size and only the explicit one would have been noticed.
+
+        """
+        for args in [(), (0,), (4,), (None,)]:
+            with self.subTest(args=args):
+                reader = self.SeekableReader(io.BytesIO(b'abcdef'), buffer_size=4)
+                self.assertFalse(reader.writable())
+
+                with self.assertRaises(self.exceptions.UnsupportedOperation) as caught:
+                    reader.truncate(*args)
+                # NOTE: the contract names OSError, so the refusal has to be one. pcapkit's
+                # UnsupportedOperation subclasses io.UnsupportedOperation, which subclasses
+                # OSError, so the in-library exception satisfies the stdlib contract as it
+                # stands -- there is no choice to make between the two here.
+                self.assertIsInstance(caught.exception, OSError)
+                self.assertIsInstance(caught.exception, io.UnsupportedOperation)
+                self._close_reader(reader)
+
+    def test_truncate_refuses_with_the_same_exception_the_stdlib_reader_raises(self) -> None:
+        """The property, rather than the behaviour: parity with CPython's own buffered reader.
+
+        Asserting "it raises" pins the fix; asserting "it raises *what a read-only
+        :class:`io.BufferedReader` raises*" pins the reason for it, and is what stops this being
+        re-opened by an argument about which exception the contract means. The stdlib's type is
+        captured by *running* the same call on a real read-only file object rather than being
+        named here, so the assertion tracks CPython instead of restating a belief about it.
+
+        Both implementations are checked. The accelerated :class:`io.BufferedReader` raises
+        ``io.UnsupportedOperation: truncate``; the pure-Python ``_pyio.BufferedReader``
+        raises ``io.UnsupportedOperation: File or stream is not writable.`` from
+        ``_BufferedIOMixin.truncate``'s ``_checkWritable()``. The messages differ and the type
+        does not, which is why the type is what is asserted.
+
+        """
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(b'abcdef')
+            path = temp.name
+        try:
+            baselines = {}
+
+            with open(path, 'rb') as accelerated:
+                self.assertIsInstance(accelerated, io.BufferedReader)
+                self.assertFalse(accelerated.writable())
+                with self.assertRaises(OSError) as caught:
+                    accelerated.truncate()
+                baselines['io.BufferedReader'] = type(caught.exception)
+
+            class NonWritableRaw(_pyio.RawIOBase):
+                """A raw stream that reads and does not write, as ``SeekableReader``'s is."""
+
+                def readable(self) -> bool:
+                    return True
+
+                def writable(self) -> bool:
+                    return False
+
+                def readinto(self, buffer) -> int:
+                    return 0
+
+            with _pyio.BufferedReader(NonWritableRaw()) as pure_python:
+                self.assertFalse(pure_python.writable())
+                with self.assertRaises(OSError) as caught:
+                    pure_python.truncate()
+                baselines['_pyio.BufferedReader'] = type(caught.exception)
+
+            for name, expected in baselines.items():
+                with self.subTest(baseline=name, expected=expected.__name__):
+                    reader = self.SeekableReader(io.BytesIO(b'abcdef'), buffer_size=4)
+                    # NOTE: the premise of the comparison -- both report themselves unwritable,
+                    # so both are in the state the contract gates ``truncate`` on.
+                    self.assertFalse(reader.writable())
+                    with self.assertRaises(expected):
+                        reader.truncate()
+                    self._close_reader(reader)
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
+
+    def test_writable_is_the_method_the_io_protocol_consults(self) -> None:
+        """Issue #645: the override was spelled ``writeable``, so it overrode nothing.
+
+        The :mod:`io` API spells it ``writable``. With the misspelling in place,
+        ``'writable' in SeekableReader.__dict__`` was :data:`False` and
+        ``SeekableReader.writable is io.IOBase.writable`` was :data:`True` -- so :mod:`io`,
+        :mod:`shutil` and any third-party caller read the inherited value and never saw the one
+        defined in this file. Both returned :data:`False`, which is the coincidence that hid it:
+        there was no symptom to notice, and editing the misspelled method would silently have
+        had no effect.
+
+        The identity assertion is the load-bearing one. ``writable()`` returning :data:`False`
+        passed before the fix too, by inheritance, so a value-only test cannot tell the two
+        trees apart.
+
+        """
+        self.assertIn('writable', self.SeekableReader.__dict__)
+        self.assertIsNot(self.SeekableReader.writable, io.IOBase.writable)
+        self.assertNotIn('writeable', self.SeekableReader.__dict__)
+
+        reader = self.SeekableReader(io.BytesIO(b'abcdef'), buffer_size=4)
+        # NOTE: the reader genuinely cannot write -- ``write`` raises -- so False is the honest
+        # answer, and the reporting was never the dishonest half. Only where it was *defined*
+        # was wrong, and the guard on ``truncate`` was missing.
+        self.assertFalse(reader.writable())
+        self.assertFalse(hasattr(reader, 'writeable'))
         self._close_reader(reader)
 
     def test_detach_raises_when_underlying_stream_has_no_detach(self) -> None:
@@ -143,14 +262,14 @@ class SeekableReaderTests(unittest.TestCase):
         warn.assert_called_once()
 
         self.assertTrue(reader.seekable())
-        self.assertFalse(reader.writeable())
+        self.assertFalse(reader.writable())
         # NOTE: an omitted size means the current position, per :meth:`io.IOBase.truncate`.
         # The position is 6 and the buffer starts at 2, so 4 octets of it are kept. This
         # asserted 0 until issue #622, which is what an omitted size was resized to.
         self.assertEqual(reader._buffer_set, 2)
-        self.assertEqual(reader.truncate(None), 4)
-        self.assertEqual(reader.truncate(6), 6)
-        self.assertEqual(reader.truncate(2), 2)
+        self.assertEqual(reader._truncate_buffer(None), 4)
+        self.assertEqual(reader._truncate_buffer(6), 6)
+        self.assertEqual(reader._truncate_buffer(2), 2)
         self._close_reader(reader)
 
     def test_read_read1_and_peek_fallback_stream_methods(self) -> None:
@@ -244,7 +363,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.peek(2), b'ab')
         self._close_reader(reader)
 
-    def test_truncate_keeps_the_content_and_not_the_padding(self) -> None:
+    def test_truncate_buffer_keeps_the_content_and_not_the_padding(self) -> None:
         """Issue #622, verbatim: the octets already read survive a truncation.
 
         The buffer holds its content at ``[0:_buffer_cur]`` and nothing but unwritten
@@ -258,7 +377,7 @@ class SeekableReaderTests(unittest.TestCase):
         reader = self.SeekableReader(io.BytesIO(b'abcde'))
 
         self.assertEqual(reader.read(4), b'abcd')
-        self.assertEqual(reader.truncate(8), 8)
+        self.assertEqual(reader._truncate_buffer(8), 8)
         self.assertEqual(reader.seek(0), 0)
 
         # NOTE: the stream holds five octets, so five is the whole of what an eight octet
@@ -267,7 +386,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.read(8), b'abcde')
         self._close_reader(reader)
 
-    def test_truncate_pads_and_keeps_on_the_side_the_bookkeeping_expects(self) -> None:
+    def test_truncate_buffer_pads_and_keeps_on_the_side_the_bookkeeping_expects(self) -> None:
         """A truncation never keeps padding in preference to content.
 
         Each case distinguishes head from tail handling, since the expected buffer is the
@@ -296,7 +415,7 @@ class SeekableReaderTests(unittest.TestCase):
                 reader = self.SeekableReader(io.BytesIO(b'abcdefghijkl'), buffer_size=buffer_size)
                 self.assertEqual(reader.read(read_size), b'abcdefghijkl'[:read_size])
 
-                self.assertEqual(reader.truncate(size), size)
+                self.assertEqual(reader._truncate_buffer(size), size)
                 self.assertEqual(bytes(reader._buffer.getvalue()), expected)
                 self.assertEqual(reader._buffer_set, expected_set)
                 # NOTE: the content pointer indexes the buffer, so it cannot be left
@@ -306,7 +425,7 @@ class SeekableReaderTests(unittest.TestCase):
                 self.assertEqual(reader._buffer_set + reader._buffer_cur, read_size)
                 self._close_reader(reader)
 
-    def test_truncate_keeps_the_window_base_in_step_with_the_stream(self) -> None:
+    def test_truncate_buffer_keeps_the_window_base_in_step_with_the_stream(self) -> None:
         """A reduction that left ``_buffer_set`` alone made the next seek read wrong octets.
 
         ``seek`` treats ``_buffer_set + _buffer_cur`` as how far the stream has been
@@ -323,7 +442,7 @@ class SeekableReaderTests(unittest.TestCase):
         reader = self.SeekableReader(io.BytesIO(b'abcdefghijklmnop'), buffer_size=8)
 
         self.assertEqual(reader.read(8), b'abcdefgh')
-        self.assertEqual(reader.truncate(3), 3)
+        self.assertEqual(reader._truncate_buffer(3), 3)
 
         # the three most recent octets, and a base that still accounts for the other five
         self.assertEqual(bytes(reader._buffer.getvalue()), b'fgh')
@@ -334,7 +453,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.read(1), b'g')
         self._close_reader(reader)
 
-    def test_truncate_leaves_the_position_where_it_was(self) -> None:
+    def test_truncate_buffer_leaves_the_position_where_it_was(self) -> None:
         """:meth:`io.IOBase.truncate` does not move the position, and neither may this one.
 
         The truncation here is to the size the buffer already has, so its *content* is the
@@ -349,25 +468,25 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.seek(2), 2)
         self.assertEqual(reader._buffer.tell(), 2)
 
-        self.assertEqual(reader.truncate(8), 8)
+        self.assertEqual(reader._truncate_buffer(8), 8)
         self.assertEqual(reader.tell(), 2)
         self.assertEqual(reader._buffer.tell(), 2)
         self.assertEqual(reader.read(2), b'cd')
         self._close_reader(reader)
 
-    def test_truncate_without_a_size_resizes_to_the_current_position(self) -> None:
+    def test_truncate_buffer_without_a_size_resizes_to_the_current_position(self) -> None:
         """An omitted size means the current position, not zero."""
         reader = self.SeekableReader(io.BytesIO(b'abcdefgh'), buffer_size=8)
 
         self.assertEqual(reader.read(5), b'abcde')
         self.assertEqual(reader.tell(), 5)
 
-        self.assertEqual(reader.truncate(), 5)
+        self.assertEqual(reader._truncate_buffer(), 5)
         self.assertEqual(reader._buffer_size, 5)
         self.assertEqual(bytes(reader._buffer.getvalue()), b'abcde')
         self._close_reader(reader)
 
-    def test_truncate_below_the_content_leaves_the_reader_usable(self) -> None:
+    def test_truncate_buffer_below_the_content_leaves_the_reader_usable(self) -> None:
         """A truncation has to bring ``_buffer_cur`` down with the buffer it indexes.
 
         Left above the new size it addressed octets the buffer no longer has, and the next
@@ -378,16 +497,16 @@ class SeekableReaderTests(unittest.TestCase):
         reader = self.SeekableReader(io.BytesIO(b'abcdefghijkl'), buffer_size=8)
 
         self.assertEqual(reader.read(6), b'abcdef')
-        self.assertEqual(reader.truncate(3), 3)
+        self.assertEqual(reader._truncate_buffer(3), 3)
         self.assertEqual(reader._buffer_cur, 3)
         self.assertEqual(reader._buffer_set, 3)
         self.assertEqual(reader.read(1), b'g')
         self._close_reader(reader)
 
-    def test_truncate_to_nothing_leaves_the_reader_usable(self) -> None:
+    def test_truncate_buffer_to_nothing_leaves_the_reader_usable(self) -> None:
         """Truncating the buffer away entirely still has to leave reads working.
 
-        ``truncate(0)`` is the only way to reach a buffer of no size: the constructor
+        ``_truncate_buffer(0)`` is the only way to reach a buffer of no size: the constructor
         refuses one, since ``io.BufferedReader`` rejects a non-positive ``buffer_size``
         with ``ValueError: buffer size must be strictly positive``. The next read then
         went to ``_write_buffer``, whose ``buf[-self._buffer_size:]`` is ``buf[-0:]`` --
@@ -400,7 +519,7 @@ class SeekableReaderTests(unittest.TestCase):
         """
         reader = self.SeekableReader(io.BytesIO(b'abcde'), buffer_size=5)
 
-        self.assertEqual(reader.truncate(0), 0)
+        self.assertEqual(reader._truncate_buffer(0), 0)
         self.assertEqual(reader.read(1), b'a')
         self.assertEqual(reader.read(2), b'bc')
         self.assertEqual(reader.tell(), 3)
@@ -743,7 +862,7 @@ class SeekableReaderTests(unittest.TestCase):
             ('seek', lambda: reader.seek(2), 2),
             ('readline', lambda: reader.readline(4), b'cdef'),
             ('read1', lambda: reader.read1(2), b'gh'),
-            ('truncate', lambda: reader.truncate(4), 4),
+            ('_truncate_buffer', lambda: reader._truncate_buffer(4), 4),
             ('read', lambda: reader.read(2), b'ij'),
         ]
         for name, operation, expected in operations:
@@ -759,7 +878,7 @@ class SeekableReaderTests(unittest.TestCase):
     def test_a_position_the_window_has_dropped_is_refused_not_guessed(self) -> None:
         """A read from before the window raises, rather than answering from the wrong octet.
 
-        :meth:`truncate` advances the window's base past the octets it drops, which can
+        :meth:`_truncate_buffer` advances the window's base past the octets it drops, which can
         leave a position already set sitting before it. :meth:`seek` refuses that position
         outright -- the stream cannot be rewound to re-supply the octets, so there is
         nothing to read -- but the buffered read paths reached it too, by way of a position
@@ -775,7 +894,7 @@ class SeekableReaderTests(unittest.TestCase):
 
         self.assertEqual(reader.read(4), b'abcd')
         self.assertEqual(reader.seek(1), 1)
-        self.assertEqual(reader.truncate(2), 2)
+        self.assertEqual(reader._truncate_buffer(2), 2)
         self.assertEqual(reader._buffer_set, 2)          # the window now starts at 2
         self.assertEqual(reader.tell(), 1)               # and the position is behind it
 
@@ -792,7 +911,7 @@ class SeekableReaderTests(unittest.TestCase):
         about a request that wants nothing: every one of these returned ``b''`` before the
         refusal existed, and a zero-length read failing on position grounds is not a
         behaviour either issue asked for. Checking the window before looking at the requested
-        size made all four of them raise from a position :meth:`truncate` had stranded.
+        size made all four of them raise from a position :meth:`_truncate_buffer` had stranded.
 
         The same position is asserted both ways round, which is what makes this a statement
         about the *size* rather than about the state: at size zero all four return, and the
@@ -811,7 +930,7 @@ class SeekableReaderTests(unittest.TestCase):
                     self.assertEqual(reader.read(4), b'abcd')
                     self.assertEqual(reader.seek(1), 1)
                     if stranded:
-                        self.assertEqual(reader.truncate(2), 2)
+                        self.assertEqual(reader._truncate_buffer(2), 2)
                         self.assertEqual(reader._buffer_set, 2)
                         self.assertLess(reader.tell(), reader._buffer_set)
 
