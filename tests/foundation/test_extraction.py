@@ -116,6 +116,9 @@ class ExtractorTests(unittest.TestCase):
         extractor._flag_e = False
         extractor._flag_a = False
         extractor._flag_n = False
+        # The EOF handlers consult this to decide whether a ``no_eof`` retry could
+        # produce anything, so an instance driven through them has to carry it.
+        extractor._eof_mark = None
         return extractor
 
     def test_properties_success_and_unsupported_paths(self) -> None:
