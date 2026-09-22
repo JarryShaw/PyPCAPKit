@@ -943,6 +943,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         """
         if frame is not None:
+            end_stream = frame.flags.END_STREAM
+
             pad_len = frame.pad_len
             data = frame.data
 

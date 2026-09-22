@@ -136,7 +136,26 @@ class FrameType(EnumSchema[Enum_Frame]):
             Revised schema.
 
         """
-        flags = 0
+        # Seed the accumulator with the frame's own ``Flags`` rather than a bare
+        # ``0``, so that a frame with no bit set still reports ``__flags__`` as
+        # the ``Flags`` both this schema and :class:`~pcapkit.protocols.data.\
+        # application.httpv2.Flags` declare it to be. ``|=`` promotes a plain
+        # ``0`` only as a side effect, so without this a flags octet of ``0x00``
+        # -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and
+        # a membership test against it raises :exc:`TypeError` rather than
+        # answering. This mirrors the construct path, which already seeds
+        # ``Flags(0)`` at every one of its six sites.
+        #
+        # ``FrameType.Flags`` itself declares no members, and from Python 3.11
+        # the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse
+        # ``Flags(0)`` outright with ``TypeError: <flag 'Flags'> has no members
+        # defined`` (3.10 and earlier hand back a pseudo-member instead), so
+        # the five frame schemas that inherit it unchanged -- ``UnassignedFrame``,
+        # ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and
+        # ``WindowUpdateFrame`` -- keep the plain ``int``. All five pass
+        # ``flags=None`` into their data objects and never surface
+        # ``__flags__``, so nothing observes the difference for them.
+        flags = self.Flags(0) if self.Flags.__members__ else 0
         for key, val in filter(lambda kv: kv[0].startswith('BIT_'),
                                self.Flags.__members__.items()):
             name = key.lower()
