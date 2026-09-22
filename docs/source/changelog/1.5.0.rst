@@ -1547,6 +1547,25 @@ pull requests between #326 and #509.
   longer for this reason but for ``R1_COUNTER``'s four-octet ``counter`` where
   :rfc:`7401#section-5.2.3` requires eight, which this defect had been masking
   (#651).
+* **Fixed** -- the ``_missing`` sentinel behind ``MultiDict.pop`` and
+  ``OrderedMultiDict.pop`` answered ``True`` to ``bool()``, stating the
+  opposite of what it means, and its class was subclassable. Both now follow
+  ``NoValueType`` in ``pcapkit.corekit.fields.field``, the package's convention
+  for a marker of this kind: ``_Missing`` carries ``@final`` and defines
+  ``__bool__`` returning ``False``. The marker is not private in practice --
+  it is the runtime default of both ``pop()`` methods, so
+  ``inspect.signature(MultiDict.pop).parameters['default'].default`` hands it to
+  any caller who asks, and ``if default:`` on that value reported "a default was
+  supplied" where none had been. No behaviour changes: both ``pop()``
+  implementations decide by identity (``default is not _missing``) and never by
+  truthiness, so ``repr``, ``__reduce__``, the pickle bytes at every protocol,
+  and every ``pop()`` result -- including the falsy defaults ``None``, ``False``,
+  ``0``, ``''`` and ``[]`` -- are unchanged, and ``pop()`` structurally cannot
+  return the marker itself. This closes the second of the three ``object()``
+  sentinel sites the sweep for #640 left open; the first needed nothing, and
+  ``_NOT_FOUND`` in ``pcapkit.utilities.compat`` is deliberately left alone as a
+  verbatim line of CPython's own ``functools.cached_property``, inside a
+  ``sys.version_info < (3, 8)`` branch no supported interpreter reaches (#661).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
