@@ -11,10 +11,44 @@ prune examples/captures
 prune temp
 prune test
 
-# Load-bearing, not belt-and-braces. ``global-include *.rst`` above matches only
-# ``*.rst``, so since the README became Markdown this line is the only thing that
-# puts it in an sdist -- and ``setup.py`` reads it unguarded for the
-# ``long_description``, so an sdist without it cannot be installed at all.
+# Belt-and-braces, both of them: setuptools ships these two whether or not this
+# file mentions them, so neither line is load-bearing. An earlier version of this
+# comment claimed the opposite -- that ``include README.md`` was "the only thing
+# that puts it in an sdist" and that an sdist without it "cannot be installed at
+# all" -- and both halves are false. Measured by deleting these four lines and the
+# two below them and rebuilding from a clean tree: the ``tar tzf`` listing is
+# identical, 861 entries either way with an empty ``diff``, and the resulting sdist
+# installs with exit 0. ``README.md``, ``LICENSE``, ``CHANGELOG.md`` and
+# ``CITATION.cff`` are all still in it.
+#
+# What actually ships them, on setuptools 84.0.0:
+#
+# * ``setuptools/command/sdist.py:59-60`` sets ``READMES`` from
+#   ``README_EXTENSIONS = ['', '.rst', '.txt', '.md']``, and
+#   ``setuptools/_distutils/command/sdist.py:277-296`` appends the first of those
+#   that exists to the file list unconditionally, before ``MANIFEST.in`` is read.
+#   The ``.md`` entry is setuptools' own addition over the distutils default, so
+#   the README becoming Markdown is exactly what this line stopped mattering for.
+# * ``setuptools/dist.py:460`` supplies the default ``license_files`` glob
+#   ``['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']``, used because
+#   ``pyproject.toml`` declares no ``license-files`` of its own. That is what emits
+#   ``adding license file 'LICENSE'`` in the build log, twice, in a build with this
+#   line deleted.
+#
+# ``setup.py`` does read ``README.md`` unguarded for the ``long_description``
+# (``setup.py:31-36``), and it reads it from wherever ``setup.py`` is executing --
+# which during ``pip install`` of an sdist is the unpacked sdist, not a checkout.
+# So the failure mode is real in principle; it just cannot be reached by removing
+# this line, because the README is in the sdist regardless.
+#
+# Of the three ``include`` lines this file originally carried, only
+# ``include CHANGELOG.md`` is load-bearing: deleting it alone drops exactly one
+# entry from the listing, and nothing else changes.
+#
+# These two are kept anyway, as an explicit statement of intent that does not
+# depend on a setuptools default staying where it is. That is a different and much
+# weaker reason than the one this comment used to give, which is the point of
+# rewriting it rather than deleting it.
 include README.md
 include LICENSE
 
@@ -44,8 +78,10 @@ include CHANGELOG.md
 # ``CHANGELOG.md`` carries only the version being released, so on its own the
 # distribution would describe one release and no history. ``prune docs`` above
 # drops the rest, which is where the history lives, so re-add just that one
-# directory afterwards -- the same shape as ``include README.md``, and for the
-# same reason. Each of those files is a self-contained reStructuredText entry
+# directory afterwards -- the same shape as ``include CHANGELOG.md`` above, and for
+# the same reason. (This used to name ``include README.md`` instead, on the
+# mistaken belief that that line was load-bearing; see the note above it.) Each of
+# those files is a self-contained reStructuredText entry
 # that renders standalone; the Sphinx index beside them is deliberately *not*
 # shipped, because it is a ``toctree`` that only Sphinx can read.
 recursive-include docs/source/changelog *.rst

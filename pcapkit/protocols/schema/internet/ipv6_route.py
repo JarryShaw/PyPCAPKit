@@ -24,9 +24,10 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
+    from pcapkit.protocols.protocol import ProtocolBase as Protocol
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict

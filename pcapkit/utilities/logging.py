@@ -43,7 +43,7 @@ import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import IO, Optional, Union
+    from typing import IO, Any, Optional, Union
 
 __all__ = [
     'logger', 'get_logger', 'configure', 'reset', 'ensure_output',
