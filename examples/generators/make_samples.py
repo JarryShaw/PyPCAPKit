@@ -18,6 +18,8 @@ which may also be run on its own:
 Module              Fixtures
 =================== ==========================================================
 :file:`pcap.py`     the ``.pcap`` captures the unit and runtime tests read
+:file:`endian.py`   the big-endian ``.pcap`` captures, and their little-endian
+                    twin, that the byte-order tests read
 :file:`pcapng.py`   the ``.pcapng`` captures the regression tests read
 :file:`legacy.py`   the extra captures ``examples/legacy_smoke/`` reads
 :file:`options.py`  the ``options-*.pcap`` option-coverage captures
@@ -50,7 +52,7 @@ DEST = ROOT / 'examples' / 'captures'
 #: own construction output, so a failure in it is a statement about the library
 #: rather than about the fixture -- and reading it after the others have already
 #: printed keeps that distinction visible in the log.
-GENERATORS = ('pcap', 'pcapng', 'legacy', 'options')
+GENERATORS = ('pcap', 'endian', 'pcapng', 'legacy', 'options')
 
 
 def load(name: 'str') -> 'ModuleType':

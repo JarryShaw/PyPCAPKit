@@ -25,6 +25,20 @@ def byteorder_callback(field: 'Field', packet: 'dict[str, Any]') -> 'None':
         field: Field instance.
         packet: Packet data.
 
+    Notes:
+        ``byteorder`` is the key a caller has to seed, and this function is what
+        defines it: :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>`
+        and :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
+        both write it from the global header's magic number. The fallback to
+        :data:`sys.byteorder` is for a schema packed or unpacked on its own, with
+        no global header to ask -- which also means a *misspelled* key looks
+        exactly like an absent one and reports nothing. That is what hid GitHub
+        issue #605: ``unpack`` wrote ``bytesorder``, so every field here was read
+        in the host's order rather than the file's, which is right by coincidence
+        on a little-endian capture and byte-swapped on a big-endian one. See
+        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` for the
+        fixtures that now take the other side of the branch.
+
     """
     field._byteorder = packet.get('byteorder', sys.byteorder)
 
