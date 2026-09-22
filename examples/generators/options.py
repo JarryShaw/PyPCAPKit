@@ -948,17 +948,80 @@ HIP_VERSION = {129: 2, 128: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
-#: Two, not one, and this is not padding for its own sake. ``HIP.make``
-#: computes the header's ``len`` field as ``total_length // 8 + 4``, which is
-#: only lossless when the parameter octets are a multiple of eight -- and the
-#: parameter padding rule pads the *contents* to eight, ignoring the four-octet
-#: type-and-length header, so a single parameter is always ``4 (mod 8)`` and
-#: always loses those four octets. ``_read_hip_param`` then checks the value
-#: exactly and rejects the packet. Two copies sum to a multiple of eight, so
-#: the arithmetic is exact and the parameter constructors become reachable:
-#: measured, this is the difference between 4 and 29 of the 49 codes
-#: round-tripping. The single-parameter case is not lost -- it is what
-#: ``hip-parameter-single`` in the test's expected-failure table records.
+#: Two, and **no longer for the reason it used to be**, which is the whole point
+#: of this note: the same constant now routes around a different set of defects
+#: from the one it was introduced for, and reading it as still being about the
+#: padding rule would send the next person to a line that is already fixed.
+#:
+#: It was two because of the defect #651 fixed. ``HIP.make`` computes the
+#: header's ``len`` field as ``total_length // 8 + 4``, which is lossless only
+#: when the parameter octets are a multiple of eight; and every padding site in
+#: the two HIP modules aligned the *contents* to eight, ignoring the four-octet
+#: type-and-length header, so a single parameter was always ``4 (mod 8)``, the
+#: floor division always dropped those four octets, and ``_read_hip_param``
+#: -- which compares the recovered length exactly -- rejected the library's own
+#: single-parameter packets. Two copies summed to a multiple of eight, so the
+#: arithmetic came out exact and the parameter constructors became reachable.
+#:
+#: #651 made the padding :rfc:`7401` Section 5.2.1's
+#: ``Total Length = 11 + Length - (Length + 3) % 8``, so each parameter is a
+#: multiple of eight on its own and the pair is no longer needed for that.
+#: Measured over this table's 49 HIP codes, on ``0c7f2b7c9`` and on the #651
+#: tree, by running the round trip at each setting:
+#:
+#: ======================  ========  ==========
+#: tree                    one copy  two copies
+#: ======================  ========  ==========
+#: ``0c7f2b7c9`` (before)  4 OK      45 OK
+#: #651 (after)            45 OK     46 OK
+#: ======================  ========  ==========
+#:
+#: So one copy went from unusable to very nearly usable, which is the strongest
+#: statement available that the padding was what made a lone parameter
+#: unrepresentable -- 41 codes that could not survive alone now can.
+#:
+#: It is still *two*, though, because the four codes that fail at one copy fail
+#: for reasons that have nothing to do with padding. Three of them pack a number
+#: of contents octets that disagrees with the ``len`` they declare, so their
+#: record is not 8-aligned however the padding is computed, and a pair cancels
+#: that misalignment exactly as it used to cancel the padding error:
+#:
+#: * ``R1_COUNTER`` (129) and ``R1_Counter`` (128) both declare ``len=12``,
+#:   which :rfc:`7401` Section 5.2.3 agrees with, but pack 12 octets in total
+#:   rather than 16 -- because ``counter`` is a
+#:   :class:`~pcapkit.corekit.fields.numbers.UInt32Field` where the RFC
+#:   specifies "R1 generation counter, 8 bytes", a 64-bit unsigned integer. Four
+#:   octets short, not filed anywhere yet, and found while measuring #651.
+#:
+#:   ``R1_COUNTER`` is the one code that round-tripped at one copy *before* #651
+#:   and does not after, and the reason is worth keeping: at ``len=12`` the old
+#:   contents-aligning rule appended exactly four surplus octets, which happened
+#:   to fill this parameter's four-octet shortfall and bring the record to 16.
+#:   Two defects cancelling, again. Correcting the padding removes the
+#:   compensation and leaves the shortfall visible, which is the right outcome
+#:   and not a regression in anything but this table's tally.
+#:
+#:   Once the width is fixed, ``R1_Counter`` will fail on its own second defect
+#:   instead: code 128 parses as an ``UnassignedParameter``, because the schema
+#:   registry is keyed on ``code=`` and ``R1CounterParameter`` declares only 129.
+#:   That is what ``hip-parameter/R1_Counter`` in the expected-failure table
+#:   records, and it is why this code fails at two copies as well as at one.
+#: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
+#:   ``hip-parameter/HOST_ID`` in that table.
+#: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
+#:   any other version -- while this table builds it at version 2. Nothing to do
+#:   with lengths at all, and it is the one whose recorded ``defect`` string in
+#:   that table names the header arithmetic rather than this.
+#:
+#: Dropping to one copy would therefore trade this module's padding workaround
+#: for two freshly exposed expected-failure entries (``R1_COUNTER`` and a
+#: changed status on ``R1_Counter``) and the loss of ``R1_COUNTER`` from the
+#: round-tripping set -- a change about *those* defects rather than about this
+#: one, and one that belongs with their fixes. The
+#: single-parameter case is not lost in the meantime: it is asserted directly,
+#: and now positively, by
+#: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
+#: :mod:`tests.protocols.test_option_roundtrip_unit`.
 HIP_COPIES = 2
 
 

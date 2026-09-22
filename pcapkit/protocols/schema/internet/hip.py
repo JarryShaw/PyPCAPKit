@@ -304,6 +304,154 @@ def transport_format_list_len(pkt: 'dict[str, Any]') -> 'int':
     return length
 
 
+def encrypted_data_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return ``ENCRYPTED`` encrypted-data length.
+
+    Used by the ``data`` field of :class:`EncryptedParameter`, which follows a
+    four-octet ``reserved`` field and a conditional sixteen-octet ``iv`` with
+    the ciphertext, sized by the remainder of the parameter. :rfc:`7401`
+    Section 5.2.18 puts all three inside ``Length`` --
+
+    ::
+
+        |             Type              |             Length            |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                           Reserved                            |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                              IV                               |
+        /                                                               /
+        /                       Encrypted data                          /
+
+    -- so both have to come off ``Length`` to leave the data, and
+    :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_encrypted` writes
+    ``len=4 + len(iv) + len(data)`` to match.
+
+    This subtracted the ``iv`` but not the ``reserved``, so the field claimed
+    four octets more than the parameter holds: on unpack it read four octets
+    of the *next* parameter into ``data``, and on pack it zero-extended the
+    ciphertext by four. That was recorded as the second half of
+    ``hip-parameter/ENCRYPTED`` in the round-trip suite's expected-failure
+    table, and left alone -- because while the padding rule was also four
+    octets out (#651), the two errors cancelled at some residues of ``Length``
+    and not others. Measured by packing through the public maker at every
+    residue, the old record total agreed with :rfc:`7401` Section 5.2.1 at
+    ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over at
+    ``{1, 2, 3, 4}`` -- so ``Length = 8``, which the unit suite happened to
+    use, is one of the four where the module emitted RFC-conformant
+    ``ENCRYPTED`` octets while getting both halves wrong.
+
+    Fixing the padding without fixing this would therefore have *regressed*
+    ``ENCRYPTED``, from right-by-accident at four of the eight residues to four
+    octets too long at all eight: with only the padding corrected the total
+    becomes ``8 + Length + pad`` against a correct ``4 + Length + pad``, which
+    is a uniform four-octet surplus with no residue left where it cancels. So
+    the two go together.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Encrypted data length.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is too short
+            to hold the ``reserved`` octets, and the ``iv`` octets where a
+            cipher that carries one was resolved -- which would otherwise
+            underflow the data length below zero.
+
+    """
+    length = pkt['len'] - 4 - (16 if pkt.get('iv') else 0)
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {pkt["len"]}')
+    return length
+
+
+def parameter_total_len(length: 'int') -> 'int':
+    """Return the total on-wire length of a HIP parameter.
+
+    :rfc:`7401` Section 5.2.1 states the arithmetic outright, so there is
+    nothing here to infer from the diagram --
+
+    ::
+
+        All of the encoded TLV parameters have a length (that includes the
+        Type and Length fields), which is a multiple of 8 bytes.  When
+        needed, padding MUST be added to the end of the parameter so that the
+        total length is a multiple of 8 bytes.
+
+        Total Length = 11 + Length - (Length + 3) % 8;
+
+    -- and this function is that formula, spelled the way the RFC spells it.
+
+    The distinction that matters is *which* quantity gets aligned. ``Length``
+    is "Length of the Contents, in bytes, excluding Type, Length, and
+    Padding", and it is the **total** -- contents plus the four octets of
+    ``Type`` and ``Length`` plus padding -- that must land on a multiple of
+    eight. Aligning the contents alone instead, as every padding site in this
+    module and in :mod:`pcapkit.protocols.internet.hip` did before #651, puts
+    every parameter at ``4 (mod 8)`` for every possible ``Length``: never a
+    multiple of eight and never the length the RFC gives. It is not even a
+    consistent offset, because the two formulas disagree in both directions --
+    at ``Length = 4`` (a whole ``SEQ``) the contents are already 8-aligned
+    with the header, so the RFC requires no padding at all and aligning the
+    contents appends four octets that must not be there; at ``Length = 8`` the
+    contents are 8-aligned on their own, so aligning them appends nothing and
+    the record is left four octets short.
+
+    Args:
+        length: The parameter's ``Length`` field, i.e. its contents length in
+            octets, excluding ``Type``, ``Length`` and ``Padding``.
+
+    Returns:
+        Total length of the parameter in octets, including ``Type``,
+        ``Length``, ``Contents`` and ``Padding``. Always a multiple of eight.
+
+    Raises:
+        FieldValueError: If ``length`` is negative. This cannot happen from
+            real wire bytes -- ``len`` is an unsigned 16-bit field -- but a
+            caller constructing a schema directly could still pass one, and
+            the RFC formula is meaningless there: it would answer 8 for
+            ``Length = -1``, a "total" smaller than the four-octet header
+            alone. Raising keeps this to the same floor-and-raise discipline
+            as :func:`two_octet_prefix_list_len`.
+
+    """
+    if length < 0:
+        raise FieldValueError(f'HIP: invalid parameter length: {length}')
+    return 11 + length - (length + 3) % 8
+
+
+def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return the number of padding octets a HIP parameter needs.
+
+    Used by the ``padding`` field of every parameter schema in this module.
+    The count is whatever :func:`parameter_total_len` leaves over once the
+    four-octet ``Type`` and ``Length`` header and the ``Length`` octets of
+    contents are accounted for, which :rfc:`7401` Section 5.2.1 bounds at
+    "0-7 bytes".
+
+    This is one function shared by every parameter rather than a lambda
+    repeated per class because it was previously the latter -- 46 copies of
+    the same wrong expression here and 49 of its counterpart in
+    :mod:`pcapkit.protocols.internet.hip`, which is 95 places for the
+    arithmetic to be wrong in and one place too few to state the RFC's reason
+    for it.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Padding length in octets, between 0 and 7 inclusive.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is
+            negative; see :func:`parameter_total_len`.
+
+    """
+    length = pkt['len']
+    return parameter_total_len(length) - 4 - length
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -322,7 +470,7 @@ class UnassignedParameter(Parameter):
     #: Parameter value.
     value: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', value: 'bytes') -> 'None': ...
@@ -341,7 +489,7 @@ class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
     #: New SPI.
     new_spi: 'int' = UInt32Field()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int',
@@ -357,7 +505,7 @@ class R1CounterParameter(Parameter, code=Enum_Parameter.R1_COUNTER):
     #: R1 counter.
     counter: 'int' = UInt32Field()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', counter: 'int') -> 'None': ...
@@ -401,6 +549,45 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
         item_type=SchemaField(schema=Locator),
     )
     #: Padding.
+    #:
+    #: **This is the one parameter in this module that does not use**
+    #: :func:`parameter_padding_len`, **and the exclusion is deliberate. Do not
+    #: "finish" #651 by changing this line on its own: doing so takes a
+    #: conformant parameter to four octets short.** Two defects here cancel each
+    #: other exactly, and #679 tracks fixing them together:
+    #:
+    #: 1. This callback does not receive the parameter's ``len`` at all. ``ListField``
+    #:    packs each nested :class:`Locator` into the shared packet context, whose
+    #:    own ``len`` key overwrites the parameter's, and ``padding`` is evaluated
+    #:    after the list -- so the value seen is the last locator's ``len``, which
+    #:    is 4 for any IPv6 locator. Measured by building this schema directly with
+    #:    a parameter ``len`` of 9 over a single locator of ``len`` 4: the record
+    #:    pads by the amount for 4, not the 3 that 9 would give.
+    #: 2. :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set` sets
+    #:    this parameter's ``len`` to ``sum(Locator.len)``, and ``Locator.len``
+    #:    counts 4-octet units where :rfc:`7401` Section 5.2.1's ``Length`` is a
+    #:    byte count -- so it writes ``4n`` where the contents are ``24n`` octets.
+    #:
+    #: Because the shadowed value is always 4 for a plain IPv6 locator, the old
+    #: expression always appends 4, giving ``4 + 24n + 4 = 24n + 8``; and because
+    #: ``24n`` is a multiple of 8, the RFC total for a byte-count ``Length`` of
+    #: ``24n`` is ``11 + 24n - 3``, the same ``24n + 8``. Measured at n = 1, 2, 5 as
+    #: 32, 56 and 128 octets, on this tree and on the tree before #651 alike. So the
+    #: wire output is right today, by two wrongs, and correcting only the padding
+    #: would leave ``24n + 4``.
+    #:
+    #: That cancellation holds for a set of **plain IPv6 locators only**, and the
+    #: reason to say so here is that it would be easy to read the paragraph above as
+    #: a guarantee about this parameter in general. It is not. A locator carrying an
+    #: SPI is 28 octets rather than 24, and an empty set has no locator to shadow
+    #: ``len`` at all, so measured on both trees: the empty set packs 4 octets where
+    #: :rfc:`7401` Section 5.2.1 wants 8; one SPI locator packs 35; two pack 63; and
+    #: a mixed plain-and-SPI pair packs 59 or 60 depending on order -- none of them a
+    #: multiple of eight. Those shapes are non-conformant *before and after* #651,
+    #: byte-identically, which is exactly why leaving this line alone is the safe
+    #: choice rather than the correct one: it ships nothing different. #679 owns
+    #: making them right, and has to account for all of these shapes, not just the
+    #: homogeneous one.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
@@ -433,7 +620,7 @@ class PuzzleParameter(Parameter, code=Enum_Parameter.PUZZLE):
     #: Random data.
     random: 'int' = NumberField(length=lambda pkt: pkt['len'] - 4, signed=False)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', lifetime: 'int',
@@ -459,7 +646,7 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     #: Solution.
     solution: 'int' = NumberField(length=lambda pkt: (pkt['len'] - 4) // 2, signed=False)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', reserved: 'int',
@@ -473,7 +660,7 @@ class SEQParameter(Parameter, code=Enum_Parameter.SEQ):
     #: Update ID.
     update_id: 'int' = UInt32Field()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'int') -> 'None': ...
@@ -489,7 +676,7 @@ class ACKParameter(Parameter, code=Enum_Parameter.ACK):
         item_type=UInt32Field(),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'bytes | list[int]') -> 'None': ...
@@ -505,7 +692,7 @@ class DHGroupListParameter(Parameter, code=Enum_Parameter.DH_GROUP_LIST):
         item_type=EnumField(length=1, namespace=Enum_Group),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', groups: 'list[Enum_Group]') -> 'None': ...
@@ -522,7 +709,7 @@ class DiffieHellmanParameter(Parameter, code=Enum_Parameter.DIFFIE_HELLMAN):
     #: Diffie-Hellman value.
     pub_val: 'int' = NumberField(length=lambda pkt: pkt['pub_len'], signed=False)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', group: 'Enum_Group', pub_len: 'int',
@@ -539,7 +726,7 @@ class HIPTransformParameter(Parameter, code=Enum_Parameter.HIP_TRANSFORM):
         item_type=EnumField(length=2, namespace=Enum_Suite),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_Suite]') -> 'None': ...
@@ -555,7 +742,7 @@ class HIPCipherParameter(Parameter, code=Enum_Parameter.HIP_CIPHER):
         item_type=EnumField(length=2, namespace=Enum_Cipher),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', ciphers: 'list[Enum_Cipher]') -> 'None': ...
@@ -573,7 +760,7 @@ class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MOD
         item_type=EnumField(length=2, namespace=Enum_NATTraversal),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', modes: 'list[Enum_NATTraversal]') -> 'None': ...
@@ -586,7 +773,7 @@ class TransactionPacingParameter(Parameter, code=Enum_Parameter.TRANSACTION_PACI
     #: Transaction pacing.
     min_ta: 'int' = UInt32Field()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', min_ta: 'int') -> 'None': ...
@@ -604,11 +791,9 @@ class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
         lambda pkt: pkt['__cipher__'] in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC),
     )
     #: Data.
-    data: 'bytes' = BytesField(
-        length=lambda pkt: pkt['len'] - (16 if pkt.get('iv') else 0),
-    )
+    data: 'bytes' = BytesField(length=encrypted_data_len)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     @classmethod
     def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
@@ -713,7 +898,7 @@ class HostIDParameter(Parameter, code=Enum_Parameter.HOST_ID):
     #: Domain ID.
     di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hi_len: 'int', di_data: 'DIData',
@@ -774,7 +959,7 @@ class HITSuiteListParameter(Parameter, code=Enum_Parameter.HIT_SUITE_LIST):
         item_type=EnumField(length=1, namespace=Enum_HITSuite),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_HITSuite]') -> 'None': ...
@@ -795,7 +980,7 @@ class CertParameter(Parameter, code=Enum_Parameter.CERT):
     #: Certificate data.
     cert: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 4)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', cert_group: 'Enum_Group', cert_count: 'int',
@@ -813,7 +998,7 @@ class NotificationParameter(Parameter, code=Enum_Parameter.NOTIFICATION):
     #: Notification data.
     msg: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 4)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', msg_type: 'Enum_NotifyMessage', msg: 'bytes') -> 'None': ...
@@ -826,7 +1011,7 @@ class EchoRequestSignedParameter(Parameter, code=Enum_Parameter.ECHO_REQUEST_SIG
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
@@ -846,7 +1031,7 @@ class RegInfoParameter(Parameter, code=Enum_Parameter.REG_INFO):
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', min_lifetime: 'int', max_lifetime: 'int',
@@ -865,7 +1050,7 @@ class RegRequestParameter(Parameter, code=Enum_Parameter.REG_REQUEST):
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_request: 'list[Enum_Registration]') -> 'None': ...
@@ -883,7 +1068,7 @@ class RegResponseParameter(Parameter, code=Enum_Parameter.REG_RESPONSE):
         item_type=EnumField(length=1, namespace=Enum_Registration),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_response: 'list[Enum_Registration]') -> 'None': ...
@@ -901,7 +1086,7 @@ class RegFailedParameter(Parameter, code=Enum_Parameter.REG_FAILED):
         item_type=EnumField(length=1, namespace=Enum_RegistrationFailure),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_failed: 'list[Enum_RegistrationFailure]') -> 'None': ...
@@ -931,7 +1116,7 @@ class EchoResponseSignedParameter(Parameter, code=Enum_Parameter.ECHO_RESPONSE_S
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
@@ -947,7 +1132,7 @@ class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORM
         item_type=EnumField(length=2, namespace=Enum_Parameter),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', formats: 'list[Enum_Parameter]') -> 'None': ...
@@ -965,7 +1150,7 @@ class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
         item_type=EnumField(length=2, namespace=Enum_ESPTransformSuite),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_ESPTransformSuite]') -> 'None': ...
@@ -978,7 +1163,7 @@ class SeqDataParameter(Parameter, code=Enum_Parameter.SEQ_DATA):
     #: Sequence number.
     seq: 'int' = UInt32Field()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', seq: 'int') -> 'None': ...
@@ -994,7 +1179,7 @@ class AckDataParameter(Parameter, code=Enum_Parameter.ACK_DATA):
         item_type=UInt32Field(),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', ack: 'list[int]') -> 'None': ...
@@ -1013,7 +1198,7 @@ class PayloadMICParameter(Parameter, code=Enum_Parameter.PAYLOAD_MIC):
     #: MIC value.
     mic: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 8)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', next: 'Enum_TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...
@@ -1026,7 +1211,7 @@ class TransactionIDParameter(Parameter, code=Enum_Parameter.TRANSACTION_ID):
     #: Transaction ID.
     id: 'int' = NumberField(length=lambda pkt: pkt['len'], signed=False)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
@@ -1039,7 +1224,7 @@ class OverlayIDParameter(Parameter, code=Enum_Parameter.OVERLAY_ID):
     #: Overlay ID.
     id: 'int' = NumberField(length=lambda pkt: pkt['len'], signed=False)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
@@ -1062,7 +1247,7 @@ class RouteDstParameter(Parameter, code=Enum_Parameter.ROUTE_DST):
         item_type=IPv6AddressField(),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | int | bytes | IPv6Address]') -> 'None': ...
@@ -1080,7 +1265,7 @@ class HIPTransportModeParameter(Parameter, code=Enum_Parameter.HIP_TRANSPORT_MOD
         item_type=EnumField(length=2, namespace=Enum_Transport),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', mode: 'list[Enum_Transport]') -> 'None': ...
@@ -1093,7 +1278,7 @@ class HIPMACParameter(Parameter, code=Enum_Parameter.HIP_MAC):
     #: HMAC value.
     hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
@@ -1106,7 +1291,7 @@ class HIPMAC2Parameter(Parameter, code=Enum_Parameter.HIP_MAC_2):
     #: HMAC value.
     hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
@@ -1121,7 +1306,7 @@ class HIPSignature2Parameter(Parameter, code=Enum_Parameter.HIP_SIGNATURE_2):
     #: Signature value.
     signature: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 2)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
@@ -1136,7 +1321,7 @@ class HIPSignatureParameter(Parameter, code=Enum_Parameter.HIP_SIGNATURE):
     #: Signature value.
     signature: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 2)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
@@ -1149,7 +1334,7 @@ class EchoRequestUnsignedParameter(Parameter, code=Enum_Parameter.ECHO_REQUEST_U
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
@@ -1162,7 +1347,7 @@ class EchoResponseUnsignedParameter(Parameter, code=Enum_Parameter.ECHO_RESPONSE
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
@@ -1211,7 +1396,7 @@ class OverlayTTLParameter(Parameter, code=Enum_Parameter.OVERLAY_TTL):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', ttl: 'int') -> 'None': ...
@@ -1234,7 +1419,7 @@ class RouteViaParameter(Parameter, code=Enum_Parameter.ROUTE_VIA):
         item_type=IPv6AddressField(),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
@@ -1247,7 +1432,7 @@ class FromParameter(Parameter, code=Enum_Parameter.FROM):
     #: Address.
     address: 'IPv6Address' = IPv6AddressField()
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'str | bytes | int | IPv6Address') -> 'None': ...
@@ -1260,7 +1445,7 @@ class RVSHMACParameter(Parameter, code=Enum_Parameter.RVS_HMAC):
     #: HMAC value.
     hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
@@ -1276,7 +1461,7 @@ class ViaRVSParameter(Parameter, code=Enum_Parameter.VIA_RVS):
         item_type=IPv6AddressField(),
     )
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
@@ -1289,7 +1474,7 @@ class RelayHMACParameter(Parameter, code=Enum_Parameter.RELAY_HMAC):
     #: HMAC value.
     hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...

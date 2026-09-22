@@ -29,9 +29,15 @@ That table can only speak about cycles that *fail*, though, and a defect can
 leave the cycle closed -- the generator constructing and reconstructing the same
 wrong octets, which match each other and so match the assertion. Those are
 pinned as tests of their own rather than as entries, since an entry would have to
-record ``'OK'`` as a failure:
-:meth:`OptionRoundTripTests.test_a_single_hip_parameter_cannot_be_constructed`
-for the HIP header arithmetic the generator's ``HIP_COPIES`` routes around.
+record ``'OK'`` as a failure. HIP's parameter padding was the standing example:
+it aligned the contents to eight rather than the record, so every parameter was
+``4 (mod 8)``, the header ``len`` field could not represent a lone one, and the
+generator's ``HIP_COPIES`` put two in a packet to make the arithmetic come out.
+A round trip could never see any of it, because pcapkit's writer and reader
+shared the error. #651 fixed it against :rfc:`7401` Section 5.2.1 rather than
+against a round trip, and
+:meth:`OptionRoundTripTests.test_a_hip_packet_carrying_one_parameter_round_trips`
+is the same pin, now asserting the case closes.
 
 IPv4's ``SID`` option width was the other one, tracked as #534 and pinned here by
 a ``test_a_parsed_sid_option_re_emits_two_octets_too_wide`` that no longer exists:
@@ -58,9 +64,10 @@ argument in the generator's tables is a legitimate value for that option, and
 none of the assertions below has been loosened to make a failing case pass. The
 one place where an argument was chosen to route *around* a defect rather than
 into it is HIP's ``HIP_COPIES``, which puts two copies of each parameter in a
-packet because one is unrepresentable; the defect that forces it is not lost,
-:meth:`OptionRoundTripTests.test_a_single_hip_parameter_cannot_be_constructed`
-pins it directly.
+packet. One copy is representable since #651 and the constant is no longer about
+padding -- see its note in the generator for the four unrelated defects that
+keep it at two -- and the single-parameter case is asserted directly by
+:meth:`OptionRoundTripTests.test_a_hip_packet_carrying_one_parameter_round_trips`.
 
 This module is unit tier: it constructs its own octets and reads no capture, so
 it runs on a fresh checkout with nothing generated.
@@ -386,18 +393,19 @@ EXPECTED_FAILURES = {
         'pcapkit/protocols/internet/hip.py:822 -- Parameter.registry[128] is '
         'UnassignedParameter, because R1CounterParameter declares code=129 only'),
 
-    # ``_make_param_encrypted`` passes ``cipher=``, which is not a field of
-    # ``EncryptedParameter`` -- so the cipher id is dropped with an
-    # ``UnknownFieldWarning`` and never reaches the wire. The mismatch itself
-    # comes from a second defect in the same parameter: the ``data`` length
-    # callback omits the four octets ``reserved`` already consumed out of
-    # ``len``, so ``len`` grows by four on every round trip (measured: 4 -> 8).
-    'hip-parameter/ENCRYPTED': Gap(
-        'MISMATCH', '',
-        'pcapkit/protocols/internet/hip.py:3445 -- cipher= is not a field of '
-        'EncryptedParameter and is silently dropped; and '
-        'pcapkit/protocols/schema/internet/hip.py:463 -- the data length '
-        "callback omits the 4 octets 'reserved' took out of len"),
+    # ``ENCRYPTED`` used to have an entry here, for two defects at once: that
+    # ``_make_param_encrypted`` passed ``cipher=``, a keyword
+    # ``EncryptedParameter`` does not accept, so the cipher id was dropped with
+    # an ``UnknownFieldWarning`` and never reached the wire; and that the
+    # ``data`` length callback omitted the four octets ``reserved`` had already
+    # taken out of ``len``, so ``len`` grew by four on every round trip
+    # (measured: 4 -> 8). The first was fixed by #556. The second was fixed
+    # alongside #651, because the two four-octet errors cancelled at four of the
+    # eight residues of ``Length`` -- measured, ``Length % 8`` in {0, 5, 6, 7} --
+    # so correcting the padding on its own would have turned "right at four
+    # residues" into "four octets too long at all eight". With both gone the
+    # cycle closes and the entry is deleted rather than kept as documentation of
+    # a defect that is no longer there.
 
     # Two parameters whose own packed length is not what the header arithmetic
     # can represent even in pairs -- see HIP_COPIES in the generator for why the
@@ -728,40 +736,61 @@ class OptionRoundTripTests(unittest.TestCase):
                         f'{outcome.detail!r}'
                     )
 
-    def test_a_single_hip_parameter_cannot_be_constructed(self) -> None:
-        """A HIP packet carrying exactly one parameter is rejected by its own reader.
+    def test_a_hip_packet_carrying_one_parameter_round_trips(self) -> None:
+        """A HIP packet carrying exactly one parameter is accepted by its own reader.
 
-        This is the defect the generator's ``HIP_COPIES = 2`` routes around, and
-        it is pinned here so that routing around it does not also bury it.
+        This assertion used to run the other way, as
+        ``test_a_single_hip_parameter_cannot_be_constructed``: it required the
+        library to *reject* its own single-parameter packets, which it did, and
+        pinned the defect the generator's ``HIP_COPIES = 2`` routes around so
+        that routing around it did not also bury it.
 
         ``HIP.make`` computes the header's ``len`` as ``total_length // 8 + 4``,
         which is lossless only when the parameter octets are a multiple of eight.
-        The parameter padding rule pads the *contents* to eight and ignores the
-        four-octet type-and-length header, so one parameter is always
-        ``4 (mod 8)``; the floor division drops those four octets, and
-        ``_read_hip_param`` compares the recovered length exactly and raises.
+        Every padding site in the two HIP modules aligned the *contents* to
+        eight and ignored the four-octet type-and-length header, so one
+        parameter was always ``4 (mod 8)``; the floor division dropped those four
+        octets and ``_read_hip_param``, which compares the recovered length
+        exactly, raised. #651 made the padding :rfc:`7401` Section 5.2.1's
+        ``Total Length = 11 + Length - (Length + 3) % 8``, under which a lone
+        parameter is 8-aligned by construction, so the case now closes and this
+        test says so positively rather than recording the raise.
 
-        Two copies sum to a multiple of eight, so the same parameter that fails
-        alone succeeds in a pair -- which is the control that makes this a
-        statement about the header arithmetic rather than about ``SEQ``.
+        Both halves of the old test are kept, because the pair was its control:
+        one copy and two copies must *both* work, and must both come back as the
+        octets they went out as. ``SEQ`` is the case that discriminates hardest,
+        at ``Length = 4``: the record needs no padding at all
+        (``11 + 4 - (4 + 3) % 8 == 8``), so the old rule's four appended octets
+        were pure surplus rather than a shortfall, and a reader that pads by any
+        non-zero amount lands in the wrong place at the start of the second copy.
+
+        ``HIP_COPIES`` itself stays at two, for reasons that are no longer this
+        one; its own note in the generator says which.
 
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
-        from pcapkit.utilities.exceptions import ProtocolError
 
         base = dict(self.options.HIP_BASE)
         one = [(Parameter.SEQ, {})]  # type: list[tuple[Any, dict[str, Any]]]
 
-        with self.assertRaises(ProtocolError) as caught:
-            HIP(parameters=one, extension=True, **base)
-        self.assertIn('invalid format', str(caught.exception))
+        for copies in (1, 2):
+            with self.subTest(copies=copies):
+                built = bytes(HIP(parameters=one * copies, extension=True, **base))
 
-        # The control: the identical parameter, twice, round-trips exactly.
-        paired = bytes(HIP(parameters=one * 2, extension=True, **base))
-        reparsed = HIP(paired, len(paired), extension=True)
-        again = bytes(HIP(parameters=reparsed.info.parameters, extension=True, **base))
-        self.assertEqual(paired, again)
+                # 40 octets of fixed header, then one 8-octet SEQ per copy --
+                # the RFC total for Length = 4, and what the header's own
+                # ``len`` field can represent exactly.
+                self.assertEqual(len(built), 40 + 8 * copies)
+                self.assertEqual(built[1], 4 + copies)
+
+                reparsed = HIP(built, len(built), extension=True)
+                self.assertEqual(
+                    len(reparsed.info.parameters.getlist(Parameter.SEQ)), copies)
+
+                again = bytes(HIP(parameters=reparsed.info.parameters,
+                                  extension=True, **base))
+                self.assertEqual(built, again)
 
     def test_recorded_gaps_are_a_minority(self) -> None:
         """Most of the option space round-trips, and the rest is accounted for.

@@ -317,9 +317,10 @@ class HIPUnitTests(unittest.TestCase):
                 [(custom, {'contents': b'wxyz'})], version=2)
             self.assertEqual(seen, ['make/v2'])
             self.assertEqual(made_list[0].value, b'wxyz')
-            # 4 octets of type and length, 4 of value, 4 of padding to a multiple
-            # of 8
-            self.assertEqual(list_len, 12)
+            # 4 octets of type and length plus 4 of value is already a multiple
+            # of 8, so RFC 7401 5.2.1 asks for no padding at all:
+            # 11 + 4 - (4 + 3) % 8 == 8.
+            self.assertEqual(list_len, 8)
 
             # ... and the OrderedMultiDict branch, which the two halves of an
             # issue like this are equally easy to fix one of and forget the other
@@ -328,7 +329,7 @@ class HIPUnitTests(unittest.TestCase):
                 OrderedMultiDict([(custom, parsed[custom])]), version=2)
             self.assertEqual(seen, ['make/v2'])
             self.assertEqual(made_dict[0].value, b'abcd')
-            self.assertEqual(dict_len, 12)
+            self.assertEqual(dict_len, 8)
         finally:
             registry.pop(custom, None)
 
@@ -1946,26 +1947,29 @@ class HIPUnitTests(unittest.TestCase):
         parses it back to confirm the corrected :func:`~pcapkit.protocols.
         schema.internet.hip.transport_format_list_len` accepts it again.
 
-        Two copies, not one: a single parameter's own total is always
-        ``4 (mod 8)`` under this module's padding rule (see
-        ``examples/generators/options.py``'s ``HIP_COPIES``), so one 40-octet
-        fixed header plus two empty ``TRANSPORT_FORMAT_LIST`` parameters (4
-        octets each) is what actually lands on an 8-octet boundary.
+        Two copies, and since #651 not because one is unrepresentable -- one
+        now is -- but because two consecutive parameters are what prove the
+        reader's *stride*. A parser that pads by the wrong amount still reads
+        a lone parameter correctly and only lands in the wrong place at the
+        start of the next one, so a single-parameter fixture cannot tell a
+        correct padding rule from any other.
 
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
 
-        # next(1) len(1)=5 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # next(1) len(1)=6 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
         # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
-        # declaring one 8-octet parameter area to follow: (5 - 4) * 8 == 8.
-        fixed = bytes([0x3b, 0x05, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        # declaring one 16-octet parameter area to follow: (6 - 4) * 8 == 16.
+        fixed = bytes([0x3b, 0x06, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
         self.assertEqual(len(fixed), 40)
 
         # Two copies of: type(2)=2049 (TRANSPORT_FORMAT_LIST) len(2)=0, no
-        # formats, no padding -- 4 octets each, 8 octets together.
-        empty = (2049).to_bytes(2, 'big') + (0).to_bytes(2, 'big')
-        self.assertEqual(len(empty), 4)
+        # formats, then the four octets of padding RFC 7401 5.2.1 requires of a
+        # parameter with no contents at all -- 11 + 0 - (0 + 3) % 8 == 8, so 8
+        # octets each and 16 together.
+        empty = (2049).to_bytes(2, 'big') + (0).to_bytes(2, 'big') + bytes(4)
+        self.assertEqual(len(empty), 8)
         raw = fixed + empty * 2
 
         proto = HIP(raw, len(raw), extension=True)
@@ -2005,20 +2009,22 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
 
-        # next(1) len(1)=7 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
+        # next(1) len(1)=8 pkt(1) ver(1)=0x01 (the reserved bit that must be 1)
         # checksum(2) control(2) shit(16) rhit(16) -- the fixed 40-octet header,
-        # declaring one 24-octet parameter area to follow: (7 - 4) * 8 == 24.
-        fixed = bytes([0x3b, 0x07, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        # declaring one 32-octet parameter area to follow: (8 - 4) * 8 == 32.
+        fixed = bytes([0x3b, 0x08, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
         self.assertEqual(len(fixed), 40)
 
         # Two copies of: type(2)=2049 len(2)=8, four two-octet format entries
-        # (10, 20, 30, 40), no padding needed (8 is already a multiple of
-        # eight under this module's padding rule, which pads the *contents*
-        # to eight and ignores the four-octet type-and-length header) --
-        # 12 octets each, 24 octets together.
+        # (10, 20, 30, 40), then four octets of padding. Eight octets of
+        # contents are 8-aligned on their own, which is exactly the residue at
+        # which the pre-#651 rule (align the contents, ignore the four-octet
+        # type-and-length header) appended nothing and left the record four
+        # octets short; RFC 7401 5.2.1 asks for 11 + 8 - (8 + 3) % 8 == 16 --
+        # so 16 octets each and 32 together.
         one = (2049).to_bytes(2, 'big') + (8).to_bytes(2, 'big') + b''.join(
-            n.to_bytes(2, 'big') for n in (10, 20, 30, 40))
-        self.assertEqual(len(one), 12)
+            n.to_bytes(2, 'big') for n in (10, 20, 30, 40)) + bytes(4)
+        self.assertEqual(len(one), 16)
         raw = fixed + one * 2
 
         proto = HIP(raw, len(raw), extension=True)
@@ -2239,21 +2245,22 @@ class HIPUnitTests(unittest.TestCase):
         Before this fix, feeding a maker-built ``modes=[1]`` parameter
         through the full parser did not reproduce the *same* phantom-entry
         symptom the direct schema round trip shows -- the single 11-octet
-        parameter this module's ``len`` arithmetic produces is not a
-        multiple of eight, so :meth:`HIP.make` raises ``ProtocolError:
-        HIPv2: invalid format`` before a packet even exists to parse, and a
-        hand-built two-copy packet (mimicking the ``HIP_COPIES = 2`` trick
-        ``examples/generators/options.py`` uses for exactly this alignment
-        reason) instead corrupts the second copy and emits ``SchemaWarning:
-        packet length < 0``. Either way the full parser does not silently
-        return a wrong value; it fails outright, which is what this test
-        pins now that the fix makes it succeed instead.
+        parameter this module's ``len`` arithmetic produced was not a
+        multiple of eight, so :meth:`HIP.make` raised ``ProtocolError:
+        HIPv2: invalid format`` before a packet even existed to parse, and a
+        hand-built two-copy packet instead corrupted the second copy and
+        emitted ``SchemaWarning: packet length < 0``. Either way the full
+        parser did not silently return a wrong value; it failed outright,
+        which is what this test pins now that the fix makes it succeed
+        instead.
 
-        Two copies land on an 8-octet boundary the same way
-        :class:`TransportFormatListParameter`'s equivalent test does, since
-        a single non-empty parameter here is always ``4 (mod 8)``: the
-        padding rule pads the *contents* to eight and ignores the
-        four-octet type-and-length header.
+        Since #651 both parameters are 8-aligned on their own -- ``len = 4``
+        (two ``reserved`` octets and one two-octet entry) is exactly the
+        residue at which :rfc:`7401` Section 5.2.1 wants no padding at all,
+        ``11 + 4 - (4 + 3) % 8 == 8``, and at which the old contents-aligning
+        rule appended four octets that must not have been there. The two
+        copies stay, because two consecutive parameters are what prove the
+        reader's stride rather than merely its handling of one record.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -2264,14 +2271,14 @@ class HIPUnitTests(unittest.TestCase):
         nat_schema = proto._make_param_nat_traversal_mode(
             Parameter.NAT_TRAVERSAL_MODE, version=2, modes=[1])
         nat_one = bytes(nat_schema)
-        self.assertEqual(nat_one, bytes.fromhex('026000040000000100000000'))
-        self.assertEqual(len(nat_one) % 8, 4)
+        self.assertEqual(nat_one, bytes.fromhex('0260000400000001'))
+        self.assertEqual(len(nat_one) % 8, 0)
 
         esp_schema = proto._make_param_esp_transform(
             Parameter.ESP_TRANSFORM, version=2, suites=[1])
         esp_one = bytes(esp_schema)
-        self.assertEqual(esp_one, bytes.fromhex('0fff00040000000100000000'))
-        self.assertEqual(len(esp_one) % 8, 4)
+        self.assertEqual(esp_one, bytes.fromhex('0fff000400000001'))
+        self.assertEqual(len(esp_one) % 8, 0)
 
         for one, code, attr in (
             (nat_one, Parameter.NAT_TRAVERSAL_MODE, 'mode_id'),
@@ -2995,6 +3002,376 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_param_puzzle(
             Parameter.PUZZLE, parsed, version=2, rhash_len=128,
         ).len, 20)
+    def test_hip_parameter_total_length_matches_the_rfc_7401_formula(self) -> None:
+        """#651: a HIP parameter's *total* length is what must be 8-aligned.
+
+        :rfc:`7401` Section 5.2.1 states the arithmetic outright, so this test
+        compares against the RFC rather than against pcapkit --
+
+        ::
+
+            All of the encoded TLV parameters have a length (that includes the
+            Type and Length fields), which is a multiple of 8 bytes.
+
+            Total Length = 11 + Length - (Length + 3) % 8;
+
+        -- and that matters more here than usual, because **pcapkit round-trips
+        its own output whatever this formula says**: the writer and the reader
+        shared one wrong expression, so their disagreement with a real peer was
+        invisible to every construct-parse-construct test in the suite. Only an
+        independent statement of the RFC's arithmetic can see it, which is what
+        ``rfc_total`` below is. It is written out longhand from the RFC text and
+        deliberately does *not* call
+        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len`,
+        since comparing an implementation with itself asserts nothing.
+
+        Every ``Length`` from 0 to 63 is checked, which is what makes the widths
+        discriminate. The defect was exactly ``4 (mod 8)``, so it is not enough
+        to test a handful of convenient values:
+
+        * ``Length = 4``, a whole ``SEQ``, and ``Length = 20``, a whole
+          ``SOLUTION``: contents plus the four-octet header are *already*
+          8-aligned, so the RFC wants **no padding at all**. The old rule
+          appended four octets that must not be there, and a rule that dropped
+          the outer ``% 8`` -- ``8 - (Length + 4) % 8`` rather than
+          ``(8 - (Length + 4) % 8) % 8`` -- would append eight. Only the
+          residue ``Length % 8 == 4`` separates the correct answer from both.
+        * ``Length = 0``, ``8``, ``16``: contents are 8-aligned on their own, so
+          the old rule appended nothing and left the record four octets short.
+          This is the residue at which the defect *under*-pads, and it is the
+          one a test of "is the result at least as long as the contents" cannot
+          see.
+        * ``Length`` not a multiple of four -- 1, 2, 3, 5, 6, 7 -- where the pad
+          is 3, 2, 1, 7, 6, 5. A formula that only ever moved in steps of four,
+          which both the old and the fixed one look like at a glance, is caught
+          here and nowhere else.
+
+        The old and the correct formula never agree, at any ``Length``: there is
+        no residue at which this test would have passed before the fix.
+
+        """
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        def rfc_total(length: int) -> int:
+            """RFC 7401 5.2.1, transcribed rather than imported."""
+            return 11 + length - (length + 3) % 8
+
+        def pre_651_total(length: int) -> int:
+            """What every one of the 95 padding sites computed before #651."""
+            return 4 + length + (8 - (length % 8)) % 8
+
+        for length in range(64):
+            with self.subTest(length=length):
+                total = hip_schema.parameter_total_len(length)
+                self.assertEqual(total, rfc_total(length))
+                # the property the RFC gives the formula *for*
+                self.assertEqual(total % 8, 0)
+                # padding is "0-7 bytes, added if needed", and the record is the
+                # header, the contents and that padding, with nothing left over
+                padding = hip_schema.parameter_padding_len({'len': length})
+                self.assertEqual(4 + length + padding, total)
+                self.assertGreaterEqual(padding, 0)
+                self.assertLessEqual(padding, 7)
+                # and the defect is gone at every single residue, not on average
+                self.assertNotEqual(total, pre_651_total(length))
+
+        # Which parameters this governs, stated rather than implied: every padding
+        # site in ``schema/internet/hip.py`` and every reported record length in
+        # ``internet/hip.py`` routes through these two helpers -- 45 of the 46
+        # parameter schemas and 48 of the 49 reported lengths -- with exactly one
+        # exclusion, ``LOCATOR_SET``, kept on the pre-#651 expression on purpose.
+        # See ``LocatorSetParameter.padding`` for why, and #679 for the fix. The
+        # counts are asserted directly in
+        # :meth:`test_hip_padding_helpers_cover_every_parameter_but_locator_set`,
+        # so the exclusion cannot silently grow to two.
+        #
+        # The sweep above covers all eight residues, which is enough for any
+        # formula periodic in ``Length % 8`` -- but not for one that is not.
+        # A ``parameter_total_len`` that masked its argument (``length & 0xFF``,
+        # say) agrees on 0..63 and diverges at 256, and nothing in the generator
+        # builds a parameter that long, so the whole suite would pass. ``len`` is
+        # an unsigned 16-bit field, so check the field's entire domain; it is one
+        # cheap loop and it closes that gap outright.
+        diverged = [length for length in range(65536)
+                    if hip_schema.parameter_total_len(length) != rfc_total(length)]
+        self.assertEqual(
+            diverged[:16], [],
+            f'parameter_total_len diverges from RFC 7401 5.2.1 at '
+            f'{len(diverged)} of the 65536 representable Length values, first '
+            f'at {diverged[:16]}'
+        )
+
+        # the three spot values worth naming, so a regression reads as a number
+        # rather than as a loop index
+        self.assertEqual(hip_schema.parameter_total_len(4), 8)    # SEQ: no padding
+        self.assertEqual(hip_schema.parameter_total_len(8), 16)   # was 12, short by 4
+        self.assertEqual(hip_schema.parameter_total_len(20), 24)  # SOLUTION: was 28
+        self.assertEqual(hip_schema.parameter_padding_len({'len': 4}), 0)
+        self.assertEqual(hip_schema.parameter_padding_len({'len': 8}), 4)
+
+        # unreachable from real wire bytes (``len`` is unsigned on the wire), but
+        # a direct construction call could pass a negative ``len``, for which the
+        # RFC formula answers 8 -- a "total" shorter than the header alone. Keep
+        # it to the same floor-and-raise discipline as the other length helpers.
+        from pcapkit.utilities.exceptions import FieldValueError
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            hip_schema.parameter_total_len(-1)
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            hip_schema.parameter_padding_len({'len': -1})
+
+    def test_hip_padding_helpers_cover_every_parameter_but_locator_set(self) -> None:
+        """#651/#679: the exclusion is exactly one parameter, and it is ``LOCATOR_SET``.
+
+        #651 routed every HIP padding site through
+        :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`, with
+        one deliberate exception: ``LOCATOR_SET``, whose own two defects cancel so
+        exactly that correcting its padding alone would take a conformant parameter
+        to four octets short. #679 fixes that pair together.
+
+        A deliberate exception needs a guard, or it grows. Two failure modes this
+        catches, and nothing else does:
+
+        * **The exclusion spreading.** A later change that reverts a second
+          parameter to the old expression -- to make some other pinned literal
+          pass, say -- would be indistinguishable from this one by inspection.
+        * **The exclusion evaporating.** Someone "finishing" #651 by pointing
+          ``LocatorSetParameter.padding`` at the helper would make that parameter
+          emit ``24n + 4`` octets where the RFC wants ``24n + 8``, and no existing
+          assertion would fail: the corekit field test's literals are what
+          ``main`` emits, so they would go red, but from a file whose connection to
+          HIP padding is not obvious from its name.
+
+        This reads the declared field objects rather than the module source, so it
+        is about what the schemas *do*, not about how they are written.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        on_helper = []  # type: list[str]
+        excluded = []  # type: list[str]
+        unpadded = []  # type: list[str]
+        for name in dir(hip_schema):
+            obj = getattr(hip_schema, name)
+            if not (isinstance(obj, type)
+                    and issubclass(obj, hip_schema.Parameter)
+                    and obj is not hip_schema.Parameter):
+                continue
+            field = obj.__fields__.get('padding')
+            if field is None:
+                unpadded.append(name)
+                continue
+            callback = getattr(field, '_length_callback', None)
+            if callback is hip_schema.parameter_padding_len:
+                on_helper.append(name)
+            else:
+                excluded.append(name)
+
+        self.assertEqual(
+            excluded, ['LocatorSetParameter'],
+            'exactly one HIP parameter schema may sit outside '
+            'parameter_padding_len, and it is LocatorSetParameter (see #679). '
+            'If this list grew, the narrowing of #651 has leaked; if it emptied, '
+            'LOCATOR_SET now emits four octets too few.'
+        )
+
+        # Three schemas declare no padding field at all, which is correct rather
+        # than an omission and is unchanged by #651: their contents are a fixed
+        # 20 octets (a two-octet port, two reserved and a 16-octet address), and
+        # 11 + 20 - (20 + 3) % 8 == 24 == 4 + 20, so the RFC asks for no padding.
+        # Measured on this tree and on b34f132f6: all three pack to 24 octets.
+        # Listed explicitly because a *fourth* name appearing here would mean a
+        # parameter had quietly lost its padding field.
+        self.assertEqual(
+            sorted(unpadded),
+            ['RegFromParameter', 'RelayFromParameter', 'RelayToParameter'])
+
+        self.assertEqual(len(on_helper), 45)
+        self.assertEqual(len(on_helper) + len(excluded) + len(unpadded), 49)
+
+        # and the excluded one is the schema registered for LOCATOR_SET, not some
+        # similarly-named class that merely sorts next to it
+        self.assertIs(hip_schema.Parameter.registry[Parameter.LOCATOR_SET],
+                      hip_schema.LocatorSetParameter)
+
+    def test_hip_parameter_records_are_eight_octet_aligned_on_the_wire(self) -> None:
+        """#651: the octets a real parameter packs, not just the arithmetic.
+
+        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len` being
+        right is necessary but not sufficient -- all 46 padding sites in the
+        schema module have to *use* it. So this packs real parameter schemas,
+        chosen to cover the residues that discriminate, and measures the octets.
+
+        ``SEQ`` is the one to read first. It carries a single four-octet Update
+        ID, so it is complete in eight octets and needs no padding whatsoever;
+        pre-#651 pcapkit emitted twelve, appending four octets a conformant
+        receiver would read as the start of the next parameter. :rfc:`7401`
+        Section 5.3.5 puts a ``SEQ`` or an ``ACK`` on every ``UPDATE``, so this
+        is not a corner of the parameter space.
+
+        The last assertion is the stride check: two consecutive parameters
+        through the full parser. A wrong padding rule still reads a *lone*
+        parameter correctly -- it only lands in the wrong place at the start of
+        the next one -- so one record cannot distinguish any padding rule from
+        any other.
+
+        Nothing here imports
+        :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len`: the
+        RFC's formula is written out inline, so on a pre-#651 tree this fails
+        with a real octet-count mismatch rather than with an
+        :exc:`AttributeError` for a helper that does not exist there yet.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+
+        proto = object.__new__(HIP)
+
+        # (maker, kwargs, declared Length, total octets, pre-#651 octets)
+        cases = [
+            ('_make_param_seq', {'update_id': 0x01020304}, 4, 8, 12),
+            ('_make_param_esp_info', {}, 12, 16, 20),
+            # #608 sizes SOLUTION's ``len`` from the operands' own widths, so
+            # reaching the RFC's ``Length = 20`` needs eight octets of each:
+            # 4 + 2 * ceil(57 / 8) == 20. No ``lifetime=`` here: an earlier
+            # revision of this case passed one to dodge #654's ``math.log2(0)``,
+            # and #665 removed that keyword, after which it survived only by
+            # being swallowed by ``**kwargs``. Dead keywords in a table like this
+            # read as requirements, so it is gone.
+            ('_make_param_solution', {'index': 1, 'opaque': b'op',
+                                      'random': 1 << 56, 'solution': 1 << 56},
+             20, 24, 28),
+            ('_make_param_unassigned', {'contents': b''}, 0, 8, 4),
+            ('_make_param_unassigned', {'contents': b'x'}, 1, 8, 12),
+            ('_make_param_unassigned', {'contents': b'x' * 5}, 5, 16, 12),
+            ('_make_param_unassigned', {'contents': b'x' * 8}, 8, 16, 12),
+        ]
+        code_for = {
+            '_make_param_seq': Parameter.SEQ,
+            '_make_param_esp_info': Parameter.ESP_INFO,
+            '_make_param_solution': Parameter.SOLUTION,
+            '_make_param_unassigned': Parameter.Unassigned_512,
+        }
+
+        for meth_name, kwargs, declared, total, pre_651 in cases:
+            with self.subTest(maker=meth_name, length=declared):
+                schema = getattr(proto, meth_name)(
+                    code_for[meth_name], version=2, **kwargs)
+                packed = bytes(schema)
+                self.assertEqual(schema.len, declared)
+                self.assertEqual(len(packed), total)
+                self.assertEqual(len(packed) % 8, 0)
+                self.assertEqual(len(packed), 11 + declared - (declared + 3) % 8)
+                # the octet count that would have been emitted before the fix,
+                # so the case is stated as a difference rather than a value
+                self.assertNotEqual(len(packed), pre_651)
+                # any padding present is zeroed, as 5.2.1 requires of the sender
+                self.assertEqual(packed[4 + declared:], bytes(total - 4 - declared))
+
+        seq = bytes(proto._make_param_seq(Parameter.SEQ, version=2,
+                                          update_id=0x01020304))
+        self.assertEqual(seq, bytes.fromhex('0181000401020304'))
+
+        # the stride: two SEQs back to back, read through the full parser. The
+        # 40-octet fixed header declares (len - 4) * 8 == 16 octets to follow.
+        fixed = bytes([0x3b, 0x06, 0x00, 0x01]) + bytes(2) + bytes(2) + bytes(16) + bytes(16)
+        self.assertEqual(len(fixed), 40)
+        parsed = HIP(fixed + seq * 2, 40 + 16, extension=True)
+        copies = parsed.info.parameters.getlist(Parameter.SEQ)
+        self.assertEqual(len(copies), 2)
+        for copy in copies:
+            self.assertEqual(copy.id, 0x01020304)
+            # the record length the data model reports is the RFC total, not the
+            # contents-aligned one -- this is the 49 sites in the protocol module
+            self.assertEqual(copy.length, 8)
+
+        # and the header's own ``len`` is now exact rather than exact-in-pairs:
+        # 4 + 16 // 8 == 6, with nothing lost to the floor division.
+        rebuilt = bytes(HIP(parameters=[(Parameter.SEQ, {'update_id': 0x01020304})] * 2,
+                           extension=True, next=6, packet=1, version=2,
+                           checksum=b'\x00\x00', controls_anonymous=False,
+                           shit=0, rhit=0, payload=b''))
+        self.assertEqual(rebuilt[1], 6)
+        self.assertEqual(rebuilt[40:], seq * 2)
+
+    def test_hip_encrypted_data_length_excludes_reserved_and_iv(self) -> None:
+        """#651: ``ENCRYPTED``'s ``data`` field had to be fixed with the padding.
+
+        :rfc:`7401` Section 5.2.18 puts ``Reserved``, ``IV`` and the encrypted
+        data all inside ``Length``, and
+        ``_make_param_encrypted`` writes ``len = 4 + len(iv) + len(data)`` to
+        match -- but the ``data`` field's length callback subtracted only the
+        ``iv``, so it claimed four octets more than the parameter holds.
+
+        The two defects cancelled at some residues of ``Length`` and not others.
+        Measured across all eight, the old total agreed with the RFC at
+        ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over at
+        ``{1, 2, 3, 4}`` -- so ``Length = 8`` is one of the four where the
+        module emitted RFC-conformant ``ENCRYPTED`` octets while getting both
+        halves wrong. Fixing the padding alone would have taken ``ENCRYPTED``
+        from right at four of the eight residues to four octets too long at all
+        eight, so the pair is asserted here together: ``Length = 8`` (where they
+        used to cancel) and ``Length = 4`` (where they did not, and the record
+        used to be eight octets over).
+
+        """
+        from pcapkit.const.hip.cipher import Cipher
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.utilities.exceptions import FieldValueError
+
+        proto = object.__new__(HIP)
+
+        # Length = 8: four ``reserved`` octets and four of data. The record is
+        # 16 octets, which is also what the pre-#651 tree emitted -- by the two
+        # errors cancelling rather than by either being right.
+        schema = proto._make_param_encrypted(
+            Parameter.ENCRYPTED, version=2, cipher=Cipher.NULL_ENCRYPT,
+            data=b'DATA')
+        self.assertEqual(schema.len, 8)
+        self.assertEqual(bytes(schema),
+                         bytes.fromhex('028100080000000044415441') + bytes(4))
+        self.assertEqual(len(bytes(schema)), 16)
+
+        # Length = 4: no data at all, and the record is 8 octets. Pre-#651 this
+        # packed 16 -- the ``data`` field zero-extending b'' out to four octets
+        # and the padding rule adding four more.
+        empty = proto._make_param_encrypted(
+            Parameter.ENCRYPTED, version=2, cipher=Cipher.NULL_ENCRYPT, data=b'')
+        self.assertEqual(empty.len, 4)
+        self.assertEqual(bytes(empty), bytes.fromhex('0281000400000000'))
+
+        # The residue claim in the docstring, asserted rather than asserted in
+        # prose. The old record total was ``8 + Length + (-Length % 8)``: four
+        # octets of ``reserved``, a ``data`` field four octets too wide, and
+        # contents-aligned padding. It agreed with the RFC at exactly four of
+        # the eight residues -- which is why a suite that only ever built
+        # ``Length = 8`` could not see either defect.
+        def old_total(length: int) -> int:
+            return 8 + length + (-length % 8)
+
+        def rfc_total(length: int) -> int:
+            return 11 + length - (length + 3) % 8
+
+        self.assertEqual(
+            sorted({L % 8 for L in range(64) if old_total(L) == rfc_total(L)}),
+            [0, 5, 6, 7])
+        self.assertEqual(
+            sorted({L % 8 for L in range(64) if old_total(L) != rfc_total(L)}),
+            [1, 2, 3, 4])
+
+        # the callback itself, at the three shapes that matter
+        self.assertEqual(hip_schema.encrypted_data_len({'len': 4}), 0)
+        self.assertEqual(hip_schema.encrypted_data_len({'len': 8}), 4)
+        self.assertEqual(
+            hip_schema.encrypted_data_len({'len': 24, 'iv': b'\x11' * 16}), 4)
+        # a ``Length`` too short for the fields already read must raise rather
+        # than drive the data length negative
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            hip_schema.encrypted_data_len({'len': 3})
+        with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
+            hip_schema.encrypted_data_len({'len': 19, 'iv': b'\x11' * 16})
 
 
 if __name__ == '__main__':
