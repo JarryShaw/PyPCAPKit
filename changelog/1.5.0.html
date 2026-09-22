@@ -1105,6 +1105,50 @@ executes every branch while bypassing both the ordering and the accumulator’s
 type. The now-stale <code class="docutils literal notranslate"><span class="pre">tcp-mptcp/MP_JOIN</span></code> entry is deleted from
 <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>, and the MP_JOIN exclusion in
 <code class="docutils literal notranslate"><span class="pre">test_tcp_mptcp_subtype_unit.py</span></code> is lifted (#587).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">NumberField.pre_process</span></code> sized a value with floor division
+dressed up as a ceiling. When a field is packed while its <code class="docutils literal notranslate"><span class="pre">length</span></code> is still
+the <code class="docutils literal notranslate"><span class="pre">-1</span></code> placeholder, the width is derived from the value, and it was derived
+with <code class="docutils literal notranslate"><span class="pre">math.ceil(value.bit_length()</span> <span class="pre">//</span> <span class="pre">8)</span></code>. <code class="docutils literal notranslate"><span class="pre">math.ceil</span></code> of an integer is
+that integer, so the <code class="docutils literal notranslate"><span class="pre">//</span></code> had already floored the quotient and the outer call
+did nothing at all; the expression was plain floor division and the width came
+out one octet short. <code class="docutils literal notranslate"><span class="pre">256</span></code> was sized at one octet, <code class="docutils literal notranslate"><span class="pre">65536</span></code> at two,
+<code class="docutils literal notranslate"><span class="pre">16777216</span></code> at three, and both <code class="docutils literal notranslate"><span class="pre">int.to_bytes</span></code> and <code class="docutils literal notranslate"><span class="pre">struct.pack</span></code> refuse a
+value that does not fit the width they are given. <strong>The reach is wider than
+“just past a boundary”</strong>: floor division is wrong for every bit length that is
+not an exact multiple of eight, so <code class="docutils literal notranslate"><span class="pre">1</span></code> – bit length 1, floored to <em>zero</em>
+octets – failed too, and every value from 1 to 127 with it. Now written as the
+ceiling it was meant to be, matching the <code class="docutils literal notranslate"><span class="pre">math.ceil(n</span> <span class="pre">/</span> <span class="pre">8)</span></code> idiom used
+elsewhere in the package. The repair is reached only by packing a field the
+caller never resolved, since a schema resolves every field before packing it
+and <code class="docutils literal notranslate"><span class="pre">__call__</span></code> installs a real width; that narrowness is why the defect
+survived the suite added for #591, whose five repair-path values – <code class="docutils literal notranslate"><span class="pre">0xFF</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0xFFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">0xFFFFFFFFFFFFFFFF</span></code> and <code class="docutils literal notranslate"><span class="pre">0x800001</span></code> – have bit
+lengths of 8, 16, 32, 64 and 24 and so sat exactly where floor division and the
+ceiling agree. #591’s own fix neither caused nor masked this, but it did change
+what the failure looks like: with <code class="docutils literal notranslate"><span class="pre">_need_process</span></code> now recomputed from the
+width in force, a mis-sized 1, 2 or 4 octets surfaces from <code class="docutils literal notranslate"><span class="pre">struct.pack</span></code> as
+<code class="docutils literal notranslate"><span class="pre">'B'</span> <span class="pre">format</span> <span class="pre">requires</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">number</span> <span class="pre">&lt;=</span> <span class="pre">255</span></code> where it used to surface from
+<code class="docutils literal notranslate"><span class="pre">int.to_bytes</span></code> as <code class="docutils literal notranslate"><span class="pre">OverflowError</span></code>, which is why the exception named in the
+report is no longer the one a mis-sized octet boundary raises. Two things on
+this path are deliberately left alone, both independent of the arithmetic: a
+signed field is sized without room for its sign bit, so an unresolved signed
+field still cannot pack <code class="docutils literal notranslate"><span class="pre">128</span></code>; and an unresolved field’s bit mask is <code class="docutils literal notranslate"><span class="pre">-1</span></code>,
+which makes the masking and the sign remap above no-ops. The identical
+<code class="docutils literal notranslate"><span class="pre">math.ceil(x.bit_length()</span> <span class="pre">//</span> <span class="pre">8)</span></code> expression also survives at the two ILNP
+nonce option builders in <code class="docutils literal notranslate"><span class="pre">hopopt.py</span></code> and <code class="docutils literal notranslate"><span class="pre">ipv6_opts.py</span></code>, which are a
+separate change (#599).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">tests/corekit/test_fields_numbers_width_repair.py</span></code>, covering
+each octet boundary in its own method rather than one parametrised sweep, since
+the defect is a pattern and a single case would pass against a fix that
+special-cased the reported width. Each boundary is asserted as a pair – the
+value below it, which always packed, and the value above it, which did not –
+so that a width shifted by one in the other direction fails too. Also swept
+over all eight boundaries, pinned as the <code class="docutils literal notranslate"><span class="pre">ceil(bit_length</span> <span class="pre">/</span> <span class="pre">8)</span></code> invariant,
+checked for the smallest mis-sized value being <code class="docutils literal notranslate"><span class="pre">1</span></code>, round-tripped through
+pack and unpack, and given controls for the bit lengths that divide by eight
+and for the reachability of the repair at all. The suite deliberately asserts
+widths and octets rather than exception types, because the exception depends on
+whether the mis-sized width happens to have a native <code class="docutils literal notranslate"><span class="pre">struct</span></code> code (#599).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

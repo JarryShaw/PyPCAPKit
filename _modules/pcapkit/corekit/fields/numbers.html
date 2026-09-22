@@ -679,13 +679,24 @@
 <span class="sd">            second is how the template and the value being returned came to</span>
 <span class="sd">            disagree in the first place. C.f. #591.</span>
 
+<span class="sd">            That width is a **ceiling** of the bit length over eight, and it is</span>
+<span class="sd">            written as one. It used to read</span>
+<span class="sd">            ``math.ceil(value.bit_length() // 8)``, which is not a ceiling at</span>
+<span class="sd">            all: :func:`math.ceil` of an :obj:`int` is that :obj:`int`, so the</span>
+<span class="sd">            ``//`` had already floored the quotient and the outer call did</span>
+<span class="sd">            nothing. Every value whose bit length is not an exact multiple of</span>
+<span class="sd">            eight was therefore sized one octet short -- ``256`` at one octet,</span>
+<span class="sd">            ``65536`` at two, and ``1`` itself at *zero* -- which</span>
+<span class="sd">            :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub</span>
+<span class="sd">            issue #599.</span>
+
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
 
             <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>

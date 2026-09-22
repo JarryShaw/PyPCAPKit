@@ -860,6 +860,16 @@ integer code for. The flag is therefore consulted <strong>after</strong> the
 rebuild rather than before it, since deciding first and rebuilding
 second is how the template and the value being returned came to
 disagree in the first place. C.f. #591.</p>
+<p>That width is a <strong>ceiling</strong> of the bit length over eight, and it is
+written as one. It used to read
+<code class="docutils literal notranslate"><span class="pre">math.ceil(value.bit_length()</span> <span class="pre">//</span> <span class="pre">8)</span></code>, which is not a ceiling at
+all: <a class="reference external" href="https://docs.python.org/3/library/math.html#math.ceil" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">math.ceil()</span></code></a> of an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> is that <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, so the
+<code class="docutils literal notranslate"><span class="pre">//</span></code> had already floored the quotient and the outer call did
+nothing. Every value whose bit length is not an exact multiple of
+eight was therefore sized one octet short – <code class="docutils literal notranslate"><span class="pre">256</span></code> at one octet,
+<code class="docutils literal notranslate"><span class="pre">65536</span></code> at two, and <code class="docutils literal notranslate"><span class="pre">1</span></code> itself at <em>zero</em> – which
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#int.to_bytes" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">int.to_bytes()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> both refuse. See GitHub
+issue #599.</p>
 </div>
 </dd></dl>
 
