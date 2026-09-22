@@ -1,0 +1,31 @@
+# The "New issue" chooser.
+#
+# ``blank_issues_enabled`` is deliberately true. Most issues here are filed by the
+# maintainer without a template, and turning it off would remove that route from
+# the web UI for no gain.
+#
+# The security link exists because ``SECURITY.md`` asks reporters not to open a
+# public issue for anything exploitable, and until now the chooser offered no way
+# to comply -- the only visible route was the public bug template.
+
+blank_issues_enabled: true
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/JarryShaw/PyPCAPKit/security/advisories/new
+    about: >-
+      Please do not open a public issue for a security problem. This opens a
+      private advisory visible only to the maintainer, so a patch can be prepared
+      before anything is public. See SECURITY.md for what to include.
+
+  - name: Ask a question, or get usage help
+    url: https://github.com/JarryShaw/PyPCAPKit/discussions
+    about: >-
+      For "how do I ...?" rather than "this is broken". Discussions keep the issue
+      tracker for defects and feature requests.
+
+  - name: Read the documentation
+    url: https://jarryshaw.github.io/PyPCAPKit/
+    about: >-
+      The API reference and per-protocol documentation, which answers most usage
+      questions faster than an issue will.
