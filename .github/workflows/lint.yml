@@ -1,0 +1,198 @@
+name: "Lint"
+
+# The four linters this repository already maintains -- vermin, pylint, mypy and
+# bandit -- had Makefile targets and no CI presence at all, so nothing noticed
+# when their output changed. (`isort` does appear in cron-vendor.yml, but as a
+# formatter that rewrites the generated constants, not as a check.) This workflow
+# is where they run.
+#
+# Every one of them is advisory -- `continue-on-error: true` on each step -- and
+# that is a measurement result rather than a preference. Counts on 15189abff,
+# each from the same flag sets the Makefile uses:
+#
+#   bandit    8 findings (7 medium, 1 low, 0 high)   exit 1
+#   mypy    115 errors in 39 files (496 checked)     exit 1
+#   vermin  105 files flagged; needs 3.11, targets 3.6 in vermin.ini   exit 1
+#   pylint 5902 messages (80 E, 4767 W, 519 R, 541 C)                  exit 30
+#
+# None of the four is clean, so none can block today: a job that is red the day
+# it lands teaches everyone to scroll past red, which costs more than the checks
+# are worth. Advisory steps keep the numbers visible (each writes its count to
+# the run summary) without that damage, and promoting one to blocking is a matter
+# of deleting its `continue-on-error` line once its count reaches zero.
+#
+# Promotion order, cheapest first:
+#   * bandit -- 8 findings, and 7 are B104 "binding to all interfaces" on
+#     `address: ... = '0.0.0.0'` *default arguments* in MH/MIP option builders,
+#     which bind no socket. This package already uses `# nosec` (16 findings are
+#     suppressed that way today), so triaging 8 comments is the whole job.
+#   * mypy -- 24 of the 115 are `unused-ignore`, i.e. `# type: ignore` comments
+#     that are no longer needed. Deleting those is risk-free and cuts a fifth.
+#   * vermin -- blocked on a decision, not on cleanup: see the step below.
+#   * pylint -- not realistically promotable at this rule set. 4358 of its 4767
+#     warnings are `unused-argument` (2931), `redefined-builtin` (808) and
+#     `super-init-not-called` (619), all three of which are inherent to the
+#     schema DSL: protocol fields are legitimately named `next`/`type`/`id`, and
+#     the `if TYPE_CHECKING: def __init__(...)` stubs exist precisely so as not
+#     to call `super().__init__`. Narrowing to `--enable=E,F` does not rescue it
+#     either -- that is still 80 errors, mostly `unsubscriptable-object` (40) and
+#     `no-member` (22) false positives off the same metaprogramming.
+
+on:
+  # Deliberately *not* `push: [main]`, which is the trigger the other validation
+  # workflows here use. Those gate something: a failing unit-test or CodeQL run
+  # on main is a commit someone must look at. These steps gate nothing yet, so a
+  # second advisory run per merge -- on a commit that already got one on its pull
+  # request -- would buy no information while competing for runners that are
+  # visibly oversubscribed (pull requests on this repository have been sitting at
+  # 21 queued checks for ten minutes at a time). The weekly schedule covers
+  # main's own drift, which is the only thing the push trigger would have added.
+  pull_request:
+    branches: [main]
+  schedule:
+    # Saturdays, an hour clear of the other weekly jobs: CodeQL runs at 02:00,
+    # Python Compatibility at 04:00 and Vendor Update at 10:00.
+    - cron: '0 6 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Only pull-request runs may be superseded -- see the note in unit-tests.yml. A
+# ref-keyed group drops a *pending* run when a newer one joins it, so scheduled
+# and manual runs are keyed on the run id to give each one its own group.
+concurrency:
+  group: lint-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
+      # 3.10-3.15 because they check that the package *runs* everywhere; these
+      # tools read the source, and running them five times over would produce
+      # five copies of the same findings for five times the runner cost.
+      #
+      # 3.14 specifically, matching cron-vendor.yml, because it is the newest
+      # non-experimental version in the test matrix and the version the recorded
+      # counts above were measured on -- so a count that moves means the code
+      # moved, not the interpreter.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      # `.[all]` rather than a bare install: pylint and mypy resolve imports, so
+      # findings depend on what is importable. Note `pypcap` and `pypcapfile` are
+      # marked `python_version < '3.12'` in pyproject.toml and so are absent here
+      # by design -- that is the source of pylint's 8 `import-error` messages,
+      # and they will persist until those engines support a current Python.
+      - name: Install package and lint tools
+        run: |
+          set -x
+
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e .[all]
+          python -m pip install -U vermin pylint mypy bandit
+
+      # Every step below runs the *Makefile* target rather than spelling the
+      # flags out again, with `RUN=` emptying the `pipenv run` prefix the targets
+      # use locally. That is what keeps this workflow and a developer's `make
+      # pylint` running the same check -- restating the flag sets here would let
+      # the two drift the first time either changed, which is how "passes on my
+      # machine" starts.
+      #
+      # `continue-on-error: true` reports the step's real verdict as a non-
+      # blocking annotation and lets the following steps run, so one tool's
+      # findings never hide another's. The `status=$?` dance is needed because
+      # the default shell is `bash -e`: without it the summary lines after a
+      # non-zero tool would never execute.
+
+      - name: bandit
+        continue-on-error: true
+        run: |
+          set +e
+          make bandit RUN= 2>&1 | tee bandit.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          {
+            echo '### bandit'
+            echo '```'
+            sed -n '/^Run metrics:/,$p' bandit.log || echo 'no run metrics in output'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $status
+
+      - name: mypy
+        continue-on-error: true
+        run: |
+          set +e
+          make mypy RUN= 2>&1 | tee mypy.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          {
+            echo '### mypy'
+            echo '```'
+            tail -n 1 mypy.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $status
+
+      # `vermin-ci`, not `vermin`: the `vermin` target redirects into temp/ and
+      # hands the file to an editor, so its exit status is the editor's and a run
+      # that found violations still succeeds. Same flags, via $(VERMIN_FLAGS).
+      #
+      # This one needs a decision rather than a cleanup before it can block, and
+      # the decision is not CI's to make. vermin.ini sets `targets = 3.6` while
+      # the code's real floor is 3.11 -- `enum.StrEnum` and
+      # `enum.show_flag_values` are 3.11 members, and 86 modules import
+      # `typing_extensions`. pyproject.toml's `requires-python` still claims
+      # `>=3.6, <4`, so the declared floor and the actual one are five releases
+      # apart. Whichever way that is resolved -- raise `requires-python`, or
+      # raise `targets` to match it -- belongs in its own change.
+      - name: vermin
+        continue-on-error: true
+        run: |
+          set +e
+          make vermin-ci RUN= 2>&1 | tee vermin.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          {
+            echo '### vermin'
+            echo '```'
+            grep -E '^(Minimum required versions|Incompatible versions|Target versions not met):' vermin.log \
+              || echo 'no verdict in output'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $status
+
+      # Last because it is by far the slowest -- minutes over ~90k lines -- so
+      # the three quick verdicts reach the summary before it starts.
+      - name: pylint
+        continue-on-error: true
+        run: |
+          set +e
+          make pylint RUN= 2>&1 | tee pylint.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          {
+            echo '### pylint'
+            echo '```'
+            printf 'messages by class (C/E/R/W):\n'
+            grep -oE ': [A-Z][0-9]{4}:' pylint.log | grep -oE '[A-Z]' | sort | uniq -c || echo 'none'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit $status
