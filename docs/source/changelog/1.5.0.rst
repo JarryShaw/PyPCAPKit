@@ -1298,6 +1298,47 @@ pull requests between #326 and #509.
   ``examples/captures/in.pcap`` carrying no flagless segment. Coverage cannot see the fix
   itself, because the changed line already executed and ``tcp.py`` reads 100% statement
   and branch either side; the added subtests are the evidence (#616).
+* **Fixed** -- **a breaking change to a public attribute.** ``Frame.len`` and
+  ``Frame.cap_len`` were filled from *opposite* wire fields depending on which
+  container format was read, so ``frame.len`` meant the captured length out of a
+  ``.pcap`` and the on-wire length out of a ``.pcapng``. The PCAP reader is the
+  one that moved, and now matches the PCAP-NG reader: ``len`` is the on-wire
+  length (the record header's ``orig_len``) and ``cap_len`` the octets actually
+  stored (``incl_len``). **Code reading ``frame.len`` or ``frame.cap_len`` from a
+  ``.pcap`` gets the other field's value than it did before**, and for a
+  truncated frame that is a different number rather than a relabelling. Which
+  reader to move was a real decision rather than the correction of a typo, and
+  not settled by seniority: the PCAP spelling is the *older* of the two, dating
+  to ``c43892af`` (2022-01-11) with the data model's docstrings agreeing with it
+  a day later, while the opposite spelling in ``pcapkit.toolkit.pcapng`` arrived
+  15 months afterwards in ``25f216f4`` (2023-04-27). Both were internally
+  consistent. What settles it is that the *names* are Wireshark's, and its
+  ``epan/dissectors/packet-frame.c`` registers ``frame.len`` as "Frame length on
+  the wire" and ``frame.cap_len`` as "Frame length stored into the capture file",
+  and raises the ``frame.len_lt_caplen`` expert info,
+  ``PI_MALFORMED``/``PI_ERROR``, on ``frame_len < cap_len`` -- which could not be
+  malformed if ``len`` were the smaller, captured one. So the later spelling is
+  the one that matches the borrowed names.
+  Both formats define the underlying fields the same way: ``pcap-savefile(5)``
+  gives ``incl_len`` as "the number of bytes of captured data that follow the
+  per-packet header" and ``orig_len`` as "the number of bytes that would have
+  been present had the packet not been truncated by the snapshot length", and
+  ``draft-ietf-opsawg-pcapng`` gives Captured Packet Length as "the number of
+  octets captured from the packet" against Original Packet Length's "number of
+  octets of packet data that would have been provided had the packet not been
+  truncated", which "SHOULD NOT be less than the Captured Packet Length". The
+  internal consumer moved with it: ``Frame.read`` hands ``_decode_next_layer``
+  the octets that are *present*, which is now spelled ``frame.cap_len`` and was
+  ``frame.len`` when that was the captured length -- handing over the on-wire
+  length instead would be the declared-length-exceeds-available-octets fault of
+  #554, #573 and #594 on every snapped frame. The dumpers are untouched, since
+  ``PCAPIO`` packs its record header from ``frame_info.incl_len`` and
+  ``frame_info.orig_len`` rather than from these two, and ``frame_info`` was
+  already right in both readers. This went unnoticed because the two lengths
+  differ only for a frame the snapshot length cut short, and no such fixture
+  existed until #614 added one -- ``big_endian.pcap``'s third frame, 1200 octets
+  on the wire against 96 captured -- so every earlier assertion compared a value
+  against itself (#618).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
