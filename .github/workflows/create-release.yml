@@ -70,6 +70,16 @@ jobs:
 
           echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_PRERELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_POSTRELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_postrelease).lower())')" >> $GITHUB_OUTPUT
+          # The version the release is *of*, with the pre-release, post-release,
+          # development and local segments removed -- ``1.5.0b5``, ``1.5.0.post2``
+          # and ``1.5.0rc1`` all reduce to ``1.5.0``. Derived here rather than in
+          # the job that consumes it because this is the only job with ``packaging``
+          # installed, and because ``Version.base_version`` is the same PEP 440
+          # reading ``util/bump_version.py`` already does -- a shell prefix strip
+          # would have to reimplement it, and would get ``1.5.0.dev1`` or an epoch
+          # wrong. The consumer then needs nothing but a string comparison.
+          echo "PCAPKIT_BASE_VERSION=$(python -c 'from packaging.version import Version; import pcapkit; print(Version(pcapkit.__version__).base_version)')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
 
       - uses: mukunku/tag-exists-action@v1.7.0
@@ -80,6 +90,8 @@ jobs:
     outputs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
+      PCAPKIT_POSTRELEASE: ${{ steps.get_version.outputs.PCAPKIT_POSTRELEASE }}
+      PCAPKIT_BASE_VERSION: ${{ steps.get_version.outputs.PCAPKIT_BASE_VERSION }}
       PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
 
@@ -108,21 +120,48 @@ jobs:
       # inside its base version's entry rather than as an entry of its own.
       #
       # Handing the file over unconditionally would therefore republish the base
-      # version's notes as the body of a release that changed no library code. So
-      # the body is used only when the generated file's own heading names the
-      # version being released, and otherwise the release keeps the generated notes
-      # alone -- which for a vendor refresh is the honest summary, since the commit
-      # list is the only thing that did change. Both outcomes are announced in the
-      # log rather than left to be inferred from the published result.
+      # version's notes *as if they were* the notes of a release that changed no
+      # library code. That is the thing to avoid, and it is not the same as
+      # withholding them: a reader landing on the ``1.5.0b5`` page wants to know
+      # what 1.5.0 is shaping up to be, and a bare pull-request list does not tell
+      # them. So the entry is reused for a derivative release -- a pre-release or a
+      # ``.postN`` of a base version whose entry *is* the one on file -- but only
+      # behind a generated preamble naming which release the entry actually
+      # describes, so the borrowing is stated on the page rather than inferred.
+      #
+      # Four outcomes, in the order the step decides them, all announced in the log
+      # rather than left to be inferred from the published result:
+      #
+      #   1. no ``CHANGELOG.md`` at all -- generated notes alone, with a warning,
+      #      because the 'Changelog drift' gate should have made this unreachable;
+      #   2. the heading names the version being released -- the entry is the body,
+      #      unchanged, which is the normal release;
+      #   3. the heading names the *base* version of a pre-release or a ``.postN``
+      #      -- preamble, then the entry, then the generated list;
+      #   4. anything else -- generated notes alone, which is the honest summary for
+      #      a release with no entry of its own and none it may borrow. Two
+      #      different facts land here and get their own message accordingly: the
+      #      entry on file is not this release's base version, or it is and this
+      #      release is not the kind that borrows one.
       #
       # Only the version token is compared, not the rest of the heading, so an
       # entry still reading "-- unreleased" is matched and dated-or-not does not
-      # change the decision. That case gets its own warning below instead.
+      # change the decision. Whether it *should* have been dated is a separate
+      # question, and the answer differs per outcome: for a pre-release, an
+      # undated base entry is simply correct -- the base version has not shipped,
+      # which is why there is a pre-release at all -- while for a final release or
+      # a ``.postN`` it is an oversight, because both mean the entry's own version
+      # is out. So the undated warning fires on outcome 2 and on the ``.postN``
+      # half of outcome 3, and stays silent on the pre-release half rather than
+      # nagging about the one state of affairs that is expected there.
       - name: Select release body
         id: release_body
         shell: bash
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_BASE_VERSION: ${{ needs.version_check.outputs.PCAPKIT_BASE_VERSION }}
+          PCAPKIT_PRERELEASE: ${{ needs.version_check.outputs.PCAPKIT_PRERELEASE }}
+          PCAPKIT_POSTRELEASE: ${{ needs.version_check.outputs.PCAPKIT_POSTRELEASE }}
         run: |
           set -euo pipefail
 
@@ -134,15 +173,82 @@ jobs:
           # The generated file opens with ``## <version> -- <date-or-unreleased>``.
           heading="$(sed -n '1s/^## \([^[:space:]]*\).*/\1/p' CHANGELOG.md)"
 
+          # Read once, because two of the branches below need it. A miss exits 1,
+          # which is why this is a condition and not a bare pipeline under ``set -e``.
+          undated=false
+          if sed -n '1p' CHANGELOG.md | grep -qi 'unreleased'; then
+            undated=true
+          fi
+
+          # A pre-release or a ``.postN`` has no entry of its own by design, and
+          # borrows its base version's when the file holds it. ``base_version``
+          # comes from ``packaging`` in the version_check job, so ``1.5.0b5``,
+          # ``1.5.0rc1``, ``1.5.0.dev1`` and ``1.5.0.post2`` all arrive as
+          # ``1.5.0`` without this step parsing a version string. A final release is
+          # deliberately excluded -- its base version *is* itself, so a final release
+          # whose heading does not match has no entry on file at all.
+          derivative=false
+          if [ "$PCAPKIT_PRERELEASE" = 'true' ] || [ "$PCAPKIT_POSTRELEASE" = 'true' ]; then
+            derivative=true
+          fi
+
+          # Guarded on non-empty so an unparseable heading and a missing base
+          # version do not read as a match against each other.
+          base_on_file=false
+          if [ -n "$PCAPKIT_BASE_VERSION" ] && [ "$heading" = "$PCAPKIT_BASE_VERSION" ]; then
+            base_on_file=true
+          fi
+
           if [ "$heading" != "$PCAPKIT_VERSION" ]; then
-            echo "::notice title=Release body generated::CHANGELOG.md holds the entry for '${heading:-<no parseable heading>}', not ${PCAPKIT_VERSION}, so this release carries the automatically generated notes alone. Expected for a pre-release and for a .postN vendor refresh, neither of which has a changelog entry of its own."
+            if [ "$derivative" = 'true' ] && [ "$base_on_file" = 'true' ]; then
+              # The preamble is the whole point of reusing the entry: without it a
+              # ``1.5.0b5`` page opening on the ``1.5.0`` entry reads as though
+              # 1.5.0 had shipped. Written to a file beside the checkout rather
+              # than into CHANGELOG.md, which is generated and must stay in step
+              # with its source; the file is discarded with the job.
+              if [ "$PCAPKIT_PRERELEASE" = 'true' ]; then
+                preamble="> **This is a pre-release of ${PCAPKIT_BASE_VERSION}, not ${PCAPKIT_BASE_VERSION} itself.** The changelog entry below belongs to ${PCAPKIT_BASE_VERSION} and describes that release *in progress* -- it is reproduced here so this pre-release can be read in context, and it may still change before ${PCAPKIT_BASE_VERSION} is final."
+              else
+                preamble="> **This is a post-release of ${PCAPKIT_BASE_VERSION} and carries no library changes of its own.** The changelog entry below belongs to ${PCAPKIT_BASE_VERSION} and is reproduced here for context; what this release actually changed is the generated list that follows it."
+              fi
+
+              {
+                printf '%s\n\n' "$preamble"
+                cat CHANGELOG.md
+              } > release-body.md
+
+              echo 'path=release-body.md' >> "$GITHUB_OUTPUT"
+              echo "::notice title=Release body from CHANGELOG.md::${PCAPKIT_VERSION} has no changelog entry of its own, as expected, so the entry for its base version ${PCAPKIT_BASE_VERSION} leads the release body behind a generated preamble saying which release that entry describes; the generated pull-request list follows it."
+
+              # ``unreleased`` on a pre-release's base entry is the normal state of
+              # affairs and gets no warning. On a ``.postN`` it is an oversight: a
+              # ``.postN`` exists only because its base version was released.
+              if [ "$PCAPKIT_POSTRELEASE" = 'true' ] && [ "$PCAPKIT_PRERELEASE" != 'true' ] \
+                   && [ "$undated" = 'true' ]; then
+                echo "::warning title=Changelog entry is undated::${PCAPKIT_VERSION} is a post-release, so ${PCAPKIT_BASE_VERSION} is already out, yet its entry still reads 'unreleased' and the release body says so too. Date the heading in docs/source/changelog/${PCAPKIT_BASE_VERSION}.rst, regenerate CHANGELOG.md and the body can be corrected in place."
+              fi
+
+              exit 0
+            fi
+
+            # Two ways to get here, and they are not the same fact, so they do not
+            # share a message: the entry on file is not this release's base version
+            # at all, or it is and this release is not the kind that may borrow one.
+            # Only a local-version segment can produce the second, which is why the
+            # versions ``util/bump_version.py`` emits never reach it.
+            if [ "$base_on_file" = 'true' ]; then
+              echo "::notice title=Release body generated::CHANGELOG.md holds the entry for '${heading}', not ${PCAPKIT_VERSION}. Only a pre-release or a .postN release leads with its base version's entry, and ${PCAPKIT_VERSION} is neither, so this release carries the automatically generated notes alone."
+              exit 0
+            fi
+
+            echo "::notice title=Release body generated::CHANGELOG.md holds the entry for '${heading:-<no parseable heading>}', which is neither ${PCAPKIT_VERSION} nor its base version ${PCAPKIT_BASE_VERSION:-<unknown>}, so this release carries the automatically generated notes alone."
             exit 0
           fi
 
           echo 'path=CHANGELOG.md' >> "$GITHUB_OUTPUT"
           echo "::notice title=Release body from CHANGELOG.md::The changelog entry for ${PCAPKIT_VERSION} leads the release body; the generated pull-request list follows it."
 
-          if sed -n '1p' CHANGELOG.md | grep -qi 'unreleased'; then
+          if [ "$undated" = 'true' ]; then
             echo "::warning title=Changelog entry is undated::The entry for ${PCAPKIT_VERSION} still reads 'unreleased', so the release body says so too. Date the heading in docs/source/changelog/${PCAPKIT_VERSION}.rst, regenerate CHANGELOG.md and the body can be corrected in place."
           fi
 
@@ -159,7 +265,9 @@ jobs:
           # an unset output here means "no body" rather than "read the file ''".
           # ``generate_release_notes`` stays on either way: the action fetches the
           # generated notes itself and joins them as ``<body>\n\n<generated>``, so
-          # the hand-written entry leads and the pull-request list follows.
+          # whichever body the step above selected -- ``CHANGELOG.md`` as it stands,
+          # or the preamble-plus-entry it assembles for a pre-release or a
+          # ``.postN`` -- leads, and the pull-request list follows.
           body_path: ${{ steps.release_body.outputs.path }}
           generate_release_notes: true
           # makeLatest: true
