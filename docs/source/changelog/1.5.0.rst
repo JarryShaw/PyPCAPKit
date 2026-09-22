@@ -1339,6 +1339,29 @@ pull requests between #326 and #509.
   existed until #614 added one -- ``big_endian.pcap``'s third frame, 1200 octets
   on the wire against 96 captured -- so every earlier assertion compared a value
   against itself (#618).
+* **Fixed** -- ``Extractor`` had the ownership of its input stream inverted, so it
+  did both halves of the wrong thing at once: a handle it opened itself, from
+  ``fin`` given as a path, was **never closed**, while a stream the *caller*
+  supplied and still needed **was**. ``_cleanup`` closed under
+  ``not self._flag_s`` where ``self._flag_s`` is the flag that gated the
+  ``open()``, and the ``SeekableReader`` wrapping a non-seekable input asked for
+  ``stream_closing=not self._flag_s`` in the same wrong direction. The leak was
+  one descriptor per extraction for the life of the process, and the production
+  root cause of the ``ResourceWarning`` that reddened #577, #596 and #600 from
+  three unrelated pull requests -- #606 made the assertion in
+  ``tests/utilities/test_stacklevel.py`` immune to foreign warnings, which
+  repaired the CI signal but could not stop the leak, because the leak was in
+  library code. Closing the caller's stream was the more dangerous half: silent
+  data loss for anyone passing an open file they meant to keep reading, with no
+  warning and no error to notice it by. Both conditions now follow ownership, via
+  a single ``Extractor._owns_input``, and a finaliser releases the handle of an
+  extraction *abandoned* before end of file -- ``auto=False``, iterated part way
+  and dropped -- which reaches ``_cleanup`` by no route at all and was the second
+  of the two warnings. Measured on ``6c3d1b0d9``: a path-given extraction left 1
+  descriptor open and a stream-given one came back closed and unreadable; the two
+  files #610 names now emit 0 such warnings where they emitted 2. ``__exit__`` is
+  deliberately left closing unconditionally, since a caller who scopes an
+  ``Extractor`` with ``with`` has asked for exactly that (#610).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
