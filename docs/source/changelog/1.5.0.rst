@@ -688,6 +688,36 @@ pull requests between #326 and #509.
   and for the reachability of the repair at all. The suite deliberately asserts
   widths and octets rather than exception types, because the exception depends on
   whether the mis-sized width happens to have a native ``struct`` code (#599).
+* **Fixed** -- ``examples/generators/options.py``'s ``TCP_BASE`` spelled three
+  header fields with names ``TCP.make`` does not declare, so every option
+  fixture in ``examples/captures/options-tcp.pcap`` was built from values the
+  generator had not asked for. ``make`` ends in ``**kwargs`` and reads nothing
+  out of it, so an undeclared keyword is accepted and discarded with no warning
+  and no ``TypeError``, which is why this survived unnoticed. ``'seq': 1`` was
+  ``seq_no``, and all 25 captured frames therefore carried sequence number 0;
+  ``'urgent_pointer'`` was ``urgent``, whose requested value and unused default
+  both happened to be 0; and ``'ack_flag': False`` was ``ack``, while
+  ``'ack': 0`` bound to ``ack`` itself -- the acknowledgement *flag* rather than
+  the number, which is ``ack_no`` -- so that pair was the wrong way round in
+  both directions. Each is renamed to the parameter ``make`` declares, keeping
+  the values the table always read as. Measured:
+  ``TCP(**TCP_BASE).info.seq`` was 0 against a declared 1 and is now 1, and
+  ``options-tcp.pcap`` changes in exactly 25 bytes -- the low octet of each
+  frame's sequence number -- with no case status and no ``EXPECTED_FAILURES``
+  entry moving. The module's six other base mappings were audited the same way:
+  five pass nothing their ``make`` does not declare, and HIP's ``extension`` is
+  declared by ``HIP.read`` instead, which is this library's documented way of
+  forwarding a read-path keyword through ``**kwargs`` rather than a sixth
+  instance of the defect (#602).
+* **Added** --
+  ``tests/protocols/test_option_generator_tcp_base_unit.py``, asserting that
+  every ``TCP_BASE`` key is a parameter ``TCP.make`` declares -- derived from
+  ``inspect.signature``, so it catches a fourth misspelling nobody has made yet
+  -- and that the segment the mapping builds carries the stated header in both
+  the data model and the packed octets. Two of the three wrong names were
+  invisible to any assertion about a *value*, the value asked for being equal to
+  the default that was used instead, which is what the signature check is for
+  (#602).
 * **Fixed** -- the ILNP Nonce option builders in ``HOPOPT`` and ``IPv6_Opts`` sized
   the option with ``math.ceil(nonce.bit_length() // 8)``, which is floor division
   dressed up as a ceiling: ``//`` floors, and ``math.ceil`` of an ``int`` is a
