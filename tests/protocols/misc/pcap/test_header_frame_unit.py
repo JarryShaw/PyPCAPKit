@@ -399,6 +399,78 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
                          datetime.datetime.fromtimestamp(float(frame.info.time_epoch),
                                                          datetime.timezone.utc))
 
+    def test_frame_header_is_read_in_the_files_byte_order(self) -> None:
+        """#605: a big-endian record header, read on a little-endian host.
+
+        :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
+        seeded the file's byte order under the key ``bytesorder``, where
+        ``byteorder_callback`` in
+        :file:`pcapkit/protocols/schema/misc/pcap/frame.py` reads ``byteorder``,
+        so the lookup always missed and always fell back to
+        :data:`sys.byteorder`. On a little-endian host reading a little-endian
+        capture that is the right answer by coincidence, which is why every
+        fixture here passed; on a big-endian capture all four record-header
+        fields came back byte-swapped.
+
+        The capture is built here rather than read from
+        :file:`examples/captures/`, so this stays in the unit tier and runs in
+        the selection :file:`.github/workflows/unit-tests.yml` uses -- the
+        fixture-backed counterpart, which goes through
+        :func:`pcapkit.interface.extract` against
+        :file:`examples/generators/endian.py`'s captures, is
+        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` and runs
+        only once the fixtures exist.
+
+        Two records, because the swap is a wrong answer *and* a crash: frame 1's
+        ``incl_len`` of 60 reads as 1006632960, which consumes the rest of the
+        file, and frame 2 is then asked to read a negative payload length --
+        ``ValueError: read length must be non-negative or -1`` out of
+        :file:`pcapkit/protocols/schema/schema.py`.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcap.header import Header
+
+        records = (
+            (1500000000, 123456, b'\x02\x00\x00\x00' + bytes(range(56))),
+            (1500000001, 654321, b'\x02\x00\x00\x00' + bytes(range(40))),
+        )
+
+        # magic a1b2c3d4: big-endian, microsecond timestamps
+        raw = b'\xa1\xb2\xc3\xd4' + struct.pack('>HHiIII', 2, 4, 0, 0, 65535,
+                                                int(LinkType.NULL))
+        for ts_sec, ts_usec, packet in records:
+            raw += struct.pack('>IIII', ts_sec, ts_usec, len(packet), len(packet))
+            raw += packet
+
+        stream = io.BytesIO(raw)
+        header = Header(stream)
+        self.assertEqual(header.byteorder, 'big')
+        self.assertFalse(header.nanosecond)
+
+        offset = 24
+        for number, (ts_sec, ts_usec, packet) in enumerate(records, start=1):
+            # the engine reads every frame off one handle, so a record whose
+            # length was read in the wrong order desynchronises the ones after it
+            self.assertEqual(stream.tell(), offset)
+
+            frame = Frame(stream, num=number, header=header.info)
+            info = frame.info.frame_info
+
+            self.assertEqual(info.ts_sec, ts_sec)
+            self.assertEqual(info.ts_usec, ts_usec)
+            self.assertEqual(info.incl_len, len(packet))
+            self.assertEqual(info.orig_len, len(packet))
+            self.assertEqual(frame.info.time_epoch,
+                             ts_sec + Decimal(ts_usec) / 1_000_000)
+            self.assertEqual(frame.info.packet, packet)
+
+            offset += 16 + len(packet)
+            self.assertEqual(stream.tell(), offset)
+
+        self.assertEqual(offset, len(raw))
+
 
 if __name__ == '__main__':
     unittest.main()
