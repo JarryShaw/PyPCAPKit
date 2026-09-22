@@ -1907,6 +1907,63 @@ pull requests between #326 and #509.
   redesign in #514, which this change is sequenced ahead of rather than part of. 9 to
   13 tests and 80 to 87 subtests over ``tests/foundation/registry/``, the touched
   module holding 88% coverage with its misses flat at 27 (#675).
+* **Fixed** -- every PCAP-NG packet block now carries the captured octets it declares. All
+  four Enhanced Packet Blocks of the committed ``examples/captures/dhcp.pcapng`` reported
+  ``len(packet) == 0`` against a ``captured_len`` of 314, 342, 314 and 342, and the Simple
+  Packet Block and the obsolete Packet Block did the same, measured on a capture
+  synthesised to carry one of each since no committed fixture has either. Those three --
+  exactly ``PCAPNG.PACKET_TYPES`` , and exactly the three schemas declaring
+  ``__payload__ = 'packet_data'`` -- are the whole of the blast radius; every other block
+  type carries no captured octets, reported ``b''`` before and still does. The octets were
+  read correctly and then thrown away: ``PCAPNG.unpack`` extracted them from the block
+  schema, and ``ProtocolBase.__init__`` overwrote the result with ``self.packet.payload``
+  , which was empty. The inherited ``packet`` splits a protocol at ``self.length`` octets
+  of header and takes everything after as the payload, a contract that holds for a
+  protocol laid out as a header followed by its payload and for nothing else.
+  ``PCAPNG.length`` returns the wire's *Block Total Length*, so the split consumed the
+  entire per-block buffer as header -- measured at ``frame.length == 348`` and
+  ``len(frame.packet.header) == 348`` on a 348-octet block -- and, separately, a PCAP-NG
+  block carries a *trailer* after its payload, the option list and a repeat of the total
+  length, so no value of ``length`` could have made that split right. ``captured_len``
+  comes straight off the block header and survived, which is why the two disagreed rather
+  than both being empty. The fix is at the computation rather than at the injection:
+  ``PCAPNG.packet`` is overridden to take the payload from the block schema's
+  ``__payload__`` field and the header from the octets ahead of it, summed out of the
+  schema buffers so that the three block types' three different payload offsets -- 28, 12
+  and 28 octets -- are not hard-coded. Teaching ``ProtocolBase.__init__`` to skip a
+  protocol that had already set ``packet`` was the smaller change and was rejected: it
+  heals ``frame.info.packet`` while leaving the public ``frame.packet`` still reporting
+  the whole block as header and ``b''`` as payload, which is the same defect from the
+  other side. ``PCAPNG.unpack`` now reads that property instead of extracting the payload
+  a second time of its own, leaving one source of truth where there were two attempts at
+  one; ``ProtocolBase.packet`` gains the contract in its docstring and not one executable
+  line, its 503 statements unchanged. This moves the parse output of every PCAP-NG
+  capture, for two properties, on the success path, which is why it ships labelled
+  breaking: ``frame.info.packet`` goes from ``b''`` to hundreds of octets,
+  ``frame.packet.header`` from the whole block to the pre-payload prefix, and anything
+  diffing a dumped file sees it change. That dump is what made this a wire-format defect
+  rather than an API wart. ``PCAPIO`` writes ``value.packet`` after each 16-octet record
+  header, so dumping those four blocks produced a **104-octet** file -- 24 of global
+  header plus four record headers and no payload at all -- in which every record header
+  declared hundreds of octets and delivered none, desynchronising any reader that walks by
+  ``incl_len`` , which is all of them: pcapkit refused its own output with
+  ``ValueError: read length must be non-negative or -1`` and scapy silently returned 1
+  packet of 64 octets instead of 5. It round-trips now, the dumped file's total size and
+  each record's octets both asserted against the source capture's own hand-parsed bytes
+  rather than against a length. ``tests/protocols/test_pcapng_regression.py`` grows 4
+  tests to 10 and 3 subtests to 19, with the payload expectations derived twice over --
+  spelled-out head and tail literals, and a ``struct`` -only re-parse of the fixture that
+  owes nothing to the code under test -- and each synthesised payload given a different
+  length modulo 4 so that an offset off by a field, or a payload that picked up the
+  block's 32-bit padding, cannot pass by coincidence. ``pcapkit/protocols/misc/pcapng.py``
+  holds 99% across the change, its 18 new statements and 6 new branches all executed, its
+  single miss the same pre-existing ``_get_timezone`` statement renumbered 1153 to 1248,
+  and no new partial branch. The uncaught ``ValueError`` that an EOF-truncated PCAP-NG
+  raises (#678) is untouched and was measured rather than assumed: all 101 truncation
+  levels of ``dhcp.pcapng`` give byte-identical outcomes before and after, 96 of them that
+  ``ValueError`` . ``examples/captures/pcapng.txt`` , a hand-regenerated legacy smoke
+  reference, still shows the old frame-level ``packet -> NIL`` and wants a separate
+  refresh (#646).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
