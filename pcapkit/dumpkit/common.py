@@ -165,6 +165,60 @@ class Dumper(DumperBase):
         return super().__init_subclass__()
 
 
+def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
+    """Render an enumeration member as ``Type::name [value]``.
+
+    This is the spelling every dumped enumeration carries in the ``json``,
+    ``tree``, ``text``, ``txt``, ``plist`` and ``xml`` output of both
+    :class:`~pcapkit.foundation.extraction.Extractor` and
+    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`, so it lives in
+    one function rather than being spelled out at each of the three places
+    :func:`make_dumper`'s hook needs it.
+
+    Args:
+        o: Enumeration member to render.
+
+    Returns:
+        The member's ``Type::name [value]`` rendering.
+
+    Note:
+        A :class:`~enum.Flag` value composed **entirely of undeclared bits** has
+        no name at all -- :attr:`~enum.Enum.name` is :data:`None`, not a string --
+        so interpolating it unguarded put the literal four characters ``None``
+        into the name half and rendered
+        :class:`~pcapkit.const.tcp.flags.Flags` ``(0)`` as ``'Flags::None [0]'``
+        (GitHub issue #648).
+
+        Two things make that worth a guard rather than a shrug. ``'None'`` is a
+        plausible member name, so a consumer splitting the rendering on ``::``
+        cannot tell it from a member genuinely so named -- and ``NONE`` *is* a
+        declared name elsewhere in the library. And the defect is not confined to
+        zero: ``Flags(1)``, ``Flags(8)`` and ``Flags(65536)`` are every bit as
+        nameless, so a guard written against ``value == 0`` would fix one case
+        and leave the rest.
+
+        The fallback is the value's own decimal spelling, which is what the
+        enumeration libraries themselves already use for an undeclared residue:
+        ``Flags(2057).name`` is ``'ACK|9'``, naming the declared bit and giving
+        the leftovers as one number. A wholly-undeclared value is that same
+        rendering with no declared bit to precede it, so ``Flags(9)`` becomes
+        ``'Flags::9 [9]'`` and ``Flags(0)`` becomes ``'Flags::0 [0]'``. It also
+        cannot be mistaken for a member name, since a Python identifier may not
+        begin with a digit -- none of the 1867 identifiers declared under
+        :mod:`pcapkit.const` is a bare decimal, and none ever can be.
+
+        This is *not* an :mod:`aenum` quirk. A stdlib :class:`enum.IntFlag` built
+        from the same members answers ``name is None`` identically on CPython
+        3.14.7, so the guard belongs here rather than in a choice of enumeration
+        library.
+
+    """
+    name = o.name
+    if name is None:
+        name = str(o.value)
+    return f'{type(o).__name__}::{name} [{o.value}]'
+
+
 def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     """Create a customised :class:`~dictdumper.dumper.Dumper` object.
 
@@ -201,7 +255,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
                 for key, val in o.items(multi=True):
                     if isinstance(key, (enum.Enum, aenum.Enum)):
-                        key = f'{type(key).__name__}::{key.name} [{key.value}]'
+                        key = render_enum(key)
                     temp[key].append(val)
                 return temp
             if isinstance(o, dict):
@@ -210,10 +264,10 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                 if addon:
                     return {
-                        'enum': f'{type(o).__name__}::{o.name} [{o.value}]',
+                        'enum': render_enum(o),
                         **addon,
                     }
-                return f'{type(o).__name__}::{o.name} [{o.value}]'
+                return render_enum(o)
             return super(type(self), self).object_hook(o)  # type: ignore[unreachable]
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument

@@ -1,0 +1,286 @@
+from __future__ import annotations
+
+import enum
+import importlib
+import importlib.util
+import pkgutil
+import unittest
+
+from tests._support import purge_modules
+
+RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
+HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: Flag values made up *entirely* of bits no member declares. Every one of these
+#: has ``name is None``, which is the whole point of #648: the defect is a
+#: property of "no declared bits", not of the number zero, so a guard written
+#: against ``value == 0`` would fix the first of these and leave the rest.
+NAMELESS_VALUES = (0, 1, 8, 9, 65536)
+
+
+class StdFlags(enum.IntFlag):
+    """A stdlib replica of :class:`pcapkit.const.tcp.flags.Flags`' declared bits.
+
+    Present so the tests can show the nameless pseudo-member is not an
+    :mod:`aenum` quirk. :mod:`enum` and :mod:`aenum` spell a wholly-undeclared
+    flag value the same way, so a fix that swapped enumeration libraries would
+    have changed nothing.
+
+    """
+
+    ACK = 2048
+    SYN = 16384
+
+
+class AnnotatedFlags(enum.IntFlag):
+    """A flag enumeration whose pseudo-members carry a public attribute.
+
+    This exists to reach the hook's ``addon`` branch with a *nameless* member.
+    That branch fires only when ``o.__dict__`` holds a key that does not begin
+    with an underscore, and a pseudo-member's ``__dict__`` is just
+    ``{'_value_': …, '_name_': None}`` -- so a plain composite never gets there
+    and falls through to the scalar return instead. Overriding
+    :meth:`~enum.Enum._missing_` to annotate the pseudo-member it builds is the
+    route that does, and it is a documented extension point rather than a poke
+    at the instance from outside.
+
+    """
+
+    ACK = 2048
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'AnnotatedFlags | None':
+        obj = super()._missing_(value)
+        if obj is not None:
+            obj.note = f'undeclared bits {value:#x}'
+        return obj
+
+
+class BaseDumper:
+    """Minimal stand-in for :class:`dictdumper.dumper.Dumper`.
+
+    Mirrors the stub in :mod:`tests.dumpkit.test_common_unit`: the hook under
+    test never reaches ``super().object_hook`` for an enumeration, so nothing
+    more than a terminating implementation is needed, and this avoids
+    instantiating a real dumper against the filesystem.
+
+    """
+
+    def object_hook(self, value):  # noqa: ANN001, ANN201
+        return {'base': value}
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class NamelessEnumRenderingTests(unittest.TestCase):
+    """#648 -- a nameless flag member must not render as ``Type::None [n]``.
+
+    :func:`~pcapkit.dumpkit.common.make_dumper`'s ``object_hook`` renders every
+    enumeration member as ``Type::name [value]``, and it interpolated
+    :attr:`~enum.Enum.name` unguarded at three separate places. A
+    :class:`~enum.Flag` value composed entirely of undeclared bits has
+    ``name is None``, so all three put the literal four characters ``None`` into
+    the name half.
+
+    The replacement is the value's own decimal spelling -- ``'Flags::0 [0]'``,
+    ``'Flags::8 [8]'`` -- chosen for three reasons these tests pin:
+
+    * It is what the enumeration libraries themselves already use for an
+      undeclared residue. ``Flags(2057).name`` is ``'ACK|9'``, naming the
+      declared bit and giving the leftovers as one decimal number; a
+      wholly-undeclared value is that rendering with no declared bit in front.
+    * It cannot be confused with a member name, because a Python identifier may
+      not begin with a digit. ``'None'`` could be: ``NONE`` is a real declared
+      name elsewhere in the library, so a consumer splitting the rendering on
+      ``::`` had no way to tell "no flags set" from a member so named.
+    * It needs no special case for zero, which matters because the defect never
+      was about zero.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_scalar_return_renders_a_nameless_member_as_its_value(self) -> None:
+        """The plain ``return`` at the end of the enumeration branch.
+
+        Covers the nameless value *and* four non-zero ones, because a fix that
+        special-cased zero would pass on ``Flags(0)`` alone and still emit
+        ``'Flags::8 [8]'``'s predecessor ``'Flags::None [8]'``.
+
+        """
+        from pcapkit.const.tcp.flags import Flags
+        from pcapkit.dumpkit.common import make_dumper
+
+        dumper = make_dumper(BaseDumper)()
+
+        for value in NAMELESS_VALUES:
+            with self.subTest(library='aenum', value=value):
+                member = Flags(value)
+                # The premise: there is no name to interpolate.
+                self.assertIsNone(member.name)
+                rendered = dumper.object_hook(member)
+                self.assertEqual(rendered, f'Flags::{value} [{value}]')
+                # The defect, stated as what must no longer appear. Asserted
+                # separately from the equality above so a future change to the
+                # rendering cannot quietly reintroduce the literal.
+                self.assertNotIn('None', rendered)
+
+            with self.subTest(library='enum', value=value):
+                # Not an ``aenum`` quirk -- stdlib behaves identically.
+                std = StdFlags(value)
+                self.assertIsNone(std.name)
+                self.assertEqual(dumper.object_hook(std), f'StdFlags::{value} [{value}]')
+
+    def test_named_members_are_untouched(self) -> None:
+        """The control. Only the name half of a *nameless* member changes.
+
+        ``Flags(2049)`` matters most here: its name is ``'ACK|1'``, so it was
+        never broken, and it is the precedent the fallback follows. If the guard
+        were written as "compose the name from the value" rather than "use the
+        value when there is no name", this is the assertion that would catch it.
+
+        """
+        from pcapkit.const.tcp.flags import Flags
+        from pcapkit.dumpkit.common import make_dumper
+
+        dumper = make_dumper(BaseDumper)()
+
+        self.assertEqual(dumper.object_hook(Flags.ACK), 'Flags::ACK [2048]')
+        self.assertEqual(dumper.object_hook(Flags.SYN | Flags.ACK), 'Flags::ACK|SYN [18432]')
+        self.assertEqual(dumper.object_hook(Flags(2049)), 'Flags::ACK|1 [2049]')
+        self.assertEqual(dumper.object_hook(Flags(2057)), 'Flags::ACK|9 [2057]')
+
+        # An explicitly declared zero keeps its declared name, which is the
+        # clearest demonstration that the guard keys on the *name* and not on the
+        # value: this member's value is 0 and its rendering is unchanged.
+        from pcapkit.const.reg.apptype import TransportProtocol
+
+        self.assertEqual(TransportProtocol(0).name, 'undefined')
+        self.assertEqual(dumper.object_hook(TransportProtocol(0)),
+                         'TransportProtocol::undefined [0]')
+
+    def test_multidict_key_path_renders_a_nameless_key(self) -> None:
+        """The ``MultiDict``/``OrderedMultiDict`` *key* path.
+
+        A second, separate interpolation of the same shape. It builds the
+        dictionary key rather than the value, so a nameless key collapsed every
+        undeclared flag value onto the single key ``'Flags::None [n]'`` -- and,
+        for two different nameless values, onto keys distinguished only by the
+        bracketed half.
+
+        """
+        from pcapkit.const.tcp.flags import Flags
+        from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+        from pcapkit.dumpkit.common import make_dumper
+
+        dumper = make_dumper(BaseDumper)()
+
+        multidict = MultiDict()
+        multidict.add(Flags(0), 'flagless')
+        multidict.add(Flags(8), 'undeclared-bit')
+        multidict.add(Flags.ACK, 'acknowledged')
+
+        converted = dumper.object_hook(multidict)
+        self.assertEqual(converted['Flags::0 [0]'], ['flagless'])
+        self.assertEqual(converted['Flags::8 [8]'], ['undeclared-bit'])
+        self.assertEqual(converted['Flags::ACK [2048]'], ['acknowledged'])
+        self.assertNotIn('Flags::None [0]', converted)
+        self.assertNotIn('Flags::None [8]', converted)
+
+        ordered = OrderedMultiDict()
+        ordered.add(Flags(0), 'first')
+        ordered.add(Flags(0), 'second')
+        self.assertEqual(dumper.object_hook(ordered)['Flags::0 [0]'], ['first', 'second'])
+
+    def test_addon_branch_renders_a_nameless_member(self) -> None:
+        """The third interpolation -- the ``'enum'`` key of the ``addon`` mapping.
+
+        Reached when the member carries public instance attributes, which for a
+        pseudo-member takes a :meth:`~enum.Enum._missing_` override. No registry
+        under :mod:`pcapkit.const` is both a flag enumeration and an annotated
+        one today, so this branch is not reachable from a capture on ``main`` --
+        but the interpolation was character-for-character the same as the other
+        two, so it is guarded with them rather than left as the one place the
+        literal ``None`` survives.
+
+        """
+        from pcapkit.dumpkit.common import make_dumper
+
+        dumper = make_dumper(BaseDumper)()
+
+        member = AnnotatedFlags(8)
+        self.assertIsNone(member.name)
+
+        converted = dumper.object_hook(member)
+        self.assertEqual(converted['enum'], 'AnnotatedFlags::8 [8]')
+        self.assertEqual(converted['note'], 'undeclared bits 0x8')
+
+        # And the named member through the same branch, as the control.
+        self.assertEqual(dumper.object_hook(AnnotatedFlags.ACK), 'AnnotatedFlags::ACK [2048]')
+
+    def test_no_flag_registry_renders_the_literal_none(self) -> None:
+        """Every flag enumeration in the library, swept rather than sampled.
+
+        The sweep is the point: #648 was first reported against
+        :class:`pcapkit.const.tcp.flags.Flags` alone, and five of the seven flag
+        registries turn out to be nameless at zero -- ``Flags`` plus the four
+        Mobility Header flag registries. Naming them here would rot the moment
+        an eighth is added, so they are discovered.
+
+        """
+        import aenum
+
+        from pcapkit.dumpkit.common import make_dumper
+
+        dumper = make_dumper(BaseDumper)()
+
+        registries = {}
+        for module in pkgutil.walk_packages(_const_path(), prefix='pcapkit.const.'):
+            try:
+                imported = importlib.import_module(module.name)
+            except ImportError:  # pragma: no cover - a registry that cannot import
+                continue
+            for attribute in vars(imported).values():
+                if not isinstance(attribute, type) or attribute.__module__ != module.name:
+                    continue
+                if issubclass(attribute, (enum.Flag, aenum.Flag)):
+                    registries[f'{module.name}.{attribute.__name__}'] = attribute
+
+        # A guard on the sweep itself: an empty mapping would make every
+        # assertion below vacuous, and that is how this test would rot silently.
+        self.assertGreaterEqual(len(registries), 7, registries)
+
+        nameless = []
+        for label, registry in sorted(registries.items()):
+            with self.subTest(registry=label):
+                member = registry(0)
+                rendered = dumper.object_hook(member)
+                self.assertNotIn('::None [', rendered)
+                if member.name is None:
+                    nameless.append(label)
+                    self.assertEqual(rendered, f'{registry.__name__}::0 [0]')
+                else:
+                    self.assertEqual(rendered, f'{registry.__name__}::{member.name} [0]')
+
+        # Not an incidental detail: if this ever drops to zero the test above
+        # stops exercising the fix at all and would pass on unfixed code.
+        self.assertGreaterEqual(len(nameless), 5, nameless)
+
+
+def _const_path() -> 'list[str]':
+    """The filesystem path of :mod:`pcapkit.const`, for :func:`pkgutil.walk_packages`.
+
+    Taken from the imported package rather than built from ``__file__`` so the
+    sweep reads the same tree the rest of the test imports from.
+
+    Returns:
+        A single-element search path for the ``pcapkit.const`` package.
+
+    """
+    import pcapkit.const
+
+    return list(pcapkit.const.__path__)
+
+
+if __name__ == '__main__':
+    unittest.main()
