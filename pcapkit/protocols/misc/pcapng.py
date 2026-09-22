@@ -105,6 +105,7 @@ from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as Data_UnknownSec
 from pcapkit.protocols.data.misc.pcapng import WireGuardKeyLog as Data_WireGuardKeyLog
 from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
+from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.protocol import ProtocolBase as Protocol
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
@@ -677,8 +678,98 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     @property
     def length(self) -> 'int':
-        """Header length of corresponding protocol."""
+        """Block total length of corresponding protocol.
+
+        Note:
+            This is the wire's *Block Total Length* -- the whole block, trailing
+            length field included -- and not a header length. The two are the
+            same thing for a protocol whose payload runs to the end of its
+            buffer, which is why
+            :attr:`ProtocolBase.length <pcapkit.protocols.protocol.ProtocolBase.length>`
+            does not distinguish them, but a PCAP-NG block carries a trailer.
+            :attr:`self.packet <packet>` is overridden accordingly; see there and
+            #646.
+
+        """
         return self._info.length
+
+    # NOTE: A plain property, where the inherited one is a
+    # :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate and it
+    # is not an oversight of the base class's caching: the inherited one caches
+    # because it *reads the stream*, and a second read would consume octets that
+    # are no longer there, whereas this one only walks buffers the schema layer has
+    # already filled and so costs a handful of dict lookups.
+    #
+    # Caching it would reintroduce, by a different route, the staleness this change
+    # exists to remove. :meth:`self.unpack <unpack>` now reports the payload
+    # through this property, so a cache would make a second ``unpack`` on the same
+    # instance return the *first* call's octets -- ``get_payload`` never even
+    # reached -- where the code before #646 recomputed from the schema every time.
+    # Nothing in the tree calls ``unpack`` twice on one instance today
+    # (``__post_init__`` is its only caller), so this is an invariant being kept
+    # rather than a bug being fixed; it was held before and there is no reason for
+    # it to stop holding. A data descriptor also wins over ``__dict__``, so a stale
+    # entry left by the inherited ``cached_property`` cannot shadow this either.
+    @property
+    def packet(self) -> 'Data_Packet':
+        """Header and payload octets of the current block.
+
+        A PCAP-NG block is not a header followed by a payload. The captured
+        octets sit in the *middle* of a packet block, ahead of the option list
+        and the trailing Block Total Length, so no single split point expresses
+        the shape and the inherited
+        :attr:`ProtocolBase.packet <pcapkit.protocols.protocol.ProtocolBase.packet>`
+        -- which reads :attr:`self.length <length>` octets of header and takes
+        everything after as payload -- cannot produce it. Since
+        :attr:`self.length <length>` is the Block Total Length, that split
+        consumed the entire block as header and left the payload empty: every
+        packet block reported ``packet == b''`` while ``captured_len`` declared
+        hundreds of octets, and dumping such a block through
+        :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a record header promising
+        octets it then did not write. See #646.
+
+        The payload is therefore the block schema's
+        :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which
+        is where the schema layer put the captured octets, and the header is the
+        block octets ahead of it. The three block types that carry captured
+        octets -- :attr:`PACKET_TYPES <PCAPNG.PACKET_TYPES>`, i.e. the Enhanced
+        Packet Block, the Simple Packet Block and the obsolete Packet Block --
+        each place the payload at a different offset, so the offset is summed
+        from the octets the schema actually unpacked rather than hard-coded per
+        block type. A block declaring no payload field is all header and no
+        payload, as before.
+
+        """
+        block = self.__header__.block
+        payload_name = self._get_payload_name(block)
+        if payload_name is None:
+            return Data_Packet(header=self._data, payload=b'')
+
+        # The octets ahead of the payload field, in wire order: the outer
+        # schema's fields up to the one holding the block -- its 4-octet Block
+        # Type -- and then the block's own fields up to the payload. The block is
+        # found by identity rather than by name so that renaming the field
+        # cannot silently fold the whole block body into the header; if it is not
+        # found at all, the header loses the Block Type and nothing else, leaving
+        # the payload -- the part #646 is about -- exact either way.
+        names = list(self.__header__.__fields__)
+        stop = next((idx for idx, name in enumerate(names)
+                     if getattr(self.__header__, name, None) is block), 0)
+
+        block_names = list(block.__fields__)
+        # Safe: ``_get_payload_name`` returned a name only because it is a field.
+        block_stop = block_names.index(payload_name)
+
+        header = bytearray()
+        for name in names[:stop]:
+            header += self.__header__.__buffer__.get(name, b'')
+        for name in block_names[:block_stop]:
+            header += block.__buffer__.get(name, b'')
+
+        return Data_Packet(
+            header=bytes(header),
+            payload=block.get_payload(payload_name),
+        )
 
     @property
     def context(self) -> 'Context':
@@ -900,13 +991,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
 
         data = self.read(length, **kwargs)
-        block_schema = self.__header__.block
-        payload_name = getattr(block_schema, '__payload__', None)
-        if payload_name in getattr(block_schema, '__fields__', {}):
-            packet = block_schema.get_payload()
-        else:
-            packet = b''
-        data.__update__(packet=packet)
+
+        # NOTE: One source of truth for the captured octets. This used to extract
+        # the payload here as well, and ``ProtocolBase.__init__`` then overwrote
+        # the result with ``self.packet.payload`` -- which was empty, because the
+        # inherited ``packet`` split the block at its Block Total Length. Reading
+        # it through the property instead means the value injected there is the
+        # value computed here, rather than a second attempt at it. See #646.
+        data.__update__(packet=self.packet.payload)
         return data
 
     def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True,
@@ -1127,6 +1219,26 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         return self.__header__.block.get_payload()
+
+    @staticmethod
+    def _get_payload_name(block: 'Schema_BlockType | bytes') -> 'Optional[str]':
+        """Get the name of the field carrying a block's captured packet octets.
+
+        Args:
+            block: Parsed block schema.
+
+        Returns:
+            The name of the block schema's payload field, or :obj:`None` when the
+            block declares none -- which is every block type outside
+            :attr:`PACKET_TYPES <PCAPNG.PACKET_TYPES>`, and also a block whose
+            body was handed over as raw :obj:`bytes` at construction time rather
+            than as a schema.
+
+        """
+        name = getattr(block, '__payload__', None)
+        if name is None or name not in getattr(block, '__fields__', {}):
+            return None
+        return name
 
     @staticmethod
     def _get_local_timezone() -> 'timezone':

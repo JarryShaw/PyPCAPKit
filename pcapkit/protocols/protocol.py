@@ -470,7 +470,27 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     # packet data
     @cached_property
     def packet(self) -> 'Data_Packet':
-        """Data_Packet data of the protocol."""
+        """Data_Packet data of the protocol.
+
+        Note:
+            The split relies on :attr:`self.length <length>` being the length of
+            the octets *preceding* the payload, and on the payload running from
+            there to the end of the buffer. Both hold for a protocol laid out as
+            a header followed by its payload, which is nearly all of them.
+
+            A protocol that is not laid out that way has to override this: one
+            whose :attr:`~length` counts something else, or one carrying a
+            *trailer* after the payload, gets a header that eats the payload and
+            a payload of ``b''``. That is what
+            :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` did to every packet
+            block -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length` is
+            the wire's Block Total Length and the captured octets sit ahead of
+            the option list and the trailing length field -- and
+            :meth:`ProtocolBase.__init__` injects this payload into every parsed
+            ``_info``, so the empty value reached the dumpers and corrupted the
+            files they wrote. See #646.
+
+        """
         try:
             return self._read_packet(header=self.length)
         except UnsupportedCall:

@@ -1878,15 +1878,25 @@ class PCAPNGUnitTests(unittest.TestCase):
                              __packet__={'byteorder': 'little'})
         self.assertEqual(len(packed), 20)
 
+        # NOTE: ``unpack`` injects the captured octets by reading ``self.packet``
+        # rather than by extracting them a second time of its own (#646), so these
+        # stubs have to present the schema surface that property reads: the outer
+        # schema's ``__fields__``/``__buffer__`` up to the field holding the block,
+        # and the block's own up to its payload field.
         unpacker = object.__new__(PCAPNG)
         unpacker.__header__ = None
         payload_block = types.SimpleNamespace(
             __payload__='packet_data',
             __fields__={'packet_data': object()},
+            __buffer__={'packet_data': b'payload'},
             get_payload=mock.Mock(return_value=b'payload'),
         )
         unpacker.__schema__ = types.SimpleNamespace(
-            unpack=mock.Mock(return_value=types.SimpleNamespace(block=payload_block)))
+            unpack=mock.Mock(return_value=types.SimpleNamespace(
+                block=payload_block,
+                __fields__={'type': object(), 'block': object()},
+                __buffer__={'type': b'\x03\x00\x00\x00'},
+            )))
         unpacker._file = io.BytesIO(b'0123456789ab')
         unpacker._ctx = types.SimpleNamespace(section=types.SimpleNamespace(byteorder='little'))
         unpacker._byte = 'big'
@@ -1894,35 +1904,59 @@ class PCAPNGUnitTests(unittest.TestCase):
         data = unpacker.unpack(12, __packet__={})
         self.assertEqual(data['packet'], b'payload')
         self.assertEqual(unpacker._byte, 'little')
-        payload_block.get_payload.assert_called_once_with()
+        payload_block.get_payload.assert_called_once_with('packet_data')
+        # Only the outer fields ahead of the block reach the header: the 4-octet
+        # block type, and none of the block's own, the payload being its first.
+        self.assertEqual(unpacker.packet.header, b'\x03\x00\x00\x00')
 
+        # The same instance, unpacked a second time with a different block in place:
+        # an already-set ``__header__`` must skip re-unpacking the schema, and the
+        # payload must be recomputed from the block that is there now rather than
+        # served from the first call. That second half is why ``PCAPNG.packet`` is a
+        # plain property and not a ``cached_property`` -- caching it would return
+        # ``b'payload'`` here and never call ``get_payload`` at all. See #646.
         cached_block = types.SimpleNamespace(
             __payload__='packet_data',
             __fields__={'packet_data': object()},
+            __buffer__={'packet_data': b'cached'},
             get_payload=mock.Mock(return_value=b'cached'),
         )
-        unpacker.__header__ = types.SimpleNamespace(block=cached_block)
+        unpacker.__header__ = types.SimpleNamespace(
+            block=cached_block,
+            __fields__={'type': object(), 'block': object()},
+            __buffer__={'type': b'\x03\x00\x00\x00'},
+        )
         unpacker.read = mock.Mock(return_value=DummyData(length=12))
         self.assertEqual(unpacker.unpack(12)['packet'], b'cached')
         unpacker.__schema__.unpack.assert_called_once()
-        cached_block.get_payload.assert_called_once_with()
+        cached_block.get_payload.assert_called_once_with('packet_data')
 
         no_ctx_unpacker = object.__new__(PCAPNG)
         no_ctx_unpacker.__header__ = None
         no_payload_block = types.SimpleNamespace(
             __payload__='payload',
             __fields__={},
+            __buffer__={},
             get_payload=mock.Mock(return_value=b'unused'),
         )
         no_ctx_unpacker.__schema__ = types.SimpleNamespace(
-            unpack=mock.Mock(return_value=types.SimpleNamespace(block=no_payload_block)))
+            unpack=mock.Mock(return_value=types.SimpleNamespace(
+                block=no_payload_block,
+                __fields__={'type': object(), 'block': object()},
+                __buffer__={'type': b'\x01\x00\x00\x00'},
+            )))
         no_ctx_unpacker._file = io.BytesIO(b'0123456789ab')
+        no_ctx_unpacker._data = b'0123456789ab'
         no_ctx_unpacker._ctx = None
         no_ctx_unpacker._byte = 'big'
         no_ctx_unpacker.read = mock.Mock(return_value=DummyData(length=12))
         self.assertEqual(no_ctx_unpacker.unpack(12)['packet'], b'')
         self.assertEqual(no_ctx_unpacker._byte, 'big')
         no_payload_block.get_payload.assert_not_called()
+        # A block declaring no payload field is all header: the raw block octets
+        # verbatim, and no payload.
+        self.assertEqual(no_ctx_unpacker.packet.header, b'0123456789ab')
+        self.assertEqual(no_ctx_unpacker.packet.payload, b'')
 
         self.assertEqual(pcapng._make_block_shb(major_version=2, section_length=-1).minor, 0)
         self.assertEqual(pcapng._make_block_shb(major_version=1, minor_version=5,
