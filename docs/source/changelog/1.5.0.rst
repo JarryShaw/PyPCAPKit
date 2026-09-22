@@ -1645,6 +1645,35 @@ pull requests between #326 and #509.
   each message in full rather than by substring, which is what the existing
   ``assertIn`` on the message body could not do, since it passes either side of
   the change (#649).
+* **Fixed** -- the release workflow published to PyPI and to Anaconda with
+  nothing a human had to approve. ``create-release.yml``'s ``pypi`` job carried
+  its ``environment: release`` commented out while the ``id-token: write`` from
+  the same upstream snippet had been re-added live below it, so the block read as
+  disabled as a unit when only its gate still was; the ``conda`` job had no
+  ``environment:`` at all, not even a commented one. Neither needed a tag either:
+  the workflow also fires on the completion of ``Vendor Update``, so a scheduled
+  registry crawl that bumped the version was enough to publish to two public
+  indexes, at a median three minutes from bump to upload. Four jobs reach outside
+  the run and all four are now gated -- ``github`` on ``github-release`` for the
+  GitHub Release and the ``v*`` tag it creates, ``tag`` on ``conda-tag`` for the
+  commit it pushes to ``main``, ``pypi`` on ``pypi``, and ``conda`` on
+  ``anaconda``. One environment per credential rather than one shared
+  ``release``, because approval is granted to an environment and not to a job, so
+  a single ``release`` approved once would release both indexes together. PyPI is
+  the one that has to be answerable alone: a version number it has accepted
+  cannot be reused, and ``skip-existing: true`` makes the re-upload *succeed*
+  having published nothing, so an unintended publish permanently consumes the
+  number the intended release wanted. The workflow half is only half the fix --
+  an ``environment:`` naming an environment that does not exist is created
+  implicitly with no protection rules and the job proceeds unapproved, so this is
+  inert until each of the four exists in repository settings with a required
+  reviewer on it, and each one's "Deployment branches and tags" has to stay
+  unrestricted or the ``tags: v*`` trigger fails outright instead of pausing.
+  ``github-pages`` is the standing example of that failure in this repository,
+  carrying no protection rule since 2021. The new test asserts the general rule
+  rather than the current file -- no job running a publishing action or a
+  ``git push`` may omit an ``environment:`` -- so a publishing job added later
+  without a gate fails rather than ships (#641).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
