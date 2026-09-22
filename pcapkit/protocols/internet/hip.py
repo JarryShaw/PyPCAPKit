@@ -1041,6 +1041,11 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
             random=_rand,
+            # Keep the field's on-wire width, which ``_rand`` alone cannot carry:
+            # ``int.bit_length()`` sees the value, not the octets it was padded
+            # into. ``schema.len`` is ``4 + RHASH_len / 8``, so the width in bits
+            # is ``(schema.len - 4) * 8``. See #653.
+            rhash_len=(schema.len - 4) * 8,
         )
         return puzzle
 
@@ -1057,7 +1062,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |             Type              |             Length            |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |  #K, 1 byte   |    Lifetime   |        Opaque, 2 bytes        |
+           |  #K, 1 byte   |   Reserved    |        Opaque, 2 bytes        |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                      Random #I, n bytes                       |
            /                                                               /
@@ -1084,7 +1089,13 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         _numk = schema.index
-        _time = schema.lifetime
+        # :rfc:`7401#section-5.2.5` names this octet ``Reserved``, "zero when sent,
+        # ignored when received", and only ``PUZZLE`` (:rfc:`7401#section-5.2.4`)
+        # has a ``Lifetime`` at this offset. Record it verbatim rather than reading
+        # it as a ``2^(value - 32)`` duration: interpreting it wrote ``0x20`` into a
+        # field the RFC requires to be zero, and made the conformant ``0x00``
+        # impossible to re-serialise. See #654.
+        _resv = schema.reserved
         _opak = schema.opaque
         _rand = schema.random
         # ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which
@@ -1098,10 +1109,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             critical=bool(schema.type & 0b1),
             length=4 + schema.len + (8 - schema.len % 8) % 8,
             index=_numk,
-            lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
+            reserved=_resv,
             opaque=_opak,
             random=_rand,
             solution=_solt,
+            # Keep the two fields' shared on-wire width, which the values alone
+            # cannot carry. Each is ``RHASH_len / 8`` octets and ``schema.len`` is
+            # ``4 + RHASH_len / 4``, so the width in bits is
+            # ``((schema.len - 4) // 2) * 8`` -- the same halving the schema's own
+            # field lengths do. See #653.
+            rhash_len=((schema.len - 4) // 2) * 8,
         )
         return solution
 
@@ -3122,12 +3139,142 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             locators=locators,
         )
 
+    @staticmethod
+    def _make_puzzle_lifetime(code: 'Enum_Parameter', version: 'int',
+                              lifetime: 'timedelta | int | float') -> 'int':
+        """Encode a ``PUZZLE`` ``Lifetime`` octet.
+
+        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``
+        seconds -- and it is the *only* place either RFC defines that encoding, so
+        it applies to ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
+        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of
+                seconds
+
+        Returns:
+            The ``Lifetime`` octet.
+
+        Raises:
+            ProtocolError: If ``lifetime`` is not a positive duration, or encodes
+                to a value the one-octet field cannot hold.
+
+        """
+        # Keyed on :class:`~datetime.timedelta`, not on :class:`int`: the old
+        # ``lifetime if isinstance(lifetime, int) else lifetime.total_seconds()``
+        # sent a plain ``float`` down the timedelta branch and escaped an
+        # :exc:`AttributeError` instead.
+        seconds = lifetime.total_seconds() if isinstance(lifetime, timedelta) else lifetime
+
+        # ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is
+        # not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it escapes the
+        # library's own error handling with a message naming neither HIP nor the
+        # field. It is reachable from conformant input rather than only from a
+        # crafted one: a ``Lifetime`` octet of ``0x00`` means ``2^-32`` seconds,
+        # below :class:`~datetime.timedelta`'s microsecond resolution, so parsing
+        # one yields ``timedelta(0)`` and re-serialising it lands here. See #654.
+        if seconds <= 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} is not a positive number of seconds')
+
+        octet = math.floor(math.log2(seconds) + 32)
+
+        # ``UInt8Field`` wraps rather than raising -- measured, ``300`` packs as
+        # ``0x2c`` -- so an out-of-range lifetime would otherwise be written as some
+        # other perfectly valid-looking duration.
+        if not 0 <= octet <= 0xFF:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid lifetime: '
+                                f'{seconds} seconds encodes to {octet}, outside the '
+                                'one-octet Lifetime field')
+        return octet
+
+    @staticmethod
+    def _make_puzzle_field_width(code: 'Enum_Parameter', version: 'int',
+                                 rhash_len: 'Optional[int]', *values: 'int') -> 'int':
+        """Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.
+
+        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``
+        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where
+        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm
+        (:rfc:`7401#section-2.3`). The width is therefore a property of the
+        association, not of the number that happens to be in the field, and it is
+        resolved here in that order of authority:
+
+        1. an explicit ``rhash_len`` argument;
+        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and
+           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both
+           ``Length`` values as literally 12 and 20;
+        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by
+           the callers below;
+        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up
+           to whole octets.
+
+        Only case 4 can lose a leading zero octet, and it is the only case where the
+        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing
+        declaring it. Reaching for it unconditionally is what re-serialised a
+        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (#653) and what built, under
+        HIPv1, parameters this library's own reader then rejected (#655).
+
+        Two things this deliberately does *not* reject, both of which look like
+        oversights and are not:
+
+        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a
+          zero-length output, so no conformant packet carries one -- but it is what
+          case 4 yields for the default ``random=0``, it is what a ``Length = 4``
+          parameter parses back to, and it is what this builder produced before this
+          change. Rejecting it would turn a degenerate-but-self-consistent case into
+          a new failure for callers that pass no value at all, which is beyond the
+          three defects this addresses.
+        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is
+          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and
+          :meth:`_read_param_solution`, whose guards are likewise written as
+          ``version == 1`` rather than as an exhaustive check, so the reader and the
+          builder agree. Validating the version belongs with :meth:`make`'s public
+          signature, not here.
+
+        Args:
+            code: parameter code
+            version: HIP protocol version
+            rhash_len: declared field width in bits, if any
+            *values: the field values that must fit
+
+        Returns:
+            The width of one field, in octets.
+
+        Raises:
+            ProtocolError: If the declared width contradicts the protocol version,
+                is not a whole number of octets, or is too narrow for ``values``.
+
+        """
+        bits = max((value.bit_length() for value in values), default=0)
+
+        if version == 1:
+            if rhash_len is not None and rhash_len != 64:
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                    f'HIPv1 fixes the field at 64 bits, got {rhash_len}')
+            rhash_len = 64
+        elif rhash_len is None:
+            rhash_len = 8 * math.ceil(bits / 8)
+
+        if rhash_len < 0 or rhash_len % 8:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'RHASH_len must be a non-negative whole number of '
+                                f'octets, got {rhash_len} bits')
+        if bits > rhash_len:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid width: '
+                                f'a {bits}-bit value does not fit a {rhash_len}-bit field')
+        return rhash_len // 8
+
     def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Optional[Data_PuzzleParameter]' = None, *,  # pylint: disable=unused-argument
                            version: 'int',
                            index: 'int' = 0,
                            lifetime: 'timedelta | int' = 0,
                            opaque: 'bytes' = b'',
                            random: 'int' = 0,
+                           rhash_len: 'Optional[int]' = None,
                            **kwargs: 'Any') -> 'Schema_PuzzleParameter':
         """Make HIP ``PUZZLE`` parameter.
 
@@ -3139,6 +3286,9 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             lifetime: lifetime
             opaque: opaque data
             random: random #I value
+            rhash_len: on-wire width of ``Random #I``, in bits; defaults to the
+                width ``param`` was parsed with, or to what ``version`` fixes, or
+                to ``random``'s own bit length
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -3147,17 +3297,20 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         """
         if param is not None:
             index = param.index
-            lifetime = math.floor(math.log2(param.lifetime.total_seconds()) + 32)
+            lifetime = self._make_puzzle_lifetime(code, version, param.lifetime)
             opaque = param.opaque
             random = param.random
+            if rhash_len is None:
+                rhash_len = param.rhash_len
         else:
-            lifetime = math.floor(math.log2(
-                lifetime if isinstance(lifetime, int) else lifetime.total_seconds()
-            ) + 32)
+            lifetime = self._make_puzzle_lifetime(code, version, lifetime)
 
         return Schema_PuzzleParameter(
             type=code,
-            len=4 + math.ceil(random.bit_length() / 8),
+            # One field of ``RHASH_len / 8`` octets after the 4-octet
+            # ``#K``/``Lifetime``/``Opaque`` prefix -- :rfc:`7401#section-5.2.4`
+            # spells the same quantity ``4 + RHASH_len / 8``.
+            len=4 + self._make_puzzle_field_width(code, version, rhash_len, random),
             index=index,
             lifetime=lifetime,
             opaque=opaque,
@@ -3167,10 +3320,11 @@ class HIP(Internet[Data_HIP, Schema_HIP],
     def _make_param_solution(self, code: 'Enum_Parameter', param: 'Optional[Data_SolutionParameter]' = None, *,  # pylint: disable=unused-argument
                              version: 'int',
                              index: 'int' = 0,
-                             lifetime: 'timedelta | int' = 0,
+                             reserved: 'Optional[int]' = None,
                              opaque: 'bytes' = b'',
                              random: 'int' = 0,
                              solution: 'int' = 0,
+                             rhash_len: 'Optional[int]' = None,
                              **kwargs: 'Any') -> 'Schema_SolutionParameter':
         """Make HIP ``SOLUTION`` parameter.
 
@@ -3179,10 +3333,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             param: parameter data
             version: HIP protocol version
             index: #K index
-            lifetime: lifetime
+            reserved: the ``Reserved`` octet, which :rfc:`7401#section-5.2.5`
+                requires to be "zero when sent". Defaults to the octet ``param``
+                arrived with, so that re-serialising reproduces it rather than
+                rewriting it, and to that mandated zero otherwise. Pass it
+                explicitly to override either -- notably to write the conformant
+                zero over a non-conformant one received from a peer, which is
+                otherwise unreachable because :class:`Data_SolutionParameter` is
+                immutable
             opaque: opaque data
             random: random #I value
             solution: solution #J value
+            rhash_len: on-wire width of ``Random #I`` and ``Puzzle solution #J``
+                alike, in bits; defaults to the width ``param`` was parsed with, or
+                to what ``version`` fixes, or to the values' own bit length
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -3190,28 +3355,36 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         """
         if param is not None:
             index = param.index
-            lifetime = math.floor(math.log2(param.lifetime.total_seconds()) + 32)
             opaque = param.opaque
             random = param.random
             solution = param.solution
-        else:
-            lifetime = math.floor(math.log2(
-                lifetime if isinstance(lifetime, int) else lifetime.total_seconds()
-            ) + 32)
+            # Both of these are `None`-sentinelled rather than overwritten
+            # outright, unlike the data fields above. `Data_SolutionParameter` is
+            # immutable, so a caller with a parsed parameter in hand has no other
+            # way to sanitise a peer's non-conformant `Reserved` -- or to re-frame
+            # the parameter for an association with a different `RHASH_len`.
+            if reserved is None:
+                reserved = param.reserved
+            if rhash_len is None:
+                rhash_len = param.rhash_len
+        elif reserved is None:
+            # :rfc:`7401#section-5.2.5`: "zero when sent".
+            reserved = 0
 
         return Schema_SolutionParameter(
             type=code,
             # Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of
-            # ``RHASH_len / 8`` octets each -- so the contents length is
-            # ``4 + 2 * ceil(bits / 8)`` and is necessarily even after the 4-octet
-            # ``#K``/``Reserved``/``Opaque`` prefix. :rfc:`7401#section-5.2.5` spells
-            # the same quantity ``4 + RHASH_len / 4``, which is an identity only
-            # because a real ``RHASH_len`` is a whole number of octets; ``ceil(bits
-            # / 4)`` on an arbitrary :meth:`int.bit_length` is not that quantity and
-            # yields an odd width that :meth:`_read_param_solution` rejects. See #608.
-            len=4 + 2 * math.ceil(max(random.bit_length(), solution.bit_length()) / 8),
+            # ``RHASH_len / 8`` octets each -- so the contents length is necessarily
+            # even after the 4-octet ``#K``/``Reserved``/``Opaque`` prefix.
+            # :rfc:`7401#section-5.2.5` spells the same quantity
+            # ``4 + RHASH_len / 4``, which is an identity only because a real
+            # ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an
+            # arbitrary :meth:`int.bit_length` is not that quantity and yields an odd
+            # width that :meth:`_read_param_solution` rejects. See #608.
+            len=4 + 2 * self._make_puzzle_field_width(code, version, rhash_len,
+                                                      random, solution),
             index=index,
-            lifetime=lifetime,
+            reserved=reserved,
             opaque=opaque,
             random=random,
             solution=solution,

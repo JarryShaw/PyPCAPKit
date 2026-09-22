@@ -532,14 +532,14 @@ class HIPUnitTests(unittest.TestCase):
             )
         self.assertEqual(proto._read_param_solution(
             hip_schema.SolutionParameter(type=Parameter.SOLUTION, len=8, index=1,
-                                         lifetime=32, opaque=b'op', random=5, solution=6),
+                                         reserved=0, opaque=b'op', random=5, solution=6),
             version=2,
             options=options,
         ).solution, 6)
         with self.assertRaises(ProtocolError):
             proto._read_param_solution(
                 hip_schema.SolutionParameter(type=Parameter.SOLUTION, len=9, index=1,
-                                             lifetime=32, opaque=b'op', random=5, solution=6),
+                                             reserved=0, opaque=b'op', random=5, solution=6),
                 version=2,
                 options=options,
             )
@@ -845,7 +845,7 @@ class HIPUnitTests(unittest.TestCase):
              hip_schema.R1CounterParameter(type=Parameter.R1_COUNTER, len=8, counter=9)),
             (proto._read_param_solution,
              hip_schema.SolutionParameter(type=Parameter.SOLUTION, len=8, index=1,
-                                          lifetime=32, opaque=b'op', random=5, solution=6),
+                                          reserved=0, opaque=b'op', random=5, solution=6),
              1),
             (proto._read_param_seq,
              hip_schema.SEQParameter(type=Parameter.SEQ, len=3, update_id=11)),
@@ -995,7 +995,7 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.SOLUTION,
             version=2,
             index=1,
-            lifetime=datetime.timedelta(seconds=1),
+            reserved=0,
             opaque=b'op',
             random=5,
             solution=6,
@@ -1425,14 +1425,15 @@ class HIPUnitTests(unittest.TestCase):
             Parameter.PUZZLE,
             hip_data.PuzzleParameter(type=Parameter.PUZZLE, critical=False,
                                      length=16, index=1, lifetime=dt1,
-                                     opaque=b'op', random=5),
+                                     opaque=b'op', random=5, rhash_len=64),
             version=2,
         ).random, 5)
         self.assertEqual(proto._make_param_solution(
             Parameter.SOLUTION,
             hip_data.SolutionParameter(type=Parameter.SOLUTION, critical=False,
-                                       length=24, index=1, lifetime=dt1,
-                                       opaque=b'op', random=5, solution=6),
+                                       length=24, index=1, reserved=0,
+                                       opaque=b'op', random=5, solution=6,
+                                       rhash_len=64),
             version=2,
         ).solution, 6)
         self.assertEqual(proto._make_param_seq(
@@ -2455,7 +2456,7 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(expected, 4 + 2 * math.ceil(bits / 8))
 
                 schema = proto._make_param_solution(
-                    Parameter.SOLUTION, version=2, index=1, lifetime=2,
+                    Parameter.SOLUTION, version=2, index=1, reserved=0,
                     opaque=b'op', random=random, solution=solution,
                 )
                 self.assertEqual(schema.len, expected)
@@ -2504,7 +2505,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(random.bit_length(), 57)
 
         schema = proto._make_param_solution(
-            Parameter.SOLUTION, version=1, index=1, lifetime=2,
+            Parameter.SOLUTION, version=1, index=1, reserved=0,
             opaque=b'op', random=random, solution=solution,
         )
         self.assertEqual(schema.len, 20)
@@ -2512,6 +2513,488 @@ class HIPUnitTests(unittest.TestCase):
         parsed = proto._read_param_solution(schema, version=1, options=options)
         self.assertEqual(parsed.random, random)
         self.assertEqual(parsed.solution, solution)
+
+    def test_hip_puzzle_and_solution_keep_the_on_wire_field_width(self) -> None:
+        """#653: re-serialising a parsed ``PUZZLE`` or ``SOLUTION`` must reproduce
+        the field width it arrived with, leading zero octets included.
+
+        The width of ``Random #I`` -- and, for ``SOLUTION``, of ``Puzzle solution
+        #J`` -- is ``RHASH_len / 8`` octets (:rfc:`7401#section-5.2.4`,
+        :rfc:`7401#section-5.2.5`), a property of the Responder's HIT Suite rather
+        than of the number that happens to sit in the field. Both builders derived
+        it from :meth:`int.bit_length` instead, and the data model carried nothing
+        better to derive it from, so every leading zero octet was dropped on the way
+        out: measured on ``origin/main`` at ``0c7f2b7c9``, a ``SOLUTION`` read with
+        ``Length = 20`` re-serialised as ``Length = 6`` and a ``PUZZLE`` read with
+        ``Length = 12`` as ``Length = 5``.
+
+        What makes this worth a test of its own rather than an
+        ``EXPECTED_FAILURES`` entry is that the cycle *closes*: nothing raises, the
+        integers survive, and the round trip silently yields a parameter describing
+        a different puzzle -- a conformant peer reads ``RHASH_len = 8`` bits where
+        the sender said 64. It only became reachable end to end once #608 was fixed
+        (#629); before that the undersized rebuild tripped
+        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`'s parity
+        guard first and failed loudly.
+
+        The octets below are written by hand, not by this library's own builder,
+        which is the only way to present it with a value narrower than its field.
+        Every HIP fixture is generated by the code under test, and the generator
+        passes ``random`` and ``solution`` as ``0`` -- the one value that has no
+        width to lose -- which is why no fixture could ever have caught this.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        # SOLUTION: Type 321, Length 20, #K = 1, Reserved = 0x20, Opaque = b'op',
+        # then Random #I and Puzzle solution #J as 8 octets each carrying 1.
+        #
+        # Reserved is 0x20 rather than the conformant 0x00 *only* so that this case
+        # isolates #653 on the unfixed tree: a 0x00 there trips #654's
+        # ``math.log2(0)`` first and the width loss is never reached. #654's own
+        # test below uses the conformant 0x00.
+        wire = bytes.fromhex('0141' '0014' '01' '20' '6f70'
+                             '0000000000000001' '0000000000000001' '00000000')
+        self.assertEqual(len(wire), 28)
+
+        unpacked = hip_schema.SolutionParameter.unpack(wire)
+        self.assertEqual(unpacked.len, 20)
+        self.assertEqual(unpacked.random, 1)
+        self.assertEqual(unpacked.solution, 1)
+
+        parsed = proto._read_param_solution(unpacked, version=2, options=options)
+        self.assertEqual(parsed.random, 1)
+        self.assertEqual(parsed.solution, 1)
+        # The width is declared on the data model, not inferred from the values.
+        self.assertEqual(parsed.rhash_len, 64)
+
+        rebuilt = proto._make_param_solution(Parameter.SOLUTION, parsed, version=2)
+        self.assertEqual(rebuilt.len, 20)
+        self.assertNotEqual(rebuilt.len, 6)  # what the unfixed builder produced
+        # Compared without the trailing padding, and then against the re-packed
+        # source schema rather than against the literal. Both are deliberate: the
+        # padding rule is itself in flight (#651/#664), and this test is about the
+        # `Length` field and the payload octets, not about how many alignment octets
+        # follow them. Either assertion alone would be weaker -- the first pins the
+        # octets that came off the wire, the second pins losslessness end to end.
+        self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], wire[:4 + unpacked.len])
+        self.assertEqual(bytes(rebuilt), bytes(unpacked))
+
+        # PUZZLE: Type 257, Length 12, #K = 1, Lifetime = 0x20, Opaque = b'op',
+        # then Random #I as 8 octets carrying 1.
+        wire = bytes.fromhex('0101' '000c' '01' '20' '6f70'
+                             '0000000000000001' '00000000')
+        self.assertEqual(len(wire), 20)
+
+        unpacked = hip_schema.PuzzleParameter.unpack(wire)
+        self.assertEqual(unpacked.len, 12)
+        self.assertEqual(unpacked.random, 1)
+
+        parsed = proto._read_param_puzzle(unpacked, version=2, options=options)
+        self.assertEqual(parsed.random, 1)
+        self.assertEqual(parsed.rhash_len, 64)
+
+        rebuilt = proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2)
+        self.assertEqual(rebuilt.len, 12)
+        self.assertNotEqual(rebuilt.len, 5)  # what the unfixed builder produced
+        self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], wire[:4 + unpacked.len])
+        self.assertEqual(bytes(rebuilt), bytes(unpacked))
+
+    def test_hip_solution_second_octet_is_reserved_not_a_lifetime(self) -> None:
+        """#654: ``SOLUTION``'s second contents octet is ``Reserved``, and must be
+        zero when sent.
+
+        :rfc:`7401#section-5.2.5` names it ``Reserved`` -- "zero when sent, ignored
+        when received" -- and :rfc:`5201#section-5.2.5` says the same, so there is
+        no HIP version under which it is a duration. Only ``PUZZLE``
+        (:rfc:`7401#section-5.2.4`) has a ``Lifetime`` at that offset, and only
+        §5.2.4 defines the ``2^(value - 32)`` seconds encoding that pcapkit was
+        applying to both. Measured on ``origin/main`` at ``0c7f2b7c9``, the octet
+        came out as ``0x20``, ``0x21``, ``0x25`` or ``0x2b`` depending on the
+        lifetime asked for, and the one value the RFC actually permits -- zero --
+        could not be written at all.
+
+        Three things are asserted, in the order they matter. The octet is zero for a
+        from-scratch build, whatever else is passed. A parameter that arrives with
+        the conformant ``0x00`` survives the round trip, where it used to be
+        unbuildable. And a parameter that arrives with a non-zero ``Reserved``
+        re-emits that same octet rather than a re-derived one, because round-trip
+        fidelity is what #653 is about and "ignored when received" is honoured by
+        not interpreting the value, not by discarding it.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.data.internet import hip as hip_data
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        # The data model no longer claims SOLUTION has a lifetime.
+        self.assertIn('reserved', hip_data.SolutionParameter.__annotations__)
+        self.assertNotIn('lifetime', hip_data.SolutionParameter.__annotations__)
+        self.assertIn('reserved', hip_schema.SolutionParameter.__annotations__)
+        self.assertNotIn('lifetime', hip_schema.SolutionParameter.__annotations__)
+        # ... while PUZZLE, where the RFC does put one, still does.
+        self.assertIn('lifetime', hip_data.PuzzleParameter.__annotations__)
+
+        # Zero when sent, for a from-scratch build, at the default and explicitly.
+        for reserved in (None, 0):
+            with self.subTest(reserved=reserved):
+                kwargs = {} if reserved is None else {'reserved': reserved}
+                schema = proto._make_param_solution(
+                    Parameter.SOLUTION, version=2, index=1, opaque=b'op',
+                    random=1 << 63, solution=1 << 63, **kwargs,
+                )
+                self.assertEqual(schema.reserved, 0)
+                self.assertEqual(schema.len, 20)
+                # Octet 5 of the parameter is the Reserved position: two octets of
+                # Type, two of Length, one of #K, then Reserved.
+                self.assertEqual(bytes(schema)[5], 0x00)
+                for stale in (0x20, 0x21, 0x25, 0x2b):
+                    self.assertNotEqual(bytes(schema)[5], stale)
+
+        # A conformant SOLUTION -- Reserved = 0x00 -- parsed and re-serialised. On
+        # the unfixed tree this raised a bare ValueError from ``math.log2(0.0)``,
+        # because 0x00 was read as ``2 ** (0 - 32)`` seconds, which is below
+        # timedelta's microsecond resolution and rounds to timedelta(0).
+        # Compared against the re-packed source schema rather than against the
+        # literal, and with the trailing padding excluded, for the reason given in
+        # `test_hip_puzzle_and_solution_keep_the_on_wire_field_width`: the padding
+        # rule is in flight (#651/#664) and is not what this test is about.
+        conformant = bytes.fromhex('0141' '0014' '01' '00' '6f70'
+                                   '8000000000000000' '8000000000000000' '00000000')
+        conformant_schema = hip_schema.SolutionParameter.unpack(conformant)
+        parsed = proto._read_param_solution(conformant_schema, version=2, options=options)
+        self.assertEqual(parsed.reserved, 0)
+        rebuilt = proto._make_param_solution(Parameter.SOLUTION, parsed, version=2)
+        self.assertEqual(rebuilt.reserved, 0)
+        self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], conformant[:4 + rebuilt.len])
+        self.assertEqual(bytes(rebuilt), bytes(conformant_schema))
+
+        # A non-zero Reserved is carried verbatim rather than re-derived.
+        received = bytes.fromhex('0141' '0014' '01' '2b' '6f70'
+                                 '8000000000000000' '8000000000000000' '00000000')
+        received_schema = hip_schema.SolutionParameter.unpack(received)
+        parsed = proto._read_param_solution(received_schema, version=2, options=options)
+        self.assertEqual(parsed.reserved, 0x2b)
+        rebuilt = proto._make_param_solution(Parameter.SOLUTION, parsed, version=2)
+        self.assertEqual(bytes(rebuilt)[5], 0x2b)
+        self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], received[:4 + rebuilt.len])
+        self.assertEqual(bytes(rebuilt), bytes(received_schema))
+
+        # ... but an explicit `reserved` still overrides it, which is the only way to
+        # write the conformant zero over a peer's non-conformant octet: the data
+        # model is immutable, so the parsed object cannot be corrected in place.
+        with self.assertRaises(UnsupportedCall):
+            parsed.reserved = 0  # type: ignore[misc]
+        sanitised = proto._make_param_solution(
+            Parameter.SOLUTION, parsed, version=2, reserved=0,
+        )
+        self.assertEqual(sanitised.reserved, 0)
+        self.assertEqual(bytes(sanitised)[5], 0x00)
+        # `received` and `conformant` differ in that octet alone, so zeroing it
+        # reproduces the conformant parameter exactly.
+        self.assertEqual(bytes(sanitised), bytes(conformant_schema))
+
+    def test_hip_puzzle_lifetime_guard_raises_an_in_library_error(self) -> None:
+        """#654: a lifetime ``math.log2`` cannot encode must raise a pcapkit
+        exception, not a bare :exc:`ValueError`.
+
+        :mod:`pcapkit.utilities.exceptions` exists so that only user-facing stack
+        information reaches the user: raising a
+        :class:`~pcapkit.utilities.exceptions.BaseError` logs once at
+        ``CRITICAL`` and, outside development mode, trims the traceback. A bare
+        :exc:`ValueError` from ``math.log2`` gets none of that -- it is invisible to
+        ``except BaseError``, it is not logged, and its message, ``expected a
+        positive input``, names neither HIP nor the parameter nor the field.
+
+        :class:`~pcapkit.utilities.exceptions.ProtocolError` is the right member of
+        that family rather than the nearest-named one. It is already what both
+        readers raise for a malformed ``PUZZLE`` or ``SOLUTION``, and it is declared
+        ``ProtocolError(BaseError, ValueError)`` -- so it joins the family *and*
+        stays catchable by any caller already written around the
+        :exc:`ValueError` that escapes today. Both halves are asserted below,
+        because the second is what makes this a non-breaking change.
+        :class:`~pcapkit.utilities.exceptions.EnumError` would not do: it is
+        ``EnumError(BaseError, TypeError)``, so it would silently stop being caught.
+
+        Reachable from conformant input rather than only from a crafted one: a
+        ``Lifetime`` octet of ``0x00`` is a legal encoding of ``2^-32`` seconds,
+        which :class:`~datetime.timedelta` rounds to zero, so parsing an ordinary
+        PUZZLE and re-emitting it lands here.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        self.assertTrue(issubclass(ProtocolError, BaseError))
+        self.assertTrue(issubclass(ProtocolError, ValueError))
+
+        # Non-positive lifetimes, as an int and as a timedelta. ``0`` is the
+        # builder's own default, which is what the round-trip generator overrides
+        # with ``{'lifetime': 1}`` to dodge -- an override that also left `random`
+        # at 0 and so hid #608 for as long as it existed.
+        for lifetime in (0, 0.0, datetime.timedelta(0), -1, datetime.timedelta(seconds=-1)):
+            with self.subTest(lifetime=lifetime):
+                with self.assertRaises(ProtocolError) as caught:
+                    proto._make_param_puzzle(
+                        Parameter.PUZZLE, version=2, index=1, lifetime=lifetime,
+                        opaque=b'op', random=1 << 63,
+                    )
+                self.assertIsInstance(caught.exception, BaseError)
+                self.assertIsInstance(caught.exception, ValueError)
+                self.assertIn('invalid lifetime', str(caught.exception))
+                self.assertIn('257', str(caught.exception))
+
+        # A lifetime too large for the one-octet field. ``UInt8Field`` wraps rather
+        # than raising -- measured, 300 packs as 0x2c -- so without this guard the
+        # parameter would carry some other, valid-looking duration.
+        with self.assertRaises(ProtocolError) as caught:
+            proto._make_param_puzzle(
+                Parameter.PUZZLE, version=2, index=1, lifetime=1 << 240,
+                opaque=b'op', random=1 << 63,
+            )
+        self.assertIn('invalid lifetime', str(caught.exception))
+
+        # A PUZZLE whose Lifetime octet is 0x00, parsed then re-serialised: the
+        # conformant-input path. On the unfixed tree this was a bare ValueError.
+        wire = bytes.fromhex('0101' '000c' '01' '00' '6f70'
+                             '8000000000000000' '00000000')
+        parsed = proto._read_param_puzzle(
+            hip_schema.PuzzleParameter.unpack(wire), version=2, options=options,
+        )
+        self.assertEqual(parsed.lifetime, datetime.timedelta(0))
+        with self.assertRaises(ProtocolError) as caught:
+            proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2)
+        self.assertIsInstance(caught.exception, BaseError)
+
+        # A positive lifetime still encodes exactly as it did before.
+        self.assertEqual(proto._make_param_puzzle(
+            Parameter.PUZZLE, version=2, index=1, lifetime=1,
+            opaque=b'op', random=1 << 63,
+        ).lifetime, 32)
+
+    def test_hip_puzzle_and_solution_size_from_version_under_hipv1(self) -> None:
+        """#655: under HIPv1 both builders must size from ``version``, not from the
+        value's bit length.
+
+        :rfc:`5201#section-5.2.4` and :rfc:`5201#section-5.2.5` state the widths as
+        literal constants -- ``Random #I`` and ``Puzzle solution #J`` are 8 bytes
+        each, ``Length`` is 12 for ``PUZZLE`` and 20 for ``SOLUTION`` -- and
+        "Random #I is represented as a 64-bit integer" leaves no narrower reading.
+        Both builders took a ``version`` keyword and neither read it, so measured on
+        ``origin/main`` at ``0c7f2b7c9`` the ``version=1`` and ``version=2`` lengths
+        were **identical at every bit width**, and under HIPv1 each builder accepted
+        only values whose ``bit_length()`` landed in 57..64. Everything narrower
+        built a parameter this library's own reader rejects -- the same shape as
+        #608 -- and everything wider overshot.
+
+        On the widths chosen
+        --------------------
+        Multiples of 8 cannot discriminate: at 8, 16, 32, 56, 64 and 128 bits the
+        correct ``2 * ceil(b / 8)`` agrees with #608's ``ceil(b / 4)`` and with the
+        floor variant, which is exactly why every byte-aligned fixture passed
+        through that defect unharmed. So 1, 9, 15, 17, 57 and 65 are the ones
+        carrying the weight here, and the byte-aligned rows are kept as controls.
+        57 and 65 bracket HIPv1's field: 57 is the narrowest value whose derived
+        width reached the required 20, and 65 the narrowest that overshoots it.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        #  bits, SOLUTION len v2, PUZZLE len v2 -- HIPv1 is always 20 and 12.
+        cases = (
+            (1, 6, 5),
+            (8, 6, 5),
+            (9, 8, 6),
+            (15, 8, 6),
+            (16, 8, 6),
+            (17, 10, 7),
+            (32, 12, 8),
+            (56, 18, 11),
+            (57, 20, 12),
+            (64, 20, 12),
+        )
+        for bits, solution_v2, puzzle_v2 in cases:
+            value = 1 << (bits - 1)
+            with self.subTest(bits=bits):
+                self.assertEqual(value.bit_length(), bits)
+
+                # HIPv1: the RFC's constants, at every width, narrow values
+                # included. PUZZLE goes first deliberately -- its keyword arguments
+                # are the same before and after this change, so on the unfixed tree
+                # this assertion is reached and reports #655 directly (measured:
+                # ``AssertionError: 12 != 5`` at 1 bit). SOLUTION's cannot be, since
+                # there the unfixed builder crashes on its own ``lifetime`` default
+                # before any length is computed -- which is #654.
+                schema = proto._make_param_puzzle(
+                    Parameter.PUZZLE, version=1, index=1, lifetime=1,
+                    opaque=b'op', random=value,
+                )
+                self.assertEqual(schema.len, 12)
+                # ... and the reader, which enforces `len == 12`, accepts it.
+                self.assertEqual(proto._read_param_puzzle(
+                    schema, version=1, options=options,
+                ).random, value)
+
+                schema = proto._make_param_solution(
+                    Parameter.SOLUTION, version=1, index=1, reserved=0,
+                    opaque=b'op', random=value, solution=value,
+                )
+                self.assertEqual(schema.len, 20)
+                self.assertEqual(proto._read_param_solution(
+                    schema, version=1, options=options,
+                ).random, value)
+
+                # HIPv2: unchanged, still derived from the value when nothing
+                # declares the width. This is what makes the v1 column a fix rather
+                # than a blanket constant.
+                self.assertEqual(proto._make_param_puzzle(
+                    Parameter.PUZZLE, version=2, index=1, lifetime=1,
+                    opaque=b'op', random=value,
+                ).len, puzzle_v2)
+                self.assertEqual(proto._make_param_solution(
+                    Parameter.SOLUTION, version=2, index=1, reserved=0,
+                    opaque=b'op', random=value, solution=value,
+                ).len, solution_v2)
+
+                # The two versions agree only where the derived width happens to be
+                # the RFC's constant, which is the whole of the defect: they used to
+                # agree everywhere.
+                self.assertEqual(solution_v2 == 20, bits in (57, 64))
+                self.assertEqual(puzzle_v2 == 12, bits in (57, 64))
+
+        # A value HIPv1 cannot represent is refused outright, with a pcapkit
+        # exception, rather than built into a parameter the reader will reject.
+        for bits in (65, 128):
+            value = 1 << (bits - 1)
+            with self.subTest(bits=bits):
+                with self.assertRaises(ProtocolError):
+                    proto._make_param_puzzle(
+                        Parameter.PUZZLE, version=1, index=1, lifetime=1,
+                        opaque=b'op', random=value,
+                    )
+                with self.assertRaises(ProtocolError):
+                    proto._make_param_solution(
+                        Parameter.SOLUTION, version=1, index=1, reserved=0,
+                        opaque=b'op', random=value, solution=value,
+                    )
+
+    def test_hip_puzzle_and_solution_accept_an_explicit_field_width(self) -> None:
+        """#653/#655: ``rhash_len`` declares the field width for a from-scratch
+        build, which is the only way HIPv2 can express one.
+
+        Under HIPv2 the width is ``RHASH_len / 8`` octets, where ``RHASH_len`` is
+        the output length of the Responder's HIT hash algorithm
+        (:rfc:`7401#section-2.3`). It genuinely varies -- ``RSA,DSA/SHA-256`` is the
+        REQUIRED HIT Suite (:rfc:`7401#section-5.2.10`), giving a 256-bit
+        ``RHASH_len`` and a 32-octet field -- so no constant and no version can
+        supply it, and a caller building a full-width parameter around a small value
+        has nowhere else to say so.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        # RHASH_len = 256 bits, the REQUIRED HIT Suite's hash: 32-octet fields, so
+        # Length is 4 + 2 * 32 = 68 for SOLUTION and 4 + 32 = 36 for PUZZLE -- even
+        # though the value would otherwise derive a 1-octet field.
+        schema = proto._make_param_solution(
+            Parameter.SOLUTION, version=2, index=1, reserved=0, opaque=b'op',
+            random=1, solution=1, rhash_len=256,
+        )
+        self.assertEqual(schema.len, 68)
+        self.assertEqual(proto._read_param_solution(
+            schema, version=2, options=options,
+        ).rhash_len, 256)
+
+        schema = proto._make_param_puzzle(
+            Parameter.PUZZLE, version=2, index=1, lifetime=1, opaque=b'op',
+            random=1, rhash_len=256,
+        )
+        self.assertEqual(schema.len, 36)
+        self.assertEqual(proto._read_param_puzzle(
+            schema, version=2, options=options,
+        ).rhash_len, 256)
+
+        # A width that is not a whole number of octets, or is negative, is not an
+        # RHASH_len -- the natural output length of a hash function, in bits.
+        for rhash_len in (12, -8):
+            with self.subTest(rhash_len=rhash_len):
+                with self.assertRaises(ProtocolError):
+                    proto._make_param_puzzle(
+                        Parameter.PUZZLE, version=2, index=1, lifetime=1, opaque=b'op',
+                        random=1, rhash_len=rhash_len,
+                    )
+
+        # Nor is one too narrow for the value it has to hold: silently truncating
+        # is what an undersized `len` used to do.
+        with self.assertRaises(ProtocolError):
+            proto._make_param_solution(
+                Parameter.SOLUTION, version=2, index=1, reserved=0, opaque=b'op',
+                random=1 << 64, solution=1, rhash_len=64,
+            )
+
+        # Under HIPv1 the RFC's constant is not negotiable.
+        with self.assertRaises(ProtocolError):
+            proto._make_param_solution(
+                Parameter.SOLUTION, version=1, index=1, reserved=0, opaque=b'op',
+                random=1, solution=1, rhash_len=256,
+            )
+
+        # An explicit width overrides the one a parsed parameter carries, so a
+        # parameter can be re-emitted for a different association.
+        parsed = proto._read_param_solution(
+            proto._make_param_solution(
+                Parameter.SOLUTION, version=2, index=1, reserved=0, opaque=b'op',
+                random=1, solution=1, rhash_len=64,
+            ),
+            version=2, options=options,
+        )
+        self.assertEqual(parsed.rhash_len, 64)
+        self.assertEqual(proto._make_param_solution(
+            Parameter.SOLUTION, parsed, version=2, rhash_len=128,
+        ).len, 36)
+        # ... and the same for PUZZLE, whose ``param``-plus-explicit-width branch is
+        # otherwise never taken.
+        parsed = proto._read_param_puzzle(
+            proto._make_param_puzzle(
+                Parameter.PUZZLE, version=2, index=1, lifetime=1, opaque=b'op',
+                random=1, rhash_len=64,
+            ),
+            version=2, options=options,
+        )
+        self.assertEqual(parsed.rhash_len, 64)
+        self.assertEqual(proto._make_param_puzzle(
+            Parameter.PUZZLE, parsed, version=2, rhash_len=128,
+        ).len, 20)
 
 
 if __name__ == '__main__':
