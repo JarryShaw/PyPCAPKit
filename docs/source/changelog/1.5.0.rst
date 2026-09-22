@@ -1063,6 +1063,53 @@ pull requests between #326 and #509.
   version, covering the version changes made by hand, which never run this script at
   all -- 40 of the 159 commits that have moved ``__version__`` on ``main``, a quarter
   over the project's life and 11 of the most recent 25 (#625).
+* **Fixed** -- ``SeekableReader.truncate`` put its padding where the reader's own
+  bookkeeping says the content is, and ``read`` then returned one octet fewer than
+  the buffer held. Same family as #604, but two defects rather than one, and the
+  padding side is only half of it. The buffer keeps its content at
+  ``[0:_buffer_cur]`` with unwritten padding behind it, so a reduction has to keep
+  the octets it has and an extension has to append at the *tail* -- the latter is
+  what ``io.IOBase.truncate`` means by "the contents of the new file area", the area
+  past the old end. It did neither: ``temp[-size:]`` sliced the buffer rather than
+  the content, so it kept the trailing padding and discarded the octets actually
+  read, and ``temp.rjust(size)`` prefixed the new zeros, displacing the content past
+  where ``_buffer_set`` and ``_buffer_cur`` address it. Separately, ``read``
+  capped a buffered read at ``min(size, self._buffer_cur - 1)``, a count less one
+  measured from the start of the buffer rather than the run remaining from the
+  position being read from -- one octet short at the start of the buffer, and
+  reaching past the content into the padding anywhere further in. The shortfall was
+  then made up from the stream, *past* the octet that had been skipped, which both
+  dropped that octet and left the return short. The reported symptom needed both:
+  ``read(4)``, ``truncate(8)``, ``seek(0)``, ``read(8)`` over ``b'abcde'`` returned
+  ``b'\x00\x00\x00e'``, four octets of an eight octet request with three of them
+  padding, and returns ``b'abcde'`` now -- five being the whole of what a five octet
+  stream can answer with. Three more of the method's contract were wrong and are
+  fixed with it: the position was reset to the start of the buffer rather than left
+  alone, so a read after a truncation resumed from the wrong octet; an omitted
+  ``size`` resized to ``0`` rather than to the current position; and
+  ``_buffer_cur`` was left addressing octets a reduced buffer no longer had, so the
+  next read raised
+  ``ValueError: memoryview assignment: lvalue and rvalue have different structures``
+  from ``_write_buffer`` rather than returning anything. ``truncate(0)`` raised the
+  same ``ValueError`` by a second route, and ``_write_buffer`` is fixed with it:
+  ``buf[-self._buffer_size:]`` is ``buf[-0:]`` for a buffer of no size at all --
+  the whole of the octets just read rather than none of them -- so it is now counted
+  from the front. That state is reachable only through ``truncate``, since the
+  constructor refuses a non-positive ``buffer_size``. A reduction also advances
+  ``_buffer_set`` past the octets it drops, keeping ``_buffer_set + _buffer_cur``
+  equal to how far the stream has been consumed, which ``seek`` reads as its licence
+  to fetch more. Clamping ``_buffer_cur`` alone made that sum *under*-report the
+  stream, and the next forward ``seek`` then spliced in octets from the wrong
+  absolute offset and said nothing: ``read(8)``, ``truncate(3)``, ``seek(6)``,
+  ``read(1)`` over ``b'abcdefghijklmnop'`` returned ``b'l'`` where ``b'g'`` is the
+  octet at offset 6 -- worse than the ``ValueError`` it replaced, being silent. All
+  three came out of fuzzing random operation sequences against the buffer's own
+  invariants, none from reading the code: of 3000 rounds, 2372 left the bookkeeping
+  inconsistent before and 683 raised an undocumented exception, and none of either
+  do now. Latent in this library rather
+  than live -- nothing here calls ``truncate``, confirmed by grep, though it is
+  public on a public class -- and invisible to the existing tests, which asserted
+  the return value and never the content (#622).
 * **Fixed** -- ``_missing_`` in the four Mobility Header flag enumerations ended in
   ``return cls(value)``, the same constructor that had just failed to find the value,
   so every in-range value that is not already a member re-entered ``_missing_``
