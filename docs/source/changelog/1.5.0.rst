@@ -1102,6 +1102,35 @@ pull requests between #326 and #509.
   and SPDX omits; the ``*`` bullets in place of ``1.``/``2.``/``3.``; and the extra
   ``All rights reserved.`` line -- and the ``DAMAGE.`` that #615 repaired from a
   stray ``DAMAGE.s`` is still clean (#630).
+* **Fixed** -- ``CITATION.cff`` shipped in no source distribution. ``MANIFEST.in``
+  carries an ``include`` line each for ``README.md``, ``LICENSE`` and
+  ``CHANGELOG.md`` but had none for the citation file, and its two
+  ``global-include`` patterns are ``*.rst`` and ``*.py``, neither of which can match
+  a ``.cff`` -- so the file sat in the repository and in nothing published. Nor was
+  there a default to fall back on. Removing all three of those ``include`` lines and
+  rebuilding shows ``README.md`` and ``LICENSE`` shipping anyway, setuptools adding
+  the latter from ``license_files`` and recording it as ``License-File: LICENSE`` in
+  ``PKG-INFO``, while ``CHANGELOG.md`` vanishes -- so of the three only
+  ``CHANGELOG.md`` is load-bearing, and a citation file, which no packaging default
+  covers at all, is in the same position. The gap is invisible from the web UI,
+  because GitHub renders the "Cite this repository"
+  button from the repository itself; citation managers, Zenodo and dependency
+  inventories read the published artifact, which is exactly the surface that was
+  missing it, so the machine-readable half of the attribution stopped travelling
+  with the code at the one point nobody can see the repository. #615 flagged the
+  omission when it added the file and #619 did not address it. It matters now
+  because #625 has just taught ``util/bump_version.py`` to keep the file's
+  ``version`` and ``date-released`` in step with the bump, and a release exercising
+  that path would otherwise publish an sdist omitting the very artefact under test.
+  It also lets ``RepositoryCitationTests`` in
+  ``tests/project/test_bump_version.py`` -- the gate #625 added for the hand-authored
+  bumps that never run the script -- execute against an unpacked sdist, where today
+  it skips itself with "CITATION.cff is not shipped in the source distribution".
+  Measured both ways with ``python -m build --sdist``: ``tar tzf`` found no
+  ``CITATION.cff`` before and ``pypcapkit-1.5.0b4/CITATION.cff`` after, the two
+  archive listings differ by that one added entry and nothing else -- 860 against
+  861 -- the shipped copy is byte-identical to the repository's, and
+  ``twine check --strict`` reports ``PASSED`` on both archives (#631).
 
 * **Fixed** -- two inaccurate claims in the #630 entry above, caught by review after
   #630 had already merged. Both were about the history of ``LICENSE`` rather than
