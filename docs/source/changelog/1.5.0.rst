@@ -1735,19 +1735,40 @@ pull requests between #326 and #509.
   declined for. A new ``bounded_option`` clamps the payload to the octets the
   area has left at that field and warns with ``SchemaWarning``; it is applied to
   all fifteen variable-width option and record payloads in the PCAP-NG schema,
-  and deliberately not to the block-level fields, which are the 32-bit band the
-  running ledger already budgets. Clamping rather than refusing is what keeps the
-  #431 accommodation, since a PCAP-NG block read has no catch point above
-  ``FieldBase.unpack`` and one refusal would abort a whole extraction rather than
-  one block; and the clamp reads only the block's own declared framing, never a
-  running total, so byte-identical input answers identically whatever preceded
-  it. Zero clamps fired across all six PCAP-NG sample captures, 338 options
-  between them, and 101 truncation levels of ``dhcp.pcapng`` gave byte-identical
-  results including the failures. The bound is pinned as a property rather than
-  as one input: every combination of one to three options against nine declared
-  lengths asserts that the octets a block's options report holding never exceed
-  the area, and the amplification ratio is asserted flat across 1, 8, 64 and 512
-  blocks, which is what separates a bound from a smaller constant (#594).
+  and deliberately not to the block-level payload fields, which are the 32-bit
+  band the running ledger already budgets. A second, ``bounded_area``, clamps a
+  packet block's option area to the octets the block itself holds, less the
+  trailing Block Total Length: the area is otherwise sized from a declared length
+  that nothing checks against the file -- ``BlockType.post_process`` compares it
+  only with its own trailing copy -- so a block declaring 1,000,000 octets while
+  holding 36 sized its area at 999,964, an option inside it declaring 65,535 was
+  under that and went unclamped, and 65,535 octets of zeros were synthesised from
+  36 regardless, 1,820x with no warning at all. That came out of the change's
+  cross-review rather than from writing it, and it is a no-op on a well-formed
+  block, where the octets left of the block are exactly the area plus the
+  trailing length's four. The five non-packet blocks' option areas keep the
+  framing assumption, each computing its span with a different offset, and the
+  general fix for a declared length reaching a read at all is #678. Clamping
+  rather than refusing is what keeps the #431 accommodation, since a PCAP-NG
+  block read has no catch point above ``FieldBase.unpack`` and one refusal would
+  abort a whole extraction rather than one block; and the clamp reads only the
+  block's own declared framing, never a running total, so byte-identical input
+  answers identically whatever preceded it. The skip for a remainder already past
+  zero is load-bearing on the unpacking path, where a ten-octet area leaves
+  ``__length__`` at -2 before a payload sizes itself and clamping to it would
+  hand the field a ``'-2s'`` struct template; it is *not* what protects the
+  packing path, since ``BytesField`` and ``StringField`` both repair a negative
+  width to ``len(value)`` in ``pre_process``. Zero clamps fired across all six
+  PCAP-NG sample captures, 338 options between them, and 501 truncation levels of
+  ``dhcp.pcapng`` swept an octet at a time gave byte-identical results including
+  the failures -- 497 of which are the uncaught ``ValueError`` that #678 records,
+  two a ``struct.error``, and two of which parse. The bound is pinned as a
+  property rather than as one input: every combination of one to three options
+  against nine declared lengths asserts that the octets a block's options report
+  holding never exceed the area, and the amplification ratio is asserted flat
+  across 1, 8, 64 and 512 blocks, which is what separates a bound from a smaller
+  constant. The worst ratio reachable over five adversarial shapes afterwards is
+  0.862x, against 1,637x, 960x and 224x for the same three before (#594).
 
 * **Fixed** -- six of the 123 constant registries under ``pcapkit/const/`` rejected an
   invalid value in a way the built-in ``enum`` does not, and three of them did not
