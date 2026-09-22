@@ -1712,6 +1712,40 @@ pull requests between #326 and #509.
   README in a source distribution and that an sdist without it could not be
   installed; both halves are false, and the #619 entry above carried the
   identical claim and is corrected with it (#642).
+* **Fixed** -- the 16-bit band the #573 entry above records as deliberately left
+  open. ``FieldBase.unpack`` pads a shortfall of 65,536 octets or fewer
+  unconditionally and charges it to nothing, which is load-bearing for a capture
+  cut short by its snapshot length, so a length declared by a 16-bit wire field
+  could still be repeated without limit. The crafted 80,048-octet PCAP-NG of
+  2,000 Enhanced Packet Blocks that entry describes, each carrying one option
+  declaring 65,535 octets against none present, synthesised 131,070,000 octets of
+  zeros -- 1637.393x its own size, linear in the block count and so unbounded in
+  the input -- and now synthesises none, with all 2,000 frames and all 2,000
+  options still parsed. The bound is taken one layer up, where the information
+  the field layer lacks already exists: a PCAP-NG block's Block Total Length is
+  authoritative and cross-checked against its own trailing copy, so the option
+  area is that length less the fixed fields, ``captured_len`` and
+  ``captured_len``'s padding, and an option declaring more payload than that area
+  has left is malformed however complete the file behind it is. A
+  snapshot-truncated capture says so through ``captured_len`` instead and leaves
+  its options whole, so it never trips this -- which is exactly what the #571
+  ``len(buffer) < length`` rejection could not distinguish, and what it was
+  declined for. A new ``bounded_option`` clamps the payload to the octets the
+  area has left at that field and warns with ``SchemaWarning``; it is applied to
+  all fifteen variable-width option and record payloads in the PCAP-NG schema,
+  and deliberately not to the block-level fields, which are the 32-bit band the
+  running ledger already budgets. Clamping rather than refusing is what keeps the
+  #431 accommodation, since a PCAP-NG block read has no catch point above
+  ``FieldBase.unpack`` and one refusal would abort a whole extraction rather than
+  one block; and the clamp reads only the block's own declared framing, never a
+  running total, so byte-identical input answers identically whatever preceded
+  it. Zero clamps fired across all six PCAP-NG sample captures, 338 options
+  between them, and 101 truncation levels of ``dhcp.pcapng`` gave byte-identical
+  results including the failures. The bound is pinned as a property rather than
+  as one input: every combination of one to three options against nine declared
+  lengths asserts that the octets a block's options report holding never exceed
+  the area, and the amplification ratio is asserted flat across 1, 8, 64 and 512
+  blocks, which is what separates a bound from a smaller constant (#594).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
