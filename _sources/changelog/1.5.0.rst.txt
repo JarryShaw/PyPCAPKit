@@ -567,6 +567,83 @@ pull requests between #326 and #509.
   -- the shape in which ``OSPF`` once shipped reachable from no table. 23 claims
   verified, no gaps; a companion case injects a gap and confirms the audit
   reports it, so the guard cannot rot into a permanently green no-op (#548).
+* **Fixed** -- both halves of what the ``Changelog drift`` gate told an author,
+  in ``util/changelog_md.py``. ``ResidualMarkupError`` named the entry file but
+  numbered its lines against the *converted* body, which rule 6 joins onto one
+  line per block: measured on this entry, the body is 55 lines against the file's
+  580, so a reported number could not reach most of the file at all, and four
+  roles written on two source lines were all reported as ``line 46``. The
+  conversion now carries a source map -- which line of the entry each stretch of
+  output came from -- so every complaint cites a line of the file the message
+  names, one complaint per construct rather than one per joined line, in the
+  entry's own order (#588). Rule 2 separately accepted only the bare-number
+  spelling of Sphinx's ``:rfc:`` role, so a citation of :rfc:`6554#section-3`
+  fell past the rule that exists for it and was reported as a role the rules do
+  not cover; both spellings now convert, with the anchor carried into the link
+  target and the link text taken from Sphinx's own so that the Markdown and the
+  rendered history say the same thing about the same page (#592). Regenerating
+  ``CHANGELOG.md`` is byte-identical over all 37 committed entries, so the fix
+  changes what the gate *says* and nothing about what it emits.
+* **Fixed** -- a ``NumberField`` whose ``length`` was a callable could not pack
+  or parse at any width ``struct`` has a native integer code for. ``length`` is
+  a placeholder of ``-1`` until the callable is resolved, ``-1`` has no native
+  code, and the template builder raised ``_need_process`` for it and never put
+  it back -- so the flag was a latch. Resolving the real width rebuilt the
+  template and left the latch set, and ``pre_process`` then handed ``bytes`` to
+  a template that had become ``>Q``, raising
+  ``struct.error: required argument is not an integer``; parsing failed in the
+  mirror direction, calling ``int.from_bytes`` on the integer that
+  ``struct.unpack`` had already produced. The flag is now recomputed from the
+  width actually in force rather than only ever raised, which is also what
+  keeps a callable resolving to a width with no native code -- 3 octets, say --
+  byte-packed as it must be. **All four native widths were affected, not only
+  the 8 that was reported**: the latch has nothing to do with the width it
+  latches into, so 1, 2 and 4 failed identically, on ``NumberField`` and on
+  ``EnumField``, both of which leave ``__template__`` unset. This is what made
+  every extended 8-octet MPTCP DSS form unbuildable, since those widths are
+  chosen at runtime from the DSS flags and so must come from a callable; #585
+  worked around it in the TCP schema alone, leaving every other caller exposed
+  (#591).
+* **Fixed** -- building any ``MP_JOIN`` option raised
+  ``AttributeError: 'TCP' object has no attribute '_flags'``. ``TCP.make``
+  constructed the options *before* it assigned the ``self._flags`` that the option
+  makers read, and ``_make_mptcp_join`` branches on that attribute to choose
+  between the three layouts :rfc:`8684` section 3.2 gives for MP_JOIN -- figure 5
+  for SYN at 12 octets, figure 6 for SYN/ACK at 16, figure 7 for ACK at 24. The
+  parse path was never affected: ``read`` assigns the flags before it parses the
+  options, so the identical branches in ``_read_mptcp_join`` always had them. Fixed
+  by hoisting the flag resolution above the ``_make_tcp_options`` call, leaving only
+  the header's data-offset computation -- which genuinely needs the options' total
+  length -- after it. **Not** fixed by giving ``_flags`` a zero default, which would
+  have been worse: ``Protocol.pack`` is public and calls ``make``, so an instance
+  that had already parsed a segment always had the attribute set, and it silently
+  built the option for the segment it had *read* rather than the one it was asked to
+  write. Measured pre-fix, a parsed MP_JOIN-SYN instance asked to pack an
+  MP_JOIN-ACK segment emitted an ACK header carrying figure 5's 12-octet SYN option,
+  with the caller's 20-octet HMAC -- the whole authentication payload of figure 7's
+  form -- replaced by an all-zero phantom token and nonce, and nothing raised. The
+  crash was the benign symptom; a default value fixes only that and leaves the
+  silent corruption. Hoisting also made one branch reachable for the first time, an
+  MP_JOIN asked for on a segment with neither SYN nor ACK set: the accumulator was
+  seeded with ``cast('Enum_Flags', 0)``, and ``typing.cast`` being a runtime no-op,
+  ``self._flags`` stayed a plain ``int`` on which the first membership test raised
+  ``TypeError`` rather than the ``ProtocolError`` the method documents. It is now
+  seeded with ``Enum_Flags(0)``, a real flagless member that compares equal to ``0``
+  and ORs identically. The read path's own seed is deliberately unchanged -- a
+  flagless MP_JOIN is rejected by ``mptcp_data_selector`` before
+  ``_read_mptcp_join`` runs, so it cannot reach those branches (#587).
+* **Added** -- ``tests/protocols/transport/test_tcp_mptcp_join_flag_ordering_unit.py``,
+  covering all three MP_JOIN layouts through the *public* constructor, the
+  construct-pack-parse cycle for each, the stale-flags case that rules out a
+  zero-valued default, the statement order itself, and controls that the parse path
+  and the flag-independent options are unaffected. The gap it closes is why 100%
+  statement and branch coverage of the two changed modules coexisted with a
+  completely broken public path: the pre-existing cases reach ``_make_mptcp_join``
+  by assigning a Python ``set`` to ``_flags`` on a bare ``TCP.__new__(TCP)``, which
+  executes every branch while bypassing both the ordering and the accumulator's
+  type. The now-stale ``tcp-mptcp/MP_JOIN`` entry is deleted from
+  ``EXPECTED_FAILURES``, and the MP_JOIN exclusion in
+  ``test_tcp_mptcp_subtype_unit.py`` is lifted (#587).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

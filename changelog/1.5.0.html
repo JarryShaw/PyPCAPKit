@@ -1028,6 +1028,83 @@ each parses, this walks the classes and catches one nothing registered at all
 – the shape in which <code class="docutils literal notranslate"><span class="pre">OSPF</span></code> once shipped reachable from no table. 23 claims
 verified, no gaps; a companion case injects a gap and confirms the audit
 reports it, so the guard cannot rot into a permanently green no-op (#548).</p></li>
+<li><p><strong>Fixed</strong> – both halves of what the <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> gate told an author,
+in <code class="docutils literal notranslate"><span class="pre">util/changelog_md.py</span></code>. <code class="docutils literal notranslate"><span class="pre">ResidualMarkupError</span></code> named the entry file but
+numbered its lines against the <em>converted</em> body, which rule 6 joins onto one
+line per block: measured on this entry, the body is 55 lines against the file’s
+580, so a reported number could not reach most of the file at all, and four
+roles written on two source lines were all reported as <code class="docutils literal notranslate"><span class="pre">line</span> <span class="pre">46</span></code>. The
+conversion now carries a source map – which line of the entry each stretch of
+output came from – so every complaint cites a line of the file the message
+names, one complaint per construct rather than one per joined line, in the
+entry’s own order (#588). Rule 2 separately accepted only the bare-number
+spelling of Sphinx’s <code class="docutils literal notranslate"><span class="pre">:rfc:</span></code> role, so a citation of <span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html#section-3"><strong>RFC 6554 Section 3</strong></a>
+fell past the rule that exists for it and was reported as a role the rules do
+not cover; both spellings now convert, with the anchor carried into the link
+target and the link text taken from Sphinx’s own so that the Markdown and the
+rendered history say the same thing about the same page (#592). Regenerating
+<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> is byte-identical over all 37 committed entries, so the fix
+changes what the gate <em>says</em> and nothing about what it emits.</p></li>
+<li><p><strong>Fixed</strong> – a <code class="docutils literal notranslate"><span class="pre">NumberField</span></code> whose <code class="docutils literal notranslate"><span class="pre">length</span></code> was a callable could not pack
+or parse at any width <code class="docutils literal notranslate"><span class="pre">struct</span></code> has a native integer code for. <code class="docutils literal notranslate"><span class="pre">length</span></code> is
+a placeholder of <code class="docutils literal notranslate"><span class="pre">-1</span></code> until the callable is resolved, <code class="docutils literal notranslate"><span class="pre">-1</span></code> has no native
+code, and the template builder raised <code class="docutils literal notranslate"><span class="pre">_need_process</span></code> for it and never put
+it back – so the flag was a latch. Resolving the real width rebuilt the
+template and left the latch set, and <code class="docutils literal notranslate"><span class="pre">pre_process</span></code> then handed <code class="docutils literal notranslate"><span class="pre">bytes</span></code> to
+a template that had become <code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code>, raising
+<code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span> <span class="pre">integer</span></code>; parsing failed in the
+mirror direction, calling <code class="docutils literal notranslate"><span class="pre">int.from_bytes</span></code> on the integer that
+<code class="docutils literal notranslate"><span class="pre">struct.unpack</span></code> had already produced. The flag is now recomputed from the
+width actually in force rather than only ever raised, which is also what
+keeps a callable resolving to a width with no native code – 3 octets, say –
+byte-packed as it must be. <strong>All four native widths were affected, not only
+the 8 that was reported</strong>: the latch has nothing to do with the width it
+latches into, so 1, 2 and 4 failed identically, on <code class="docutils literal notranslate"><span class="pre">NumberField</span></code> and on
+<code class="docutils literal notranslate"><span class="pre">EnumField</span></code>, both of which leave <code class="docutils literal notranslate"><span class="pre">__template__</span></code> unset. This is what made
+every extended 8-octet MPTCP DSS form unbuildable, since those widths are
+chosen at runtime from the DSS flags and so must come from a callable; #585
+worked around it in the TCP schema alone, leaving every other caller exposed
+(#591).</p></li>
+<li><p><strong>Fixed</strong> – building any <code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code> option raised
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'TCP'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'_flags'</span></code>. <code class="docutils literal notranslate"><span class="pre">TCP.make</span></code>
+constructed the options <em>before</em> it assigned the <code class="docutils literal notranslate"><span class="pre">self._flags</span></code> that the option
+makers read, and <code class="docutils literal notranslate"><span class="pre">_make_mptcp_join</span></code> branches on that attribute to choose
+between the three layouts <span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.2 gives for MP_JOIN – figure 5
+for SYN at 12 octets, figure 6 for SYN/ACK at 16, figure 7 for ACK at 24. The
+parse path was never affected: <code class="docutils literal notranslate"><span class="pre">read</span></code> assigns the flags before it parses the
+options, so the identical branches in <code class="docutils literal notranslate"><span class="pre">_read_mptcp_join</span></code> always had them. Fixed
+by hoisting the flag resolution above the <code class="docutils literal notranslate"><span class="pre">_make_tcp_options</span></code> call, leaving only
+the header’s data-offset computation – which genuinely needs the options’ total
+length – after it. <strong>Not</strong> fixed by giving <code class="docutils literal notranslate"><span class="pre">_flags</span></code> a zero default, which would
+have been worse: <code class="docutils literal notranslate"><span class="pre">Protocol.pack</span></code> is public and calls <code class="docutils literal notranslate"><span class="pre">make</span></code>, so an instance
+that had already parsed a segment always had the attribute set, and it silently
+built the option for the segment it had <em>read</em> rather than the one it was asked to
+write. Measured pre-fix, a parsed MP_JOIN-SYN instance asked to pack an
+MP_JOIN-ACK segment emitted an ACK header carrying figure 5’s 12-octet SYN option,
+with the caller’s 20-octet HMAC – the whole authentication payload of figure 7’s
+form – replaced by an all-zero phantom token and nonce, and nothing raised. The
+crash was the benign symptom; a default value fixes only that and leaves the
+silent corruption. Hoisting also made one branch reachable for the first time, an
+MP_JOIN asked for on a segment with neither SYN nor ACK set: the accumulator was
+seeded with <code class="docutils literal notranslate"><span class="pre">cast('Enum_Flags',</span> <span class="pre">0)</span></code>, and <code class="docutils literal notranslate"><span class="pre">typing.cast</span></code> being a runtime no-op,
+<code class="docutils literal notranslate"><span class="pre">self._flags</span></code> stayed a plain <code class="docutils literal notranslate"><span class="pre">int</span></code> on which the first membership test raised
+<code class="docutils literal notranslate"><span class="pre">TypeError</span></code> rather than the <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code> the method documents. It is now
+seeded with <code class="docutils literal notranslate"><span class="pre">Enum_Flags(0)</span></code>, a real flagless member that compares equal to <code class="docutils literal notranslate"><span class="pre">0</span></code>
+and ORs identically. The read path’s own seed is deliberately unchanged – a
+flagless MP_JOIN is rejected by <code class="docutils literal notranslate"><span class="pre">mptcp_data_selector</span></code> before
+<code class="docutils literal notranslate"><span class="pre">_read_mptcp_join</span></code> runs, so it cannot reach those branches (#587).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">tests/protocols/transport/test_tcp_mptcp_join_flag_ordering_unit.py</span></code>,
+covering all three MP_JOIN layouts through the <em>public</em> constructor, the
+construct-pack-parse cycle for each, the stale-flags case that rules out a
+zero-valued default, the statement order itself, and controls that the parse path
+and the flag-independent options are unaffected. The gap it closes is why 100%
+statement and branch coverage of the two changed modules coexisted with a
+completely broken public path: the pre-existing cases reach <code class="docutils literal notranslate"><span class="pre">_make_mptcp_join</span></code>
+by assigning a Python <code class="docutils literal notranslate"><span class="pre">set</span></code> to <code class="docutils literal notranslate"><span class="pre">_flags</span></code> on a bare <code class="docutils literal notranslate"><span class="pre">TCP.__new__(TCP)</span></code>, which
+executes every branch while bypassing both the ordering and the accumulator’s
+type. The now-stale <code class="docutils literal notranslate"><span class="pre">tcp-mptcp/MP_JOIN</span></code> entry is deleted from
+<code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>, and the MP_JOIN exclusion in
+<code class="docutils literal notranslate"><span class="pre">test_tcp_mptcp_subtype_unit.py</span></code> is lifted (#587).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

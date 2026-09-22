@@ -581,6 +581,12 @@
 <span class="sd">        This method will return a new instance of :class:`NumberField` instead of</span>
 <span class="sd">        updating the current instance.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            Rebuilding the template here is what applies a callable ``length``,</span>
+<span class="sd">            and :meth:`build_template` recomputes ``self._need_process`` as it</span>
+<span class="sd">            goes, so the flag and the template always describe the same width.</span>
+<span class="sd">            They did not always: see GitHub issue #591.</span>
+
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
@@ -607,18 +613,40 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Template for field.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            ``self._need_process`` is **assigned** here rather than only ever</span>
+<span class="sd">            raised, so that it always describes the ``length`` this template</span>
+<span class="sd">            was built for. It used to be</span>
+<span class="sd">            set :data:`True` in the fall-through branch and never put back,</span>
+<span class="sd">            which made it a latch: a callable ``length`` is a placeholder of</span>
+<span class="sd">            ``-1`` at construction, ``-1`` takes the fall-through branch, and</span>
+<span class="sd">            the flag then survived the rebuild in :meth:`__call__` that</span>
+<span class="sd">            resolved the real width. :meth:`pre_process` consequently handed</span>
+<span class="sd">            :obj:`bytes` to a template that had become ``&gt;Q`` -- or ``&gt;I``,</span>
+<span class="sd">            ``&gt;H``, ``&gt;B`` -- and :func:`struct.pack` refused it. See GitHub</span>
+<span class="sd">            issue #591.</span>
+
+<span class="sd">            Assigning it is what tells a placeholder apart from a width that</span>
+<span class="sd">            genuinely needs byte packing, without having to remember that a</span>
+<span class="sd">            placeholder was ever in play: the answer for ``-1`` is</span>
+<span class="sd">            :data:`True`, the answer for ``8`` is :data:`False`, and whichever</span>
+<span class="sd">            width is in force now is the one that decides. A callable</span>
+<span class="sd">            resolving to, say, ``3`` still takes the fall-through branch and</span>
+<span class="sd">            still gets :data:`True`, because for ``3`` that is the correct</span>
+<span class="sd">            answer rather than a leftover one.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>       <span class="c1"># unpack to 8-byte integer (long long)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'q'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'Q'</span>
+            <span class="n">struct_fmt</span><span class="p">,</span> <span class="n">need_process</span> <span class="o">=</span> <span class="s1">'q'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'Q'</span><span class="p">,</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>     <span class="c1"># unpack to 4-byte integer (int / long)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'i'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'I'</span>
+            <span class="n">struct_fmt</span><span class="p">,</span> <span class="n">need_process</span> <span class="o">=</span> <span class="s1">'i'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'I'</span><span class="p">,</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>     <span class="c1"># unpack to 2-byte integer (short)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'h'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'H'</span>
+            <span class="n">struct_fmt</span><span class="p">,</span> <span class="n">need_process</span> <span class="o">=</span> <span class="s1">'h'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'H'</span><span class="p">,</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>     <span class="c1"># unpack to 1-byte integer (char)</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="s1">'b'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'B'</span>
+            <span class="n">struct_fmt</span><span class="p">,</span> <span class="n">need_process</span> <span class="o">=</span> <span class="s1">'b'</span> <span class="k">if</span> <span class="n">signed</span> <span class="k">else</span> <span class="s1">'B'</span><span class="p">,</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>                 <span class="c1"># do not unpack</span>
-            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">s'</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">struct_fmt</span><span class="p">,</span> <span class="n">need_process</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1">s'</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="o">=</span> <span class="n">need_process</span>
         <span class="k">return</span> <span class="n">struct_fmt</span></div>
 
 
@@ -643,20 +671,29 @@
 <span class="sd">            its signed range afterwards, so that e.g. a PCAP-NG section length</span>
 <span class="sd">            of ``-1`` (section length not specified) can be written out.</span>
 
+<span class="sd">            A field packed without having been resolved -- so with ``_length``</span>
+<span class="sd">            still negative -- has its width derived from the value instead, and</span>
+<span class="sd">            that rebuild can land on a width :func:`struct` has a native</span>
+<span class="sd">            integer code for. The flag is therefore consulted **after** the</span>
+<span class="sd">            rebuild rather than before it, since deciding first and rebuilding</span>
+<span class="sd">            second is how the template and the value being returned came to</span>
+<span class="sd">            disagree in the first place. C.f. #591.</span>
+
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">value</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
 
             <span class="n">endian</span> <span class="o">=</span> <span class="s1">'&gt;'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">'big'</span> <span class="k">else</span> <span class="s1">'&lt;'</span>
             <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">'</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span>
 
         <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>

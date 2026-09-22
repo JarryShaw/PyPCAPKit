@@ -996,12 +996,22 @@
 <span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tcp_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
-
-        <span class="n">offset</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="mi">20</span> <span class="o">+</span> <span class="n">total_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="c1"># NOTE: the connection control flags are resolved *before* the options are</span>
+        <span class="c1"># built, because option makers reached from ``_make_tcp_options`` read</span>
+        <span class="c1"># :attr:`self._flags` -- ``_make_mptcp_join`` branches on it to pick between</span>
+        <span class="c1"># the three MP_JOIN layouts of :rfc:`8684` section 3.2 (figure 5 for SYN,</span>
+        <span class="c1"># figure 6 for SYN/ACK, figure 7 for ACK). This block used to sit *after* the</span>
+        <span class="c1"># ``_make_tcp_options`` call below, so on a fresh instance MP_JOIN construction</span>
+        <span class="c1"># died with ``AttributeError: 'TCP' object has no attribute '_flags'``, and on</span>
+        <span class="c1"># an instance that had already parsed a segment it silently built the option</span>
+        <span class="c1"># for *that* segment's flags instead: measured pre-fix, a parsed MP_JOIN-SYN</span>
+        <span class="c1"># instance asked to ``pack`` an MP_JOIN-ACK segment emitted an ACK header</span>
+        <span class="c1"># carrying the 12-octet SYN option, dropping the caller's 20-octet HMAC. That</span>
+        <span class="c1"># second outcome is why initialising ``_flags`` to zero is not the fix -- it</span>
+        <span class="c1"># would leave the stale read intact and turn the fresh case into a spurious</span>
+        <span class="c1"># ``invalid flags combination``. Nothing between here and the old assignment</span>
+        <span class="c1"># site reads ``self._flags`` or depends on the option build, so hoisting the</span>
+        <span class="c1"># whole block is behaviour-preserving for every other option. C.f. #587.</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">'cwr'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">cwr</span><span class="p">),</span>
             <span class="s1">'ece'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ece</span><span class="p">),</span>
@@ -1013,11 +1023,33 @@
             <span class="s1">'fin'</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fin</span><span class="p">),</span>
         <span class="p">}</span>  <span class="c1"># type: Schema_Flags</span>
 
-        <span class="n">_flag</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``.</span>
+        <span class="c1"># :func:`typing.cast` is a runtime no-op, so the accumulator used to stay the</span>
+        <span class="c1"># plain :class:`int` ``0`` whenever no flag was set, and ``Enum_Flags.SYN in</span>
+        <span class="c1"># self._flags`` then raised ``TypeError: argument of type 'int' is not a</span>
+        <span class="c1"># container or iterable`` instead of reaching ``_make_mptcp_join``'s own</span>
+        <span class="c1"># ``ProtocolError: ... invalid flags combination``. That branch was unreachable</span>
+        <span class="c1"># before the hoist above -- construction died on the missing attribute first --</span>
+        <span class="c1"># so this keeps the newly reachable no-SYN-no-ACK case raising the library's</span>
+        <span class="c1"># documented error rather than a bare Python one. :class:`Enum_Flags` is an</span>
+        <span class="c1"># :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that</span>
+        <span class="c1"># still compares equal to ``0`` and still ORs as before. The read path keeps its</span>
+        <span class="c1"># ``cast`` at the top of ``read``: it cannot reach these branches, because</span>
+        <span class="c1"># ``mptcp_data_selector`` rejects a flagless MP_JOIN before ``_read_mptcp_join``</span>
+        <span class="c1"># runs, and changing it would alter the ``connection`` value reported for every</span>
+        <span class="c1"># flagless parsed segment. C.f. #587.</span>
+        <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">_flag</span> <span class="o">|=</span> <span class="n">Enum_Flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">=</span> <span class="n">_flag</span>
+
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_tcp_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="p">[],</span> <span class="mi">0</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="mi">20</span> <span class="o">+</span> <span class="n">total_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_TCP</span><span class="p">(</span>
             <span class="n">srcport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_port</span><span class="p">(</span><span class="n">srcport</span><span class="p">,</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">),</span>

@@ -775,6 +775,13 @@ sign the class already fixes, stays legal.</p>
 </dl>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> instead of
 updating the current instance.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Rebuilding the template here is what applies a callable <code class="docutils literal notranslate"><span class="pre">length</span></code>,
+and <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template" title="pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_template()</span></code></a> recomputes <code class="docutils literal notranslate"><span class="pre">self._need_process</span></code> as it
+goes, so the flag and the template always describe the same width.
+They did not always: see GitHub issue #591.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -795,6 +802,28 @@ updating the current instance.</p>
 <dd class="field-odd"><p>Template for field.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><code class="docutils literal notranslate"><span class="pre">self._need_process</span></code> is <strong>assigned</strong> here rather than only ever
+raised, so that it always describes the <code class="docutils literal notranslate"><span class="pre">length</span></code> this template
+was built for. It used to be
+set <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> in the fall-through branch and never put back,
+which made it a latch: a callable <code class="docutils literal notranslate"><span class="pre">length</span></code> is a placeholder of
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> at construction, <code class="docutils literal notranslate"><span class="pre">-1</span></code> takes the fall-through branch, and
+the flag then survived the rebuild in <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.__call__" title="pcapkit.corekit.fields.numbers.NumberField.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> that
+resolved the real width. <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process" title="pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> consequently handed
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> to a template that had become <code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code> – or <code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&gt;H</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;B</span></code> – and <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> refused it. See GitHub
+issue #591.</p>
+<p>Assigning it is what tells a placeholder apart from a width that
+genuinely needs byte packing, without having to remember that a
+placeholder was ever in play: the answer for <code class="docutils literal notranslate"><span class="pre">-1</span></code> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, the answer for <code class="docutils literal notranslate"><span class="pre">8</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, and whichever
+width is in force now is the one that decides. A callable
+resolving to, say, <code class="docutils literal notranslate"><span class="pre">3</span></code> still takes the fall-through branch and
+still gets <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, because for <code class="docutils literal notranslate"><span class="pre">3</span></code> that is the correct
+answer rather than a leftover one.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -824,6 +853,13 @@ neither <a class="reference external" href="https://docs.python.org/3/library/st
 signed field. A signed field therefore maps the pattern back into
 its signed range afterwards, so that e.g. a PCAP-NG section length
 of <code class="docutils literal notranslate"><span class="pre">-1</span></code> (section length not specified) can be written out.</p>
+<p>A field packed without having been resolved – so with <code class="docutils literal notranslate"><span class="pre">_length</span></code>
+still negative – has its width derived from the value instead, and
+that rebuild can land on a width <code class="xref py py-func docutils literal notranslate"><span class="pre">struct()</span></code> has a native
+integer code for. The flag is therefore consulted <strong>after</strong> the
+rebuild rather than before it, since deciding first and rebuilding
+second is how the template and the value being returned came to
+disagree in the first place. C.f. #591.</p>
 </div>
 </dd></dl>
 
