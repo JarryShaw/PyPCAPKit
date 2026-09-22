@@ -1004,6 +1004,36 @@ pull requests between #326 and #509.
   own Markdown API rather than assumed: the ladder comes back as four list items each
   nesting three, which is what #613 had to repair in the 1.4 file when a stray list
   marker collapsed the whole document into one nested item (#624).
+* **Fixed** -- ``util/bump_version.py`` left ``CITATION.cff`` naming the previous
+  release. Nothing else in the repository maintains that file -- no workflow, hook
+  or packaging file mentions it -- so every bump since it landed in #615 would have
+  stranded the ``version`` and ``date-released`` it renders as GitHub's "Cite this
+  repository" button and that citation managers, Zenodo and dependency inventories
+  read directly. Both fields now move with ``__version__``. They have the same
+  standing, since the file's own header says both describe the newest *published*
+  release, and moving only one would assert that 1.5.0b5 was released on the day
+  1.5.0b4 was; the date is taken in UTC, because seven of the thirty most recent
+  bumps were made late evening in US-Eastern where a local date is a day behind the
+  publish it describes. That the two are the same day at all is measured rather
+  than assumed: the bump is what triggers ``create-release.yml``, the median gap to
+  the PyPI upload is three minutes, and the UTC calendar dates agree 30 times out
+  of 30. The rewrite is line-oriented, so the comment header, key ordering and each
+  field's existing quoting survive -- ``cff-version`` and a ``references`` entry's
+  own ``version`` are anchored out at column zero -- and the result is checked with
+  ``cffconvert --validate``. An absent file is reported on stderr and skipped
+  rather than failing the vendor cron before its ``git commit``, which would
+  discard the whole registry crawl for the sake of a documentation file; a file
+  present with no ``version`` field raises instead, before anything is written,
+  because rewriting nothing while reporting success is the staleness this fixes.
+  Two things came with it. The script gains a ``main()`` guard, having previously
+  run the entire bump at import, which is why it had no testable surface; and the
+  ``import pcapkit`` fallback in its version reader, which returned ``"1.5.0b4'\n"``
+  -- closing quote and newline included, which ``packaging`` rejects -- is fixed,
+  a path that had never worked and went unnoticed because the only caller installs
+  the package first. A new gate asserts the committed file still names the packaged
+  version, covering the version changes made by hand, which never run this script at
+  all -- 40 of the 159 commits that have moved ``__version__`` on ``main``, a quarter
+  over the project's life and 11 of the most recent 25 (#625).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
