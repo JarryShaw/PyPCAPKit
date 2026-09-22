@@ -39,12 +39,19 @@ class Registration(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Registration(key)
+            try:
+                return Registration(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Registration(default)
         if key not in Registration._member_map_:  # pylint: disable=no-member
             return extend_enum(Registration, key, default)
         return Registration[key]  # type: ignore[misc]

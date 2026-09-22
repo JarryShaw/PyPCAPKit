@@ -60,12 +60,19 @@ class Group(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Group(key)
+            try:
+                return Group(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Group(default)
         if key not in Group._member_map_:  # pylint: disable=no-member
             return extend_enum(Group, key, default)
         return Group[key]  # type: ignore[misc]

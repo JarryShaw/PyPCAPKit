@@ -66,12 +66,19 @@ class Frame(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Frame(key)
+            try:
+                return Frame(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Frame(default)
         if key not in Frame._member_map_:  # pylint: disable=no-member
             return extend_enum(Frame, key, default)
         return Frame[key]  # type: ignore[misc]

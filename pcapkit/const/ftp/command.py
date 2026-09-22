@@ -289,21 +289,27 @@ class Command(StrEnum):
         """Backport support for original codes.
 
         Args:
-            key: Key to get enum item.
+            key: Key to get enum item. Looked up case-insensitively, since
+                member names are canonicalised to upper case on registration.
             default: Default value if not found.
 
         :meta private:
         """
-        if key not in Command._member_map_:  # pylint: disable=no-member
-            return extend_enum(Command, key.upper(), default if default is not None else key)
-        return Command[key]  # type: ignore[misc]
+        name = key.upper()
+        if name not in Command._member_map_:  # pylint: disable=no-member
+            return extend_enum(Command, name, default if default is not None else key)
+        return Command[name]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'Command':
         """Lookup function used when value is not found.
 
         Args:
-            value: Value to get enum item.
+            value: Value to get enum item. Matched case-insensitively against
+                the canonical upper-case member names.
 
         """
-        return extend_enum(cls, value.upper(), value)
+        name = value.upper()
+        if name in cls._member_map_:
+            return cls._member_map_[name]  # type: ignore[return-value]
+        return extend_enum(cls, name, value)

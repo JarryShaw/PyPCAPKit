@@ -63,6 +63,66 @@ class FTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             ftp.read(length=4)
 
+    def test_command_get_is_case_insensitive(self) -> None:
+        """``Command.get`` normalised the key it registered but not the key it
+        looked up, so the first lowercase command raised ``TypeError`` instead
+        of resolving -- #582.
+
+        :rfc:`959#section-5.3` makes FTP commands case-insensitive -- "Upper and
+        lower case alphabetic characters are to be treated identically. Thus, any
+        of the following may represent the retrieve command: ``RETR Retr retr
+        ReTr rETr``" -- so every casing of a registered command has to resolve to
+        the *same* member rather than to a second one registered alongside it.
+
+        The citation is section 5.3 (COMMANDS, which gives the command syntax),
+        not section 4.1 (FTP COMMANDS, which only lists the per-command
+        semantics); #582 cited 4.1 and a cross-review caught it. Verified against
+        the RFC text: the sentence sits between the 5.3 and 5.4 headings. The
+        ``:rfc:`959#section-4.1``` citations in
+        :mod:`pcapkit.const.ftp.command` are a different claim -- the command
+        *kind* (access control, transfer parameter, service) -- and are correct.
+        """
+        from pcapkit.const.ftp.command import Command
+
+        for key in ('RETR', 'retr', 'ReTr', 'rEtR'):
+            with self.subTest(key=key):
+                self.assertIs(Command.get(key), Command.RETR)
+
+        # ``_missing_`` carried the identical mismatch, so the value-lookup
+        # form raised too.
+        self.assertIs(Command('retr'), Command.RETR)
+
+        # A genuinely unknown command still registers, under its canonical
+        # upper-case name, and does not create a case-variant duplicate.
+        unknown = Command.get('xyzw')
+        self.assertEqual(unknown._name_, 'XYZW')
+        self.assertIs(Command.get('XYZW'), unknown)
+        self.assertEqual([name for name in Command._member_map_
+                          if name.upper() == 'RETR'], ['RETR'])
+
+    def test_ftp_read_parses_a_lowercase_request(self) -> None:
+        """The case-insensitivity is reachable from wire data: ``ftp.py``
+        compiles ``FTP_REQUEST`` with :data:`re.I` and passes the match
+        verbatim, so a lowercase request used to crash the parse -- #582.
+        """
+        from pcapkit.const.ftp.command import Command
+        from pcapkit.protocols.application.ftp import FTP, Type
+
+        ftp = object.__new__(FTP)
+        ftp.__cached__ = {}
+
+        for raw, command, args in ((b'retr file.txt\r\n', Command.RETR, 'file.txt'),
+                                   (b'Retr file.txt\r\n', Command.RETR, 'file.txt'),
+                                   (b'user guest\r\n', Command.USER, 'guest'),
+                                   (b'RETR file.txt\r\n', Command.RETR, 'file.txt')):
+            with self.subTest(raw=raw):
+                ftp.__header__ = SimpleNamespace(data=raw)
+                ftp._data = raw
+                request = ftp.read(length=len(raw))
+                self.assertEqual(request.type, Type.REQUEST)
+                self.assertIs(request.cmmd, command)
+                self.assertEqual(request.args, args)
+
     def test_ftp_make_builds_request_and_response_packets(self) -> None:
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.ftp.return_code import ReturnCode

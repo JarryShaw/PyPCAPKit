@@ -688,6 +688,70 @@ pull requests between #326 and #509.
   and for the reachability of the repair at all. The suite deliberately asserts
   widths and octets rather than exception types, because the exception depends on
   whether the mis-sized width happens to have a native ``struct`` code (#599).
+* **Fixed** -- the string-keyed ``get()`` in ``pcapkit.const.ftp.command`` and
+  ``pcapkit.const.http.method`` tested membership with the raw key but
+  registered ``key.upper()``, so the *first* lowercase or mixed-case token
+  raised ``TypeError: 'RETR' already in use`` rather than resolving. Reachable
+  from wire data for FTP: ``pcapkit.protocols.application.ftp`` compiles its
+  request pattern with ``re.I`` and passes the match verbatim, and
+  :rfc:`959#section-5.3` makes FTP commands case-insensitive -- "Upper and lower
+  case alphabetic characters are to be treated identically", listing
+  ``RETR Retr retr ReTr rETr`` as the same command -- so ``retr file.txt`` was a
+  valid request this library could not parse. Both ``get()`` and ``_missing_``
+  now look the key up under the same canonical upper-case name they register it
+  under, so every casing resolves to the one member that already exists instead
+  of colliding with it. Resolving rather than registering a second member
+  matters beyond not crashing -- a duplicate ``GET`` would carry neither the
+  ``safe`` nor the ``idempotent`` attribute of the real one (#582, #583).
+* **Fixed** -- ``httpv1``'s ``_RE_METHOD`` was unanchored and ``re.match``
+  anchors only at the start, so it prefix-matched, and the request-line reader
+  then passed the whole ``para1`` to ``Method.get`` rather than the captured
+  ``method`` group. Together those meant ``b'Get'`` matched on the single
+  character ``G``, satisfied the guard that decides a start-line is a request,
+  and handed the entire mixed-case token to a lookup that raised on it. Fixing
+  either half alone still gives a wrong answer -- normalising the lookup would
+  parse ``b'Get'`` as ``GET`` off a one-character match, and passing the group
+  would parse it as a method named ``G``. The pattern is now anchored at both
+  ends and the captured group is what is looked up, so a token that is not a
+  method is a malformed request line rather than a mis-parsed one. Method tokens
+  are case-sensitive per :rfc:`9110#section-9.1`, so no ``re.I`` was added:
+  ``GET`` parses, ``Get`` and ``get`` are rejected (#583).
+* **Fixed** -- ``_RE_STATUS`` in the same reader carried the same unanchored
+  prefix defect, found by auditing ``_RE_METHOD``'s siblings, and it escaped as
+  the wrong exception type. That pattern is only a guard -- the value is taken
+  from ``int(para2)`` on the raw token -- so a prefix match let a malformed
+  status past the guard and then out of ``int()`` uncaught, where
+  ``_read_http_header`` documents ``ProtocolError``. Measured: a status of
+  ``200x`` raised
+  ``ValueError: invalid literal for int() with base 10: b'200x'``, and one of
+  ``2000`` raised ``ValueError: 2000 is not a valid StatusCode``;
+  both are now ``ProtocolError``.
+  :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three, so the
+  anchor is what the grammar already said -- the production lives in HTTP/1.1
+  because ``status-code`` is part of its ``status-line``, while
+  :rfc:`9110#section-15` covers the code semantics and the IANA registry rather
+  than the syntax. ``_RE_VERSION`` was audited at the same time and is safe as
+  it stands, because both of its call sites read the captured group rather than
+  the raw token (#583).
+* **Fixed** -- ``get()``'s documented ``default`` was ignored on the integer
+  path throughout the generated ``pcapkit.const`` tree, because ``get``
+  delegated the lookup to the enum call and ``_missing_`` has no access to the
+  caller's ``default`` -- so ``Hardware.get(99999, 0)`` raised
+  ``ValueError: 99999 is not a valid Hardware`` instead of returning the
+  fallback it was handed. The integer path now consults ``default`` before
+  letting the lookup error escape. ``-1``, the placeholder the generated
+  signature already carried, is what separates "no default was supplied" from
+  "a default was supplied and should be used", so a caller that asked for no
+  fallback still gets the error rather than a silent substitution. The sweep
+  #584 asked for puts the scope at 110 of the 118 integer registries, not the
+  three the issue named; the two carrying a bespoke integer fallback of their
+  own, ``pcapng`` ``OptionType`` and ``reg`` ``AppType``, are deliberately left
+  alone, since neither drops a default by raising. Not reachable from wire data
+  -- every value a wire field can carry already resolves -- so this is a
+  contract fix rather than a parse fix. Applied to the nine vendor templates as
+  well as the 113 generated modules, and a new test renders the shared template
+  and compares it against the module generated from it, so a regeneration
+  cannot quietly undo it (#584).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
