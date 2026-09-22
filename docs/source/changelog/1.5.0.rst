@@ -211,7 +211,7 @@ pull requests between #326 and #509.
   :rfc:`3931` L2TPv3-over-IP header with no class to dispatch to, so the
   declaration would have pointed the :rfc:`2661` parser at it. See the
   corresponding **Fixed** entry below; the mechanism itself is unaffected, and
-  its worked example now names ``L2TPv3`` rather than ``L2TPv2``.
+  its worked example now names ``L2TPv3`` rather than ``L2TPv2`` (#570).
 * **Changed** -- extraction is around 46% faster on a 1,117-frame HTTP capture,
   with byte-identical output (#420). A reassembled datagram's payload is now
   analysed on first read rather than eagerly, which cuts IP reassembly's own
@@ -347,7 +347,7 @@ pull requests between #326 and #509.
   so nothing pinned that silence against a future regression; and
   ``register_extractor_engine``'s real keyword, ``name``, was not itself
   under test, only its already-corrected docstring, so a future rename could
-  put the two out of step again exactly as quietly as before.
+  put the two out of step again exactly as quietly as before (#577).
 * **Fixed** -- ``FieldBase.unpack`` zero-padded straight up to a field's
   declared ``length`` with ``rjust()``, regardless of how little data
   ``buffer`` actually held; a ~40-octet PCAP-NG Decryption Secrets Block with a
@@ -958,11 +958,19 @@ pull requests between #326 and #509.
   reStructuredText -- for the README only, since it is the one documentation file
   whose renderers are GitHub and PyPI rather than Sphinx. Accordingly
   ``setup.py`` reads ``README.md`` and declares its content type as
-  ``text/markdown``, and the ``include README.md`` line in ``MANIFEST.in`` is now
-  the only thing that puts the README in a source distribution, because
-  ``global-include *.rst`` no longer matches it -- which matters, since
-  ``setup.py`` reads the file unguarded and an sdist without it cannot be
-  installed. Verified with ``twine check --strict`` against a built sdist and
+  ``text/markdown``, and ``MANIFEST.in`` gains an ``include README.md`` line
+  because ``global-include *.rst`` no longer matches the file. That line is
+  belt-and-braces rather than load-bearing, contrary to what this entry claimed
+  when it was written: setuptools' own ``sdist`` command ships whichever of
+  ``README``, ``README.rst``, ``README.txt`` and ``README.md`` exists, before
+  ``MANIFEST.in`` is read at all, so deleting the line leaves the sdist's file
+  listing byte-identical -- 861 entries either way, with an empty ``diff`` -- and
+  the result still installs. ``setup.py`` does read the file unguarded, but it
+  reads it from wherever ``setup.py`` is executing, which when ``pip`` installs an
+  sdist is the unpacked sdist rather than a checkout, so that read cannot be made
+  to fail by dropping the line either. Of the ``include`` lines in that file only
+  ``CHANGELOG.md`` is load-bearing, which the #631 entry below measured
+  independently. Verified with ``twine check --strict`` against a built sdist and
   wheel, both of which pass. The rename's own references moved with it, since a
   change that renames a file owns the references to it:
   ``examples/benchmark/Dockerfile`` copies ``README.md`` -- a literal ``COPY`` of
@@ -976,7 +984,7 @@ pull requests between #326 and #509.
   choice rather than a hard requirement, because the page it lands on is rendered
   by Sphinx. ``examples/benchmark/benchmark.py`` still says ``README.rst`` and is
   left alone, because it means the benchmark suite's own README in the same
-  directory, not the project's.
+  directory, not the project's (#619).
 * **Changed** -- ``CODE_OF_CONDUCT.md`` moves from Contributor Covenant 1.4 to
   Contributor Covenant 3.0, at the maintainer's request. The text is the canonical
   3.0 Markdown fetched from
@@ -1674,6 +1682,36 @@ pull requests between #326 and #509.
   rather than the current file -- no job running a publishing action or a
   ``git push`` may omit an ``environment:`` -- so a publishing job added later
   without a gate fails rather than ships (#641).
+* **Fixed** -- three names appeared in string annotations that their own module
+  never imported, so a type checker or a documentation build could not resolve
+  them while every test went on passing: ``Any`` in
+  ``pcapkit/utilities/logging.py``, and in
+  ``pcapkit/protocols/schema/internet/ipv6_route.py`` both ``Protocol`` in a
+  ``payload:`` stub and ``Optional`` inside a ``typing.cast``. All three are now
+  in their module's ``TYPE_CHECKING`` block, ``Protocol`` spelled
+  ``ProtocolBase as Protocol`` the way twenty-one sibling schema modules already
+  spell it in that same stub, which makes twenty-two. The ``cast`` case is the
+  one worth naming: ``typing.cast`` never evaluates its first argument, so no
+  test that runs the line can see a bad name in it. Nothing resolves at runtime
+  that did not resolve before -- ``TYPE_CHECKING`` is ``False`` when the
+  interpreter runs, so a name imported under it is absent from the module
+  namespace either way, and making these annotations resolve at runtime is a
+  separate decision about the idiom rather than a missing import. mypy 2.3.1 over
+  ``pcapkit`` reported three ``name-defined`` errors before and none after, its
+  total moving 115 to 112, so nothing else shifted. A new
+  ``tests/project/test_annotation_names.py`` pins the invariant without needing a
+  type checker installed: it resolves every string annotation in the package
+  against the names its own module binds, following a nested forward reference
+  such as ``'list["Nested"]'`` while treating ``Literal`` members and
+  ``Annotated`` metadata as the values they are, and it reports exactly those
+  three findings on the unfixed tree and none after. That module reaches the two
+  PEP 695 node classes it needs through ``getattr`` rather than naming them,
+  because ``ast.TypeAlias`` and ``ast.TypeVar`` arrived in Python 3.12 while the
+  supported range starts at 3.10. The same change corrects the ``MANIFEST.in``
+  comment asserting that ``include README.md`` was the only thing putting the
+  README in a source distribution and that an sdist without it could not be
+  installed; both halves are false, and the #619 entry above carried the
+  identical claim and is corrected with it (#642).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
