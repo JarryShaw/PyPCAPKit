@@ -1936,17 +1936,28 @@ pull requests between #326 and #509.
   the whole block as header and ``b''`` as payload, which is the same defect from the
   other side. ``PCAPNG.unpack`` now reads that property instead of extracting the payload
   a second time of its own, leaving one source of truth where there were two attempts at
-  one; ``ProtocolBase.packet`` gains the contract in its docstring and not one executable
-  line, its 503 statements unchanged. This moves the parse output of every PCAP-NG
-  capture, for two properties, on the success path, which is why it ships labelled
-  breaking: ``frame.info.packet`` goes from ``b''`` to hundreds of octets,
-  ``frame.packet.header`` from the whole block to the pre-payload prefix, and anything
-  diffing a dumped file sees it change. That dump is what made this a wire-format defect
-  rather than an API wart. ``PCAPIO`` writes ``value.packet`` after each 16-octet record
-  header, so dumping those four blocks produced a **104-octet** file -- 24 of global
-  header plus four record headers and no payload at all -- in which every record header
-  declared hundreds of octets and delivered none, desynchronising any reader that walks by
-  ``incl_len``, which is all of them: pcapkit refused its own output with
+  one. The property is a plain ``property`` rather than the ``cached_property`` it
+  overrides, which a cross-review on a second model is what settled: the inherited one
+  caches because it *reads the stream*, where a second read would consume octets that are
+  gone, while this one only walks buffers the schema layer has already filled and so has
+  nothing to amortise -- and caching it would have reintroduced the same staleness by
+  another route, a second ``unpack`` on one instance handing back the *first* call's
+  octets with ``get_payload`` never reached, an invariant the code held before this change
+  and has no reason to stop holding. Nothing calls ``unpack`` twice on one instance today,
+  ``__post_init__`` being its only caller, so the unit test asserts the property directly:
+  swap the block on a live instance, unpack again, and the payload must be the new
+  block's, which fails ``b'payload' != b'cached'`` under a cache. ``ProtocolBase.packet``
+  gains the contract in its docstring and not one executable line, its 503 statements
+  unchanged. This moves the parse output of every PCAP-NG capture, for two properties, on
+  the success path, which is why it ships labelled breaking: ``frame.info.packet`` goes
+  from ``b''`` to hundreds of octets, ``frame.packet.header`` from the whole block to the
+  pre-payload prefix, and anything diffing a dumped file sees it change. That dump is what
+  made this a wire-format defect rather than an API wart. ``PCAPIO`` writes
+  ``value.packet`` after each 16-octet record header, so dumping those four blocks
+  produced a **104-octet** file -- 24 of global header plus four record headers and no
+  payload at all -- in which every record header declared hundreds of octets and delivered
+  none, desynchronising any reader that walks by ``incl_len``, which is all of them:
+  pcapkit refused its own output with
   ``ValueError: read length must be non-negative or -1`` and scapy silently returned 1
   packet of 64 octets instead of 5. It round-trips now, the dumped file's total size and
   each record's octets both asserted against the source capture's own hand-parsed bytes
@@ -1964,15 +1975,25 @@ pull requests between #326 and #509.
   ``captured_len`` below ``original_len``, and a Simple Packet Block whose captured length
   is bounded by the interface's ``snaplen`` -- neither of which may come back padded out
   to the on-wire length. The offsets hold at 28, 12 and 28 across all of it, which is the
-  property the walk has to have. ``pcapkit/protocols/misc/pcapng.py`` holds 99% across the
-  change, its 18 new statements and 6 new branches all executed, its single miss the same
-  pre-existing ``_get_timezone`` statement renumbered 1153 to 1248, and no new partial
-  branch. The uncaught ``ValueError`` that an EOF-truncated PCAP-NG raises (#678) is
-  untouched and was measured rather than assumed: all 101 truncation levels of
-  ``dhcp.pcapng`` give byte-identical outcomes before and after, 96 of them that
-  ``ValueError``. ``examples/captures/pcapng.txt``, a hand-regenerated legacy smoke
-  reference, still shows the old frame-level ``packet -> NIL`` and wants a separate
-  refresh (#646).
+  property the walk has to have. With both trees running the same -- current -- tests,
+  which is the only comparison that isolates the code from the suite,
+  ``pcapkit/protocols/misc/pcapng.py`` holds 99.91% across the change, its 18 new
+  statements and 6 new branches all executed, its miss count flat at 1 and its
+  partial-branch count flat at 1, that single miss being the same pre-existing
+  ``_get_timezone`` statement renumbered 1153 to 1265; ``pcapkit/protocols/protocol.py``
+  is identical in every column, 503 statements and 228 misses either side, which is the
+  check that its change really is docstring-only. The uncaught ``ValueError`` that an
+  EOF-truncated PCAP-NG raises (#678) is untouched and was measured rather than assumed,
+  over a truncation set stated rather than described because "101 levels" admits several
+  readings that do not agree on the counts: the whole-percent prefixes
+  ``max(1, 1508 * i // 100) for i in range(101)``, which for this file are 101 distinct
+  lengths from 1 to 1508. Both trees give 96 of that ``ValueError``, one ``FormatError``,
+  one ``ProtocolError`` and three parses, and -- compared level by level rather than only
+  in aggregate, since a matching total can hide two levels that swapped -- the SHA-256 of
+  the sorted length-to-outcome mapping is
+  ``ca44d3ee658087cf2a667c454f839dd931c1c04790b2fe32cee8e1a2e861b182`` on each.
+  ``examples/captures/pcapng.txt``, a hand-regenerated legacy smoke reference, still shows
+  the old frame-level ``packet -> NIL`` and wants a separate refresh (#646).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
