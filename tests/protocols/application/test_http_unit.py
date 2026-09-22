@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -29,6 +30,24 @@ def http2_schema(**kwargs: object) -> SimpleNamespace:
     schema = SimpleNamespace(**kwargs)
     setattr(schema, '__flags__', flags)
     return schema
+
+
+def http2_frame_bytes(type_: int, flags: int, sid: int, payload: bytes) -> bytes:
+    """Build the wire bytes of one HTTP/2 frame.
+
+    The length field counts the *whole* frame, header included -- this
+    library's convention rather than :rfc:`9113#section-4.1`'s, as the NOTE in
+    :meth:`test_unregistered_frame_type_does_not_mutate_the_class_registry`
+    spells out. ``make`` writes ``payload + 9`` and the readers recover the
+    payload as ``length - 9``.
+
+    """
+    return (
+        (len(payload) + 9).to_bytes(3, 'big')
+        + bytes([type_, flags])
+        + sid.to_bytes(4, 'big')
+        + payload
+    )
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -780,9 +799,17 @@ class HTTPUnitTests(unittest.TestCase):
         data_plain_schema, data_plain_flags = proto._make_http_data(data=b'plain')
         self.assertEqual(data_plain_schema.data, b'plain')
         self.assertEqual(data_plain_flags, 0)
-        frame_schema, frame_flags = proto._make_http_data(SimpleNamespace(pad_len=3, data=b'from-frame'))
+        # ``_make_http_data`` reads ``frame.flags.END_STREAM`` back (#652), so
+        # this stub carries a ``flags`` namespace in the same shape the
+        # ``_make_http_headers`` stub below already used.
+        frame_schema, frame_flags = proto._make_http_data(SimpleNamespace(
+            flags=SimpleNamespace(END_STREAM=True, PADDED=False),
+            pad_len=3,
+            data=b'from-frame',
+        ))
         self.assertEqual(frame_schema.data, b'from-frame')
         self.assertTrue(frame_flags & DataFrame.Flags.PADDED)
+        self.assertTrue(frame_flags & DataFrame.Flags.END_STREAM)
 
         headers_schema, headers_flags = proto._make_http_headers(
             end_stream=True,
@@ -1078,6 +1105,113 @@ class HTTPUnitTests(unittest.TestCase):
             'flags': {f'bit_{bit}': 0 for bit in range(8)},
         })
         self.assertEqual(plain.__flags__, 0)
+        # ``IntFlag`` compares equal to ``int``, so the assertion above passes
+        # for both a plain ``0`` and a ``Flags(0)``. Pin the type too -- that is
+        # the whole of #650.
+        self.assertIs(type(plain.__flags__), DataFrame.Flags)
+
+    def test_make_http_data_restores_end_stream_from_the_frame(self) -> None:
+        """``_make_http_data`` must read ``END_STREAM`` back off ``frame.flags``.
+
+        It was the only one of the six ``_make_http_*`` methods that never
+        looked at ``frame.flags``, so a DATA frame parsed with ``END_STREAM``
+        set rebuilt with the bit clear and a parse -> reconstruct round trip
+        lost it silently (#652). ``PADDED`` survived only because it is
+        re-derived from ``pad_len``.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.schema.application.httpv2 import DataFrame
+
+        for end_stream, flags_octet in ((False, 0x00), (True, 0x01)):
+            with self.subTest(end_stream=end_stream):
+                raw = http2_frame_bytes(0x00, flags_octet, 1, b'hello')
+                proto = HTTPv2(io.BytesIO(raw), len(raw))
+                info = proto.read()
+
+                # The bit is present on the parse ...
+                self.assertIs(info.flags.END_STREAM, end_stream)
+
+                # ... and must still be present on the rebuild.
+                _, rebuilt = proto._make_http_data(info)
+                self.assertEqual(
+                    bool(rebuilt & DataFrame.Flags.END_STREAM), end_stream)
+
+                # It must reach the constructed header's flags octet, which is
+                # what a round trip actually writes to the wire.
+                header = proto.make(**proto._make_data(info))
+                self.assertEqual(header.flags['bit_0'], int(end_stream))
+                self.assertEqual(header.pack()[4], flags_octet)
+
+    def test_a_flagless_frame_seeds_its_flags_as_an_enum(self) -> None:
+        """A flags octet of ``0x00`` must still yield a ``Flags``, not an ``int``.
+
+        ``FrameType.post_process`` seeded its accumulator with a bare ``0`` and
+        ``|=`` promoted it only as a side effect, so a frame with no bit set --
+        routine in HTTP/2, not an edge case -- left ``__flags__`` a plain
+        ``int`` where the schema and the data model both declare a ``Flags``,
+        and a membership test against it raised ``TypeError`` (#650, the #616
+        shape).
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.protocols.schema.application.httpv2 import (DataFrame, FrameType,
+                                                                 UnassignedFrame)
+
+        for label, flags_octet in (('none set', 0x00), ('END_STREAM', 0x01)):
+            with self.subTest(flags=label):
+                raw = http2_frame_bytes(0x00, flags_octet, 1, b'hello')
+                info = HTTPv2(io.BytesIO(raw), len(raw)).read()
+
+                value = info.flags.__value__
+                self.assertIs(type(value), DataFrame.Flags)
+                self.assertEqual(value, flags_octet)
+
+                # The #616 symptom: this raised ``TypeError: argument of type
+                # 'int' is not a container or iterable`` for the 0x00 case.
+                self.assertEqual(DataFrame.Flags.END_STREAM in value,
+                                 bool(flags_octet & 0x01))
+
+        # ``FrameType.Flags`` declares no members, which is the predicate
+        # ``post_process`` guards its seed on -- pinned here so the guard
+        # cannot be simplified away without this failing first.
+        self.assertEqual(len(FrameType.Flags.__members__), 0)
+
+        # What makes the guard *necessary* is version-dependent, so it is
+        # asserted as such rather than unconditionally. The 3.11 enum rewrite
+        # made a memberless ``enum.Flag`` subclass refuse ``Flags(0)``
+        # outright, where earlier interpreters handed back a pseudo-member --
+        # ``Enum.__new__`` gained ``if not cls._member_map_: raise TypeError``
+        # (3.11's ``enum.py:1117``), which runs *before* the ``_missing_`` hook
+        # that used to manufacture one. Measured either side of the boundary
+        # rather than taken from a changelog:
+        #
+        #   3.8.20   Flags(0) -> OK <Flags.0: 0>
+        #   3.9.25   Flags(0) -> OK <Flags.0: 0>
+        #   3.10.21  Flags(0) -> OK <Flags.0: 0>
+        #   3.11.15  Flags(0) -> TypeError: <flag 'Flags'> has no members defined
+        #   3.12.13  Flags(0) -> TypeError: ... has no members; specify `names=()` ...
+        #   3.14.7   Flags(0) -> TypeError: ... has no members; specify `names=()` ...
+        #
+        # 3.12 only reworded the message; the refusal itself starts at 3.11.
+        # The guard keys on the memberless-ness above rather than on this, so
+        # it is correct on every supported interpreter either way.
+        if sys.version_info >= (3, 11):
+            with self.assertRaises(TypeError):
+                FrameType.Flags(0)
+
+        # The five frame schemas that inherit that memberless enum therefore
+        # keep the plain ``int`` -- and must not raise on the way.
+        unassigned = UnassignedFrame(data=b'x')
+        unassigned.post_process({
+            'flags': {f'bit_{bit}': 0 for bit in range(8)},
+        })
+        self.assertIs(type(unassigned.__flags__), int)
+        self.assertEqual(unassigned.__flags__, 0)
 
     def test_application_base_rejects_next_layer_operations(self) -> None:
         from pcapkit.protocols.application.application import Application
