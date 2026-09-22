@@ -7,7 +7,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import load_module, purge_modules, sample_path
+from tests._support import isolate_modules, load_module, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -71,7 +71,11 @@ class FakeDecoded:
 
 class InterfaceCoreTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        # ``isolate_modules`` rather than ``purge_modules``: ``_load_module`` below
+        # binds a non-generic ``ProtocolBase`` stand-in and five other stand-in
+        # modules under ``pcapkit.*`` names, none of which may outlive the test
+        # that installed them. See #660.
+        isolate_modules(self)
 
     def _load_module(self):
         import sys

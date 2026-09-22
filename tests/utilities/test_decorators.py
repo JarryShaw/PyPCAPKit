@@ -3,12 +3,16 @@ from __future__ import annotations
 import io
 import unittest
 
-from tests._support import bootstrap_core_modules, install_fake_payload_protocols, purge_modules
+from tests._support import (bootstrap_core_modules, install_fake_payload_protocols,
+                            isolate_modules)
 
 
 class DecoratorTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        # ``isolate_modules`` rather than ``purge_modules``: ``bootstrap_core_modules``
+        # binds partially-initialised real modules under ``pcapkit.*`` names, and
+        # ``_payload_stand_ins`` binds outright stand-ins. See #660.
+        isolate_modules(self)
         modules = bootstrap_core_modules()
         self.decorators = modules['decorators']
         self.exceptions = modules['exceptions']
@@ -364,8 +368,7 @@ class DecoratorTests(unittest.TestCase):
     # ``test_beholder_uses_the_protocol_payload_accessor_not_the_schema``.
     ##########################################################################
 
-    @staticmethod
-    def _payload_stand_ins():
+    def _payload_stand_ins(self):
         """``Raw`` and ``NoPayload`` stand-ins recording what they were handed."""
         class NoPayload:
             def __init__(self, file_, length, error=None, alias=None) -> None:
@@ -377,7 +380,7 @@ class DecoratorTests(unittest.TestCase):
         class Raw(NoPayload):
             pass
 
-        install_fake_payload_protocols(Raw, NoPayload)
+        install_fake_payload_protocols(self, Raw, NoPayload)
         return Raw, NoPayload
 
     @staticmethod

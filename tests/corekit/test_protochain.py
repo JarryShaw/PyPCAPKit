@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import unittest
 
-from tests._support import bootstrap_core_modules, install_fake_protocol_module, purge_modules
+from tests._support import bootstrap_core_modules, install_fake_protocol_module, isolate_modules
 
 
 class ProtoChainTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
-        self.ProtocolBase = install_fake_protocol_module()
+        # ``isolate_modules`` rather than ``purge_modules``: the stand-in
+        # ``ProtocolBase`` installed below is not ``Generic``, so leaving it in
+        # ``sys.modules`` breaks every later test that imports pcapkit. See #660.
+        isolate_modules(self)
+        self.ProtocolBase = install_fake_protocol_module(self)
         modules = bootstrap_core_modules()
         self.protochain = modules['protochain']
         self.exceptions = modules['exceptions']

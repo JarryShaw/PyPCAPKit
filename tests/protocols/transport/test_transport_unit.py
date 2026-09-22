@@ -6,7 +6,7 @@ import io
 import unittest
 from unittest import mock
 
-from tests._support import install_fake_payload_protocols, purge_modules
+from tests._support import install_fake_payload_protocols, isolate_modules
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -15,7 +15,10 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TransportUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        purge_modules(['pcapkit'])
+        # ``isolate_modules`` rather than ``purge_modules``: two tests below bind
+        # stand-ins over ``pcapkit.protocols.misc.raw`` and ``...misc.null``, which
+        # are on the import path of most of the package. See #660.
+        isolate_modules(self)
 
     def test_register_validates_protocols_and_abstract_base(self) -> None:
         from pcapkit.corekit.module import ModuleDescriptor
@@ -172,7 +175,7 @@ class TransportUnitTests(unittest.TestCase):
             def make(self, **kwargs: object) -> object:
                 raise NotImplementedError
 
-        install_fake_payload_protocols(FakeRaw, FakeNoPayload)
+        install_fake_payload_protocols(self, FakeRaw, FakeNoPayload)
 
         with mock.patch('pcapkit.protocols.transport.transport.logger.error') as logger_error:
             report = DummyTransport.analyze((80, 60000), b'data')
@@ -216,7 +219,7 @@ class TransportUnitTests(unittest.TestCase):
             def make(self, **kwargs: object) -> object:
                 raise NotImplementedError
 
-        install_fake_payload_protocols(FakeRaw, FakeNoPayload)
+        install_fake_payload_protocols(self, FakeRaw, FakeNoPayload)
 
         with mock.patch('pcapkit.protocols.transport.transport.logger.error') as logger_error:
             report = DummyTransport.analyze((443, 65000), b'body')
