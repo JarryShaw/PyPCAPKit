@@ -1377,6 +1377,13 @@ class TCPUDPUnitTests(unittest.TestCase):
         the octets that were never read would have been, which before #604 was
         the other way round. That is reachable
         here because :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
+        pads the short read with zero octets rather than raising, so the
+        option parses with its declared ``length`` intact and a ``data`` value
+        of the six real octets followed by four zero ones. The zeros go on the
+        *tail*, where the octets that were never read would have been; before
+        #604 they were placed at the front, which for a numeric field corrupted
+        the value outright. That is reachable here because
+        :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
         sizes each parsed option by ``len(schema)`` -- what it actually
         consumed (8 octets) -- rather than by its self-reported ``length``, so
         its own ``TCP: invalid format`` threshold never sees the shortfall --
@@ -1385,8 +1392,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         ``IPv4UnitTests.test_a_truncated_option_still_parses_its_declared_length``).
         ``length=32`` (30 octets of data wanted, still only 6 available) is
         checked alongside 12 because the pad width tracks ``length - 2``: 32
-        yields 24 zero octets where 12 yields 4, pinning that the padding
-        scales with the declared length rather than being a fixed 4.
+        yields 24 trailing zero octets where 12 yields 4, pinning that the
+        padding scales with the declared length rather than being a fixed 4.
 
         """
         import struct
@@ -1414,6 +1421,14 @@ class TCPUDPUnitTests(unittest.TestCase):
                 )
                 unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
                                    if code == custom)
+                # The six octets actually behind the option come first, where
+                # they were read, and the zeros synthesised for the ones that
+                # were not follow them. Before #604 they arrived the other way
+                # round; since ``trailing`` is non-zero and ``zeroes`` is
+                # non-zero for both declared lengths, this assertion tells the
+                # two orders apart rather than holding for either. See #604 and
+                # ``FieldBaseShortReadPaddingSideTests`` in
+                # ``tests/corekit/test_fields_field.py``.
                 self.assertEqual(unassigned.data, trailing + b'\x00' * zeroes)
                 self.assertEqual(bytes(proto.__header__), raw)
 
