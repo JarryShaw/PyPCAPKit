@@ -446,8 +446,12 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
 
     #: Numeric index.
     index: 'int' = UInt8Field()
-    #: Lifetime.
-    lifetime: 'int' = UInt8Field()
+    #: Reserved octet -- "zero when sent, ignored when received"
+    #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
+    #: This octet is *not* a lifetime: only ``PUZZLE`` carries one, at the same
+    #: offset, and only :rfc:`7401#section-5.2.4` defines the ``2^(value - 32)``
+    #: seconds encoding that goes in it. See #654.
+    reserved: 'int' = UInt8Field()
     #: Opaque data.
     opaque: 'bytes' = BytesField(length=2)
     #: Random data.
@@ -458,7 +462,7 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', lifetime: 'int',
+        def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', reserved: 'int',
                      opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...
 
 

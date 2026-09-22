@@ -204,9 +204,16 @@ class PuzzleParameter(Parameter):
     opaque: 'bytes'
     #: Random number.
     random: 'int'
+    #: On-wire width of :attr:`random`, in bits -- ``RHASH_len`` in
+    #: :rfc:`7401#section-2.3` terms, which :rfc:`7401#section-5.2.4` makes the
+    #: exact width of ``Random #I``. Declared rather than recomputed from
+    #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it
+    #: a parameter read with ``Length = 12`` re-serialised as ``Length = 5``.
+    #: See #653.
+    rhash_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
@@ -215,17 +222,30 @@ class SolutionParameter(Parameter):
 
     #: Numeric index.
     index: 'int'
-    #: Lifetime.
-    lifetime: 'timedelta'
+    #: Reserved octet -- "zero when sent, ignored when received"
+    #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
+    #: Carried verbatim rather than interpreted, so that re-serialising a parsed
+    #: parameter reproduces the octet it arrived with. It used to be read as a
+    #: ``PUZZLE`` ``Lifetime``, which only :rfc:`7401#section-5.2.4` defines, and
+    #: the conformant ``0x00`` then could not be re-serialised at all. See #654.
+    reserved: 'int'
     #: Solution data.
     opaque: 'bytes'
     #: Random number.
     random: 'int'
     #: Puzzle solution.
     solution: 'int'
+    #: On-wire width of :attr:`random` and of :attr:`solution` -- which are equal
+    #: and each ``RHASH_len / 8`` octets -- in bits. ``RHASH_len`` in
+    #: :rfc:`7401#section-2.3` terms; :rfc:`7401#section-5.2.5` makes it the exact
+    #: width of both fields. Declared rather than recomputed from
+    #: :meth:`int.bit_length`, which cannot see a leading zero octet: without it a
+    #: parameter read with ``Length = 20`` re-serialised as ``Length = 6``.
+    #: See #653.
+    rhash_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', reserved: 'int', opaque: 'bytes', random: 'int', solution: 'int', rhash_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
