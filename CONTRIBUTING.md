@@ -74,7 +74,9 @@ python util/changelog_md.py --check    # exits 0 when they agree, prints a diff 
 
 The generator needs only the standard library, so it runs against a bare interpreter. The
 `Changelog drift` job in `.github/workflows/unit-tests.yml` runs `--check` on every push to `main`
-and every pull request targeting it, and a hand-edited `CHANGELOG.md` will fail it.
+and every pull request targeting it, and again whenever another workflow calls that one as a gate —
+the vendor and conda updates, the pages deploy and the release all do, and the job carries no
+`gate-only` guard to opt out. A hand-edited `CHANGELOG.md` will fail it.
 
 ## Documentation
 
@@ -105,24 +107,28 @@ make vermin    # minimum-Python-version check
 Four of them — `pylint`, `mypy`, `bandit` and `vermin` — also run in CI, as the `Lint` job in
 `.github/workflows/lint.yml`: on every pull request against `main`, on a weekly Saturday schedule
 and on demand through `workflow_dispatch`, on Python 3.14 alone rather than across the test matrix.
-The job invokes the same `Makefile` targets listed above, with `RUN=` emptying the `pipenv run`
-prefix, so what CI checks and what you check locally cannot drift apart.
+The job drives them through the `Makefile` rather than restating their flags — `pylint`, `mypy` and
+`bandit` by the targets above, `vermin` by its `vermin-ci` variant — with `RUN=` emptying the
+`pipenv run` prefix. Both paths read the same flag variables, so a check cannot come out clean
+locally and red in CI because the two definitions drifted.
 
 **Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
 as a non-blocking annotation and a red linter will not fail your pull request. That is a consequence
 of none of the four being clean today; the workflow's header records the current counts and what
 each tool would need before its `continue-on-error` line could be deleted. Read the job's run
-summary — every step writes its count there — and treat it as information you should not add to.
+summary — each step writes its own verdict there — and try not to add to the numbers.
 
 `isort` is the exception and is still local-only. It does appear in `cron-vendor.yml`, but as a
 formatter that rewrites the regenerated constants rather than as a check, so nothing verifies import
 ordering on a pull request.
 
-One trap in the target list above: `make vermin` writes its report to `temp/vermin.txt` and hands
-that file to a viewer — VS Code if it is on `PATH`, otherwise `cat`. The status you get back is
-that viewer's rather than vermin's, so a run that found violations still looks like a success.
-`make vermin-ci` is the same check without the redirect, and it is the one CI runs. Running the lot
-before you push still saves a review round.
+One trap in the target list above: `make vermin` redirects its report into `temp/vermin.txt`
+rather than to your terminal, and vermin exits 1 today because `vermin.ini` sets `targets = 3.6`
+against a real floor of 3.11. Make gives up at that redirect, so the run fails with
+`make: *** [vermin] Error 1`, the report left in the file, and the line that would have opened it
+never reached. `make vermin-ci` runs the same flags straight to stdout, which is why CI uses it
+and why it is the easier of the two to read at a desk. Running the lot before you push still saves
+a review round.
 
 ### Format of the Commit Message
 
