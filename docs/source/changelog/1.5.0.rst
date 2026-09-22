@@ -1518,8 +1518,9 @@ pull requests between #326 and #509.
   #655).
 * **Fixed** -- every HIP parameter pcapkit emitted was ``4 (mod 8)`` octets long,
   because the padding was computed to align the *contents* rather than the record.
-  **This changes the octets of every HIP parameter written, and the ``length``
-  every parameter's data model reports.** :rfc:`7401#section-5.2.1` requires that
+  Corrected for **45 of the 46** HIP parameters; ``LOCATOR_SET`` is deliberately
+  excluded, for the reason below. **This changes the octets those 45 parameters
+  write, and the ``length`` their data models report.** :rfc:`7401#section-5.2.1` requires that
   "all of the encoded TLV parameters have a length (that includes the Type and
   Length fields), which is a multiple of 8 bytes", and states the arithmetic
   outright as ``Total Length = 11 + Length - (Length + 3) % 8``; all 95 padding
@@ -1536,11 +1537,20 @@ pull requests between #326 and #509.
   wrong offset, in both directions; pcapkit did not, because its reader consumed
   the same wrong count its writer wrote, which is why no round-trip test in the
   suite could see this and why the fix is asserted against the RFC's arithmetic
-  rather than against a round trip. The 46 ``PaddingField`` callbacks in
-  ``pcapkit/protocols/schema/internet/hip.py`` and the 49 record lengths in
-  ``pcapkit/protocols/internet/hip.py`` are now one ``parameter_total_len`` and one
-  ``parameter_padding_len``, stating the RFC formula once instead of 95 times
-  (#651). ``EncryptedParameter``'s ``data`` length callback is fixed in the same
+  rather than against a round trip. 93 of the 95 sites -- 45 of the 46
+  ``PaddingField`` callbacks in ``pcapkit/protocols/schema/internet/hip.py`` and 48
+  of the 49 record lengths in ``pcapkit/protocols/internet/hip.py`` -- are now one
+  ``parameter_total_len`` and one ``parameter_padding_len``, stating the RFC formula
+  once instead of 95 times (#651). ``LOCATOR_SET`` keeps the old expression at both
+  of its sites, on purpose, because two defects there cancel each other exactly and
+  correcting only the padding would break a parameter that is currently right: its
+  padding callback never receives the parameter's ``len`` (the nested ``Locator``
+  schemas share a packet context whose own ``len`` shadows it, so the value seen is
+  always 4 for an IPv6 locator), and the parameter's ``len`` is written in 4-octet
+  units where the RFC's ``Length`` is a byte count. Always-4 padding gives
+  ``4 + 24n + 4``, and because ``24n`` is a multiple of 8 the RFC total for a
+  byte-count ``Length`` of ``24n`` is the same ``24n + 8`` -- measured at n = 1, 2
+  and 5 as 32, 56 and 128 octets both before and after. #679 carries the pair. ``EncryptedParameter``'s ``data`` length callback is fixed in the same
   change and could not have been left: it subtracted the sixteen ``iv`` octets but
   not the four ``reserved`` ones, and those four cancelled the padding's four at
   ``Length % 8`` in ``{0, 5, 6, 7}`` -- so correcting the padding alone would have
@@ -1550,10 +1560,10 @@ pull requests between #326 and #509.
   as the header and parameters "in 8-byte units, excluding the first 8 bytes", so
   the floor division is exact once each parameter is a multiple of eight, where
   before it was exact only for an even number of them. Migration: a ``SEQ``
-  parameter's ``length`` is now 8 where it was 12, and every other parameter's
-  moves likewise, so code comparing stored pcapkit output byte for byte, or
-  asserting on ``Data_*Parameter.length``, sees different values -- the RFC's
-  values. ``examples/generators/options.py``'s ``HIP_COPIES`` stays at two, no
+  parameter's ``length`` is now 8 where it was 12, and the other 44 corrected
+  parameters move likewise, so code comparing stored pcapkit output byte for byte,
+  or asserting on ``Data_*Parameter.length``, sees different values -- the RFC's
+  values. ``LOCATOR_SET`` is unchanged in both respects. ``examples/generators/options.py``'s ``HIP_COPIES`` stays at two, no
   longer for this reason but for ``R1_COUNTER``'s four-octet ``counter`` where
   :rfc:`7401#section-5.2.3` requires eight, which this defect had been masking
   (#651).
