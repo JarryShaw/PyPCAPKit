@@ -434,7 +434,22 @@ class RegistryLogLevelTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class ExtractorLoggingTests(unittest.TestCase):
-    """The debug trail should explain what pcapkit did with a file."""
+    """The debug trail should explain what pcapkit did with a file.
+
+    Every :class:`~pcapkit.foundation.extraction.Extractor` here is entered as a
+    context manager, purely so that its ``__exit__`` runs and closes the input
+    file. These are the only tests in :mod:`tests.utilities` that read a capture,
+    so a handle one of them leaks is reported -- as a :exc:`ResourceWarning`, at
+    whatever unrelated point the collector reaches it -- inside a sibling module's
+    test. :mod:`tests.utilities.test_stacklevel` records warnings to inspect their
+    attribution, and used to assert that its window held exactly one; a stray
+    handle from here was therefore enough to fail it (:issue:`606`).
+
+    The constructions are otherwise unchanged: with ``auto=True`` the extraction
+    runs in ``__init__``, so the bodies are empty and everything asserted is read
+    afterwards.
+
+    """
 
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
@@ -449,7 +464,8 @@ class ExtractorLoggingTests(unittest.TestCase):
         from tests._support import sample_path
 
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
-            extractor = Extractor(fin=sample_path('in.pcap'), nofile=True, store=False)
+            with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False) as extractor:
+                pass
 
         messages = [record.getMessage() for record in caught.records]
         self.assertTrue(any('opening input file' in message for message in messages), messages)
@@ -481,7 +497,8 @@ class ExtractorLoggingTests(unittest.TestCase):
 
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
-            Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True)
+            with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True):
+                pass
 
         frames = [line for line in stdout.getvalue().splitlines()
                   if line.startswith('Frame ')]
@@ -492,7 +509,9 @@ class ExtractorLoggingTests(unittest.TestCase):
         # with per-frame records
         with self.assertLogs('pcapkit', level=logging.DEBUG) as caught:
             with contextlib.redirect_stdout(io.StringIO()):
-                Extractor(fin=sample_path('in.pcap'), nofile=True, store=False, verbose=True)
+                with Extractor(fin=sample_path('in.pcap'), nofile=True, store=False,
+                               verbose=True):
+                    pass
         self.assertEqual([record.getMessage() for record in caught.records
                           if record.getMessage().startswith('Frame ')], [])
 

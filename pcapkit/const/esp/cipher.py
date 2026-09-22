@@ -222,12 +222,19 @@ class Cipher(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Cipher(key)
+            try:
+                return Cipher(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Cipher(default)
         if key not in Cipher._member_map_:  # pylint: disable=no-member
             return extend_enum(Cipher, key, default)
         return Cipher[key]  # type: ignore[misc]

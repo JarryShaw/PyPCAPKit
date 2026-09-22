@@ -54,12 +54,19 @@ class MPTCPOption(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return MPTCPOption(key)
+            try:
+                return MPTCPOption(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return MPTCPOption(default)
         if key not in MPTCPOption._member_map_:  # pylint: disable=no-member
             return extend_enum(MPTCPOption, key, default)
         return MPTCPOption[key]  # type: ignore[misc]

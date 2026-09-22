@@ -32,12 +32,19 @@ class OptionAction(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return OptionAction(key)
+            try:
+                return OptionAction(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return OptionAction(default)
         if key not in OptionAction._member_map_:  # pylint: disable=no-member
             return extend_enum(OptionAction, key, default)
         return OptionAction[key]  # type: ignore[misc]

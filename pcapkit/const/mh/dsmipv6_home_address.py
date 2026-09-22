@@ -45,12 +45,19 @@ class DSMIPv6HomeAddress(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return DSMIPv6HomeAddress(key)
+            try:
+                return DSMIPv6HomeAddress(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return DSMIPv6HomeAddress(default)
         if key not in DSMIPv6HomeAddress._member_map_:  # pylint: disable=no-member
             return extend_enum(DSMIPv6HomeAddress, key, default)
         return DSMIPv6HomeAddress[key]  # type: ignore[misc]
