@@ -258,8 +258,30 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             time=_time,
             number=self._fnum,
             time_epoch=_epch,
-            len=_ilen,
-            cap_len=_olen,
+            # NOTE: ``len`` is the on-wire length and ``cap_len`` the captured
+            # one, i.e. ``orig_len`` and ``incl_len`` respectively -- not the
+            # other way round, which is what this reader used to do (see #618).
+            #
+            # The two only differ for a frame the snapshot length cut short, so
+            # until ``big_endian.pcap`` arrived with #614 no fixture here could
+            # tell the two assignments apart.
+            #
+            # Worth knowing *why* this reader moved rather than the other one,
+            # because it was not the newer of the two: this convention dates to
+            # c43892af (2022-01-11) and the data model's docstrings agreed with
+            # it a day later, while the opposite convention in
+            # :func:`pcapkit.toolkit.pcapng.block2frame` arrived 15 months after
+            # that in 25f216f4 (2023-04-27). Both were internally consistent, so
+            # neither is a typo and seniority does not settle it. What settles it
+            # is that the names are Wireshark's, and its ``packet-frame.c``
+            # registers ``frame.len`` as "Frame length on the wire" and
+            # ``frame.cap_len`` as "Frame length stored into the capture file",
+            # and raises ``frame.len_lt_caplen`` -- ``PI_MALFORMED`` -- on
+            # ``frame_len < cap_len``, which could not be malformed if ``len``
+            # were the smaller, captured one. So the later convention is the one
+            # that matches the names, and this one is brought into line with it.
+            len=_olen,
+            cap_len=_ilen,
         )
 
         if not _read:
@@ -294,7 +316,23 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             #: io.BytesIO: Source data stream.
             self._file = io.BytesIO(self._data)
 
-        return self._decode_next_layer(frame, self._ghdr.network, frame.len)
+        # NOTE: The dissector is handed the octets that are actually *present*,
+        # i.e. ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame
+        # the snapshot length cut short the latter is larger than the file holds,
+        # and handing it over is the declared-length-exceeds-available-octets
+        # fault of #554, #573 and #594. This read ``frame.len`` before #618, when
+        # that *was* the captured length -- so the value handed over here is the
+        # same one as before and the dissection is unchanged; only the spelling
+        # moved, to the attribute that now means what this call site needs.
+        #
+        # No test pins this line, and that is a known gap rather than an
+        # oversight: reverting just this argument to ``frame.len`` leaves the
+        # whole suite green. ``big_endian.pcap``'s truncated frame dissects to
+        # ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the ``length``
+        # it is handed, so the over-long value never reaches anything that checks
+        # it. Catching a regression here needs a fixture whose truncation lands
+        # in a length-checked field instead of bottoming out in ``Raw``.
+        return self._decode_next_layer(frame, self._ghdr.network, frame.cap_len)
 
     def make(self,
              timestamp: 'Optional[float | Decimal | int | dt_type]' = None,

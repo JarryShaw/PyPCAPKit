@@ -26,6 +26,10 @@ class PcapFrameRuntimeTests(unittest.TestCase):
         self.assertEqual(frame.protochain.aliases, ('Ethernet', 'IPv6', 'IPv6_ICMP'))
         self.assertEqual(frame.index('IPv6'), 1)
         self.assertEqual(frame.info.number, 1)
+        # equal because ``in.pcap`` was captured whole, not because the two mean
+        # the same thing -- they do not, and which is which is #618. The frames
+        # that can tell them apart are in
+        # :file:`tests/protocols/misc/pcap/test_frame_length_runtime.py`.
         self.assertEqual(frame.info.cap_len, frame.info.len)
 
     def test_frame_packet_and_payload_walk_protocol_stack(self) -> None:
@@ -88,8 +92,15 @@ class PcapFrameRuntimeTests(unittest.TestCase):
             self.assertEqual(frame.packet.payload, expected[16:])
             # the nested layer was always right -- it is parsed from the
             # schema's payload rather than from the frame's raw data -- so this
-            # pins the two to each other, which is what was broken
-            self.assertEqual(bytes(frame.payload), expected[16:16 + frame.info.len])
+            # pins the two to each other, which is what was broken.
+            #
+            # Sliced by ``cap_len`` rather than by ``len``: the octets in the
+            # file are the *captured* ones, and since #618 ``len`` is the on-wire
+            # length, which for a truncated frame runs past the end of the
+            # record. ``arp.pcap`` is not truncated, so the two are equal here
+            # and this is a correctness fix rather than a behaviour change --
+            # which is exactly why it needs stating.
+            self.assertEqual(bytes(frame.payload), expected[16:16 + frame.info.cap_len])
 
 
 if __name__ == '__main__':
