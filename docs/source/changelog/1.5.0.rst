@@ -81,7 +81,7 @@ pull requests between #326 and #509.
   skipping them (#440, #504).
 * **Added** -- coverage for the untested half of the #431 accommodation: a TCP
   or IPv4 option whose declared length asks for more data than the capture
-  actually holds, pinning that it still parses, with the short read left-padded
+  actually holds, pinning that it still parses, with the short read zero-padded
   rather than rejected. The one test #431 left behind only covers an option
   area with no data behind it at all; a candidate fix for #554 turned the
   untested half into an unwrapped ``FieldValueError`` while the rest of the
@@ -814,6 +814,44 @@ pull requests between #326 and #509.
   well as the 113 generated modules, and a new test renders the shared template
   and compares it against the module generated from it, so a regeneration
   cannot quietly undo it (#584).
+* **Fixed** -- ``FieldBase.unpack`` padded a short read on the wrong side. When a
+  field's buffer falls short of its declared length -- the deliberate
+  accommodation that lets a snapshot-truncated capture parse (#431) -- the
+  shortfall was zero-filled with ``rjust()``, which places the zeros at the
+  *front*. That asserts the octets never read were the leading ones, and a short
+  read has lost the trailing ones: the buffer ran out. It is now ``ljust()``,
+  which is correct for **both** byte orders rather than only for big-endian
+  fields, so the correction is not byte-order-conditional. The two directions
+  fail differently and only one was loud. Measured: one octet of a four-octet
+  little-endian ``120`` read as ``2013265920``, inflated by ``2 ** 24``; three
+  octets of a four-octet big-endian ``0x01020304`` read as ``0x10203``, scaled
+  *down* by 256. The second is the dangerous one -- a value smaller than the
+  truth passes a sanity check, where an inflated one overruns -- which is why the
+  big-endian half went unnoticed. A full read is untouched at every width and
+  order, since the padding is only ever consulted when the buffer falls short
+  (#604).
+* **Fixed** -- as a consequence of the above, the unhandled ``MemoryError`` at
+  ``pcapkit/protocols/protocol.py:1016`` on a truncated PCAP-NG capture.
+  ``dhcp_little_endian.pcapng`` cut to 161, 641 or 1389 octets left a one-octet
+  read of a little-endian 32-bit block length, which ``rjust()`` turned into
+  ``0x78000000`` or ``0x84000000`` -- 1.88 to 2.06 GiB -- and which was then
+  passed straight to ``self._file.read()`` as an allocation size, from a
+  1772-octet file. Under a 1 GiB address-space cap all three raise
+  ``MemoryError`` there; with more address space the allocation succeeds and the
+  parse goes on to fail anyway, so the visible symptom depended on how much
+  memory the process could get. With ``ljust()`` the same reads report 120 and
+  132, no large allocation is attempted, and all three end in the ordinary,
+  already-handled parse failure instead (#604).
+* **Added** -- ``FieldBaseShortReadPaddingSideTests``, ten cases over 133
+  subtests covering both byte orders at 2, 4 and 8 octets and at every
+  truncation point: the two figures #604 reports as literals, the
+  value-preserving property stated over every width and shortfall rather than as
+  a table, the two failure directions as inequalities, a signed field, a
+  byte-string field, and an unpack-then-pack cycle. Eight of the ten fail on the
+  unfixed tree. The other two must pass on both and are the guard rails -- a full
+  read at every width and order, which may not move, and a read against an
+  entirely empty buffer, which pads to all zeros either way and is the #431
+  behaviour the option and list loops depend on (#604).
 * **Added** -- ``CITATION.cff``, citation metadata in Citation File Format
   1.2.0, which GitHub renders as the repository's "Cite this repository" button
   and which citation managers and dependency inventories read directly. It is
