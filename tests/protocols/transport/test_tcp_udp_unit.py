@@ -1371,6 +1371,12 @@ class TCPUDPUnitTests(unittest.TestCase):
         ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
         10 octets here) for more than the 6 octets actually behind it.
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        tail-pads the short read with zero octets rather than raising, so the
+        option parses with its declared ``length`` intact and a ``data`` value
+        of the six real octets followed by four zero ones -- the zeros go where
+        the octets that were never read would have been, which before #604 was
+        the other way round. That is reachable
+        here because :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
         pads the short read with zero octets rather than raising, so the
         option parses with its declared ``length`` intact and a ``data`` value
         of the six real octets followed by four zero ones. The zeros go on the
