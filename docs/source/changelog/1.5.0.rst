@@ -1506,6 +1506,47 @@ pull requests between #326 and #509.
   first -- so the round trip stopped raising and started quietly emitting a
   different parameter, which is why they were worth fixing together (#653, #654,
   #655).
+* **Fixed** -- every HIP parameter pcapkit emitted was ``4 (mod 8)`` octets long,
+  because the padding was computed to align the *contents* rather than the record.
+  **This changes the octets of every HIP parameter written, and the ``length``
+  every parameter's data model reports.** :rfc:`7401#section-5.2.1` requires that
+  "all of the encoded TLV parameters have a length (that includes the Type and
+  Length fields), which is a multiple of 8 bytes", and states the arithmetic
+  outright as ``Total Length = 11 + Length - (Length + 3) % 8``; all 95 padding
+  sites instead computed ``(8 - (Length % 8)) % 8``, which has no ``+ 4`` inside
+  the modulus and so aligns the contents alone. Across every ``Length`` from 0 to
+  63 the result was never a multiple of eight and never the value the RFC gives,
+  and it erred in both directions: at ``Length = 4`` -- a whole ``SEQ``, and
+  :rfc:`7401#section-5.3.5` puts a ``SEQ`` or an ``ACK`` on every ``UPDATE`` --
+  the record is complete in eight octets and pcapkit appended four that must not
+  be there, while at ``Length = 8`` the contents were already 8-aligned, nothing
+  was appended, and the record went out four octets short. A conformant peer
+  reading ``Length`` and consuming ``11 + Length - (Length + 3) % 8`` octets
+  therefore lands mid-parameter and reads the rest of the parameter area at a
+  wrong offset, in both directions; pcapkit did not, because its reader consumed
+  the same wrong count its writer wrote, which is why no round-trip test in the
+  suite could see this and why the fix is asserted against the RFC's arithmetic
+  rather than against a round trip. The 46 ``PaddingField`` callbacks in
+  ``pcapkit/protocols/schema/internet/hip.py`` and the 49 record lengths in
+  ``pcapkit/protocols/internet/hip.py`` are now one ``parameter_total_len`` and one
+  ``parameter_padding_len``, stating the RFC formula once instead of 95 times
+  (#651). ``EncryptedParameter``'s ``data`` length callback is fixed in the same
+  change and could not have been left: it subtracted the sixteen ``iv`` octets but
+  not the four ``reserved`` ones, and those four cancelled the padding's four at
+  ``Length % 8`` in ``{0, 5, 6, 7}`` -- so correcting the padding alone would have
+  taken ``ENCRYPTED`` from right at four of the eight residues to four octets too
+  long at all eight. ``HIP.make``'s ``len = total_length // 8 + 4`` is *not* part
+  of the defect and is unchanged: :rfc:`7401#section-5.1.3` defines Header Length
+  as the header and parameters "in 8-byte units, excluding the first 8 bytes", so
+  the floor division is exact once each parameter is a multiple of eight, where
+  before it was exact only for an even number of them. Migration: a ``SEQ``
+  parameter's ``length`` is now 8 where it was 12, and every other parameter's
+  moves likewise, so code comparing stored pcapkit output byte for byte, or
+  asserting on ``Data_*Parameter.length``, sees different values -- the RFC's
+  values. ``examples/generators/options.py``'s ``HIP_COPIES`` stays at two, no
+  longer for this reason but for ``R1_COUNTER``'s four-octet ``counter`` where
+  :rfc:`7401#section-5.2.3` requires eight, which this defect had been masking
+  (#651).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
