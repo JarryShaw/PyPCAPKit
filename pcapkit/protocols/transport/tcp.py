@@ -478,7 +478,19 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
         # connection control flags
-        _flag = cast('Enum_Flags', 0)
+        #
+        # NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a
+        # runtime no-op -- it returns its second argument unchanged -- so the accumulator
+        # used to stay the plain :class:`int` ``0`` for a segment whose flags octet is all
+        # zero. Nothing then promoted it, because the ``|=`` below is the only promotion and
+        # it never runs; ``Enum_Flags.SYN in self._flags`` raised ``TypeError: argument of
+        # type 'int' is not a container or iterable`` instead of answering. A segment with
+        # any flag set masked the defect entirely. :class:`Enum_Flags` is an
+        # :class:`aenum.IntFlag` and declares no ``_missing_`` of its own, so
+        # ``Enum_Flags(0)`` is a valid flagless member that still compares equal to ``0``
+        # and still ORs as before; only the type, and hence the ``repr``, differs. That is
+        # what :attr:`connection` already advertises it returns. C.f. #616.
+        _flag = Enum_Flags(0)
         for key, val in schema.flags.items():
             if val == 1:
                 _flag |= Enum_Flags.get(key.upper())
@@ -580,11 +592,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # so this keeps the newly reachable no-SYN-no-ACK case raising the library's
         # documented error rather than a bare Python one. :class:`Enum_Flags` is an
         # :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that
-        # still compares equal to ``0`` and still ORs as before. The read path keeps its
-        # ``cast`` at the top of ``read``: it cannot reach these branches, because
+        # still compares equal to ``0`` and still ORs as before. :meth:`read` seeds itself
+        # the same way; it kept the ``cast`` until #616, on the grounds that
         # ``mptcp_data_selector`` rejects a flagless MP_JOIN before ``_read_mptcp_join``
-        # runs, and changing it would alter the ``connection`` value reported for every
-        # flagless parsed segment. C.f. #587.
+        # runs, so no caller could reach the ``TypeError``. That made the read path latent
+        # rather than sound -- latent by virtue of a guard in another file -- which is a
+        # fragile reason for a ``TypeError`` not to happen. C.f. #587, #616.
         _flag = Enum_Flags(0)
         for key, val in flags.items():
             if val == 1:
