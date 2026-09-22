@@ -28,12 +28,19 @@ class Type(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Type(key)
+            try:
+                return Type(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Type(default)
         if key not in Type._member_map_:  # pylint: disable=no-member
             return extend_enum(Type, key, default)
         return Type[key]  # type: ignore[misc]

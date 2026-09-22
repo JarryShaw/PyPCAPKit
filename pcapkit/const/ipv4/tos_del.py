@@ -28,12 +28,19 @@ class ToSDelay(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return ToSDelay(key)
+            try:
+                return ToSDelay(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return ToSDelay(default)
         if key not in ToSDelay._member_map_:  # pylint: disable=no-member
             return extend_enum(ToSDelay, key, default)
         return ToSDelay[key]  # type: ignore[misc]
