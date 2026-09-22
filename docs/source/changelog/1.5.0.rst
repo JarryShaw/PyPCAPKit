@@ -1063,6 +1063,41 @@ pull requests between #326 and #509.
   version, covering the version changes made by hand, which never run this script at
   all -- 40 of the 159 commits that have moved ``__version__`` on ``main``, a quarter
   over the project's life and 11 of the most recent 25 (#625).
+* **Fixed** -- the HIP ``SOLUTION`` builder sized the parameter with
+  ``4 + math.ceil(max(random.bit_length(), solution.bit_length()) / 4)``, which is
+  an invalid shorthand for the two fields it actually has to describe.
+  :rfc:`7401#section-5.2.5` gives the parameter's ``Length`` as
+  ``4 + RHASH_len / 4`` over a ``Random #I`` and a ``Puzzle solution #J`` of
+  ``RHASH_len / 8`` octets **each**, and ``/ 4`` equals twice ``/ 8`` only because
+  ``RHASH_len`` -- the natural output length of a hash function, in bits -- is a
+  whole number of octets. Applied to an arbitrary ``bit_length()`` the identity
+  fails, and the builder emitted an *odd* contents width, which its own reader then
+  refused: ``_read_param_solution``'s ``(schema.len - 4) % 2`` guard exists because
+  ``SolutionParameter`` splits that width into two equal ``(len - 4) // 2`` halves,
+  so an odd width cannot be framed at all. ``random=0x1`` with ``solution=0xfff``
+  declared ``len=7`` and raised
+  ``ProtocolError: HIPv2: [ParamNo 321] invalid format`` on input the library had
+  itself produced. The undersized length was the
+  worse half of it: because both fields take their width from that same ``len``,
+  ``solution=0xfff`` was packed into the one octet it allowed and came back as
+  ``0xff`` -- silent truncation, nothing raised. Fixed to
+  ``4 + 2 * math.ceil(max(...) / 8)``, the form the sibling ``PUZZLE`` builder
+  already uses, which is even by construction and so can never trip the guard.
+  Loosening the reader was rejected as the alternative: an odd contents width has
+  no meaning in the wire format, since the RFC makes the two fields equal-width and
+  says nothing about which would take an extra octet, and a laxer guard would still
+  have truncated the value (#608).
+* **Added** -- ``SOLUTION`` parameter width coverage in
+  ``tests/protocols/internet/test_hip_unit.py``: eight widths asserting the declared
+  length, the reader's acceptance and the construct-pack-parse cycle, plus a 57-bit
+  case pinning the 20-octet length :rfc:`5201#section-5.2.5` requires of HIPv1. Five
+  of the eight widths -- 1, 9, 12, 17 and 25 bits -- are deliberately *not* multiples
+  of eight, because at a multiple of eight the defective ``ceil(bits / 4)`` coincides
+  with the correct width, which is why every fixture that reached this builder passed
+  through it unharmed; the round-trip case in ``examples/generators/options.py``
+  supplies no ``random`` or ``solution`` at all, so it exercised the formula at zero
+  bits. 57 bits is what discriminates on the HIPv1 path for the same reason 64 does
+  not: both formulas give 20 at a full-width value (#608).
 
 * **Fixed** -- ``LICENSE``'s copyright notice began the term at 2018, a year after
   the work it covers. The repository's first commit is ``c57f7d0b7`` "Initial

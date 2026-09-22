@@ -2386,6 +2386,133 @@ class HIPUnitTests(unittest.TestCase):
         self.assertIs(encrypted.post_process({'__cipher__': Cipher.NULL_ENCRYPT}), encrypted)
         self.assertIs(encrypted.cipher, Cipher.NULL_ENCRYPT)
 
+    def test_hip_solution_parameter_length_is_two_whole_octet_fields(self) -> None:
+        """#608: a ``SOLUTION`` parameter must be built with an even contents
+        width, because its own reader splits that width into two equal halves.
+
+        :rfc:`7401#section-5.2.5` gives the ``SOLUTION`` parameter's ``Length``
+        as ``4 + RHASH_len / 4``, over a ``Random #I`` and a ``Puzzle solution
+        #J`` of ``RHASH_len / 8`` octets *each*. The ``/ 4`` is shorthand for
+        twice ``/ 8`` and holds only because ``RHASH_len`` -- the natural output
+        length of a hash function, in bits -- is a whole number of octets.
+        :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_solution` used to
+        apply that shorthand to an arbitrary :meth:`int.bit_length`, where the
+        identity fails, and so emitted an odd contents width that
+        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`'s
+        ``(len - 4) % 2`` guard rejects -- the library refusing to parse what it
+        had just built.
+
+        Two independent symptoms, both asserted below. The odd ``len`` is
+        rejected outright; and because
+        :class:`~pcapkit.protocols.schema.internet.hip.SolutionParameter` sizes
+        each field from that same ``len``, an undersized ``len`` also silently
+        *truncates* the values on the way out -- ``solution=0xfff`` packed into
+        the one octet ``len=7`` allowed for it came back as ``0xff``.
+
+        On the widths chosen
+        --------------------
+        Only the widths that are **not** multiples of 8 can tell the right
+        formula from the wrong ones, which is why five of the eight cases below
+        are 1, 9, 12, 17 and 25 bits. At 12 bits, for instance, the four
+        plausible field-pair widths disagree: ``2 * ceil(12 / 8) == 4``
+        (correct), ``ceil(12 / 4) == 3`` (the defect), ``2 * floor(12 / 8) == 2``,
+        and ``ceil(12 / 8) == 2`` (one field's worth rather than two). At 1 bit
+        they are 2, 1, 0 and 1.
+
+        The 8-, 16- and 24-bit cases are deliberate controls rather than
+        discriminators: at a multiple of 8 the defect's ``ceil(bits / 4)`` and
+        the floor variant both coincide with the correct width, which is exactly
+        why every byte-aligned fixture this library ships passed through the
+        defect unharmed. They are asserted to confirm the repair changes nothing
+        on the path that already worked.
+
+        """
+        import math
+
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        # (random, solution) pairs, ordered by the width that governs the length.
+        #        random,   solution,  bits, expected len
+        cases = (
+            (0x1, 0x1, 1, 6),            # discriminates: /4 -> 5, floor -> 4, half -> 5
+            (0xff, 0xff, 8, 6),          # control: /4 and floor both agree here
+            (0x1, 0x1ff, 9, 8),          # discriminates: /4 -> 7, floor -> 6, half -> 6
+            (0x1, 0xfff, 12, 8),         # the issue's headline case; /4 -> 7
+            (0xffff, 0x1, 16, 8),        # control: /4 and floor both agree here
+            (0x1ffff, 0x3, 17, 10),      # discriminates: /4 -> 9, floor -> 8, half -> 7
+            (0xffffff, 0xffffff, 24, 10),  # control -- the width #601's fixture uses
+            (0x1ffffff, 0x0, 25, 12),    # discriminates: /4 -> 11, floor -> 10, half -> 8
+        )
+        for random, solution, bits, expected in cases:
+            with self.subTest(random=random, solution=solution, bits=bits):
+                self.assertEqual(max(random.bit_length(), solution.bit_length()), bits)
+                self.assertEqual(expected, 4 + 2 * math.ceil(bits / 8))
+
+                schema = proto._make_param_solution(
+                    Parameter.SOLUTION, version=2, index=1, lifetime=2,
+                    opaque=b'op', random=random, solution=solution,
+                )
+                self.assertEqual(schema.len, expected)
+
+                # The reader's own guard: an odd contents width cannot be split
+                # into the two equal fields the schema declares.
+                self.assertEqual((schema.len - 4) % 2, 0)
+                parsed = proto._read_param_solution(schema, version=2, options=options)
+                self.assertEqual(parsed.random, random)
+                self.assertEqual(parsed.solution, solution)
+
+                # ... and the values must survive the octets, not just the schema:
+                # too small a `len` narrows both fields and drops the high octets.
+                packed = bytes(schema)
+                reparsed = hip_schema.SolutionParameter.unpack(packed)
+                self.assertEqual(reparsed.len, expected)
+                self.assertEqual(reparsed.random, random)
+                self.assertEqual(reparsed.solution, solution)
+
+    def test_hip_solution_parameter_at_57_bits_stays_legal_for_hipv1(self) -> None:
+        """#608: a 57-bit puzzle value must still build the 20-octet
+        ``SOLUTION`` parameter that HIPv1 requires.
+
+        :rfc:`5201#section-5.2.5` fixes ``Random #I`` and ``Puzzle solution #J``
+        at 8 octets each and the parameter's ``Length`` at 20, and
+        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`
+        enforces exactly that for ``version=1``. A 57-bit value is a perfectly
+        ordinary 8-octet field with seven leading zero bits, so it must produce
+        ``Length = 20``; ``4 + ceil(57 / 4)`` produces 19, which fails both the
+        HIPv1 equality check and the ``(len - 4) % 2`` parity check.
+
+        57 bits is the discriminating width here precisely because 64 is not:
+        ``4 + ceil(64 / 4)`` and ``4 + 2 * ceil(64 / 8)`` are both 20, so a test
+        written with a full-width 64-bit value would pass either way.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.protocols.internet.hip import HIP
+
+        proto = object.__new__(HIP)
+        options = OrderedMultiDict()
+
+        random = 1 << 56  # bit_length() == 57
+        solution = 0x1
+        self.assertEqual(random.bit_length(), 57)
+
+        schema = proto._make_param_solution(
+            Parameter.SOLUTION, version=1, index=1, lifetime=2,
+            opaque=b'op', random=random, solution=solution,
+        )
+        self.assertEqual(schema.len, 20)
+
+        parsed = proto._read_param_solution(schema, version=1, options=options)
+        self.assertEqual(parsed.random, random)
+        self.assertEqual(parsed.solution, solution)
+
 
 if __name__ == '__main__':
     unittest.main()

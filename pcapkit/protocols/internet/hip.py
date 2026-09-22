@@ -1087,7 +1087,11 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         _time = schema.lifetime
         _opak = schema.opaque
         _rand = schema.random
-        _solt = schema.solution  # Length (schema.len) = 4 + RHASH_len / 4
+        # ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which
+        # is the same quantity as ``4 + 2 * (RHASH_len / 8)`` -- two equal-width fields
+        # of ``RHASH_len / 8`` octets -- only because ``RHASH_len`` is a whole number of
+        # octets. Do not reuse the ``/ 4`` shorthand on a width that is not; see #608.
+        _solt = schema.solution
 
         solution = Data_SolutionParameter(
             type=schema.type,
@@ -3197,7 +3201,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         return Schema_SolutionParameter(
             type=code,
-            len=4 + math.ceil(max(random.bit_length(), solution.bit_length()) / 4),
+            # Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of
+            # ``RHASH_len / 8`` octets each -- so the contents length is
+            # ``4 + 2 * ceil(bits / 8)`` and is necessarily even after the 4-octet
+            # ``#K``/``Reserved``/``Opaque`` prefix. :rfc:`7401#section-5.2.5` spells
+            # the same quantity ``4 + RHASH_len / 4``, which is an identity only
+            # because a real ``RHASH_len`` is a whole number of octets; ``ceil(bits
+            # / 4)`` on an arbitrary :meth:`int.bit_length` is not that quantity and
+            # yields an odd width that :meth:`_read_param_solution` rejects. See #608.
+            len=4 + 2 * math.ceil(max(random.bit_length(), solution.bit_length()) / 8),
             index=index,
             lifetime=lifetime,
             opaque=opaque,
