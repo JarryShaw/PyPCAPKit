@@ -256,7 +256,7 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector
         rather than a :class:`~pcapkit.corekit.fields.misc.ConditionalField`
         wrapping ``NumberField(length=lambda pkt: ...)``, which is what it was
-        until #576, for two independent reasons.
+        until #576.
 
         The width lambda read ``8 if pkt['flags']['a'] else 0`` -- **0**, not 4 --
         so an unextended Data ACK packed no octets at all while the ``length``
@@ -265,20 +265,44 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         declared, and the ``ack`` value the caller supplied was simply not
         present.
 
-        Correcting the lambda to ``8 if ... else 4`` would not have worked,
-        because :class:`~pcapkit.corekit.fields.numbers.NumberField` cannot pack
-        a callable length at all: it calls ``build_template`` once at
-        ``__init__`` with the placeholder length ``-1``, which latches
-        ``_need_process = True``, and nothing clears that flag when
-        ``__call__`` later resolves the real length and rebuilds the template as
-        ``>I``/``>Q``. ``pre_process`` then hands :func:`struct.pack` bytes for
-        an integer template and it raises ``struct.error: required argument is
-        not an integer``. Measured on the 8-octet form, which the old lambda did
-        reach: ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that. Fixing
-        that belongs to :mod:`pcapkit.corekit.fields.numbers`; selecting between
-        two fields that each fix ``__template__`` at class level sidesteps it
-        entirely and is the pattern :func:`mptcp_add_address_selector` already
-        uses here.
+        Correcting the lambda to ``8 if ... else 4`` would not have worked *at the
+        time*, because :class:`~pcapkit.corekit.fields.numbers.NumberField` could
+        not pack a callable length at all: it called ``build_template`` once at
+        ``__init__`` with the placeholder length ``-1``, which latched
+        ``_need_process = True``, and nothing cleared that flag when ``__call__``
+        later resolved the real length and rebuilt the template as ``>I``/``>Q``.
+        ``pre_process`` then handed :func:`struct.pack` bytes for an integer
+        template and it raised ``struct.error: required argument is not an
+        integer``. Measured on the 8-octet form, which the old lambda did reach:
+        ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised exactly that.
+
+        That half is now history: **#598 fixed it**, in
+        :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix
+        belonged, by recomputing ``_need_process`` from the width actually in
+        force instead of once from the placeholder. A callable-length
+        ``NumberField`` packs and unpacks both the 4- and the 8-octet form today,
+        so ``ConditionalField(NumberField(length=...), lambda pkt:
+        pkt['flags']['A'])`` would express this field correctly. Nor was wire
+        *absence* ever the obstacle: :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len`
+        and :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the
+        sibling ``M`` flag, so this very class already leans on that wrapper to
+        keep a field off the wire.
+
+        The ``SwitchField`` form is kept anyway, for a narrower reason about
+        composition rather than about absence. A
+        :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``
+        forwards to the wrapped field unconditionally, never consulting the
+        condition, so reading it while the condition is false -- the wrapped field
+        then still unresolved, at its ``-1`` placeholder -- raises
+        ``struct.error: bad char in struct format``. Nothing here meets that only
+        because :class:`Schema
+        <pcapkit.protocols.schema.schema.Schema>`'s ``pack`` and ``unpack``
+        special-case ``ConditionalField`` by name and skip the wrapped field
+        outright before any ``length`` is read. A ``SwitchField`` needs no such
+        special case: its selector always hands back an already-concrete field,
+        :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its
+        ``length`` is safe wherever it is read. Swapping the two would be a
+        behaviour change, not a tidy-up, and #603 does not make it.
 
     """
     if not pkt['flags']['A']:
@@ -308,8 +332,10 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
     Note:
         Identical in shape to :func:`mptcp_dss_ack_selector`, and it replaces the
         identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']
-        else 0, ...)``. See that function's note for why the ``0`` was wrong and
-        why a corrected lambda would not have packed either. C.f. #576.
+        else 0, ...)``. See that function's note for why the ``0`` was wrong, why a
+        corrected lambda would not have packed either *at the time*, and why the
+        ``SwitchField`` form is kept now that #598 has made a callable length work.
+        C.f. #576, #598.
 
     """
     if not pkt['flags']['M']:
@@ -881,7 +907,7 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     #: 4 octets when ``A`` is set, 8 when ``a`` is set as well, absent otherwise --
     #: :rfc:`8684` section 3.3 figure 9. Both the presence test and the width live
     #: in :func:`mptcp_dss_ack_selector`, whose note records what this field
-    #: declared until #576 and why a narrower fix would not have packed.
+    #: declared until #576 and why the switch form is kept.
     ack: 'int' = SwitchField(
         selector=mptcp_dss_ack_selector,
     )

@@ -196,7 +196,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         """
         if cast('Optional[Schema_Frame]', self.__header__) is None:
             packet = kwargs.get('__packet__', {})  # packet data
-            packet['bytesorder'] = self._ghdr.magic_number.byteorder
+            packet['byteorder'] = self._ghdr.magic_number.byteorder
             self.__header__ = cast('Schema_Frame', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 

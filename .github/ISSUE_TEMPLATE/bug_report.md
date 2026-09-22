@@ -9,9 +9,10 @@ A clear and concise description of what the bug is.
 
 **System information**
 A clear and concise description of your system information.
- - OS Version: [e.g. macOS Mojave 10.14.4]
- - Python Version: [e.g 3.7, 3.6, 3.5, 3.4]
+ - OS Version: [e.g. macOS 15.3, Ubuntu 24.04, Windows 11]
+ - Python Version: [e.g. 3.14, 3.12, 3.10]
  - Python Implementation: [e.g. CPython, PyPy]
+ - `pcapkit` Version: [e.g. 1.5.0b4; `python -c "import pcapkit; print(pcapkit.__version__)"`]
 
 **Traceback stack**
 Run program again with `PCAPKIT_DEVMODE=true` set to provide the traceback stack.

@@ -5,8 +5,9 @@
 - Use *Preview* tab to see how your *pull request* will actually look like
 
 - [ ] [Searched](https://github.com/JarryShaw/PyPCAPKit/search?q=is%3Apr&type=Issues) for similar pull requests
-- [ ] Followed PEP8 coding style
-- [ ] Tested with proper test samples
+- [ ] Followed the [coding style](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBUTING.md#coding-style) (`make pylint`, `make mypy`, `make isort`)
+- [ ] `make test` passes, and a test case covers the change
+- [ ] Added a [changelog entry](https://github.com/JarryShaw/PyPCAPKit/blob/main/CONTRIBUTING.md#changelog-entries) under `docs/source/changelog/` and regenerated `CHANGELOG.md`, if the change is user-visible
 
 ### What is the purpose of your *pull request*?
 - [ ] Bug fix
