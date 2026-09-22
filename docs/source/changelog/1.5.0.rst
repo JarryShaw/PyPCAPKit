@@ -1828,6 +1828,43 @@ pull requests between #326 and #509.
   six escaped the two existing sweeps. ``tests/const/test_const_enum_get.py`` drops ``Flags`` from
   ``EXPECTED_TO_RESOLVE_ANYTHING`` and its sweep grows 110 to 111, a registry that
   bounds its domain finally having a failure for ``default`` to fall back from (#647).
+* **Changed** -- ``SeekableReader.truncate()`` raises instead of returning a size, and
+  the misspelled ``writeable()`` is now spelled ``writable()``. Both are breaks for an
+  external caller and neither breaks anything inside the package. ``io.IOBase``
+  documents one gate over two methods -- "If False, write() and truncate() will raise
+  OSError" -- and this reader's ``writable()`` answers False, so a caller that checked
+  it first, which is exactly what the contract invites, got a surprise either way
+  round: ``write`` and ``writelines`` raised, and ``truncate`` returned its new size.
+  What settled the question is that this is not a pure-Python nicety of ``_pyio`` that
+  the accelerated path skips -- every ordinary read-only file object in CPython raises
+  here, ``open(path, 'rb').truncate()`` giving ``io.UnsupportedOperation: truncate``
+  off the C ``BufferedReader``, and ``_pyio.BufferedReader`` the same type from
+  ``_BufferedIOMixin.truncate``'s ``_checkWritable()``. The refusal is
+  ``UnsupportedOperation('truncate')``, the same one ``write`` already raises, and no
+  trade-off was needed between the house exception and the ABC's: pcapkit's
+  ``UnsupportedOperation`` subclasses ``io.UnsupportedOperation``, which subclasses
+  ``OSError``, so the in-library exception *is* the one the contract names. The
+  resizing ``truncate`` used to perform is not deleted, only made private as
+  ``_truncate_buffer``. It never touched the underlying stream -- it resizes a private
+  lookback window, which is the counter-argument the issue itself raised -- and it is
+  the only route to the "position sits before the window" state that ``seek`` and the
+  four buffered read paths must refuse, which #643 and #644 landed tests for; deleting
+  it would have taken their mechanism with them. ``writeable()``, separately, was never
+  an override of anything: ``'writable' in SeekableReader.__dict__`` was False and
+  ``SeekableReader.writable is io.IOBase.writable`` was True, so ``io``, ``shutil`` and
+  any third-party caller read the inherited value and never saw the one defined in this
+  file. Both answered False, which is the coincidence that hid it -- there was no
+  symptom to notice, and editing the misspelled method would silently have had no
+  effect. The value reported is unchanged and was always honest, the reader genuinely
+  being unable to write; only where the method was defined was wrong. Nothing in the
+  package called either method, confirmed by grep, so the risk is entirely to external
+  callers, which is what made this a question asked before it was acted on. The new
+  test asserts the property rather than the behaviour -- that a ``SeekableReader``
+  raises the same exception type a read-only ``io.BufferedReader`` raises for the same
+  call -- with that type captured by running the call rather than named in the test, so
+  it tracks CPython across the 3.10--3.15 matrix instead of restating a belief about
+  it. 31 to 34 tests and 35 to 41 subtests over ``tests/corekit/test_io.py``, the
+  module at 100% coverage before and after (#645).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
