@@ -33,12 +33,19 @@ class DITypes(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return DITypes(key)
+            try:
+                return DITypes(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return DITypes(default)
         if key not in DITypes._member_map_:  # pylint: disable=no-member
             return extend_enum(DITypes, key, default)
         return DITypes[key]  # type: ignore[misc]

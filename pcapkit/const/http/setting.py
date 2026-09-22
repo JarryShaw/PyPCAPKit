@@ -64,12 +64,19 @@ class Setting(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return Setting(key)
+            try:
+                return Setting(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return Setting(default)
         if key not in Setting._member_map_:  # pylint: disable=no-member
             return extend_enum(Setting, key, default)
         return Setting[key]  # type: ignore[misc]

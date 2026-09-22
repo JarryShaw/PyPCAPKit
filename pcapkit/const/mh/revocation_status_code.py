@@ -54,12 +54,19 @@ class RevocationStatusCode(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return RevocationStatusCode(key)
+            try:
+                return RevocationStatusCode(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return RevocationStatusCode(default)
         if key not in RevocationStatusCode._member_map_:  # pylint: disable=no-member
             return extend_enum(RevocationStatusCode, key, default)
         return RevocationStatusCode[key]  # type: ignore[misc]

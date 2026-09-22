@@ -2334,6 +2334,101 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         self._assert_constructed_header_round_trips(IPv6_Opts)
 
+    def _assert_ilnp_nonce_option_is_sized_by_the_ceiling(self, protocol_cls: type) -> None:
+        """The ILNP nonce option must declare enough octets to hold its nonce.
+
+        ``nonce`` is packed by a
+        :class:`~pcapkit.corekit.fields.numbers.NumberField` whose width *is*
+        the option's own declared ``len`` (c.f.
+        :class:`~pcapkit.protocols.schema.internet.hopopt.ILNPOption`), so an
+        under-declared ``len`` does not merely mis-state a length -- it
+        silently truncates the nonce on the wire, with no exception raised.
+
+        The builder used to size with ``math.ceil(nonce.bit_length() // 8)``.
+        ``//`` floors, and :func:`math.ceil` of an :class:`int` is a no-op, so
+        the ceiling was never actually taken: every nonce whose bit length was
+        not an exact multiple of eight got sized short, and any nonce below 256
+        was declared as *zero* octets and dropped from the wire altogether
+        (``nonce=9`` packed to ``b'\\x8b\\x00'`` and parsed back as ``0``).
+
+        ``0xFFFFFF`` -- bit length 24, the value the option-round-trip
+        generator happens to use -- is one of the few values floor division
+        gets right, which is why the round-trip suite never caught this. Every
+        case below bar the two marked controls therefore has a bit length that
+        is deliberately **not** a multiple of eight, and several are below 256
+        (c.f. #601).
+
+        """
+        from pcapkit.const.ipv6.option import Option
+        from pcapkit.protocols.data.internet import hopopt as hopopt_data
+        from pcapkit.protocols.data.internet import ipv6_opts as opts_data
+        from pcapkit.protocols.schema.internet import hopopt as hopopt_schema
+        from pcapkit.protocols.schema.internet import ipv6_opts as opts_schema
+
+        is_hopopt = protocol_cls.__name__ == 'HOPOPT'
+        data = hopopt_data if is_hopopt else opts_data
+        schema = hopopt_schema if is_hopopt else opts_schema
+        proto = object.__new__(protocol_cls)
+
+        #: nonce value -> the octet width it needs to survive the wire
+        cases = [
+            (0, 1),             # bit length  0 -- floored to one octet
+            (1, 1),             # bit length  1
+            (9, 1),             # bit length  4
+            (42, 1),            # bit length  6
+            (127, 1),           # bit length  7
+            (255, 1),           # bit length  8 -- control: floor was right here
+            (256, 2),           # bit length  9
+            (65536, 3),         # bit length 17
+            (0xFFFFFF, 3),      # bit length 24 -- control: floor was right here
+            (0x1FFFFFFFF, 5),   # bit length 33
+        ]
+
+        # Guard the table itself. These values only discriminate between the
+        # floor and the ceiling while their bit lengths are *not* multiples of
+        # eight, so rounding them off to convenient constants later would
+        # quietly disarm this regression -- which is exactly how the defect
+        # survived in the first place.
+        discriminating = [nonce for nonce, _ in cases if nonce.bit_length() % 8]
+        self.assertGreaterEqual(len(discriminating), 6)
+        self.assertTrue(any(nonce < 256 for nonce in discriminating))
+
+        for nonce, width in cases:
+            with self.subTest(nonce=nonce):
+                opt = proto._make_opt_ilnp(Option.ILNP_Nonce, nonce=nonce)
+                self.assertEqual(opt.len, width)
+
+                # the nonce has to survive being packed, not merely be handed
+                # back from the schema object it was passed into
+                raw = bytes(opt)
+                self.assertEqual(len(raw), 2 + width)
+                self.assertEqual(raw[1], width)
+                self.assertEqual(raw[2:], nonce.to_bytes(width, 'big'))
+
+                parsed = schema.ILNPOption.unpack(io.BytesIO(raw), len(raw), {})
+                self.assertEqual(parsed.len, width)
+                self.assertEqual(parsed.nonce, nonce)
+
+        # the ``opt=`` branch takes the nonce from the data model instead of the
+        # keyword, and has to size it the same way
+        from_data = proto._make_opt_ilnp(
+            Option.ILNP_Nonce,
+            data.ILNPOption(type=Option.ILNP_Nonce, length=4, nonce=127,
+                            action=0, change=False),
+        )
+        self.assertEqual(from_data.len, 1)
+        self.assertEqual(bytes(from_data)[2:], b'\x7f')
+
+    def test_hopopt_ilnp_nonce_option_is_sized_by_the_ceiling(self) -> None:
+        from pcapkit.protocols.internet.hopopt import HOPOPT
+
+        self._assert_ilnp_nonce_option_is_sized_by_the_ceiling(HOPOPT)
+
+    def test_ipv6_opts_ilnp_nonce_option_is_sized_by_the_ceiling(self) -> None:
+        from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
+
+        self._assert_ilnp_nonce_option_is_sized_by_the_ceiling(IPv6_Opts)
+
     def test_option_registries_are_not_clobbered_by_a_nested_enum_registry(self) -> None:
         """Option type 0 must resolve to the padding option in every module.
 

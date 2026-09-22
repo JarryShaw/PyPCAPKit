@@ -48,12 +48,19 @@ class MNIDSubtype(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return MNIDSubtype(key)
+            try:
+                return MNIDSubtype(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return MNIDSubtype(default)
         if key not in MNIDSubtype._member_map_:  # pylint: disable=no-member
             return extend_enum(MNIDSubtype, key, default)
         return MNIDSubtype[key]  # type: ignore[misc]

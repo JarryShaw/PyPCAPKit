@@ -1884,9 +1884,21 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         if opt is not None:
             nonce = opt.nonce
 
+        # NOTE: ``nonce`` is packed by a NumberField whose width is this very
+        # ``len`` (c.f. pcapkit.protocols.schema.internet.hopopt.ILNPOption), so
+        # the declared octet count has to be the ceiling of the bit length over
+        # eight -- ``bit_length() // 8`` floors instead, and wrapping a float-free
+        # floor division in ``math.ceil`` is a no-op, so every nonce whose bit
+        # length is not a multiple of eight used to be sized short and silently
+        # truncated on the wire (a nonce below 256 was declared as *zero* octets
+        # and vanished outright). ``bit_length()`` is 0 for 0 itself, which would
+        # likewise declare a zero-octet nonce -- collapsing "the nonce is 0" into
+        # "there is no nonce", when RFC 6744 gives the option a Nonce Value field
+        # -- so the width is floored at one octet, matching
+        # pcapkit.protocols.internet.mh.MH._make_opt_mn_id (c.f. #601).
         return Schema_ILNPOption(
             type=code,
-            len=math.ceil(nonce.bit_length() // 8),
+            len=max(1, math.ceil(nonce.bit_length() / 8)),
             nonce=nonce,
         )
 
