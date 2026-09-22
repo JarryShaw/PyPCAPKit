@@ -21,6 +21,16 @@ default. GitHub issue #602 is three such keys:
   which is the acknowledgement *flag*, not the acknowledgement number
   ``ack_no``. The pair was the wrong way round, and neither half said so.
 
+That silence is gone: issue #617 has :meth:`ProtocolBase.__init__
+<pcapkit.protocols.protocol.ProtocolBase.__init__>` check a construction keyword
+against the protocol's signatures and raise
+:exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one that no signature
+declares. ``TCP.make`` still ends in ``**kwargs`` and still reads nothing out of
+it -- the check is upstream of it -- so the account above remains the account of
+how the defect was possible, and
+:meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_now_refused_rather_than_absorbed`
+is where the new behaviour is pinned.
+
 Why the expected header is written out here
 -------------------------------------------
 
@@ -229,34 +239,70 @@ class TCPBaseKeywordTests(unittest.TestCase):
         options = _load_generator()
         self.assertEqual(dict(options.TCP_BASE), EXPECTED_HEADER)
 
-    def test_make_still_has_the_kwargs_that_hid_the_defect(self) -> None:
-        """``make`` really does absorb an undeclared keyword without complaint.
+    def test_an_undeclared_keyword_is_now_refused_rather_than_absorbed(self) -> None:
+        """Constructing with an undeclared keyword raises.
 
-        Without this, the check above looks like a style rule. It is not: the
-        reason a misspelling cost twenty-five wrong fixture frames instead of a
-        :exc:`TypeError` is the ``**kwargs`` at the end of the signature, and
-        that nothing ever inspects it. Recording the behaviour here means a
-        change to it -- ``make`` starting to reject or warn about the leftovers,
-        as :class:`~pcapkit.protocols.schema.schema.Schema` construction already
-        warns about an unknown field -- turns this red rather than passing
-        silently.
+        This test used to assert the opposite, and the change is the point.
+        ``make`` still ends its signature with ``**kwargs`` and still reads
+        nothing out of it, so on its own it would still absorb a misspelling; what
+        changed in #617 is that :meth:`ProtocolBase.__init__
+        <pcapkit.protocols.protocol.ProtocolBase.__init__>` now checks the
+        keywords against the signatures before ``make`` is reached, and refuses a
+        name none of them declares. That closes the asymmetry with
+        :class:`~pcapkit.protocols.schema.schema.Schema` construction, which has
+        always warned :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for
+        an unknown field.
+
+        The ``**kwargs`` assertion is kept because it says why the check has to
+        live outside ``make``: were the signature closed, Python would raise on
+        its own and none of this would be needed.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import UnsupportedCall
 
         signature = inspect.signature(TCP.make)
         self.assertTrue(
             any(parameter.kind is parameter.VAR_KEYWORD
                 for parameter in signature.parameters.values()),
-            'TCP.make no longer takes **kwargs, so an undeclared keyword would '
-            'raise instead of being dropped',
+            'TCP.make no longer takes **kwargs, so Python itself would reject an '
+            'undeclared keyword and the check in ProtocolBase.__init__ would be '
+            'redundant rather than load-bearing',
         )
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
-            TCP(srcport=50000, dstport=80, no_such_tcp_field=12345)
+            with self.assertRaises(UnsupportedCall) as context:
+                TCP(srcport=50000, dstport=80, no_such_tcp_field=12345)
 
+        self.assertIn('no_such_tcp_field', str(context.exception))
+        # A warning would be the weaker fix the issue weighed and rejected; the
+        # silence here is now the silence of an exception having been raised.
         self.assertEqual([str(warning.message) for warning in caught], [])
+
+    def test_the_three_keys_of_the_defect_are_each_refused(self) -> None:
+        """Each misspelling of #602 raises, named, rather than being dropped.
+
+        ``TCP_BASE`` is correct today, so the mapping itself can no longer
+        demonstrate the defect. Putting the three keys back one at a time is what
+        keeps the original report reproducible: before the fix every one of them
+        built a segment whose field kept its default -- ``seq=1`` produced
+        ``info.seq == 0`` -- with an empty ``warnings`` list.
+
+        """
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import UnsupportedCall
+
+        options = _load_generator()
+        for wrong, right in (('seq', 'seq_no'), ('ack_flag', 'ack'),
+                             ('urgent_pointer', 'urgent')):
+            keywords = dict(options.TCP_BASE)
+            keywords[wrong] = keywords.pop(right)
+
+            with self.subTest(keyword=wrong):
+                with self.assertRaises(UnsupportedCall) as context:
+                    TCP(**keywords)
+                self.assertIn(repr(wrong), str(context.exception))
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

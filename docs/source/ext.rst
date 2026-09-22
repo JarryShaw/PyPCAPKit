@@ -227,6 +227,62 @@ The following code snippet shows how to create a new protocol class:
    # register protocol class
    register_ethertype(EtherType.Internet_Protocol_version_4, MyIPv4)
 
+.. important::
+
+   **Declare every construction keyword your protocol accepts.** Since #617,
+   building a protocol *through its constructor* with a keyword that no signature
+   declares raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than
+   discarding it, so a misspelling costs an exception instead of a silently wrong
+   field. The accepted set is read from :func:`inspect.signature` -- the union of every
+   keyword-taking parameter of ``make``, ``read``, ``pack``, ``unpack``,
+   ``__post_init__`` and ``__init__`` anywhere in the class's MRO -- which is
+   wider than ``make`` alone because :meth:`ProtocolBase.__post_init__
+   <pcapkit.protocols.protocol.ProtocolBase.__post_init__>` hands the same
+   ``**kwargs`` to the construction and to the parse, so a keyword only ``read``
+   declares still travels through ``make``.
+
+   Two shapes a signature cannot express are declared on the class instead, via
+   :attr:`ProtocolBase.__keywords__
+   <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`:
+
+   .. code-block:: python
+
+      class MyIPv4(Internet[IPv4Data, IPv4Schema],
+                   schema=IPv4Schema, data=IPv4Data):
+          #: A keyword read out of ``**kwargs`` by name rather than declared as a
+          #: parameter, as ``ESP.read`` does with ``packet``. Unioned down the MRO.
+          __keywords__ = frozenset({'my_extra_keyword'})
+
+          def read(self, length=None, **kwargs):
+              extra = kwargs.get('my_extra_keyword')
+              ...
+
+   Setting it to :obj:`None` skips the check entirely, and is meant only for a
+   *dispatcher* whose real signature belongs to a class chosen at call time --
+   :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` is the one
+   such class in the library. Unlike a set, :obj:`None` is not inherited, so a
+   subclass of a dispatcher is checked normally. Prefer a declared parameter to
+   either: it is also what documents the keyword to your callers.
+
+   Parsing is unaffected, and so is :meth:`ProtocolBase.from_data
+   <pcapkit.protocols.protocol.ProtocolBase.from_data>`, which warns
+   :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` instead -- its keywords
+   come from your ``_make_data``, so a mismatch there is a disagreement between
+   two of your own mappings rather than a caller's typo.
+
+   .. warning::
+
+      The check lives in :meth:`ProtocolBase.__init__
+      <pcapkit.protocols.protocol.ProtocolBase.__init__>`, where every producer's
+      keywords converge, so it covers ``SomeProtocol(...)`` and the ``pack`` it
+      leads to -- but **not a direct ``SomeProtocol.make(...)`` call**, which still
+      discards an undeclared keyword in silence. ``object.__new__(cls).make(...)``
+      is the idiom that reaches it, used by this package's own tests and by
+      :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` to reach its
+      versioned implementation. Covering that would mean interposing on every
+      ``make`` in the tree, which is a larger change than #617 and was deliberately
+      not made. Construct through the constructor to get the check.
+
 .. note::
 
    Registering after the fact, as above, is one option. The other is passing
