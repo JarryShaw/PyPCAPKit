@@ -1263,6 +1263,41 @@ pull requests between #326 and #509.
   file uses. The error came from generalising the pre-BSD era off two blobs that
   turned out to be the same file, ``bc836cfa2^:LICENSE`` and ``1c69341dc:LICENSE``;
   enumerating all 14 commits that ever touched ``LICENSE`` is what caught it (#638).
+* **Fixed** -- ``TCP.read`` seeded its connection-flag accumulator with
+  ``cast('Enum_Flags', 0)``. ``typing.cast`` is a runtime no-op -- it returns its second
+  argument unchanged -- so the accumulator began life as the plain ``int`` ``0``, and the
+  ``|=`` that promotes it to a ``pcapkit.const.tcp.flags.Flags`` member is the only thing
+  that ever did. A segment whose flags octet is all zero, an nmap NULL scan among them,
+  promoted nothing and left ``self._flags`` an ``int``, so a membership test against it
+  raised ``TypeError: argument of type 'int' is not a container or iterable`` rather than
+  answering, and ``TCP.connection`` returned an ``int`` where both that property and
+  ``Data_TCP.connection`` annotate ``Flags``. Any flag at all masked it, which is how it
+  survived a module at 100% statement and branch coverage. The seed is ``Flags(0)`` now,
+  which is what #597 had already done to the sibling accumulator in ``make`` for the same
+  reason; ``Flags`` declares no ``_missing_`` of its own, so ``Flags(0)`` is an ordinary
+  ``aenum.IntFlag`` pseudo-member and does not meet the ``RecursionError`` that the same
+  construction hits on the flag enumerations under ``pcapkit.const.mh`` (#623). Nothing a
+  caller can reach changed: the three MP_JOIN layouts of :rfc:`8684` section 3.2 are
+  chosen by ``_read_mptcp_join`` from these very membership tests, but
+  ``mptcp_data_selector`` rejects a flagless MP_JOIN with a ``FieldError`` before the
+  dispatcher runs -- measured identical either side of the fix -- so the ``TypeError`` was
+  latent rather than live, and latent only by virtue of a guard in another file. Called
+  directly on a flagless parsed segment the dispatcher now raises the library's own
+  ``ProtocolError`` naming an invalid flags combination instead. One difference *is*
+  observable, and it is a dump-format change rather than a value change: a flagless
+  segment's ``connection`` renders as the string ``Flags::None [0]`` where it rendered as
+  the number ``0``, in all three of the JSON, tree and PLIST outputs. The value is
+  numerically the same and the wire bytes are untouched; what changed is that
+  ``connection`` no longer switches JSON type with the flags, having been a number for a
+  flagless segment and a string -- ``Flags::ACK [2048]`` -- for every other one. The
+  literal ``None`` inside it is a separate rendering defect: the hook
+  ``pcapkit.dumpkit.common.make_dumper`` installs interpolates ``o.name`` without
+  accounting for a nameless composite member, so it would spell any zero-valued flag
+  enumeration in the library the same way. That is left to its own change and pinned by a
+  test here so it cannot drift unnoticed. The committed example dumps are unaffected,
+  ``examples/captures/in.pcap`` carrying no flagless segment. Coverage cannot see the fix
+  itself, because the changed line already executed and ``tcp.py`` reads 100% statement
+  and branch either side; the added subtests are the evidence (#616).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
