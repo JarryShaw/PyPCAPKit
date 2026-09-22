@@ -372,11 +372,31 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
 #: Header fields shared by every constructed TCP segment. Only ``options``
 #: varies between cases, so a difference in the octets is a difference in the
 #: option and nothing else.
+#:
+#: Every key here has to be spelled the way :meth:`TCP.make
+#: <pcapkit.protocols.transport.tcp.TCP.make>` declares it, because ``make``
+#: takes ``**kwargs`` and *silently drops* whatever it does not declare -- no
+#: ``UnknownFieldWarning``, no ``TypeError``, nothing. GitHub issue #602 is
+#: three keys that were spelled wrong and therefore ignored:
+#:
+#: * ``'seq'`` is ``seq_no``. The mapping read as sequence number 1 and every
+#:   generated frame carried 0, which is what made the defect worth an issue:
+#:   the captures were not the packets this table describes.
+#: * ``'urgent_pointer'`` is ``urgent``. Harmless in effect, since the value
+#:   asked for and the default that was used are both 0.
+#: * ``'ack_flag'`` is ``ack``, and ``ack`` is the *acknowledgement flag*
+#:   rather than the acknowledgement number, which is ``ack_no``. So the two
+#:   were the wrong way round: ``'ack': 0`` set the flag (to a falsy 0) and
+#:   ``'ack_flag': False`` set nothing at all.
+#:
+#: The values are unchanged from what the mapping always claimed to mean: a
+#: SYN-only segment with sequence number 1, every other flag clear, and the
+#: acknowledgement number, checksum and urgent pointer at zero.
 TCP_BASE = {
-    'srcport': 50000, 'dstport': 80, 'seq': 1, 'ack': 0,
-    'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack_flag': False,
+    'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
+    'ns': False, 'cwr': False, 'ece': False, 'urg': False, 'ack': False,
     'psh': False, 'rst': False, 'syn': True, 'fin': False,
-    'window': 8192, 'checksum': b'\x00\x00', 'urgent_pointer': 0,
+    'window': 8192, 'checksum': b'\x00\x00', 'urgent': 0,
     'payload': b'',
 }
 
