@@ -65,14 +65,44 @@ class EndToEndTestCase(unittest.TestCase):
         """Drop the imported library so the class starts from a clean state.
 
         The surrounding tiers purge in :meth:`setUp`, i.e. once per test. A
-        fresh :mod:`pcapkit` import measures at roughly 0.45s on this machine,
+        fresh :mod:`pcapkit` import measures at roughly 0.7s on this machine,
         which across this tier would cost more than the extractions themselves,
         so the purge happens once per class instead. That is equivalent here:
         every test below imports :mod:`pcapkit` inside the test method, so none
         of them depends on what an earlier test left in :data:`sys.modules`.
 
+        The re-import on the last line is what keeps it once per class, and it
+        has to happen here rather than being left to the first test.
+        :func:`tests.conftest.restore_module_table` snapshots the module table
+        immediately after this method and restores to that snapshot after every
+        test, so purging without re-importing makes the snapshot an *empty*
+        table -- and then all 92 of this tier's test methods pay the 0.7s each,
+        rather than one per class across its 28 classes. Measured with a
+        throwaway subclass of this class whose second and third test methods
+        report whether ``pcapkit`` is still in :data:`sys.modules`: ``True`` on
+        ``mainline`` and ``True`` with this line, ``False`` without it. The other
+        ``setUpClass`` methods in the suite are unaffected because each already
+        loads something immediately after its own purge, which populates the
+        table before the snapshot is taken.
+
+        The re-import is guarded because it is an optimisation and nothing more,
+        so it must not be able to turn a test failure into a class error. Most
+        subclasses carry ``@skipUnless(HAS_RUNTIME, ...)`` and never reach this
+        method without the runtime dependencies installed, but
+        ``PlistRoundTripTests`` and ``PcapngUnescapedKeyTests`` do not, so on a
+        checkout without them an unguarded ``import`` here would raise
+        :exc:`ModuleNotFoundError` out of ``setUpClass`` and error the whole
+        class, where before it was the individual tests that failed. Swallowed,
+        the table simply stays cold and those tests fail exactly as they did.
+        :exc:`BaseException` is deliberately not caught, for the same reason as
+        in :func:`tests._support._close_quietly`.
+
         """
         purge_modules(['pcapkit'])
+        try:
+            importlib.import_module('pcapkit')
+        except Exception:  # pragma: no cover  # pylint: disable=broad-except
+            pass
 
     def setUp(self) -> None:
         """Hand the test a private scratch directory."""

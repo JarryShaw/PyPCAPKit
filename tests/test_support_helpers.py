@@ -24,17 +24,29 @@ Three things are worth pinning, and they are the three ways this could rot:
 * nothing it is handed in teardown makes it raise
   (:class:`ToleranceTests`).
 
+The module-isolation helpers are pinned here too, for the same reason and with
+more cause: :class:`SnapshotRestoreTests` and
+:class:`StandInsDoNotOutliveTheirTestTests` cover
+:func:`~tests._support.isolate_modules` and the snapshot/restore pair beneath it,
+which exist because issue #660 -- twelve failures in :mod:`tests.project`,
+visible only in some collection orders -- was a stand-in module left bound in
+:data:`sys.modules` by a test that had finished.
+
 This module is unit-tier: it drives the helper with stand-ins rather than real
 extractors, so it reads no sample capture and needs no engine installed.
 
 """
 from __future__ import annotations
 
+import importlib
 import signal
+import sys
 import time
+import types
 import unittest
 
-from tests._support import close_extractor, time_limit
+from tests._support import (close_extractor, install_fake_protocol_module, isolate_modules,
+                            restore_modules, snapshot_modules, time_limit)
 
 
 class Closeable:
@@ -250,6 +262,177 @@ class TimeLimitTests(unittest.TestCase):
             pass
 
         self.assertEqual(signal.alarm(0), 0)
+
+
+class SnapshotRestoreTests(unittest.TestCase):
+    """:func:`~tests._support.restore_modules` is an exact inverse.
+
+    Three ways a test can leave the table different, and the restore has to undo
+    all three: a name it added, a name it dropped, and a name it rebound to
+    something else. The third is the one issue #660 turned on -- a stand-in bound
+    over ``pcapkit.protocols.protocol`` is a rebind, and a restore that only
+    removed additions would leave it in place.
+
+    Every name used here is under ``pcapkit.`` so the helpers actually match it,
+    and every one is removed again on teardown whatever the assertions do.
+
+    """
+
+    ADDED = 'pcapkit.__support_probe_added'
+    REBOUND = 'pcapkit.__support_probe_rebound'
+    DROPPED = 'pcapkit.__support_probe_dropped'
+
+    def setUp(self) -> None:
+        self.addCleanup(self._forget_probes)
+        self.original = types.ModuleType(self.REBOUND)
+        self.dropped = types.ModuleType(self.DROPPED)
+        sys.modules[self.REBOUND] = self.original
+        sys.modules[self.DROPPED] = self.dropped
+
+    def _forget_probes(self) -> None:
+        for name in (self.ADDED, self.REBOUND, self.DROPPED):
+            sys.modules.pop(name, None)
+
+    def test_restore_undoes_an_addition_a_drop_and_a_rebind(self) -> None:
+        snapshot = snapshot_modules(['pcapkit'])
+
+        sys.modules[self.ADDED] = types.ModuleType(self.ADDED)
+        sys.modules[self.REBOUND] = types.ModuleType(self.REBOUND)
+        del sys.modules[self.DROPPED]
+
+        restore_modules(snapshot, ['pcapkit'])
+
+        self.assertNotIn(self.ADDED, sys.modules)
+        self.assertIs(sys.modules[self.REBOUND], self.original)
+        self.assertIs(sys.modules[self.DROPPED], self.dropped)
+
+    def test_the_snapshot_is_the_whole_pcapkit_region_and_nothing_else(self) -> None:
+        snapshot = snapshot_modules(['pcapkit'])
+
+        self.assertIn(self.REBOUND, snapshot)
+        self.assertTrue(all(name == 'pcapkit' or name.startswith('pcapkit.')
+                            for name in snapshot),
+                        'snapshot_modules captured a name outside the prefixes it was given')
+        # A prefix match is on dotted components, not on the string: a
+        # differently-named top-level package that merely starts with the same
+        # letters is a different package and must not be swept up.
+        sibling = 'pcapkit_not_ours'
+        sys.modules[sibling] = types.ModuleType(sibling)
+        self.addCleanup(sys.modules.pop, sibling, None)
+
+        self.assertNotIn(sibling, snapshot_modules(['pcapkit']))
+
+        restore_modules(snapshot_modules(['pcapkit']), ['pcapkit'])
+        self.assertIn(sibling, sys.modules)
+
+
+class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
+    """A test that installs a stand-in leaves :data:`sys.modules` as it found it.
+
+    The regression test for issue #660, and written the way it is on purpose.
+    The real polluting test case is *run* here, through
+    :class:`unittest.TestResult`, exactly as a runner would run it -- so what is
+    measured is the test case's own isolation and nothing else. Going through
+    :mod:`pytest` instead would prove nothing about it, because
+    :func:`tests.conftest.restore_module_table` would clean up after it either
+    way and the assertion would pass whether or not the test case had been
+    fixed.
+
+    Before the fix this failed on any ordering, on the fake ``ProtocolBase`` and
+    the stub ``pcapkit`` that ``ProtoChainTests.setUp`` left behind.
+
+    """
+
+    def setUp(self) -> None:
+        # This test case re-imports pcapkit into a table it then compares, so it
+        # gets the same isolation it is asserting about.
+        isolate_modules(self)
+
+    def _run_and_diff(self, case: 'unittest.TestCase') -> 'unittest.TestResult':
+        """Run ``case`` and assert it changed no ``pcapkit.*`` binding."""
+        before = snapshot_modules(['pcapkit'])
+
+        result = unittest.TestResult()
+        case.run(result)
+
+        after = snapshot_modules(['pcapkit'])
+
+        self.assertEqual(
+            sorted(set(after) - set(before)), [],
+            'the test left new pcapkit entries in sys.modules; whatever imports '
+            'pcapkit next inherits them (#660)')
+        self.assertEqual(
+            sorted(set(before) - set(after)), [],
+            'the test dropped pcapkit entries from sys.modules and did not put them back')
+        self.assertEqual(
+            sorted(name for name in before if before[name] is not after.get(name)), [],
+            'the test rebound a pcapkit name to a different module object and left it '
+            'rebound; a non-generic ProtocolBase stand-in left this way makes every '
+            'later `class X(Protocol[...])` raise TypeError (#660)')
+        return result
+
+    def test_protochain_leaves_no_fake_protocol_module_behind(self) -> None:
+        from tests.corekit.test_protochain import ProtoChainTests
+
+        case = ProtoChainTests(sorted(_method_names(ProtoChainTests))[0])
+
+        result = self._run_and_diff(case)
+
+        # Asserted after the isolation check, so a genuine failure in that test
+        # case is reported as its own failure rather than as a leak here.
+        self.assertEqual((len(result.failures), len(result.errors)), (0, 0),
+                         f'the borrowed test case did not pass: '
+                         f'{result.failures or result.errors}')
+
+    def test_the_real_protocol_base_still_subscripts_afterwards(self) -> None:
+        """The failure mode itself, rather than the table it came from.
+
+        ``pcapkit/protocols/misc/pcap/frame.py:59`` is the line that raised
+        ``TypeError: type 'ProtocolBase' is not subscriptable``, so importing it
+        after the polluting test case has run is the most direct statement of
+        what #660 was.
+
+        """
+        from tests.corekit.test_protochain import ProtoChainTests
+
+        case = ProtoChainTests(sorted(_method_names(ProtoChainTests))[0])
+        case.run(unittest.TestResult())
+
+        frame = importlib.import_module('pcapkit.protocols.misc.pcap.frame')
+        protocol = importlib.import_module('pcapkit.protocols.protocol')
+
+        self.assertTrue(hasattr(frame, 'Frame'))
+        self.assertIsNotNone(getattr(protocol.ProtocolBase, '__class_getitem__', None),
+                             'pcapkit.protocols.protocol.ProtocolBase is not the real '
+                             'generic class -- a stand-in is still bound over it (#660)')
+
+    def test_installing_a_stand_in_without_isolation_is_refused(self) -> None:
+        """The other half: the mistake cannot be made quietly again.
+
+        A future test file that calls the installer without arranging its removal
+        gets a :exc:`RuntimeError` naming the fix, in its own ``setUp``, instead
+        of a green run that breaks a different directory.
+
+        """
+        class Unisolated(unittest.TestCase):
+            def runTest(self) -> None:
+                pass
+
+        with self.assertRaises(RuntimeError) as caught:
+            install_fake_protocol_module(Unisolated())
+
+        self.assertIn('isolate_modules', str(caught.exception))
+
+
+def _method_names(case_class: type) -> 'list[str]':
+    """Test-method names on ``case_class``, however many it happens to have.
+
+    Read off the class rather than hard-coded, so that renaming or adding a test
+    in the borrowed module does not break this one.
+
+    """
+    return [name for name in dir(case_class)
+            if name.startswith('test') and callable(getattr(case_class, name))]
 
 
 if __name__ == '__main__':

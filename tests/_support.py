@@ -202,7 +202,35 @@ def bootstrap_core_modules() -> dict[str, object]:
     }
 
 
-def install_fake_protocol_module() -> type:
+def install_fake_protocol_module(test: 'unittest.TestCase') -> type:
+    """Bind a non-generic ``ProtocolBase`` stand-in over the real one.
+
+    The stand-in shares the real class's :attr:`~type.__name__` but is *not*
+    :class:`~typing.Generic`, so every ``class X(Protocol[...])`` in the package
+    raises :exc:`TypeError` while it is installed. That is the point -- the
+    tests using it are unit-testing :mod:`pcapkit.corekit.protochain` against a
+    cheap stand-in rather than importing the library -- but it also means the
+    stand-in surviving the test that installed it breaks every later test that
+    imports :mod:`pcapkit`. See :func:`isolate_modules` for the mechanism and
+    issue #660 for what it looked like when it was missing.
+
+    Args:
+        test: The running test. Must already be under :func:`isolate_modules`,
+            which is what puts :data:`sys.modules` back afterwards. Required
+            rather than optional so that a future caller cannot install the
+            stand-in without arranging for its removal -- the mistake is a
+            :exc:`TypeError` at the call rather than twelve unrelated failures
+            in another directory.
+
+    Returns:
+        The stand-in class, to subclass in the test.
+
+    Raises:
+        RuntimeError: If ``test`` is not under :func:`isolate_modules`.
+
+    """
+    require_module_isolation(test, 'install_fake_protocol_module')
+
     ensure_package('pcapkit.protocols', ROOT / 'pcapkit' / 'protocols')
 
     protocol_module = types.ModuleType('pcapkit.protocols.protocol')
@@ -229,7 +257,25 @@ def install_fake_protocol_module() -> type:
     return ProtocolBase
 
 
-def install_fake_payload_protocols(raw_cls: type, null_cls: type) -> None:
+def install_fake_payload_protocols(test: 'unittest.TestCase', raw_cls: type,
+                                   null_cls: type) -> None:
+    """Bind ``Raw`` and ``NoPayload`` stand-ins over the real payload protocols.
+
+    Args:
+        test: The running test, for the same reason as in
+            :func:`install_fake_protocol_module` -- these two names are on the
+            import path of most of the package, so leaving stand-ins bound to
+            them poisons every later test that imports :mod:`pcapkit`.
+        raw_cls: Stand-in to bind as ``pcapkit.protocols.misc.raw.Raw``.
+        null_cls: Stand-in to bind as
+            ``pcapkit.protocols.misc.null.NoPayload``.
+
+    Raises:
+        RuntimeError: If ``test`` is not under :func:`isolate_modules`.
+
+    """
+    require_module_isolation(test, 'install_fake_payload_protocols')
+
     ensure_package('pcapkit.protocols.misc', ROOT / 'pcapkit' / 'protocols' / 'misc')
 
     raw_module = types.ModuleType('pcapkit.protocols.misc.raw')
@@ -268,9 +314,178 @@ def _reset_abc_caches() -> None:
             reset(obj)
 
 
-def purge_modules(prefixes: Iterable[str]) -> None:
+#: Default :data:`sys.modules` prefixes the isolation helpers below cover, and
+#: the ones :func:`tests.conftest.restore_module_table` puts back after every
+#: test. Only the package under test: a test that imports a third-party module
+#: for the first time is not polluting anything, and dropping, say, ``scapy``
+#: from :data:`sys.modules` between tests would cost a re-import for no gain.
+ISOLATED_PREFIXES = ('pcapkit',)
+
+#: Attribute :func:`isolate_modules` sets on the test it is given, and that
+#: :func:`require_module_isolation` looks for. Private by name because nothing
+#: outside this module should read it.
+_ISOLATION_FLAG = '_pcapkit_module_isolation'
+
+
+def _under_prefix(name: str, prefixes: 'tuple[str, ...]') -> bool:
+    """Whether ``name`` is one of ``prefixes`` or a submodule of one."""
+    return any(name == prefix or name.startswith(prefix + '.') for prefix in prefixes)
+
+
+def snapshot_modules(prefixes: Iterable[str] = ISOLATED_PREFIXES) -> 'dict[str, types.ModuleType]':
+    """The :data:`sys.modules` entries currently under ``prefixes``.
+
+    Args:
+        prefixes: Module-name prefixes to capture, matched as in
+            :func:`purge_modules`.
+
+    Returns:
+        A new mapping of name to module object. The *objects* are shared with
+        :data:`sys.modules`, which is what makes :func:`restore_modules` a
+        restore rather than a re-import: putting the same object back leaves
+        every class it holds identical, so an ``isinstance`` check against a
+        class captured before the test still answers the same afterwards.
+
+    """
+    prefixes = tuple(prefixes)
+    return {name: module for name, module in list(sys.modules.items())
+            if _under_prefix(name, prefixes)}
+
+
+def restore_modules(snapshot: 'dict[str, types.ModuleType]',
+                    prefixes: Iterable[str] = ISOLATED_PREFIXES) -> None:
+    """Put the ``prefixes`` region of :data:`sys.modules` back to ``snapshot``.
+
+    The inverse of :func:`snapshot_modules` over the *bindings*, and exact in
+    both directions: a name the test added is removed, a name it dropped is put
+    back, and a name it rebound is bound to what it held before. Nothing outside
+    ``prefixes`` is touched.
+
+    Bindings are the whole of it, though, and the limit is worth stating. This
+    restores which module object a name refers to; it does not restore the
+    *contents* of a module object. A test that reaches into an already-imported
+    module and mutates it in place -- adding an entry to a registry dict, say --
+    rebinds nothing, so there is nothing here to undo and the mutation outlives
+    the test. Isolating against that needs a purge, so that the next import
+    rebuilds the module from source, which is what the callers of
+    :func:`purge_modules` are doing. Issue #660 was a rebinding, which is why
+    this is the right shape for it.
+
+    Args:
+        snapshot: The mapping :func:`snapshot_modules` returned.
+        prefixes: The prefixes it was taken over. Passing a wider set than was
+            snapshotted would delete modules that were never captured, so the
+            two calls have to agree -- which is why :func:`isolate_modules`
+            makes both of them rather than leaving it to the caller.
+
+    """
+    prefixes = tuple(prefixes)
     for name in list(sys.modules):
-        if any(name == prefix or name.startswith(prefix + '.') for prefix in prefixes):
+        if _under_prefix(name, prefixes) and name not in snapshot:
+            sys.modules.pop(name, None)
+    for name, module in snapshot.items():
+        sys.modules[name] = module
+    # For the same reason :func:`purge_modules` does it: whatever the test
+    # imported while the region was purged built a second set of ``Mapping``
+    # subclasses and churned the shared ABC caches, and those stale answers
+    # outlive the modules that caused them.
+    _reset_abc_caches()
+
+
+def isolate_modules(test: 'unittest.TestCase',
+                    prefixes: Iterable[str] = ISOLATED_PREFIXES) -> None:
+    """Purge ``prefixes`` for the duration of ``test``, and restore them after.
+
+    This is :func:`purge_modules` with the other half attached, and it is what
+    every test that stands something in for a real module wants instead. The
+    difference is the whole of issue #660: purging on the way *in* protects the
+    test that does it and nothing else, so a test that replaces
+    ``pcapkit.protocols.protocol`` with a stand-in and then finishes leaves that
+    stand-in bound for whatever runs next. Twelve tests in
+    :mod:`tests.project.test_public_api` and
+    :mod:`tests.project.test_documentation_claims` failed with ``TypeError: type
+    'ProtocolBase' is not subscriptable`` on exactly that, and only when the
+    file that installed the stand-in happened to run before them.
+
+    Restoring on the way *out* makes the order irrelevant, which is the only
+    fix worth having here: the failure was hidden for as long as it was because
+    some *other* test's purge usually healed the state before anything noticed,
+    so any fix that leaves the healing accidental -- moving a file so it sorts
+    elsewhere, relying on a sibling to purge -- leaves the defect in place and
+    merely re-hides it.
+
+    Registered with :meth:`~unittest.TestCase.addCleanup` rather than done in a
+    ``tearDown``, so it also runs when ``setUp`` itself raises part-way through
+    installing the stand-ins, and so a subclass cannot forget to call ``super``.
+
+    Args:
+        test: The running test, or anything else exposing
+            :meth:`~unittest.TestCase.addCleanup`.
+        prefixes: Module-name prefixes to isolate.
+
+    """
+    snapshot = snapshot_modules(prefixes)
+    setattr(test, _ISOLATION_FLAG, True)
+    # Registered *before* the purge, so the restore still happens if the purge
+    # itself raises half-way through the table.
+    test.addCleanup(_release_module_isolation, test, snapshot, tuple(prefixes))
+    purge_modules(prefixes)
+
+
+def _release_module_isolation(test: 'unittest.TestCase',
+                              snapshot: 'dict[str, types.ModuleType]',
+                              prefixes: 'tuple[str, ...]') -> None:
+    """Restore ``snapshot`` and mark ``test`` as no longer isolated."""
+    try:
+        restore_modules(snapshot, prefixes)
+    finally:
+        setattr(test, _ISOLATION_FLAG, False)
+
+
+def require_module_isolation(test: 'unittest.TestCase', helper: str) -> None:
+    """Refuse to install a stand-in for a test that has not arranged its removal.
+
+    Args:
+        test: The test the caller was handed.
+        helper: Name of the calling helper, for the error message.
+
+    Raises:
+        RuntimeError: If ``test`` never called :func:`isolate_modules`, or has
+            already released its isolation.
+
+    """
+    if not getattr(test, _ISOLATION_FLAG, False):
+        raise RuntimeError(
+            f'{helper}() needs {type(test).__name__} to be under '
+            f'tests._support.isolate_modules(self) first -- otherwise the stand-in it '
+            f'binds outlives this test and breaks whatever imports pcapkit next. '
+            f'Call isolate_modules(self) in setUp instead of purge_modules([...]); '
+            f'see issue #660.'
+        )
+
+
+def purge_modules(prefixes: Iterable[str]) -> None:
+    """Drop every :data:`sys.modules` entry under ``prefixes``.
+
+    Purging only, with nothing put back: a test calling this protects *itself*
+    from what ran before it and makes no promise to what runs after. That is
+    enough for the majority of callers, which purge so that the next ``import
+    pcapkit`` re-runs the package from source and then import nothing unusual --
+    a re-imported real module is not pollution.
+
+    It is *not* enough for a test that binds a stand-in over a real module name.
+    Use :func:`isolate_modules` there, which snapshots first and restores on
+    teardown.
+
+    Args:
+        prefixes: Module-name prefixes. A name matches when it equals a prefix
+            or begins with the prefix followed by a dot, so ``'pcapkit'`` takes
+            ``pcapkit`` and ``pcapkit.corekit.protochain`` but not
+            ``pcapkit_extra``.
+
+    """
+    for name in list(sys.modules):
+        if _under_prefix(name, tuple(prefixes)):
             sys.modules.pop(name, None)
     _reset_abc_caches()
 
