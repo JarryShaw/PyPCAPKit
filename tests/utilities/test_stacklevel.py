@@ -162,6 +162,41 @@ def source_at(filename: 'str', lineno: 'int') -> 'str':
     return linecache.getline(filename, lineno).strip()
 
 
+def emissions(records: 'list[pywarnings.WarningMessage]',
+              category: 'type[Warning]') -> 'list[pywarnings.WarningMessage]':
+    """The recorded warnings of ``category``, discarding anything foreign.
+
+    :func:`warnings.catch_warnings` records *every* warning raised in its window,
+    not only the one the probe provoked, and the ``simplefilter('always')`` these
+    probes install un-ignores the categories Python suppresses by default --
+    :exc:`ResourceWarning` among them. A file handle some earlier test left open
+    is reported whenever the collector happens to reach it, so it surfaces inside
+    an arbitrary window, and asserting that a window held exactly one record let
+    another test's litter fail *this* one (:issue:`606`).
+
+    That is not a theoretical ordering concern. The same failure was watched
+    migrating between two pull requests with neither branch touched and neither
+    head moved, nine minutes apart -- which is only possible if what trips is
+    decided by garbage-collection timing rather than by any test's code.
+
+    What these probes need is that *their* warning was raised and attributed
+    correctly, not that it was the only warning in the process. Selecting by
+    category gives exactly that, and stays robust against the next foreign
+    warning rather than against only the one that happened to be observed.
+
+    The callers count over :class:`~pcapkit.utilities.warnings.BaseWarning`, the
+    root of the package's own categories, rather than over the one category they
+    expect. Narrowing the count that far would have dropped something the old
+    assertion did buy: a *second* complaint from :mod:`pcapkit` under some other
+    category is a real defect, and counting only the expected category would let
+    it pass unnoticed. Counting pcapkit's warnings as a group keeps that, and
+    gives up only the part that was never this module's business -- warnings the
+    package did not raise at all.
+
+    """
+    return [record for record in records if issubclass(record.category, category)]
+
+
 class Recorder(logging.Handler):
     """A handler that keeps records, so their attribution can be read back.
 
@@ -301,8 +336,10 @@ class StacklevelAttributionTests(unittest.TestCase):
                 pywarnings.resetwarnings()
                 pywarnings.simplefilter('always')
                 info_final(Probe)
-        self.assertEqual(len(records), 1, [str(record.message) for record in records])
-        return records[-1]
+        emitted = emissions(records, pcapkit_warnings.BaseWarning)
+        self.assertEqual(len(emitted), 1, [str(record.message) for record in records])
+        self.assertIs(emitted[-1].category, pcapkit_warnings.InfoWarning)
+        return emitted[-1]
 
     def test_warning_blames_the_same_line_from_every_depth(self) -> None:
         """One logical call, six outer depths, one attribution."""
@@ -351,6 +388,42 @@ class StacklevelAttributionTests(unittest.TestCase):
                     del sys.tracebacklimit
             else:
                 sys.tracebacklimit = saved
+
+    def test_a_foreign_warning_in_the_window_does_not_fail_the_probe(self) -> None:
+        """Another test's litter must not be mistaken for this module's probe.
+
+        The probes record with ``simplefilter('always')``, which un-ignores the
+        categories Python hides by default, so a file handle an earlier test left
+        for the collector arrives in the window as a :exc:`ResourceWarning`. Two
+        assumptions used to break on that: the count, which required the window to
+        hold exactly one record, and the *position*, since the probe returned the
+        last record rather than its own (:issue:`606`).
+
+        Warnings are raised on both sides of the probe here deliberately -- one
+        before and one after -- because the trailing one is what made picking by
+        position wrong rather than merely lucky. Emitting them directly keeps the
+        test deterministic: the real thing depends on garbage-collection timing,
+        which is why it moved between unrelated pull requests instead of failing
+        reproducibly anywhere.
+
+        """
+        finalise = info_final  # bound before the patch, which replaces the global
+
+        def noisy(cls: 'type[Info]') -> 'type[Info]':
+            """Finalise ``cls``, framed by warnings from nowhere in particular."""
+            pywarnings.warn("unclosed file <_io.BufferedReader name='in.pcap'>",
+                            ResourceWarning)
+            finalised = finalise(cls)
+            pywarnings.warn("unclosed file <_io.BufferedReader name='in.pcap'>",
+                            ResourceWarning)
+            return finalised
+
+        with mock.patch.object(sys.modules[__name__], 'info_final', noisy):
+            record = self.warning_site()
+
+        self.assertIs(record.category, pcapkit_warnings.InfoWarning)
+        self.assertEqual(os.path.abspath(record.filename), os.path.abspath(__file__))
+        self.assertIn('finalise(cls)', source_at(record.filename, record.lineno))
 
     def error_site(self) -> 'logging.LogRecord':
         """Provoke one :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`.
@@ -423,8 +496,10 @@ class WarnWrapperLevelTests(unittest.TestCase):
                 pywarnings.resetwarnings()
                 pywarnings.simplefilter('always')
                 pcapkit_warnings.warn('a complaint', pcapkit_warnings.SchemaWarning, **kwargs)
-        self.assertEqual(len(records), 1)
-        return records[-1]
+        emitted = emissions(records, pcapkit_warnings.BaseWarning)
+        self.assertEqual(len(emitted), 1, [str(record.message) for record in records])
+        self.assertIs(emitted[-1].category, pcapkit_warnings.SchemaWarning)
+        return emitted[-1]
 
     def test_level_one_blames_the_line_that_called_warn(self) -> None:
         record = self.emit(stacklevel=1)
