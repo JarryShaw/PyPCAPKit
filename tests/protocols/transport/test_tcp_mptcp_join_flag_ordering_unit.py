@@ -615,13 +615,13 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
             self._info = self.unpack(...)   # -> read(), which sets _flags again
 
         so a fully constructed instance's ``_flags`` is whatever the **read** path left,
-        and the read path still seeds with ``cast('Enum_Flags', 0)`` -- measured: a
-        flagless ``TCP(...)`` reports ``_flags`` as the plain ``int`` ``0``. That read
-        path is deliberately unchanged (see
-        :meth:`TCPMPTCPJoinReadPathUnitTests.test_a_flagless_segment_is_rejected_by_the_schema_selector`),
-        and it cannot affect option construction, which has already finished by then.
-        Observing ``make`` alone is the only way to assert on the value the option makers
-        actually see.
+        not what ``make`` computed. When this test was written the read path also seeded
+        with ``cast('Enum_Flags', 0)``, so a flagless ``TCP(...)`` reported ``_flags`` as
+        the plain ``int`` ``0``; #616 changed that seed to ``Enum_Flags(0)``, so both paths
+        now leave an ``Enum_Flags`` member. The re-parse still overwrites what ``make``
+        assigned either way, and it cannot affect option construction, which has already
+        finished by then. Observing ``make`` alone is the only way to assert on the value
+        the option makers actually see.
 
         """
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
@@ -675,9 +675,15 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
 
         ``mptcp_data_selector`` cannot choose an MP_JOIN schema with neither flag set, so
         it raises :exc:`~pcapkit.utilities.exceptions.FieldError` there. That is why
-        ``_read_mptcp_join``'s closing ``ProtocolError`` remains unreachable and why its
-        ``cast('Enum_Flags', 0)`` was deliberately left as it was -- the make path needed
-        the ``Enum_Flags(0)`` seed; this one does not.
+        ``_read_mptcp_join``'s closing ``ProtocolError`` is unreachable from a caller, and
+        it is still unreachable: this guard is what #616 measured as identical either side
+        of changing the read path's seed. That unreachability was the original reason for
+        leaving the seed as ``cast('Enum_Flags', 0)``, and #616's reason for changing it
+        anyway -- a ``TypeError`` averted only by a guard in a different file is averted
+        fragilely. ``read`` seeds ``Enum_Flags(0)`` now, as ``make`` has since #597, so
+        calling the dispatcher directly on a flagless parsed segment reaches its
+        ``ProtocolError`` rather than a bare ``TypeError``; see
+        :meth:`tests.protocols.transport.test_tcp_udp_unit.TCPUDPUnitTests.test_a_flagless_segment_seeds_its_connection_flags_as_an_enum`.
 
         """
         from pcapkit.protocols.transport.tcp import TCP

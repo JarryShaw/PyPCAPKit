@@ -992,12 +992,16 @@ class TCPUDPUnitTests(unittest.TestCase):
         # dispatchers read the same attribute with the same ``in`` tests, and ``make`` is
         # the public entry point that assigns it, so this installs the ``Enum_Flags``
         # member production assigns instead of a ``set`` that merely answers ``in``. C.f.
-        # #603. It has to be ``make`` and not a parsed segment for the flagless case
-        # further down: ``read`` still accumulates into ``cast('Enum_Flags', 0)``, a runtime
-        # no-op, so a flagless *parsed* instance carries a plain ``int`` and
-        # ``_read_mptcp_join`` raises ``TypeError`` rather than its documented
-        # ``ProtocolError``. That is deliberate and unreachable from a caller --
-        # ``mptcp_data_selector`` rejects a flagless MP_JOIN in the schema layer first, and
+        # #603. Until #616 it *had* to be ``make`` rather than a parsed segment for the
+        # flagless case further down: ``read`` seeded its accumulator with
+        # ``cast('Enum_Flags', 0)``, a runtime no-op, so a flagless *parsed* instance
+        # carried a plain ``int`` and ``_read_mptcp_join`` raised ``TypeError`` instead of
+        # its documented ``ProtocolError``. #616 made ``read`` seed ``Enum_Flags(0)`` too,
+        # so either entry point serves now; ``make`` stays because these rows are about the
+        # dispatchers rather than about parsing, and
+        # :meth:`test_a_flagless_segment_seeds_its_connection_flags_as_an_enum` below
+        # covers the parsed side. Either way ``mptcp_data_selector`` rejects a flagless
+        # MP_JOIN in the schema layer first, and
         # ``tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`` pins both
         # halves against real segments.
         proto.make(syn=True)
@@ -1522,6 +1526,122 @@ class TCPUDPUnitTests(unittest.TestCase):
             self.assertEqual(warn.call_count, 0)
         finally:
             registry.pop(MPTCPOption(0xF), None)
+
+    def test_a_flagless_segment_seeds_its_connection_flags_as_an_enum(self) -> None:
+        """A segment whose flags octet is all zero still parses to an ``Enum_Flags``. C.f. #616.
+
+        :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>` seeded its flag
+        accumulator with ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a runtime
+        no-op -- it returns its second argument unchanged -- so the accumulator began
+        life as the plain :class:`int` ``0``. The ``|=`` in the loop below it is the
+        only thing that promotes it to an
+        :class:`~pcapkit.const.tcp.flags.Flags` member, and that never runs when no
+        flag bit is set, so a flagless segment left ``self._flags`` an :obj:`int`.
+        ``Enum_Flags.SYN in self._flags`` then raised ``TypeError: argument of type
+        'int' is not a container or iterable`` rather than answering. Any flag at all
+        masked it, which is why it survived a file at 100% coverage.
+
+        The type assertions are the load-bearing ones. ``0 == Enum_Flags(0)`` is
+        :data:`True`, so ``assertEqual(proto.connection, 0)`` passes on both sides of
+        the fix and cannot discriminate -- and neither can a membership test alone, on
+        the flagful rows. Hence ``assertIs(type(...), Enum_Flags)``, which is what the
+        :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` property has always
+        advertised it returns.
+
+        The last block pins the consequence rather than the type. ``_read_mptcp_join``
+        chooses between :rfc:`8684` section 3.2's three MP_JOIN layouts by testing
+        ``self._flags`` for SYN and ACK, and falls through to the library's own
+        ``ProtocolError`` when neither is set. On an :obj:`int` it died on a bare
+        :exc:`TypeError` two lines earlier instead. That branch is not reachable from
+        a caller -- :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector`
+        rejects a flagless MP_JOIN with a ``FieldError`` before the dispatcher runs --
+        so this was latent, but latent only by virtue of a guard in a different file.
+        The instance is parsed through ``TCP(...)`` rather than having ``_flags``
+        written onto a bare ``object.__new__(TCP)``, for the reason #603 and #612 give
+        in :func:`mptcp_option` above: a hand-written attribute proves nothing about
+        what production puts there.
+
+        The closing block pins the one difference a consumer can see, so that it is a
+        recorded decision rather than a silent change: a flagless segment's
+        ``connection`` now dumps as the string ``'Flags::None [0]'`` where it dumped as
+        the number ``0``. That is not a regression so much as the removal of an
+        inconsistency -- the field was a number for a flagless segment and a string for
+        every other one -- but the literal ``None`` in it is a rendering defect of
+        :func:`~pcapkit.dumpkit.common.make_dumper`'s hook, which interpolates ``o.name``
+        without accounting for a nameless composite member. It would do the same to any
+        zero-valued flag enumeration in the library, so it is left to its own change.
+
+        """
+        import struct
+
+        import dictdumper
+
+        from pcapkit.const.tcp.flags import Flags as Enum_Flags
+        from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.dumpkit.common import make_dumper
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        def segment(flags_octet: 'int') -> 'bytes':
+            """A bare 20-octet header -- data offset 5, no options -- and a flags octet."""
+            return struct.pack('!HHIIBBHHH', 1, 2, 0, 0, 5 << 4, flags_octet, 0, 0, 0)
+
+        # (flags octet, the Enum_Flags the octet's low bits mean)
+        cases = [
+            (0x00, Enum_Flags(0)),
+            (0x02, Enum_Flags.SYN),
+            (0x10, Enum_Flags.ACK),
+            (0x12, Enum_Flags.SYN | Enum_Flags.ACK),
+        ]
+        for octet, expected in cases:
+            with self.subTest(flags_octet=octet):
+                raw = segment(octet)
+                proto = TCP(raw, len(raw))
+
+                # The accumulator, the property, and the data field are one value.
+                self.assertIs(type(proto._flags), Enum_Flags)
+                self.assertIs(type(proto.connection), Enum_Flags)
+                self.assertIs(type(proto.info.connection), Enum_Flags)
+                self.assertEqual(proto._flags, expected)
+                self.assertIs(proto.connection, proto._flags)
+                self.assertIs(proto.info.connection, proto._flags)
+
+                # Membership answers instead of raising -- the whole point of #616.
+                self.assertEqual(Enum_Flags.SYN in proto.connection, bool(octet & 0x02))
+                self.assertEqual(Enum_Flags.ACK in proto.connection, bool(octet & 0x10))
+
+                # The numeric value is unchanged by the fix, which is exactly why the
+                # type is what has to be asserted.
+                self.assertEqual(int(proto.connection), int(expected))
+                self.assertEqual(proto.connection, int(expected))
+
+        # The flagless segment reaches the dispatcher's own fall-through error rather
+        # than a bare TypeError from the SYN membership test above it.
+        flagless = segment(0x00)
+        proto = TCP(flagless, len(flagless))
+        self.assertIs(type(proto._flags), Enum_Flags)
+        schema = DummyData(kind=Option.Multipath_TCP, subtype=MPTCPOption.MP_JOIN)
+        with self.assertRaisesRegex(ProtocolError, 'invalid flags combination'):
+            proto._read_mptcp_join(schema, options=DummyData())  # type: ignore[arg-type]
+
+        # The one place the change is observable to a consumer, pinned here so it cannot
+        # drift silently. ``make_dumper``'s hook renders any enum member as
+        # ``Type::name [value]``, and an ``aenum.IntFlag`` pseudo-member carrying no bits
+        # has ``name is None`` -- so a flagless segment dumps as the string
+        # ``'Flags::None [0]'`` where it used to dump as the number ``0``. Note what that
+        # replaced: ``connection`` was a JSON *number* for a flagless segment and a
+        # *string* for every other one, so the field is consistently typed now rather than
+        # switching type with the flags. The literal ``None`` is a rendering defect in
+        # ``pcapkit.dumpkit.common`` -- it reads ``o.name`` without accounting for a
+        # nameless composite member, and would do the same to any zero-valued flag enum in
+        # the library -- so it is left to its own change rather than fixed from here.
+        # ``self`` is reached only by the fallback ``super()`` call at the end of the hook,
+        # which an enum never gets to, so the unbound form needs no dumper instance.
+        self.assertIsNone(Enum_Flags(0).name)
+        hook = make_dumper(dictdumper.JSON).object_hook
+        self.assertEqual(hook(None, proto.info.connection), 'Flags::None [0]')
+        self.assertEqual(hook(None, Enum_Flags.ACK), 'Flags::ACK [2048]')
 
 
 if __name__ == '__main__':
