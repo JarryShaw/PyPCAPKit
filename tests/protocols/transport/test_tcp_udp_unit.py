@@ -1563,13 +1563,17 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         The closing block pins the one difference a consumer can see, so that it is a
         recorded decision rather than a silent change: a flagless segment's
-        ``connection`` now dumps as the string ``'Flags::None [0]'`` where it dumped as
+        ``connection`` now dumps as the string ``'Flags::0 [0]'`` where it dumped as
         the number ``0``. That is not a regression so much as the removal of an
         inconsistency -- the field was a number for a flagless segment and a string for
-        every other one -- but the literal ``None`` in it is a rendering defect of
-        :func:`~pcapkit.dumpkit.common.make_dumper`'s hook, which interpolates ``o.name``
-        without accounting for a nameless composite member. It would do the same to any
-        zero-valued flag enumeration in the library, so it is left to its own change.
+        every other one.
+
+        That string read ``'Flags::None [0]'`` when this test was written, because
+        :func:`~pcapkit.dumpkit.common.make_dumper`'s hook interpolated ``o.name``
+        without accounting for a nameless composite member. #648 has since guarded it,
+        so the name half is now the value's own decimal spelling -- the same spelling
+        the enumeration library already uses for an undeclared residue, as in
+        ``Flags(2049).name == 'ACK|1'``.
 
         """
         import struct
@@ -1628,19 +1632,23 @@ class TCPUDPUnitTests(unittest.TestCase):
         # The one place the change is observable to a consumer, pinned here so it cannot
         # drift silently. ``make_dumper``'s hook renders any enum member as
         # ``Type::name [value]``, and an ``aenum.IntFlag`` pseudo-member carrying no bits
-        # has ``name is None`` -- so a flagless segment dumps as the string
-        # ``'Flags::None [0]'`` where it used to dump as the number ``0``. Note what that
-        # replaced: ``connection`` was a JSON *number* for a flagless segment and a
-        # *string* for every other one, so the field is consistently typed now rather than
-        # switching type with the flags. The literal ``None`` is a rendering defect in
-        # ``pcapkit.dumpkit.common`` -- it reads ``o.name`` without accounting for a
-        # nameless composite member, and would do the same to any zero-valued flag enum in
-        # the library -- so it is left to its own change rather than fixed from here.
+        # has ``name is None`` -- so a flagless segment dumps as a *string* where it used
+        # to dump as the number ``0``. Note what that replaced: ``connection`` was a JSON
+        # *number* for a flagless segment and a *string* for every other one, so the field
+        # is consistently typed now rather than switching type with the flags.
+        #
+        # The name half of that string was the literal ``None`` until #648 guarded the
+        # interpolation; it is now the value's own decimal spelling, so the rendering is
+        # ``'Flags::0 [0]'``. Both halves are asserted here because this segment is the
+        # only wire-reachable producer of a nameless member in the library, which makes
+        # this the test that notices if the guard is ever removed.
         # ``self`` is reached only by the fallback ``super()`` call at the end of the hook,
         # which an enum never gets to, so the unbound form needs no dumper instance.
         self.assertIsNone(Enum_Flags(0).name)
         hook = make_dumper(dictdumper.JSON).object_hook
-        self.assertEqual(hook(None, proto.info.connection), 'Flags::None [0]')
+        rendered = hook(None, proto.info.connection)
+        self.assertEqual(rendered, 'Flags::0 [0]')
+        self.assertNotIn('None', rendered)
         self.assertEqual(hook(None, Enum_Flags.ACK), 'Flags::ACK [2048]')
 
 

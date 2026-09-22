@@ -17,6 +17,8 @@ classes.
 Internal Definitions
 --------------------
 
+.. autofunction:: pcapkit.dumpkit.common.render_enum
+
 .. autoclass:: pcapkit.dumpkit.common.DumperBase
    :members:
    :show-inheritance:
