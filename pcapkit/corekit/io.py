@@ -147,6 +147,46 @@ class SeekableReader(io.BufferedReader):
         else:
             self._buffer_view[old_ptr:self._buffer_cur] = buf
 
+    def _seek_buffer(self) -> 'int':
+        """Point the buffer at the current stream position, and say how much it can serve.
+
+        The buffer is a sliding window whose octet 0 sits at absolute ``_buffer_set`` and
+        whose content occupies ``[0:_buffer_cur]``, so ``_buffer_set + _buffer_cur`` is how
+        far the underlying stream has been consumed. Two things follow, and every buffered
+        read path needs both of them:
+
+        * The buffer's own cursor is a **derived** quantity, ``_tell - _buffer_set``, rather
+          than a fourth piece of state to be maintained. Nothing was maintaining it: a read
+          served from the stream writes through :attr:`_buffer_view` and leaves the cursor
+          untouched, :meth:`_write_buffer` rewinds it to the start of the appended octets
+          when the window slides, and :meth:`peek` used to advance it while leaving ``_tell``
+          alone. Deriving it here, at each point of use, is what makes the drift
+          unrepresentable instead of merely repaired afterwards by the next :meth:`seek`.
+        * What is available is the run from the position to the end of the content,
+          ``_buffer_set + _buffer_cur - _tell`` -- not ``_buffer_cur``, which is measured
+          from the window's base and so counts octets that lie *behind* the position, and
+          not that count less one, which is short of both. Over-asking does not fail: the
+          buffer is allocated full of NUL padding, so it hands that back as though it were
+          data, with a plausible length that then suppresses the top-up from the stream.
+
+        Returns:
+            The number of octets the buffer can answer for from the current position.
+
+        Raises:
+            SeekError: If the position lies before the window, whose octets are then gone
+                for good -- the stream cannot be rewound to re-supply them. :meth:`seek`
+                refuses that position for the same reason; it is reachable here only through
+                a :meth:`truncate` that moved the window's base past a position already set.
+
+        """
+        buf_off = self._tell - self._buffer_set
+        if buf_off < 0:
+            raise SeekError(f'cannot read before the beginning of the buffer: '
+                            f'{self._tell} < {self._buffer_set}')
+
+        self._buffer.seek(buf_off, io.SEEK_SET)
+        return self._buffer_cur - buf_off
+
     def close(self) -> 'None':
         """Flush and close this stream. This method has no effect if the file is already closed.
         Once the file is closed, any operation on the file (e.g. reading or writing) will raise
@@ -211,10 +251,29 @@ class SeekableReader(io.BufferedReader):
                 with open(self._buffer_path, 'rb') as temp_file:
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.readline(size)
+            elif not size:
+                # NOTE: a request for no octets is answered without consulting the window,
+                # which has nothing to say about it. Asking anyway refuses a zero-length
+                # read from a position :meth:`truncate` has left behind the window -- a
+                # refusal over data that was never wanted, and not what this used to do.
+                #
+                # Truthiness rather than ``size == 0`` on purpose. It is the same test for
+                # every value this method can be reached with -- ``size`` is an ``int`` by
+                # the time control arrives, and ``False`` is ``0`` -- but :meth:`peek` does
+                # not normalise a ``None`` its signature does not permit, and there the two
+                # spellings diverge: ``size == 0`` would send ``None`` on to the window and
+                # report a type error as a position error. Keeping it falsy keeps that call
+                # failing as the :exc:`TypeError` it always was.
+                buf = b''
             else:
-                buf = self._buffer.readline(min(size, self._buffer_cur - 1))
+                buf_rem = self._seek_buffer()
+                buf = self._buffer.readline(buf_rem if size < 0 else min(size, buf_rem))
 
-            if not buf.endswith(b'\n') and (size_rem := size - len(buf)) > 0:
+            # NOTE: an unbounded ``readline`` has to keep going until the line ends, and
+            # capping it at the buffer's content -- which the line need not end inside --
+            # is what makes the continuation necessary rather than optional here.
+            size_rem = -1
+            if not buf.endswith(b'\n') and (size < 0 or (size_rem := size - len(buf)) > 0):
                 buf_tmp = self._stream.readline(size_rem)
                 self._write_buffer(buf_tmp)
                 buf += buf_tmp
@@ -264,6 +323,23 @@ class SeekableReader(io.BufferedReader):
 
         Return the new absolute position.
 
+        Note:
+            The target is computed, then validated, and only then written to ``_tell``. A
+            branch that assigned the position before deciding whether to accept it left a
+            refused seek having moved it anyway, with the resync below -- the one thing that
+            puts the buffer's cursor back in step -- skipped on the way out. A caller that
+            catches the error and reasonably takes the position to be unchanged then read
+            from the rejected offset instead, silently and without a second error.
+
+            The negative check applies to every ``whence``, rather than only
+            :data:`~io.SEEK_SET` looking at its offset. An absolute position below zero
+            cannot exist under any of them, and it is not the same failure as a position
+            that has merely slid out of the window -- which is ordinary, and recoverable
+            with ``buffer_save=True``. Reporting the first as ``negative seek value`` keeps
+            the two distinguishable, and being a property of the position rather than of the
+            window it holds with a saved buffer as well, where the old refusal did not
+            apply at all and the seek returned a negative position as if it had worked.
+
         """
         # NOTE: we mark the end of buffer content to the end of buffer
         # so that it may trigger the IO to read more data to fill in
@@ -272,16 +348,23 @@ class SeekableReader(io.BufferedReader):
         #buf_end = self._buffer_set + self._buffer_cur
 
         if whence == io.SEEK_SET:
-            if offset < 0:
-                raise SeekError(f'negative seek value {offset}')
-            self._tell = offset
+            target = offset
         elif whence == io.SEEK_CUR:
-            self._tell += offset
+            target = self._tell + offset
         elif whence == io.SEEK_END:
-            self._tell = buf_end + offset
+            target = buf_end + offset
         else:
             raise SeekError(f'invalid whence ({whence}, should be {io.SEEK_SET}, {io.SEEK_CUR} or {io.SEEK_END})')
 
+        if target < 0:
+            raise SeekError(f'negative seek value {target}')
+        # NOTE: both refusals read the target rather than ``_tell``, which is what lets them
+        # run before the position is committed. This one is the window's, so a saved buffer
+        # -- which can still supply the octets from file -- is exempt from it.
+        if target < self._buffer_set and self._buffer_file is None:
+            raise SeekError(f'cannot seek before the beginning of the buffer: {target} < {self._buffer_set}')
+
+        self._tell = target
         if self._tell >= self._buffer_set:
             if self._tell > buf_end:
                 warn(f'seek beyond the end of the buffer: {self._tell} > {buf_end}',
@@ -300,8 +383,10 @@ class SeekableReader(io.BufferedReader):
                 self._tell = tmp_end + len(tmp_buf)
             self._buffer.seek(self._tell - self._buffer_set, io.SEEK_SET)
         else:
-            if self._buffer_file is None:
-                raise SeekError(f'cannot seek before the beginning of the buffer: {self._tell} < {self._buffer_set}')
+            # NOTE: only a saved buffer reaches here -- the refusal above has already
+            # turned away a position before the window when there is no file to serve it
+            # from, which is what the refusal used to do at this point instead, after
+            # ``_tell`` had been moved.
             self._buffer.seek(0, io.SEEK_SET)
         return self._tell
 
@@ -414,15 +499,11 @@ class SeekableReader(io.BufferedReader):
                 with open(self._buffer_path, 'rb') as temp_file:
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.read(size)
+            elif not size:
+                # NOTE: as in :meth:`readline` -- no octets wanted, so no window check.
+                buf = b''
             else:
-                # NOTE: ``_buffer_cur`` counts the octets written into the buffer, so what
-                # is available from here is the run between the current position and the end
-                # of that content. That count less one is neither: at the start of the
-                # buffer it is one octet short, and the shortfall is then made up from the
-                # stream -- past the octet that was skipped, losing it -- while further in
-                # it reaches beyond the content and hands the padding behind it back as
-                # data, which is also what an uncapped read does.
-                buf_rem = self._buffer_set + self._buffer_cur - self._tell
+                buf_rem = self._seek_buffer()
                 buf = self._buffer.read(buf_rem if size < 0 else min(size, buf_rem))
 
             size_rem = -1
@@ -452,8 +533,14 @@ class SeekableReader(io.BufferedReader):
                 with open(self._buffer_path, 'rb') as temp_file:
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.read1(size)
+            elif not size:
+                # NOTE: as in :meth:`readline` -- no octets wanted, so no window check.
+                buf = b''
             else:
-                buf = self._buffer.read1(min(size, self._buffer_cur - 1))
+                # NOTE: no continuation from the stream when the buffer answered, since
+                # :meth:`read1` is specified to return only buffered octets if any are.
+                buf_rem = self._seek_buffer()
+                buf = self._buffer.read1(buf_rem if size < 0 else min(size, buf_rem))
 
             if not buf:  # pragma: no cover
                 size_rem = -1
@@ -539,8 +626,22 @@ class SeekableReader(io.BufferedReader):
                 with open(self._buffer_path, 'rb') as temp_file:
                     temp_file.seek(self._tell, io.SEEK_SET)
                     buf = temp_file.peek(size)
+            elif not size:
+                # NOTE: as in :meth:`readline` -- no octets wanted, so no window check. Only
+                # the buffered branch is short-circuited: the branch above hands a bare
+                # ``peek()`` to the raw stream, whose own ``peek(0)`` may legitimately
+                # return a whole buffer's worth, and that is left as it was.
+                buf = b''
             else:
-                buf = self._buffer.read(min(size, self._buffer_cur - 1))
+                # NOTE: read through the view rather than through ``self._buffer``, whose
+                # cursor an ordinary read would advance. A preview must leave the position
+                # alone, and the buffer's cursor is part of the position: advancing it here
+                # while leaving ``_tell`` untouched is what made the *next* buffered read
+                # start from the wrong octet, with ``tell()`` reporting the right one.
+                buf_rem = self._seek_buffer()
+                buf_off = self._buffer.tell()
+                buf = bytes(self._buffer_view[
+                    buf_off:buf_off + (buf_rem if size < 0 else min(size, buf_rem))])
 
             if not buf and len(buf) < size:  # pragma: no cover
                 size_rem = -1
