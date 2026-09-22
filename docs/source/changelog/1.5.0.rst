@@ -644,6 +644,50 @@ pull requests between #326 and #509.
   type. The now-stale ``tcp-mptcp/MP_JOIN`` entry is deleted from
   ``EXPECTED_FAILURES``, and the MP_JOIN exclusion in
   ``test_tcp_mptcp_subtype_unit.py`` is lifted (#587).
+* **Fixed** -- ``NumberField.pre_process`` sized a value with floor division
+  dressed up as a ceiling. When a field is packed while its ``length`` is still
+  the ``-1`` placeholder, the width is derived from the value, and it was derived
+  with ``math.ceil(value.bit_length() // 8)``. ``math.ceil`` of an integer is
+  that integer, so the ``//`` had already floored the quotient and the outer call
+  did nothing at all; the expression was plain floor division and the width came
+  out one octet short. ``256`` was sized at one octet, ``65536`` at two,
+  ``16777216`` at three, and both ``int.to_bytes`` and ``struct.pack`` refuse a
+  value that does not fit the width they are given. **The reach is wider than
+  "just past a boundary"**: floor division is wrong for every bit length that is
+  not an exact multiple of eight, so ``1`` -- bit length 1, floored to *zero*
+  octets -- failed too, and every value from 1 to 127 with it. Now written as the
+  ceiling it was meant to be, matching the ``math.ceil(n / 8)`` idiom used
+  elsewhere in the package. The repair is reached only by packing a field the
+  caller never resolved, since a schema resolves every field before packing it
+  and ``__call__`` installs a real width; that narrowness is why the defect
+  survived the suite added for #591, whose five repair-path values -- ``0xFF``,
+  ``0xFFFF``, ``0xFFFFFFFF``, ``0xFFFFFFFFFFFFFFFF`` and ``0x800001`` -- have bit
+  lengths of 8, 16, 32, 64 and 24 and so sat exactly where floor division and the
+  ceiling agree. #591's own fix neither caused nor masked this, but it did change
+  what the failure looks like: with ``_need_process`` now recomputed from the
+  width in force, a mis-sized 1, 2 or 4 octets surfaces from ``struct.pack`` as
+  ``'B' format requires 0 <= number <= 255`` where it used to surface from
+  ``int.to_bytes`` as ``OverflowError``, which is why the exception named in the
+  report is no longer the one a mis-sized octet boundary raises. Two things on
+  this path are deliberately left alone, both independent of the arithmetic: a
+  signed field is sized without room for its sign bit, so an unresolved signed
+  field still cannot pack ``128``; and an unresolved field's bit mask is ``-1``,
+  which makes the masking and the sign remap above no-ops. The identical
+  ``math.ceil(x.bit_length() // 8)`` expression also survives at the two ILNP
+  nonce option builders in ``hopopt.py`` and ``ipv6_opts.py``, which are a
+  separate change (#599).
+* **Added** -- ``tests/corekit/test_fields_numbers_width_repair.py``, covering
+  each octet boundary in its own method rather than one parametrised sweep, since
+  the defect is a pattern and a single case would pass against a fix that
+  special-cased the reported width. Each boundary is asserted as a pair -- the
+  value below it, which always packed, and the value above it, which did not --
+  so that a width shifted by one in the other direction fails too. Also swept
+  over all eight boundaries, pinned as the ``ceil(bit_length / 8)`` invariant,
+  checked for the smallest mis-sized value being ``1``, round-tripped through
+  pack and unpack, and given controls for the bit lengths that divide by eight
+  and for the reachability of the repair at all. The suite deliberately asserts
+  widths and octets rather than exception types, because the exception depends on
+  whether the mis-sized width happens to have a native ``struct`` code (#599).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
