@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -470,6 +471,20 @@
 <span class="sd">    Args:</span>
 <span class="sd">        field: Field instance.</span>
 <span class="sd">        packet: Packet data.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        ``byteorder`` is the key a caller has to seed, and this function is what</span>
+<span class="sd">        defines it: :meth:`Frame.pack &lt;pcapkit.protocols.misc.pcap.frame.Frame.pack&gt;`</span>
+<span class="sd">        and :meth:`Frame.unpack &lt;pcapkit.protocols.misc.pcap.frame.Frame.unpack&gt;`</span>
+<span class="sd">        both write it from the global header's magic number. The fallback to</span>
+<span class="sd">        :data:`sys.byteorder` is for a schema packed or unpacked on its own, with</span>
+<span class="sd">        no global header to ask -- which also means a *misspelled* key looks</span>
+<span class="sd">        exactly like an absent one and reports nothing. That is what hid GitHub</span>
+<span class="sd">        issue #605: ``unpack`` wrote ``bytesorder``, so every field here was read</span>
+<span class="sd">        in the host's order rather than the file's, which is right by coincidence</span>
+<span class="sd">        on a little-endian capture and byte-swapped on a big-endian one. See</span>
+<span class="sd">        :file:`tests/protocols/misc/pcap/test_frame_endian_runtime.py` for the</span>
+<span class="sd">        fixtures that now take the other side of the branch.</span>
 
 <span class="sd">    """</span>
     <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'byteorder'</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>

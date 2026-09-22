@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -518,24 +519,30 @@
 <span class="s1">        """Backport support for original codes.</span>
 
 <span class="s1">        Args:</span>
-<span class="s1">            key: Key to get enum item.</span>
+<span class="s1">            key: Key to get enum item. Looked up case-insensitively, since</span>
+<span class="s1">                member names are canonicalised to upper case on registration.</span>
 <span class="s1">            default: Default value if not found.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
-<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key.upper(), default if default is not None else key)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">        name = key.upper()</span>
+<span class="s1">        if name not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, name, default if default is not None else key)</span>
+<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[name]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Lookup function used when value is not found.</span>
 
 <span class="s1">        Args:</span>
-<span class="s1">            value: Value to get enum item.</span>
+<span class="s1">            value: Value to get enum item. Matched case-insensitively against</span>
+<span class="s1">                the canonical upper-case member names.</span>
 
 <span class="s1">        """</span>
-<span class="s1">        return extend_enum(cls, value.upper(), value)</span>
+<span class="s1">        name = value.upper()</span>
+<span class="s1">        if name in cls._member_map_:</span>
+<span class="s1">            return cls._member_map_[name]  # type: ignore[return-value]</span>
+<span class="s1">        return extend_enum(cls, name, value)</span>
 <span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
 
 

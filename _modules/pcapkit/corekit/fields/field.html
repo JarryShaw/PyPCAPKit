@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -898,8 +899,8 @@
         <span class="c1"># ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --</span>
         <span class="c1"># and is thus attacker-controlled: a corrupt or hostile capture can</span>
         <span class="c1"># declare an arbitrarily large one. Past :data:`_MAX_ZERO_PAD_LENGTH`, a</span>
-        <span class="c1"># length short of what ``buffer`` holds is provably bogus: ``rjust()``</span>
-        <span class="c1"># cannot recover data that was never in the buffer, only zero-pad for</span>
+        <span class="c1"># length short of what ``buffer`` holds is provably bogus: the padding</span>
+        <span class="c1"># cannot recover data that was never in the buffer, only zero-fill for</span>
         <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
         <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
         <span class="c1"># the packet's own say-so. C.f. #554.</span>
@@ -977,7 +978,28 @@
                 <span class="p">)</span>
             <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
-        <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">buffer</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># NOTE: ``ljust()``, not ``rjust()``. A short read has lost the *trailing*</span>
+        <span class="c1"># octets of the field -- the buffer ran out, so what is missing is</span>
+        <span class="c1"># whatever came after what was read -- so the zeros belong at the end,</span>
+        <span class="c1"># where the unread octets were. ``rjust()`` instead put them at the</span>
+        <span class="c1"># front, which asserts that the octets never read were the *leading*</span>
+        <span class="c1"># ones, and that is wrong for every byte order rather than only for</span>
+        <span class="c1"># little-endian ones. Measured on the tree that padded with ``rjust()``:</span>
+        <span class="c1"># one octet of a four-octet little-endian 120 (``0x78``) read as</span>
+        <span class="c1"># 2,013,265,920, and three octets of a four-octet big-endian</span>
+        <span class="c1"># ``0x01020304`` read as ``0x10203``. ``ljust()`` answers 120 and</span>
+        <span class="c1"># ``0x1020300``. The big-endian error is the more dangerous of the two --</span>
+        <span class="c1"># it scales the value *down*, so it passes a sanity check far more easily</span>
+        <span class="c1"># than the inflated little-endian one, which is why the defect went</span>
+        <span class="c1"># unnoticed there. See #604.</span>
+        <span class="c1">#</span>
+        <span class="c1"># This changes what a truncated field *reports*, which is the point, and</span>
+        <span class="c1"># not *whether* a truncated capture parses, which must not change: the</span>
+        <span class="c1"># accommodation itself is deliberate (#431) and the budget above is built</span>
+        <span class="c1"># around preserving it. An entirely empty buffer pads to all zeros either</span>
+        <span class="c1"># way, so the end-of-option-list and ``Pad1`` reads the option and list</span>
+        <span class="c1"># loops depend on are unaffected.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">buffer</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 </div>
 

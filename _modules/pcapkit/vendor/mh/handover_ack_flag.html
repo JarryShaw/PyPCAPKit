@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -497,12 +498,19 @@
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Key to get enum item.</span>
-<span class="s1">            default: Default value if not found.</span>
+<span class="s1">            default: Default value if not found. The placeholder ``-1`` stands</span>
+<span class="s1">                for *no default*, in which case an unresolvable key propagates</span>
+<span class="s1">                the lookup error instead of falling back.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
 <span class="s1">        if isinstance(key, int):</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
+<span class="s1">            try:</span>
+<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
+<span class="s1">            except ValueError:</span>
+<span class="s1">                if default == -1:</span>
+<span class="s1">                    raise</span>
+<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
 <span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>

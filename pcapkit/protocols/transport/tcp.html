@@ -377,6 +377,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -3627,7 +3628,7 @@ an MP_CAPABLE length either RFC form uses.</p>
 <p>4 octets when <code class="docutils literal notranslate"><span class="pre">A</span></code> is set, 8 when <code class="docutils literal notranslate"><span class="pre">a</span></code> is set as well, absent otherwise –
 <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.3 figure 9. Both the presence test and the width live
 in <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, whose note records what this field
-declared until #576 and why a narrower fix would not have packed.</p>
+declared until #576 and why the switch form is kept.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4187,27 +4188,48 @@ instance – the field is absent from the wire.</p></li>
 <p>This is a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SwitchField" title="pcapkit.corekit.fields.misc.SwitchField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SwitchField</span></code></a> selector
 rather than a <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>
 wrapping <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">...)</span></code>, which is what it was
-until #576, for two independent reasons.</p>
+until #576.</p>
 <p>The width lambda read <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['a']</span> <span class="pre">else</span> <span class="pre">0</span></code> – <strong>0</strong>, not 4 –
 so an unextended Data ACK packed no octets at all while the <code class="docutils literal notranslate"><span class="pre">length</span></code>
 octet still counted 4 for it. That is the defect #576 records: the option
 went onto the wire 4 (or 8, with <code class="docutils literal notranslate"><span class="pre">dsn</span></code> too) octets shorter than it
 declared, and the <code class="docutils literal notranslate"><span class="pre">ack</span></code> value the caller supplied was simply not
 present.</p>
-<p>Correcting the lambda to <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">else</span> <span class="pre">4</span></code> would not have worked,
-because <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> cannot pack
-a callable length at all: it calls <code class="docutils literal notranslate"><span class="pre">build_template</span></code> once at
-<code class="docutils literal notranslate"><span class="pre">__init__</span></code> with the placeholder length <code class="docutils literal notranslate"><span class="pre">-1</span></code>, which latches
-<code class="docutils literal notranslate"><span class="pre">_need_process</span> <span class="pre">=</span> <span class="pre">True</span></code>, and nothing clears that flag when
-<code class="docutils literal notranslate"><span class="pre">__call__</span></code> later resolves the real length and rebuilds the template as
-<code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>/<code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code>. <code class="docutils literal notranslate"><span class="pre">pre_process</span></code> then hands <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> bytes for
-an integer template and it raises <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span>
-<span class="pre">not</span> <span class="pre">an</span> <span class="pre">integer</span></code>. Measured on the 8-octet form, which the old lambda did
-reach: <code class="docutils literal notranslate"><span class="pre">_make_mptcp_dss(DSS,</span> <span class="pre">ack=1</span> <span class="pre">&lt;&lt;</span> <span class="pre">40)</span></code> raised exactly that. Fixing
-that belongs to <a class="reference internal" href="../../corekit/fields/numbers.html#module-pcapkit.corekit.fields.numbers" title="pcapkit.corekit.fields.numbers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code></a>; selecting between
-two fields that each fix <code class="docutils literal notranslate"><span class="pre">__template__</span></code> at class level sidesteps it
-entirely and is the pattern <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_add_address_selector()</span></code></a> already
-uses here.</p>
+<p>Correcting the lambda to <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">else</span> <span class="pre">4</span></code> would not have worked <em>at the
+time</em>, because <a class="reference internal" href="../../corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> could
+not pack a callable length at all: it called <code class="docutils literal notranslate"><span class="pre">build_template</span></code> once at
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> with the placeholder length <code class="docutils literal notranslate"><span class="pre">-1</span></code>, which latched
+<code class="docutils literal notranslate"><span class="pre">_need_process</span> <span class="pre">=</span> <span class="pre">True</span></code>, and nothing cleared that flag when <code class="docutils literal notranslate"><span class="pre">__call__</span></code>
+later resolved the real length and rebuilt the template as <code class="docutils literal notranslate"><span class="pre">&gt;I</span></code>/<code class="docutils literal notranslate"><span class="pre">&gt;Q</span></code>.
+<code class="docutils literal notranslate"><span class="pre">pre_process</span></code> then handed <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.pack" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.pack()</span></code></a> bytes for an integer
+template and it raised <code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">required</span> <span class="pre">argument</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span>
+<span class="pre">integer</span></code>. Measured on the 8-octet form, which the old lambda did reach:
+<code class="docutils literal notranslate"><span class="pre">_make_mptcp_dss(DSS,</span> <span class="pre">ack=1</span> <span class="pre">&lt;&lt;</span> <span class="pre">40)</span></code> raised exactly that.</p>
+<p>That half is now history: <strong>#598 fixed it</strong>, in
+<a class="reference internal" href="../../corekit/fields/numbers.html#module-pcapkit.corekit.fields.numbers" title="pcapkit.corekit.fields.numbers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code></a> where this note used to say the fix
+belonged, by recomputing <code class="docutils literal notranslate"><span class="pre">_need_process</span></code> from the width actually in
+force instead of once from the placeholder. A callable-length
+<code class="docutils literal notranslate"><span class="pre">NumberField</span></code> packs and unpacks both the 4- and the 8-octet form today,
+so <code class="docutils literal notranslate"><span class="pre">ConditionalField(NumberField(length=...),</span> <span class="pre">lambda</span> <span class="pre">pkt:</span>
+<span class="pre">pkt['flags']['A'])</span></code> would express this field correctly. Nor was wire
+<em>absence</em> ever the obstacle: <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.ssn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.ssn</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.dl_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.dl_len</span></code></a>
+and <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum" title="pcapkit.protocols.schema.transport.tcp.MPTCPDSS.checksum"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MPTCPDSS.checksum</span></code></a> are each a <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> on the
+sibling <code class="docutils literal notranslate"><span class="pre">M</span></code> flag, so this very class already leans on that wrapper to
+keep a field off the wire.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept anyway, for a narrower reason about
+composition rather than about absence. A
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">length</span></code>
+forwards to the wrapped field unconditionally, never consulting the
+condition, so reading it while the condition is false – the wrapped field
+then still unresolved, at its <code class="docutils literal notranslate"><span class="pre">-1</span></code> placeholder – raises
+<code class="docutils literal notranslate"><span class="pre">struct.error:</span> <span class="pre">bad</span> <span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>. Nothing here meets that only
+because <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">pack</span></code> and <code class="docutils literal notranslate"><span class="pre">unpack</span></code>
+special-case <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> by name and skip the wrapped field
+outright before any <code class="docutils literal notranslate"><span class="pre">length</span></code> is read. A <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> needs no such
+special case: its selector always hands back an already-concrete field,
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a> included, so its
+<code class="docutils literal notranslate"><span class="pre">length</span></code> is safe wherever it is read. Swapping the two would be a
+behaviour change, not a tidy-up, and #603 does not make it.</p>
 </div>
 </dd></dl>
 
@@ -4242,8 +4264,10 @@ instance – the field is absent from the wire.</p></li>
 <p class="admonition-title">Note</p>
 <p>Identical in shape to <a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector" title="pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector"><code class="xref py py-func docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector()</span></code></a>, and it replaces the
 identical defect: <code class="docutils literal notranslate"><span class="pre">NumberField(length=lambda</span> <span class="pre">pkt:</span> <span class="pre">8</span> <span class="pre">if</span> <span class="pre">pkt['flags']['m']</span>
-<span class="pre">else</span> <span class="pre">0,</span> <span class="pre">...)</span></code>. See that function’s note for why the <code class="docutils literal notranslate"><span class="pre">0</span></code> was wrong and
-why a corrected lambda would not have packed either. C.f. #576.</p>
+<span class="pre">else</span> <span class="pre">0,</span> <span class="pre">...)</span></code>. See that function’s note for why the <code class="docutils literal notranslate"><span class="pre">0</span></code> was wrong, why a
+corrected lambda would not have packed either <em>at the time</em>, and why the
+<code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is kept now that #598 has made a callable length work.
+C.f. #576, #598.</p>
 </div>
 </dd></dl>
 

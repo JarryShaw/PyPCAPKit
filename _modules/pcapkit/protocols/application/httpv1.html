@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -499,12 +500,23 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'HTTP'</span><span class="p">]</span>
 
-<span class="c1"># Regular expression to match HTTP methods.</span>
-<span class="n">_RE_METHOD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"(?P&lt;method&gt;[A-Z][A-Z-]*)"</span><span class="p">)</span>  <span class="c1"># RFC 9110, section 16.1.1, 9.1, 5.6.2</span>
+<span class="c1"># Regular expression to match HTTP methods. Anchored at both ends: :func:`re.match`</span>
+<span class="c1"># anchors only at the start, so an unanchored pattern prefix-matches and accepts the</span>
+<span class="c1"># leading ``G`` of ``Get`` as a whole method token. Method tokens are case-sensitive</span>
+<span class="c1"># per :rfc:`9110#section-9.1`, so ``Get`` is not ``GET`` and must not parse as one.</span>
+<span class="n">_RE_METHOD</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"(?P&lt;method&gt;[A-Z][A-Z-]*)\Z"</span><span class="p">)</span>  <span class="c1"># RFC 9110, section 16.1.1, 9.1, 5.6.2</span>
 <span class="c1"># Regular expression to match HTTP version string.</span>
 <span class="n">_RE_VERSION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"HTTP/(?P&lt;version&gt;\d\.\d)"</span><span class="p">)</span>
-<span class="c1"># Regular expression to match HTTP status code.</span>
-<span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">'</span><span class="p">)</span>
+<span class="c1"># Regular expression to match HTTP status code. Anchored for the same reason as</span>
+<span class="c1"># ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and the</span>
+<span class="c1"># value is taken from ``int(para2)`` on the raw token, so an unanchored prefix</span>
+<span class="c1"># match let ``200x`` and ``2000`` past the guard and then out of ``int()`` as a</span>
+<span class="c1"># bare ``ValueError`` -- where ``_read_http_header`` documents ``ProtocolError``.</span>
+<span class="c1"># :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the</span>
+<span class="c1"># grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``</span>
+<span class="c1"># production; :rfc:`9110#section-15` covers the code semantics and registry, not</span>
+<span class="c1"># the syntax.</span>
+<span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Type">
@@ -754,7 +766,7 @@
         <span class="k">if</span> <span class="n">match1</span> <span class="ow">and</span> <span class="n">match2</span><span class="p">:</span>
             <span class="n">header_line</span> <span class="o">=</span> <span class="n">Data_RequestHeader</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">Type</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">,</span>
-                <span class="n">method</span><span class="o">=</span><span class="n">Enum_Method</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para1</span><span class="p">)),</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">Enum_Method</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match1</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'method'</span><span class="p">))),</span>
                 <span class="n">uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para2</span><span class="p">),</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match2</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'version'</span><span class="p">)),</span>
             <span class="p">)</span>

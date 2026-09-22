@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -755,7 +756,7 @@
 <span class="sd">        This is a :class:`~pcapkit.corekit.fields.misc.SwitchField` selector</span>
 <span class="sd">        rather than a :class:`~pcapkit.corekit.fields.misc.ConditionalField`</span>
 <span class="sd">        wrapping ``NumberField(length=lambda pkt: ...)``, which is what it was</span>
-<span class="sd">        until #576, for two independent reasons.</span>
+<span class="sd">        until #576.</span>
 
 <span class="sd">        The width lambda read ``8 if pkt['flags']['a'] else 0`` -- **0**, not 4 --</span>
 <span class="sd">        so an unextended Data ACK packed no octets at all while the ``length``</span>
@@ -764,20 +765,44 @@
 <span class="sd">        declared, and the ``ack`` value the caller supplied was simply not</span>
 <span class="sd">        present.</span>
 
-<span class="sd">        Correcting the lambda to ``8 if ... else 4`` would not have worked,</span>
-<span class="sd">        because :class:`~pcapkit.corekit.fields.numbers.NumberField` cannot pack</span>
-<span class="sd">        a callable length at all: it calls ``build_template`` once at</span>
-<span class="sd">        ``__init__`` with the placeholder length ``-1``, which latches</span>
-<span class="sd">        ``_need_process = True``, and nothing clears that flag when</span>
-<span class="sd">        ``__call__`` later resolves the real length and rebuilds the template as</span>
-<span class="sd">        ``&gt;I``/``&gt;Q``. ``pre_process`` then hands :func:`struct.pack` bytes for</span>
-<span class="sd">        an integer template and it raises ``struct.error: required argument is</span>
-<span class="sd">        not an integer``. Measured on the 8-octet form, which the old lambda did</span>
-<span class="sd">        reach: ``_make_mptcp_dss(DSS, ack=1 &lt;&lt; 40)`` raised exactly that. Fixing</span>
-<span class="sd">        that belongs to :mod:`pcapkit.corekit.fields.numbers`; selecting between</span>
-<span class="sd">        two fields that each fix ``__template__`` at class level sidesteps it</span>
-<span class="sd">        entirely and is the pattern :func:`mptcp_add_address_selector` already</span>
-<span class="sd">        uses here.</span>
+<span class="sd">        Correcting the lambda to ``8 if ... else 4`` would not have worked *at the</span>
+<span class="sd">        time*, because :class:`~pcapkit.corekit.fields.numbers.NumberField` could</span>
+<span class="sd">        not pack a callable length at all: it called ``build_template`` once at</span>
+<span class="sd">        ``__init__`` with the placeholder length ``-1``, which latched</span>
+<span class="sd">        ``_need_process = True``, and nothing cleared that flag when ``__call__``</span>
+<span class="sd">        later resolved the real length and rebuilt the template as ``&gt;I``/``&gt;Q``.</span>
+<span class="sd">        ``pre_process`` then handed :func:`struct.pack` bytes for an integer</span>
+<span class="sd">        template and it raised ``struct.error: required argument is not an</span>
+<span class="sd">        integer``. Measured on the 8-octet form, which the old lambda did reach:</span>
+<span class="sd">        ``_make_mptcp_dss(DSS, ack=1 &lt;&lt; 40)`` raised exactly that.</span>
+
+<span class="sd">        That half is now history: **#598 fixed it**, in</span>
+<span class="sd">        :mod:`pcapkit.corekit.fields.numbers` where this note used to say the fix</span>
+<span class="sd">        belonged, by recomputing ``_need_process`` from the width actually in</span>
+<span class="sd">        force instead of once from the placeholder. A callable-length</span>
+<span class="sd">        ``NumberField`` packs and unpacks both the 4- and the 8-octet form today,</span>
+<span class="sd">        so ``ConditionalField(NumberField(length=...), lambda pkt:</span>
+<span class="sd">        pkt['flags']['A'])`` would express this field correctly. Nor was wire</span>
+<span class="sd">        *absence* ever the obstacle: :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len`</span>
+<span class="sd">        and :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the</span>
+<span class="sd">        sibling ``M`` flag, so this very class already leans on that wrapper to</span>
+<span class="sd">        keep a field off the wire.</span>
+
+<span class="sd">        The ``SwitchField`` form is kept anyway, for a narrower reason about</span>
+<span class="sd">        composition rather than about absence. A</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``</span>
+<span class="sd">        forwards to the wrapped field unconditionally, never consulting the</span>
+<span class="sd">        condition, so reading it while the condition is false -- the wrapped field</span>
+<span class="sd">        then still unresolved, at its ``-1`` placeholder -- raises</span>
+<span class="sd">        ``struct.error: bad char in struct format``. Nothing here meets that only</span>
+<span class="sd">        because :class:`Schema</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;`'s ``pack`` and ``unpack``</span>
+<span class="sd">        special-case ``ConditionalField`` by name and skip the wrapped field</span>
+<span class="sd">        outright before any ``length`` is read. A ``SwitchField`` needs no such</span>
+<span class="sd">        special case: its selector always hands back an already-concrete field,</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its</span>
+<span class="sd">        ``length`` is safe wherever it is read. Swapping the two would be a</span>
+<span class="sd">        behaviour change, not a tidy-up, and #603 does not make it.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'A'</span><span class="p">]:</span>
@@ -810,8 +835,10 @@
 <span class="sd">    Note:</span>
 <span class="sd">        Identical in shape to :func:`mptcp_dss_ack_selector`, and it replaces the</span>
 <span class="sd">        identical defect: ``NumberField(length=lambda pkt: 8 if pkt['flags']['m']</span>
-<span class="sd">        else 0, ...)``. See that function's note for why the ``0`` was wrong and</span>
-<span class="sd">        why a corrected lambda would not have packed either. C.f. #576.</span>
+<span class="sd">        else 0, ...)``. See that function's note for why the ``0`` was wrong, why a</span>
+<span class="sd">        corrected lambda would not have packed either *at the time*, and why the</span>
+<span class="sd">        ``SwitchField`` form is kept now that #598 has made a callable length work.</span>
+<span class="sd">        C.f. #576, #598.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">]:</span>
@@ -1476,7 +1503,7 @@
     <span class="c1">#: 4 octets when ``A`` is set, 8 when ``a`` is set as well, absent otherwise --</span>
     <span class="c1">#: :rfc:`8684` section 3.3 figure 9. Both the presence test and the width live</span>
     <span class="c1">#: in :func:`mptcp_dss_ack_selector`, whose note records what this field</span>
-    <span class="c1">#: declared until #576 and why a narrower fix would not have packed.</span>
+    <span class="c1">#: declared until #576 and why the switch form is kept.</span>
     <span class="n">ack</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">mptcp_dss_ack_selector</span><span class="p">,</span>
     <span class="p">)</span>

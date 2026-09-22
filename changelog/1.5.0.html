@@ -377,6 +377,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" checked="" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">1.5.0 – unreleased</a></li>
@@ -542,7 +543,7 @@ coverage that records the entries which cannot close the cycle rather than
 skipping them (#440, #504).</p></li>
 <li><p><strong>Added</strong> – coverage for the untested half of the #431 accommodation: a TCP
 or IPv4 option whose declared length asks for more data than the capture
-actually holds, pinning that it still parses, with the short read left-padded
+actually holds, pinning that it still parses, with the short read zero-padded
 rather than rejected. The one test #431 left behind only covers an option
 area with no data behind it at all; a candidate fix for #554 turned the
 untested half into an unwrapped <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> while the rest of the
@@ -1149,6 +1150,412 @@ pack and unpack, and given controls for the bit lengths that divide by eight
 and for the reachability of the repair at all. The suite deliberately asserts
 widths and octets rather than exception types, because the exception depends on
 whether the mis-sized width happens to have a native <code class="docutils literal notranslate"><span class="pre">struct</span></code> code (#599).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code>’s <code class="docutils literal notranslate"><span class="pre">TCP_BASE</span></code> spelled three
+header fields with names <code class="docutils literal notranslate"><span class="pre">TCP.make</span></code> does not declare, so every option
+fixture in <code class="docutils literal notranslate"><span class="pre">examples/captures/options-tcp.pcap</span></code> was built from values the
+generator had not asked for. <code class="docutils literal notranslate"><span class="pre">make</span></code> ends in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> and reads nothing
+out of it, so an undeclared keyword is accepted and discarded with no warning
+and no <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, which is why this survived unnoticed. <code class="docutils literal notranslate"><span class="pre">'seq':</span> <span class="pre">1</span></code> was
+<code class="docutils literal notranslate"><span class="pre">seq_no</span></code>, and all 25 captured frames therefore carried sequence number 0;
+<code class="docutils literal notranslate"><span class="pre">'urgent_pointer'</span></code> was <code class="docutils literal notranslate"><span class="pre">urgent</span></code>, whose requested value and unused default
+both happened to be 0; and <code class="docutils literal notranslate"><span class="pre">'ack_flag':</span> <span class="pre">False</span></code> was <code class="docutils literal notranslate"><span class="pre">ack</span></code>, while
+<code class="docutils literal notranslate"><span class="pre">'ack':</span> <span class="pre">0</span></code> bound to <code class="docutils literal notranslate"><span class="pre">ack</span></code> itself – the acknowledgement <em>flag</em> rather than
+the number, which is <code class="docutils literal notranslate"><span class="pre">ack_no</span></code> – so that pair was the wrong way round in
+both directions. Each is renamed to the parameter <code class="docutils literal notranslate"><span class="pre">make</span></code> declares, keeping
+the values the table always read as. Measured:
+<code class="docutils literal notranslate"><span class="pre">TCP(**TCP_BASE).info.seq</span></code> was 0 against a declared 1 and is now 1, and
+<code class="docutils literal notranslate"><span class="pre">options-tcp.pcap</span></code> changes in exactly 25 bytes – the low octet of each
+frame’s sequence number – with no case status and no <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>
+entry moving. The module’s six other base mappings were audited the same way:
+five pass nothing their <code class="docutils literal notranslate"><span class="pre">make</span></code> does not declare, and HIP’s <code class="docutils literal notranslate"><span class="pre">extension</span></code> is
+declared by <code class="docutils literal notranslate"><span class="pre">HIP.read</span></code> instead, which is this library’s documented way of
+forwarding a read-path keyword through <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> rather than a sixth
+instance of the defect (#602).</p></li>
+<li><p><strong>Added</strong> –
+<code class="docutils literal notranslate"><span class="pre">tests/protocols/test_option_generator_tcp_base_unit.py</span></code>, asserting that
+every <code class="docutils literal notranslate"><span class="pre">TCP_BASE</span></code> key is a parameter <code class="docutils literal notranslate"><span class="pre">TCP.make</span></code> declares – derived from
+<code class="docutils literal notranslate"><span class="pre">inspect.signature</span></code>, so it catches a fourth misspelling nobody has made yet
+– and that the segment the mapping builds carries the stated header in both
+the data model and the packed octets. Two of the three wrong names were
+invisible to any assertion about a <em>value</em>, the value asked for being equal to
+the default that was used instead, which is what the signature check is for
+(#602).</p></li>
+<li><p><strong>Fixed</strong> – the ILNP Nonce option builders in <code class="docutils literal notranslate"><span class="pre">HOPOPT</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6_Opts</span></code> sized
+the option with <code class="docutils literal notranslate"><span class="pre">math.ceil(nonce.bit_length()</span> <span class="pre">//</span> <span class="pre">8)</span></code>, which is floor division
+dressed up as a ceiling: <code class="docutils literal notranslate"><span class="pre">//</span></code> floors, and <code class="docutils literal notranslate"><span class="pre">math.ceil</span></code> of an <code class="docutils literal notranslate"><span class="pre">int</span></code> is a
+no-op, so the ceiling was never actually taken. The nonce is packed by a
+<code class="docutils literal notranslate"><span class="pre">NumberField</span></code> whose width <em>is</em> that declared <code class="docutils literal notranslate"><span class="pre">len</span></code>, so an under-declared
+length did not merely mis-state the option – it silently truncated the nonce on
+the wire, with nothing raised. Every nonce whose bit length was not an exact
+multiple of eight was affected, and <strong>small values were the worst case rather
+than boundary values</strong>: any nonce below 256 was declared as <em>zero</em> octets and
+dropped from the packet altogether, so <code class="docutils literal notranslate"><span class="pre">nonce=9</span></code> packed to <code class="docutils literal notranslate"><span class="pre">b'\x8b\x00'</span></code> and
+parsed back as <code class="docutils literal notranslate"><span class="pre">0</span></code>, while <code class="docutils literal notranslate"><span class="pre">nonce=256</span></code> and <code class="docutils literal notranslate"><span class="pre">nonce=65536</span></code> each truncated to
+<code class="docutils literal notranslate"><span class="pre">0</span></code> as well. Fixed to <code class="docutils literal notranslate"><span class="pre">max(1,</span> <span class="pre">math.ceil(nonce.bit_length()</span> <span class="pre">/</span> <span class="pre">8))</span></code>, the form
+already used at five other sizing sites across <code class="docutils literal notranslate"><span class="pre">hip.py</span></code> and <code class="docutils literal notranslate"><span class="pre">mh.py</span></code>. The
+one-octet floor is the <code class="docutils literal notranslate"><span class="pre">mh.py</span></code> convention and is load-bearing here because
+<code class="docutils literal notranslate"><span class="pre">nonce</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>, whose bit length is <code class="docutils literal notranslate"><span class="pre">0</span></code>: without it the default
+argument builds an ILNP Nonce option carrying no Nonce Value field at all,
+collapsing “the nonce is 0” into “there is no nonce” when <span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a> gives the
+option that field. The read path was never affected, since it takes the width
+from the <code class="docutils literal notranslate"><span class="pre">len</span></code> octet on the wire rather than recomputing it (#601).</p></li>
+<li><p><strong>Added</strong> – ILNP nonce sizing coverage in
+<code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_ipv6_extension_unit.py</span></code>, one test per protocol,
+asserting the declared length, the exact packed octets and the
+construct-pack-parse cycle over ten nonces. The reason the existing suite missed
+this is that the only ILNP nonce it ever exercised was <code class="docutils literal notranslate"><span class="pre">0xFFFFFF</span></code> – bit length
+24, an exact multiple of eight, precisely where floor division and the ceiling
+agree – the same blind spot that hid the identical typo in <code class="docutils literal notranslate"><span class="pre">numbers.py</span></code> behind
+bit lengths 8, 16, 24, 32 and 64. Every new case bar two deliberate controls
+therefore has a bit length that is <em>not</em> a multiple of eight, several of them
+below 256. The table also guards itself: the test asserts that at least six of
+its own values stay non-byte-aligned and that one stays below 256, so rounding
+them off to convenient constants later cannot quietly disarm the regression
+(#601).</p></li>
+<li><p><strong>Fixed</strong> – the string-keyed <code class="docutils literal notranslate"><span class="pre">get()</span></code> in <code class="docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.const.http.method</span></code> tested membership with the raw key but
+registered <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code>, so the <em>first</em> lowercase or mixed-case token
+raised <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">'RETR'</span> <span class="pre">already</span> <span class="pre">in</span> <span class="pre">use</span></code> rather than resolving. Reachable
+from wire data for FTP: <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code> compiles its
+request pattern with <code class="docutils literal notranslate"><span class="pre">re.I</span></code> and passes the match verbatim, and
+<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5.3"><strong>RFC 959 Section 5.3</strong></a> makes FTP commands case-insensitive – “Upper and lower
+case alphabetic characters are to be treated identically”, listing
+<code class="docutils literal notranslate"><span class="pre">RETR</span> <span class="pre">Retr</span> <span class="pre">retr</span> <span class="pre">ReTr</span> <span class="pre">rETr</span></code> as the same command – so <code class="docutils literal notranslate"><span class="pre">retr</span> <span class="pre">file.txt</span></code> was a
+valid request this library could not parse. Both <code class="docutils literal notranslate"><span class="pre">get()</span></code> and <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+now look the key up under the same canonical upper-case name they register it
+under, so every casing resolves to the one member that already exists instead
+of colliding with it. Resolving rather than registering a second member
+matters beyond not crashing – a duplicate <code class="docutils literal notranslate"><span class="pre">GET</span></code> would carry neither the
+<code class="docutils literal notranslate"><span class="pre">safe</span></code> nor the <code class="docutils literal notranslate"><span class="pre">idempotent</span></code> attribute of the real one (#582, #583).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">httpv1</span></code>’s <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code> was unanchored and <code class="docutils literal notranslate"><span class="pre">re.match</span></code>
+anchors only at the start, so it prefix-matched, and the request-line reader
+then passed the whole <code class="docutils literal notranslate"><span class="pre">para1</span></code> to <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> rather than the captured
+<code class="docutils literal notranslate"><span class="pre">method</span></code> group. Together those meant <code class="docutils literal notranslate"><span class="pre">b'Get'</span></code> matched on the single
+character <code class="docutils literal notranslate"><span class="pre">G</span></code>, satisfied the guard that decides a start-line is a request,
+and handed the entire mixed-case token to a lookup that raised on it. Fixing
+either half alone still gives a wrong answer – normalising the lookup would
+parse <code class="docutils literal notranslate"><span class="pre">b'Get'</span></code> as <code class="docutils literal notranslate"><span class="pre">GET</span></code> off a one-character match, and passing the group
+would parse it as a method named <code class="docutils literal notranslate"><span class="pre">G</span></code>. The pattern is now anchored at both
+ends and the captured group is what is looked up, so a token that is not a
+method is a malformed request line rather than a mis-parsed one. Method tokens
+are case-sensitive per <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>, so no <code class="docutils literal notranslate"><span class="pre">re.I</span></code> was added:
+<code class="docutils literal notranslate"><span class="pre">GET</span></code> parses, <code class="docutils literal notranslate"><span class="pre">Get</span></code> and <code class="docutils literal notranslate"><span class="pre">get</span></code> are rejected (#583).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">_RE_STATUS</span></code> in the same reader carried the same unanchored
+prefix defect, found by auditing <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code>’s siblings, and it escaped as
+the wrong exception type. That pattern is only a guard – the value is taken
+from <code class="docutils literal notranslate"><span class="pre">int(para2)</span></code> on the raw token – so a prefix match let a malformed
+status past the guard and then out of <code class="docutils literal notranslate"><span class="pre">int()</span></code> uncaught, where
+<code class="docutils literal notranslate"><span class="pre">_read_http_header</span></code> documents <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code>. Measured: a status of
+<code class="docutils literal notranslate"><span class="pre">200x</span></code> raised
+<code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">invalid</span> <span class="pre">literal</span> <span class="pre">for</span> <span class="pre">int()</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">10:</span> <span class="pre">b'200x'</span></code>, and one of
+<code class="docutils literal notranslate"><span class="pre">2000</span></code> raised <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">2000</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">StatusCode</span></code>;
+both are now <code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code>.
+<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-4"><strong>RFC 9112 Section 4</strong></a> gives <code class="docutils literal notranslate"><span class="pre">status-code</span> <span class="pre">=</span> <span class="pre">3DIGIT</span></code>, exactly three, so the
+anchor is what the grammar already said – the production lives in HTTP/1.1
+because <code class="docutils literal notranslate"><span class="pre">status-code</span></code> is part of its <code class="docutils literal notranslate"><span class="pre">status-line</span></code>, while
+<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15"><strong>RFC 9110 Section 15</strong></a> covers the code semantics and the IANA registry rather
+than the syntax. <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code> was audited at the same time and is safe as
+it stands, because both of its call sites read the captured group rather than
+the raw token (#583).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">get()</span></code>’s documented <code class="docutils literal notranslate"><span class="pre">default</span></code> was ignored on the integer
+path throughout the generated <code class="docutils literal notranslate"><span class="pre">pcapkit.const</span></code> tree, because <code class="docutils literal notranslate"><span class="pre">get</span></code>
+delegated the lookup to the enum call and <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> has no access to the
+caller’s <code class="docutils literal notranslate"><span class="pre">default</span></code> – so <code class="docutils literal notranslate"><span class="pre">Hardware.get(99999,</span> <span class="pre">0)</span></code> raised
+<code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">99999</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">Hardware</span></code> instead of returning the
+fallback it was handed. The integer path now consults <code class="docutils literal notranslate"><span class="pre">default</span></code> before
+letting the lookup error escape. <code class="docutils literal notranslate"><span class="pre">-1</span></code>, the placeholder the generated
+signature already carried, is what separates “no default was supplied” from
+“a default was supplied and should be used”, so a caller that asked for no
+fallback still gets the error rather than a silent substitution. The sweep
+#584 asked for puts the scope at 110 of the 118 integer registries, not the
+three the issue named; the two carrying a bespoke integer fallback of their
+own, <code class="docutils literal notranslate"><span class="pre">pcapng</span></code> <code class="docutils literal notranslate"><span class="pre">OptionType</span></code> and <code class="docutils literal notranslate"><span class="pre">reg</span></code> <code class="docutils literal notranslate"><span class="pre">AppType</span></code>, are deliberately left
+alone, since neither drops a default by raising. Not reachable from wire data
+– every value a wire field can carry already resolves – so this is a
+contract fix rather than a parse fix. Applied to the nine vendor templates as
+well as the 113 generated modules, and a new test renders the shared template
+and compares it against the module generated from it, so a regeneration
+cannot quietly undo it (#584).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code> padded a short read on the wrong side. When a
+field’s buffer falls short of its declared length – the deliberate
+accommodation that lets a snapshot-truncated capture parse (#431) – the
+shortfall was zero-filled with <code class="docutils literal notranslate"><span class="pre">rjust()</span></code>, which places the zeros at the
+<em>front</em>. That asserts the octets never read were the leading ones, and a short
+read has lost the trailing ones: the buffer ran out. It is now <code class="docutils literal notranslate"><span class="pre">ljust()</span></code>,
+which is correct for <strong>both</strong> byte orders rather than only for big-endian
+fields, so the correction is not byte-order-conditional. The two directions
+fail differently and only one was loud. Measured: one octet of a four-octet
+little-endian <code class="docutils literal notranslate"><span class="pre">120</span></code> read as <code class="docutils literal notranslate"><span class="pre">2013265920</span></code>, inflated by <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">24</span></code>; three
+octets of a four-octet big-endian <code class="docutils literal notranslate"><span class="pre">0x01020304</span></code> read as <code class="docutils literal notranslate"><span class="pre">0x10203</span></code>, scaled
+<em>down</em> by 256. The second is the dangerous one – a value smaller than the
+truth passes a sanity check, where an inflated one overruns – which is why the
+big-endian half went unnoticed. A full read is untouched at every width and
+order, since the padding is only ever consulted when the buffer falls short
+(#604).</p></li>
+<li><p><strong>Fixed</strong> – as a consequence of the above, the unhandled <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> at
+<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/protocol.py:1016</span></code> on a truncated PCAP-NG capture.
+<code class="docutils literal notranslate"><span class="pre">dhcp_little_endian.pcapng</span></code> cut to 161, 641 or 1389 octets left a one-octet
+read of a little-endian 32-bit block length, which <code class="docutils literal notranslate"><span class="pre">rjust()</span></code> turned into
+<code class="docutils literal notranslate"><span class="pre">0x78000000</span></code> or <code class="docutils literal notranslate"><span class="pre">0x84000000</span></code> – 1.88 to 2.06 GiB – and which was then
+passed straight to <code class="docutils literal notranslate"><span class="pre">self._file.read()</span></code> as an allocation size, from a
+1772-octet file. Under a 1 GiB address-space cap all three raise
+<code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> there; with more address space the allocation succeeds and the
+parse goes on to fail anyway, so the visible symptom depended on how much
+memory the process could get. With <code class="docutils literal notranslate"><span class="pre">ljust()</span></code> the same reads report 120 and
+132, no large allocation is attempted, and all three end in the ordinary,
+already-handled parse failure instead (#604).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">FieldBaseShortReadPaddingSideTests</span></code>, ten cases over 133
+subtests covering both byte orders at 2, 4 and 8 octets and at every
+truncation point: the two figures #604 reports as literals, the
+value-preserving property stated over every width and shortfall rather than as
+a table, the two failure directions as inequalities, a signed field, a
+byte-string field, and an unpack-then-pack cycle. Eight of the ten fail on the
+unfixed tree. The other two must pass on both and are the guard rails – a full
+read at every width and order, which may not move, and a read against an
+entirely empty buffer, which pads to all zeros either way and is the #431
+behaviour the option and list loops depend on (#604).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code>, citation metadata in Citation File Format
+1.2.0, which GitHub renders as the repository’s “Cite this repository” button
+and which citation managers and dependency inventories read directly. It is
+the machine-readable half of the attribution BSD-3-Clause already asks for, so
+credit carries into a paper or a bill of materials rather than depending on a
+reader opening <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code>. Validated with <code class="docutils literal notranslate"><span class="pre">cffconvert</span> <span class="pre">--validate</span></code> and
+against the published 1.2.0 schema; <code class="docutils literal notranslate"><span class="pre">doi</span></code> and <code class="docutils literal notranslate"><span class="pre">orcid</span></code> are omitted rather
+than invented, since neither exists for this project today and both are
+checked formats, so a wrong value would still validate. The licence itself is
+deliberately unchanged – still BSD-3-Clause, no <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> file, no change to
+its terms. Alongside it the copyright line moves from <code class="docutils literal notranslate"><span class="pre">2018-2023</span></code> to
+<code class="docutils literal notranslate"><span class="pre">2018-2026</span></code> – <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> was its only occurrence in the tree, since
+<code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> already derives its own from the current year – and a
+stray <code class="docutils literal notranslate"><span class="pre">s</span></code> after the closing <code class="docutils literal notranslate"><span class="pre">DAMAGE.</span></code> of the licence text, present since
+the Mozilla-to-BSD relicence, is removed, so the wording now matches canonical
+BSD-3-Clause exactly (#615).</p></li>
+<li><p><strong>Fixed</strong> – reading a big-endian classic PCAP byte-swapped every record header
+field, and then crashed. <code class="docutils literal notranslate"><span class="pre">Frame.unpack</span></code> seeded the file’s declared byte order
+under the key <code class="docutils literal notranslate"><span class="pre">bytesorder</span></code> where the frame schema’s <code class="docutils literal notranslate"><span class="pre">byteorder_callback</span></code>
+reads <code class="docutils literal notranslate"><span class="pre">byteorder</span></code>, so the lookup never found it and always fell back to
+<code class="docutils literal notranslate"><span class="pre">sys.byteorder</span></code> – the reading host’s order rather than the file’s. On a
+little-endian host reading a little-endian capture that fallback gives the
+right answer by coincidence, and every capture in this repository was
+little-endian, so the wrong code path has always produced correct results.
+Against a big-endian capture, measured before the fix, frame 1 of
+<code class="docutils literal notranslate"><span class="pre">big_endian.pcap</span></code> read <code class="docutils literal notranslate"><span class="pre">ts_sec=3106905</span></code>, <code class="docutils literal notranslate"><span class="pre">ts_usec=1088553216</span></code> and
+<code class="docutils literal notranslate"><span class="pre">incl_len=1241513984</span></code> for a record whose real values are <code class="docutils literal notranslate"><span class="pre">1500000000</span></code>,
+<code class="docutils literal notranslate"><span class="pre">123456</span></code> and <code class="docutils literal notranslate"><span class="pre">74</span></code>, dating the frame to 1970-02-05 rather than to
+2017-07-14. <code class="docutils literal notranslate"><span class="pre">incl_len</span></code> is the payload length, so that first record
+then consumed the whole file and the second was read with a negative payload
+length, raising <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">read</span> <span class="pre">length</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">non-negative</span> <span class="pre">or</span> <span class="pre">-1</span></code> out of
+the schema – which is the reported crash, and it is the <em>second</em> symptom
+rather than the first. The sibling <code class="docutils literal notranslate"><span class="pre">Frame.pack</span></code> eleven lines earlier spelled
+the key correctly, which is what marks this as a slip rather than a second key,
+and the fallback is what made a misspelled key indistinguishable from an absent
+one; <code class="docutils literal notranslate"><span class="pre">byteorder_callback</span></code> now records that it is the definition of the key
+and why the fallback hides a typo (#605).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">examples/generators/endian.py</span></code>, and the byte-order tests that
+read what it writes. There was no big-endian <code class="docutils literal notranslate"><span class="pre">.pcap</span></code> in the repository at all,
+which is why #605 survived its own code review: the one-character fix leaves the
+corrected path exactly as untested as the broken one. The generator writes three
+captures – <code class="docutils literal notranslate"><span class="pre">big_endian.pcap</span></code> (magic <code class="docutils literal notranslate"><span class="pre">a1</span> <span class="pre">b2</span> <span class="pre">c3</span> <span class="pre">d4</span></code>),
+<code class="docutils literal notranslate"><span class="pre">big_endian_nanosecond.pcap</span></code> (<code class="docutils literal notranslate"><span class="pre">a1</span> <span class="pre">b2</span> <span class="pre">3c</span> <span class="pre">4d</span></code>, the first fixture to take that
+branch of the magic-number table) and <code class="docutils literal notranslate"><span class="pre">little_endian.pcap</span></code> (<code class="docutils literal notranslate"><span class="pre">d4</span> <span class="pre">c3</span> <span class="pre">b2</span> <span class="pre">a1</span></code>) –
+carrying the <em>same three records</em> in each container, so the tests can assert
+that the byte order makes no difference to what is read out rather than only
+that the big-endian file matches numbers written down in a test. Frame 3 is
+captured short, 1200 octets on the wire cut to a 96-octet <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">incl_len</span></code> and <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> differ and cannot both be satisfied by one
+byte-swapped value. <code class="docutils literal notranslate"><span class="pre">test_frame_endian_runtime.py</span></code> drives all three through
+<code class="docutils literal notranslate"><span class="pre">extract()</span></code> and walks each file’s record chain with <code class="docutils literal notranslate"><span class="pre">struct</span></code> to derive its
+own expectations; a unit-tier case in <code class="docutils literal notranslate"><span class="pre">test_header_frame_unit.py</span></code> builds a
+two-record big-endian capture in memory instead, so the regression is also
+caught by the fixture-free selection CI runs on every push. All four fail on the
+unfixed tree – the three fixture-backed ones by that <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, the
+in-memory one by <code class="docutils literal notranslate"><span class="pre">AssertionError:</span> <span class="pre">3106905</span> <span class="pre">!=</span> <span class="pre">1500000000</span></code> – while the
+little-endian twin passes on both trees, which is what shows the records
+themselves are not the variable (#605).</p></li>
+<li><p><strong>Changed</strong> – <code class="docutils literal notranslate"><span class="pre">tests/protocols/transport/test_tcp_udp_unit.py</span></code> now reaches the
+MP_JOIN dispatchers through <code class="docutils literal notranslate"><span class="pre">TCP()</span></code> itself, instead of assigning a Python
+<code class="docutils literal notranslate"><span class="pre">set</span></code> to <code class="docutils literal notranslate"><span class="pre">_flags</span></code> on a bare <code class="docutils literal notranslate"><span class="pre">TCP.__new__(TCP)</span></code>. A <code class="docutils literal notranslate"><span class="pre">set</span></code> answers the
+membership tests <code class="docutils literal notranslate"><span class="pre">_make_mptcp_join</span></code> and <code class="docutils literal notranslate"><span class="pre">_read_mptcp_join</span></code> use, so every flag
+branch ran and both TCP modules read 100% statement and branch coverage – while
+the attribute had neither the <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code> type production assigns nor the
+ordering that governs when it exists at all, which is how #587 stayed invisible
+behind that number and how the <code class="docutils literal notranslate"><span class="pre">cast('Enum_Flags',</span> <span class="pre">0)</span></code> no-op behind it went
+unnoticed too. Measured on the rewrite, against the 17 tests of that file: revert
+#587’s hoist and two of them fail with
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'TCP'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'_flags'</span></code>
+where all 17 passed before; restore the <code class="docutils literal notranslate"><span class="pre">cast</span></code> and two fail with
+<code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">argument</span> <span class="pre">of</span> <span class="pre">type</span> <span class="pre">'int'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">container</span> <span class="pre">or</span> <span class="pre">iterable</span></code>, again
+where all 17 passed. The library is unchanged and the file’s tests still pass, so
+the coverage numbers do not move – the point is what the same numbers are now
+worth (#603).</p></li>
+<li><p><strong>Fixed</strong> – documentation. <code class="docutils literal notranslate"><span class="pre">mptcp_dss_ack_selector</span></code>’s note said a corrected
+field-width lambda “would not have worked” and that fixing it belonged to
+<code class="docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.numbers</span></code>, which is exactly where #598 then fixed it; the
+same paragraph sat in <code class="docutils literal notranslate"><span class="pre">test_tcp_mptcp_length_arithmetic_unit.py</span></code>’s module
+docstring, whose other stale claim was that MP_JOIN “cannot be built through the
+public <code class="docutils literal notranslate"><span class="pre">TCP()</span></code> constructor at all”, true only until #587. A callable-length
+<code class="docutils literal notranslate"><span class="pre">NumberField</span></code> packs and unpacks both DSS widths now, and wire <em>absence</em> was
+never the obstacle either: <code class="docutils literal notranslate"><span class="pre">MPTCPDSS.ssn</span></code>, <code class="docutils literal notranslate"><span class="pre">dl_len</span></code> and <code class="docutils literal notranslate"><span class="pre">checksum</span></code> have
+always been <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code> on the sibling <code class="docutils literal notranslate"><span class="pre">M</span></code> flag, so the class already
+relied on that wrapper to keep a field off the wire. The <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> form is
+kept for the narrower reason the note now gives – <code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">length</span></code> forwards to the wrapped field without consulting the condition, so it
+is safe here only because <code class="docutils literal notranslate"><span class="pre">Schema.pack</span></code> and <code class="docutils literal notranslate"><span class="pre">Schema.unpack</span></code> special-case that
+wrapper by name, whereas a <code class="docutils literal notranslate"><span class="pre">SwitchField</span></code> always resolves to a concrete field.
+Replacing it would be a behaviour change and is not made (#603).</p></li>
+<li><p><strong>Changed</strong> – the README is a landing page now, and Markdown rather than
+reStructuredText. <code class="docutils literal notranslate"><span class="pre">README.rst</span></code> (424 lines) became <code class="docutils literal notranslate"><span class="pre">README.md</span></code> (103),
+keeping what a reader arriving from PyPI or a search result actually needs –
+what the library is, why it exists rather than Scapy or DPKT, how to install
+it, a worked example, and where the documentation lives – and dropping the
+technical detail the documentation already carried. <strong>Module Structure</strong>,
+<strong>Engine Comparison</strong>, <strong>Engine support by Python version</strong>, <strong>Test
+Environment</strong>, <strong>Test Results</strong> and <strong>Installation Notes</strong> were each already
+duplicated in <code class="docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code>, in a fuller form, so they are linked
+rather than restated. Two blocks existed nowhere else and moved rather than
+going: <strong>Testing</strong> is now <code class="docutils literal notranslate"><span class="pre">docs/source/testing.rst</span></code>, registered in the index
+toctree, and the <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">setup</span></code> local development block joined
+the Installation section of <code class="docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code>. Requested by the project
+owner, and a deliberate exception to the convention that documentation here is
+reStructuredText – for the README only, since it is the one documentation file
+whose renderers are GitHub and PyPI rather than Sphinx. Accordingly
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> reads <code class="docutils literal notranslate"><span class="pre">README.md</span></code> and declares its content type as
+<code class="docutils literal notranslate"><span class="pre">text/markdown</span></code>, and the <code class="docutils literal notranslate"><span class="pre">include</span> <span class="pre">README.md</span></code> line in <code class="docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> is now
+the only thing that puts the README in a source distribution, because
+<code class="docutils literal notranslate"><span class="pre">global-include</span> <span class="pre">*.rst</span></code> no longer matches it – which matters, since
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> reads the file unguarded and an sdist without it cannot be
+installed. Verified with <code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">check</span> <span class="pre">--strict</span></code> against a built sdist and
+wheel, both of which pass. The rename’s own references moved with it, since a
+change that renames a file owns the references to it:
+<code class="docutils literal notranslate"><span class="pre">examples/benchmark/Dockerfile</span></code> copies <code class="docutils literal notranslate"><span class="pre">README.md</span></code> – a literal <code class="docutils literal notranslate"><span class="pre">COPY</span></code> of
+the old name would have failed the layer outright and taken <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">bench</span></code>,
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">bench-quick</span></code> and <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> with it – and the benchmark harness prose
+that named the root README as the destination of its generated tables now names
+<code class="docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code>, which is where those tables went. That covers the
+<code class="docutils literal notranslate"><span class="pre">Makefile</span></code> comment, <code class="docutils literal notranslate"><span class="pre">report.py</span></code>, <code class="docutils literal notranslate"><span class="pre">test_harness.py</span></code>, <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> and the
+suite’s own README, including the one place whose stated reason had inverted: the
+emitted markup is kept parseable by plain docutils, which is now a conservative
+choice rather than a hard requirement, because the page it lands on is rendered
+by Sphinx. <code class="docutils literal notranslate"><span class="pre">examples/benchmark/benchmark.py</span></code> still says <code class="docutils literal notranslate"><span class="pre">README.rst</span></code> and is
+left alone, because it means the benchmark suite’s own README in the same
+directory, not the project’s.</p></li>
+<li><p><strong>Changed</strong> – <code class="docutils literal notranslate"><span class="pre">CODE_OF_CONDUCT.md</span></code> moves from Contributor Covenant 1.4 to
+Contributor Covenant 3.0, at the maintainer’s request. The text is the canonical
+3.0 Markdown fetched from
+<a class="reference external" href="https://www.contributor-covenant.org/version/3/0/code_of_conduct/code_of_conduct.md">https://www.contributor-covenant.org/version/3/0/code_of_conduct/code_of_conduct.md</a>
+rather than a transcription, so the pledge, the encouraged and restricted
+behaviours and the scope are unaltered. Three things needed deciding rather than
+copying. 3.0 ships two <code class="docutils literal notranslate"><span class="pre">[NOTE</span></code> placeholders an adopter must fill: the reporting
+channel, which now names <code class="docutils literal notranslate"><span class="pre">jarryshaw&#64;icloud.com</span></code> – the same contact 1.4 carried
+and the one <code class="docutils literal notranslate"><span class="pre">SECURITY.md</span></code> already points at as its email fallback – plus
+GitHub’s report-abuse form for the case a single-maintainer project cannot
+otherwise cover, a report about the maintainer; and the enforcement section, whose
+placeholder is an instruction to the adopter and is removed. 3.0 then assigns
+enforcement throughout to plural “Community Moderators” (and once, inconsistently,
+to “Community Managers”), which this repository does not have, so all eight
+occurrences become the singular maintainer. The four-rung ladder – Warning,
+Temporarily Limited Activities, Temporary Suspension, Permanent Ban – is offered
+as a suggestion and is <strong>kept</strong>, because each rung maps onto a lever one person
+actually holds on GitHub: a private message, a locked thread, an interaction limit
+or block, a permanent block. Finally, 3.0 is licensed CC BY-SA 4.0 where 1.4’s
+attribution paragraph carried no licence notice at all, so the attribution now
+names version 3.0, links the permanent <code class="docutils literal notranslate"><span class="pre">version/3/0/</span></code> URL, carries the CC BY-SA
+4.0 notice and link, indicates that changes were made as BY requires, and says
+explicitly that the share-alike term covers this document only – the code remains
+BSD-3-Clause and <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> is untouched. Rendering was checked against GitHub’s
+own Markdown API rather than assumed: the ladder comes back as four list items each
+nesting three, which is what #613 had to repair in the 1.4 file when a stray list
+marker collapsed the whole document into one nested item (#624).</p></li>
+<li><p><strong>Fixed</strong> – the one assertion #604 left pinning the old padding side, which had
+been red on <code class="docutils literal notranslate"><span class="pre">mainline</span></code> since #621 merged.
+<code class="docutils literal notranslate"><span class="pre">TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length</span></code>
+expected a truncated TCP option’s <code class="docutils literal notranslate"><span class="pre">data</span></code> as the synthesised zero octets
+<em>followed by</em> the real ones, which is what <code class="docutils literal notranslate"><span class="pre">rjust()</span></code> produced; #621 made the
+padding <code class="docutils literal notranslate"><span class="pre">ljust()</span></code> everywhere but could not retarget this file, since another
+change (#612) owned it at the time and editing it concurrently risked discarding
+work that has since landed. The real octets now come first for both parametrised
+widths, and the docstring above the assertion says tail-padding rather than
+left-padding. Test-only: no library code changes, and
+the sibling case in <code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_ipv4_unit.py</span></code> was already
+retargeted in #621. Measured against <code class="docutils literal notranslate"><span class="pre">main</span></code> at <code class="docutils literal notranslate"><span class="pre">2221c2d8f</span></code>: two subtest
+failures before, none after (#604).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">main</span></code> went red the moment #604’s <code class="docutils literal notranslate"><span class="pre">ljust()</span></code> landed, because
+<code class="docutils literal notranslate"><span class="pre">TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length</span></code>
+still pinned the head-padded short read that fix removed. The
+<code class="docutils literal notranslate"><span class="pre">Reserved_79</span></code> option declaring <code class="docutils literal notranslate"><span class="pre">length=12</span></code> over 6 real octets now reports
+<code class="docutils literal notranslate"><span class="pre">aabbccddeeff00000000</span></code> where the test expected <code class="docutils literal notranslate"><span class="pre">00000000aabbccddeeff</span></code>, so
+both subtests – <code class="docutils literal notranslate"><span class="pre">declared_length=12</span></code> and <code class="docutils literal notranslate"><span class="pre">=32</span></code> – failed on that one
+assertion while the 17 other cases in the file stayed green: the parse itself
+never changed, only which end the synthesised zeros sit at. The expectation
+is inverted, and the docstring above it – which said the short read was
+<em>left</em>-padded and described the value as four zero octets followed by the six
+real ones – is corrected to match, since a docstring that contradicts its
+own assertion is how the stale expectation survived in the first place. The
+inputs do discriminate: <code class="docutils literal notranslate"><span class="pre">trailing</span></code> is non-zero and the pad width is 4 and
+24, so neither subtest would hold under the other order. #621 left this file
+alone deliberately, because #612 owned it at the time, and merged two minutes
+ahead of the cross-review verdict that named it (#604, #621).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> left <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> naming the previous
+release. Nothing else in the repository maintains that file – no workflow, hook
+or packaging file mentions it – so every bump since it landed in #615 would have
+stranded the <code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">date-released</span></code> it renders as GitHub’s “Cite this
+repository” button and that citation managers, Zenodo and dependency inventories
+read directly. Both fields now move with <code class="docutils literal notranslate"><span class="pre">__version__</span></code>. They have the same
+standing, since the file’s own header says both describe the newest <em>published</em>
+release, and moving only one would assert that 1.5.0b5 was released on the day
+1.5.0b4 was; the date is taken in UTC, because seven of the thirty most recent
+bumps were made late evening in US-Eastern where a local date is a day behind the
+publish it describes. That the two are the same day at all is measured rather
+than assumed: the bump is what triggers <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>, the median gap to
+the PyPI upload is three minutes, and the UTC calendar dates agree 30 times out
+of 30. The rewrite is line-oriented, so the comment header, key ordering and each
+field’s existing quoting survive – <code class="docutils literal notranslate"><span class="pre">cff-version</span></code> and a <code class="docutils literal notranslate"><span class="pre">references</span></code> entry’s
+own <code class="docutils literal notranslate"><span class="pre">version</span></code> are anchored out at column zero – and the result is checked with
+<code class="docutils literal notranslate"><span class="pre">cffconvert</span> <span class="pre">--validate</span></code>. An absent file is reported on stderr and skipped
+rather than failing the vendor cron before its <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code>, which would
+discard the whole registry crawl for the sake of a documentation file; a file
+present with no <code class="docutils literal notranslate"><span class="pre">version</span></code> field raises instead, before anything is written,
+because rewriting nothing while reporting success is the staleness this fixes.
+Two things came with it. The script gains a <code class="docutils literal notranslate"><span class="pre">main()</span></code> guard, having previously
+run the entire bump at import, which is why it had no testable surface; and the
+<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapkit</span></code> fallback in its version reader, which returned <code class="docutils literal notranslate"><span class="pre">&quot;1.5.0b4'\n&quot;</span></code>
+– closing quote and newline included, which <code class="docutils literal notranslate"><span class="pre">packaging</span></code> rejects – is fixed,
+a path that had never worked and went unnoticed because the only caller installs
+the package first. A new gate asserts the committed file still names the packaged
+version, covering the version changes made by hand, which never run this script at
+all – 40 of the 159 commits that have moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code>, a quarter
+over the project’s life and 11 of the most recent 25 (#625).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code>’s copyright notice began the term at 2018, a year after
+the work it covers. The repository’s first commit is <code class="docutils literal notranslate"><span class="pre">c57f7d0b7</span></code> “Initial
+commit”, dated 2017-11-07, so the notice understated the term and contradicted the
+only other copyright site in the tree: <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code> computes its Sphinx
+footer as <code class="docutils literal notranslate"><span class="pre">f'2017-{datetime.date.today().year},</span> <span class="pre">Jarry</span> <span class="pre">Shaw'</span></code> and has said 2017
+for as long as it has existed. The two now agree on where the term starts. The
+wrong start year survived every maintenance pass the line has had, because each
+looked only at the other end of the range: <code class="docutils literal notranslate"><span class="pre">bc836cfa2</span></code> (2020-05-31) introduced
+<code class="docutils literal notranslate"><span class="pre">2018-2020</span></code> when the BSD-3-Clause text replaced MPL 2.0 – the file until then was
+stock MPL text carrying no author notice at all, so 2018 is the first start year the
+project ever asserted and it was already a year late when it was written – and the
+range was then bumped by hand three times, to <code class="docutils literal notranslate"><span class="pre">2018-2022</span></code>, <code class="docutils literal notranslate"><span class="pre">2018-2023</span></code> and
+<code class="docutils literal notranslate"><span class="pre">2018-2026</span></code> (#615), each bump correcting the end year and copying <code class="docutils literal notranslate"><span class="pre">2018</span></code>
+forward untouched. The end year is
+<strong>dropped</strong> rather than automated, which is the other half of the change: the
+notice ships inside the sdist and the wheel, so its text is fixed at build time in
+every copy already downloaded and cannot be computed the way the docs footer is;
+copyright subsists from creation whether or not a notice names the current year;
+and BSD-3-Clause’s canonical form is <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">&lt;year&gt;</span> <span class="pre">&lt;owner&gt;</span></code>, singular. So
+a range here is six years of hand maintenance on one line buying nothing, and no
+workflow, script hook or other automation is added in its place – that was
+considered and rejected, since automating a value that need not be current is worse
+than not carrying it. <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> is deliberately untouched, a self-maintaining
+docs footer showing a range being both conventional and correct. The licence body
+is unaltered: the whole-file diff is one hunk at line 3, and the remaining 28 lines
+carry the canonical BSD-3-Clause wording verbatim. Three things distinguish the
+file from SPDX’s bare <code class="docutils literal notranslate"><span class="pre">licenseText</span></code>, and all three predate this change – the
+<code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line, which the opensource.org template carries and
+SPDX omits; the <code class="docutils literal notranslate"><span class="pre">*</span></code> bullets in place of <code class="docutils literal notranslate"><span class="pre">1.</span></code>/<code class="docutils literal notranslate"><span class="pre">2.</span></code>/<code class="docutils literal notranslate"><span class="pre">3.</span></code>; and the extra
+<code class="docutils literal notranslate"><span class="pre">All</span> <span class="pre">rights</span> <span class="pre">reserved.</span></code> line – and the <code class="docutils literal notranslate"><span class="pre">DAMAGE.</span></code> that #615 repaired from a
+stray <code class="docutils literal notranslate"><span class="pre">DAMAGE.s</span></code> is still clean (#630).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

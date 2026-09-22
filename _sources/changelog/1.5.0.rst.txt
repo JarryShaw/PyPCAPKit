@@ -81,7 +81,7 @@ pull requests between #326 and #509.
   skipping them (#440, #504).
 * **Added** -- coverage for the untested half of the #431 accommodation: a TCP
   or IPv4 option whose declared length asks for more data than the capture
-  actually holds, pinning that it still parses, with the short read left-padded
+  actually holds, pinning that it still parses, with the short read zero-padded
   rather than rejected. The one test #431 left behind only covers an option
   area with no data behind it at all; a candidate fix for #554 turned the
   untested half into an unwrapped ``FieldValueError`` while the rest of the
@@ -688,6 +688,413 @@ pull requests between #326 and #509.
   and for the reachability of the repair at all. The suite deliberately asserts
   widths and octets rather than exception types, because the exception depends on
   whether the mis-sized width happens to have a native ``struct`` code (#599).
+* **Fixed** -- ``examples/generators/options.py``'s ``TCP_BASE`` spelled three
+  header fields with names ``TCP.make`` does not declare, so every option
+  fixture in ``examples/captures/options-tcp.pcap`` was built from values the
+  generator had not asked for. ``make`` ends in ``**kwargs`` and reads nothing
+  out of it, so an undeclared keyword is accepted and discarded with no warning
+  and no ``TypeError``, which is why this survived unnoticed. ``'seq': 1`` was
+  ``seq_no``, and all 25 captured frames therefore carried sequence number 0;
+  ``'urgent_pointer'`` was ``urgent``, whose requested value and unused default
+  both happened to be 0; and ``'ack_flag': False`` was ``ack``, while
+  ``'ack': 0`` bound to ``ack`` itself -- the acknowledgement *flag* rather than
+  the number, which is ``ack_no`` -- so that pair was the wrong way round in
+  both directions. Each is renamed to the parameter ``make`` declares, keeping
+  the values the table always read as. Measured:
+  ``TCP(**TCP_BASE).info.seq`` was 0 against a declared 1 and is now 1, and
+  ``options-tcp.pcap`` changes in exactly 25 bytes -- the low octet of each
+  frame's sequence number -- with no case status and no ``EXPECTED_FAILURES``
+  entry moving. The module's six other base mappings were audited the same way:
+  five pass nothing their ``make`` does not declare, and HIP's ``extension`` is
+  declared by ``HIP.read`` instead, which is this library's documented way of
+  forwarding a read-path keyword through ``**kwargs`` rather than a sixth
+  instance of the defect (#602).
+* **Added** --
+  ``tests/protocols/test_option_generator_tcp_base_unit.py``, asserting that
+  every ``TCP_BASE`` key is a parameter ``TCP.make`` declares -- derived from
+  ``inspect.signature``, so it catches a fourth misspelling nobody has made yet
+  -- and that the segment the mapping builds carries the stated header in both
+  the data model and the packed octets. Two of the three wrong names were
+  invisible to any assertion about a *value*, the value asked for being equal to
+  the default that was used instead, which is what the signature check is for
+  (#602).
+* **Fixed** -- the ILNP Nonce option builders in ``HOPOPT`` and ``IPv6_Opts`` sized
+  the option with ``math.ceil(nonce.bit_length() // 8)``, which is floor division
+  dressed up as a ceiling: ``//`` floors, and ``math.ceil`` of an ``int`` is a
+  no-op, so the ceiling was never actually taken. The nonce is packed by a
+  ``NumberField`` whose width *is* that declared ``len``, so an under-declared
+  length did not merely mis-state the option -- it silently truncated the nonce on
+  the wire, with nothing raised. Every nonce whose bit length was not an exact
+  multiple of eight was affected, and **small values were the worst case rather
+  than boundary values**: any nonce below 256 was declared as *zero* octets and
+  dropped from the packet altogether, so ``nonce=9`` packed to ``b'\x8b\x00'`` and
+  parsed back as ``0``, while ``nonce=256`` and ``nonce=65536`` each truncated to
+  ``0`` as well. Fixed to ``max(1, math.ceil(nonce.bit_length() / 8))``, the form
+  already used at five other sizing sites across ``hip.py`` and ``mh.py``. The
+  one-octet floor is the ``mh.py`` convention and is load-bearing here because
+  ``nonce`` defaults to ``0``, whose bit length is ``0``: without it the default
+  argument builds an ILNP Nonce option carrying no Nonce Value field at all,
+  collapsing "the nonce is 0" into "there is no nonce" when :rfc:`6744` gives the
+  option that field. The read path was never affected, since it takes the width
+  from the ``len`` octet on the wire rather than recomputing it (#601).
+* **Added** -- ILNP nonce sizing coverage in
+  ``tests/protocols/internet/test_ipv6_extension_unit.py``, one test per protocol,
+  asserting the declared length, the exact packed octets and the
+  construct-pack-parse cycle over ten nonces. The reason the existing suite missed
+  this is that the only ILNP nonce it ever exercised was ``0xFFFFFF`` -- bit length
+  24, an exact multiple of eight, precisely where floor division and the ceiling
+  agree -- the same blind spot that hid the identical typo in ``numbers.py`` behind
+  bit lengths 8, 16, 24, 32 and 64. Every new case bar two deliberate controls
+  therefore has a bit length that is *not* a multiple of eight, several of them
+  below 256. The table also guards itself: the test asserts that at least six of
+  its own values stay non-byte-aligned and that one stays below 256, so rounding
+  them off to convenient constants later cannot quietly disarm the regression
+  (#601).
+* **Fixed** -- the string-keyed ``get()`` in ``pcapkit.const.ftp.command`` and
+  ``pcapkit.const.http.method`` tested membership with the raw key but
+  registered ``key.upper()``, so the *first* lowercase or mixed-case token
+  raised ``TypeError: 'RETR' already in use`` rather than resolving. Reachable
+  from wire data for FTP: ``pcapkit.protocols.application.ftp`` compiles its
+  request pattern with ``re.I`` and passes the match verbatim, and
+  :rfc:`959#section-5.3` makes FTP commands case-insensitive -- "Upper and lower
+  case alphabetic characters are to be treated identically", listing
+  ``RETR Retr retr ReTr rETr`` as the same command -- so ``retr file.txt`` was a
+  valid request this library could not parse. Both ``get()`` and ``_missing_``
+  now look the key up under the same canonical upper-case name they register it
+  under, so every casing resolves to the one member that already exists instead
+  of colliding with it. Resolving rather than registering a second member
+  matters beyond not crashing -- a duplicate ``GET`` would carry neither the
+  ``safe`` nor the ``idempotent`` attribute of the real one (#582, #583).
+* **Fixed** -- ``httpv1``'s ``_RE_METHOD`` was unanchored and ``re.match``
+  anchors only at the start, so it prefix-matched, and the request-line reader
+  then passed the whole ``para1`` to ``Method.get`` rather than the captured
+  ``method`` group. Together those meant ``b'Get'`` matched on the single
+  character ``G``, satisfied the guard that decides a start-line is a request,
+  and handed the entire mixed-case token to a lookup that raised on it. Fixing
+  either half alone still gives a wrong answer -- normalising the lookup would
+  parse ``b'Get'`` as ``GET`` off a one-character match, and passing the group
+  would parse it as a method named ``G``. The pattern is now anchored at both
+  ends and the captured group is what is looked up, so a token that is not a
+  method is a malformed request line rather than a mis-parsed one. Method tokens
+  are case-sensitive per :rfc:`9110#section-9.1`, so no ``re.I`` was added:
+  ``GET`` parses, ``Get`` and ``get`` are rejected (#583).
+* **Fixed** -- ``_RE_STATUS`` in the same reader carried the same unanchored
+  prefix defect, found by auditing ``_RE_METHOD``'s siblings, and it escaped as
+  the wrong exception type. That pattern is only a guard -- the value is taken
+  from ``int(para2)`` on the raw token -- so a prefix match let a malformed
+  status past the guard and then out of ``int()`` uncaught, where
+  ``_read_http_header`` documents ``ProtocolError``. Measured: a status of
+  ``200x`` raised
+  ``ValueError: invalid literal for int() with base 10: b'200x'``, and one of
+  ``2000`` raised ``ValueError: 2000 is not a valid StatusCode``;
+  both are now ``ProtocolError``.
+  :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three, so the
+  anchor is what the grammar already said -- the production lives in HTTP/1.1
+  because ``status-code`` is part of its ``status-line``, while
+  :rfc:`9110#section-15` covers the code semantics and the IANA registry rather
+  than the syntax. ``_RE_VERSION`` was audited at the same time and is safe as
+  it stands, because both of its call sites read the captured group rather than
+  the raw token (#583).
+* **Fixed** -- ``get()``'s documented ``default`` was ignored on the integer
+  path throughout the generated ``pcapkit.const`` tree, because ``get``
+  delegated the lookup to the enum call and ``_missing_`` has no access to the
+  caller's ``default`` -- so ``Hardware.get(99999, 0)`` raised
+  ``ValueError: 99999 is not a valid Hardware`` instead of returning the
+  fallback it was handed. The integer path now consults ``default`` before
+  letting the lookup error escape. ``-1``, the placeholder the generated
+  signature already carried, is what separates "no default was supplied" from
+  "a default was supplied and should be used", so a caller that asked for no
+  fallback still gets the error rather than a silent substitution. The sweep
+  #584 asked for puts the scope at 110 of the 118 integer registries, not the
+  three the issue named; the two carrying a bespoke integer fallback of their
+  own, ``pcapng`` ``OptionType`` and ``reg`` ``AppType``, are deliberately left
+  alone, since neither drops a default by raising. Not reachable from wire data
+  -- every value a wire field can carry already resolves -- so this is a
+  contract fix rather than a parse fix. Applied to the nine vendor templates as
+  well as the 113 generated modules, and a new test renders the shared template
+  and compares it against the module generated from it, so a regeneration
+  cannot quietly undo it (#584).
+* **Fixed** -- ``FieldBase.unpack`` padded a short read on the wrong side. When a
+  field's buffer falls short of its declared length -- the deliberate
+  accommodation that lets a snapshot-truncated capture parse (#431) -- the
+  shortfall was zero-filled with ``rjust()``, which places the zeros at the
+  *front*. That asserts the octets never read were the leading ones, and a short
+  read has lost the trailing ones: the buffer ran out. It is now ``ljust()``,
+  which is correct for **both** byte orders rather than only for big-endian
+  fields, so the correction is not byte-order-conditional. The two directions
+  fail differently and only one was loud. Measured: one octet of a four-octet
+  little-endian ``120`` read as ``2013265920``, inflated by ``2 ** 24``; three
+  octets of a four-octet big-endian ``0x01020304`` read as ``0x10203``, scaled
+  *down* by 256. The second is the dangerous one -- a value smaller than the
+  truth passes a sanity check, where an inflated one overruns -- which is why the
+  big-endian half went unnoticed. A full read is untouched at every width and
+  order, since the padding is only ever consulted when the buffer falls short
+  (#604).
+* **Fixed** -- as a consequence of the above, the unhandled ``MemoryError`` at
+  ``pcapkit/protocols/protocol.py:1016`` on a truncated PCAP-NG capture.
+  ``dhcp_little_endian.pcapng`` cut to 161, 641 or 1389 octets left a one-octet
+  read of a little-endian 32-bit block length, which ``rjust()`` turned into
+  ``0x78000000`` or ``0x84000000`` -- 1.88 to 2.06 GiB -- and which was then
+  passed straight to ``self._file.read()`` as an allocation size, from a
+  1772-octet file. Under a 1 GiB address-space cap all three raise
+  ``MemoryError`` there; with more address space the allocation succeeds and the
+  parse goes on to fail anyway, so the visible symptom depended on how much
+  memory the process could get. With ``ljust()`` the same reads report 120 and
+  132, no large allocation is attempted, and all three end in the ordinary,
+  already-handled parse failure instead (#604).
+* **Added** -- ``FieldBaseShortReadPaddingSideTests``, ten cases over 133
+  subtests covering both byte orders at 2, 4 and 8 octets and at every
+  truncation point: the two figures #604 reports as literals, the
+  value-preserving property stated over every width and shortfall rather than as
+  a table, the two failure directions as inequalities, a signed field, a
+  byte-string field, and an unpack-then-pack cycle. Eight of the ten fail on the
+  unfixed tree. The other two must pass on both and are the guard rails -- a full
+  read at every width and order, which may not move, and a read against an
+  entirely empty buffer, which pads to all zeros either way and is the #431
+  behaviour the option and list loops depend on (#604).
+* **Added** -- ``CITATION.cff``, citation metadata in Citation File Format
+  1.2.0, which GitHub renders as the repository's "Cite this repository" button
+  and which citation managers and dependency inventories read directly. It is
+  the machine-readable half of the attribution BSD-3-Clause already asks for, so
+  credit carries into a paper or a bill of materials rather than depending on a
+  reader opening ``LICENSE``. Validated with ``cffconvert --validate`` and
+  against the published 1.2.0 schema; ``doi`` and ``orcid`` are omitted rather
+  than invented, since neither exists for this project today and both are
+  checked formats, so a wrong value would still validate. The licence itself is
+  deliberately unchanged -- still BSD-3-Clause, no ``NOTICE`` file, no change to
+  its terms. Alongside it the copyright line moves from ``2018-2023`` to
+  ``2018-2026`` -- ``LICENSE`` was its only occurrence in the tree, since
+  ``docs/source/conf.py`` already derives its own from the current year -- and a
+  stray ``s`` after the closing ``DAMAGE.`` of the licence text, present since
+  the Mozilla-to-BSD relicence, is removed, so the wording now matches canonical
+  BSD-3-Clause exactly (#615).
+* **Fixed** -- reading a big-endian classic PCAP byte-swapped every record header
+  field, and then crashed. ``Frame.unpack`` seeded the file's declared byte order
+  under the key ``bytesorder`` where the frame schema's ``byteorder_callback``
+  reads ``byteorder``, so the lookup never found it and always fell back to
+  ``sys.byteorder`` -- the reading host's order rather than the file's. On a
+  little-endian host reading a little-endian capture that fallback gives the
+  right answer by coincidence, and every capture in this repository was
+  little-endian, so the wrong code path has always produced correct results.
+  Against a big-endian capture, measured before the fix, frame 1 of
+  ``big_endian.pcap`` read ``ts_sec=3106905``, ``ts_usec=1088553216`` and
+  ``incl_len=1241513984`` for a record whose real values are ``1500000000``,
+  ``123456`` and ``74``, dating the frame to 1970-02-05 rather than to
+  2017-07-14. ``incl_len`` is the payload length, so that first record
+  then consumed the whole file and the second was read with a negative payload
+  length, raising ``ValueError: read length must be non-negative or -1`` out of
+  the schema -- which is the reported crash, and it is the *second* symptom
+  rather than the first. The sibling ``Frame.pack`` eleven lines earlier spelled
+  the key correctly, which is what marks this as a slip rather than a second key,
+  and the fallback is what made a misspelled key indistinguishable from an absent
+  one; ``byteorder_callback`` now records that it is the definition of the key
+  and why the fallback hides a typo (#605).
+* **Added** -- ``examples/generators/endian.py``, and the byte-order tests that
+  read what it writes. There was no big-endian ``.pcap`` in the repository at all,
+  which is why #605 survived its own code review: the one-character fix leaves the
+  corrected path exactly as untested as the broken one. The generator writes three
+  captures -- ``big_endian.pcap`` (magic ``a1 b2 c3 d4``),
+  ``big_endian_nanosecond.pcap`` (``a1 b2 3c 4d``, the first fixture to take that
+  branch of the magic-number table) and ``little_endian.pcap`` (``d4 c3 b2 a1``) --
+  carrying the *same three records* in each container, so the tests can assert
+  that the byte order makes no difference to what is read out rather than only
+  that the big-endian file matches numbers written down in a test. Frame 3 is
+  captured short, 1200 octets on the wire cut to a 96-octet ``snaplen``, so
+  ``incl_len`` and ``orig_len`` differ and cannot both be satisfied by one
+  byte-swapped value. ``test_frame_endian_runtime.py`` drives all three through
+  ``extract()`` and walks each file's record chain with ``struct`` to derive its
+  own expectations; a unit-tier case in ``test_header_frame_unit.py`` builds a
+  two-record big-endian capture in memory instead, so the regression is also
+  caught by the fixture-free selection CI runs on every push. All four fail on the
+  unfixed tree -- the three fixture-backed ones by that ``ValueError``, the
+  in-memory one by ``AssertionError: 3106905 != 1500000000`` -- while the
+  little-endian twin passes on both trees, which is what shows the records
+  themselves are not the variable (#605).
+* **Changed** -- ``tests/protocols/transport/test_tcp_udp_unit.py`` now reaches the
+  MP_JOIN dispatchers through ``TCP()`` itself, instead of assigning a Python
+  ``set`` to ``_flags`` on a bare ``TCP.__new__(TCP)``. A ``set`` answers the
+  membership tests ``_make_mptcp_join`` and ``_read_mptcp_join`` use, so every flag
+  branch ran and both TCP modules read 100% statement and branch coverage -- while
+  the attribute had neither the ``aenum.IntFlag`` type production assigns nor the
+  ordering that governs when it exists at all, which is how #587 stayed invisible
+  behind that number and how the ``cast('Enum_Flags', 0)`` no-op behind it went
+  unnoticed too. Measured on the rewrite, against the 17 tests of that file: revert
+  #587's hoist and two of them fail with
+  ``AttributeError: 'TCP' object has no attribute '_flags'``
+  where all 17 passed before; restore the ``cast`` and two fail with
+  ``TypeError: argument of type 'int' is not a container or iterable``, again
+  where all 17 passed. The library is unchanged and the file's tests still pass, so
+  the coverage numbers do not move -- the point is what the same numbers are now
+  worth (#603).
+* **Fixed** -- documentation. ``mptcp_dss_ack_selector``'s note said a corrected
+  field-width lambda "would not have worked" and that fixing it belonged to
+  ``pcapkit.corekit.fields.numbers``, which is exactly where #598 then fixed it; the
+  same paragraph sat in ``test_tcp_mptcp_length_arithmetic_unit.py``'s module
+  docstring, whose other stale claim was that MP_JOIN "cannot be built through the
+  public ``TCP()`` constructor at all", true only until #587. A callable-length
+  ``NumberField`` packs and unpacks both DSS widths now, and wire *absence* was
+  never the obstacle either: ``MPTCPDSS.ssn``, ``dl_len`` and ``checksum`` have
+  always been ``ConditionalField`` on the sibling ``M`` flag, so the class already
+  relied on that wrapper to keep a field off the wire. The ``SwitchField`` form is
+  kept for the narrower reason the note now gives -- ``ConditionalField``'s
+  ``length`` forwards to the wrapped field without consulting the condition, so it
+  is safe here only because ``Schema.pack`` and ``Schema.unpack`` special-case that
+  wrapper by name, whereas a ``SwitchField`` always resolves to a concrete field.
+  Replacing it would be a behaviour change and is not made (#603).
+* **Changed** -- the README is a landing page now, and Markdown rather than
+  reStructuredText. ``README.rst`` (424 lines) became ``README.md`` (103),
+  keeping what a reader arriving from PyPI or a search result actually needs --
+  what the library is, why it exists rather than Scapy or DPKT, how to install
+  it, a worked example, and where the documentation lives -- and dropping the
+  technical detail the documentation already carried. **Module Structure**,
+  **Engine Comparison**, **Engine support by Python version**, **Test
+  Environment**, **Test Results** and **Installation Notes** were each already
+  duplicated in ``docs/source/index.rst``, in a fuller form, so they are linked
+  rather than restated. Two blocks existed nowhere else and moved rather than
+  going: **Testing** is now ``docs/source/testing.rst``, registered in the index
+  toctree, and the ``pipenv`` and ``make setup`` local development block joined
+  the Installation section of ``docs/source/index.rst``. Requested by the project
+  owner, and a deliberate exception to the convention that documentation here is
+  reStructuredText -- for the README only, since it is the one documentation file
+  whose renderers are GitHub and PyPI rather than Sphinx. Accordingly
+  ``setup.py`` reads ``README.md`` and declares its content type as
+  ``text/markdown``, and the ``include README.md`` line in ``MANIFEST.in`` is now
+  the only thing that puts the README in a source distribution, because
+  ``global-include *.rst`` no longer matches it -- which matters, since
+  ``setup.py`` reads the file unguarded and an sdist without it cannot be
+  installed. Verified with ``twine check --strict`` against a built sdist and
+  wheel, both of which pass. The rename's own references moved with it, since a
+  change that renames a file owns the references to it:
+  ``examples/benchmark/Dockerfile`` copies ``README.md`` -- a literal ``COPY`` of
+  the old name would have failed the layer outright and taken ``make bench``,
+  ``make bench-quick`` and ``run.sh`` with it -- and the benchmark harness prose
+  that named the root README as the destination of its generated tables now names
+  ``docs/source/index.rst``, which is where those tables went. That covers the
+  ``Makefile`` comment, ``report.py``, ``test_harness.py``, ``run.sh`` and the
+  suite's own README, including the one place whose stated reason had inverted: the
+  emitted markup is kept parseable by plain docutils, which is now a conservative
+  choice rather than a hard requirement, because the page it lands on is rendered
+  by Sphinx. ``examples/benchmark/benchmark.py`` still says ``README.rst`` and is
+  left alone, because it means the benchmark suite's own README in the same
+  directory, not the project's.
+* **Changed** -- ``CODE_OF_CONDUCT.md`` moves from Contributor Covenant 1.4 to
+  Contributor Covenant 3.0, at the maintainer's request. The text is the canonical
+  3.0 Markdown fetched from
+  https://www.contributor-covenant.org/version/3/0/code_of_conduct/code_of_conduct.md
+  rather than a transcription, so the pledge, the encouraged and restricted
+  behaviours and the scope are unaltered. Three things needed deciding rather than
+  copying. 3.0 ships two ``[NOTE`` placeholders an adopter must fill: the reporting
+  channel, which now names ``jarryshaw@icloud.com`` -- the same contact 1.4 carried
+  and the one ``SECURITY.md`` already points at as its email fallback -- plus
+  GitHub's report-abuse form for the case a single-maintainer project cannot
+  otherwise cover, a report about the maintainer; and the enforcement section, whose
+  placeholder is an instruction to the adopter and is removed. 3.0 then assigns
+  enforcement throughout to plural "Community Moderators" (and once, inconsistently,
+  to "Community Managers"), which this repository does not have, so all eight
+  occurrences become the singular maintainer. The four-rung ladder -- Warning,
+  Temporarily Limited Activities, Temporary Suspension, Permanent Ban -- is offered
+  as a suggestion and is **kept**, because each rung maps onto a lever one person
+  actually holds on GitHub: a private message, a locked thread, an interaction limit
+  or block, a permanent block. Finally, 3.0 is licensed CC BY-SA 4.0 where 1.4's
+  attribution paragraph carried no licence notice at all, so the attribution now
+  names version 3.0, links the permanent ``version/3/0/`` URL, carries the CC BY-SA
+  4.0 notice and link, indicates that changes were made as BY requires, and says
+  explicitly that the share-alike term covers this document only -- the code remains
+  BSD-3-Clause and ``LICENSE`` is untouched. Rendering was checked against GitHub's
+  own Markdown API rather than assumed: the ladder comes back as four list items each
+  nesting three, which is what #613 had to repair in the 1.4 file when a stray list
+  marker collapsed the whole document into one nested item (#624).
+* **Fixed** -- the one assertion #604 left pinning the old padding side, which had
+  been red on ``mainline`` since #621 merged.
+  ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
+  expected a truncated TCP option's ``data`` as the synthesised zero octets
+  *followed by* the real ones, which is what ``rjust()`` produced; #621 made the
+  padding ``ljust()`` everywhere but could not retarget this file, since another
+  change (#612) owned it at the time and editing it concurrently risked discarding
+  work that has since landed. The real octets now come first for both parametrised
+  widths, and the docstring above the assertion says tail-padding rather than
+  left-padding. Test-only: no library code changes, and
+  the sibling case in ``tests/protocols/internet/test_ipv4_unit.py`` was already
+  retargeted in #621. Measured against ``main`` at ``2221c2d8f``: two subtest
+  failures before, none after (#604).
+* **Fixed** -- ``main`` went red the moment #604's ``ljust()`` landed, because
+  ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
+  still pinned the head-padded short read that fix removed. The
+  ``Reserved_79`` option declaring ``length=12`` over 6 real octets now reports
+  ``aabbccddeeff00000000`` where the test expected ``00000000aabbccddeeff``, so
+  both subtests -- ``declared_length=12`` and ``=32`` -- failed on that one
+  assertion while the 17 other cases in the file stayed green: the parse itself
+  never changed, only which end the synthesised zeros sit at. The expectation
+  is inverted, and the docstring above it -- which said the short read was
+  *left*-padded and described the value as four zero octets followed by the six
+  real ones -- is corrected to match, since a docstring that contradicts its
+  own assertion is how the stale expectation survived in the first place. The
+  inputs do discriminate: ``trailing`` is non-zero and the pad width is 4 and
+  24, so neither subtest would hold under the other order. #621 left this file
+  alone deliberately, because #612 owned it at the time, and merged two minutes
+  ahead of the cross-review verdict that named it (#604, #621).
+* **Fixed** -- ``util/bump_version.py`` left ``CITATION.cff`` naming the previous
+  release. Nothing else in the repository maintains that file -- no workflow, hook
+  or packaging file mentions it -- so every bump since it landed in #615 would have
+  stranded the ``version`` and ``date-released`` it renders as GitHub's "Cite this
+  repository" button and that citation managers, Zenodo and dependency inventories
+  read directly. Both fields now move with ``__version__``. They have the same
+  standing, since the file's own header says both describe the newest *published*
+  release, and moving only one would assert that 1.5.0b5 was released on the day
+  1.5.0b4 was; the date is taken in UTC, because seven of the thirty most recent
+  bumps were made late evening in US-Eastern where a local date is a day behind the
+  publish it describes. That the two are the same day at all is measured rather
+  than assumed: the bump is what triggers ``create-release.yml``, the median gap to
+  the PyPI upload is three minutes, and the UTC calendar dates agree 30 times out
+  of 30. The rewrite is line-oriented, so the comment header, key ordering and each
+  field's existing quoting survive -- ``cff-version`` and a ``references`` entry's
+  own ``version`` are anchored out at column zero -- and the result is checked with
+  ``cffconvert --validate``. An absent file is reported on stderr and skipped
+  rather than failing the vendor cron before its ``git commit``, which would
+  discard the whole registry crawl for the sake of a documentation file; a file
+  present with no ``version`` field raises instead, before anything is written,
+  because rewriting nothing while reporting success is the staleness this fixes.
+  Two things came with it. The script gains a ``main()`` guard, having previously
+  run the entire bump at import, which is why it had no testable surface; and the
+  ``import pcapkit`` fallback in its version reader, which returned ``"1.5.0b4'\n"``
+  -- closing quote and newline included, which ``packaging`` rejects -- is fixed,
+  a path that had never worked and went unnoticed because the only caller installs
+  the package first. A new gate asserts the committed file still names the packaged
+  version, covering the version changes made by hand, which never run this script at
+  all -- 40 of the 159 commits that have moved ``__version__`` on ``main``, a quarter
+  over the project's life and 11 of the most recent 25 (#625).
+
+* **Fixed** -- ``LICENSE``'s copyright notice began the term at 2018, a year after
+  the work it covers. The repository's first commit is ``c57f7d0b7`` "Initial
+  commit", dated 2017-11-07, so the notice understated the term and contradicted the
+  only other copyright site in the tree: ``docs/source/conf.py`` computes its Sphinx
+  footer as ``f'2017-{datetime.date.today().year}, Jarry Shaw'`` and has said 2017
+  for as long as it has existed. The two now agree on where the term starts. The
+  wrong start year survived every maintenance pass the line has had, because each
+  looked only at the other end of the range: ``bc836cfa2`` (2020-05-31) introduced
+  ``2018-2020`` when the BSD-3-Clause text replaced MPL 2.0 -- the file until then was
+  stock MPL text carrying no author notice at all, so 2018 is the first start year the
+  project ever asserted and it was already a year late when it was written -- and the
+  range was then bumped by hand three times, to ``2018-2022``, ``2018-2023`` and
+  ``2018-2026`` (#615), each bump correcting the end year and copying ``2018``
+  forward untouched. The end year is
+  **dropped** rather than automated, which is the other half of the change: the
+  notice ships inside the sdist and the wheel, so its text is fixed at build time in
+  every copy already downloaded and cannot be computed the way the docs footer is;
+  copyright subsists from creation whether or not a notice names the current year;
+  and BSD-3-Clause's canonical form is ``Copyright (c) <year> <owner>``, singular. So
+  a range here is six years of hand maintenance on one line buying nothing, and no
+  workflow, script hook or other automation is added in its place -- that was
+  considered and rejected, since automating a value that need not be current is worse
+  than not carrying it. ``conf.py`` is deliberately untouched, a self-maintaining
+  docs footer showing a range being both conventional and correct. The licence body
+  is unaltered: the whole-file diff is one hunk at line 3, and the remaining 28 lines
+  carry the canonical BSD-3-Clause wording verbatim. Three things distinguish the
+  file from SPDX's bare ``licenseText``, and all three predate this change -- the
+  ``BSD 3-Clause License`` title line, which the opensource.org template carries and
+  SPDX omits; the ``*`` bullets in place of ``1.``/``2.``/``3.``; and the extra
+  ``All rights reserved.`` line -- and the ``DAMAGE.`` that #615 repaired from a
+  stray ``DAMAGE.s`` is still clean (#630).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

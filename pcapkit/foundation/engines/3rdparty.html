@@ -377,6 +377,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -472,13 +473,13 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <a class="reference external" href="https://scapy.net">Scapy</a>’s layer registries – <code class="docutils literal notranslate"><span class="pre">conf.l2types</span></code> and the <code class="docutils literal notranslate"><span class="pre">bind_layers</span></code>
 payload table, both of which exist only as import side effects of the layer
 modules. Importing a narrower submodule leaves them empty, and
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine dissected
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine dissected
 nothing at all and said so only on <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>. See
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Scapy.__init__()</span></code></a> for why naming the layer modules individually is not a
 cheaper route to the same place.</p>
 <p>One side effect is worth knowing about in advance: <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code> loads
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there
 triggers a <code class="docutils literal notranslate"><span class="pre">CryptographyDeprecationWarning</span></code> from <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code> about
 finite-field Diffie-Hellman. It concerns a key-exchange code path
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> never executes, but it subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UserWarning</span></code></a> rather
@@ -530,9 +531,9 @@ category (see <a class="reference internal" href="../../utilities/warnings.html#
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy.run" title="Link to this definition">¶</a></dt>
-<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
+<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator
-from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
+from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a> – which <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> binds to
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code>, since that is the import that populates the layer
 registries <code class="docutils literal notranslate"><span class="pre">sniff</span></code> needs to dissect anything.</p>
@@ -554,7 +555,7 @@ protocol implementations.</p>
 <dd><p>Read frames with Scapy engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed frame instance.</p>

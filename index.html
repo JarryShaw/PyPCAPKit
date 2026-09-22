@@ -377,6 +377,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -486,6 +487,11 @@ construction and analysis library.</p>
 <li class="toctree-l2"><a class="reference internal" href="demo.html#cli-samples">CLI Samples</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#the-option-round-trip-generator">The option round-trip generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pep.html">Help Wanted</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pep.html#more-protocols-more">More Protocols, More!!!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pep.html#pcapng-support">PCAPNG Support</a></li>
@@ -554,7 +560,7 @@ command line tool for PCAP extraction.</p>
 <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project as its CLI support.</p>
 </div>
 </div>
-<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post239)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.7.1rc1.post240)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, and etc, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is
 designed to be much more comprehensive, which means it is able to provide
 more detailed information about the packet, as well as a more <em>Pythonic</em>
@@ -874,6 +880,23 @@ earlier than the library does; see <a class="reference internal" href="#engine-p
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 <span class="c1"># and to update at any time</span>
 git<span class="w"> </span>pull
+</pre></div>
+</div>
+<p>For local development with <code class="docutils literal notranslate"><span class="pre">pipenv</span></code>, the repository already includes a
+<code class="file docutils literal notranslate"><span class="pre">Pipfile</span></code> and <code class="file docutils literal notranslate"><span class="pre">Makefile</span></code> targets that keep both the virtualenv and
+the package caches inside the project directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>setup
+</pre></div>
+</div>
+<p>This resolves two common local setup issues on macOS/Homebrew installations:
+<code class="docutils literal notranslate"><span class="pre">pipenv</span></code> cache permission errors under <code class="file docutils literal notranslate"><span class="pre">~/Library/Caches</span></code>, and <code class="docutils literal notranslate"><span class="pre">lxml</span></code>
+builds failing to locate Homebrew’s <code class="docutils literal notranslate"><span class="pre">libxml2</span></code>/<code class="docutils literal notranslate"><span class="pre">libxslt</span></code> headers.</p>
+<p>If you prefer to run <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> directly, use the same local cache layout and
+skip any stale, user-local <code class="file docutils literal notranslate"><span class="pre">Pipfile.lock</span></code>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">PIPENV_VENV_IN_PROJECT</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">PIPENV_CACHE_DIR</span><span class="o">=</span><span class="nv">$PWD</span>/.pipenv-cache<span class="w"> </span><span class="se">\</span>
+<span class="nv">PIP_CACHE_DIR</span><span class="o">=</span><span class="nv">$PWD</span>/.pip-cache<span class="w"> </span><span class="se">\</span>
+pipenv<span class="w"> </span>install<span class="w"> </span>--skip-lock<span class="w"> </span>--dev
 </pre></div>
 </div>
 <p>And since <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports various extraction engines, and extensive

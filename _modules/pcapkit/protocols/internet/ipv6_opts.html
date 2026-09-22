@@ -370,6 +370,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -2436,9 +2437,21 @@
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">nonce</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">nonce</span>
 
+        <span class="c1"># NOTE: ``nonce`` is packed by a NumberField whose width is this very</span>
+        <span class="c1"># ``len`` (c.f. pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),</span>
+        <span class="c1"># so the declared octet count has to be the ceiling of the bit length over</span>
+        <span class="c1"># eight -- ``bit_length() // 8`` floors instead, and wrapping a float-free</span>
+        <span class="c1"># floor division in ``math.ceil`` is a no-op, so every nonce whose bit</span>
+        <span class="c1"># length is not a multiple of eight used to be sized short and silently</span>
+        <span class="c1"># truncated on the wire (a nonce below 256 was declared as *zero* octets</span>
+        <span class="c1"># and vanished outright). ``bit_length()`` is 0 for 0 itself, which would</span>
+        <span class="c1"># likewise declare a zero-octet nonce -- collapsing "the nonce is 0" into</span>
+        <span class="c1"># "there is no nonce", when RFC 6744 gives the option a Nonce Value field</span>
+        <span class="c1"># -- so the width is floored at one octet, matching</span>
+        <span class="c1"># pcapkit.protocols.internet.mh.MH._make_opt_mn_id (c.f. #601).</span>
         <span class="k">return</span> <span class="n">Schema_ILNPOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nonce</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">//</span> <span class="mi">8</span><span class="p">),</span>
+            <span class="nb">len</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nonce</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)),</span>
             <span class="n">nonce</span><span class="o">=</span><span class="n">nonce</span><span class="p">,</span>
         <span class="p">)</span></div>
 
