@@ -15,6 +15,7 @@ is inspired and based on the `Werkzeug`_ project.
 import copy
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
+from pcapkit.utilities.compat import final
 from pcapkit.utilities.exceptions import MissingKeyError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -75,14 +76,54 @@ class _omd_bucket(Generic[_KT, _VT]):
             omd._last_bucket = self.prev  # pylint: disable=protected-access
 
 
+@final
 class _Missing:
+    """Marker for a ``default`` argument that the caller did not supply.
+
+    :meth:`MultiDict.pop` and :meth:`OrderedMultiDict.pop` cannot use
+    :obj:`None` here, because ``pop(key, None)`` is the canonical :obj:`dict`
+    idiom for *return* :obj:`None` *rather than raise* -- were the marker
+    :obj:`None`, that call would raise
+    :exc:`~pcapkit.utilities.exceptions.MissingKeyError` instead. Both
+    implementations therefore test this marker by **identity**, never by
+    truthiness.
+
+    Follows :class:`~pcapkit.corekit.fields.field.NoValueType`, the package's
+    convention for a sentinel of this kind: :func:`~typing.final`, and falsy.
+
+    """
+
     def __repr__(self) -> 'str':
+        """Return ``'no value'``."""
         return "no value"
 
+    def __bool__(self) -> 'Literal[False]':
+        """Return :obj:`False`.
+
+        A marker meaning *no value was supplied* that answered :obj:`True`
+        would state the opposite of what it means. The marker is reachable
+        without touching a private name -- it is the runtime default of both
+        ``pop()`` methods, so :func:`inspect.signature` exposes it -- which is
+        why this is defined rather than left to :class:`object`.
+
+        """
+        return False
+
     def __reduce__(self) -> 'str':
+        """Return ``'_missing'``, pickling the singleton by name.
+
+        Returning a :obj:`str` from :meth:`~object.__reduce__` asks :mod:`pickle`
+        to save a reference to that global rather than the instance's state, so
+        unpickling re-resolves :data:`pcapkit.corekit.multidict._missing` and
+        identity survives the round trip -- which is what the identity tests in
+        ``pop()`` need if the marker ever crosses a process boundary.
+
+        """
         return "_missing"
 
 
+#: _Missing: Marker for an unsupplied ``default`` argument to
+#: :meth:`MultiDict.pop` and :meth:`OrderedMultiDict.pop`.
 _missing = _Missing()
 
 ###############################################################################

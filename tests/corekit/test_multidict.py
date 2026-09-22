@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import copy
+import inspect
+import pickle
+import sys
 import unittest
 
 from tests._support import bootstrap_core_modules, purge_modules
@@ -10,6 +13,7 @@ class MultiDictTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
         modules = bootstrap_core_modules()
+        self.modules = modules
         self.multidict = modules['multidict']
         self.exceptions = modules['exceptions']
 
@@ -99,6 +103,75 @@ class MultiDictTests(unittest.TestCase):
 
         with self.assertRaises(self.exceptions.MissingKeyError):
             data.pop('missing')
+
+    def test_missing_sentinel_follows_novalue_convention(self) -> None:
+        """``_missing`` is falsy, like :class:`~pcapkit.corekit.fields.field.NoValueType`.
+
+        The sentinel is the runtime default of :meth:`MultiDict.pop` and
+        :meth:`OrderedMultiDict.pop`, so it is reachable through
+        :func:`inspect.signature` even though the name is private. A marker
+        meaning *no default was supplied* that answers :data:`True` to
+        :func:`bool` says the opposite of what it means, which is why
+        ``NoValueType`` defines ``__bool__``.
+
+        Both ``pop()`` implementations decide on **identity** rather than on
+        truthiness, so the falsy sentinel must not change what they do -- the
+        falsy-``default`` cases below are the regression guard for that, since
+        an ``if default:`` in place of ``if default is not _missing:`` would
+        turn every one of them into a :exc:`MissingKeyError`.
+
+        """
+        missing = self.multidict._missing
+
+        self.assertIs(bool(missing), False)
+        self.assertFalse(missing)
+
+        # unchanged by the above -- ``__reduce__`` returning a bare name is
+        # pickle-by-name, and it is the only thing that lets the singleton
+        # survive a round trip through another process
+        self.assertEqual(repr(missing), 'no value')
+        self.assertEqual(missing.__reduce__(), '_missing')
+        for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
+            with self.subTest(protocol=protocol):
+                self.assertIs(pickle.loads(pickle.dumps(missing, protocol=protocol)), missing)
+
+        for factory in (self.multidict.MultiDict, self.multidict.OrderedMultiDict):
+            with self.subTest(factory=factory.__name__):
+                self.assertIs(
+                    inspect.signature(factory.pop).parameters['default'].default, missing
+                )
+
+                with self.assertRaises(self.exceptions.MissingKeyError):
+                    factory().pop('absent')
+
+                for default in (None, False, 0, '', [], missing.__class__()):
+                    with self.subTest(default=default):
+                        self.assertIs(factory().pop('absent', default), default)
+
+    def test_missing_sentinel_is_marked_final(self) -> None:
+        """``_Missing`` carries ``@final``, like ``NoValueType``.
+
+        ``typing.final`` only started recording ``__final__`` on the decorated
+        class in Python 3.11, and :data:`pcapkit.utilities.compat.final` is
+        ``typing.final`` on every version from 3.8 up -- so asserting
+        ``__final__`` directly would pass vacuously on 3.8 through 3.10, which
+        are in the supported range. Probe the decorator with a throwaway class
+        and skip where it cannot record the mark, rather than assert nothing.
+
+        """
+        compat = self.modules['compat']
+
+        @compat.final
+        class _Probe:
+            pass
+
+        if getattr(_Probe, '__final__', None) is not True:
+            self.skipTest(
+                f'{compat.final!r} does not record __final__ on Python '
+                f'{".".join(str(part) for part in sys.version_info[:2])}'
+            )
+
+        self.assertIs(self.multidict._Missing.__final__, True)
 
     def test_ordered_multidict_keeps_insertion_order_for_duplicates(self) -> None:
         data = self.multidict.OrderedMultiDict([('a', 1), ('b', 2), ('a', 3)])

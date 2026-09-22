@@ -36,6 +36,17 @@ is inspired and based on the `Werkzeug`_ project.
    :no-special-members: __init__
    :show-inheritance:
 
+Auxiliaries
+-----------
+
+.. autoclass:: pcapkit.corekit.multidict._Missing
+
+   .. automethod:: __bool__
+   .. automethod:: __reduce__
+
+.. autodata:: pcapkit.corekit.multidict._missing
+   :no-value:
+
 Type Variables
 --------------
 
