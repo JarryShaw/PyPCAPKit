@@ -6,9 +6,13 @@ import ipaddress
 import importlib.util
 import types
 import unittest
+from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import purge_modules
+
+if TYPE_CHECKING:
+    from typing import Any
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -16,6 +20,50 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 class DummyData(dict):
     __getattr__ = dict.__getitem__
+
+
+def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
+                 **kwargs: 'Any') -> 'Any':
+    """Build one MPTCP option the way a caller builds it, and hand back its schema.
+
+    The MP_JOIN makers dispatch on ``self._flags`` to pick between the three layouts of
+    :rfc:`8684` section 3.2, and :meth:`TCP.make
+    <pcapkit.protocols.transport.tcp.TCP.make>` is what assigns that attribute -- as an
+    :class:`aenum.IntFlag` member, resolved *before* ``_make_tcp_options`` runs.
+
+    Until #603 the MP_JOIN cases here wrote a plain :obj:`set` onto the attribute of a bare
+    ``object.__new__(TCP)`` instead. A :obj:`set` answers the ``in`` tests the dispatchers
+    use, so every branch ran and both TCP modules read 100% statement and branch coverage
+    -- while the attribute had neither the type nor the provenance production gives it. That
+    is how #587, an ordering defect that broke MP_JOIN construction for every caller, sat
+    behind that coverage number untouched, and how the ``cast('Enum_Flags', 0)`` no-op
+    behind it went unnoticed too. Going through ``TCP()`` means an ordering or type defect
+    fails a test here instead of passing one.
+
+    Each call constructs a **fresh** instance, because the point is that ``_flags`` is
+    resolved from these very arguments rather than left over from an earlier call.
+
+    Args:
+        opt: A ``pcapkit.protocols.data.transport.tcp`` option object, for the data-model
+            construction form. Passed as an
+            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, which is the shape
+            ``_make_tcp_options`` takes it in; ``subtype`` then comes from the object.
+        syn: Whether the carrying segment sets ``SYN``.
+        ack: Whether the carrying segment sets ``ACK``.
+        **kwargs: The keyword construction form, including ``subtype``. Ignored when
+            ``opt`` is given.
+
+    Returns:
+        The constructed option schema, as ``_make_mode_mp`` returned it.
+
+    """
+    from pcapkit.const.tcp.option import Option
+    from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.protocols.transport.tcp import TCP
+
+    options = ([(Option.Multipath_TCP, kwargs)] if opt is None else
+               OrderedMultiDict([(Option.Multipath_TCP, opt)]))
+    return TCP(syn=syn, ack=ack, options=options).__header__.options[0]  # type: ignore[arg-type]
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -487,7 +535,12 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(mapped_options[0].mss, 1300)
         self.assertEqual(type(mapped_options[-1]).__name__, 'EndOfOptionList')
 
-        proto._flags = {Flags.SYN}
+        # NOTE: the MP_JOIN forms reach ``_make_mode_mp`` through :func:`mptcp_option`,
+        # i.e. through ``TCP()`` itself, rather than by writing ``proto._flags`` here.
+        # ``_flags`` is then the ``Enum_Flags`` member production assigns, resolved in
+        # production's order relative to the option build. C.f. #603. The options that do
+        # not read ``_flags`` keep calling ``proto._make_mode_mp`` directly, since going
+        # through the constructor would tell us nothing extra about them.
         join_syn = tcp_data.MPTCPJoinSYN(
             kind=Option.Multipath_TCP,
             length=12,
@@ -498,9 +551,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             token=2,
             nonce=3,
         )
-        self.assertEqual(proto._make_mode_mp(Option.Multipath_TCP, join_syn).addr_id, 1)
+        self.assertEqual(mptcp_option(join_syn, syn=True).addr_id, 1)
 
-        proto._flags = {Flags.SYN, Flags.ACK}
         join_synack = tcp_data.MPTCPJoinSYNACK(
             kind=Option.Multipath_TCP,
             length=20,
@@ -511,9 +563,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             hmac=b'12345678',
             nonce=4,
         )
-        self.assertEqual(proto._make_mode_mp(Option.Multipath_TCP, join_synack).addr_id, 2)
+        self.assertEqual(mptcp_option(join_synack, syn=True, ack=True).addr_id, 2)
 
-        proto._flags = {Flags.ACK}
         join_ack = tcp_data.MPTCPJoinACK(
             kind=Option.Multipath_TCP,
             length=24,
@@ -521,9 +572,8 @@ class TCPUDPUnitTests(unittest.TestCase):
             connection=Flags.ACK,
             hmac=b'1' * 20,
         )
-        self.assertEqual(proto._make_mode_mp(Option.Multipath_TCP, join_ack).hmac, b'1' * 20)
+        self.assertEqual(mptcp_option(join_ack, ack=True).hmac, b'1' * 20)
 
-        proto._flags = set()
         capable = tcp_data.MPTCPCapable(
             kind=Option.Multipath_TCP,
             length=32,
@@ -797,7 +847,6 @@ class TCPUDPUnitTests(unittest.TestCase):
         ))
 
     def test_tcp_mptcp_constructors_cover_flag_branches(self) -> None:
-        from pcapkit.const.tcp.flags import Flags
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.protocols.transport.tcp import TCP
@@ -825,24 +874,22 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_mptcp_capable(MPTCPOption.MP_CAPABLE,
                                                    rkey=2, skey=1).to_dict()['rkey'], 2)
 
-        proto._flags = {Flags.SYN}
-        join_syn = proto._make_mptcp_join(MPTCPOption.MP_JOIN, backup=True,
-                                          addr_id=1, token=2, nonce=3)
+        # NOTE: each MP_JOIN layout is selected by the flags a caller passes to ``TCP()``,
+        # not by a ``proto._flags`` written here -- see :func:`mptcp_option` and #603.
+        join_syn = mptcp_option(syn=True, subtype=MPTCPOption.MP_JOIN, backup=True,
+                                addr_id=1, token=2, nonce=3)
         self.assertEqual(type(join_syn).__name__, 'MPTCPJoinSYN')
         self.assertTrue(join_syn.to_dict()['test']['backup'])
 
-        proto._flags = {Flags.SYN, Flags.ACK}
-        join_synack = proto._make_mptcp_join(MPTCPOption.MP_JOIN, addr_id=1,
-                                             hmac=b'12345678', nonce=3)
+        join_synack = mptcp_option(syn=True, ack=True, subtype=MPTCPOption.MP_JOIN,
+                                   addr_id=1, hmac=b'12345678', nonce=3)
         self.assertEqual(type(join_synack).__name__, 'MPTCPJoinSYNACK')
         self.assertEqual(join_synack.to_dict()['hmac'], b'12345678')
 
-        proto._flags = {Flags.ACK}
-        join_ack = proto._make_mptcp_join(MPTCPOption.MP_JOIN, hmac=b'1' * 20)
+        join_ack = mptcp_option(ack=True, subtype=MPTCPOption.MP_JOIN, hmac=b'1' * 20)
         self.assertEqual(type(join_ack).__name__, 'MPTCPJoinACK')
         self.assertEqual(join_ack.to_dict()['hmac'], b'1' * 20)
 
-        proto._flags = set()
         self.assertTrue(proto._make_mptcp_dss(MPTCPOption.DSS, data_fin=True,
                                               ack=1).to_dict()['flags']['A'])
         self.assertTrue(proto._make_mptcp_dss(MPTCPOption.DSS, dsn=1, ssn=2,
@@ -858,13 +905,20 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(proto._make_mptcp_fastclose(MPTCPOption.MP_FASTCLOSE,
                                                      key=123).to_dict()['key'], 123)
 
+        # NOTE: a segment with neither SYN nor ACK selects no MP_JOIN layout, and the
+        # library's own ``ProtocolError`` is what a caller must get for it. Reaching that
+        # through ``TCP()`` rather than through a hand-written ``proto._flags = set()``
+        # makes this one assertion catch both defects #603 is about: revert #587's hoist
+        # and ``_flags`` does not exist yet, so this raises ``AttributeError``; restore the
+        # ``cast('Enum_Flags', 0)`` no-op and ``_flags`` is a plain ``int``, so
+        # ``Enum_Flags.SYN in self._flags`` raises ``TypeError``. A ``set`` gave the right
+        # answer for the wrong reason and hid both.
         with self.assertRaises(ProtocolError):
-            proto._make_mptcp_join(MPTCPOption.MP_JOIN)
+            mptcp_option(subtype=MPTCPOption.MP_JOIN)
         with self.assertRaises(ProtocolError):
             proto._make_mptcp_dss(MPTCPOption.DSS, dsn=1)
 
     def test_tcp_mptcp_readers_cover_subtype_and_error_branches(self) -> None:
-        from pcapkit.const.tcp.flags import Flags
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
         from pcapkit.const.tcp.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
@@ -934,7 +988,19 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_CAPABLE,
             ), options=options)
 
-        proto._flags = {Flags.SYN}
+        # NOTE: ``proto.make(...)`` rather than ``proto._flags = {Flags.SYN}``. Both
+        # dispatchers read the same attribute with the same ``in`` tests, and ``make`` is
+        # the public entry point that assigns it, so this installs the ``Enum_Flags``
+        # member production assigns instead of a ``set`` that merely answers ``in``. C.f.
+        # #603. It has to be ``make`` and not a parsed segment for the flagless case
+        # further down: ``read`` still accumulates into ``cast('Enum_Flags', 0)``, a runtime
+        # no-op, so a flagless *parsed* instance carries a plain ``int`` and
+        # ``_read_mptcp_join`` raises ``TypeError`` rather than its documented
+        # ``ProtocolError``. That is deliberate and unreachable from a caller --
+        # ``mptcp_data_selector`` rejects a flagless MP_JOIN in the schema layer first, and
+        # ``tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`` pins both
+        # halves against real segments.
+        proto.make(syn=True)
         join_syn = mark(
             MPTCPJoinSYN(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 1},
                          addr_id=1, token=2, nonce=3),
@@ -958,7 +1024,7 @@ class TCPUDPUnitTests(unittest.TestCase):
         # defect rather than the RFC. The rejection case is now 20: the value the
         # guard used to *require*, which no MP_JOIN form produces, so it stays a
         # genuine rejection rather than an off-by-one near the correct length.
-        proto._flags = {Flags.SYN, Flags.ACK}
+        proto.make(syn=True, ack=True)
         join_synack = mark(
             MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'backup': 0},
                             addr_id=1, hmac=b'12345678', nonce=3),
@@ -974,7 +1040,7 @@ class TCPUDPUnitTests(unittest.TestCase):
                 MPTCPOption.MP_JOIN,
             ), options=options)
 
-        proto._flags = {Flags.ACK}
+        proto.make(ack=True)
         join_ack = mark(
             MPTCPJoinACK(test={'subtype': MPTCPOption.MP_JOIN.value}, hmac=b'1' * 20),
             24,
@@ -987,7 +1053,7 @@ class TCPUDPUnitTests(unittest.TestCase):
                 23,
                 MPTCPOption.MP_JOIN,
             ), options=options)
-        proto._flags = set()
+        proto.make()
         with self.assertRaises(ProtocolError):
             proto._read_mode_mp(join_syn, options=options)
 
