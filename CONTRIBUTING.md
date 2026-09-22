@@ -8,8 +8,8 @@ happens after that.
 ## Getting started
 
 - Fork the repository on GitHub.
-- Read the README for installation and build instructions, and its *Testing* section for the test
-  commands.
+- Read the README for installation and build instructions, and the *Testing* page it links from its
+  *Documentation* table — `docs/source/testing.rst` — for the test commands.
 - Set up a development environment. `make setup` runs `pipenv install --skip-lock --dev`, and the
   `Makefile` exports `PIPENV_VENV_IN_PROJECT=1`, so the environment lands in `.venv/` inside the
   checkout. **Only that environment has the dependencies** — the `make` targets below all run
@@ -73,8 +73,8 @@ python util/changelog_md.py --check    # exits 0 when they agree, prints a diff 
 ```
 
 The generator needs only the standard library, so it runs against a bare interpreter. The
-`Changelog drift` job in `.github/workflows/unit-tests.yml` runs `--check` on every push and pull
-request, and a hand-edited `CHANGELOG.md` will fail it.
+`Changelog drift` job in `.github/workflows/unit-tests.yml` runs `--check` on every push to `main`
+and every pull request targeting it, and a hand-edited `CHANGELOG.md` will fail it.
 
 ## Documentation
 
@@ -83,8 +83,9 @@ Documentation is reStructuredText under `docs/source/`, built with `make docs`. 
 
 The Markdown files at the repository root — this one, `CODE_OF_CONDUCT.md`, `SECURITY.md`,
 `CHANGELOG.md` and the README — are a deliberate exception to that rule, because their consumers are
-GitHub's own rendering and the release body rather than Sphinx. The exception stops at the root:
-anything added under `docs/source/` is `.rst`.
+GitHub's own rendering and the release body rather than Sphinx. The issue and pull-request templates
+under `.github/` are Markdown for the same reason. The exception ends there: anything added under
+`docs/source/` is `.rst`.
 
 ## Coding style
 
@@ -101,8 +102,27 @@ make bandit    # security lint
 make vermin    # minimum-Python-version check
 ```
 
-None of these is run by the pull-request workflows, so they are a local gate rather than something a
-pull request will fail on. Running them anyway saves a review round.
+Four of them — `pylint`, `mypy`, `bandit` and `vermin` — also run in CI, as the `Lint` job in
+`.github/workflows/lint.yml`: on every pull request against `main`, on a weekly Saturday schedule
+and on demand through `workflow_dispatch`, on Python 3.14 alone rather than across the test matrix.
+The job invokes the same `Makefile` targets listed above, with `RUN=` emptying the `pipenv run`
+prefix, so what CI checks and what you check locally cannot drift apart.
+
+**Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
+as a non-blocking annotation and a red linter will not fail your pull request. That is a consequence
+of none of the four being clean today; the workflow's header records the current counts and what
+each tool would need before its `continue-on-error` line could be deleted. Read the job's run
+summary — every step writes its count there — and treat it as information you should not add to.
+
+`isort` is the exception and is still local-only. It does appear in `cron-vendor.yml`, but as a
+formatter that rewrites the regenerated constants rather than as a check, so nothing verifies import
+ordering on a pull request.
+
+One trap in the target list above: `make vermin` writes its report to `temp/vermin.txt` and hands
+that file to a viewer — VS Code if it is on `PATH`, otherwise `cat`. The status you get back is
+that viewer's rather than vermin's, so a run that found violations still looks like a success.
+`make vermin-ci` is the same check without the redirect, and it is the one CI runs. Running the lot
+before you push still saves a review round.
 
 ### Format of the Commit Message
 
