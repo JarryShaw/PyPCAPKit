@@ -17,8 +17,9 @@ tested without a stopwatch are tested here:
 * the overlap marking, which is what stops the report claiming a gap it did not
   measure;
 * that the emitted reStructuredText parses under **plain docutils** with no
-  errors and uses no Sphinx-only roles -- the README is rendered by docutils on
-  GitHub, where ``:mod:`` and friends come out as visible errors.
+  errors and uses no Sphinx-only roles, so that a table stays pasteable into any
+  reStructuredText a plain docutils reader will see, where ``:mod:`` and friends
+  come out as visible errors.
 
 Run with ``python -m pytest examples/benchmark/test_harness.py``. Nothing here
 needs docker, and only the driver-assertion tests need ``pcapkit`` importable.
@@ -361,7 +362,7 @@ class TestFormatting:
 
 
 class TestRenderedMarkup:
-    """What actually gets pasted into the README."""
+    """What actually gets pasted into the documentation."""
 
     def _snippet(self, emulated=None):
         """Render a full snippet from a two-environment run."""
@@ -474,7 +475,7 @@ class TestRenderedMarkup:
                          'Passes', 'CPython 3.11.14', 'in.pcap', '1000', 'abc1234'):
             assert expected in snippet
         # The containerised design is what makes the host irrelevant; printing host
-        # details would undo it, and would leak machine identity into a public README.
+        # details would undo it, and would leak machine identity into public docs.
         import platform as host_platform  # pylint: disable=import-outside-toplevel
         for leak in (host_platform.node(), host_platform.release(), host_platform.version()):
             if leak:
@@ -897,7 +898,7 @@ class TestUnmeasuredByVersion:
 
 
 class TestVersionsMarkup:
-    """The per-version table as it will be pasted into README.rst."""
+    """The per-version table as it will be pasted into docs/source/index.rst."""
 
     def _snippet(self, missing=(), emulated=None, **kwargs):
         """Render the per-version snippet from a whole matrix run."""
@@ -1181,7 +1182,7 @@ class TestMatrixProvenance:
         assert 'Passes' in snippet.split('Test Results (Relative)')[0]
 
     def test_the_two_tables_do_not_share_a_heading(self):
-        """Two sections named "Test Results" in one README is one too many.
+        """Two sections named "Test Results" on one page is one too many.
 
         Both snippets are pasted into the same document, and a reader then has no way
         to say which table a sentence underneath is about.
@@ -1309,9 +1310,9 @@ class TestHostileReasons:
     def test_both_snippets_still_parse(self, reason):
         """A gcc diagnostic in a reason must not break the pasted table.
 
-        The promise is that these snippets go into README.rst verbatim, and GitHub
-        renders that with docutils -- where each of these strings produces a visible
-        error block instead of the table.
+        The promise is that these snippets go into docs/source/index.rst verbatim,
+        and that they stay parseable by plain docutils -- where each of these strings
+        produces a visible error block instead of the table.
 
         """
         docutils_core = pytest.importorskip('docutils.core')
@@ -1411,7 +1412,7 @@ class TestFixedFormatting:
 
         Significant figures -- which every other number in the report uses -- would
         give ``0.01700`` and ``14.74`` different numbers of decimal places in the same
-        column. Four places is also what the hand-maintained table in README.rst has
+        column. Four places is also what the hand-maintained table in the docs has
         always used, so a regenerated table diffs its numbers rather than its layout.
 
         """

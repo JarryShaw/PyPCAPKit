@@ -11,7 +11,11 @@ prune examples/captures
 prune temp
 prune test
 
-include README.rst
+# Load-bearing, not belt-and-braces. ``global-include *.rst`` above matches only
+# ``*.rst``, so since the README became Markdown this line is the only thing that
+# puts it in an sdist -- and ``setup.py`` reads it unguarded for the
+# ``long_description``, so an sdist without it cannot be installed at all.
+include README.md
 include LICENSE
 
 # The changelog needs two lines of its own, and neither is redundant.
@@ -24,7 +28,7 @@ include CHANGELOG.md
 # ``CHANGELOG.md`` carries only the version being released, so on its own the
 # distribution would describe one release and no history. ``prune docs`` above
 # drops the rest, which is where the history lives, so re-add just that one
-# directory afterwards -- the same shape as ``include README.rst``, and for the
+# directory afterwards -- the same shape as ``include README.md``, and for the
 # same reason. Each of those files is a self-contained reStructuredText entry
 # that renders standalone; the Sphinx index beside them is deliberately *not*
 # shipped, because it is a ``toctree`` that only Sphinx can read.

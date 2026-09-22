@@ -54,7 +54,7 @@ usage() {
 usage: run.sh [options]
 
 Builds one benchmark image per Python version and runs them all, printing a
-summary and two paste-ready reStructuredText tables for README.rst: absolute
+summary and two paste-ready reStructuredText tables for the docs: absolute
 milliseconds per (engine, Python version), and engine ratios pooled across the
 whole matrix.
 
@@ -456,7 +456,7 @@ docker cp "${REPORTER}:/out/." "${OUT_DIR}/" >/dev/null 2>&1 || status=1
 echo >&2
 if [ -f "${OUT_DIR}/table-versions.rst" ] && [ -f "${OUT_DIR}/table.rst" ]; then
     echo "==> wrote ${OUT_DIR}/table-versions.rst -- absolute milliseconds per engine" >&2
-    echo "    and Python version, ready to paste into README.rst's Test Results," >&2
+    echo "    and Python version, ready to paste into the docs' Test Results," >&2
     echo "    and ${OUT_DIR}/table.rst -- the machine-independent ratio view," >&2
     echo '    alongside the raw JSON and the per-environment locks' >&2
 

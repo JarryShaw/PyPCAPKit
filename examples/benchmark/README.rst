@@ -2,9 +2,9 @@
 Engine Benchmark Suite
 ======================
 
-A containerised benchmark that produces the engine speed table in the project
-``README.rst`` -- the whole table, every supported Python version, in one run. One
-command, on any machine with Docker, and the output is two paste-ready
+A containerised benchmark that produces the engine speed table in the project docs,
+``docs/source/index.rst`` -- the whole table, every supported Python version, in one
+run. One command, on any machine with Docker, and the output is two paste-ready
 reStructuredText snippets:
 
 .. code-block:: shell
@@ -97,7 +97,7 @@ precisely the condition under which absolute times are comparable -- with each o
 A ratio there would be worse than redundant: ratios are normalised *within* one
 environment, so dividing across two interpreters yields a number that is neither
 engine's speed nor the interpreter's. The snippet says so in its own prose, because
-the person reading the table in ``README.rst`` later is not the person who read this
+the person reading the table in the docs later is not the person who read this
 file.
 
 **The ratio table is normalised to the default engine measured in the same
@@ -115,7 +115,7 @@ engine's own milliseconds per packet. That is what lets a reader convert the rat
 back into times on the machine the run happened on.
 
 Both snippets carry their own ``Test Results`` heading -- the per-version one takes
-the name, since it is what ``README.rst``'s **Test Results** section is, and the ratio
+the name, since it is what the docs' **Test Results** section is, and the ratio
 one is ``Test Results (Relative)`` so that pasting both does not produce two sections
 with one name. The ``Test Environment`` block, which serves both, is in
 ``table.rst``.
@@ -377,7 +377,7 @@ untracked):
    * - File
      - What it is
    * - ``table-versions.rst``
-     - absolute ms/packet per engine and Python version -- ``README.rst``'s **Test
+     - absolute ms/packet per engine and Python version -- the docs' **Test
        Results** section, verbatim
    * - ``table.rst``
      - ``Test Environment`` plus the machine-independent ratio table
@@ -491,9 +491,12 @@ baseline, that machine drift cancels, that repeats are paired one to one rather 
 averaged first, that the environments stitch together correctly, that an unmeasured
 engine keeps its reason, that the overlap marking neither over- nor under-claims, and
 that the emitted reStructuredText parses under **plain docutils** with no warnings and
-uses no Sphinx-only roles. That last one matters because GitHub renders
-``README.rst`` with docutils, where a ``:mod:`` role comes out as a visible error
-block while looking perfectly fine in the project's own Sphinx docs.
+uses no Sphinx-only roles. That last one is now a conservative choice rather than a
+hard requirement: the snippets land in ``docs/source/index.rst``, which Sphinx
+renders, so a ``:mod:`` role would survive there. Keeping them docutils-clean is what
+lets a table be pasted into any reStructuredText a plain docutils reader will see --
+where a ``:mod:`` role comes out as a visible error block while looking perfectly fine
+in the project's own Sphinx docs.
 
 The matrix adds its own statements to check, since most of the ways a version column
 can be wrong are silent: that a document lands in the column its *interpreter* names

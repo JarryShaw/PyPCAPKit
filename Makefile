@@ -87,11 +87,11 @@ coverage: samples
 	pipenv run coverage run -m pytest -q
 	pipenv run coverage report
 
-# The engine speed table in README.rst -- every supported Python version, one
-# image each, measured in containers so the host does not affect the result. Needs
-# docker, and nothing else: deliberately not run through pipenv, since the whole
-# point is that the measuring environments are the pinned ones inside the images
-# rather than whatever is installed here.
+# The engine speed table in docs/source/index.rst -- every supported Python
+# version, one image each, measured in containers so the host does not affect the
+# result. Needs docker, and nothing else: deliberately not run through pipenv,
+# since the whole point is that the measuring environments are the pinned ones
+# inside the images rather than whatever is installed here.
 #
 # Expect around two hours at the defaults: five interpreters, seven environments,
 # and almost all of the measuring time is pyshark, which spawns a tshark process

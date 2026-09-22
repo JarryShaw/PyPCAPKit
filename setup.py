@@ -29,8 +29,8 @@ logger.addHandler(handler)
 
 
 def get_long_description() -> "str":
-    """Extract description from README.rst, for PyPI's usage."""
-    readme = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.rst")
+    """Extract description from README.md, for PyPI's usage."""
+    readme = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.md")
     with open(readme, encoding="utf-8") as file:
         long_description = file.read()
     return long_description
@@ -178,5 +178,5 @@ except ImportError:
 setup(
     cmdclass=cmdclass,
     long_description=get_long_description(),
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
 )

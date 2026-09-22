@@ -39,10 +39,15 @@ measured several times and each row carries the range actually observed. Rows
 whose ranges overlap are marked: this run does not establish which of them is
 faster, and reporting their medians as though it did would be inventing precision.
 
-The emitted markup is plain reStructuredText for **docutils**, which is what
-renders the project's README on GitHub. No Sphinx-only roles (``:mod:``,
-``:func:``, ``:manpage:``) appear in it -- only double-backtick literals -- because
-docutils does not know them and renders them as errors.
+The emitted markup is plain reStructuredText for **docutils**. No Sphinx-only
+roles (``:mod:``, ``:func:``, ``:manpage:``) appear in it -- only double-backtick
+literals -- because docutils does not know them and renders them as errors.
+
+The snippets land in :file:`docs/source/index.rst`, which Sphinx renders, so a
+Sphinx-only role would in fact survive there. Staying docutils-clean is kept
+deliberately anyway: it is what lets a table be pasted into any reStructuredText
+a plain docutils reader will see, the project README having been one such
+destination until it became Markdown.
 
 """
 
@@ -61,7 +66,7 @@ __all__ = ['Row', 'absolutes_by_version', 'baseline_absolutes', 'collect', 'over
            'unmeasured_by_version', 'version_columns']
 
 #: Engine name reported for ``pcapkit``'s own parser. ``pcapkit.extract`` accepts
-#: ``'default'``; the README and the docs call it ``pcapkit``, and that is the
+#: ``'default'``; the documentation calls it ``pcapkit``, and that is the
 #: spelling the table uses.
 BASELINE = 'default'
 
@@ -70,7 +75,8 @@ BASELINE_LABEL = 'pcapkit'
 
 #: Marks a row whose observed range overlaps another row's, i.e. a gap this run
 #: does not resolve. A double dagger rather than a footnote reference, so the
-#: emitted snippet cannot collide with footnote numbers already in the README.
+#: emitted snippet cannot collide with footnote numbers already on the page it is
+#: pasted into.
 OVERLAP_MARK = '‡'
 
 #: Marks a row that was not measured, and points at the note carrying the reason.
@@ -109,7 +115,7 @@ def _escape(text: 'str') -> 'str':
     * anything ending ``::`` -- *literal block expected; none found*.
 
     Each of those turns the snippet this module promises can be pasted into
-    :file:`README.rst` verbatim into a visible error block on GitHub, and the failure
+    :file:`docs/source/index.rst` verbatim into a visible error block, and the failure
     is invisible here because the harness's own fixtures are all well-behaved English.
 
     Args:
@@ -285,8 +291,8 @@ def _fixed(value: 'float', decimals: 'int' = 4) -> 'str':
     number of decimal places -- ``0.01700`` above ``14.74`` -- which is precisely the
     layout that makes a column impossible to scan. Fixed places line the decimal
     points up, and they are also what the table this replaces in
-    :file:`README.rst` has always used, so a regenerated table is a diff of the
-    numbers rather than a diff of the formatting.
+    :file:`docs/source/index.rst` has always used, so a regenerated table is a diff
+    of the numbers rather than a diff of the formatting.
 
     Args:
         value: Number to format.
@@ -729,7 +735,7 @@ def _provenance(documents: 'Sequence[dict[str, Any]]', image: 'Optional[str]',
     Deliberately excludes anything identifying the host it ran on -- no hostname,
     no kernel, no CPU model. Containerising the benchmark is what makes the host
     irrelevant, and printing host details would undo that while also making the
-    output awkward to paste into a public README. The architecture *is* included,
+    output awkward to paste into public documentation. The architecture *is* included,
     because it changes the numbers and identifies nothing.
 
     Args:
@@ -879,7 +885,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
                         emulated: 'Optional[str]' = None) -> 'str':
     """Render the per-version table of absolute milliseconds per packet.
 
-    This is the snippet that replaces :file:`README.rst`'s **Test Results** section
+    This is the snippet that replaces :file:`docs/source/index.rst`'s **Test Results** section
     outright: engines down the side, Python versions across the top, ``--`` for a cell
     that could not be measured. It is self-contained -- heading, prose, table, notes --
     because it is pasted as a unit, and a note explaining a gap is no use in a
@@ -1055,7 +1061,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     lines.append('')
 
     # A heading of its own rather than "Test Results", which is the per-version
-    # absolute table's -- both snippets go into the same README, and two sections
+    # absolute table's -- both snippets go onto the same page, and two sections
     # with one name is a document where a reader cannot say which table a sentence is
     # about.
     heading = 'Test Results (Relative)'
@@ -1358,7 +1364,7 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     snippet = render_rst(rows, documents, args.image, args.emulated, missing)
 
     print('-' * 78)
-    print('reStructuredText below, ready to paste into README.rst')
+    print('reStructuredText below, ready to paste into docs/source/index.rst')
     print('-' * 78)
     print()
     print(versions_snippet)
