@@ -1004,6 +1004,19 @@ pull requests between #326 and #509.
   own Markdown API rather than assumed: the ladder comes back as four list items each
   nesting three, which is what #613 had to repair in the 1.4 file when a stray list
   marker collapsed the whole document into one nested item (#624).
+* **Fixed** -- the one assertion #604 left pinning the old padding side, which had
+  been red on ``mainline`` since #621 merged.
+  ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
+  expected a truncated TCP option's ``data`` as the synthesised zero octets
+  *followed by* the real ones, which is what ``rjust()`` produced; #621 made the
+  padding ``ljust()`` everywhere but could not retarget this file, since another
+  change (#612) owned it at the time and editing it concurrently risked discarding
+  work that has since landed. The real octets now come first for both parametrised
+  widths, and the docstring above the assertion says tail-padding rather than
+  left-padding. Test-only: no library code changes, and
+  the sibling case in ``tests/protocols/internet/test_ipv4_unit.py`` was already
+  retargeted in #621. Measured against ``main`` at ``2221c2d8f``: two subtest
+  failures before, none after (#604).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

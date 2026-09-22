@@ -1371,9 +1371,11 @@ class TCPUDPUnitTests(unittest.TestCase):
         ``data`` field (``BytesField(length=lambda pkt: pkt['length'] - 2)``,
         10 octets here) for more than the 6 octets actually behind it.
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
-        left-pads the short read with zero octets rather than raising, so the
+        tail-pads the short read with zero octets rather than raising, so the
         option parses with its declared ``length`` intact and a ``data`` value
-        of four zero octets followed by the six real ones. That is reachable
+        of the six real octets followed by four zero ones -- the zeros go where
+        the octets that were never read would have been, which before #604 was
+        the other way round. That is reachable
         here because :meth:`~pcapkit.protocols.transport.tcp.TCP._read_tcp_options`
         sizes each parsed option by ``len(schema)`` -- what it actually
         consumed (8 octets) -- rather than by its self-reported ``length``, so
@@ -1412,7 +1414,7 @@ class TCPUDPUnitTests(unittest.TestCase):
                 )
                 unassigned = next(opt for code, opt in proto.info.options.items(multi=True)
                                    if code == custom)
-                self.assertEqual(unassigned.data, b'\x00' * zeroes + trailing)
+                self.assertEqual(unassigned.data, trailing + b'\x00' * zeroes)
                 self.assertEqual(bytes(proto.__header__), raw)
 
     def test_unregistered_option_kind_does_not_mutate_the_class_registry(self) -> None:
