@@ -1574,7 +1574,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             return self._read_join_synack(schema, options=options)  # type: ignore[arg-type]
         if Enum_Flags.SYN not in self._flags and Enum_Flags.ACK in self._flags:  # MP_JOIN-ACK
             return self._read_join_ack(schema, options=options)  # type: ignore[arg-type]
-        raise ProtocolError(f'{self.alias}: : [OptNo {schema.kind}] {schema.subtype}: invalid flags combination')
+        raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] {schema.subtype}: invalid flags combination')
 
     def _read_join_syn(self, schema: 'Schema_MPTCPJoinSYN', *, options: 'Option') -> 'Data_MPTCPJoinSYN':  # pylint: disable=unused-argument
         """Read Join Connection option for Initial SYN.
@@ -2828,7 +2828,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             return self._make_join_synack(subtype, opt, **kwargs)  # type: ignore[arg-type]
         if Enum_Flags.SYN not in self._flags and Enum_Flags.ACK in self._flags:  # MP_JOIN-ACK
             return self._make_join_ack(subtype, opt, **kwargs)  # type: ignore[arg-type]
-        raise ProtocolError(f'{self.alias}: : [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid flags combination')
+        raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid flags combination')
 
     def _make_join_syn(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPJoinSYN]' = None, *,
                        backup: 'bool' = False,
@@ -2994,9 +2994,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         flag_m = cast('int', dsn).bit_length() > 32 if flag_M else False
 
         if flag_M and (ssn is None or dl_len is None or checksum is None):
-            raise ProtocolError(f'{self.alias}: : [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
         if not flag_M and (ssn is not None or dl_len is not None or checksum is not None):
-            raise ProtocolError(f'{self.alias}: : [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
+            raise ProtocolError(f'{self.alias}: [OptNo {Enum_Option.Multipath_TCP}] {subtype}: missing required fields')
 
         return Schema_MPTCPDSS(
             kind=cast('Enum_Option', Enum_Option.Multipath_TCP),
