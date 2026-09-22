@@ -977,6 +977,33 @@ pull requests between #326 and #509.
   by Sphinx. ``examples/benchmark/benchmark.py`` still says ``README.rst`` and is
   left alone, because it means the benchmark suite's own README in the same
   directory, not the project's.
+* **Changed** -- ``CODE_OF_CONDUCT.md`` moves from Contributor Covenant 1.4 to
+  Contributor Covenant 3.0, at the maintainer's request. The text is the canonical
+  3.0 Markdown fetched from
+  https://www.contributor-covenant.org/version/3/0/code_of_conduct/code_of_conduct.md
+  rather than a transcription, so the pledge, the encouraged and restricted
+  behaviours and the scope are unaltered. Three things needed deciding rather than
+  copying. 3.0 ships two ``[NOTE`` placeholders an adopter must fill: the reporting
+  channel, which now names ``jarryshaw@icloud.com`` -- the same contact 1.4 carried
+  and the one ``SECURITY.md`` already points at as its email fallback -- plus
+  GitHub's report-abuse form for the case a single-maintainer project cannot
+  otherwise cover, a report about the maintainer; and the enforcement section, whose
+  placeholder is an instruction to the adopter and is removed. 3.0 then assigns
+  enforcement throughout to plural "Community Moderators" (and once, inconsistently,
+  to "Community Managers"), which this repository does not have, so all eight
+  occurrences become the singular maintainer. The four-rung ladder -- Warning,
+  Temporarily Limited Activities, Temporary Suspension, Permanent Ban -- is offered
+  as a suggestion and is **kept**, because each rung maps onto a lever one person
+  actually holds on GitHub: a private message, a locked thread, an interaction limit
+  or block, a permanent block. Finally, 3.0 is licensed CC BY-SA 4.0 where 1.4's
+  attribution paragraph carried no licence notice at all, so the attribution now
+  names version 3.0, links the permanent ``version/3/0/`` URL, carries the CC BY-SA
+  4.0 notice and link, indicates that changes were made as BY requires, and says
+  explicitly that the share-alike term covers this document only -- the code remains
+  BSD-3-Clause and ``LICENSE`` is untouched. Rendering was checked against GitHub's
+  own Markdown API rather than assumed: the ladder comes back as four list items each
+  nesting three, which is what #613 had to repair in the 1.4 file when a stray list
+  marker collapsed the whole document into one nested item (#624).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
