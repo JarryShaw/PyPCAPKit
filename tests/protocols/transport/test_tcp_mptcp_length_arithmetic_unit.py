@@ -79,19 +79,25 @@ the ``ack``/``dsn`` values the caller supplied were simply not present. Measured
 the generator's own override arguments: 12 octets packed against a declared 20.
 
 A second defect sat behind the first: correcting the lambda to ``8 if ... else 4`` would still
-not have packed, because :class:`~pcapkit.corekit.fields.numbers.NumberField` cannot pack a
-callable length at all -- it calls ``build_template`` once at ``__init__`` with the placeholder
-length ``-1``, latching ``_need_process = True``, and nothing clears that when ``__call__``
-later resolves the real length and rebuilds the template as ``>I``/``>Q``. Measured on the
-8-octet form, which the old lambda did reach: ``_make_mptcp_dss(DSS, ack=1 << 40)`` raised
-``struct.error: required argument is not an integer``. That belongs to
-:mod:`pcapkit.corekit.fields.numbers` and is not fixed here; the schema instead selects between
+not have packed *at the time*, because :class:`~pcapkit.corekit.fields.numbers.NumberField`
+could not pack a callable length at all -- it called ``build_template`` once at ``__init__``
+with the placeholder length ``-1``, latching ``_need_process = True``, and nothing cleared that
+when ``__call__`` later resolved the real length and rebuilt the template as ``>I``/``>Q``.
+Measured on the 8-octet form, which the old lambda did reach: ``_make_mptcp_dss(DSS, ack=1 <<
+40)`` raised ``struct.error: required argument is not an integer``. #576 left that to
+:mod:`pcapkit.corekit.fields.numbers`, and **#598 has since fixed it** by recomputing
+``_need_process`` from the width in force rather than once from the placeholder, so a callable
+length packs and unpacks both widths today. The schema keeps selecting between
 :class:`~pcapkit.corekit.fields.numbers.UInt32Field` and
 :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at class
 level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
 :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` already uses in that
-module. :class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms that could not be
-packed before at all.
+module -- for the narrower reason recorded in
+:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector`'s own note, which is
+about :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s condition-blind ``length`` and
+not about wire absence. Swapping the two would be a behaviour change and is not made here.
+:class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms that could not be packed
+before at all.
 
 MP_JOIN-SYN is not a defect either
 -----------------------------------
@@ -119,13 +125,21 @@ parse-side bug cannot cancel out behind a closed round trip -- the pattern
 the blind spot :mod:`tests.protocols.test_option_roundtrip_unit`'s own docstring names ("a
 defect can leave the cycle closed").
 
-MP_JOIN cannot be built through the public ``TCP()`` constructor at all -- ``_make_mptcp_join``
-dispatches on ``self._flags``, which ``TCP._make`` assigns *after* it has already built the
-options, so construction raises ``AttributeError: 'TCP' object has no attribute '_flags'``.
-That is a separate, already-recorded gap (``tcp-mptcp/MP_JOIN`` in
-:data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`, with exactly that
-diagnosis) and is not touched here, so the MP_JOIN classes drive the makers directly and reach
-the readers by parsing bytes, where ``_flags`` *is* set.
+When this module was written MP_JOIN could not be built through the public ``TCP()``
+constructor at all -- ``_make_mptcp_join`` dispatches on ``self._flags``, which ``TCP.make``
+assigned *after* it had already built the options, so construction raised ``AttributeError:
+'TCP' object has no attribute '_flags'``. That was a separate, already-recorded gap
+(``tcp-mptcp/MP_JOIN`` in :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`,
+with exactly that diagnosis) and was left alone here, which is why the MP_JOIN classes drive
+the makers directly and reach the readers by parsing bytes, where ``_flags`` *is* set.
+
+**#587 has since hoisted that assignment above the option build**, so the constructor route is
+open now and its ``EXPECTED_FAILURES`` entry is gone;
+:mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit` covers all three
+layouts through ``TCP()`` proper. The classes here are still written against the makers, which
+is what keeps them a check on the *length arithmetic* of each form rather than on the dispatch,
+so they are left as they are -- but the reason is now choice rather than impossibility. C.f.
+#587, #603.
 
 """
 from __future__ import annotations

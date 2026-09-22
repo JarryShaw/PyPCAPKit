@@ -852,6 +852,95 @@ pull requests between #326 and #509.
   read at every width and order, which may not move, and a read against an
   entirely empty buffer, which pads to all zeros either way and is the #431
   behaviour the option and list loops depend on (#604).
+* **Added** -- ``CITATION.cff``, citation metadata in Citation File Format
+  1.2.0, which GitHub renders as the repository's "Cite this repository" button
+  and which citation managers and dependency inventories read directly. It is
+  the machine-readable half of the attribution BSD-3-Clause already asks for, so
+  credit carries into a paper or a bill of materials rather than depending on a
+  reader opening ``LICENSE``. Validated with ``cffconvert --validate`` and
+  against the published 1.2.0 schema; ``doi`` and ``orcid`` are omitted rather
+  than invented, since neither exists for this project today and both are
+  checked formats, so a wrong value would still validate. The licence itself is
+  deliberately unchanged -- still BSD-3-Clause, no ``NOTICE`` file, no change to
+  its terms. Alongside it the copyright line moves from ``2018-2023`` to
+  ``2018-2026`` -- ``LICENSE`` was its only occurrence in the tree, since
+  ``docs/source/conf.py`` already derives its own from the current year -- and a
+  stray ``s`` after the closing ``DAMAGE.`` of the licence text, present since
+  the Mozilla-to-BSD relicence, is removed, so the wording now matches canonical
+  BSD-3-Clause exactly (#615).
+* **Fixed** -- reading a big-endian classic PCAP byte-swapped every record header
+  field, and then crashed. ``Frame.unpack`` seeded the file's declared byte order
+  under the key ``bytesorder`` where the frame schema's ``byteorder_callback``
+  reads ``byteorder``, so the lookup never found it and always fell back to
+  ``sys.byteorder`` -- the reading host's order rather than the file's. On a
+  little-endian host reading a little-endian capture that fallback gives the
+  right answer by coincidence, and every capture in this repository was
+  little-endian, so the wrong code path has always produced correct results.
+  Against a big-endian capture, measured before the fix, frame 1 of
+  ``big_endian.pcap`` read ``ts_sec=3106905``, ``ts_usec=1088553216`` and
+  ``incl_len=1241513984`` for a record whose real values are ``1500000000``,
+  ``123456`` and ``74``, dating the frame to 1970-02-05 rather than to
+  2017-07-14. ``incl_len`` is the payload length, so that first record
+  then consumed the whole file and the second was read with a negative payload
+  length, raising ``ValueError: read length must be non-negative or -1`` out of
+  the schema -- which is the reported crash, and it is the *second* symptom
+  rather than the first. The sibling ``Frame.pack`` eleven lines earlier spelled
+  the key correctly, which is what marks this as a slip rather than a second key,
+  and the fallback is what made a misspelled key indistinguishable from an absent
+  one; ``byteorder_callback`` now records that it is the definition of the key
+  and why the fallback hides a typo (#605).
+* **Added** -- ``examples/generators/endian.py``, and the byte-order tests that
+  read what it writes. There was no big-endian ``.pcap`` in the repository at all,
+  which is why #605 survived its own code review: the one-character fix leaves the
+  corrected path exactly as untested as the broken one. The generator writes three
+  captures -- ``big_endian.pcap`` (magic ``a1 b2 c3 d4``),
+  ``big_endian_nanosecond.pcap`` (``a1 b2 3c 4d``, the first fixture to take that
+  branch of the magic-number table) and ``little_endian.pcap`` (``d4 c3 b2 a1``) --
+  carrying the *same three records* in each container, so the tests can assert
+  that the byte order makes no difference to what is read out rather than only
+  that the big-endian file matches numbers written down in a test. Frame 3 is
+  captured short, 1200 octets on the wire cut to a 96-octet ``snaplen``, so
+  ``incl_len`` and ``orig_len`` differ and cannot both be satisfied by one
+  byte-swapped value. ``test_frame_endian_runtime.py`` drives all three through
+  ``extract()`` and walks each file's record chain with ``struct`` to derive its
+  own expectations; a unit-tier case in ``test_header_frame_unit.py`` builds a
+  two-record big-endian capture in memory instead, so the regression is also
+  caught by the fixture-free selection CI runs on every push. All four fail on the
+  unfixed tree -- the three fixture-backed ones by that ``ValueError``, the
+  in-memory one by ``AssertionError: 3106905 != 1500000000`` -- while the
+  little-endian twin passes on both trees, which is what shows the records
+  themselves are not the variable (#605).
+* **Changed** -- ``tests/protocols/transport/test_tcp_udp_unit.py`` now reaches the
+  MP_JOIN dispatchers through ``TCP()`` itself, instead of assigning a Python
+  ``set`` to ``_flags`` on a bare ``TCP.__new__(TCP)``. A ``set`` answers the
+  membership tests ``_make_mptcp_join`` and ``_read_mptcp_join`` use, so every flag
+  branch ran and both TCP modules read 100% statement and branch coverage -- while
+  the attribute had neither the ``aenum.IntFlag`` type production assigns nor the
+  ordering that governs when it exists at all, which is how #587 stayed invisible
+  behind that number and how the ``cast('Enum_Flags', 0)`` no-op behind it went
+  unnoticed too. Measured on the rewrite, against the 17 tests of that file: revert
+  #587's hoist and two of them fail with
+  ``AttributeError: 'TCP' object has no attribute '_flags'``
+  where all 17 passed before; restore the ``cast`` and two fail with
+  ``TypeError: argument of type 'int' is not a container or iterable``, again
+  where all 17 passed. The library is unchanged and the file's tests still pass, so
+  the coverage numbers do not move -- the point is what the same numbers are now
+  worth (#603).
+* **Fixed** -- documentation. ``mptcp_dss_ack_selector``'s note said a corrected
+  field-width lambda "would not have worked" and that fixing it belonged to
+  ``pcapkit.corekit.fields.numbers``, which is exactly where #598 then fixed it; the
+  same paragraph sat in ``test_tcp_mptcp_length_arithmetic_unit.py``'s module
+  docstring, whose other stale claim was that MP_JOIN "cannot be built through the
+  public ``TCP()`` constructor at all", true only until #587. A callable-length
+  ``NumberField`` packs and unpacks both DSS widths now, and wire *absence* was
+  never the obstacle either: ``MPTCPDSS.ssn``, ``dl_len`` and ``checksum`` have
+  always been ``ConditionalField`` on the sibling ``M`` flag, so the class already
+  relied on that wrapper to keep a field off the wire. The ``SwitchField`` form is
+  kept for the narrower reason the note now gives -- ``ConditionalField``'s
+  ``length`` forwards to the wrapped field without consulting the condition, so it
+  is safe here only because ``Schema.pack`` and ``Schema.unpack`` special-case that
+  wrapper by name, whereas a ``SwitchField`` always resolves to a concrete field.
+  Replacing it would be a behaviour change and is not made (#603).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so

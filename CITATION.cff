@@ -1,0 +1,40 @@
+# Citation metadata for PyPCAPKit, in Citation File Format 1.2.0.
+# c.f. https://citation-file-format.github.io
+#
+# This is the machine-readable half of the attribution that BSD-3-Clause asks for.
+# GitHub renders it as the repository's "Cite this repository" button, and citation
+# managers, Zenodo and dependency inventories read it directly -- so credit carries
+# into a paper or a bill of materials instead of depending on a reader noticing
+# ``LICENSE``. It grants nothing and restricts nothing; the licence is unchanged.
+#
+# ``version`` and ``date-released`` describe the newest *published* release, so they
+# move with ``pcapkit.__version__`` in ``pcapkit/__init__.py`` and the matching entry
+# under ``docs/source/changelog/`` when a release goes out.
+#
+# No ``doi`` and no ``orcid``: neither exists for this project or its author today,
+# and both fields are checked formats rather than free text, so an invented value
+# would validate and still be wrong. They are omitted rather than guessed.
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: PyPCAPKit
+abstract: >-
+  PyPCAPKit is a comprehensive, Python-native network packet analysis library: a
+  PCAP file extraction, construction and analysis toolkit that dissects protocols
+  in more detail than the common extractors do, over a choice of extraction
+  engines, and exposes them through a Pythonic interface.
+type: software
+authors:
+  - given-names: Jarry
+    family-names: Shaw
+    email: jarryshaw@icloud.com
+    alias: JarryShaw
+repository-code: https://github.com/JarryShaw/PyPCAPKit
+url: https://jarryshaw.github.io/PyPCAPKit/
+repository-artifact: https://pypi.org/project/pypcapkit/
+license: BSD-3-Clause
+version: 1.5.0b4
+date-released: '2026-09-20'
+keywords:
+  - network
+  - pcap
+  - packet
