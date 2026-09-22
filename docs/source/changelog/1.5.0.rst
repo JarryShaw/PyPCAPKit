@@ -1004,6 +1004,22 @@ pull requests between #326 and #509.
   own Markdown API rather than assumed: the ladder comes back as four list items each
   nesting three, which is what #613 had to repair in the 1.4 file when a stray list
   marker collapsed the whole document into one nested item (#624).
+* **Fixed** -- ``main`` went red the moment #604's ``ljust()`` landed, because
+  ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
+  still pinned the head-padded short read that fix removed. The
+  ``Reserved_79`` option declaring ``length=12`` over 6 real octets now reports
+  ``aabbccddeeff00000000`` where the test expected ``00000000aabbccddeeff``, so
+  both subtests -- ``declared_length=12`` and ``=32`` -- failed on that one
+  assertion while the 17 other cases in the file stayed green: the parse itself
+  never changed, only which end the synthesised zeros sit at. The expectation
+  is inverted, and the docstring above it -- which said the short read was
+  *left*-padded and described the value as four zero octets followed by the six
+  real ones -- is corrected to match, since a docstring that contradicts its
+  own assertion is how the stale expectation survived in the first place. The
+  inputs do discriminate: ``trailing`` is non-zero and the pad width is 4 and
+  24, so neither subtest would hold under the other order. #621 left this file
+  alone deliberately, because #612 owned it at the time, and merged two minutes
+  ahead of the cross-review verdict that named it (#604, #621).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
