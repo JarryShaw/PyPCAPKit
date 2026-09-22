@@ -1128,8 +1128,10 @@ pull requests between #326 and #509.
   four, and so did every composite of two defined bits, such as
   ``BindingACKFlag(0x06)``. Defining ``_missing_`` at all is what caused it, because
   it shadowed the ``aenum`` ``Flag`` machinery that resolves exactly those values;
-  ``pcapkit/const/tcp/flags.py`` defines no ``_missing_`` and has never had the
-  defect. All four now end in ``return super()._missing_(value)``, which is what
+  ``pcapkit/const/tcp/flags.py`` defined no ``_missing_`` at the time and never had
+  the defect -- it has one now, added by #647 below, ending in the same
+  ``super()._missing_(value)`` tail for the same reason. All four now end in
+  ``return super()._missing_(value)``, which is what
   ``pcapkit/vendor/default.py`` emits for every other generated enumeration and what
   75 of the 117 modules under ``pcapkit/const/`` already do, so ``F(0)`` is an empty
   flag and ``BindingACKFlag(0x06)`` is ``S|D``. The ``extend_enum`` idiom that
@@ -1746,6 +1748,55 @@ pull requests between #326 and #509.
   lengths asserts that the octets a block's options report holding never exceed
   the area, and the amplification ratio is asserted flat across 1, 8, 64 and 512
   blocks, which is what separates a bound from a smaller constant (#594).
+
+* **Fixed** -- six of the 123 constant registries under ``pcapkit/const/`` rejected an
+  invalid value in a way the built-in ``enum`` does not, and three of them did not
+  reject it at all. ``Flags``, ``ftp.command.CommandType`` and
+  ``reg.apptype.TransportProtocol`` are ``IntFlag`` types that defined no
+  ``_missing_``, so the ``aenum`` ``Flag`` machinery composed a pseudo-member for any
+  integer whatsoever: ``Flags(-1)`` returned ``65520``, the OR of every declared TCP
+  header flag, so a value no 16-bit wire field can hold read back as *every* flag set
+  at once, while ``Flags(-65536)`` read back as none set. ``ftp.command.Command``,
+  ``ftp.command.FEATCode`` and ``http.method.Method`` are ``StrEnum`` types whose
+  ``_missing_`` reached ``value.upper()`` before checking the type, so an integer
+  raised ``AttributeError: 'int' object has no attribute 'upper'``. All six now raise
+  a bare ``ValueError``, which is what ``enum.IntEnum`` raises for a value it does not
+  define and what 113 of the 117 modules already did. Issue #647's own proposal --
+  replacing those 113 with ``pcapkit.utilities.exceptions.EnumError`` -- was
+  deliberately rejected: ``EnumError`` is ``(BaseError, TypeError)`` and not a
+  ``ValueError`` at all, so it would have diverged from the built-in it was meant to
+  improve on, walked past the ``except ValueError`` in all 113 generated ``get()``
+  bodies and silently undone #584, and logged CRITICAL from ``BaseError.__init__``
+  once per discarded default. The one deliberate divergence from the built-in is kept
+  and now pinned: the mutable registries look a value up, miss, and ``extend_enum`` it
+  rather than raising, so ``Method('FROBNICATE')``, ``ProtectionAuthority(1 << 70)``
+  and ``AppType.get(65000, proto=tcp)`` still register. The three flag guards end in
+  ``return super()._missing_(value)``, so in-range composites still decompose and #623
+  stays fixed. Two of the four unguarded modules needed no change --
+  ``ipv6/extension_header.py`` and ``ftp.command.ConformanceRequirement`` define no
+  ``_missing_`` either, and ``aenum`` already raises the bare ``ValueError`` for them.
+  ``pcapkit/vendor/tcp/flags.py`` turned out to carry the guard's value checker all
+  along, as ``FLAG = 'isinstance(value, int) and 4 <= value <= 15'``, while its
+  template never interpolated it; those are the registry's *bit offsets* and its
+  members are ``1 << offset``, so emitting it unchanged would have rejected every
+  composite, every member above bit 3, and ``Flags(0)``. It now reads
+  ``0 <= value <= 0xFFFF``, the 16-bit field those bits live in.
+  ``TransportProtocol`` reads its bound off ``cls.__members__`` instead of a literal,
+  because ``TransportProtocol.get`` extends the registry at runtime at ``max * 2`` and
+  a written-down bound would reject the member it had just grown. Fixed in the four
+  bespoke templates under ``pcapkit/vendor/`` rather than in the generated tree --
+  ``pcapkit/vendor/default.py`` needed no change, since the 113 it emits were already
+  correct -- and regenerated from the live IANA registries: 42 insertions and zero
+  deletions across exactly 4 of the 134 files, so nothing else in the tree was stale,
+  including the 30k-line ``reg/apptype.py``. A new
+  ``tests/const/test_const_enum_builtin_parity.py`` asserts the property the fix is
+  actually about, that a constant registry and a stdlib ``enum.IntEnum`` raise the
+  same exception type for the same invalid value, over all 123 registries rather than
+  the six; it is keyed on ``aenum.Enum`` because an ``IntFlag`` is not a subclass of
+  ``IntEnum`` -- its MRO runs through ``Flag`` instead -- which is how three of these
+  six escaped the two existing sweeps. ``tests/const/test_const_enum_get.py`` drops ``Flags`` from
+  ``EXPECTED_TO_RESOLVE_ANYTHING`` and its sweep grows 110 to 111, a registry that
+  bounds its domain finally having a failure for ``default`` to fall back from (#647).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
