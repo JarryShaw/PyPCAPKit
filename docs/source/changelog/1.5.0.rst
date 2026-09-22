@@ -814,6 +814,22 @@ pull requests between #326 and #509.
   well as the 113 generated modules, and a new test renders the shared template
   and compares it against the module generated from it, so a regeneration
   cannot quietly undo it (#584).
+* **Added** -- ``CITATION.cff``, citation metadata in Citation File Format
+  1.2.0, which GitHub renders as the repository's "Cite this repository" button
+  and which citation managers and dependency inventories read directly. It is
+  the machine-readable half of the attribution BSD-3-Clause already asks for, so
+  credit carries into a paper or a bill of materials rather than depending on a
+  reader opening ``LICENSE``. Validated with ``cffconvert --validate`` and
+  against the published 1.2.0 schema; ``doi`` and ``orcid`` are omitted rather
+  than invented, since neither exists for this project today and both are
+  checked formats, so a wrong value would still validate. The licence itself is
+  deliberately unchanged -- still BSD-3-Clause, no ``NOTICE`` file, no change to
+  its terms. Alongside it the copyright line moves from ``2018-2023`` to
+  ``2018-2026`` -- ``LICENSE`` was its only occurrence in the tree, since
+  ``docs/source/conf.py`` already derives its own from the current year -- and a
+  stray ``s`` after the closing ``DAMAGE.`` of the licence text, present since
+  the Mozilla-to-BSD relicence, is removed, so the wording now matches canonical
+  BSD-3-Clause exactly (#615).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
