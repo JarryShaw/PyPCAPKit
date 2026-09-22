@@ -75,7 +75,7 @@ class {NAME}(IntFlag):
         """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return cls(value)
+        return super()._missing_(value)
 '''  # type: Callable[[str, str, str, str, str], str]
 
 

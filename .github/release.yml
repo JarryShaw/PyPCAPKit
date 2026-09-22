@@ -1,13 +1,29 @@
 # .github/release.yml
+#
+# Categories for GitHub's automatically generated release notes. These are live:
+# `create-release.yml` asks for the generated notes with
+# `generate_release_notes: true` and the action joins them after the release body,
+# so on a normal release they follow the `CHANGELOG.md` entry, and on a
+# pre-release or a `.postN` vendor refresh -- neither of which has a changelog
+# entry of its own -- they are the whole of the notes.
+#
+# Categorisation keys on pull-request *labels*, and on nothing else. There is no
+# matching on the `type(scope):` subject prefix this project actually uses, so the
+# type a pull request announces in its title cannot reach this file. In practice
+# only Dependabot labels anything, which is why the catch-all is no longer titled
+# "Features": across the last 40 merged pull requests 24 were `fix`, 6 `test`,
+# 6 `docs`, 2 `feat` and 1 `perf`, so a Features heading described two of them and
+# mislabelled the rest.
+#
+# `*` catches the pull requests that "didn't match any of the previous
+# categories", so it has to come last. With the dependency category ahead of it,
+# no `exclude` is needed to keep the two apart.
 
 changelog:
   categories:
-    - title: 🏕 Features
-      labels:
-        - '*'
-      exclude:
-        labels:
-          - dependencies
     - title: 👒 Dependencies
       labels:
         - dependencies
+    - title: 🏕 Changes
+      labels:
+        - '*'

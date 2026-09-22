@@ -18,6 +18,22 @@ prune test
 include README.md
 include LICENSE
 
+# Load-bearing, and missed for the same reason as ``CHANGELOG.md`` below:
+# neither ``global-include`` at the top of this file can reach a ``.cff``, so
+# without this line ``CITATION.cff`` sits in the repository and in no source
+# distribution at all -- measured by building one each way, not assumed. Nor is
+# there a default to fall back on: setuptools ships ``LICENSE`` from its
+# ``license_files`` whether or not this file mentions it, but no packaging
+# default covers a citation file. The published artifact is the surface that
+# matters, because GitHub renders the "Cite this repository" button from the
+# repository itself while citation managers, Zenodo and dependency inventories
+# read what was actually published -- so omitting it drops the machine-readable
+# half of the attribution at the one point nobody can see the repository. It
+# also lets ``RepositoryCitationTests`` in
+# ``tests/project/test_bump_version.py`` run against an unpacked sdist, where
+# today it skips itself with "not shipped in the source distribution".
+include CITATION.cff
+
 # The changelog needs two lines of its own, and neither is redundant.
 #
 # ``global-include *.rst`` above matches only ``*.rst``, so the root
