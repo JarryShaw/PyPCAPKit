@@ -153,7 +153,7 @@ RUN set -eux; \
     rm -f /tmp/pypcap-install.log
 
 # `pcapkit` last, because it is the thing under test and changes on every commit.
-COPY pyproject.toml setup.py MANIFEST.in README.rst ./
+COPY pyproject.toml setup.py MANIFEST.in README.md ./
 COPY pcapkit ./pcapkit
 
 # --no-deps so the pinned requirements above stay authoritative: `pcapkit`

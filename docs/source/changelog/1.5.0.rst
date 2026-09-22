@@ -941,6 +941,42 @@ pull requests between #326 and #509.
   is safe here only because ``Schema.pack`` and ``Schema.unpack`` special-case that
   wrapper by name, whereas a ``SwitchField`` always resolves to a concrete field.
   Replacing it would be a behaviour change and is not made (#603).
+* **Changed** -- the README is a landing page now, and Markdown rather than
+  reStructuredText. ``README.rst`` (424 lines) became ``README.md`` (103),
+  keeping what a reader arriving from PyPI or a search result actually needs --
+  what the library is, why it exists rather than Scapy or DPKT, how to install
+  it, a worked example, and where the documentation lives -- and dropping the
+  technical detail the documentation already carried. **Module Structure**,
+  **Engine Comparison**, **Engine support by Python version**, **Test
+  Environment**, **Test Results** and **Installation Notes** were each already
+  duplicated in ``docs/source/index.rst``, in a fuller form, so they are linked
+  rather than restated. Two blocks existed nowhere else and moved rather than
+  going: **Testing** is now ``docs/source/testing.rst``, registered in the index
+  toctree, and the ``pipenv`` and ``make setup`` local development block joined
+  the Installation section of ``docs/source/index.rst``. Requested by the project
+  owner, and a deliberate exception to the convention that documentation here is
+  reStructuredText -- for the README only, since it is the one documentation file
+  whose renderers are GitHub and PyPI rather than Sphinx. Accordingly
+  ``setup.py`` reads ``README.md`` and declares its content type as
+  ``text/markdown``, and the ``include README.md`` line in ``MANIFEST.in`` is now
+  the only thing that puts the README in a source distribution, because
+  ``global-include *.rst`` no longer matches it -- which matters, since
+  ``setup.py`` reads the file unguarded and an sdist without it cannot be
+  installed. Verified with ``twine check --strict`` against a built sdist and
+  wheel, both of which pass. The rename's own references moved with it, since a
+  change that renames a file owns the references to it:
+  ``examples/benchmark/Dockerfile`` copies ``README.md`` -- a literal ``COPY`` of
+  the old name would have failed the layer outright and taken ``make bench``,
+  ``make bench-quick`` and ``run.sh`` with it -- and the benchmark harness prose
+  that named the root README as the destination of its generated tables now names
+  ``docs/source/index.rst``, which is where those tables went. That covers the
+  ``Makefile`` comment, ``report.py``, ``test_harness.py``, ``run.sh`` and the
+  suite's own README, including the one place whose stated reason had inverted: the
+  emitted markup is kept parseable by plain docutils, which is now a conservative
+  choice rather than a hard requirement, because the page it lands on is rendered
+  by Sphinx. ``examples/benchmark/benchmark.py`` still says ``README.rst`` and is
+  left alone, because it means the benchmark suite's own README in the same
+  directory, not the project's.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
