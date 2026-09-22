@@ -66,8 +66,10 @@ scope. In particular:
 
 - memory exhaustion, unbounded allocation, or a hang on a malformed packet,
 - an uncaught exception escaping the public API where a `pcapkit` exception was
-  promised -- parse errors are supposed to arrive as
-  `pcapkit.utilities.exceptions` types, not as an arbitrary traceback,
+  promised -- parse errors are meant to arrive as `pcapkit.utilities.exceptions`
+  types rather than as an arbitrary traceback. That is the intent rather than
+  something the parser manages everywhere today, so it is worth reporting even
+  though some cases are already known,
 - anything that executes code, writes outside the requested output path, or reads
   an unrelated file as a result of the *contents* of a capture.
 
@@ -80,3 +82,29 @@ Out of scope:
   that is an ordinary bug and belongs in a public issue,
 - needing elevated privileges to capture live traffic, which is the operating
   system's requirement rather than this project's.
+
+## Handling untrusted captures
+
+The scope above is about what to report. This is what a caller can do in the
+meantime, because hardening a parser against hostile input is ongoing work rather
+than a finished state, and some of it is limited by what a given layer can even
+tell apart -- a capture legitimately truncated in transit and one crafted to look
+that way are not always separable from inside the field that declares the length.
+
+So if the captures you hand `pcapkit` are not ones you produced yourself:
+
+- **Bound the memory.** A malformed or hostile capture can expand to a great deal
+  more than its size on disk. Parse in a subprocess under an address-space limit
+  (`resource.RLIMIT_AS`) or a container memory limit, rather than relying on the
+  parser to bound itself.
+- **Bound the time**, by the same mechanism and for the same reason.
+- **Expect failure, including failure the hierarchy does not cover.** Catch
+  `pcapkit.utilities.exceptions.BaseError` for parse errors, and be ready for
+  built-in types such as `MemoryError` reaching you as well.
+- **Do not trust a field more than the capture it came from.** A truncated or
+  malformed field may parse to a value rather than raise, so a value that carries
+  a security decision deserves its own validation.
+
+None of this is peculiar to `pcapkit` -- it is the ordinary posture for giving
+attacker-controlled bytes to any parser. It is written down because parsing them
+is what `pcapkit` is for.
