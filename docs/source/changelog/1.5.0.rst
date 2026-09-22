@@ -1591,8 +1591,9 @@ pull requests between #326 and #509.
   a JSON *string* for every other frame in the same capture; it is consistently
   a string now, ``"Flags::None [0]"`` where it read ``0``, the same shape of
   change #616 made to TCP's ``connection``. The seed is guarded rather than
-  unconditional because ``FrameType.Flags`` declares no members and a
-  memberless ``enum.Flag`` subclass refuses ``Flags(0)`` outright, so the five
+  unconditional because ``FrameType.Flags`` declares no members and, from
+  Python 3.12, a memberless ``enum.Flag`` subclass refuses ``Flags(0)``
+  outright, so the five
   frame schemas that inherit it -- ``UnassignedFrame``, ``PriorityFrame``,
   ``RSTStreamFrame``, ``GoawayFrame`` and ``WindowUpdateFrame`` -- keep the
   plain ``int``, which nothing observes since all five pass ``flags=None`` into
