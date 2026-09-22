@@ -1566,6 +1566,41 @@ pull requests between #326 and #509.
   ``_NOT_FOUND`` in ``pcapkit.utilities.compat`` is deliberately left alone as a
   verbatim line of CPython's own ``functools.cached_property``, inside a
   ``sys.version_info < (3, 8)`` branch no supported interpreter reaches (#661).
+* **Fixed** -- two HTTP/2 flag defects, one on each side of a round trip.
+  **This changes the octets a reconstructed DATA frame emits, and the dumped
+  value of a flagless frame's flags.** ``_make_http_data`` was the only one of
+  the six ``_make_http_*`` methods that never read ``frame.flags``, so a DATA
+  frame parsed with ``END_STREAM`` set rebuilt with the bit clear: the flags
+  octet went ``0x01`` to ``0x00``, silently, producing a well-formed frame
+  saying the stream continues where the capture said it ended
+  [:rfc:`9113#section-6.1`]. ``PADDED`` was never affected, being re-derived
+  from ``pad_len`` rather than read back, and all five sibling builders already
+  restored theirs -- so this was a missing read-back rather than a design, and
+  it now reads ``frame.flags.END_STREAM`` the way they do (#652). Separately,
+  ``FrameType.post_process`` seeded its flag accumulator with a bare ``0``, and
+  ``|=`` promotes that only as a side effect, so a frame with **no** bit set
+  left ``__flags__`` a plain ``int`` where both the schema and the data model
+  declare a ``Flags`` -- and ``END_STREAM in __value__`` raised
+  ``TypeError: argument of type 'int' is not a container or iterable`` rather
+  than answering ``False``. That is the common case rather than an edge one: a
+  ``0x00`` flags
+  octet is every opening ``SETTINGS``, every non-final ``DATA`` and every
+  non-ACK ``PING``. It now seeds ``self.Flags(0)``, which the construct path had
+  been doing correctly at all six of its own sites. The visible consequence is
+  in the dump, where ``__value__`` was a JSON *number* for a flagless frame and
+  a JSON *string* for every other frame in the same capture; it is consistently
+  a string now, ``"Flags::None [0]"`` where it read ``0``, the same shape of
+  change #616 made to TCP's ``connection``. The seed is guarded rather than
+  unconditional because ``FrameType.Flags`` declares no members and a
+  memberless ``enum.Flag`` subclass refuses ``Flags(0)`` outright, so the five
+  frame schemas that inherit it -- ``UnassignedFrame``, ``PriorityFrame``,
+  ``RSTStreamFrame``, ``GoawayFrame`` and ``WindowUpdateFrame`` -- keep the
+  plain ``int``, which nothing observes since all five pass ``flags=None`` into
+  their data objects. Note that a DATA round trip is **still** lossy after
+  this, for an unrelated reason found while measuring it and left to its own
+  change: three payload length callbacks in the frame schemas are
+  mis-parenthesised, so an unpadded ``DATA``, ``HEADERS`` or ``PUSH_PROMISE``
+  frame parses with its whole payload dropped (#668). (#652, #650).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
