@@ -965,8 +965,14 @@ class Extractor(Generic[_P]):
 
         if not self._ifile.seekable():
             logger.debug('input stream is not seekable, wrapping it in SeekableReader')
+            # NOTE: ``stream_closing`` decides whether closing the wrapper also
+            # closes the stream underneath it, so it follows *ownership*: only a
+            # handle this class opened itself is ours to release. A non-seekable
+            # stream always came from the caller, so the polarity here is the
+            # same one ``_cleanup`` uses, and it was inverted in both places --
+            # see #610.
             self._ifile = SeekableReader(self._ifile, buffer_size, buffer_save, buffer_path,
-                                         stream_closing=not self._flag_s)
+                                         stream_closing=self._flag_s)
 
         if not self._flag_q:
             output, ext = self.__output__[fmt]
@@ -1065,16 +1071,100 @@ class Extractor(Generic[_P]):
         self._ifile.close()
         self._exeng.close()
 
+    def __del__(self) -> 'None':
+        """Release the input stream if this class still owns an open one.
+
+        A backstop for the extraction that is *abandoned* rather than finished:
+        with ``auto=False`` the caller drives :meth:`__next__` itself, and one that
+        stops before end of file never reaches :meth:`_cleanup` at all, so the
+        ownership rule there never gets to run. The handle then survives until the
+        interpreter collects it, and CPython announces that with the
+        ``ResourceWarning`` #606 was tripping over -- from an unrelated test, in an
+        unrelated file, which is what made that flake so hard to place.
+
+        This is a backstop and not the recommended route: collection is not
+        deterministic, and :class:`Extractor` takes part in a reference cycle
+        through its engine, so a handle can outlive its last reference until the
+        cyclic collector runs. Use :class:`Extractor` as a context manager -- see
+        :meth:`__enter__` -- where the moment of release matters.
+
+        Note:
+            A finaliser must not raise, so this reads through
+            :attr:`~object.__dict__` rather than attribute access. That matters
+            for more than tidiness: ``_flag_s`` is assigned early in
+            :meth:`__init__` and ``_ifile`` only much later, so a constructor
+            that fails in between -- an unreadable path, an unknown format --
+            leaves an instance whose flag says "mine" and which has no stream at
+            all. The close itself is guarded too, that being what a close during
+            interpreter shutdown can fail at.
+
+        """
+        if not self._owns_input():
+            return
+        try:
+            ifile = self.__dict__['_ifile']
+            if not ifile.closed:
+                ifile.close()
+        except (OSError, ValueError):  # pragma: no cover
+            # Nothing useful can be reported from a finaliser, and raising here
+            # would only produce an "Exception ignored in __del__" on stderr.
+            pass
+
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _owns_input(self) -> 'bool':
+        """Whether the input stream is this class's to close.
+
+        The one place the ownership rule of #610 is written down, so that
+        :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.
+
+        Returns:
+            :data:`True` when the input stream was opened by this class and is
+            therefore its to release -- ``fin`` given as a path, i.e.
+            :attr:`self._flag_s <Extractor._flag_s>` set, or a
+            :class:`~pcapkit.corekit.io.SeekableReader` this class wrapped around
+            a caller's non-seekable stream. :data:`False` for a stream the caller
+            supplied and still owns, and :data:`False` when there is no stream at
+            all.
+
+        Note:
+            The two :data:`True` cases are written as separate tests rather than
+            folded together because they *can* in principle coincide -- a path
+            naming something non-seekable would be opened here and then wrapped --
+            and the answer has to be :data:`True` for both halves of it. That
+            cannot arise today, since :meth:`make_name` admits a path only through
+            :func:`os.path.isfile`, which is :data:`False` for a FIFO or a device,
+            and a regular file is always seekable. The second test is therefore
+            defensive rather than dead, and is the reason
+            ``SeekableReader(..., stream_closing=self._flag_s)`` passes the flag
+            instead of :data:`False`.
+
+        """
+        # NOTE: read through ``__dict__``, and answer for the *stream* rather
+        # than for the flag alone, so that this is :data:`False` rather than
+        # raising on a partially constructed instance -- ``_flag_s`` is assigned
+        # early in ``__init__`` and ``_ifile`` only much later, so a constructor
+        # that failed in between leaves the flag set and no stream behind it.
+        ifile = self.__dict__.get('_ifile')
+        if ifile is None:
+            return False
+        if self.__dict__.get('_flag_s'):
+            return True
+        return isinstance(ifile, SeekableReader)
 
     def _cleanup(self) -> 'None':
         """Cleanup after extraction & analysis.
 
         The method calls :meth:`self._exeng.close <pcapkit.foundation.engines.engine.Engine.close>`,
         sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
-        as :data:`True` and closes the input file (if necessary).
+        as :data:`True` and closes the input file *if this class opened it*.
+
+        That proviso is the whole of it: a handle opened here -- ``fin`` given as
+        a path, i.e. :attr:`self._flag_s <Extractor._flag_s>` set -- is closed,
+        and a stream the caller supplied is left alone for the caller to close
+        when it is done with it.
 
         It also tells the flow tracer the capture has ended, via
         :meth:`TraceFlow.finish <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`.
@@ -1092,8 +1182,12 @@ class Extractor(Generic[_P]):
         if self._flag_t and self._tcp:
             self._trace.tcp.finish()
 
-        if isinstance(self._ifile, SeekableReader):
-            self._ifile.close()
-        elif not self._flag_s:
+        # NOTE: *Ownership* decides who closes the input, not seekability --
+        # see :meth:`_owns_input`. Before #610 this read ``not self._flag_s``,
+        # which got both halves wrong at once: the handle this class opened
+        # itself was never closed, leaking a descriptor and emitting the
+        # ``ResourceWarning`` #606 tripped over, while a stream the caller
+        # supplied and still needed *was* closed.
+        if self._owns_input():
             self._ifile.close()
         self._exeng.close()
