@@ -33,12 +33,19 @@ class ECDSACurve(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return ECDSACurve(key)
+            try:
+                return ECDSACurve(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return ECDSACurve(default)
         if key not in ECDSACurve._member_map_:  # pylint: disable=no-member
             return extend_enum(ECDSACurve, key, default)
         return ECDSACurve[key]  # type: ignore[misc]

@@ -32,12 +32,19 @@ class SecretsType(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return SecretsType(key)
+            try:
+                return SecretsType(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return SecretsType(default)
         if key not in SecretsType._member_map_:  # pylint: disable=no-member
             return extend_enum(SecretsType, key, default)
         return SecretsType[key]  # type: ignore[misc]

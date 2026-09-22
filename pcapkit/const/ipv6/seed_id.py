@@ -32,12 +32,19 @@ class SeedID(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return SeedID(key)
+            try:
+                return SeedID(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return SeedID(default)
         if key not in SeedID._member_map_:  # pylint: disable=no-member
             return extend_enum(SeedID, key, default)
         return SeedID[key]  # type: ignore[misc]

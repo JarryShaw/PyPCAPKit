@@ -28,12 +28,19 @@ class QSFunction(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return QSFunction(key)
+            try:
+                return QSFunction(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return QSFunction(default)
         if key not in QSFunction._member_map_:  # pylint: disable=no-member
             return extend_enum(QSFunction, key, default)
         return QSFunction[key]  # type: ignore[misc]

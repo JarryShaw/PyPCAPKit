@@ -53,12 +53,23 @@ if TYPE_CHECKING:
 
 __all__ = ['HTTP']
 
-# Regular expression to match HTTP methods.
-_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)")  # RFC 9110, section 16.1.1, 9.1, 5.6.2
+# Regular expression to match HTTP methods. Anchored at both ends: :func:`re.match`
+# anchors only at the start, so an unanchored pattern prefix-matches and accepts the
+# leading ``G`` of ``Get`` as a whole method token. Method tokens are case-sensitive
+# per :rfc:`9110#section-9.1`, so ``Get`` is not ``GET`` and must not parse as one.
+_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\Z")  # RFC 9110, section 16.1.1, 9.1, 5.6.2
 # Regular expression to match HTTP version string.
 _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
-# Regular expression to match HTTP status code.
-_RE_STATUS = re.compile(rb'\d{3}')
+# Regular expression to match HTTP status code. Anchored for the same reason as
+# ``_RE_METHOD``, and it matters more here: this pattern is only a guard, and the
+# value is taken from ``int(para2)`` on the raw token, so an unanchored prefix
+# match let ``200x`` and ``2000`` past the guard and then out of ``int()`` as a
+# bare ``ValueError`` -- where ``_read_http_header`` documents ``ProtocolError``.
+# :rfc:`9112#section-4` gives ``status-code = 3DIGIT``, exactly three -- the
+# grammar is in HTTP/1.1 because ``status-code`` is part of its ``status-line``
+# production; :rfc:`9110#section-15` covers the code semantics and registry, not
+# the syntax.
+_RE_STATUS = re.compile(rb'\d{3}\Z')
 
 
 class Type(StrEnum):
@@ -289,7 +300,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if match1 and match2:
             header_line = Data_RequestHeader(
                 type=Type.REQUEST,
-                method=Enum_Method.get(self.decode(para1)),
+                method=Enum_Method.get(self.decode(match1.group('method'))),
                 uri=self.decode(para2),
                 version=self.decode(match2.group('version')),
             )

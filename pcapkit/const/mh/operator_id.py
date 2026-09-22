@@ -37,12 +37,19 @@ class OperatorID(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return OperatorID(key)
+            try:
+                return OperatorID(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return OperatorID(default)
         if key not in OperatorID._member_map_:  # pylint: disable=no-member
             return extend_enum(OperatorID, key, default)
         return OperatorID[key]  # type: ignore[misc]

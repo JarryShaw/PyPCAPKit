@@ -225,12 +225,19 @@ class RouterAlert(IntEnum):
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+            default: Default value if not found. The placeholder ``-1`` stands
+                for *no default*, in which case an unresolvable key propagates
+                the lookup error instead of falling back.
 
         :meta private:
         """
         if isinstance(key, int):
-            return RouterAlert(key)
+            try:
+                return RouterAlert(key)
+            except ValueError:
+                if default == -1:
+                    raise
+                return RouterAlert(default)
         if key not in RouterAlert._member_map_:  # pylint: disable=no-member
             return extend_enum(RouterAlert, key, default)
         return RouterAlert[key]  # type: ignore[misc]
