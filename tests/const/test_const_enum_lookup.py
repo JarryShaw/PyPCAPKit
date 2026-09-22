@@ -29,9 +29,14 @@ already a member re-entered ``_missing_`` unbounded and raised
 was ``0`` -- no flags set -- and every composite of two defined bits. Overriding
 ``_missing_`` at all is what caused it: the override shadowed the ``aenum``
 :class:`~aenum.Flag` machinery that resolves precisely those values, which is why
-:class:`~pcapkit.const.tcp.flags.Flags`, which defines no ``_missing_``, never
-had the defect. :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag` and
-its three siblings now end in ``return super()._missing_(value)``, the tail
+:class:`~pcapkit.const.tcp.flags.Flags`, which at the time defined no
+``_missing_``, never had the defect -- and, as GitHub issue #647 then found, had
+no range guard either, so it resolved *any* integer and ``Flags(-1)`` read back
+as every TCP header flag set at once. It now carries the same guard ending in
+``return super()._missing_(value)``, which is what keeps issue #623 fixed while
+issue #647 is too; :mod:`tests.const.test_const_enum_builtin_parity` is where
+that lands. :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag` and its
+three siblings end in that same tail, the one
 :mod:`pcapkit.vendor.default` emits for every other generated enumeration. So
 this module carries a companion sweep over the :class:`~aenum.IntFlag` classes,
 covering the contract the :class:`~aenum.IntEnum` sweep declines to.

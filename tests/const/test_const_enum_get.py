@@ -20,6 +20,11 @@ defect was live in 110 -- not just the three the issue named. Three of the
 remaining eight never raise on an out-of-range integer because they auto-extend
 the whole space, and five carry no ``get(key, default)`` at all.
 
+GitHub issue #647 moved one of those three into the sweep, so the arithmetic is
+now 111 + 2 + 5. :class:`~pcapkit.const.tcp.flags.Flags` resolved every integer
+only because it defined no ``_missing_`` to bound its domain; it does now, so its
+``get`` has a failure for ``default`` to fall back from like the other 110.
+
 Two more registries are outside this sweep because they are
 :class:`~aenum.StrEnum` rather than integer enums, and both were deliberately
 left alone: :class:`~pcapkit.const.pcapng.option_type.OptionType` and
@@ -66,12 +71,18 @@ from tests._support import purge_modules
 UNRESOLVABLE = 1 << 70
 
 #: Enums whose integer path resolves *anything* rather than raising, so there is
-#: no fallback for ``default`` to supply: all three auto-extend their unassigned
-#: spans across the full integer range.
+#: no fallback for ``default`` to supply: both auto-extend their unassigned spans
+#: across the full integer range.
+#:
+#: :class:`~pcapkit.const.tcp.flags.Flags` was a third entry until GitHub issue
+#: #647. It resolved anything for a different reason -- it defined no
+#: ``_missing_`` at all, so ``aenum`` composed a pseudo-member for any integer,
+#: and ``Flags(-1)`` read back as every TCP header flag set at once. It now
+#: bounds its own domain like the rest of the tree and so belongs in the sweep
+#: below rather than in this set.
 EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
     'pcapkit.const.ipv4.protection_authority.ProtectionAuthority',
     'pcapkit.const.mh.cga_type.CGAType',
-    'pcapkit.const.tcp.flags.Flags',
 })
 
 #: Enums carrying no ``get(key, default)``, so there is no ``default`` to drop.
@@ -212,7 +223,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
             if qualname in EXPECTED_TO_RESOLVE_ANYTHING:
                 # Covered by its own test below. Probing them here would extend
                 # a module-global registry as a side effect of a sweep whose
-                # subject is something else, and for these three the ``try``
+                # subject is something else, and for these two the ``try``
                 # never raises, so it would assert nothing about the fix.
                 continue
             with self.subTest(enum=qualname):
@@ -221,27 +232,31 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 fallback = next(iter(obj)).value
                 self.assertIs(obj.get(UNRESOLVABLE, fallback), obj(fallback))
                 covered += 1
-        self.assertEqual(covered, 110)
+        # 111 rather than 110 since GitHub issue #647 gave
+        # :class:`~pcapkit.const.tcp.flags.Flags` a range guard, which moved it
+        # out of ``EXPECTED_TO_RESOLVE_ANYTHING`` and into this sweep.
+        self.assertEqual(covered, 111)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
-        """The three registries excused from the sweep, and why.
+        """The two registries excused from the sweep, and why.
 
         Their ``_missing_`` extends for *any* integer, so the integer path never
         raises and ``default`` has nothing to supply. Asserted rather than merely
         listed, so ``EXPECTED_TO_RESOLVE_ANYTHING`` cannot quietly grow to hide a
         registry that does raise.
 
-        Kept out of the sweep because probing the two :class:`~aenum.IntEnum`
-        ones *mutates* the registry: the call permanently registers a member on
-        a module-global class. That is done deliberately here, and ``setUpClass``
-        registers a class cleanup that purges :mod:`pcapkit` afterwards so the
-        pollution cannot reach another module.
+        Kept out of the sweep because probing them *mutates* the registry: the
+        call permanently registers a member on a module-global class. That is
+        done deliberately here, and ``setUpClass`` registers a class cleanup that
+        purges :mod:`pcapkit` afterwards so the pollution cannot reach another
+        module.
 
         Measured: ``ProtectionAuthority`` grows 8 members to 9 and ``CGAType`` 7
-        to 8, because their ``_missing_`` calls ``extend_enum``. ``Flags`` does
-        not grow at all -- it is an :class:`~aenum.IntFlag` and returns a
-        pseudo-member instead -- which is why the shared assertion below is
-        "resolves", not "extends".
+        to 8, because their ``_missing_`` calls ``extend_enum``. The shared
+        assertion below is still "resolves" rather than "extends" because that is
+        the property excusing them, and it is the property
+        :class:`~pcapkit.const.tcp.flags.Flags` stopped having in GitHub issue
+        #647 -- it resolved without extending, and now does neither.
         """
         for qualname in sorted(EXPECTED_TO_RESOLVE_ANYTHING):
             module_name, _, class_name = qualname.rpartition('.')
@@ -253,7 +268,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 self.assertIsNotNone(resolved)
                 self.assertEqual(int(resolved), UNRESOLVABLE)
                 # It resolves with or without a default, so the sentinel branch
-                # this change added is never reached for these three.
+                # this change added is never reached for these two.
                 self.assertIs(resolved, obj.get(UNRESOLVABLE, 0))
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,

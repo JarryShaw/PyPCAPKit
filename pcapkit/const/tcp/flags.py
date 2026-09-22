@@ -78,3 +78,15 @@ class Flags(IntFlag):
                     raise
                 return Flags(default)
         return Flags[key]  # type: ignore[misc]
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'Flags':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        return super()._missing_(value)
