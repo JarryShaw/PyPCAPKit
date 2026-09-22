@@ -126,19 +126,46 @@ isort:
 	pipenv run isort -l100 -ppcapkit pcapkit/{const,vendor}/*/*.py
 	pipenv run isort -l100 -ppcapkit util/*.py examples/generators/*.py
 
+# The command prefix that puts the lint tools on PATH. Locally that is pipenv, as
+# everywhere else in this file. The lint workflow installs the tools into the
+# job's own interpreter instead and overrides this to empty (`make pylint RUN=`),
+# which is the whole point of the variable: CI runs these recipes rather than
+# restating their flags, so there is exactly one definition of each tool's flag
+# set and "clean locally, red in CI" cannot start from the two drifting apart.
+RUN ?= pipenv run
+
+# Flag sets are variables rather than literals for the same reason -- `vermin`
+# needs two recipes (see below) and would otherwise carry two copies of its
+# flags. Note the `pcapkit` before the flags as well as after: that is how this
+# recipe has always read, and vermin de-duplicates the paths (it reports 496
+# files analyzed either way), so it is preserved verbatim rather than tidied.
+VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv
+PYLINT_FLAGS = --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.emptystring,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,compare-to-empty-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,eq-without-hash,old-division,no-absolute-import,input-builtin,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes
+MYPY_FLAGS = --follow-imports=silent --ignore-missing-imports --show-column-numbers --show-error-codes
+BANDIT_FLAGS = -r
+
 vermin:
 	mkdir -p temp
-	pipenv run vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv pcapkit > temp/vermin.txt
+	$(RUN) vermin pcapkit $(VERMIN_FLAGS) pcapkit > temp/vermin.txt
 	command -v code >/dev/null && code temp/vermin.txt || cat temp/vermin.txt
 
+# What CI runs. The `vermin` target above redirects into temp/ and then hands the
+# file to an editor, so its exit status is the editor's (or `cat`'s) and a run
+# that found violations still succeeds -- fine at a desk, useless as a check.
+# This one writes to stdout and lets vermin's failure propagate, which is what
+# `targets = 3.6` in vermin.ini is for: vermin exits non-zero when the target is
+# not met, and the code's real floor is 3.11.
+vermin-ci:
+	$(RUN) vermin pcapkit $(VERMIN_FLAGS) pcapkit
+
 pylint:
-	pipenv run pylint --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.emptystring,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,compare-to-empty-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,eq-without-hash,old-division,no-absolute-import,input-builtin,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes pcapkit
+	$(RUN) pylint $(PYLINT_FLAGS) pcapkit
 
 mypy:
-	pipenv run mypy --follow-imports=silent --ignore-missing-imports --show-column-numbers --show-error-codes pcapkit
+	$(RUN) mypy $(MYPY_FLAGS) pcapkit
 
 bandit:
-	pipenv run bandit -r pcapkit
+	$(RUN) bandit $(BANDIT_FLAGS) pcapkit
 
 profile:
 	$(MAKE) -C test profile
