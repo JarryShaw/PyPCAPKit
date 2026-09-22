@@ -43,9 +43,16 @@ class Frame(Protocol):
     number: 'int'
     #: UNIX timestamp.
     time_epoch: 'Decimal'
-    #: Number of octets of packet saved in file.
+    #: Actual length of the packet as it appeared on the wire, i.e. the record
+    #: header's ``orig_len``. Larger than :attr:`cap_len` for a frame the
+    #: snapshot length cut short. Named after Wireshark's ``frame.len``,
+    #: registered as "Frame length on the wire".
     len: 'int'
-    #: Actual length of packet.
+    #: Number of octets of packet data actually captured and saved in the file,
+    #: i.e. the record header's ``incl_len``, and so the number of octets
+    #: :attr:`~pcapkit.protocols.data.protocol.Protocol.packet` holds. Named
+    #: after Wireshark's ``frame.cap_len``, registered as "Frame length stored
+    #: into the capture file".
     cap_len: 'int'
 
     if TYPE_CHECKING:
