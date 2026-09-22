@@ -1460,6 +1460,52 @@ pull requests between #326 and #509.
   implementations -- ``object.__new__(cls).make(**kwargs)`` is the idiom that
   reaches it, and ``HTTP.make`` uses it to reach its versioned implementation
   (#617).
+* **Fixed** -- the HIP ``PUZZLE`` and ``SOLUTION`` builders derived three
+  wire-format values from the payload value instead of taking them from the data
+  model, and all three were wrong. **This changes two public data models and the
+  octets both parameters emit.** The width of ``Random #I``, and of
+  ``Puzzle solution #J``, came from ``int.bit_length()`` alone, and nothing else
+  was available to derive it from, so every leading zero octet was dropped on
+  re-serialisation: a ``SOLUTION`` read with ``Length = 20`` rebuilt as
+  ``Length = 6``, a ``PUZZLE`` read with ``Length = 12`` as ``Length = 5``, and
+  silently, because the integers survive and nothing raises. That width is
+  ``RHASH_len / 8`` octets [:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`],
+  a property of the Responder's HIT Suite rather than of the number that happens
+  to sit in the field, so both data models now carry it as ``rhash_len`` and both
+  builders prefer it; a new ``rhash_len=`` keyword states it for a build from
+  scratch, which under HIPv2 is the only place it can come from, since
+  ``RSA,DSA/SHA-256`` is the REQUIRED HIT Suite [:rfc:`7401#section-5.2.10`] and
+  makes the field 32 octets rather than 8. On the mandatory path roughly one
+  parameter in 256 has a zero top octet and lost it (#653). ``SOLUTION``'s second
+  contents octet is ``Reserved``, "zero when sent, ignored when received"
+  [:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically] -- not the
+  ``Lifetime`` that only :rfc:`7401#section-5.2.4` defines, and that pcapkit was
+  encoding there as ``2^(value - 32)`` seconds. It wrote ``0x20``, ``0x21``,
+  ``0x25`` or ``0x2b`` into a field the RFC requires to be zero, and could not
+  write that zero at all: an RFC-conformant ``SOLUTION`` whose ``Reserved`` is
+  ``0x00`` parsed to ``timedelta(0)`` and then could not be re-serialised, escaping
+  a bare ``ValueError`` from ``math.log2(0.0)`` that was not a ``BaseError`` and so
+  bypassed the library's own error handling entirely. The field is renamed
+  ``reserved``, defaults to the mandated zero, and is carried verbatim across a
+  round trip rather than re-derived (#654). And neither builder read its own
+  ``version`` keyword, so ``version=1`` and ``version=2`` computed identical
+  lengths at every bit width, where :rfc:`5201#section-5.2.4` and
+  :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and ``Length``
+  as literally 12 and 20. Under HIPv1 each builder therefore accepted only a
+  ``bit_length()`` of 57..64 and built, for everything narrower, a parameter this
+  library's own reader rejects -- the same shape as #608, in the ``PUZZLE`` builder
+  that #629 never opened (#655). The two remaining ``math.log2`` sites, both in
+  ``PUZZLE`` where a lifetime is real, now raise ``ProtocolError`` rather than
+  letting ``ValueError`` escape; ``ProtocolError`` is ``(BaseError, ValueError)``,
+  so a caller written around the old bare exception still catches it. Migration:
+  ``SolutionParameter.lifetime`` is now ``reserved`` and an ``int`` rather than a
+  ``timedelta``; both ``PuzzleParameter`` and ``SolutionParameter`` gained a
+  required ``rhash_len``; and ``_make_param_solution`` no longer takes
+  ``lifetime=``. All three were only reachable end to end once #608 was fixed in
+  #629, which removed the parity guard that had been failing these rebuilds loudly
+  first -- so the round trip stopped raising and started quietly emitting a
+  different parameter, which is why they were worth fixing together (#653, #654,
+  #655).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
