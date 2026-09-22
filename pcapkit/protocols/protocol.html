@@ -1036,6 +1036,14 @@ class, and importing it is written back so the import happens once.</p>
 fallback’s resolution under <code class="docutils literal notranslate"><span class="pre">proto</span></code> would be exactly the insertion
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._lookup_registry</span></code> exists
 to avoid.</p>
+<p>So a miss resolves its fallback descriptor again on every frame, and
+what keeps that affordable is <a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code></a> reading
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> instead of re-entering
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> – see #574. Memoising the resolved
+class here instead, whether under <code class="docutils literal notranslate"><span class="pre">proto</span></code>, in <code class="docutils literal notranslate"><span class="pre">registry</span></code>’s
+default factory, or in a cache beside the registry, would retain a
+class that <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> then makes stale; #425 and #428
+at this layer and #560 at the schema layer are all that same defect.</p>
 </div>
 </dd></dl>
 

@@ -580,12 +580,20 @@ rather than on this one. See <a class="reference internal" href="l2tp.html#modul
 <dd><p>Bases: <a class="reference internal" href="l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.L2TP" title="pcapkit.protocols.data.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.link.l2tp.L2TP" title="pcapkit.protocols.schema.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>]</p>
 <p>This class implements Layer Two Tunnelling Protocol version 2.</p>
 <p>The protocol is dispatched from <a class="reference internal" href="../transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a> at port 1701.</p>
+<p>Only the <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> framing is read: <a class="reference internal" href="#pcapkit.protocols.link.l2tpv2.L2TPv2.read" title="pcapkit.protocols.link.l2tpv2.L2TPv2.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> refuses a datagram whose
+version nibble is not <code class="docutils literal notranslate"><span class="pre">2</span></code>, so a v3 datagram arriving on port 1701
+(<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.2 shares the port) degrades to
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> instead of being reported as v2.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>IANA protocol number 115 (<code class="docutils literal notranslate"><span class="pre">L2TP</span></code>) is deliberately left unbound. It
-references <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. <strong>L2TPv3</strong>, whose session and control
+references <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>, i.e. <strong>L2TPv3</strong>, whose session and control
 message headers are a different shape – so the binding waits on an
-<code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class rather than on this one.</p>
+<code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> class rather than on this one. Binding <em>this</em> class there was
+proposed in GitHub issue #548 and does not work: over IP the v3 session
+header carries no version nibble at all, so this class cannot recognise
+that the datagram is not its own. See
+<a class="reference internal" href="l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> for the measurement.</p>
 <p>As with <a class="reference internal" href="ospf.html#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>, the class subclasses
 <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> and so reports
 <code class="docutils literal notranslate"><span class="pre">layer</span> <span class="pre">==</span> <span class="pre">'Link'</span></code> even though it is carried inside UDP. That is a
@@ -608,9 +616,15 @@ its public import path.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tpv2.L2TPv2.version">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">version</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.l2tpv2.L2TPv2.version" title="Link to this definition">¶</a></dt>
 <dd><p>Version of current protocol.</p>
-<p>Always <code class="docutils literal notranslate"><span class="pre">2</span></code>: <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> fixes the version nibble, and a datagram
+<p>Always <code class="docutils literal notranslate"><span class="pre">2</span></code>: <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> fixes the version nibble, and a datagram
 carrying any other value is a different protocol reached through a
 different class. c.f. <a class="reference internal" href="l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>.</p>
+<p>This is enforced rather than merely asserted – <a class="reference internal" href="#pcapkit.protocols.link.l2tpv2.L2TPv2.read" title="pcapkit.protocols.link.l2tpv2.L2TPv2.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a> refuses a
+datagram whose nibble is not <code class="docutils literal notranslate"><span class="pre">2</span></code>, so this hard-coded answer cannot
+disagree with
+<a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.L2TP.version" title="pcapkit.protocols.data.link.l2tp.L2TP.version"><code class="xref py py-attr docutils literal notranslate"><span class="pre">info.version</span></code></a>
+on the same octets. It did before that guard landed, reporting <code class="docutils literal notranslate"><span class="pre">2</span></code>
+here and <code class="docutils literal notranslate"><span class="pre">3</span></code> there.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -647,7 +661,7 @@ does. Element zero is what callers treat as canonical, so both
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tpv2.L2TPv2.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tpv2.html#L2TPv2.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tpv2.L2TPv2.read" title="Link to this definition">¶</a></dt>
 <dd><p>Read Layer Two Tunnelling Protocol.</p>
-<p>Structure of L2TP header [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>]:</p>
+<p>Structure of L2TP header [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

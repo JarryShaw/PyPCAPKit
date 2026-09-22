@@ -475,6 +475,32 @@ class can be imported by <code class="docutils literal notranslate"><span class=
 <dt class="sig sig-object py" id="pcapkit.corekit.module.ModuleDescriptor.klass">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">klass</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.corekit.module.pcapkit.corekit.module._T" title="pcapkit.corekit.module.pcapkit.corekit.module._T"><span class="pre">_T</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.module.ModuleDescriptor.klass" title="Link to this definition">¶</a></dt>
 <dd><p>Import class from module.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The module is read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> first, and
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.import_module()</span></code></a> is entered only when it is not
+loaded yet. That matters because this property is on a <em>per-frame</em>
+dispatch path: a next layer code nobody registered falls back to a
+<a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> for
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> which
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_next_layer</span></code>
+deliberately does not write back, so every unrecognised frame
+resolves the same descriptor again – 48 of the 52 resolutions an
+extraction of <code class="file docutils literal notranslate"><span class="pre">many_interfaces.pcapng</span></code> performs.
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.import_module" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">import_module()</span></code></a> keeps real per-call work for an
+already-imported module (locks, <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.machinery.ModuleSpec" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleSpec</span></code></a>
+checks, the <code class="docutils literal notranslate"><span class="pre">fromlist</span></code> walk), so each repeat cost ~436 ns where
+this property now costs ~117 ns.</p>
+<p>The class is still read off the module with <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> on
+every access, and nothing is memoised here. That is the point:
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> <em>is</em> the module cache, and it is the only one
+whose invalidation the interpreter maintains –
+<a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> rebinds the class in place and
+<code class="docutils literal notranslate"><span class="pre">sys.modules.pop()</span></code> drops the entry, both of which this sees
+immediately. Holding the resolved class instead would serve the
+pre-reload class forever, and an instance of it fails
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#isinstance" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">isinstance()</span></code></a> against the live one.</p>
+</div>
 </dd></dl>
 
 <dl class="py property">

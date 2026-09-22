@@ -479,12 +479,27 @@
 <span class="sd">---------------------------</span>
 
 <span class="sd">**L2TPv3** [:rfc:`3931`] has a different session header and a different control</span>
-<span class="sd">message header from v2, and is reachable two ways -- over UDP port 1701 like v2,</span>
-<span class="sd">and directly over IP as **protocol number 115**. That second route is why</span>
+<span class="sd">message header from v2, and is reachable two ways -- over UDP port 1701 like v2</span>
+<span class="sd">(§4.1.2), and directly over IP as **protocol number 115** (§4.1.1: *"L2TPv3 over</span>
+<span class="sd">IP (both versions) utilizes the IANA-assigned IP protocol ID 115"*). That second</span>
+<span class="sd">route is why</span>
 <span class="sd">:attr:`Internet.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
 <span class="sd">leaves 115 unbound today: the binding waits on an ``L2TPv3`` class, not on a</span>
 <span class="sd">different framing decision. It also means v3 is the first member of this family</span>
 <span class="sd">to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.</span>
+
+<span class="sd">GitHub issue #548 proposed closing that gap by binding</span>
+<span class="sd">:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead, which does not</span>
+<span class="sd">work and is worth recording so it is not proposed again. Over IP the v3 session</span>
+<span class="sd">header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions imposed</span>
+<span class="sd">by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw 32-bit</span>
+<span class="sd">Session ID and carries **no version nibble at all**, so there is nothing a v2</span>
+<span class="sd">parser could even test to recognise that the datagram is not its own. Measured,</span>
+<span class="sd">that binding reported ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``</span>
+<span class="sd">for a v3-over-IP datagram: a complete header assembled out of the top half of a</span>
+<span class="sd">Session ID and the first two octets of the PPP frame behind it. 115 is a missing</span>
+<span class="sd">*class*, not a missing registration, and until that class exists an undissected</span>
+<span class="sd">payload is the honest answer.</span>
 
 <span class="sd">**L2F** [:rfc:`2341`] is reached when the version nibble reads ``1``. It is *not*</span>
 <span class="sd">an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reserves</span>
@@ -500,8 +515,16 @@
 <span class="sd">Selecting a version</span>
 <span class="sd">-------------------</span>
 
-<span class="sd">Nothing dispatches on the version nibble yet, because only one version exists.</span>
-<span class="sd">When a second lands, the mechanism it wants already has a precedent in</span>
+<span class="sd">Nothing *dispatches* on the version nibble yet, because only one version exists</span>
+<span class="sd">-- but :meth:`L2TPv2.read &lt;pcapkit.protocols.link.l2tpv2.L2TPv2.read&gt;` does</span>
+<span class="sd">**check** it, and refuses anything other than ``2``. That is the half of the</span>
+<span class="sd">mechanism which is useful with one version implemented: it keeps v3 traffic on</span>
+<span class="sd">port 1701 (:rfc:`3931` §4.1.2 shares the port, so this is ordinary capture</span>
+<span class="sd">traffic rather than a corner case) from being reported as v2 with a tunnel and</span>
+<span class="sd">session ID read out of v3's Control Connection ID.</span>
+
+<span class="sd">When a second version lands, the remaining half -- delegation rather than refusal</span>
+<span class="sd">-- already has a precedent in</span>
 <span class="sd">:class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and</span>
 <span class="sd">delegates to a per-version class. L2TP is the easier case: HTTP has to</span>
 <span class="sd">*trial-parse* each candidate in</span>
@@ -509,7 +532,9 @@
 <span class="sd">format carries no version field, whereas L2TP states its version explicitly in</span>
 <span class="sd">those four bits. So a deterministic switch on ``Ver`` is enough, and no new</span>
 <span class="sd">registry is needed -- the class bound at UDP 1701 reads two octets, masks out the</span>
-<span class="sd">nibble, and hands the datagram to the matching class.</span>
+<span class="sd">nibble, and hands the datagram to the matching class. Note the switch belongs on</span>
+<span class="sd">the **UDP** path only: over IP protocol 115 there is no nibble to switch on, per</span>
+<span class="sd">the §4.1.1 note above.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol</span>
 

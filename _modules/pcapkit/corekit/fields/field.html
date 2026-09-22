@@ -448,6 +448,8 @@
 <span class="sd">"""base field class"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
@@ -458,7 +460,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Field'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -504,7 +506,146 @@
 <span class="c1">#: #431). Every such read is of a fixed-width, few-octet field, always far</span>
 <span class="c1">#: under this ceiling, so it is untouched; only a length past it -- which no</span>
 <span class="c1">#: fixed-width field ever legitimately is -- gets refused.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A ceiling on one field says nothing about how many fields a parse may pad,</span>
+<span class="c1">#: which is what :data:`_MAX_ZERO_PAD_SHORTFALL` and</span>
+<span class="c1">#: :data:`_ZERO_PAD_BUDGET_RATIO` below are for. See #573.</span>
 <span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="o">=</span> <span class="mh">0x40_000</span>
+
+<span class="c1">#: int: Shortfall :meth:`FieldBase.unpack` will always zero-pad for, whatever</span>
+<span class="c1">#: else a parse has already padded.</span>
+<span class="c1">#:</span>
+<span class="c1">#: :data:`_MAX_ZERO_PAD_LENGTH` bounds each field on its own, and a packet holds</span>
+<span class="c1">#: many fields, so the *sum* was unbounded: a declared length just under the</span>
+<span class="c1">#: ceiling is honoured however often it is declared. Measured on this tree, 200</span>
+<span class="c1">#: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block</span>
+<span class="c1">#: declaring ``secrets_length`` of 262,142 against two supplied octets through</span>
+<span class="c1">#: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --</span>
+<span class="c1">#: retained 50.0 MiB, an amplification of 10,922x per block. Every individual</span>
+<span class="c1">#: field was under the ceiling, so nothing refused any of them (#573).</span>
+<span class="c1">#:</span>
+<span class="c1">#: The sum therefore wants a budget, and this is the figure that makes one</span>
+<span class="c1">#: *safe*. A budget on its own is not: a capture cut short by its snapshot length</span>
+<span class="c1">#: pads legitimately and must keep parsing (#431, and the reasoning that declined</span>
+<span class="c1">#: #571), and it pads far more than it reads, so any running budget tight enough</span>
+<span class="c1">#: to matter starts refusing real captures. Worse, it refuses them *sometimes* --</span>
+<span class="c1">#: measured on this tree with a running budget alone, the same legitimate</span>
+<span class="c1">#: 54-octet frame parsed to one result on 37 of 40 calls and to another on calls</span>
+<span class="c1">#: 26, 33 and 39, because whether it fit depended on what had been parsed before</span>
+<span class="c1">#: it. A guard whose answer moves with history is not a guard.</span>
+<span class="c1">#:</span>
+<span class="c1">#: 65,536 is what removes that. It is the whole span of a 16-bit wire length</span>
+<span class="c1">#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and</span>
+<span class="c1">#: a PCAP-NG option all declare their size -- so no shortfall that one of those</span>
+<span class="c1">#: can produce is subject to the budget at all, and every one of them is padded</span>
+<span class="c1">#: unconditionally, exactly as before. Measured: the largest legitimate single</span>
+<span class="c1">#: shortfall found anywhere was 65,495 octets, from a snapshot-truncated</span>
+<span class="c1">#: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total</span>
+<span class="c1">#: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a</span>
+<span class="c1">#: truncated PCAP-NG option. Both sit under this figure, and so does anything</span>
+<span class="c1">#: else a 16-bit field can ask for.</span>
+<span class="c1">#:</span>
+<span class="c1">#: What is left above it is the band a *32-bit* wire length reaches --</span>
+<span class="c1">#: PCAP-NG's own block and secrets lengths, which is where #573's amplification</span>
+<span class="c1">#: lives -- and legitimately that is a once-per-file event, since only the last</span>
+<span class="c1">#: block of a truncated capture is cut short. So the band gets the running budget</span>
+<span class="c1">#: below, whose one-off term already covers any single such event outright.</span>
+<span class="n">_MAX_ZERO_PAD_SHORTFALL</span> <span class="o">=</span> <span class="mh">0x10_000</span>
+
+<span class="c1">#: int: Zero padding *past* :data:`_MAX_ZERO_PAD_SHORTFALL` that</span>
+<span class="c1">#: :meth:`FieldBase.unpack` will synthesise in total for every octet a parse has</span>
+<span class="c1">#: actually been given, over and above the one-off</span>
+<span class="c1">#: :data:`_MAX_ZERO_PAD_LENGTH` allowance.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A shortfall in this band -- past 65,536 octets and so past anything a 16-bit</span>
+<span class="c1">#: wire length can declare, but within :data:`_MAX_ZERO_PAD_LENGTH` -- is a</span>
+<span class="c1">#: PCAP-NG block or secrets length, a 32-bit figure. One of those, on its own, is</span>
+<span class="c1">#: legitimate: it is what the final block of a capture truncated at EOF looks</span>
+<span class="c1">#: like, and the ``_MAX_ZERO_PAD_LENGTH`` term of the allowance covers it whole,</span>
+<span class="c1">#: from a cold start, because such a shortfall cannot exceed that ceiling and</span>
+<span class="c1">#: still be padded at all.</span>
+<span class="c1">#:</span>
+<span class="c1">#: *Repeating* one is not legitimate, and that is what 16 is chosen to catch.</span>
+<span class="c1">#: Truncation cuts the end of a file, so a capture has one short block, not two</span>
+<span class="c1">#: hundred; #573's shape has two hundred because they are declared rather than</span>
+<span class="c1">#: cut. 16 octets of further allowance per octet genuinely read leaves any real</span>
+<span class="c1">#: file an allowance orders of magnitude past the one event it can want, while</span>
+<span class="c1">#: bounding the sum for a file whose blocks all lie.</span>
+<span class="n">_ZERO_PAD_BUDGET_RATIO</span> <span class="o">=</span> <span class="mh">0x10</span>
+
+<span class="c1">#: ContextVar[Optional[list[int]]]: Running ``[octets supplied, octets</span>
+<span class="c1">#: synthesised]`` ledger for :meth:`FieldBase.unpack`, against which</span>
+<span class="c1">#: :data:`_ZERO_PAD_BUDGET_RATIO` is enforced.</span>
+<span class="c1">#:</span>
+<span class="c1">#: A :class:`~contextvars.ContextVar` rather than a plain module global so that</span>
+<span class="c1">#: a thread parsing one capture cannot spend the budget of a thread parsing</span>
+<span class="c1">#: another: a new thread runs in an empty :class:`~contextvars.Context`, so it</span>
+<span class="c1">#: reads the default and installs a ledger of its own. The default is</span>
+<span class="c1">#: :data:`None` rather than a list precisely because ``ContextVar.get()`` hands</span>
+<span class="c1">#: back the *same* default object to every context, so a mutable default would</span>
+<span class="c1">#: be the shared global this is meant to avoid.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Measured, because the two cases differ and the difference is easy to state</span>
+<span class="c1">#: wrongly: a thread gets its own ledger, but an :mod:`asyncio` task does *not*</span>
+<span class="c1">#: -- :func:`asyncio.create_task` copies the current context, and a copied</span>
+<span class="c1">#: context carries the same list object, so a task started after a ledger exists</span>
+<span class="c1">#: shares and mutates it. :func:`_zero_pad_budget` is how such a task gets a</span>
+<span class="c1">#: budget of its own.</span>
+<span class="c1">#:</span>
+<span class="c1">#: The ledger is cumulative and is not reset on its own. That is deliberate:</span>
+<span class="c1">#: real parsing supplies real octets, so the allowance grows with the work</span>
+<span class="c1">#: actually done and a long-lived process does not drift into refusing valid</span>
+<span class="c1">#: captures.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Be precise about what that means in practice, because nothing in this package</span>
+<span class="c1">#: calls :func:`_zero_pad_budget` -- so the bound as shipped is over everything a</span>
+<span class="c1">#: context has ever parsed, not over one ``Extractor`` run. It is still a bound,</span>
+<span class="c1">#: and still proportionate: total padding past</span>
+<span class="c1">#: :data:`_MAX_ZERO_PAD_SHORTFALL` stays within</span>
+<span class="c1">#: ``_MAX_ZERO_PAD_LENGTH + _ZERO_PAD_BUDGET_RATIO`` times the octets that</span>
+<span class="c1">#: context has genuinely been given, so a long-running service that has read a</span>
+<span class="c1">#: great deal has earned proportionately more, rather than banking an unlimited</span>
+<span class="c1">#: allowance. Scoping it per file would make the bound tighter and is a one-line</span>
+<span class="c1">#: change at whichever layer owns a run; :func:`_zero_pad_budget` exists so that</span>
+<span class="c1">#: layer has something to call.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Cumulative state is what makes an answer depend on history, so note what is</span>
+<span class="c1">#: *not* weighed against it: a shortfall within :data:`_MAX_ZERO_PAD_SHORTFALL`</span>
+<span class="c1">#: neither consults this ledger nor is charged to it, which is what keeps every</span>
+<span class="c1">#: legitimate short read answering the same however much preceded it. Only the</span>
+<span class="c1">#: 32-bit band above reads and writes ``[1]``.</span>
+<span class="n">_zero_pad_ledger</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span>
+    <span class="s1">'pcapkit.corekit.fields.field._zero_pad_ledger'</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[list[int]]'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+<span class="p">)</span>  <span class="c1"># type: contextvars.ContextVar[Optional[list[int]]]</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zero_pad_budget</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[list[int]]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Give the parse in this block a padding budget of its own.</span>
+
+<span class="sd">    :data:`_zero_pad_ledger` is cumulative across a context, so by default the</span>
+<span class="sd">    bound :meth:`FieldBase.unpack` enforces is over everything that context has</span>
+<span class="sd">    parsed. Entering this scope starts a fresh ledger and restores the previous</span>
+<span class="sd">    one afterwards, which is what makes the bound *per parse* -- per</span>
+<span class="sd">    ``Extractor`` run, per file, per frame -- for a caller that wants it that</span>
+<span class="sd">    way, and what makes it reproducible for a test.</span>
+
+<span class="sd">    Note that nothing in this package calls it yet: the layer that knows where</span>
+<span class="sd">    one parse ends is the layer that should, and that is not this one.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        The ledger installed for the block, as ``[octets supplied, octets</span>
+<span class="sd">        synthesised]``. It is live: reading it inside the block reports what the</span>
+<span class="sd">        parse has done so far.</span>
+
+<span class="sd">    """</span>
+    <span class="n">ledger</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ledger</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">ledger</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FieldMeta">
@@ -733,7 +874,13 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If ``buffer`` holds fewer octets than :attr:`length`</span>
-<span class="sd">                declares, and ``length`` is past :data:`_MAX_ZERO_PAD_LENGTH`.</span>
+<span class="sd">                declares, and either ``length`` is past</span>
+<span class="sd">                :data:`_MAX_ZERO_PAD_LENGTH`, or the shortfall is past</span>
+<span class="sd">                :data:`_MAX_ZERO_PAD_SHORTFALL` and takes this parse's total of</span>
+<span class="sd">                such shortfalls past what :data:`_ZERO_PAD_BUDGET_RATIO` allows</span>
+<span class="sd">                for the octets it has actually been given. A shortfall within</span>
+<span class="sd">                :data:`_MAX_ZERO_PAD_SHORTFALL` is always padded and never</span>
+<span class="sd">                raises.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: ``length`` recomputes struct.calcsize() on every read, so the</span>
@@ -761,6 +908,74 @@
                 <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> declares a length of </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s), '</span>
                 <span class="sa">f</span><span class="s1">'but only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s) are available.'</span>
             <span class="p">)</span>
+
+        <span class="c1"># NOTE: The ceiling above bounds one field; this bounds their sum. A</span>
+        <span class="c1"># declared length just under :data:`_MAX_ZERO_PAD_LENGTH` passes it every</span>
+        <span class="c1"># time it is declared, so 200 of them amplified 4,800 wire octets into</span>
+        <span class="c1"># 50.0 MiB of retained zeros with the ceiling doing exactly what it was</span>
+        <span class="c1"># written to do -- the sum was never bounded at all. C.f. #573.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``max(length, 0)`` is defensive rather than a case anything is known to</span>
+        <span class="c1"># reach. :attr:`length` here resolves through :func:`struct.calcsize`, so</span>
+        <span class="c1"># it cannot be negative; the classes that instead answer it straight out</span>
+        <span class="c1"># of ``self._length``, which *is* negative for a variable-length field --</span>
+        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.PayloadField` and</span>
+        <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField` -- each replace this</span>
+        <span class="c1"># method outright and so never arrive here. The clamp costs one</span>
+        <span class="c1"># comparison and stops a negative width ever *granting* padding allowance</span>
+        <span class="c1"># for reading nothing, which is the one way this bookkeeping could be</span>
+        <span class="c1"># turned against itself.</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">supplied</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="k">else</span> <span class="n">width</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="n">width</span> <span class="o">-</span> <span class="n">supplied</span>
+
+        <span class="c1"># ``supplied`` is what earns allowance, so it is tallied on every read,</span>
+        <span class="c1"># padded or not: a parse made of small, honest reads is exactly the parse</span>
+        <span class="c1"># that should be able to afford the one large shortfall a capture</span>
+        <span class="c1"># truncated at EOF ends on.</span>
+        <span class="c1">#</span>
+        <span class="c1"># It counts octets as each field saw them, which is not the same as</span>
+        <span class="c1"># octets consumed from the file. A nested schema re-reads its enclosing</span>
+        <span class="c1"># field's span, and :meth:`OptionField.unpack &lt;pcapkit.corekit.fields.</span>
+        <span class="c1"># collections.OptionField.unpack&gt;` peeks an option's type field and then</span>
+        <span class="c1"># rewinds and parses the same span again, so a span can be credited more</span>
+        <span class="c1"># than once -- measured at 28 credited octets for a 24-octet IPv4 header</span>
+        <span class="c1"># carrying four one-octet ``NOP`` options. The over-count is bounded by</span>
+        <span class="c1"># nesting depth, so it makes the allowance somewhat more generous than the</span>
+        <span class="c1"># ratio alone suggests; it cannot grow without limit, which is what would</span>
+        <span class="c1"># actually matter.</span>
+        <span class="n">ledger</span> <span class="o">=</span> <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ledger</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ledger</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ledger</span><span class="p">)</span>
+        <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">supplied</span>
+
+        <span class="c1"># A shortfall no larger than :data:`_MAX_ZERO_PAD_SHORTFALL` is padded</span>
+        <span class="c1"># without consulting the budget, and is not charged to it either. That is</span>
+        <span class="c1"># the load-bearing half of this fix rather than a concession in it: it is</span>
+        <span class="c1"># what keeps the answer a function of *this* read rather than of</span>
+        <span class="c1"># everything read before it. No shortfall a 16-bit wire length can produce</span>
+        <span class="c1"># -- which is every shortfall a snapshot-truncated capture, a truncated</span>
+        <span class="c1"># option area or an over-long ``ihl`` can produce (#431, #571) -- is ever</span>
+        <span class="c1"># refused, on the first frame or the ten-thousandth.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Nor may those small shortfalls *spend* the budget, which is why they are</span>
+        <span class="c1"># not tallied against it. A snapshot-truncated capture of offload-sized</span>
+        <span class="c1"># frames pads some 935 octets for every octet it reads, all of it in this</span>
+        <span class="c1"># band; charging that to the same ledger would exhaust it within a few</span>
+        <span class="c1"># frames and refuse the next large shortfall -- reintroducing exactly the</span>
+        <span class="c1"># history-dependence the band exists to remove.</span>
+        <span class="k">if</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">_MAX_ZERO_PAD_SHORTFALL</span><span class="p">:</span>
+            <span class="n">allowance</span> <span class="o">=</span> <span class="n">_MAX_ZERO_PAD_LENGTH</span> <span class="o">+</span> <span class="n">_ZERO_PAD_BUDGET_RATIO</span> <span class="o">*</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">&gt;</span> <span class="n">allowance</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> would zero-pad </span><span class="si">{</span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s), '</span>
+                    <span class="sa">f</span><span class="s1">'taking this parse to </span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">padding</span><span class="si">}</span><span class="s1"> octet(s) of '</span>
+                    <span class="sa">f</span><span class="s1">'padding past </span><span class="si">{</span><span class="n">_MAX_ZERO_PAD_SHORTFALL</span><span class="si">}</span><span class="s1"> octet(s) against '</span>
+                    <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">ledger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> octet(s) actually read, past the </span><span class="si">{</span><span class="n">allowance</span><span class="si">}</span><span class="s1"> '</span>
+                    <span class="sa">f</span><span class="s1">'octet(s) allowed.'</span>
+                <span class="p">)</span>
+            <span class="n">ledger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">padding</span>
 
         <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">buffer</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>

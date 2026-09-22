@@ -467,7 +467,7 @@ than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer’s,
 and a defect programme run through the issue tracker across some 140 issues and
 pull requests between #326 and #509.</p>
-<ul class="simple">
+<ul>
 <li><p><strong>Added</strong> – three extraction engines: <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> and
 <code class="docutils literal notranslate"><span class="pre">engine='pcap_ct'</span></code>, two independent distributions of the same <code class="docutils literal notranslate"><span class="pre">libpcap</span></code>
 interface, and <code class="docutils literal notranslate"><span class="pre">engine='pypcapfile'</span></code> (#386, #405). They buy speed by doing
@@ -666,9 +666,13 @@ arbitrary registry, and an unrecognised class keyword raises
 <code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code>, matching the other four families. Backed by the new
 <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols.register_protocol_code</span></code>, which can
 also be called directly to register a class that declined at class-definition
-time. This is the mechanism #548 (<code class="docutils literal notranslate"><span class="pre">TransType.L2TP</span></code> registered nowhere)
-needs and does not yet use – fixing it is now a one-declaration change, left
-for its own issue rather than folded in here.</p></li>
+time. This was written up as the mechanism #548 (<code class="docutils literal notranslate"><span class="pre">TransType.L2TP</span></code>
+registered nowhere) needs, with fixing that issue described here as “now a
+one-declaration change”. Investigating #548 found otherwise – 115 is an
+<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> L2TPv3-over-IP header with no class to dispatch to, so the
+declaration would have pointed the <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> parser at it. See the
+corresponding <strong>Fixed</strong> entry below; the mechanism itself is unaffected, and
+its worked example now names <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> rather than <code class="docutils literal notranslate"><span class="pre">L2TPv2</span></code>.</p></li>
 <li><p><strong>Changed</strong> – extraction is around 46% faster on a 1,117-frame HTTP capture,
 with byte-identical output (#420). A reassembled datagram’s payload is now
 analysed on first read rather than eagerly, which cuts IP reassembly’s own
@@ -726,12 +730,12 @@ callbacks underflowed below zero, which <code class="docutils literal notranslat
 raise instead (#449, #456, #460, #463).</p></li>
 <li><p><strong>Fixed</strong> – field widths and units, each measured against the specification
 rather than inferred: HIP’s <code class="docutils literal notranslate"><span class="pre">TRANSPORT_FORMAT_LIST</span></code>, <code class="docutils literal notranslate"><span class="pre">NAT_TRAVERSAL_MODE</span></code>
-and <code class="docutils literal notranslate"><span class="pre">ESP_TRANSFORM</span></code> list entries are two octets, not one [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
-<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a>, <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a>] (#463, #472); the MN-ID option sizes from its
+and <code class="docutils literal notranslate"><span class="pre">ESP_TRANSFORM</span></code> list entries are two octets, not one [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>,
+<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5770.html"><strong>RFC 5770</strong></a>, <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7402.html"><strong>RFC 7402</strong></a>] (#463, #472); the MN-ID option sizes from its
 subtype, not from <code class="docutils literal notranslate"><span class="pre">identifier</span></code>’s Python type (#448, #464, #467);
 IPv6-Route’s <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> is computed in 8-octet units on both sides
-[<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>] (#487, #489); and the Fast Binding Update and Acknowledgment
-Lifetimes are plain seconds [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>], not <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>’s four-second units
+[<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>] (#487, #489); and the Fast Binding Update and Acknowledgment
+Lifetimes are plain seconds [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>], not <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>’s four-second units
 (#502).</p></li>
 <li><p><strong>Fixed</strong> – stdlib exceptions leaking out where the library’s own were
 promised: a malformed IP field value raised a bare <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of
@@ -766,7 +770,7 @@ sequence-indexed reassembly buffer; it also read an <code class="docutils litera
 dissect at all (#409), and its IPv4 fragment offset reached reassembly
 unscaled (#483, #484). The four IPv6 adapters disagreed about whether the
 8-octet Fragment header belongs to <code class="docutils literal notranslate"><span class="pre">ihl</span></code>, <code class="docutils literal notranslate"><span class="pre">header</span></code> and <code class="docutils literal notranslate"><span class="pre">tl</span></code>; per
-<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none of them, and all four now agree
+<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> section 4.5 it belongs to none of them, and all four now agree
 (#415, #424).</p></li>
 <li><p><strong>Fixed</strong> – PCAP and PCAP-NG output and parsing: <code class="docutils literal notranslate"><span class="pre">bytes(frame)</span></code> returned the
 <em>next</em> frame’s octets, <code class="docutils literal notranslate"><span class="pre">files=True</span></code> wrote names like <code class="docutils literal notranslate"><span class="pre">Frame</span> <span class="pre">1..json</span></code>, and a
@@ -783,7 +787,7 @@ buffer-relative slicing, so on any capture carrying a SYN with a realistic
 initial sequence number incomplete datagrams were dropped silently, and the
 <code class="docutils literal notranslate"><span class="pre">completed=False</span></code> branch of the public API was unreachable (#349, #376).</p></li>
 <li><p><strong>Fixed</strong> – constant lookups that rejected a value the registry defines.
-<code class="docutils literal notranslate"><span class="pre">RouterAlert(0)</span></code> is the only value <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2113.html"><strong>RFC 2113</strong></a> defines and the one IGMP,
+<code class="docutils literal notranslate"><span class="pre">RouterAlert(0)</span></code> is the only value <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2113.html"><strong>RFC 2113</strong></a> defines and the one IGMP,
 RSVP and MLD actually send, and it was discarded because the vendor crawler
 skipped a header row IANA’s CSV does not have; IPX <code class="docutils literal notranslate"><span class="pre">Socket(0)</span></code> is that
 protocol’s own default, so <code class="docutils literal notranslate"><span class="pre">bytes(IPX(...))</span></code> crashed on its own defaults;
@@ -815,6 +819,55 @@ package’s own default <code class="docutils literal notranslate"><span class="
 <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> instead of padding for it; the option and list loops’
 own tolerance for a short read past a truncated area (#431) is far under
 that ceiling and is untouched (#554).</p></li>
+<li><p><strong>Fixed</strong> – that ceiling bounds one field, and a packet holds many, so the
+<em>sum</em> of a parse’s zero padding was still unbounded: a declared length just
+under 262144 octets is honoured however often it is declared. 200 minimal
+PCAP-NG Decryption Secrets Blocks – 4,800 wire octets, each declaring a
+<code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> of 262,142 against two supplied octets – retained 50.0 MiB,
+an amplification of 10,922x per block, with the per-field guard never firing
+because every individual field was within it. <code class="docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code> now keeps a
+running per-context ledger of octets supplied against octets synthesised, and
+raises <code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code> once the total of shortfalls <em>past 65,536 octets</em>
+passes <code class="docutils literal notranslate"><span class="pre">262144</span> <span class="pre">+</span> <span class="pre">16</span> <span class="pre">*</span> <span class="pre">supplied</span></code>. The same 200 blocks now retain 0.2 MiB,
+54.6x rather than 10,922x.
+A shortfall of 65,536 octets or fewer is padded unconditionally and charged to
+nothing, and that band is the load-bearing part rather than a concession. 65,536
+is the whole span of a 16-bit wire length – how an IP header, an IPv6 payload,
+a TCP or IPv4 option and a PCAP-NG option all declare their size – so no
+shortfall a capture cut short by its snapshot length can produce is subject to
+the budget at all, on the first frame or the ten-thousandth. Without that band,
+a running budget alone made the <em>same</em> legitimate 54-octet frame declaring an
+IPv4 total length of 65,535 parse to one result on 37 of 40 identical calls and
+to another on calls 26, 33 and 39, since whether it fit depended on what had
+been parsed before it; a guard whose answer moves with history is worse than the
+amplification it bounds. The worst legitimate single shortfall measured anywhere
+was 65,495 octets, from exactly that frame, and the worst from a truncated
+PCAP-NG option was 64,750.
+<strong>What this does not close, measured rather than assumed</strong>: the 16-bit band is
+deliberately untouched, so a length declared by a 16-bit wire field can still be
+repeated without limit. A crafted 80,048-octet PCAP-NG file of 2,000 Enhanced
+Packet Blocks, each carrying one option declaring 65,535 octets against four
+real ones, parses end to end through <code class="docutils literal notranslate"><span class="pre">Extractor(store=True)</span></code> and retains
+125.00 MiB of synthesised zeros for 216.88 MiB of RSS – 1,637x its own size,
+linear in the block count – both before this change and after it. That is not
+an oversight in the bound: parsing a bare 40-octet IPv4 header declaring a total
+length of 65,535, which is what a legitimate capture of offload-sized segments
+truncated to its snapshot length looks like, amplifies by <strong>the same 1,637x</strong>.
+The two are not separable by any budget at this layer. Separating them needs the
+frame’s own <code class="docutils literal notranslate"><span class="pre">incl_len</span></code>/<code class="docutils literal notranslate"><span class="pre">orig_len</span></code> – a crafted block claims nothing was
+truncated while declaring more than it holds, and a snapshot-truncated frame
+says so on the wire – which is knowable at the protocol layer and not here.
+Nor is the budget scoped per file: nothing in the package resets the ledger, so
+as shipped the bound is over everything a context has parsed rather than over
+one <code class="docutils literal notranslate"><span class="pre">Extractor</span></code> run. That is still proportionate to the octets that context
+was genuinely given, and tightening it is a one-line change at whichever layer
+owns a run.
+Verified against every capture in <code class="docutils literal notranslate"><span class="pre">examples/captures/</span></code>, every one of them
+truncated at some 8,700 offsets, 190 snapshot-length rewrites, and the synthetic
+offload shapes above. The comparison is of the instrumented padding and
+supplied-octet tallies <em>and</em> of each parse’s outcome – frame count, or
+exception type and message – so a cut that changed from parsing to crashing
+would show rather than be swallowed; every one is identical to before (#573).</p></li>
 <li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">TCP._make_mptcp_addaddr</span></code> could not build an <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code>
 option end to end: its <code class="docutils literal notranslate"><span class="pre">kind=</span></code>/<code class="docutils literal notranslate"><span class="pre">length=</span></code> arguments were rejected with
 <code class="docutils literal notranslate"><span class="pre">UnknownFieldWarning</span></code> and silently dropped, and <code class="docutils literal notranslate"><span class="pre">.pack()</span></code> then raised
@@ -872,7 +925,7 @@ third real field the way <code class="docutils literal notranslate"><span class=
 bitfield, and a second, independent field for the same bits would either
 double-encode them or need a “derive, don’t pack” field kind this library does
 not have (#566). Separately, <code class="docutils literal notranslate"><span class="pre">_make_mptcp_capable</span></code> wrote
-<code class="docutils literal notranslate"><span class="pre">length=20</span> <span class="pre">if</span> <span class="pre">rkey</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">32</span></code> where <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives 12 and
+<code class="docutils literal notranslate"><span class="pre">length=20</span> <span class="pre">if</span> <span class="pre">rkey</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">else</span> <span class="pre">32</span></code> where <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a> section 3.1 gives 12 and
 20, and <code class="docutils literal notranslate"><span class="pre">MPTCPCapable.rkey</span></code>’s own condition (<code class="docutils literal notranslate"><span class="pre">pkt['length']</span> <span class="pre">!=</span> <span class="pre">32</span></code>) dropped
 the receiver’s key for exactly the length the maker used to mean “key present”
 – so a spec-correct, key-absent MP_CAPABLE could not be built at all, and a
@@ -881,6 +934,100 @@ in <code class="docutils literal notranslate"><span class="pre">_read_mptcp_capa
 packed output</strong>: a 20-octet, key-present option built or parsed under the old
 code becomes 12 octets with no key, or 20 octets with the key actually present,
 depending on which the caller meant (#567).</p></li>
+<li><p><strong>Fixed</strong> – IPv6-Route’s RPL routing data was five octets wide at the front
+where <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a> section 3 gives four, and three further defects sat
+stacked behind it. <code class="docutils literal notranslate"><span class="pre">CmprI</span></code>, <code class="docutils literal notranslate"><span class="pre">CmprE</span></code> and <code class="docutils literal notranslate"><span class="pre">Pad</span></code> are each a 4-bit field,
+sharing one 32-bit word with a 20-bit <code class="docutils literal notranslate"><span class="pre">Reserved</span></code>, but the schema declared
+<code class="docutils literal notranslate"><span class="pre">cmpr_i</span></code> and <code class="docutils literal notranslate"><span class="pre">cmpr_e</span></code> as whole octets – so a constructed two-address
+header packed to 41 octets while the <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> of 5 derived from that
+inflated data area declared 48. Correcting the width is a <strong>wire-format
+change</strong>, and it reshapes the schema: <code class="docutils literal notranslate"><span class="pre">RPL(cmpr_i=...,</span> <span class="pre">cmpr_e=...)</span></code> is now
+<code class="docutils literal notranslate"><span class="pre">RPL(cmpr={'cmpr_i':</span> <span class="pre">...,</span> <span class="pre">'cmpr_e':</span> <span class="pre">...})</span></code>, beside the
+<code class="docutils literal notranslate"><span class="pre">pad={'pad_len':</span> <span class="pre">...}</span></code> that was already there. Behind it, the reader’s
+<code class="docutils literal notranslate"><span class="pre">header.length</span> <span class="pre">%</span> <span class="pre">16</span></code> guard read <code class="docutils literal notranslate"><span class="pre">Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span></code> as an octet count and
+assumed 16-octet addresses, which an SRH only carries when <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CmprE</span></code> are both 0 – the unit confusion #487 fixed for Source Route and
+Type 2, flagged and deliberately left by #489 for want of a working RPL
+round trip to validate a replacement against. It is replaced by section
+4.2’s own address-count arithmetic,
+<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">(((Hdr</span> <span class="pre">Ext</span> <span class="pre">Len</span> <span class="pre">*</span> <span class="pre">8)</span> <span class="pre">-</span> <span class="pre">Pad</span> <span class="pre">-</span> <span class="pre">(16</span> <span class="pre">-</span> <span class="pre">CmprE))</span> <span class="pre">/</span> <span class="pre">(16</span> <span class="pre">-</span> <span class="pre">CmprI))</span> <span class="pre">+</span> <span class="pre">1</span></code>, which
+the reader now requires to close – non-negative and whole.
+<code class="docutils literal notranslate"><span class="pre">RPL.post_process</span></code> subtracted <code class="docutils literal notranslate"><span class="pre">pad_len</span></code> a second time from a buffer
+whose own length callback had already taken it off, losing one address per
+<code class="docutils literal notranslate"><span class="pre">16</span> <span class="pre">-</span> <span class="pre">CmprI</span></code> octets of padding, and set <code class="docutils literal notranslate"><span class="pre">ip</span></code> only when it had parsed
+octets – so once the guard stopped rejecting every constructed header,
+<code class="docutils literal notranslate"><span class="pre">IPv6_Route(type=...,</span> <span class="pre">data={'ip':</span> <span class="pre">[...]})</span></code> raised a bare
+<code class="docutils literal notranslate"><span class="pre">AttributeError:</span> <span class="pre">'RPL'</span> <span class="pre">object</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">attribute</span> <span class="pre">'ip'</span></code> from the reader. And
+<code class="docutils literal notranslate"><span class="pre">_make_data_type_rpl</span></code> computed <code class="docutils literal notranslate"><span class="pre">Pad</span></code> as <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">-</span> <span class="pre">length</span> <span class="pre">%</span> <span class="pre">8</span></code> without the
+outer <code class="docutils literal notranslate"><span class="pre">%</span> <span class="pre">8</span></code>, so an already-aligned address vector was handed a full 8
+octets of padding where section 3 requires that when <code class="docutils literal notranslate"><span class="pre">CmprI</span></code> and <code class="docutils literal notranslate"><span class="pre">CmprE</span></code>
+are both 0, <code class="docutils literal notranslate"><span class="pre">Pad</span></code> MUST carry a value of 0. The narrower <code class="docutils literal notranslate"><span class="pre">cmpr_i</span></code> also
+removes a latent divide-by-zero: a whole octet could hold 16, making
+<code class="docutils literal notranslate"><span class="pre">16</span> <span class="pre">-</span> <span class="pre">CmprI</span></code> zero, where a 4-bit field tops out at 15.
+<code class="docutils literal notranslate"><span class="pre">ipv6-route-type/RPL_Source_Route_Header</span></code> round-trips now and its
+<code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code> entry is deleted; as with the guard it replaces, none
+of this has been checked against a real RPL capture (#564).</p></li>
+<li><p><strong>Changed</strong> – <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code> reads an already-imported module out of
+<code class="docutils literal notranslate"><span class="pre">sys.modules</span></code> rather than re-entering <code class="docutils literal notranslate"><span class="pre">importlib.import_module</span></code>, which
+matters because next layer dispatch resolves a descriptor there on a per-frame
+path. A registry <em>hit</em> holding a <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> is resolved once and
+written back, but a <em>miss</em> deliberately is not – recording a miss in a
+class-level <code class="docutils literal notranslate"><span class="pre">collections.defaultdict</span></code> is the defect #425/#428 fixed at this
+layer and #560 fixed at the schema layer – so every unrecognised frame resolved
+the same fallback descriptor again: 48 of the 52 <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.klass</span></code>
+resolutions an extraction of <code class="docutils literal notranslate"><span class="pre">many_interfaces.pcapng</span></code> performs, and 4 of the 7
+on <code class="docutils literal notranslate"><span class="pre">ipv4.pcap</span></code>. <code class="docutils literal notranslate"><span class="pre">import_module</span></code> keeps real per-call work for a module
+<code class="docutils literal notranslate"><span class="pre">sys.modules</span></code> already holds, so that resolution now costs ~117 ns rather than
+~436 ns and the whole miss path ~526 ns rather than ~883 ns, on CPython 3.14.7.
+<strong>The scale is worth stating plainly: this is not measurable in</strong> <code class="docutils literal notranslate"><span class="pre">extract()</span></code>
+<strong>wall clock.</strong> 48 avoided calls is ~17 us against a ~37 ms extraction, two
+orders of magnitude inside this host’s run-to-run variance, and the “~40% of
+cumulative time” reading that prompted the work was an artifact of
+<code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code> being a recursive-descent dispatcher – its <em>self</em> time is
+0.58%, while <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code> is 16.7%. What the change is taken for is its
+shape rather than its speed: nothing memoises the resolved class, anywhere, so
+<code class="docutils literal notranslate"><span class="pre">sys.modules</span></code> stays the only module cache in play and its invalidation is the
+interpreter’s. A memo of the class would serve the pre-reload class after an
+<code class="docutils literal notranslate"><span class="pre">importlib.reload</span></code> forever, and an instance of it fails <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against
+the live one. Proposed by <code class="docutils literal notranslate"><span class="pre">&#64;Ts-Boom</span></code> in #563, whose profiling found the miss
+path; the implementation differs because that one added a second,
+never-invalidated cache of resolved classes (#574).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">L2TPv2</span></code> parsed any version nibble, so an L2TPv3 datagram was
+reported as v2 with a tunnel and session ID read out of v3’s Control
+Connection ID. <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2661.html"><strong>RFC 2661</strong></a> §3.1 fixes <code class="docutils literal notranslate"><span class="pre">Ver</span></code> at 2 and reserves 1 for L2F, and
+<code class="docutils literal notranslate"><span class="pre">L2TPv2.version</span></code> already documented that “a datagram carrying any other
+value is a different protocol reached through a different class” – but nothing
+enforced it, so the hard-coded <code class="docutils literal notranslate"><span class="pre">Literal[2]</span></code> property and <code class="docutils literal notranslate"><span class="pre">info.version</span></code>
+disagreed on the same octets, answering 2 and 3. <code class="docutils literal notranslate"><span class="pre">read</span></code> now raises
+<code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code>, which degrades the payload to <code class="docutils literal notranslate"><span class="pre">Raw</span></code> through the existing
+<code class="docutils literal notranslate"><span class="pre">beholder</span></code> path with the reason recorded. <strong>This affects real captures</strong>:
+<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.2 puts L2TPv3 on port 1701 too, the port <code class="docutils literal notranslate"><span class="pre">UDP.__proto__</span></code>
+already binds, so <code class="docutils literal notranslate"><span class="pre">Ethernet:IPv4:UDP:L2TPv2:Raw</span></code> with invented field values
+becomes <code class="docutils literal notranslate"><span class="pre">Ethernet:IPv4:UDP:Raw</span></code> with the octets preserved.</p>
+<p>This is the resolution of #548, which reported <code class="docutils literal notranslate"><span class="pre">TransType.L2TP</span></code> (115) as
+registered nowhere and proposed binding <code class="docutils literal notranslate"><span class="pre">L2TPv2</span></code> there. That binding is
+wrong rather than merely awkward: <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a> §4.1.1 gives 115 to <em>L2TPv3 over
+IP</em>, whose session header is “free of any restrictions imposed by coexistence
+with L2TPv2 and L2F” and carries <strong>no version nibble at all</strong>, so a v2 parser
+cannot even detect that the datagram is not its own. Measured, it produced
+<code class="docutils literal notranslate"><span class="pre">version=4</span></code>, <code class="docutils literal notranslate"><span class="pre">tunnelid=0x5678</span></code> and <code class="docutils literal notranslate"><span class="pre">sessionid=0xff03</span></code> from the top half
+of a Session ID and two octets of the PPP frame behind it. 115 is a missing
+<em>class</em>, not a missing registration, and stays unbound until an <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code>
+class exists; no dissector was invented here to fill it. The reasoning is now
+recorded in <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code> rather than only in a test, and
+<code class="docutils literal notranslate"><span class="pre">register_protocol_code</span></code>’s worked example – which named <code class="docutils literal notranslate"><span class="pre">L2TPv2</span></code> at 115 –
+names <code class="docutils literal notranslate"><span class="pre">L2TPv3</span></code> instead (#548).</p>
+</li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">tests/protocols/test_dispatch_reachability_unit.py</span></code>, the
+coverage #548 asked for: every <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> descendant whose <code class="docutils literal notranslate"><span class="pre">__index__</span></code>
+returns an enum member is checked to be reachable under that code in the
+registry its enum <em>type</em> designates, read from the same
+<code class="docutils literal notranslate"><span class="pre">_CODE_DESTINATIONS</span></code> table backing <code class="docutils literal notranslate"><span class="pre">code=</span></code> so the two cannot drift. Where
+<code class="docutils literal notranslate"><span class="pre">test_dispatch_registry_unit.py</span></code> walks the 38 entries that exist and checks
+each parses, this walks the classes and catches one nothing registered at all
+– the shape in which <code class="docutils literal notranslate"><span class="pre">OSPF</span></code> once shipped reachable from no table. 23 claims
+verified, no gaps; a companion case injects a gap and confirms the audit
+reports it, so the guard cannot rot into a permanently green no-op (#548).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

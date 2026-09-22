@@ -1086,20 +1086,37 @@
 <span class="sd">            Parsed route data.</span>
 
 <span class="sd">        """</span>
-        <span class="c1"># NOTE: this guard has the same surface shape as the Source Route and</span>
-        <span class="c1"># Type 2 unit confusion #487 fixed above -- ``header.length`` is</span>
-        <span class="c1"># ``Hdr Ext Len`` in 8-octet units, not octets, and ``% 16`` reads</span>
-        <span class="c1"># like a leftover assumption that it was already a total octet</span>
-        <span class="c1"># count. It is left as-is here: RPL addresses are variable-length</span>
-        <span class="c1"># (compressed by ``cmpr_i``/``cmpr_e``), so a fixed ``% 16`` bound is</span>
-        <span class="c1"># not obviously the right invariant even under correct units, and</span>
-        <span class="c1"># nothing here has been checked against a real RPL capture. Flagged</span>
-        <span class="c1"># for follow-up rather than guessed at. (The round trip through</span>
-        <span class="c1"># ``RPL.post_process`` this note used to say was broken -- it</span>
-        <span class="c1"># treated a ``make``-built ``list[bytes]`` as ``bytes`` and raised</span>
-        <span class="c1"># on pack -- was fixed by #556; that no longer blocks validating a</span>
-        <span class="c1"># replacement here, but the replacement itself is still unwritten.)</span>
-        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># NOTE: the ``% 16`` bound that stood here had the same surface shape</span>
+        <span class="c1"># as the Source Route and Type 2 unit confusion #487 fixed above --</span>
+        <span class="c1"># ``header.length`` is ``Hdr Ext Len``, in the 8-octet units</span>
+        <span class="c1"># :rfc:`6554#section-3` specifies, not octets -- and it additionally</span>
+        <span class="c1"># assumed 16-octet addresses, which an SRH only carries when ``CmprI``</span>
+        <span class="c1"># and ``CmprE`` are both 0. #489 called it out but deliberately left</span>
+        <span class="c1"># it alone, because ``RPL.post_process`` raised on every pack back</span>
+        <span class="c1"># then so there was no round trip to validate a replacement against.</span>
+        <span class="c1"># #556 removed that blocker and #564 the mis-sized fixed area behind</span>
+        <span class="c1"># it, so the replacement is written here rather than guessed at.</span>
+        <span class="c1">#</span>
+        <span class="c1"># :rfc:`6554#section-4.2` derives the address count from the same</span>
+        <span class="c1"># fields this reader has to hand:</span>
+        <span class="c1">#</span>
+        <span class="c1">#     n = (((Hdr Ext Len * 8) - Pad - (16 - CmprE)) / (16 - CmprI)) + 1</span>
+        <span class="c1">#</span>
+        <span class="c1"># so the invariant actually available is that the division closes --</span>
+        <span class="c1"># non-negative, and whole. ``16 - cmpr_i`` cannot be zero: ``CmprI``</span>
+        <span class="c1"># is a *"4-bit unsigned integer"* per :rfc:`6554#section-3`, hence at</span>
+        <span class="c1"># most 15. Note this is a well-formedness check the library needs in</span>
+        <span class="c1"># order to walk ``Addresses[1..n]`` at all; :rfc:`6554#section-4.2`</span>
+        <span class="c1"># itself specifies no malformed-header drop condition, only</span>
+        <span class="c1"># ``Segments Left &gt; n``, so nothing stricter is imposed here. Still</span>
+        <span class="c1"># not checked against a real RPL capture, which is the caveat the</span>
+        <span class="c1"># ``% 16`` bound carried too.</span>
+        <span class="n">cmpr_i</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_i'</span><span class="p">]</span>
+        <span class="n">cmpr_e</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr</span><span class="p">[</span><span class="s1">'cmpr_e'</span><span class="p">]</span>
+        <span class="n">pad_len</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span>
+
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="n">pad_len</span> <span class="o">-</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_e</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">remainder</span> <span class="o">%</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_i</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [TypeNo </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
@@ -1107,9 +1124,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">ipv6_route_header_length</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span><span class="p">),</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">seg_left</span><span class="p">,</span>
-            <span class="n">cmpr_i</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">,</span>
-            <span class="n">cmpr_e</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_e</span><span class="p">,</span>
-            <span class="n">pad</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">],</span>
+            <span class="n">cmpr_i</span><span class="o">=</span><span class="n">cmpr_i</span><span class="p">,</span>
+            <span class="n">cmpr_e</span><span class="o">=</span><span class="n">cmpr_e</span><span class="p">,</span>
+            <span class="n">pad</span><span class="o">=</span><span class="n">pad_len</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ipv6_route</span></div>
@@ -1270,7 +1287,16 @@
                 <span class="n">prefix_e</span> <span class="o">=</span> <span class="n">os_path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
                 <span class="n">cmpr_e</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix_e</span><span class="p">)</span>
 
-                <span class="n">pad</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">-</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_i</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_e</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span>
+                <span class="c1"># NOTE: the outer ``% 8`` is what keeps a vector that is</span>
+                <span class="c1"># already 8-octet aligned from being handed a *full* 8 octets</span>
+                <span class="c1"># of padding -- ``8 - 0`` is 8, not 0. That is reachable</span>
+                <span class="c1"># whenever ``dst`` shares no prefix with the addresses, which</span>
+                <span class="c1"># makes ``cmpr_i`` and ``cmpr_e`` both 0 and the vector a</span>
+                <span class="c1"># multiple of 16, and it contradicts :rfc:`6554#section-3`:</span>
+                <span class="c1"># *"Note that when CmprI and CmprE are both 0, Pad MUST carry</span>
+                <span class="c1"># a value of 0."* ``_make_data_type_none`` above already</span>
+                <span class="c1"># spells the idiom this way; this branch did not.</span>
+                <span class="n">pad</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_i</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">16</span> <span class="o">-</span> <span class="n">cmpr_e</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
 
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ip</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
@@ -1284,8 +1310,10 @@
                     <span class="n">ip_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">descr</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span><span class="p">[</span><span class="n">cmpr_e</span><span class="p">:])</span>
 
         <span class="k">return</span> <span class="n">Schema_RPL</span><span class="p">(</span>
-            <span class="n">cmpr_i</span><span class="o">=</span><span class="n">cmpr_i</span><span class="p">,</span>
-            <span class="n">cmpr_e</span><span class="o">=</span><span class="n">cmpr_e</span><span class="p">,</span>
+            <span class="n">cmpr</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'cmpr_i'</span><span class="p">:</span> <span class="n">cmpr_i</span><span class="p">,</span>
+                <span class="s1">'cmpr_e'</span><span class="p">:</span> <span class="n">cmpr_e</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="n">pad</span><span class="o">=</span><span class="p">{</span>
                 <span class="s1">'pad_len'</span><span class="p">:</span> <span class="n">pad</span><span class="p">,</span>
             <span class="p">},</span>

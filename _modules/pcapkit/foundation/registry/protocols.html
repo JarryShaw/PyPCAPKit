@@ -613,7 +613,7 @@
 <span class="c1">#: Enum type -&gt; the class(es) owning the :attr:`ProtocolBase.__proto__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__proto__&gt;` dispatch registry</span>
 <span class="c1">#: keyed by that enum type -- the "registry-of-registries" that lets</span>
-<span class="c1">#: ``code=`` infer a destination from a key's own type, per GH-514. This is</span>
+<span class="c1">#: ``code=`` infer a destination from a key's own type, per #514. This is</span>
 <span class="c1">#: not an invention: it is exactly the targeting</span>
 <span class="c1">#: :func:`register_ethertype`, :func:`register_transtype`,</span>
 <span class="c1">#: :func:`register_linktype` and :func:`register_sctp` already hard-code by</span>
@@ -708,11 +708,22 @@
 
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">       register_protocol_code(L2TPv2, [TransType.L2TP, {UDP: 1701}])</span>
+<span class="sd">       register_protocol_code(L2TPv3, [TransType.L2TP, {UDP: 1701}])</span>
 
 <span class="sd">    The explicit mapping form is accepted for any key, even one whose type</span>
 <span class="sd">    could be inferred -- being more explicit than required is never an</span>
 <span class="sd">    error.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        That example names ``L2TPv3``, which this package does not implement</span>
+<span class="sd">        yet, rather than :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`. It is</span>
+<span class="sd">        v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it</span>
+<span class="sd">        directly over IP on protocol 115 and §4.1.2 puts it over UDP on port</span>
+<span class="sd">        1701. :class:`L2TPv2 &lt;pcapkit.protocols.link.l2tpv2.L2TPv2&gt;` answers on</span>
+<span class="sd">        port 1701 only, and registering *it* at ``TransType.L2TP`` would point</span>
+<span class="sd">        the :rfc:`2661` parser at a v3-over-IP header -- see</span>
+<span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue #548 for</span>
+<span class="sd">        what that produced when measured.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol class to register.</span>

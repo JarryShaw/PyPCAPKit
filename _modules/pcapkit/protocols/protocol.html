@@ -1821,6 +1821,16 @@
 <span class="sd">            :meth:`self._lookup_registry &lt;ProtocolBase._lookup_registry&gt;` exists</span>
 <span class="sd">            to avoid.</span>
 
+<span class="sd">            So a miss resolves its fallback descriptor again on every frame, and</span>
+<span class="sd">            what keeps that affordable is :attr:`ModuleDescriptor.klass</span>
+<span class="sd">            &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` reading</span>
+<span class="sd">            :data:`sys.modules` instead of re-entering</span>
+<span class="sd">            :func:`importlib.import_module` -- see #574. Memoising the resolved</span>
+<span class="sd">            class here instead, whether under ``proto``, in ``registry``'s</span>
+<span class="sd">            default factory, or in a cache beside the registry, would retain a</span>
+<span class="sd">            class that :func:`importlib.reload` then makes stale; #425 and #428</span>
+<span class="sd">            at this layer and #560 at the schema layer are all that same defect.</span>
+
 <span class="sd">        """</span>
         <span class="n">protocol</span> <span class="o">=</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>

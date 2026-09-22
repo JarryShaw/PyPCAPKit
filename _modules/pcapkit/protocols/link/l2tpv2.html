@@ -504,7 +504,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Data_Flags</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.l2tp</span><span class="w"> </span><span class="kn">import</span> <span class="n">L2TP</span> <span class="k">as</span> <span class="n">Schema_L2TP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -536,11 +536,20 @@
 <span class="sd">    The protocol is dispatched from :attr:`UDP.__proto__</span>
 <span class="sd">    &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;` at port 1701.</span>
 
+<span class="sd">    Only the :rfc:`2661` framing is read: :meth:`read` refuses a datagram whose</span>
+<span class="sd">    version nibble is not ``2``, so a v3 datagram arriving on port 1701</span>
+<span class="sd">    (:rfc:`3931` §4.1.2 shares the port) degrades to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw` instead of being reported as v2.</span>
+
 <span class="sd">    Note:</span>
 <span class="sd">        IANA protocol number 115 (``L2TP``) is deliberately left unbound. It</span>
 <span class="sd">        references :rfc:`3931`, i.e. **L2TPv3**, whose session and control</span>
 <span class="sd">        message headers are a different shape -- so the binding waits on an</span>
-<span class="sd">        ``L2TPv3`` class rather than on this one.</span>
+<span class="sd">        ``L2TPv3`` class rather than on this one. Binding *this* class there was</span>
+<span class="sd">        proposed in GitHub issue #548 and does not work: over IP the v3 session</span>
+<span class="sd">        header carries no version nibble at all, so this class cannot recognise</span>
+<span class="sd">        that the datagram is not its own. See</span>
+<span class="sd">        :class:`~pcapkit.protocols.link.l2tp.L2TP` for the measurement.</span>
 
 <span class="sd">        As with :class:`~pcapkit.protocols.link.ospf.OSPF`, the class subclasses</span>
 <span class="sd">        :class:`~pcapkit.protocols.link.link.Link` and so reports</span>
@@ -571,6 +580,13 @@
 <span class="sd">        Always ``2``: :rfc:`2661` fixes the version nibble, and a datagram</span>
 <span class="sd">        carrying any other value is a different protocol reached through a</span>
 <span class="sd">        different class. c.f. :class:`~pcapkit.protocols.link.l2tp.L2TP`.</span>
+
+<span class="sd">        This is enforced rather than merely asserted -- :meth:`read` refuses a</span>
+<span class="sd">        datagram whose nibble is not ``2``, so this hard-coded answer cannot</span>
+<span class="sd">        disagree with</span>
+<span class="sd">        :attr:`info.version &lt;pcapkit.protocols.data.link.l2tp.L2TP.version&gt;`</span>
+<span class="sd">        on the same octets. It did before that guard landed, reporting ``2``</span>
+<span class="sd">        here and ``3`` there.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="mi">2</span>
@@ -620,6 +636,22 @@
 <span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span>
+
+        <span class="c1"># NOTE: :rfc:`2661` §3.1 fixes ``Ver`` at 2 and reserves 1 "to permit</span>
+        <span class="c1"># detection of L2F packets should they arrive intermixed with L2TP</span>
+        <span class="c1"># packets", while :rfc:`3931` uses 3 -- so a datagram carrying any other</span>
+        <span class="c1"># nibble is a different protocol, exactly as ``version`` documents.</span>
+        <span class="c1"># Refuse it rather than parse it: every field after this word has a</span>
+        <span class="c1"># different meaning (or no meaning) in another version, so continuing</span>
+        <span class="c1"># reports a tunnel and session ID assembled out of octets that are</span>
+        <span class="c1"># neither. Reported as GitHub issue #548, where an :rfc:`3931` §4.1.1</span>
+        <span class="c1"># L2TPv3-over-IP datagram yielded ``version=4``, ``tunnelid=0x5678`` and</span>
+        <span class="c1"># ``sessionid=0xff03`` -- read out of the top half of a Session ID and</span>
+        <span class="c1"># the first two octets of the PPP frame behind it. This is also what</span>
+        <span class="c1"># makes the hard-coded ``Literal[2]`` of ``version`` true, instead of</span>
+        <span class="c1"># disagreeing with ``info.version`` on the same datagram.</span>
+        <span class="k">if</span> <span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid version: </span><span class="si">{</span><span class="n">_flag</span><span class="p">[</span><span class="s2">"version"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="n">flags</span> <span class="o">=</span> <span class="n">Data_Flags</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Type</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]),</span>

@@ -683,7 +683,13 @@ mapping dictionary.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">buffer</span></code> holds fewer octets than <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>
-    declares, and <code class="docutils literal notranslate"><span class="pre">length</span></code> is past <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_LENGTH</span></code>.</p>
+    declares, and either <code class="docutils literal notranslate"><span class="pre">length</span></code> is past
+    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_LENGTH</span></code>, or the shortfall is past
+    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_SHORTFALL</span></code> and takes this parse’s total of
+    such shortfalls past what <code class="xref py py-data docutils literal notranslate"><span class="pre">_ZERO_PAD_BUDGET_RATIO</span></code> allows
+    for the octets it has actually been given. A shortfall within
+    <code class="xref py py-data docutils literal notranslate"><span class="pre">_MAX_ZERO_PAD_SHORTFALL</span></code> is always padded and never
+    raises.</p>
 </dd>
 </dl>
 </dd></dl>
