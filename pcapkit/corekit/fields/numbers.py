@@ -223,13 +223,24 @@ class NumberField(Field[int], Generic[_T]):
             second is how the template and the value being returned came to
             disagree in the first place. C.f. #591.
 
+            That width is a **ceiling** of the bit length over eight, and it is
+            written as one. It used to read
+            ``math.ceil(value.bit_length() // 8)``, which is not a ceiling at
+            all: :func:`math.ceil` of an :obj:`int` is that :obj:`int`, so the
+            ``//`` had already floored the quotient and the outer call did
+            nothing. Every value whose bit length is not an exact multiple of
+            eight was therefore sized one octet short -- ``256`` at one octet,
+            ``65536`` at two, and ``1`` itself at *zero* -- which
+            :meth:`int.to_bytes` and :func:`struct.pack` both refuse. See GitHub
+            issue #599.
+
         """
         value = value & self._bit_mask
         if self._signed and value > self._bit_mask >> 1:
             value -= self._bit_mask + 1
 
         if self._need_process and self._length < 0:
-            self._length = math.ceil(value.bit_length() // 8)
+            self._length = math.ceil(value.bit_length() / 8)
 
             endian = '>' if self._byteorder == 'big' else '<'
             struct_fmt = self.build_template(self._length, self._signed)
