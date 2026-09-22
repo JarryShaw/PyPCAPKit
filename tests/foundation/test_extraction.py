@@ -463,11 +463,22 @@ class ExtractorTests(unittest.TestCase):
             call_interrupt()
         self.assertTrue(call_interrupt._flag_e)
 
+        # ``_flag_s`` set means ``fin`` was a path and ``Extractor`` opened the
+        # handle itself, so ``_cleanup`` owns it and has to close it. This
+        # assertion read ``assertFalse`` until #610, pinning the leak in place.
         named_file = self._bare_extractor()
         named_file._flag_s = True
         named_file._ifile = ClosableBytesIO(b'data')
         named_file._cleanup()
-        self.assertFalse(named_file._ifile.closed_by_test)
+        self.assertTrue(named_file._ifile.closed_by_test)
+
+        # ...and cleared means the caller supplied the stream, which is not
+        # ``Extractor``'s to close.
+        given_stream = self._bare_extractor()
+        given_stream._flag_s = False
+        given_stream._ifile = ClosableBytesIO(b'data')
+        given_stream._cleanup()
+        self.assertFalse(given_stream._ifile.closed_by_test)
 
         with manual as ctx:
             self.assertIs(ctx, manual)
