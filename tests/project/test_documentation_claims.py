@@ -72,10 +72,20 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
     def test_documented_sense_matches_the_code(self) -> None:
         """The docstring says "not raise", and the code continues on EOF.
 
-        The behaviour is decided by ``if self._flag_n: continue`` inside the
-        ``except (EOFError, StopIteration)`` handler of ``record_frames``: the
-        flag makes extraction *carry on*. So the documentation has to be phrased
-        as suppressing the error, not as raising it.
+        The behaviour is decided by an ``if`` on ``_flag_n`` with a ``continue``
+        in its body, inside the ``except (EOFError, StopIteration)`` handler of
+        ``record_frames``: the flag makes extraction *carry on*. So the
+        documentation has to be phrased as suppressing the error, not as raising
+        it.
+
+        Note:
+            The condition was a bare ``if self._flag_n:`` until #620, which is why
+            this checks for the ``continue`` under a test *mentioning* the flag
+            rather than for that exact line -- the flag now shares the condition
+            with a termination check, since on its own it never stopped. That also
+            means this test does not distinguish #620's defect from its fix: it
+            pins the documented *sense* of the flag, not that the loop ends.
+            :file:`tests/foundation/test_extraction_no_eof.py` pins the ending.
 
         """
         from pcapkit.foundation.extraction import Extractor

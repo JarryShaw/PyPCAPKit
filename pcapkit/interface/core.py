@@ -133,7 +133,13 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
         buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
-        no_eof: if not raise :exc:`EOFError` when reach EOF
+        no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,
+            which is what a live capture on a pipe or on standard input wants,
+            since a read there blocks until the writer produces more or closes.
+            Retrying stops as soon as one retry finds nothing new, so an
+            exhausted input finishes rather than spinning; on a *seekable*
+            input, where nothing blocks, that means a file still being appended
+            to ends at the data present when the extraction reached it
 
         context: caller supplied parsing context for protocols that need
             information not carried on the wire, keyed by protocol index ID --

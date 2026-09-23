@@ -136,9 +136,13 @@ class Extractor(Generic[_P]):
         #: Verbose flag. This is used to determine if the verbose callback
         #: function should be called at each frame.
         _flag_v: 'bool'
-        #: No EOF flag. It is useful when the input file is a live capture,
-        #: as the extraction process will not stop until the user interrupt
-        #: the process.
+        #: No EOF flag. It is useful when the input is a live capture on a pipe or
+        #: on standard input, where reaching the end of what has arrived so far
+        #: does not mean the capture is over: the extraction retries instead of
+        #: stopping. It retries only while the input is still producing, though --
+        #: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`
+        #: for the rule and for what it narrows, without which an exhausted stream
+        #: spins forever (#620).
         _flag_n: 'bool'
         #: Input filename flag. It indicates if the input file is a file
         #: name or a binary IO object. For the latter, we should not close
@@ -183,6 +187,13 @@ class Extractor(Generic[_P]):
         _ifile: 'BufferedReader'
         #: Output file object.
         _ofile: 'Dumper | Type[Dumper]'
+
+        #: Position of the input stream at the previous end of stream, or
+        #: :data:`None` before the first one. Comparing it against the position
+        #: at the next end of stream is what tells a live capture that has paused
+        #: -- retry, more may arrive -- from one that is finished, which is the
+        #: termination condition ``no_eof`` was missing (#620).
+        _eof_mark: 'Optional[int]'
 
         #: Magic number.
         _magic: 'bytes'
@@ -701,7 +712,9 @@ class Extractor(Generic[_P]):
                 except (EOFError, StopIteration):
                     warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
 
-                    if self._flag_n:
+                    # ``no_eof`` retries -- but only while the input is still
+                    # producing, or an exhausted stream spins here forever (#620).
+                    if self._flag_n and self._note_eof_progress():
                         continue
 
                     # quit when EOF
@@ -789,7 +802,13 @@ class Extractor(Generic[_P]):
             buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)
             buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)
 
-            no_eof: if not raise :exc:`EOFError` when reach EOF
+            no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,
+                which is what a live capture on a pipe or on standard input wants,
+                since a read there blocks until the writer produces more or closes.
+                Retrying stops as soon as one retry finds nothing new, so an
+                exhausted input finishes rather than spinning; on a *seekable*
+                input, where nothing blocks, that means a file still being appended
+                to ends at the data present when the extraction reached it
 
             context: caller supplied parsing context for protocols that need
                 information not carried on the wire, keyed by protocol index
@@ -831,6 +850,7 @@ class Extractor(Generic[_P]):
         self._flag_v = False                 # verbose flag
         self._flag_s = isinstance(fin, str)  # input filename flag
         self._flag_n = no_eof                # no EOF flag
+        self._eof_mark = None                # stream position at the last EOF
 
         # verbose callback function
         if isinstance(verbose, bool):
@@ -1026,7 +1046,9 @@ class Extractor(Generic[_P]):
             except (EOFError, StopIteration) as error:
                 warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
 
-                if self._flag_n:
+                # See :meth:`_note_eof_progress`: ``no_eof`` retries a live capture
+                # that has merely paused, and gives up on an exhausted one (#620).
+                if self._flag_n and self._note_eof_progress():
                     continue
 
                 self._cleanup()
@@ -1050,7 +1072,11 @@ class Extractor(Generic[_P]):
                 except (EOFError, StopIteration):
                     warn('EOF reached', ExtractionWarning, stacklevel=stacklevel())
 
-                    if self._flag_n:
+                    # See :meth:`_note_eof_progress`. Once the input is finished
+                    # there is no frame left to return, so the error is the only
+                    # truthful answer this form can give -- ``no_eof`` defers it
+                    # rather than suppressing it outright (#620).
+                    if self._flag_n and self._note_eof_progress():
                         continue
 
                     self._cleanup()
@@ -1153,6 +1179,70 @@ class Extractor(Generic[_P]):
         if self.__dict__.get('_flag_s'):
             return True
         return isinstance(ifile, SeekableReader)
+
+    def _note_eof_progress(self) -> 'bool':
+        """Record this end of stream, and say whether the input advanced to reach it.
+
+        This is the termination condition ``no_eof`` was missing. The flag means
+        "end of stream is not necessarily the end of the capture" -- which is true
+        of a live capture, and is why :mod:`pcapkit.__main__` sets it for
+        ``fin='-'`` -- so the extraction retries rather than stopping. What it had
+        no way to decide was when the stream is *genuinely* finished, and for an
+        exhausted one every retry raises end of stream again immediately, which is
+        the spin #620 reported.
+
+        The signal is the input's own position. End of stream is raised by
+        :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in
+        the stream measure zero, and it restores the position before raising, so
+        the position at end of stream is stable. Two consecutive ends of stream at
+        the *same* position therefore mean nothing arrived between them.
+
+        What "between them" covers, exactly
+        -----------------------------------
+
+        For a **pipe**, everything, and the live-capture case is safe. A blocking
+        read on a pipe whose writer is open but idle *blocks*; it does not report
+        end of stream. So a pipe reports it only once the writer has closed --
+        permanently -- and a capture that merely pauses never reaches here at all.
+        Measured: a pipe paused mid-capture for 1.5s blocked for the whole pause
+        and then delivered its remaining frames, with this method not consulted
+        until after the writer closed.
+
+        For a **seekable regular file**, only the microseconds between two
+        immediately consecutive probes, because such a file does not block -- it
+        reports end of stream at once. So an extraction over a file that is still
+        being appended to ends at the data present when it got there, rather than
+        following the writer. That is a deliberate narrowing of what ``no_eof``
+        used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last
+        record 0.6s in yielded all six frames, and here it yields five. The
+        previous behaviour was unbounded by construction -- it is the defect #620
+        reports -- so *some* stopping rule had to be chosen, and a timed grace
+        period would only make the cut-off intermittent rather than absent.
+        Following a growing file wants a deliberate policy of its own; see the
+        note in :file:`docs/source/changelog/1.5.0.rst`.
+
+        Warning:
+            **Not idempotent.** Each call consumes one end-of-stream observation
+            by overwriting :attr:`_eof_mark`, so calling it twice for one end of
+            stream spends the retry it would have granted. Call it exactly once
+            per handler, which is what the three call sites do.
+
+        Returns:
+            :data:`True` when retrying may yet produce a frame -- this is the first
+            end of stream, or the input has advanced since the last one.
+            :data:`False` when the input is standing still and the loop should stop.
+
+        """
+        try:
+            position = self._ifile.tell()
+        except (OSError, ValueError):
+            # An input that cannot say where it is cannot be shown to be making
+            # progress either, and stopping is the safe answer: the alternative
+            # is the unbounded loop this method exists to end.
+            return False
+
+        previous, self._eof_mark = self._eof_mark, position
+        return previous is None or position > previous
 
     def _cleanup(self) -> 'None':
         """Cleanup after extraction & analysis.
