@@ -1994,6 +1994,77 @@ pull requests between #326 and #509.
   ``ca44d3ee658087cf2a667c454f839dd931c1c04790b2fe32cee8e1a2e861b182`` on each.
   ``examples/captures/pcapng.txt``, a hand-regenerated legacy smoke reference, still shows
   the old frame-level ``packet -> NIL`` and wants a separate refresh (#646).
+* **Fixed** -- an unpadded HTTP/2 ``DATA``, ``HEADERS`` or ``PUSH_PROMISE`` frame parsed
+  with its whole payload silently discarded. Three payload length callbacks in
+  ``pcapkit/protocols/schema/application/httpv2.py`` put the conditional expression in the
+  wrong place: a conditional binds looser than ``-``, so
+  ``pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0`` groups as
+  ``(pkt['__length__'] - pkt['pad_len']) if ... else 0`` and the ``else`` arm returned
+  ``0`` -- "read no octets at all" to ``BytesField`` -- where it was meant to subtract
+  ``0``. Since ``__length__`` is the *remaining* declared length at the field, the
+  unpadded arm wants ``__length__`` itself, which is what subtracting a zero padding
+  length gives. The grouping was read off the AST rather than by eye, the top-level node
+  being the ``IfExp`` whose ``orelse`` is a bare ``Constant(0)``, which is also what
+  showed that the outer parentheses on the ``HeadersFrame`` and ``PushPromiseFrame``
+  forms were line-continuation only and changed nothing. Padding is rare in HTTP/2, so
+  the broken arm was the common one rather than the edge case, and nothing raised, warned
+  or logged: ``info.data`` was simply ``b''``. Measured on wire octets through the public
+  ``HTTP(io.BytesIO(raw), len(raw))`` path, an unpadded ``DATA`` frame declaring
+  ``b'{"ok":true}\n'`` parsed as ``b''`` and now parses as those twelve octets; unpadded
+  ``HEADERS`` and ``PUSH_PROMISE`` lost and now keep the RFC 7541 appendix C.4.1 header
+  block fragment ``b'\x82\x86\x84A\x0fwww.example.com'``, which is precisely what HPACK
+  decoding would have been handed. Padded frames are untouched, for a reason stronger
+  than the measurement: ``(A - B) if T else 0`` and ``A - (B if T else 0)`` are both
+  ``A - B`` for truthy ``T``, so only the ``else`` arm could ever have moved -- both arms
+  are asserted anyway, so that a repair to the unpadded one cannot break the other. The
+  padded arm also has no off-by-one, which #668 asked be checked rather than assumed:
+  ``Schema.unpack`` decrements ``packet['__length__']`` by each field's width as it goes,
+  so ``pad_len``'s own octet is already out of it by the time the payload field runs, and
+  a padded frame declaring ``1 + len(data) + pad_len`` arrives at the payload with
+  ``__length__ == len(data) + pad_len``. The three sibling sites that were never wrong
+  are what localise the defect to the grouping rather than to the field machinery:
+  ``ContinuationFrame.fragment``, ``UnassignedFrame.data`` and ``GoawayFrame.debug`` use
+  the plain ``length=lambda pkt: pkt['__length__']`` with no conditional, share the same
+  ``BytesField``, the same ``__length__`` bookkeeping and the same frame dispatch, and
+  carried their payload correctly throughout -- they are pinned as controls rather than
+  left as an argument. Why nothing caught it: ``test_option_roundtrip_unit`` does drive
+  every frame type, but through ``make`` -> parse -> ``make``, and ``make`` writes the
+  length field from ``_make_http_length``, so both sides agreed on an empty payload and
+  the octets matched; its generator passes no payload argument for these three frames at
+  all, measured as ``kwargs={}``, so what it round-tripped was ``b''`` and there was
+  nothing to lose, while ``test_httpv2_frame_readers_cover_successful_frames`` drives the
+  readers from hand-built schema stubs, so the callback never ran there either. The new
+  ``tests/protocols/application/test_httpv2_payload_length_unit.py`` reads wire octets,
+  which is the gap: 15 tests and 9 subtests over the padded and unpadded shapes of all
+  three frames plus both ``PRIORITY`` combinations, asserting the payload *octets* and
+  never its length, because a length assertion survives a read of the right width from
+  the wrong offset. Its padded cases pad with a non-zero ``b'\xde\xad\xbe\xef'`` rather
+  than the zeros :rfc:`9113#section-6.1` tells a sender to use -- pcapkit does not police
+  padding content -- so that failing to subtract the padding yields a different byte
+  string instead of a coincidentally equal count. Four wrong fixes were written over the
+  schema to check the tests discriminate, and each is rejected: dropping the conditional
+  outright (caught by ``packet length < 0: -4``), subtracting ``pad_len + 1`` (caught as
+  ``b'{"ok":true}'`` against ``b'{"ok":true}\n'``), subtracting the padding on the arm
+  where it is absent, and fixing ``DataFrame`` while forgetting the other two. Four tests
+  and three subtests fail before the change and all pass after; 137 tests and 547
+  subtests pass across ``tests/protocols/application/``, the round-trip module and the
+  four other HTTP/2-touching modules. ``EXPECTED_FAILURES`` is unmoved, its one HTTP/2
+  entry ``httpv2-frame/PRIORITY`` still failing with the same ``CONSTRUCT`` status and
+  the same detail -- ``PriorityFrame`` has neither a payload field nor a ``PADDED`` flag,
+  so this change cannot reach it -- and none of the 44 entries was deleted; that entry's
+  own cited ``pcapkit/protocols/application/httpv2.py:572`` is stale, the
+  ``header.length != 9`` guard it describes now being at ``:562``. The schema module was
+  already at 100% coverage and stays there, 101 statements and 4 branches either side
+  with nothing missing or partial, because the changed lines did execute before -- just
+  with an empty payload -- so the number that moved is the suite: 73 to 88 tests and 399
+  to 408 subtests over the same targets. The construct side needed no change,
+  ``_make_http_length`` having always computed the DATA payload as
+  ``len(frame.data) + (pad_len + 1 if pad_len else 0)``, i.e. assuming ``data`` holds the
+  whole payload whether or not the frame is padded -- it was the read path that only
+  agreed with that when the frame *was* padded. Ships labelled breaking: restoring a
+  dropped payload moves the parse output of essentially every HTTP/2 capture on the
+  success path, so anything holding a golden file or a regression baseline that recorded
+  the empty value sees it change (#668).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
