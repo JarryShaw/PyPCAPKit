@@ -2263,6 +2263,18 @@ pull requests between #326 and #509.
   the ones #651 and this fix removed; dropping it is #689, deferred because it
   would halve every ``hip-parameter`` frame the fixture above reads (#672,
   #679).
+* **Fixed** -- three test comments stated an exact count of committed
+  captures under ``examples/captures/``, a number that drifts every time that
+  directory's tracked set changes and in one case was already wrong when
+  written. ``tests/_tiers.py`` and ``tests/test_tier_guard.py`` both cited
+  "six," correct at the time; ``tests/integration/_helpers.py`` said "four,"
+  which undercounted the tracked set the day it was written. All three now
+  describe the invariant instead of a number that has to be kept in sync with
+  it by hand: ``_tiers.py`` reads "the moment somebody commits another
+  capture... or stops committing one," ``_helpers.py`` reads "...are
+  fixtures -- some of them committed --...," and ``test_tier_guard.py`` drops
+  its "seventh capture" phrasing the same way. Prose-only, verified with
+  ``coverage.parser.PythonParser`` that no executable statement moved (#700).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
