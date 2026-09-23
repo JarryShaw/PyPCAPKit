@@ -12,7 +12,7 @@ Four things are worth pinning, and they are the four ways this could rot:
 * the tier rule here still matches the one CI runs
   (:class:`TierClassificationTests`, :class:`WorkflowAgreementTests`);
 * committedness comes from git rather than from a list of names that goes stale
-  the moment a seventh capture is committed (:class:`CommittedCaptureTests`);
+  the moment another capture is committed (:class:`CommittedCaptureTests`);
 * a violation is caught and explained, the legitimate reads next to it are not,
   and several violations in one module are listed in the order those violations
   appear in the file rather than in the order a tree walk happened to reach them
@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+import subprocess
 import tempfile
 import textwrap
 import unittest
@@ -131,17 +132,80 @@ class CommittedCaptureTests(unittest.TestCase):
         self.assertNotIn('test.pcap', tracked)
 
     def test_every_tracked_name_exists_and_matches_git(self) -> None:
-        """The set is the index's answer verbatim, prefix stripped."""
+        """The set is the index's answer verbatim, prefix stripped.
+
+        "Verbatim" is checked by re-deriving the index here, independently of
+        :func:`~tests._tiers.committed_captures` -- a second call to that same
+        function would only prove it agrees with itself, not that it agrees
+        with git. A hardcoded, stale, or otherwise wrong literal set would fail
+        the comparison below; it could only have passed the old body, which
+        asserted nothing but non-emptiness and the absence of a ``/``.
+
+        """
         tracked = _tiers.committed_captures()
         assert tracked is not None
         self.assertTrue(tracked, 'git tracks no capture at all, which cannot be right')
+
+        relative_root = _tiers.SAMPLE_ROOT.relative_to(_tiers.ROOT).as_posix()
+        # Shell out directly rather than through `_tiers._git` -- going through
+        # the implementation's own helper would only show that
+        # `committed_captures()` agrees with itself, not with git. The failure
+        # tolerance mirrors `_git`'s for the same reason it exists there: no
+        # executable, no repository, or a non-zero exit is "cannot tell", not
+        # "the sets disagree", and a source tarball's test run should not fail
+        # for a rule it cannot possibly break.
+        try:
+            completed = subprocess.run(
+                ('git', 'ls-files', '-z', '--', relative_root),
+                cwd=str(_tiers.ROOT), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                timeout=30, check=False,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            self.skipTest(f'git ls-files could not be run independently: {exc}')
+        if completed.returncode != 0:
+            self.skipTest('git ls-files exited non-zero on a fresh, independent re-derivation')
+
+        listing = completed.stdout.decode('utf-8', 'surrogateescape')
+        prefix = relative_root + '/'
+        expected = {
+            entry[len(prefix):] for entry in listing.split('\0')
+            if entry and entry.startswith(prefix)
+        }
+        self.assertEqual(
+            tracked, expected,
+            'committed_captures() disagrees with a freshly re-derived `git ls-files`'
+        )
+
         for name in tracked:
             with self.subTest(capture=name):
                 self.assertNotIn('/', name, 'names are relative to examples/captures/')
+                self.assertTrue(
+                    (_tiers.SAMPLE_ROOT / name).is_file(),
+                    f'git tracks examples/captures/{name} but it is not on disk'
+                )
 
     def test_capture_suggestions_are_captures(self) -> None:
-        """The replacement suggestion offers captures, not reference outputs."""
+        """The suggestion is the tracked set filtered to captures and sorted.
+
+        Equality against a set built independently of
+        :func:`~tests._tiers.committed_capture_names` is the point, but on an
+        empty tracked set it holds vacuously -- both sides would be ``()`` --
+        so the ``assertTrue`` guard below comes first, the same guard its
+        sibling ``test_every_tracked_name_exists_and_matches_git`` carries for
+        the same reason. Only past that guard do the two example-name
+        assertions add anything: they are satisfied by any list that happens
+        to contain ``in.pcap`` and omit ``out.txt``, hardcoded or not, so they
+        stay a readable sanity check on top of the real one rather than the
+        thing holding the test up.
+
+        """
+        tracked = _tiers.committed_captures()
+        assert tracked is not None
+        self.assertTrue(tracked, 'git tracks no capture at all, which cannot be right')
+        expected = tuple(sorted(name for name in tracked if name.endswith(_tiers.CAPTURE_SUFFIXES)))
+
         suggestions = _tiers.committed_capture_names()
+        self.assertEqual(suggestions, expected)
         self.assertIn('in.pcap', suggestions)
         self.assertNotIn('out.txt', suggestions)
 

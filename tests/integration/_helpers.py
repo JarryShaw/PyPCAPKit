@@ -55,8 +55,8 @@ class EndToEndTestCase(unittest.TestCase):
 
     Gives every test a private temporary directory in :attr:`tmp_path` and an
     :meth:`extract` wrapper that closes the input stream on teardown. Captures
-    under :file:`examples/captures/` are fixtures -- four of them are committed
-    -- so nothing here ever writes outside :attr:`tmp_path`.
+    under :file:`examples/captures/` are fixtures -- some of them committed --
+    so nothing here ever writes outside :attr:`tmp_path`.
 
     """
 
