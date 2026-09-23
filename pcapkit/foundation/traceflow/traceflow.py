@@ -143,7 +143,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:
+    #: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | ~typing.Type[Dumper], str | None]]:
     #: Format dumper mapping for writing output files. The values should be a
     #: tuple representing the module name and class name, or a
     #: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.
@@ -403,7 +403,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format)
-        #: Type[Dumper]: Dumper class.
+        #: ~typing.Type[Dumper]: Dumper class.
         self._foutio = fio
         #: Optional[str]: Output file extension.
         self._fdpext = ext
