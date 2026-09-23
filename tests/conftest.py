@@ -110,16 +110,25 @@ def restore_module_table() -> 'Iterator[None]':
     ``pcapkit/protocols/misc/pcap/frame.py:59`` -- twelve tests in
     :mod:`tests.project`, and only when the polluting file happened to be
     collected first. Three separate files turned out to leak this way, one of
-    which does not import :mod:`tests._support` at all.
+    which -- :mod:`tests.cli.test_main` -- did not import :mod:`tests._support`
+    at all.
 
-    Hence a guard here rather than a ``tearDown`` in each of them. The three
-    known leaks are also fixed at their call sites, with
+    Hence a guard here rather than a ``tearDown`` in each of them. Every known
+    leak is also fixed at its call site, with
     :func:`tests._support.isolate_modules`, because that is the honest fix and it
     holds under :mod:`unittest` as well; but a per-file fix only covers the files
     that have it, and the next one written without it would reintroduce the same
     order-dependent failure. This covers every test that exists and every test
     that will be written, which is the difference between the failure being
     unlikely and being impossible.
+
+    Two of the three were fixed at their call sites when this guard landed, and
+    the third was not: :mod:`tests.cli.test_main` kept its own purge loop, which
+    purges and restores nothing, and this fixture went on quietly healing it for
+    every test. That is issue #688 -- it took an audit rather than a failing run
+    to find, because a guard that repairs a leak also hides it. It is now fixed
+    at its call site too, which is what makes the paragraph above true of all
+    three rather than of two.
 
     Deliberately *not* fixed by moving ``test_protochain.py`` so it sorts
     elsewhere, or by leaning on a neighbouring test's purge to heal the state.
