@@ -2175,10 +2175,19 @@ pull requests between #326 and #509.
   whatever ``entry_data.read(8)`` returned, and since the block body is padded to a 32-bit
   boundary with NULs that ``bytes.strip()`` does not strip, that padding was read as a field
   *name* with no length prefix behind it -- so every journal entry of unaligned length raised
-  a bare ``struct.error``, measured on a 14-octet ``MESSAGE=hello`` entry. A NUL-only line now
-  ends the entry and a short prefix ends it with a warning; the separate silent loss of every
-  field after a binary one, from a ``read()`` that reaches EOF where it means to skip one
-  newline, is filed as #704 rather than fixed. The five deliberately unclamped non-packet
+  a bare ``struct.error``, measured on a 14-octet ``MESSAGE=hello`` entry -- a defect about
+  ordinary input rather than about truncation. A NUL-only line now ends the entry and a short
+  prefix ends it with a warning. The same function leaked two more of the family, found on the
+  cross-review's second pass and fixed with it: a binary field's declared length is the widest
+  in the format and nothing bounded it against the entry holding it, so at ``2**63`` and above
+  ``BytesIO.read`` refused it with a bare ``OverflowError`` while below that it silently
+  returned whatever was there -- the same malformed prefix fatal or invisible by magnitude
+  alone, now clamped to what the entry has left and reported; and a field name, key or value
+  that is not UTF-8 raised a bare ``UnicodeDecodeError``, fatal to a whole extraction over one
+  octet in one field, now decoded with ``errors='replace'`` and reported, which is the option
+  this module's own ``StringField`` already takes. The separate silent loss of every field
+  after a binary one, from a ``read()`` that reaches EOF where it means to skip one newline, is
+  filed as #704 rather than fixed. The five deliberately unclamped non-packet
   option areas keep the per-block framing assumption #676's note describes, which this does
   not close. Also
   here because it is the fifth and last registrar in the package with no overwrite guard
