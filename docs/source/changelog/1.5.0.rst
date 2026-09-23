@@ -2216,6 +2216,53 @@ pull requests between #326 and #509.
   ``StreamEOFError``. The two modules hold 99.93% coverage with their 25 new statements
   covered and their single miss flat, and ``examples/captures/pcapng.txt`` does not move
   further, leaving the #683 drift #685 tracks exactly as it was (#678).
+* **Fixed** -- HIP's ``R1_COUNTER``/``R1_Counter`` parameter packed 12 octets
+  where :rfc:`7401#section-5.2.3` requires 16, and ``LOCATOR_SET`` declared its
+  ``Length`` in 4-octet units where :rfc:`7401#section-5.2.1`'s ``Length`` is a
+  byte count -- two independent defects, fixed together because the evidence
+  for either needed the other out of the way first. ``R1CounterParameter``'s
+  ``counter`` was a ``UInt32Field`` where the RFC states the R1 generation
+  counter's width twice, as "8 bytes" in the diagram and as "a 64-bit unsigned
+  integer" in prose; both HIP versions that reach this class -- ``R1_Counter``
+  (128) and ``R1_COUNTER`` (129) -- packed a 12-octet record, landing at
+  ``4 (mod 8)`` instead of aligned. It is a ``UInt64Field`` now, and the record
+  is 16 octets (#672). ``LocatorSetParameter``'s own ``Length`` was written as
+  ``sum(Locator.len)``, in the 4-octet units :rfc:`8046#section-4` gives
+  ``Locator Length``, where this parameter's own ``Length`` is a byte count; a
+  set of *n* plain IPv6 locators therefore declared ``4n`` octets against
+  ``24n`` actually present, and ``Schema.unpack`` handed the nested
+  ``ListField`` only the declared octets, so ``n = 2`` and ``n = 5`` both
+  parsed one truncated locator and left the rest of the record unconsumed.
+  ``HIP._make_param_locator_set`` now sums ``8 + Locator.len * 4`` per locator
+  -- the fixed header plus the RFC 8046 contents each one actually carries
+  (#679). A second, independent defect in the same parameter's padding is
+  fixed alongside it, one #651 deliberately left alone because it happened to
+  cancel this one exactly: the nested ``Locator`` schemas share the
+  parameter's packet context and pack their own ``len`` over it, so
+  ``padding`` -- evaluated after the list -- always saw 4 rather than the
+  parameter's real length. A new ``locator_set_len_callback`` snapshots
+  ``Length`` under a private key before any locator packs into the context,
+  and ``locator_set_padding_len`` reads that snapshot rather than the shadowed
+  one. An RFC-only byte-stride walk over
+  ``examples/captures/options-internet.pcap``, independent of pcapkit's own
+  parser, went from 1 violation -- ``LOCATOR_SET``'s empty record, concealed
+  until now because ``examples/generators/options.py``'s ``R1_COUNTER``
+  override used ``counter=0``, a value the width defect could not be told
+  apart from -- to 2 once the counter was patched non-zero, to 0 once both
+  parameters were fixed; the fixture now overrides both ``R1_COUNTER`` codes
+  with ``counter=0xaabbccdd`` so a future regression cannot hide behind a zero
+  again. 10 new test methods across two new files -- 4 in
+  ``test_hip_r1_counter_width_unit.py``, 6 in
+  ``test_hip_locator_set_length_unit.py`` -- fail against the unfixed code and
+  pass against the fix; the three HIP modules stay at 100% coverage, and
+  ``tests/`` subtests move 586 to 623. ``EXPECTED_FAILURES`` is unmoved at 44
+  entries: ``hip-parameter/R1_Counter`` stays, because code 128 registers no
+  schema of its own -- ``R1CounterParameter`` declares only ``code=129`` --
+  which is a separate registry defect this does not touch, filed as #690.
+  ``HIP_COPIES`` also stays at two, now for no defect at all rather than for
+  the ones #651 and this fix removed; dropping it is #689, deferred because it
+  would halve every ``hip-parameter`` frame the fixture above reads (#672,
+  #679).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
