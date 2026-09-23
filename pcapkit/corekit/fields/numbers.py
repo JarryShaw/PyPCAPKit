@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 import aenum
 
 from pcapkit.corekit.fields.field import Field, NoValue
-from pcapkit.utilities.exceptions import FieldValueError, IntError
+from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError
 
 __all__ = [
     'NumberField',
@@ -480,6 +480,11 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
+    Notes:
+        A wire value the ``namespace`` registry has no member for resolves to a
+        nameless pseudo-member rather than failing the parse -- see
+        :meth:`post_process`.
+
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
@@ -501,13 +506,85 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             packet: Packet data.
 
         Returns:
-            Processed field value.
+            Processed field value -- the registry member declared for the value,
+            or a nameless pseudo-member carrying the value itself when the
+            registry declares none.
+
+        Raises:
+            BaseError: Whatever in-library error the registry raised for the
+                value, re-raised untouched.
+
+        Notes:
+            The registry is consulted through its constructor, which raises for
+            a value no member and no ``_missing_`` rule accounts for. That raise
+            used to propagate, and it is :mod:`aenum`'s own bare
+            :exc:`ValueError`: not one of :mod:`pcapkit.utilities.exceptions`,
+            so a caller cannot tell it from a bug of its own, and not an
+            :exc:`EOFError`, so :meth:`Extractor.record_frames
+            <pcapkit.foundation.extraction.Extractor.record_frames>` does not
+            catch it. One unassigned code therefore cost the whole extraction.
+
+            It also made the "unknown" reader the formats require unreachable
+            for any genuinely unassigned code -- PCAP-NG's
+            :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the
+            ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --
+            because the lookup failed several frames before the dispatch that
+            would have selected it. PCAP-NG repeats a block's total length at
+            both ends precisely so that a reader can skip a block type it does
+            not recognise; that skip is what this fallback restores. See GitHub
+            issue #701.
+
+            The fallback is the same nameless pseudo-member this method already
+            builds for a field carrying no registry at all, so it is a value
+            shape the package already produces and the dump layer already
+            renders -- as ``<unknown>::<unassigned> [28]``, through
+            :func:`~pcapkit.dumpkit.common.render_enum`, not through the
+            ``name is None`` branch #648 added, which a member named
+            ``<unassigned>`` never takes -- and one an :class:`int`-keyed
+            dispatch registry looks up by value like any declared member. It is
+            built per value rather than grafted onto
+            the registry with :func:`aenum.extend_enum`, for two reasons: a
+            capture carrying many distinct unassigned codes would otherwise grow
+            a process-global registry without bound, which is the growth
+            :meth:`ProtocolBase._lookup_registry
+            <pcapkit.protocols.protocol.ProtocolBase._lookup_registry>` exists
+            to avoid; and a stdlib :class:`enum.IntEnum` registry is then
+            handled exactly like an :class:`aenum.IntEnum` one.
+
+            Only a *foreign* rejection is absorbed. A registry rejecting a value
+            with one of :mod:`pcapkit.utilities.exceptions` has made a
+            deliberate decision that this layer -- which sees only that the value
+            arrived in a field of some width -- is in no position to overrule, so
+            an in-library error propagates unchanged and it is only :mod:`aenum`'s
+            and :mod:`enum`'s "no member has this value" that becomes a
+            pseudo-member. That is what keeps the fallback from being an
+            unconditional ``except ValueError: pass``.
+
+            No registry under :mod:`pcapkit.const` raises an in-library error
+            from its guard today, and deliberately so: a generated guard raises a
+            bare, unlogged :exc:`ValueError` precisely because the generated
+            ``get()``'s ``except ValueError`` fallback has to keep catching it
+            (GitHub issues #584 and #647). The registries that *do* bound
+            themselves to a width and reject outside it are the bit-flag ones --
+            :class:`pcapkit.const.tcp.flags.Flags` among them -- and none of
+            those is named as the namespace of a plain :class:`EnumField`
+            anywhere in the package, so no in-library guard loses its force
+            through this method. The distinction is therefore for a registry
+            registered from outside :mod:`pcapkit.const`, which has no such
+            obligation to stay quiet.
 
         """
         value = super().post_process(value, packet)
-        if self._namespace is None:
-            unknown = enum.IntEnum('<unknown>', {
-                '<unassigned>': value,
-            }, module='pcapkit.const', qualname='pcapkit.const.<unknown>')
-            return getattr(unknown, '<unassigned>')
-        return self._namespace(value)
+        if self._namespace is not None:
+            try:
+                return self._namespace(value)
+            except ValueError as error:
+                # NOTE: An in-library rejection is pcapkit's own decision about
+                # the value, rather than the enumeration library reporting that
+                # no member carries it, so it is not this layer's to absorb.
+                if isinstance(error, BaseError):
+                    raise
+        unknown = enum.IntEnum('<unknown>', {
+            '<unassigned>': value,
+        }, module='pcapkit.const', qualname='pcapkit.const.<unknown>')
+        return getattr(unknown, '<unassigned>')
