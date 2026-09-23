@@ -2129,6 +2129,66 @@ pull requests between #326 and #509.
   with its 5 new statements covered and its misses flat at 1, mypy and pylint
   are unmoved at 112 errors and 364 messages, and ``EXPECTED_FAILURES`` is
   unmoved at 44 entries (#692).
+* **Fixed** -- every EOF-truncated PCAP-NG file raised a bare ``ValueError`` out of
+  ``Extractor``, so the whole extraction was lost rather than the one truncated block.
+  The root is one layer above the reported site: Block Total Length is cross-checked
+  against its own trailing copy and never against the file, so a last block declaring
+  more than the file holds left ``PCAPNG.read`` seeking *past* the real end -- legal and
+  silent -- and the next block read then measured a **negative** remainder, since
+  ``prepare`` derives it as the end of the stream less the current position. That
+  negative reached ``SchemaField`` through ``pcapng_block_selector`` and
+  ``io.RawIOBase.read`` refused it, which is why nearly every truncation level failed
+  rather than only the one holding the cut. The seek is now clamped to the octets
+  ``_read_fileng`` actually returned, with a ``ProtocolWarning`` naming the overrun, and
+  a tail under the twelve octets a block needs at minimum is reported as the quiet
+  ``StreamEOFError`` that ``Extractor.record_frames`` already catches -- the one case
+  that is deliberately not a clamp, because at the end of the file no block is being
+  read and clamping would fabricate a frame out of zero padding. A second, independent
+  route to the same shape is closed with a new ``nonnegative()`` helper, composed into
+  ``bounded_option`` and ``bounded_area`` and applied to the eight unwrapped
+  ``length - N`` spans and the eight ``__option_padding__``-sized padding fields:
+  ``_TextField.__call__`` builds its ``struct`` template as ``f'{length}s'``
+  unconditionally, so a negative became the format ``'-8s'`` and ``struct.calcsize``
+  raised -- neither that nor the ``ValueError`` being one of
+  ``pcapkit.utilities.exceptions``, and neither being an ``EOFError``, so neither was
+  caught where the frame loop catches the end of a file. 28 of the module's 74 length
+  callbacks returned a negative before and none do now, from ``-1`` on an ``epb_hash``
+  declaring no payload to ``-16777248`` on an Enhanced Packet Block's option area; the
+  200-block, 8,048-octet ``captured_len = 0xFFFFFF`` vector that reached ``struct``
+  through ``bounded_area``'s own ``nominal <= available`` test being true for a negative
+  nominal now parses to 200 frames. Measured over all 1,509 octet boundaries of
+  ``examples/captures/dhcp.pcapng`` with one harness either side: 6 levels parsed before
+  and 1,495 do now, against 1,479 ``ValueError`` and 10 ``struct.error`` before and none
+  from outside the library after, with the frame count degrading monotonically with the
+  cut and the 13 levels that still raise all cutting into the Section Header Block, where
+  no frame was left to lose. The five deliberately unclamped non-packet option areas keep
+  the per-block framing assumption #676's note describes, which this does not close. Also
+  here because it is the fifth and last registrar in the package with no overwrite guard
+  at all: ``Option.register`` now reports a displaced option schema as a
+  ``RegistryWarning`` naming every namespace the ``ns='opt'`` fan-out displaced something
+  in, once per registration rather than once per namespace, tested by membership rather
+  than by subscripting because the per-namespace registries are plain ``defaultdict``\ s
+  and reading one to look would insert ``UnknownOption`` for a code nobody registered.
+  Presence alone is the firing condition, as on the seven code-keyed parser registrars and
+  unlike the narrower guard #681 gave ``register_protocol``, since this key is a
+  caller-supplied ``code`` that ``__init_subclass__`` passes once per subclass; a
+  namespace the call itself creates is exempt, because it starts as a copy of ``opt``'s
+  defaults and nothing in it is a prior registration. One draft did move
+  ``EXPECTED_FAILURES``, and it is worth recording: flooring the three decryption-secrets
+  payloads that read ``__length__`` *whole* rather than subtracting from it packs nothing,
+  because ``Schema.pack`` leaves that key at ``-1`` for "unknown" -- which emptied both
+  payloads and turned ``pcapng-secrets/TLS_Key_Log`` and ``.../WireGuard_Key_Log`` from
+  ``MISMATCH`` to ``OK``, an empty payload comparing equal to an empty payload. Reverted
+  and pinned; the entry count holds at 44 with its 35 PCAP-NG cases unmoved. Ships
+  labelled breaking: well-formed captures are byte-identical, verified by regenerating
+  ``examples/captures/pcapng.txt`` either side of the change, but any truncated PCAP-NG
+  now yields the frames before the cut where it previously raised -- so a caller reading
+  "extraction raised" as "this file is unusable" gets a partial result instead, whose last
+  frame may carry zero-padded octets -- and three exception classes change at the margins,
+  eight short-file depths moving from ``ProtocolError: unknown byteorder magic`` to
+  ``StreamEOFError``. The two modules hold 99.93% coverage with their 25 new statements
+  covered and their single miss flat, and ``examples/captures/pcapng.txt`` does not move
+  further, leaving the #683 drift #685 tracks exactly as it was (#678).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
