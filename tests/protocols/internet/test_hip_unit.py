@@ -3078,12 +3078,15 @@ class HIPUnitTests(unittest.TestCase):
         # Which parameters this governs, stated rather than implied: every padding
         # site in ``schema/internet/hip.py`` and every reported record length in
         # ``internet/hip.py`` routes through these two helpers -- 45 of the 46
-        # parameter schemas and 48 of the 49 reported lengths -- with exactly one
-        # exclusion, ``LOCATOR_SET``, kept on the pre-#651 expression on purpose.
-        # See ``LocatorSetParameter.padding`` for why, and #679 for the fix. The
-        # counts are asserted directly in
-        # :meth:`test_hip_padding_helpers_cover_every_parameter_but_locator_set`,
-        # so the exclusion cannot silently grow to two.
+        # parameter schemas and 48 of the 49 reported lengths. The forty-sixth is
+        # ``LOCATOR_SET``, which since #679 uses
+        # :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`
+        # instead: the same arithmetic, read off a snapshot of the parameter's
+        # own ``Length`` rather than off ``pkt['len']``, which its nested
+        # locators shadow while they pack. The counts and the identity of that
+        # one callback are asserted directly in
+        # :meth:`test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else`,
+        # so a third expression cannot appear unnoticed.
         #
         # The sweep above covers all eight residues, which is enough for any
         # formula periodic in ``Length % 8`` -- but not for one that is not.
@@ -3119,27 +3122,43 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.parameter_padding_len({'len': -1})
 
-    def test_hip_padding_helpers_cover_every_parameter_but_locator_set(self) -> None:
-        """#651/#679: the exclusion is exactly one parameter, and it is ``LOCATOR_SET``.
+    def test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else(self) -> None:
+        """#651/#664/#679: two padding callbacks cover all 46, and no third exists.
 
         #651 routed every HIP padding site through
         :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`, with
-        one deliberate exception: ``LOCATOR_SET``, whose own two defects cancel so
-        exactly that correcting its padding alone would take a conformant parameter
-        to four octets short. #679 fixes that pair together.
+        one deliberate exception. ``LOCATOR_SET`` carried two defects that
+        cancelled at the shape its tests sampled -- a ``Length`` in 4-octet units
+        where :rfc:`7401` Section 5.2.1 counts bytes, and a padding callback
+        reading the nested ``Locator.len`` instead of the parameter's -- so
+        correcting either alone made the wire output worse, and #664 documented
+        the exclusion rather than leaving it to look accidental.
 
-        A deliberate exception needs a guard, or it grows. Two failure modes this
-        catches, and nothing else does:
+        **#679 fixed the pair, so the exclusion is no longer a hold-back.**
+        ``LocatorSetParameter.padding`` now uses
+        :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`,
+        which defers to ``parameter_padding_len`` for the arithmetic and differs
+        from it only in *where it reads the length from*: the
+        :data:`~pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN` snapshot
+        that :func:`~pcapkit.protocols.schema.internet.hip.locator_set_len_callback`
+        takes before the nested locators overwrite ``pkt['len']``.
 
-        * **The exclusion spreading.** A later change that reverts a second
-          parameter to the old expression -- to make some other pinned literal
-          pass, say -- would be indistinguishable from this one by inspection.
-        * **The exclusion evaporating.** Someone "finishing" #651 by pointing
-          ``LocatorSetParameter.padding`` at the helper would make that parameter
-          emit ``24n + 4`` octets where the RFC wants ``24n + 8``, and no existing
-          assertion would fail: the corekit field test's literals are what
-          ``main`` emits, so they would go red, but from a file whose connection to
-          HIP padding is not obvious from its name.
+        So the shape this guards has changed, and the reason to keep guarding it
+        has not. Three failure modes, none of which anything else catches:
+
+        * **A third expression appearing.** A later change that gives some
+          parameter an inline lambda -- to make a pinned literal pass, say --
+          would be indistinguishable from the two legitimate callbacks by
+          inspection. ``bespoke`` below must stay empty.
+        * **The ``LOCATOR_SET`` callback regressing to a raw ``pkt['len']``
+          read.** That is the pre-#664 state, and it silently re-introduces
+          defect 1: the value read would be the last locator's 4, so the padding
+          would be four octets at every locator count again.
+        * **``LOCATOR_SET`` being "tidied" onto ``parameter_padding_len``
+          directly.** That looks like a simplification and is not one: on the
+          packing path the nested locators have already shadowed ``len`` by then,
+          so it would read 4 for an IPv6 locator and 5 for an SPI-bearing one
+          rather than the parameter's byte count.
 
         This reads the declared field objects rather than the module source, so it
         is about what the schemas *do*, not about how they are written.
@@ -3149,7 +3168,8 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.protocols.schema.internet import hip as hip_schema
 
         on_helper = []  # type: list[str]
-        excluded = []  # type: list[str]
+        on_locator_set = []  # type: list[str]
+        bespoke = []  # type: list[str]
         unpadded = []  # type: list[str]
         for name in dir(hip_schema):
             obj = getattr(hip_schema, name)
@@ -3164,15 +3184,24 @@ class HIPUnitTests(unittest.TestCase):
             callback = getattr(field, '_length_callback', None)
             if callback is hip_schema.parameter_padding_len:
                 on_helper.append(name)
+            elif callback is hip_schema.locator_set_padding_len:
+                on_locator_set.append(name)
             else:
-                excluded.append(name)
+                bespoke.append(name)
 
         self.assertEqual(
-            excluded, ['LocatorSetParameter'],
-            'exactly one HIP parameter schema may sit outside '
-            'parameter_padding_len, and it is LocatorSetParameter (see #679). '
-            'If this list grew, the narrowing of #651 has leaked; if it emptied, '
-            'LOCATOR_SET now emits four octets too few.'
+            bespoke, [],
+            'every HIP parameter schema must pad through parameter_padding_len '
+            'or, for LOCATOR_SET alone, locator_set_padding_len. A name here is '
+            'a third padding expression, which is what #651 existed to remove.'
+        )
+        self.assertEqual(
+            on_locator_set, ['LocatorSetParameter'],
+            'exactly one HIP parameter schema reads its padding length from the '
+            'LOCATOR_SET_LEN snapshot, and it is LocatorSetParameter (see #679). '
+            'If this emptied, LOCATOR_SET is reading a len its nested locators '
+            'have already shadowed; if it grew, some other parameter has been '
+            'given a snapshot it has no nested schemas to need.'
         )
 
         # Three schemas declare no padding field at all, which is correct rather
@@ -3187,12 +3216,21 @@ class HIPUnitTests(unittest.TestCase):
             ['RegFromParameter', 'RelayFromParameter', 'RelayToParameter'])
 
         self.assertEqual(len(on_helper), 45)
-        self.assertEqual(len(on_helper) + len(excluded) + len(unpadded), 49)
+        self.assertEqual(
+            len(on_helper) + len(on_locator_set) + len(bespoke) + len(unpadded), 49)
 
-        # and the excluded one is the schema registered for LOCATOR_SET, not some
-        # similarly-named class that merely sorts next to it
+        # and the one on the snapshot is the schema registered for LOCATOR_SET,
+        # not some similarly-named class that merely sorts next to it
         self.assertIs(hip_schema.Parameter.registry[Parameter.LOCATOR_SET],
                       hip_schema.LocatorSetParameter)
+
+        # the snapshot callback is installed where it has to be -- on the
+        # ``locators`` ListField, which resolves before any nested Locator has
+        # packed -- rather than merely existing in the module
+        self.assertIs(
+            getattr(hip_schema.LocatorSetParameter.__fields__['locators'],
+                    '_callback', None),
+            hip_schema.locator_set_len_callback)
 
     def test_hip_parameter_records_are_eight_octet_aligned_on_the_wire(self) -> None:
         """#651: the octets a real parameter packs, not just the arithmetic.

@@ -550,57 +550,61 @@ class IPAddressFieldTests(unittest.TestCase):
 
         # the same two sites still take every legitimate value they took before.
         #
-        # These two literals are unchanged by #651, and that is worth a note rather
-        # than being left to look like an oversight: #651 corrected HIP parameter
-        # padding to :rfc:`7401` Section 5.2.1's
-        # ``Total Length = 11 + Length - (Length + 3) % 8`` at 45 of the 46
-        # parameters, and ``LOCATOR_SET`` is the one deliberately left alone. So
-        # these records are byte-for-byte what ``main`` emits -- verified against
-        # ``b34f132f6`` rather than assumed -- and they are *also* what the RFC
-        # asks for.
+        # Both literals moved with #679, and in a way worth stating precisely
+        # because it is not the direction a reader of #651 would guess: the
+        # records are still **32 octets**, and only the two ``Length`` octets
+        # changed, from ``0004`` to ``0018``. Measured with ``.pack()`` on both
+        # trees rather than reasoned about -- ``f0999858e`` emits
+        # ``00c10004...00000000`` and the fix emits ``00c10018...00000000``, 32
+        # octets each. Note the argument order: the first argument is the
+        # produced octets and the second is the literal.
         #
-        # The reason they are already right is that two defects in this parameter
-        # cancel each other exactly, which is why correcting the padding here alone
-        # would have broken it. ``LocatorSetParameter.padding``'s callback never
-        # receives the parameter's ``len``: ``ListField`` packs each nested
-        # ``Locator`` into the shared packet context, whose own ``len`` overwrites
-        # the parameter's, and ``padding`` is evaluated after the list -- so it sees
-        # the last locator's ``len``, which is 4 for any IPv6 locator. Meanwhile
-        # ``_make_param_locator_set`` writes the parameter's ``len`` as
-        # ``sum(Locator.len)``, in 4-octet units, where the RFC's ``Length`` is a
-        # byte count: ``4n`` where the contents are ``24n`` octets.
+        # ``LOCATOR_SET`` was the one parameter #651 and #664 left on the old
+        # padding expression, because two defects in it cancelled. Its ``len``
+        # was ``sum(Locator.len)`` -- 4-octet units, where :rfc:`7401`
+        # Section 5.2.1's ``Length`` is "length of the Contents, in bytes" -- so
+        # it declared ``4n`` for a ``24n``-octet contents; and its padding
+        # callback read the nested ``Locator.len`` instead of the parameter's,
+        # because ``ListField`` packs each ``Locator`` into the shared packet
+        # context and ``padding`` is evaluated after the list. That shadowed
+        # value is 4 for any IPv6 locator, so the old expression appended exactly
+        # four octets at every count: ``4 + 24n + 4 = 24n + 8``, which is also
+        # the RFC total for a byte-count ``Length`` of ``24n``. Hence 32 octets
+        # here before and after, by two wrongs then and by the arithmetic now.
         #
-        # Always-4 padding gives ``4 + 24n + 4 = 24n + 8``; and because ``24n`` is a
-        # multiple of 8, the RFC total for a byte-count ``Length`` of ``24n`` is
-        # ``11 + 24n - 3``, the same ``24n + 8``. Measured at n = 1, 2, 5 on both
-        # trees: 32, 56 and 128 octets, equal to the RFC total in every case. #679
-        # tracks fixing the pair together; see ``LocatorSetParameter.padding`` for
-        # why neither half moves on its own.
+        # #679 fixed the pair together. ``Length`` is now the byte count 24, the
+        # padding is ``rfc_total(24) - 4 - 24`` = 4, and the total is the same 32
+        # -- while the shapes the cancellation never covered stopped being
+        # wrong: an empty set went from 4 octets to the 8 the RFC requires, one
+        # SPI-bearing locator from 35 to 32, two from 63 to 64, and a mixed pair
+        # from 59 or 60 to 56. Those live in
+        # :mod:`tests.protocols.internet.test_hip_locator_set_length_unit`, which
+        # sweeps shapes rather than counts for exactly that reason.
         #
         # They pin exact octets rather than a length or a prefix, deliberately.
         # Exact octets are the whole subject of #651, and pcapkit round-trips its
         # own output whatever the padding rule says -- writer and reader shared the
         # error -- so a comparison that tolerated trailing bytes would have gone on
         # passing through the defect and through the fix alike. For the same reason
-        # these stay 32 octets: a shorter pin here would silently bless the
-        # four-octet shortfall that narrowing #651 exists to avoid.
+        # these stay 32 octets: a shorter pin here would silently bless a
+        # four-octet shortfall.
         self.assertEqual(
             hip._make_param_locator_set(  # type: ignore[arg-type]
                 Parameter.LOCATOR_SET, version=2,
                 locator_set=[{'ip': '2001:db8::1'}]).pack().hex(),
-            '00c10004000004000000000020010db800000000000000000000000100000000')
+            '00c10018000004000000000020010db800000000000000000000000100000000')
         self.assertEqual(
             tcp._make_mptcp_addaddr(  # type: ignore[arg-type]
                 MPTCPOption.ADD_ADDR, addr_id=1, addr='192.0.2.1').address,
             ipaddress.IPv4Address('192.0.2.1'))
         # int(True) is 1, and 1 is ::1 for an IPv6-only locator -- the escape
         # hatch works and still widens to the family the wire format fixes.
-        # Four trailing octets shorter since #651, as above.
+        # Same 32 octets, same two ``Length`` octets moved, as above.
         self.assertEqual(
             hip._make_param_locator_set(  # type: ignore[arg-type]
                 Parameter.LOCATOR_SET, version=2,
                 locator_set=[{'ip': int(True)}]).pack().hex(),
-            '00c1000400000400000000000000000000000000000000000000000100000000')
+            '00c1001800000400000000000000000000000000000000000000000100000000')
 
     def test_ipv4_interface_post_process_rejects_a_non_contiguous_netmask(self) -> None:
         """``IPv4InterfaceField.post_process`` builds
