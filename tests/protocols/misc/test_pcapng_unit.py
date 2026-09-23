@@ -4192,72 +4192,6 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual([entry for entry in caught
                           if entry.category.__name__ == 'SchemaWarning'], [])
 
-    def test_journal_fields_following_a_binary_field_are_not_discarded(self) -> None:
-        """#704: skipping a binary field's terminator used to skip everything.
-
-        ``entry_data.read()`` with no argument reads to *end of file*, not past
-        the one newline octet the format puts there, so the outer ``while
-        True`` loop's next ``readline()`` finds nothing and ends the entry.
-        A single binary field cannot show this -- there is nothing behind it
-        to lose -- so the entry needs a *second* binary field, and a text
-        field after that, to tell a length-bounded skip from an unbounded one.
-
-        """
-        entries, caught = self._extract_journal(
-            b'BEFORE=zero\n'
-            b'FIRST\n' + struct.pack('<Q', 3) + b'one\n' +
-            b'SECOND\n' + struct.pack('<Q', 3) + b'two\n' +
-            b'AFTER=three\n')
-
-        self.assertEqual(len(entries), 1)
-        self.assertEqual(entries[0]['BEFORE'], 'zero')
-        self.assertEqual(entries[0]['FIRST'], b'one')
-        self.assertEqual(entries[0]['SECOND'], b'two')
-        self.assertEqual(entries[0]['AFTER'], 'three')
-        self.assertEqual([item for item in caught
-                          if item.category.__name__ == 'SchemaWarning'], [])
-
-    def test_a_binary_last_field_before_a_trailing_separator_is_not_warned(self) -> None:
-        """A cross-review false positive on #722: the terminator check itself.
-
-        ``self.entry.split(b'\\n\\n')`` consumes an entry's last field's own
-        terminating newline together with the blank line that separates it
-        from whatever follows -- a trailing separator an entry *may* carry
-        per ``draft-richardson-opsawg-pcapng-extras-01``. A *text* last
-        field's ``readline()`` never notices; the terminator check added for
-        #704 did, and warned over a newline that was in the capture all
-        along. The split has to give that one octet back to the segment it
-        took it from.
-
-        """
-        entries, caught = self._extract_journal(
-            b'MESSAGE\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n')
-
-        self.assertEqual(len(entries), 2)
-        self.assertEqual(entries[0]['MESSAGE'], b'abc')
-        self.assertEqual(len(entries[1]), 0)
-        self.assertEqual([item for item in caught
-                          if item.category.__name__ == 'SchemaWarning'], [])
-
-    def test_a_binary_field_ending_the_first_of_two_entries_is_not_warned(self) -> None:
-        """The same false positive, with a second real entry behind the split.
-
-        Identical mechanism to the trailing-separator case above, just with
-        real content on the far side of the ``\\n\\n`` instead of nothing --
-        confirming the fix is the split giving back a stolen octet, not a
-        special case for an empty second entry.
-
-        """
-        entries, caught = self._extract_journal(
-            b'A=1\nBIN\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n' + b'B=2\n')
-
-        self.assertEqual(len(entries), 2)
-        self.assertEqual(entries[0]['A'], '1')
-        self.assertEqual(entries[0]['BIN'], b'abc')
-        self.assertEqual(entries[1]['B'], '2')
-        self.assertEqual([item for item in caught
-                          if item.category.__name__ == 'SchemaWarning'], [])
-
     def test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped(self) -> None:
         """A 64-bit length was either fatal or invisible, by magnitude alone.
 
@@ -4299,9 +4233,214 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                 if remainder[declared:declared + 1] == b'\n':
                     self.assertEqual(schema_warnings, [])
                 else:
-                    self.assertEqual(len(schema_warnings), 1)
                     self.assertIn('is not followed by', str(schema_warnings[0].message))
+                    # a bad terminator ends only this entry -- the walk
+                    # keeps going, looking for the next one's separator
+                    # (#722's scope, not #728's outer abort) -- so for
+                    # declared in (0, 1) the one padding octet left behind
+                    # is walked too and short-prefixes a bogus field of its
+                    # own; only that it is the short-prefix warning is
+                    # pinned here, not how many times it fires
+                    for extra in schema_warnings[1:]:
+                        self.assertIn('of the 8 it needs', str(extra.message))
                 self.assertEqual(entries[0]['BINARY'], remainder[:declared])
+
+    def test_a_bad_terminator_ends_only_its_own_entry_not_the_whole_walk(self) -> None:
+        """#728 review: a bad terminator used to abort the whole block.
+
+        The rewrite that walks the entry end to end, rather than pre-slicing
+        it on ``b'\\n\\n'``, added a ``malformed`` flag that broke the *outer*
+        per-entry loop on a bad terminator -- so #722's per-entry check
+        silently widened into a per-block one, and a well-formed entry behind
+        a corrupted one was dropped entirely, which
+        :meth:`test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped`
+        above cannot show because its bad terminator always lands at the
+        block's own end. There is nothing between the corrupted octet and
+        ``GOOD=1`` here -- not even the format's own separator -- so recovery
+        must come from the walk itself continuing, not from resynchronising on
+        a blank line it happens to find.
+
+        """
+        entries, caught = self._extract_journal(
+            b'DATA\n' + struct.pack('<Q', 3) + b'abcQ' + b'GOOD=1\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['DATA'], b'abc')
+        self.assertEqual(entries[1]['GOOD'], '1')
+        schema_warnings = [item for item in caught
+                            if item.category.__name__ == 'SchemaWarning']
+        self.assertEqual(len(schema_warnings), 1)
+        self.assertIn('is not followed by', str(schema_warnings[0].message))
+
+    def test_a_bad_terminator_before_a_real_separator_still_reaches_the_next_entry(self) -> None:
+        """The same recovery, with the block's actual entry separator present.
+
+        A well-formed ``\\n\\n`` here is one entry's real trailing newline
+        plus the separator blank line behind it, each consumed by a distinct
+        read within *that* entry's own inner loop -- see
+        :meth:`test_a_binary_field_ending_the_first_of_two_entries_is_not_warned`.
+        A bad terminator instead ends the current entry's inner loop
+        immediately, before it gets a chance to look for that separator, so
+        each of the two octets behind the corrupted byte is read as its own
+        line by a fresh, otherwise-empty entry -- pinned here as the two
+        empty dicts between ``DATA`` and ``GOOD``. That is one entry more
+        than main's delimiter-based split produces for the same bytes, but it
+        drops nothing: the count is pinned so a future change to the walk
+        that starts silently discarding ``GOOD=1`` again is caught even
+        though it is not the last entry.
+
+        """
+        entries, caught = self._extract_journal(
+            b'DATA\n' + struct.pack('<Q', 3) + b'abcQ' + b'\n\n' + b'GOOD=1\n')
+
+        self.assertEqual(len(entries), 4)
+        self.assertEqual(entries[0]['DATA'], b'abc')
+        self.assertEqual(entries[1], {})
+        self.assertEqual(entries[2], {})
+        self.assertEqual(entries[3]['GOOD'], '1')
+        schema_warnings = [item for item in caught
+                            if item.category.__name__ == 'SchemaWarning']
+        self.assertEqual(len(schema_warnings), 1)
+        self.assertIn('is not followed by', str(schema_warnings[0].message))
+
+    def test_journal_fields_following_a_binary_field_are_not_discarded(self) -> None:
+        """#704: skipping a binary field's terminator used to skip everything.
+
+        ``entry_data.read()`` with no argument reads to *end of file*, not past
+        the one newline octet the format puts there, so the next ``readline()``
+        found nothing and ended the entry. A single binary field cannot show
+        this -- there is nothing behind it to lose -- so the entry needs a
+        *second* binary field, and a text field after that, to tell a
+        length-bounded skip from an unbounded one.
+
+        """
+        entries, caught = self._extract_journal(
+            b'BEFORE=zero\n'
+            b'FIRST\n' + struct.pack('<Q', 3) + b'one\n' +
+            b'SECOND\n' + struct.pack('<Q', 3) + b'two\n' +
+            b'AFTER=three\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['BEFORE'], 'zero')
+        self.assertEqual(entries[0]['FIRST'], b'one')
+        self.assertEqual(entries[0]['SECOND'], b'two')
+        self.assertEqual(entries[0]['AFTER'], 'three')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_binary_last_field_before_a_trailing_separator_is_not_warned(self) -> None:
+        """A blank-line separator is found by reading, not by pre-slicing.
+
+        ``draft-richardson-opsawg-pcapng-extras-01`` lets an entry carry a
+        trailing separator. The old parser sliced the buffer into segments
+        with ``self.entry.split(b'\\n\\n')`` before reading a single field, so
+        the separator's own bytes were gone by the time a binary last field's
+        terminator was checked, and the check that landed in #722 warned over
+        a newline that was in the capture all along. Walking the buffer whole
+        never removes those bytes -- the blank line ends the current entry by
+        being *read*, and whatever the buffer still holds after it starts the
+        next one -- so there is nothing here for that check to trip over.
+
+        """
+        entries, caught = self._extract_journal(
+            b'MESSAGE\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['MESSAGE'], b'abc')
+        self.assertEqual(len(entries[1]), 0)
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_binary_field_ending_the_first_of_two_entries_is_not_warned(self) -> None:
+        """The same case, with a second real entry behind the separator.
+
+        Identical mechanism to the trailing-separator case above, just with
+        real content on the far side of the ``\\n\\n`` instead of nothing.
+
+        """
+        entries, caught = self._extract_journal(
+            b'A=1\nBIN\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n' + b'B=2\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['A'], '1')
+        self.assertEqual(entries[0]['BIN'], b'abc')
+        self.assertEqual(entries[1]['B'], '2')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_trailing_separator_with_no_padding_still_starts_an_entry(self) -> None:
+        """A trailing separator landing exactly on the last octet was dropped.
+
+        The two tests above see their trailing separator followed by the
+        block's own NUL padding, which the walk also treats as ending an
+        entry -- so the extra empty entry that padding produces stood in for
+        the one the separator itself should have produced, and the gap went
+        unnoticed. Seven octets of field plus one of separator is eight, a
+        multiple of four, so :meth:`_journal_block` adds none: the blank line
+        is the last octet in the buffer, ``entry_data.tell()`` reaches
+        ``total`` in the same read that found it, and the walk used to stop
+        right there without recording that a separator had been seen at all.
+        Rebuilding from the result then wrote a :attr:`length` one octet
+        short of what was actually read.
+
+        """
+        entries, caught = self._extract_journal(b'ABC=12\n' + b'\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['ABC'], '12')
+        self.assertEqual(len(entries[1]), 0)
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_journal_binary_value_containing_a_blank_line_is_not_shredded(self) -> None:
+        """#723 defect A: a length-prefixed value needs no escaping for ``\\n\\n``.
+
+        ``self.entry.split(b'\\n\\n')`` used to cut a binary field's own value
+        in the middle whenever that value happened to contain the entry
+        separator, turning the tail of the value into a bogus field in a
+        fabricated second entry. The value here carries two such separators;
+        a parser that only counts bytes out by the declared length, and never
+        inspects them, must return it whole and warn about nothing.
+
+        """
+        entries, caught = self._extract_journal(
+            b'BEFORE=zero\n'
+            b'BINARY\n' + struct.pack('<Q', 7) + b'x\n\ny\n\nz' + b'\n' +
+            b'AFTER=one\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['BEFORE'], 'zero')
+        self.assertEqual(entries[0]['BINARY'], b'x\n\ny\n\nz')
+        self.assertEqual(entries[0]['AFTER'], 'one')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_journal_binary_length_prefix_beginning_with_a_blank_line_is_not_shredded(self) -> None:
+        """#723 defect B: the separator can live inside the length prefix itself.
+
+        ``struct.pack('<Q', 2570) == b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` --
+        the prefix of a 2,570-octet binary field *is* the entry separator plus
+        six NULs. Splitting on ``b'\\n\\n'`` before reading a field cuts this
+        entry apart before the length prefix is ever unpacked, so the old
+        parser read zero fields from it. This is the discriminating case a
+        delimiter-based parser cannot survive: the fix has to be a parser that
+        never looks for the separator inside a field it has not finished
+        reading yet.
+
+        """
+        payload = bytes(i % 256 for i in range(2570))
+        entries, caught = self._extract_journal(
+            b'BEFORE=zero\n'
+            b'BINARY\n' + struct.pack('<Q', len(payload)) + payload + b'\n' +
+            b'AFTER=one\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(len(entries[0]), 3)
+        self.assertEqual(entries[0]['BEFORE'], 'zero')
+        self.assertEqual(entries[0]['BINARY'], payload)
+        self.assertEqual(entries[0]['AFTER'], 'one')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
 
     def test_a_journal_field_that_is_not_utf8_is_replaced_and_reported(self) -> None:
         """One bad octet in one field used to cost the whole extraction.
