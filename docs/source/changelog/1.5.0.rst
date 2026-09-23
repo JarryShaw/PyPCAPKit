@@ -2160,7 +2160,7 @@ pull requests between #326 and #509.
   ``examples/captures/dhcp.pcapng`` with one harness either side: 6 levels parsed before
   and 1,495 do now, against 1,479 ``ValueError`` and 10 ``struct.error`` before and none
   from outside the library after, with the frame count degrading monotonically with the
-  cut and the 13 levels that still raise all cutting into the Section Header Block, where
+  cut and the 14 levels that still raise all cutting into the Section Header Block, where
   no frame was left to lose. The five deliberately unclamped non-packet option areas keep
   the per-block framing assumption #676's note describes, which this does not close. Also
   here because it is the fifth and last registrar in the package with no overwrite guard
