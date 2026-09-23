@@ -2223,8 +2223,8 @@ pull requests between #326 and #509.
   for either needed the other out of the way first. ``R1CounterParameter``'s
   ``counter`` was a ``UInt32Field`` where the RFC states the R1 generation
   counter's width twice, as "8 bytes" in the diagram and as "a 64-bit unsigned
-  integer" in prose; both HIP versions that reach this class -- ``R1_Counter``
-  (128) and ``R1_COUNTER`` (129) -- packed a 12-octet record, landing at
+  integer" in prose; both HIP versions whose *packing* reaches this class --
+  ``R1_Counter`` (128) and ``R1_COUNTER`` (129) -- packed a 12-octet record, landing at
   ``4 (mod 8)`` instead of aligned. It is a ``UInt64Field`` now, and the record
   is 16 octets (#672). ``LocatorSetParameter``'s own ``Length`` was written as
   ``sum(Locator.len)``, in the 4-octet units :rfc:`8046#section-4` gives
@@ -2246,9 +2246,10 @@ pull requests between #326 and #509.
   one. An RFC-only byte-stride walk over
   ``examples/captures/options-internet.pcap``, independent of pcapkit's own
   parser, went from 1 violation -- ``LOCATOR_SET``'s empty record, concealed
-  until now because ``examples/generators/options.py``'s ``R1_COUNTER``
-  override used ``counter=0``, a value the width defect could not be told
-  apart from -- to 2 once the counter was patched non-zero, to 0 once both
+  until now because ``R1_COUNTER``'s ``counter`` field defaulted to ``0`` with
+  no override anywhere in ``examples/generators/options.py``, a value the
+  width defect could not be told apart from -- to 2 once the counter was
+  patched non-zero, to 0 once both
   parameters were fixed; the fixture now overrides both ``R1_COUNTER`` codes
   with ``counter=0xaabbccdd`` so a future regression cannot hide behind a zero
   again. 10 new test methods across two new files -- 4 in
@@ -2266,9 +2267,11 @@ pull requests between #326 and #509.
 * **Fixed** -- three test comments stated an exact count of committed
   captures under ``examples/captures/``, a number that drifts every time that
   directory's tracked set changes and in one case was already wrong when
-  written. ``tests/_tiers.py`` and ``tests/test_tier_guard.py`` both cited
-  "six," correct at the time; ``tests/integration/_helpers.py`` said "four,"
-  which undercounted the tracked set the day it was written. All three now
+  written. ``tests/_tiers.py`` cited "six," correct at the time;
+  ``tests/test_tier_guard.py`` said "the moment a seventh capture is
+  committed" -- the same count, as an ordinal rather than the word "six";
+  ``tests/integration/_helpers.py`` said "four," which undercounted the
+  tracked set the day it was written. All three now
   describe the invariant instead of a number that has to be kept in sync with
   it by hand: ``_tiers.py`` reads "the moment somebody commits another
   capture... or stops committing one," ``_helpers.py`` reads "...are
@@ -2283,18 +2286,25 @@ pull requests between #326 and #509.
   ``test_capture_suggestions_are_captures`` had the same gap. Found while
   cross-reviewing #703, which is itself prose-only and left this out of
   scope; the fix rides in as the second and third commits on that PR's
-  branch, whose own description names only #700. Both tests now re-derive the
-  expected set independently -- ``git ls-files -z`` under
-  ``examples/captures/`` -- and assert equality against it rather than
-  against themselves, plus a per-name ``Path.is_file()`` check the old
-  version never made. A cross-review of the first version of this fix found
+  branch, whose own description names only #700.
+  ``test_every_tracked_name_exists_and_matches_git`` now re-derives the
+  expected set independently -- shelling out to ``git ls-files -z`` under
+  ``examples/captures/`` rather than calling back into ``_tiers.py`` -- and
+  asserts equality against it rather than against itself, plus a per-name
+  ``Path.is_file()`` check the old version never made. Its sibling
+  ``test_capture_suggestions_are_captures`` gets a narrower fix: it asserts
+  equality against ``committed_capture_names()``'s own filter re-implemented
+  inline over ``_tiers.committed_captures()``, which catches a wrong filter
+  but, unlike its sibling, still trusts ``committed_captures()`` for the
+  tracked set itself rather than re-deriving it from git. A cross-review of
+  the first version of this fix found
   it wrong twice over: a stale docstring in ``_tiers.py`` still claimed
   ``test_tier_guard.py`` "only stats ``in.pcap``," falsified by the new
   per-name loop; and the new ``assertEqual`` on
   ``test_capture_suggestions_are_captures`` was vacuous on an empty tracked
   set (``() == ()`` passes trivially), having dropped the non-emptiness guard
   the other test kept. Both are corrected in a follow-up commit. Even after
-  the fix, a hardcoded literal that happens to match today's six tracked
+  the fix, a hardcoded literal that happens to match today's tracked
   names still passes -- the test detects a set that is wrong *at the moment it
   runs*, not hardcoding as a practice, which turns a permanent blind spot into
   a tripwire that fires on the next change to the tracked set (#708).
@@ -2310,25 +2320,34 @@ pull requests between #326 and #509.
   (whose nested ``name``/``read`` members go with it, being reachable only
   through a private class) -- while 39 ``autoattribute`` directives were
   added for class-private state that *is* contract: ``Extractor._flag_f``,
-  the built-in and third-party engines' own ``_backend``, ``TraceFlow``'s
-  internal fields, and ``FieldBase``/``Field`` internals among them. The 128
+  the third-party engines' own ``_backend``, ``TraceFlow``'s internal fields,
+  and ``FieldBase``/``Field`` internals among them; the built-in ``PCAP`` and
+  ``PCAPNG`` engines gained a different set of their own -- ``_gbhdr``,
+  ``_vinfo``, ``_dlink`` and ``_nnsec`` for the former, ``_ctx`` and
+  ``_ctx_list`` for the latter -- and no ``_backend`` at all. The 128
   runtime definitions of ``_missing_`` -- 121 under ``pcapkit.const``, the
-  other 7 inline in ``pcapkit.protocols`` -- gained one write-up apiece
-  instead of a directive per class: a new "Unrecognised Values" section in
+  other 7 inline in ``pcapkit.protocols`` -- gained one unified write-up in
+  place of a directive per class: a new "Unrecognised Values" section in
   ``docs/source/pcapkit/const/index.rst``, cross-referenced from
   ``registry.rst``, since ``conf.py`` already excludes ``_missing_`` from
-  every ``automodule`` via ``exclude-members``. ``CONTRIBUTING.md`` gained the
+  every ``autoclass`` via ``exclude-members`` in ``autodoc_default_options``
+  -- there is no ``automodule`` directive anywhere under ``docs/source/``.
+  ``CONTRIBUTING.md`` gained the
   rule itself as a named section, so the next directive gets judged against a
   written test rather than against precedent. Verified with
   ``sphinx-build -b html`` under ``PCAPKIT_SPHINX=1``: 55 warnings on ``main``
-  before this change, 56 after, the one addition being a pre-existing bare-
+  before this change, 56 after, the one addition being a pre-existing bare
   ``Type`` cross-reference ambiguity newly rendered by ``TraceFlow._foutio``'s
   new directive rather than a defect this change introduced -- #709 tracks
   it. No line under ``pcapkit/`` changed (#684).
 * **Fixed** -- ``tests/dumpkit/test_nameless_enum_rendering_unit.py`` (added
-  by #670) swept every flag-enum registry against one fixed tuple ending in
-  ``65536``, on the assumption that every such registry is 16 bits wide.
-  Seven registries are not, at four distinct widths:
+  by #670) carried two probes on the same wrong assumption that every
+  flag-enum registry is 16 bits wide:
+  ``test_scalar_return_renders_a_nameless_member_as_its_value`` checked one
+  fixed tuple ending in ``65536`` against ``tcp.flags.Flags`` and its own
+  ``StdFlags`` stand-in alone, and ``test_no_flag_registry_renders_the_literal_none``
+  swept every flag-enum registry instead, but only against ``registry(0)``.
+  Seven registries are not *all* 16 bits, at four distinct widths:
   ``ftp.command.CommandType`` (3 bits), ``reg.apptype.TransportProtocol`` (4,
   computed at runtime), ``mh.binding_ack_flag.BindingACKFlag``,
   ``mh.handover_ack_flag.HandoverACKFlag`` and
@@ -2344,10 +2363,10 @@ pull requests between #326 and #509.
   new ``test_a_value_past_the_field_is_refused_rather_than_rendered`` pins
   the boundary directly: the widest in-field value is accepted, one past it
   is refused. The file goes from 1 failed / 5 passed / 16 subtests to 6
-  passed / 64 subtests. A cross-review found that of the seven guard
-  ``raise`` lines this newly reaches, six were already covered by passing
-  tests from #677, predating this fix; only ``tcp/flags.py``'s own guard line
-  was genuinely newly reached by it. No line under ``pcapkit/`` changed
+  passed / 64 subtests. A cross-review found that all seven guard
+  ``raise`` lines this reaches -- ``tcp/flags.py``'s own included -- were
+  already covered by passing tests from #677, predating this fix; none was
+  genuinely newly reached by it. No line under ``pcapkit/`` changed
   (#702).
 * **Changed** -- ``examples/captures/out.json``, ``out.plist``, ``out.txt``
   and ``pcapng.txt`` are no longer tracked in git; they are build output, not
@@ -2363,7 +2382,9 @@ pull requests between #326 and #509.
   reworded to describe regenerating these reports via ``make fixtures``
   rather than implying they ship committed, and a new
   ``tests/project/test_capture_tracking.py`` (5 tests, 8 subtests) pins the
-  invariant going forward, shown failing against the pre-change tree (#685).
+  invariant going forward; 2 of the 5 tests (5 of the 8 subtests) fail
+  against the pre-change tree with the four reports restored to the index,
+  the other 3 passing on both trees by construction (#685).
 * **Fixed** -- two ``#:`` autodoc comments in
   ``pcapkit/foundation/traceflow/traceflow.py`` named a bare ``Type``, which
   Sphinx's cross-reference resolver resolves against every class named
@@ -2374,17 +2395,23 @@ pull requests between #326 and #509.
   ``TraceFlow._foutio``, the built docs pointed a reader at the wrong class
   with no warning that anything had gone sideways. Both sites now spell it
   ``~typing.Type[Dumper]``, the same form eight other files in the tree
-  already use for the identical ambiguity. Line 146 (``__output__``'s ``#:``
-  comment) is fixed for the same reason but is currently inert: a separate,
-  correct ``# type:`` comment two lines below already drives that signature
-  through ``napoleon_attr_annotations``, so this half of the fix is insurance
-  against the day nothing else does. **This does not close #709.** Four more
+  already use for the identical ambiguity. Line 146 (the first line of
+  ``__output__``'s ``#:`` block, which continues through line 148) is fixed
+  for the same reason but is currently inert: the actual ``# type:`` comment
+  that drives that signature is sixteen lines below, at line 162, and it
+  spells the identical bare ``Type[Dumper]`` -- so it is not correct either.
+  The mechanism is likely ``sphinx_autodoc_typehints`` rather than
+  ``napoleon_attr_annotations``: Napoleon's own attribute-annotation lookup
+  fires only for a Google/Numpy ``Attributes:`` section, and ``__output__``
+  is documented through autodoc's ``#:`` scraping instead. This half of the
+  fix is insurance against the day something reads it cleanly. **This does
+  not close #709.** Four more
   bare ``Type`` sites -- hand-written ``:type:`` fields at
   ``docs/source/pcapkit/foundation/engines/engine.rst:40``,
   ``.../reassembly/reassembly.rst:33`` and ``:43``, and
   ``.../traceflow/traceflow.rst:40`` -- carry the same ambiguity and are not
-  touched here; #709 stays open for them, with no PR yet filed against that
-  half (#709).
+  touched here; #709 stays open for them, though PR #714 covers exactly
+  those four sites (#709).
 * **Fixed** -- ``register_protocol``'s overwrite warning could claim a
   protocol was replaced with itself. The guard that decides *whether* to
   warn was already correct -- ``incumbent is not protocol``, an identity
