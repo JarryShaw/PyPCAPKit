@@ -1445,6 +1445,8 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end_stream</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">END_STREAM</span>
+
             <span class="n">pad_len</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pad_len</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">data</span>
 

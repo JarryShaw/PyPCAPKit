@@ -668,6 +668,32 @@ instance.</p>
 <dd class="field-odd"><p>Curated protocol schema data.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> here absorbs the keywords that
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__post_init__</span></code> hands to the
+parse as well as to the construction, so an implementation is not
+expected to declare every keyword it is called with. It is <em>not</em> a
+place for a caller to put a keyword no signature declares: since
+#617, building a protocol <em>through its constructor</em> with such a
+keyword raises <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>
+from <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code> rather than
+discarding it.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Calling this method directly is not checked</strong>, and still discards an
+undeclared keyword in silence. The check lives in
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__</span></code>, so it covers
+<code class="docutils literal notranslate"><span class="pre">SomeProtocol(...)</span></code> and the <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> it leads to, but not
+<code class="docutils literal notranslate"><span class="pre">SomeProtocol.make(...)</span></code> on an instance obtained some other way –
+<code class="docutils literal notranslate"><span class="pre">object.__new__(cls).make(**kwargs)</span></code> is the idiom, used by this
+package’s own tests and by <a class="reference internal" href="application/http.html#pcapkit.protocols.application.http.HTTP.make" title="pcapkit.protocols.application.http.HTTP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.make</span></code></a> to reach its versioned
+implementation. Covering it would mean interposing on every <code class="docutils literal notranslate"><span class="pre">make</span></code>
+in the tree rather than on the one place their keywords converge, which
+is a larger change than #617 and deliberately not made here. Construct
+through the constructor to get the check.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1185,6 +1211,15 @@ propagated to nested layers by
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code>.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – When constructing (<code class="docutils literal notranslate"><span class="pre">file</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>), if a
+    keyword names no parameter of this protocol’s <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>,
+    <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read" title="pcapkit.protocols.protocol.Protocol.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack" title="pcapkit.protocols.protocol.Protocol.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>,
+    <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__" title="pcapkit.protocols.protocol.Protocol.__post_init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__post_init__()</span></code></a> or <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__" title="pcapkit.protocols.protocol.Protocol.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a>, anywhere in the MRO,
+    and is not listed in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__keywords__</span></code>. See #617; until then
+    such a keyword was silently discarded. Parsing (<code class="docutils literal notranslate"><span class="pre">file</span></code> is
+    given) is unaffected.</p>
 </dd>
 </dl>
 <div class="admonition note">

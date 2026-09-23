@@ -1528,6 +1528,11 @@
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">_time</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">_opak</span><span class="p">,</span>
             <span class="n">random</span><span class="o">=</span><span class="n">_rand</span><span class="p">,</span>
+            <span class="c1"># Keep the field's on-wire width, which ``_rand`` alone cannot carry:</span>
+            <span class="c1"># ``int.bit_length()`` sees the value, not the octets it was padded</span>
+            <span class="c1"># into. ``schema.len`` is ``4 + RHASH_len / 8``, so the width in bits</span>
+            <span class="c1"># is ``(schema.len - 4) * 8``. See #653.</span>
+            <span class="n">rhash_len</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">puzzle</span></div>
 
@@ -1547,7 +1552,7 @@
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 <span class="sd">           |             Type              |             Length            |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">           |  #K, 1 byte   |    Lifetime   |        Opaque, 2 bytes        |</span>
+<span class="sd">           |  #K, 1 byte   |   Reserved    |        Opaque, 2 bytes        |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 <span class="sd">           |                      Random #I, n bytes                       |</span>
 <span class="sd">           /                                                               /</span>
@@ -1574,7 +1579,13 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
 
         <span class="n">_numk</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">index</span>
-        <span class="n">_time</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span>
+        <span class="c1"># :rfc:`7401#section-5.2.5` names this octet ``Reserved``, "zero when sent,</span>
+        <span class="c1"># ignored when received", and only ``PUZZLE`` (:rfc:`7401#section-5.2.4`)</span>
+        <span class="c1"># has a ``Lifetime`` at this offset. Record it verbatim rather than reading</span>
+        <span class="c1"># it as a ``2^(value - 32)`` duration: interpreting it wrote ``0x20`` into a</span>
+        <span class="c1"># field the RFC requires to be zero, and made the conformant ``0x00``</span>
+        <span class="c1"># impossible to re-serialise. See #654.</span>
+        <span class="n">_resv</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">reserved</span>
         <span class="n">_opak</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">opaque</span>
         <span class="n">_rand</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">random</span>
         <span class="c1"># ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which</span>
@@ -1588,10 +1599,16 @@
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">_numk</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">_time</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)),</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">_resv</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">_opak</span><span class="p">,</span>
             <span class="n">random</span><span class="o">=</span><span class="n">_rand</span><span class="p">,</span>
             <span class="n">solution</span><span class="o">=</span><span class="n">_solt</span><span class="p">,</span>
+            <span class="c1"># Keep the two fields' shared on-wire width, which the values alone</span>
+            <span class="c1"># cannot carry. Each is ``RHASH_len / 8`` octets and ``schema.len`` is</span>
+            <span class="c1"># ``4 + RHASH_len / 4``, so the width in bits is</span>
+            <span class="c1"># ``((schema.len - 4) // 2) * 8`` -- the same halving the schema's own</span>
+            <span class="c1"># field lengths do. See #653.</span>
+            <span class="n">rhash_len</span><span class="o">=</span><span class="p">((</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">solution</span></div>
 
@@ -3757,6 +3774,135 @@
         <span class="p">)</span></div>
 
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                              <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int | float'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Encode a ``PUZZLE`` ``Lifetime`` octet.</span>
+
+<span class="sd">        :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``</span>
+<span class="sd">        seconds -- and it is the *only* place either RFC defines that encoding, so</span>
+<span class="sd">        it applies to ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is</span>
+<span class="sd">        ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            lifetime: lifetime, as a :class:`~datetime.timedelta` or a number of</span>
+<span class="sd">                seconds</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The ``Lifetime`` octet.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``lifetime`` is not a positive duration, or encodes</span>
+<span class="sd">                to a value the one-octet field cannot hold.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># Keyed on :class:`~datetime.timedelta`, not on :class:`int`: the old</span>
+        <span class="c1"># ``lifetime if isinstance(lifetime, int) else lifetime.total_seconds()``</span>
+        <span class="c1"># sent a plain ``float`` down the timedelta branch and escaped an</span>
+        <span class="c1"># :exc:`AttributeError` instead.</span>
+        <span class="n">seconds</span> <span class="o">=</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span>
+
+        <span class="c1"># ``math.log2`` raises a bare :exc:`ValueError` at zero and below. That is</span>
+        <span class="c1"># not a :class:`~pcapkit.utilities.exceptions.BaseError`, so it escapes the</span>
+        <span class="c1"># library's own error handling with a message naming neither HIP nor the</span>
+        <span class="c1"># field. It is reachable from conformant input rather than only from a</span>
+        <span class="c1"># crafted one: a ``Lifetime`` octet of ``0x00`` means ``2^-32`` seconds,</span>
+        <span class="c1"># below :class:`~datetime.timedelta`'s microsecond resolution, so parsing</span>
+        <span class="c1"># one yields ``timedelta(0)`` and re-serialising it lands here. See #654.</span>
+        <span class="k">if</span> <span class="n">seconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> is not a positive number of seconds'</span><span class="p">)</span>
+
+        <span class="n">octet</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+
+        <span class="c1"># ``UInt8Field`` wraps rather than raising -- measured, ``300`` packs as</span>
+        <span class="c1"># ``0x2c`` -- so an out-of-range lifetime would otherwise be written as some</span>
+        <span class="c1"># other perfectly valid-looking duration.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">octet</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid lifetime: '</span>
+                                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s1"> seconds encodes to </span><span class="si">{</span><span class="n">octet</span><span class="si">}</span><span class="s1">, outside the '</span>
+                                <span class="s1">'one-octet Lifetime field'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">octet</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                                 <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve the on-wire width of a ``PUZZLE``/``SOLUTION`` payload field.</span>
+
+<span class="sd">        ``Random #I`` and ``Puzzle solution #J`` are each exactly ``RHASH_len / 8``</span>
+<span class="sd">        octets wide (:rfc:`7401#section-5.2.4`, :rfc:`7401#section-5.2.5`), where</span>
+<span class="sd">        ``RHASH_len`` is the output length of the Responder's HIT hash algorithm</span>
+<span class="sd">        (:rfc:`7401#section-2.3`). The width is therefore a property of the</span>
+<span class="sd">        association, not of the number that happens to be in the field, and it is</span>
+<span class="sd">        resolved here in that order of authority:</span>
+
+<span class="sd">        1. an explicit ``rhash_len`` argument;</span>
+<span class="sd">        2. under HIPv1, the constant the RFC fixes -- :rfc:`5201#section-5.2.4` and</span>
+<span class="sd">           :rfc:`5201#section-5.2.5` state both fields as literally 8 bytes and both</span>
+<span class="sd">           ``Length`` values as literally 12 and 20;</span>
+<span class="sd">        3. the width carried by a parsed parameter, passed in as ``rhash_len`` by</span>
+<span class="sd">           the callers below;</span>
+<span class="sd">        4. failing all of those, the value's own :meth:`int.bit_length`, rounded up</span>
+<span class="sd">           to whole octets.</span>
+
+<span class="sd">        Only case 4 can lose a leading zero octet, and it is the only case where the</span>
+<span class="sd">        width is genuinely unknowable -- a from-scratch HIPv2 build with nothing</span>
+<span class="sd">        declaring it. Reaching for it unconditionally is what re-serialised a</span>
+<span class="sd">        ``Length = 20`` ``SOLUTION`` as ``Length = 6`` (#653) and what built, under</span>
+<span class="sd">        HIPv1, parameters this library's own reader then rejected (#655).</span>
+
+<span class="sd">        Two things this deliberately does *not* reject, both of which look like</span>
+<span class="sd">        oversights and are not:</span>
+
+<span class="sd">        * ``rhash_len == 0``, i.e. a zero-width payload field. No real hash has a</span>
+<span class="sd">          zero-length output, so no conformant packet carries one -- but it is what</span>
+<span class="sd">          case 4 yields for the default ``random=0``, it is what a ``Length = 4``</span>
+<span class="sd">          parameter parses back to, and it is what this builder produced before this</span>
+<span class="sd">          change. Rejecting it would turn a degenerate-but-self-consistent case into</span>
+<span class="sd">          a new failure for callers that pass no value at all, which is beyond the</span>
+<span class="sd">          three defects this addresses.</span>
+<span class="sd">        * a ``version`` that is neither 1 nor 2, which falls through to case 4 and is</span>
+<span class="sd">          treated as HIPv2. That mirrors :meth:`_read_param_puzzle` and</span>
+<span class="sd">          :meth:`_read_param_solution`, whose guards are likewise written as</span>
+<span class="sd">          ``version == 1`` rather than as an exhaustive check, so the reader and the</span>
+<span class="sd">          builder agree. Validating the version belongs with :meth:`make`'s public</span>
+<span class="sd">          signature, not here.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: parameter code</span>
+<span class="sd">            version: HIP protocol version</span>
+<span class="sd">            rhash_len: declared field width in bits, if any</span>
+<span class="sd">            *values: the field values that must fit</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The width of one field, in octets.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the declared width contradicts the protocol version,</span>
+<span class="sd">                is not a whole number of octets, or is too narrow for ``values``.</span>
+
+<span class="sd">        """</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rhash_len</span> <span class="o">!=</span> <span class="mi">64</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                    <span class="sa">f</span><span class="s1">'HIPv1 fixes the field at 64 bits, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">64</span>
+        <span class="k">elif</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rhash_len</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">bits</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rhash_len</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">rhash_len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                <span class="sa">f</span><span class="s1">'RHASH_len must be a non-negative whole number of '</span>
+                                <span class="sa">f</span><span class="s1">'octets, got </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1"> bits'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bits</span> <span class="o">&gt;</span> <span class="n">rhash_len</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HIPv</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid width: '</span>
+                                <span class="sa">f</span><span class="s1">'a </span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s1">-bit value does not fit a </span><span class="si">{</span><span class="n">rhash_len</span><span class="si">}</span><span class="s1">-bit field'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rhash_len</span> <span class="o">//</span> <span class="mi">8</span>
+
 <div class="viewcode-block" id="HIP._make_param_puzzle">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_puzzle">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_puzzle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_PuzzleParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -3765,6 +3911,7 @@
                            <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                            <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                            <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_PuzzleParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``PUZZLE`` parameter.</span>
 
@@ -3776,6 +3923,9 @@
 <span class="sd">            lifetime: lifetime</span>
 <span class="sd">            opaque: opaque data</span>
 <span class="sd">            random: random #I value</span>
+<span class="sd">            rhash_len: on-wire width of ``Random #I``, in bits; defaults to the</span>
+<span class="sd">                width ``param`` was parsed with, or to what ``version`` fixes, or</span>
+<span class="sd">                to ``random``'s own bit length</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
@@ -3784,17 +3934,20 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">index</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+            <span class="n">lifetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">lifetime</span><span class="p">)</span>
             <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
             <span class="n">random</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">random</span>
+            <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rhash_len</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">rhash_len</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span>
-                <span class="n">lifetime</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+            <span class="n">lifetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_lifetime</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Schema_PuzzleParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">),</span>
+            <span class="c1"># One field of ``RHASH_len / 8`` octets after the 4-octet</span>
+            <span class="c1"># ``#K``/``Lifetime``/``Opaque`` prefix -- :rfc:`7401#section-5.2.4`</span>
+            <span class="c1"># spells the same quantity ``4 + RHASH_len / 8``.</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">,</span> <span class="n">random</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
@@ -3807,10 +3960,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_param_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="s1">'Optional[Data_SolutionParameter]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">version</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                              <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                             <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta | int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="n">reserved</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
                              <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                              <span class="n">solution</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_SolutionParameter'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make HIP ``SOLUTION`` parameter.</span>
 
@@ -3819,10 +3973,21 @@
 <span class="sd">            param: parameter data</span>
 <span class="sd">            version: HIP protocol version</span>
 <span class="sd">            index: #K index</span>
-<span class="sd">            lifetime: lifetime</span>
+<span class="sd">            reserved: the ``Reserved`` octet, which :rfc:`7401#section-5.2.5`</span>
+<span class="sd">                requires to be "zero when sent". Defaults to the octet ``param``</span>
+<span class="sd">                arrived with, so that re-serialising reproduces it rather than</span>
+<span class="sd">                rewriting it, and to that mandated zero otherwise. Pass it</span>
+<span class="sd">                explicitly to override either -- notably to write the conformant</span>
+<span class="sd">                zero over a non-conformant one received from a peer, which is</span>
+<span class="sd">                otherwise unreachable because :class:`Data_SolutionParameter` is</span>
+<span class="sd">                immutable</span>
 <span class="sd">            opaque: opaque data</span>
 <span class="sd">            random: random #I value</span>
 <span class="sd">            solution: solution #J value</span>
+<span class="sd">            rhash_len: on-wire width of ``Random #I`` and ``Puzzle solution #J``</span>
+<span class="sd">                alike, in bits; defaults to the width ``param`` was parsed with, or</span>
+<span class="sd">                to what ``version`` fixes, or to the values' own bit length</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            HIP parameter schema.</span>
@@ -3830,28 +3995,36 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">index</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
             <span class="n">opaque</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">opaque</span>
             <span class="n">random</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">random</span>
             <span class="n">solution</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">solution</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span>
-                <span class="n">lifetime</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="p">)</span> <span class="o">+</span> <span class="mi">32</span><span class="p">)</span>
+            <span class="c1"># Both of these are `None`-sentinelled rather than overwritten</span>
+            <span class="c1"># outright, unlike the data fields above. `Data_SolutionParameter` is</span>
+            <span class="c1"># immutable, so a caller with a parsed parameter in hand has no other</span>
+            <span class="c1"># way to sanitise a peer's non-conformant `Reserved` -- or to re-frame</span>
+            <span class="c1"># the parameter for an association with a different `RHASH_len`.</span>
+            <span class="k">if</span> <span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reserved</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">reserved</span>
+            <span class="k">if</span> <span class="n">rhash_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rhash_len</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">rhash_len</span>
+        <span class="k">elif</span> <span class="n">reserved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># :rfc:`7401#section-5.2.5`: "zero when sent".</span>
+            <span class="n">reserved</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="n">Schema_SolutionParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="c1"># Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of</span>
-            <span class="c1"># ``RHASH_len / 8`` octets each -- so the contents length is</span>
-            <span class="c1"># ``4 + 2 * ceil(bits / 8)`` and is necessarily even after the 4-octet</span>
-            <span class="c1"># ``#K``/``Reserved``/``Opaque`` prefix. :rfc:`7401#section-5.2.5` spells</span>
-            <span class="c1"># the same quantity ``4 + RHASH_len / 4``, which is an identity only</span>
-            <span class="c1"># because a real ``RHASH_len`` is a whole number of octets; ``ceil(bits</span>
-            <span class="c1"># / 4)`` on an arbitrary :meth:`int.bit_length` is not that quantity and</span>
-            <span class="c1"># yields an odd width that :meth:`_read_param_solution` rejects. See #608.</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">bit_length</span><span class="p">(),</span> <span class="n">solution</span><span class="o">.</span><span class="n">bit_length</span><span class="p">())</span> <span class="o">/</span> <span class="mi">8</span><span class="p">),</span>
+            <span class="c1"># ``RHASH_len / 8`` octets each -- so the contents length is necessarily</span>
+            <span class="c1"># even after the 4-octet ``#K``/``Reserved``/``Opaque`` prefix.</span>
+            <span class="c1"># :rfc:`7401#section-5.2.5` spells the same quantity</span>
+            <span class="c1"># ``4 + RHASH_len / 4``, which is an identity only because a real</span>
+            <span class="c1"># ``RHASH_len`` is a whole number of octets; ``ceil(bits / 4)`` on an</span>
+            <span class="c1"># arbitrary :meth:`int.bit_length` is not that quantity and yields an odd</span>
+            <span class="c1"># width that :meth:`_read_param_solution` rejects. See #608.</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_puzzle_field_width</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">,</span>
+                                                      <span class="n">random</span><span class="p">,</span> <span class="n">solution</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-            <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime</span><span class="p">,</span>
+            <span class="n">reserved</span><span class="o">=</span><span class="n">reserved</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
             <span class="n">random</span><span class="o">=</span><span class="n">random</span><span class="p">,</span>
             <span class="n">solution</span><span class="o">=</span><span class="n">solution</span><span class="p">,</span>

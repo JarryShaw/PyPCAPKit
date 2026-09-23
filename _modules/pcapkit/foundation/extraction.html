@@ -1443,8 +1443,14 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream is not seekable, wrapping it in SeekableReader'</span><span class="p">)</span>
+            <span class="c1"># NOTE: ``stream_closing`` decides whether closing the wrapper also</span>
+            <span class="c1"># closes the stream underneath it, so it follows *ownership*: only a</span>
+            <span class="c1"># handle this class opened itself is ours to release. A non-seekable</span>
+            <span class="c1"># stream always came from the caller, so the polarity here is the</span>
+            <span class="c1"># same one ``_cleanup`` uses, and it was inverted in both places --</span>
+            <span class="c1"># see #610.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">SeekableReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">buffer_save</span><span class="p">,</span> <span class="n">buffer_path</span><span class="p">,</span>
-                                         <span class="n">stream_closing</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
+                                         <span class="n">stream_closing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
@@ -1553,9 +1559,88 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Release the input stream if this class still owns an open one.</span>
+
+<span class="sd">        A backstop for the extraction that is *abandoned* rather than finished:</span>
+<span class="sd">        with ``auto=False`` the caller drives :meth:`__next__` itself, and one that</span>
+<span class="sd">        stops before end of file never reaches :meth:`_cleanup` at all, so the</span>
+<span class="sd">        ownership rule there never gets to run. The handle then survives until the</span>
+<span class="sd">        interpreter collects it, and CPython announces that with the</span>
+<span class="sd">        ``ResourceWarning`` #606 was tripping over -- from an unrelated test, in an</span>
+<span class="sd">        unrelated file, which is what made that flake so hard to place.</span>
+
+<span class="sd">        This is a backstop and not the recommended route: collection is not</span>
+<span class="sd">        deterministic, and :class:`Extractor` takes part in a reference cycle</span>
+<span class="sd">        through its engine, so a handle can outlive its last reference until the</span>
+<span class="sd">        cyclic collector runs. Use :class:`Extractor` as a context manager -- see</span>
+<span class="sd">        :meth:`__enter__` -- where the moment of release matters.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A finaliser must not raise, so this reads through</span>
+<span class="sd">            :attr:`~object.__dict__` rather than attribute access. That matters</span>
+<span class="sd">            for more than tidiness: ``_flag_s`` is assigned early in</span>
+<span class="sd">            :meth:`__init__` and ``_ifile`` only much later, so a constructor</span>
+<span class="sd">            that fails in between -- an unreadable path, an unknown format --</span>
+<span class="sd">            leaves an instance whose flag says "mine" and which has no stream at</span>
+<span class="sd">            all. The close itself is guarded too, that being what a close during</span>
+<span class="sd">            interpreter shutdown can fail at.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'_ifile'</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ifile</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+                <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="c1"># Nothing useful can be reported from a finaliser, and raising here</span>
+            <span class="c1"># would only produce an "Exception ignored in __del__" on stderr.</span>
+            <span class="k">pass</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_owns_input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether the input stream is this class's to close.</span>
+
+<span class="sd">        The one place the ownership rule of #610 is written down, so that</span>
+<span class="sd">        :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` when the input stream was opened by this class and is</span>
+<span class="sd">            therefore its to release -- ``fin`` given as a path, i.e.</span>
+<span class="sd">            :attr:`self._flag_s &lt;Extractor._flag_s&gt;` set, or a</span>
+<span class="sd">            :class:`~pcapkit.corekit.io.SeekableReader` this class wrapped around</span>
+<span class="sd">            a caller's non-seekable stream. :data:`False` for a stream the caller</span>
+<span class="sd">            supplied and still owns, and :data:`False` when there is no stream at</span>
+<span class="sd">            all.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The two :data:`True` cases are written as separate tests rather than</span>
+<span class="sd">            folded together because they *can* in principle coincide -- a path</span>
+<span class="sd">            naming something non-seekable would be opened here and then wrapped --</span>
+<span class="sd">            and the answer has to be :data:`True` for both halves of it. That</span>
+<span class="sd">            cannot arise today, since :meth:`make_name` admits a path only through</span>
+<span class="sd">            :func:`os.path.isfile`, which is :data:`False` for a FIFO or a device,</span>
+<span class="sd">            and a regular file is always seekable. The second test is therefore</span>
+<span class="sd">            defensive rather than dead, and is the reason</span>
+<span class="sd">            ``SeekableReader(..., stream_closing=self._flag_s)`` passes the flag</span>
+<span class="sd">            instead of :data:`False`.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: read through ``__dict__``, and answer for the *stream* rather</span>
+        <span class="c1"># than for the flag alone, so that this is :data:`False` rather than</span>
+        <span class="c1"># raising on a partially constructed instance -- ``_flag_s`` is assigned</span>
+        <span class="c1"># early in ``__init__`` and ``_ifile`` only much later, so a constructor</span>
+        <span class="c1"># that failed in between leaves the flag set and no stream behind it.</span>
+        <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_ifile'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ifile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_flag_s'</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Extractor._cleanup">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._cleanup">[docs]</a>
@@ -1564,7 +1649,12 @@
 
 <span class="sd">        The method calls :meth:`self._exeng.close &lt;pcapkit.foundation.engines.engine.Engine.close&gt;`,</span>
 <span class="sd">        sets :attr:`self._flag_e &lt;pcapkit.foundation.extraction.Extractor._flag_e&gt;`</span>
-<span class="sd">        as :data:`True` and closes the input file (if necessary).</span>
+<span class="sd">        as :data:`True` and closes the input file *if this class opened it*.</span>
+
+<span class="sd">        That proviso is the whole of it: a handle opened here -- ``fin`` given as</span>
+<span class="sd">        a path, i.e. :attr:`self._flag_s &lt;Extractor._flag_s&gt;` set -- is closed,</span>
+<span class="sd">        and a stream the caller supplied is left alone for the caller to close</span>
+<span class="sd">        when it is done with it.</span>
 
 <span class="sd">        It also tells the flow tracer the capture has ended, via</span>
 <span class="sd">        :meth:`TraceFlow.finish &lt;pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish&gt;`.</span>
@@ -1582,9 +1672,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span><span class="p">:</span>
+        <span class="c1"># NOTE: *Ownership* decides who closes the input, not seekability --</span>
+        <span class="c1"># see :meth:`_owns_input`. Before #610 this read ``not self._flag_s``,</span>
+        <span class="c1"># which got both halves wrong at once: the handle this class opened</span>
+        <span class="c1"># itself was never closed, leaking a descriptor and emitting the</span>
+        <span class="c1"># ``ResourceWarning`` #606 tripped over, while a stream the caller</span>
+        <span class="c1"># supplied and still needed *was* closed.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 </div>

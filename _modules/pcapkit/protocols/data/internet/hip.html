@@ -680,9 +680,16 @@
     <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Random number.</span>
     <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: On-wire width of :attr:`random`, in bits -- ``RHASH_len`` in</span>
+    <span class="c1">#: :rfc:`7401#section-2.3` terms, which :rfc:`7401#section-5.2.4` makes the</span>
+    <span class="c1">#: exact width of ``Random #I``. Declared rather than recomputed from</span>
+    <span class="c1">#: :meth:`int.bit_length`, which cannot see a leading zero octet: without it</span>
+    <span class="c1">#: a parameter read with ``Length = 12`` re-serialised as ``Length = 5``.</span>
+    <span class="c1">#: See #653.</span>
+    <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 
@@ -694,17 +701,30 @@
 
     <span class="c1">#: Numeric index.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Lifetime.</span>
-    <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span>
+    <span class="c1">#: Reserved octet -- "zero when sent, ignored when received"</span>
+    <span class="c1">#: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).</span>
+    <span class="c1">#: Carried verbatim rather than interpreted, so that re-serialising a parsed</span>
+    <span class="c1">#: parameter reproduces the octet it arrived with. It used to be read as a</span>
+    <span class="c1">#: ``PUZZLE`` ``Lifetime``, which only :rfc:`7401#section-5.2.4` defines, and</span>
+    <span class="c1">#: the conformant ``0x00`` then could not be re-serialised at all. See #654.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Solution data.</span>
     <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span>
     <span class="c1">#: Random number.</span>
     <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: Puzzle solution.</span>
     <span class="n">solution</span><span class="p">:</span> <span class="s1">'int'</span>
+    <span class="c1">#: On-wire width of :attr:`random` and of :attr:`solution` -- which are equal</span>
+    <span class="c1">#: and each ``RHASH_len / 8`` octets -- in bits. ``RHASH_len`` in</span>
+    <span class="c1">#: :rfc:`7401#section-2.3` terms; :rfc:`7401#section-5.2.5` makes it the exact</span>
+    <span class="c1">#: width of both fields. Declared rather than recomputed from</span>
+    <span class="c1">#: :meth:`int.bit_length`, which cannot see a leading zero octet: without it a</span>
+    <span class="c1">#: parameter read with ``Length = 20`` re-serialised as ``Length = 6``.</span>
+    <span class="c1">#: See #653.</span>
+    <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'timedelta'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_Parameter'</span><span class="p">,</span> <span class="n">critical</span><span class="p">:</span> <span class="s1">'bool'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">reserved</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">opaque</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">solution</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">rhash_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long</span></div>
 
 
 

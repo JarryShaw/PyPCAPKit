@@ -490,6 +490,18 @@
         <span class="c1">#: Saved subclass protocol data (only for HTTP base class).</span>
         <span class="n">_http</span><span class="p">:</span> <span class="s1">'HTTP[_PT, _ST]'</span>
 
+    <span class="c1">#: This class is a version dispatcher rather than a protocol with a header of</span>
+    <span class="c1">#: its own, so its construction keywords cannot be enumerated: :meth:`make`</span>
+    <span class="c1">#: declares only ``version`` and forwards everything else to</span>
+    <span class="c1">#: :meth:`HTTPv1.make &lt;pcapkit.protocols.application.httpv1.HTTP.make&gt;` or</span>
+    <span class="c1">#: :meth:`HTTPv2.make &lt;pcapkit.protocols.application.httpv2.HTTP.make&gt;`</span>
+    <span class="c1">#: according to that value -- so the set of names that is correct here depends</span>
+    <span class="c1">#: on an argument. :obj:`None` therefore opts out of the construction keyword</span>
+    <span class="c1">#: check that :meth:`ProtocolBase.__init__</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__init__&gt;` performs (#617); the</span>
+    <span class="c1">#: two versioned classes are checked normally when constructed directly.</span>
+    <span class="n">__keywords__</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
     <span class="c1">##########################################################################</span>

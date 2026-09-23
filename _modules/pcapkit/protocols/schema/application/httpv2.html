@@ -608,7 +608,26 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        """</span>
-        <span class="n">flags</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Seed the accumulator with the frame's own ``Flags`` rather than a bare</span>
+        <span class="c1"># ``0``, so that a frame with no bit set still reports ``__flags__`` as</span>
+        <span class="c1"># the ``Flags`` both this schema and :class:`~pcapkit.protocols.data.\</span>
+        <span class="c1"># application.httpv2.Flags` declare it to be. ``|=`` promotes a plain</span>
+        <span class="c1"># ``0`` only as a side effect, so without this a flags octet of ``0x00``</span>
+        <span class="c1"># -- routine in HTTP/2, not an edge case -- leaves an ``int`` behind and</span>
+        <span class="c1"># a membership test against it raises :exc:`TypeError` rather than</span>
+        <span class="c1"># answering. This mirrors the construct path, which already seeds</span>
+        <span class="c1"># ``Flags(0)`` at every one of its six sites.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``FrameType.Flags`` itself declares no members, and from Python 3.11</span>
+        <span class="c1"># the enum rewrite makes a memberless :class:`enum.Flag` subclass refuse</span>
+        <span class="c1"># ``Flags(0)`` outright with ``TypeError: &lt;flag 'Flags'&gt; has no members</span>
+        <span class="c1"># defined`` (3.10 and earlier hand back a pseudo-member instead), so</span>
+        <span class="c1"># the five frame schemas that inherit it unchanged -- ``UnassignedFrame``,</span>
+        <span class="c1"># ``PriorityFrame``, ``RSTStreamFrame``, ``GoawayFrame`` and</span>
+        <span class="c1"># ``WindowUpdateFrame`` -- keep the plain ``int``. All five pass</span>
+        <span class="c1"># ``flags=None`` into their data objects and never surface</span>
+        <span class="c1"># ``__flags__``, so nothing observes the difference for them.</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'BIT_'</span><span class="p">),</span>
                                <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>

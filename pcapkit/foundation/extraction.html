@@ -915,7 +915,11 @@ subclass.</p>
 <dd><p>Cleanup after extraction &amp; analysis.</p>
 <p>The method calls <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.Engine.close" title="pcapkit.foundation.engines.engine.Engine.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._exeng.close</span></code></a>,
 sets <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="pcapkit.foundation.extraction.Extractor._flag_e"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_e</span></code></a>
-as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and closes the input file (if necessary).</p>
+as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and closes the input file <em>if this class opened it</em>.</p>
+<p>That proviso is the whole of it: a handle opened here – <code class="docutils literal notranslate"><span class="pre">fin</span></code> given as
+a path, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_s" title="pcapkit.foundation.extraction.Extractor._flag_s"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_s</span></code></a> set – is closed,
+and a stream the caller supplied is left alone for the caller to close
+when it is done with it.</p>
 <p>It also tells the flow tracer the capture has ended, via
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">TraceFlow.finish</span></code>.
 That is the point at which a traced flow nothing has superseded can be

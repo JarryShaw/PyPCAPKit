@@ -571,6 +571,58 @@ definition no longer touches the filesystem.</p>
 
 <section id="internal-definitions">
 <h2>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.dumpkit.common.render_enum">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">render_enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">o</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#render_enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.render_enum" title="Link to this definition">¶</a></dt>
+<dd><p>Render an enumeration member as <code class="docutils literal notranslate"><span class="pre">Type::name</span> <span class="pre">[value]</span></code>.</p>
+<p>This is the spelling every dumped enumeration carries in the <code class="docutils literal notranslate"><span class="pre">json</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tree</span></code>, <code class="docutils literal notranslate"><span class="pre">text</span></code>, <code class="docutils literal notranslate"><span class="pre">txt</span></code>, <code class="docutils literal notranslate"><span class="pre">plist</span></code> and <code class="docutils literal notranslate"><span class="pre">xml</span></code> output of both
+<a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> and
+<a class="reference internal" href="../foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a>, so it lives in
+one function rather than being spelled out at each of the three places
+<a class="reference internal" href="#pcapkit.dumpkit.common.make_dumper" title="pcapkit.dumpkit.common.make_dumper"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_dumper()</span></code></a>’s hook needs it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>o</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></span>) – Enumeration member to render.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The member’s <code class="docutils literal notranslate"><span class="pre">Type::name</span> <span class="pre">[value]</span></code> rendering.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Flag" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></a> value composed <strong>entirely of undeclared bits</strong> has
+no name at all – <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum.name" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, not a string –
+so interpolating it unguarded put the literal four characters <code class="docutils literal notranslate"><span class="pre">None</span></code>
+into the name half and rendered
+<a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flags</span></code></a> <code class="docutils literal notranslate"><span class="pre">(0)</span></code> as <code class="docutils literal notranslate"><span class="pre">'Flags::None</span> <span class="pre">[0]'</span></code>
+(GitHub issue #648).</p>
+<p>Two things make that worth a guard rather than a shrug. <code class="docutils literal notranslate"><span class="pre">'None'</span></code> is a
+plausible member name, so a consumer splitting the rendering on <code class="docutils literal notranslate"><span class="pre">::</span></code>
+cannot tell it from a member genuinely so named – and <code class="docutils literal notranslate"><span class="pre">NONE</span></code> <em>is</em> a
+declared name elsewhere in the library. And the defect is not confined to
+zero: <code class="docutils literal notranslate"><span class="pre">Flags(1)</span></code>, <code class="docutils literal notranslate"><span class="pre">Flags(8)</span></code> and <code class="docutils literal notranslate"><span class="pre">Flags(65536)</span></code> are every bit as
+nameless, so a guard written against <code class="docutils literal notranslate"><span class="pre">value</span> <span class="pre">==</span> <span class="pre">0</span></code> would fix one case
+and leave the rest.</p>
+<p>The fallback is the value’s own decimal spelling, which is what the
+enumeration libraries themselves already use for an undeclared residue:
+<code class="docutils literal notranslate"><span class="pre">Flags(2057).name</span></code> is <code class="docutils literal notranslate"><span class="pre">'ACK|9'</span></code>, naming the declared bit and giving
+the leftovers as one number. A wholly-undeclared value is that same
+rendering with no declared bit to precede it, so <code class="docutils literal notranslate"><span class="pre">Flags(9)</span></code> becomes
+<code class="docutils literal notranslate"><span class="pre">'Flags::9</span> <span class="pre">[9]'</span></code> and <code class="docutils literal notranslate"><span class="pre">Flags(0)</span></code> becomes <code class="docutils literal notranslate"><span class="pre">'Flags::0</span> <span class="pre">[0]'</span></code>. It also
+cannot be mistaken for a member name, since a Python identifier may not
+begin with a digit – none of the 1867 identifiers declared under
+<a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> is a bare decimal, and none ever can be.</p>
+<p>This is <em>not</em> an <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> quirk. A stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntFlag</span></code></a> built
+from the same members answers <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> identically on CPython
+3.14.7, so the guard belongs here rather than in a choice of enumeration
+library.</p>
+</div>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.dumpkit.common.DumperBase">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">DumperBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#DumperBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.DumperBase" title="Link to this definition">¶</a></dt>

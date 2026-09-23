@@ -657,6 +657,23 @@ be zero or positive</p></li>
 <li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> - end of the stream; <code class="docutils literal notranslate"><span class="pre">offset</span></code> is usually negative</p></li>
 </ul>
 <p>Return the new absolute position.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The target is computed, then validated, and only then written to <code class="docutils literal notranslate"><span class="pre">_tell</span></code>. A
+branch that assigned the position before deciding whether to accept it left a
+refused seek having moved it anyway, with the resync below – the one thing that
+puts the buffer’s cursor back in step – skipped on the way out. A caller that
+catches the error and reasonably takes the position to be unchanged then read
+from the rejected offset instead, silently and without a second error.</p>
+<p>The negative check applies to every <code class="docutils literal notranslate"><span class="pre">whence</span></code>, rather than only
+<code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> looking at its offset. An absolute position below zero
+cannot exist under any of them, and it is not the same failure as a position
+that has merely slid out of the window – which is ordinary, and recoverable
+with <code class="docutils literal notranslate"><span class="pre">buffer_save=True</span></code>. Reporting the first as <code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">seek</span> <span class="pre">value</span></code> keeps
+the two distinguishable, and being a property of the position rather than of the
+window it holds with a saved buffer as well, where the old refusal did not
+apply at all and the seek returned a negative position as if it had worked.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
