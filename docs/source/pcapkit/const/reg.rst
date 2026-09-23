@@ -65,10 +65,19 @@ Application Layer Protocol Numbers
 This module contains the constant enumeration for **Application Layer Protocol Numbers**,
 which is automatically generated from :class:`pcapkit.vendor.reg.apptype.AppType`.
 
+.. AppType has 8,182 members, six of which collide with builtins (dict, exec, help,
+   max, set, sum) and win bare ``:type:`` lookups project-wide (#717). The autoclass
+   below no-indexes itself and every member to kill those collisions; this stub keeps
+   :class:`AppType <pcapkit.const.reg.apptype.AppType>` itself a working xref target.
+
+.. py:class:: AppType
+   :no-typesetting:
+
 .. autoclass:: pcapkit.const.reg.apptype.AppType
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
 
 .. rubric:: Footnotes
 
