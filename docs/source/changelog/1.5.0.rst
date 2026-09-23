@@ -2349,6 +2349,21 @@ pull requests between #326 and #509.
   tests from #677, predating this fix; only ``tcp/flags.py``'s own guard line
   was genuinely newly reached by it. No line under ``pcapkit/`` changed
   (#702).
+* **Changed** -- ``examples/captures/out.json``, ``out.plist``, ``out.txt``
+  and ``pcapng.txt`` are no longer tracked in git; they are build output, not
+  fixtures, and a tracked rendering with no reader goes stale silently every
+  time the code that produces it changes. ``pcapng.txt`` is exactly that: it
+  still recorded ``packet -> NIL`` for the four Enhanced Packet Blocks of
+  ``dhcp.pcapng`` long after #683 gave those blocks their captured octets
+  back, and nothing had regenerated it. Rather than regenerate it once more
+  and leave the same drift free to recur, the four files are removed from
+  the index and folded into ``examples/captures/``'s existing blanket
+  ``.gitignore`` rule; ``in.pcap`` and ``dhcp.pcapng``, the genuine inputs,
+  stay tracked. ``examples/legacy_smoke/Makefile`` and its ``README.rst`` are
+  reworded to describe regenerating these reports via ``make fixtures``
+  rather than implying they ship committed, and a new
+  ``tests/project/test_capture_tracking.py`` (5 tests, 8 subtests) pins the
+  invariant going forward, shown failing against the pre-change tree (#685).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
