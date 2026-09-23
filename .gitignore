@@ -6,12 +6,22 @@ pcapkit-temp.html
 # generated captures at examples/sample/, and nothing should track them.
 examples/sample/
 examples/captures/*
-!examples/captures/out.json
-!examples/captures/out.plist
-!examples/captures/out.txt
+# Only the two genuine *inputs* are tracked. Everything else in this directory is
+# build output: the captures `examples/generators/make_samples.py` writes, and the
+# reference reports `examples/legacy_smoke/` renders out of these two inputs --
+# out.json, out.plist, out.txt and pcapng.txt, via `make fixtures` there.
+#
+# Those four used to be tracked, and the reason they no longer are is that a
+# tracked report goes stale silently. Nothing reads one back, so nothing notices
+# when a parser change alters how a frame renders: #685 was exactly that, with
+# pcapng.txt still recording `packet -> NIL` for four blocks long after #683 gave
+# PCAP-NG packet blocks their captured octets back. Regenerating them on every such
+# change is work with no reader, and the tier guard in `tests/_tiers.py` asks git
+# which captures are tracked rather than hardcoding a list, so dropping them here
+# is the whole change -- see `examples/legacy_smoke/README.rst` for how to rebuild
+# them locally.
 !examples/captures/in.pcap
 !examples/captures/dhcp.pcapng
-!examples/captures/pcapng.txt
 
 src
 !requirements.txt

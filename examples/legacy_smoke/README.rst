@@ -112,12 +112,14 @@ Most of these run with nothing but ``pcapkit``. These do not:
   capture into a temporary file -- never into ``../captures/``, which holds generated
   captures the test suite pins.
 
-Regenerating the committed fixtures
------------------------------------
+Regenerating the reference reports
+----------------------------------
 
-Four files in ``../captures/`` are committed outputs rather than inputs, and they are
-produced by two of the scripts here. To refresh them after a change to how
-``pcapkit`` renders a capture:
+Four files in ``../captures/`` are reports rather than inputs -- ``out.json``,
+``out.plist``, ``out.txt`` and ``pcapng.txt`` -- and they are produced by two of the
+scripts here. **Git does not track them**, so a fresh clone does not have them. Build
+them the way you would any other generated capture, and again after a change to how
+``pcapkit`` renders one:
 
 .. code-block:: shell
 
@@ -130,15 +132,25 @@ That is the whole recipe. It runs, equivalently:
    TZ=UTC python test_extractor.py     # ../captures/out.json, out.plist, out.txt  <- in.pcap
    TZ=UTC python test_pcapng.py        # ../captures/pcapng.txt                    <- dhcp.pcapng
 
-Both inputs are committed, so this works on a fresh clone with no ``make samples``
+Both *inputs* are committed, so this works on a fresh clone with no ``make samples``
 first. Use ``make fixtures PYTHON=../../.venv/bin/python`` to pick a specific
 interpreter.
 
+These four were tracked once, and #685 is why they are not any more. Nothing reads a
+report back -- no test asserts on one, and the docs only quote them as prose -- so a
+parser change that alters how a frame renders leaves the committed copy quietly wrong,
+with no failure anywhere to say so. ``pcapng.txt`` sat recording ``packet -> NIL`` for
+four blocks that had started carrying their captured octets, and the staleness was
+found by reading the file rather than by anything breaking. Generating them on demand
+means the copy on your disk describes the tree you are standing in, which was the only
+thing that made them worth looking at.
+
 ``TZ=UTC`` **is not decoration.** ``pcapkit`` renders frame timestamps in the host's
 local zone, so an unpinned run rewrites every timestamp line in all four files with
-wherever it happened to be run -- which is how these fixtures came to disagree with
-each other, the PCAP three having been generated at UTC-05:00 and ``pcapng.txt`` at
-UTC+08:00. Pinning UTC makes the output reproducible on any host. It also happens to
-be the only zone in which PCAP-NG's ``timestamp_epoch`` is the true UNIX epoch:
+wherever it happened to be run -- which is how these reports came to disagree with
+each other while they were still tracked, the PCAP three having been generated at
+UTC-05:00 and ``pcapng.txt`` at UTC+08:00. Pinning UTC makes the output reproducible on
+any host, so two runs can be diffed against each other. It also happens to be the only
+zone in which PCAP-NG's ``timestamp_epoch`` is the true UNIX epoch:
 ``PCAPNG._read_timestamp`` adds the zone's UTC offset to the value it returns, so a
-fixture generated anywhere else bakes in that offset.
+report generated anywhere else bakes in that offset.
