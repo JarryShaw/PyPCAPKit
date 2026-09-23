@@ -70,6 +70,10 @@ utility arguments and methods of specified protocols.
    .. autoattribute:: _data
    .. autoattribute:: _file
    .. autoattribute:: _info
+   .. autoattribute:: _next
+   .. autoattribute:: _protos
+   .. autoattribute:: _seekset
+   .. autoattribute:: _sigterm
    .. autoattribute:: __data__
 
    .. automethod:: __init__

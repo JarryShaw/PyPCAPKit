@@ -51,6 +51,8 @@ all engine support functionality.
 
    .. autoproperty:: extractor
 
+   .. autoattribute:: _extractor
+
    .. automethod:: unsupported_reason
 
    .. automethod:: run

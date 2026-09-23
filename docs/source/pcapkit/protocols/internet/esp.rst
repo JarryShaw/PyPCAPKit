@@ -223,8 +223,6 @@ MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, delibe
 
 .. autodata:: pcapkit.protocols.internet.esp.INTEGRITY_SUITES
 
-.. autofunction:: pcapkit.protocols.internet.esp._resolve
-
 Known Limitations
 -----------------
 
@@ -250,8 +248,6 @@ Processing Status
    :show-inheritance:
 
 .. autofunction:: pcapkit.protocols.internet.esp.load_cryptography
-
-.. autodata:: pcapkit.protocols.internet.esp._CRYPTO
 
 Header Schemas
 --------------

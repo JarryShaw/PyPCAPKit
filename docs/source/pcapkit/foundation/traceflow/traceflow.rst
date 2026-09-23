@@ -73,6 +73,19 @@ which is an abstract base class for all flow tracing classes.
    .. autoattribute:: _bidir
       :no-value:
 
+   .. autoattribute:: _fproot
+      :no-value:
+   .. autoattribute:: _foutio
+      :no-value:
+   .. autoattribute:: _fdpext
+      :no-value:
+   .. autoattribute:: _endian
+      :no-value:
+   .. autoattribute:: _nnsecd
+      :no-value:
+   .. autoattribute:: _analyse
+      :no-value:
+
    .. automethod:: __call__
    .. automethod:: __init_subclass__
 

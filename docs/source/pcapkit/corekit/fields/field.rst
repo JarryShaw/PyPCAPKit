@@ -7,9 +7,17 @@ Base Fields
    :members:
    :show-inheritance:
 
+   .. autoattribute:: _length
+   .. autoattribute:: _length_callback
+
 .. autoclass:: pcapkit.corekit.fields.field.FieldBase
    :members:
    :show-inheritance:
+
+   .. autoattribute:: _name
+   .. autoattribute:: _template
+   .. autoattribute:: _default
+   .. autoattribute:: _callback
 
 Auxiliaries
 -----------
