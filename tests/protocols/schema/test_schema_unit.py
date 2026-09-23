@@ -5,6 +5,7 @@ import enum
 import importlib.util
 import io
 import unittest
+import warnings
 from unittest import mock
 
 from tests._support import purge_modules, time_limit
@@ -260,7 +261,23 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertIs(BaseEnumSchema.registry[Code.two], ManySchema)
         self.assertIs(BaseEnumSchema.registry[Code.three], ManySchema)
 
-        BaseEnumSchema.register(Code.two, OneSchema)
+        # ``Code.two`` is held by ``ManySchema``, so this is a genuine overwrite
+        # and now reports one. Captured and asserted rather than left to escape:
+        # an unasserted warning is noise in every later run of the suite, and the
+        # capture is what stops this line from quietly becoming a second, silent
+        # copy of the behaviour ``EnumSchemaRegistryOverwriteTests`` pins.
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            BaseEnumSchema.register(Code.two, OneSchema)
+
+        overwrites = [str(item.message) for item in caught
+                      if issubclass(item.category, RegistryWarning)]
+        self.assertEqual(len(overwrites), 1)
+        self.assertIn(repr(ManySchema), overwrites[0])
+        self.assertIn(repr(OneSchema), overwrites[0])
+
         self.assertIs(BaseEnumSchema.registry[Code.two], OneSchema)
         self.assertIs(BaseEnumSchema.from_dict().registry, BaseEnumSchema.registry)
 

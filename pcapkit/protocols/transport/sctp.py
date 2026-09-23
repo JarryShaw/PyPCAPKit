@@ -609,14 +609,26 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             its :attr:`self.__proto__ <SCTP.__proto__>` registry is keyed by
             PPID rather than by port number.
 
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this PPID is already
+                registered, naming the displaced entry and its replacement so a
+                caller can tell *what* was lost. Fires on presence alone, as the
+                port-keyed :meth:`Transport.register
+                <pcapkit.protocols.transport.transport.Transport.register>` it
+                overrides does.
+
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
-            warn(f'payload protocol identifier {code} already registered, overwriting',
-                 RegistryWarning)
+            warn(f'payload protocol identifier {code} already registered, overwriting '
+                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod

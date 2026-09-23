@@ -268,6 +268,86 @@ class ProtocolRegistryTests(unittest.TestCase):
                 self.assertEqual(
                     len(self._registry_warnings(caught, RegistryWarning)), 1)
 
+    def test_sibling_registries_name_what_they_displaced(self) -> None:
+        """Every code-keyed registrar says *what* it overwrote, not just that it did.
+
+        The presence-only condition is deliberately unchanged -- see the test
+        above -- but the message was ``'protocol {code} already registered,
+        overwriting'`` and stopped there, so a caller learned that something had
+        been displaced and never which class it was. That is the same diagnostic
+        gap #675 closed for :func:`~pcapkit.foundation.registry.protocols.\
+        register_protocol`, and it is the part of #681 that does generalise.
+
+        All seven code-keyed registrars are covered, including the two that reach
+        :meth:`Transport.register
+        <pcapkit.protocols.transport.transport.Transport.register>` through
+        :class:`~pcapkit.protocols.transport.tcp.TCP` and
+        :class:`~pcapkit.protocols.transport.udp.UDP` rather than overriding it,
+        and :meth:`ProtocolBase.register
+        <pcapkit.protocols.protocol.ProtocolBase.register>` itself, which the
+        other six shadow.
+
+        """
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.misc.null import NoPayload
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.protocol import ProtocolBase
+        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        UnitProtocol = self._unit_protocol()
+
+        # The premise: two different classes, both acceptable to every gate.
+        self.assertIsNot(Raw, NoPayload)
+
+        cases = (
+            ('protocol-base', UnitProtocol, ProtocolBase.__dict__['__proto__'], 1),
+            ('link-ethertype', Link, Link.__dict__['__proto__'],
+             EtherType.Internet_Protocol_version_4),
+            ('internet-transtype', Internet, Internet.__dict__['__proto__'],
+             TransType.TCP),
+            ('pcap-frame-linktype', Frame, Frame.__dict__['__proto__'],
+             LinkType.ETHERNET),
+            ('pcapng-linktype', PCAPNG, PCAPNG.__dict__['__proto__'],
+             LinkType.ETHERNET),
+            ('tcp-port', TCP, TCP.__dict__['__proto__'], 80),
+            ('udp-port', UDP, UDP.__dict__['__proto__'], 53),
+            ('sctp-ppid', SCTP, SCTP.__dict__['__proto__'],
+             PayloadProtocolIdentifier.WebRTC_DCEP),
+        )
+        for label, owner, registry, code in cases:
+            with self.subTest(registry=label):
+                self._guard_registry(registry, code)
+
+                # Seed a known incumbent, so the assertion is about this test's
+                # own value rather than whatever the built-in table happens to
+                # hold -- several of these codes ship pre-seeded with an
+                # unresolved ``ModuleDescriptor``, whose ``repr`` is not the
+                # class's.
+                registry[code] = Raw
+
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    owner.register(code, NoPayload)
+
+                self.assertIs(registry[code], NoPayload)
+
+                messages = self._registry_warnings(caught, RegistryWarning)
+                self.assertEqual(len(messages), 1)
+                self.assertIn(repr(Raw), messages[0])
+                self.assertIn(repr(NoPayload), messages[0])
+                self.assertLess(messages[0].index(repr(Raw)),
+                                messages[0].index(repr(NoPayload)))
+
     def test_register_protocol_validates_and_updates_registry(self) -> None:
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.utilities.exceptions import RegistryError

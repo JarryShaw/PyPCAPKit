@@ -125,13 +125,26 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             protocol: module descriptor or a
                 :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this EtherType is
+                already registered, naming the displaced entry and its
+                replacement so a caller can tell *what* was lost. Fires on
+                presence alone -- see :meth:`ProtocolBase.register
+                <pcapkit.protocols.protocol.ProtocolBase.register>` for why that
+                differs from ``register_protocol``.
+
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, Protocol):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
-            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
+            warn(f'protocol {code} already registered, overwriting '
+                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     ##########################################################################
