@@ -2160,9 +2160,27 @@ pull requests between #326 and #509.
   ``examples/captures/dhcp.pcapng`` with one harness either side: 6 levels parsed before
   and 1,495 do now, against 1,479 ``ValueError`` and 10 ``struct.error`` before and none
   from outside the library after, with the frame count degrading monotonically with the
-  cut and the 14 levels that still raise all cutting into the Section Header Block, where
-  no frame was left to lose. The five deliberately unclamped non-packet option areas keep
-  the per-block framing assumption #676's note describes, which this does not close. Also
+  cut; of the 14 levels that still raise, twelve leave a file too short to hold a block at
+  all and the other two cut into the Interface Description Block's ``if_tsresol`` option,
+  so none of them costs a frame that was in the file. That claim is about the truncation
+  sweep rather than about every input: a 4,000-round bounded mutation fuzz either side of
+  the change, same seed and cap, takes the parse rate from 2,118 to 3,438 and removes both
+  of #678's families, and the two foreign families left are measured unchanged --
+  ``ValueError: N is not a valid BlockType``, filed as #701, where an unassigned block type
+  raises from ``aenum`` inside ``EnumField.post_process`` so the ``UnknownBlock`` default
+  the registry declares is unreachable; and ``MemoryError`` at exactly 30 of 4,000 in both
+  trees, which is #593's 32-bit band. A third bare exception in this module *is* fixed here,
+  found by the cross-review and reachable from valid input rather than truncated:
+  ``SystemdJournalExportBlock.post_process`` unpacked a 64-bit binary-field length out of
+  whatever ``entry_data.read(8)`` returned, and since the block body is padded to a 32-bit
+  boundary with NULs that ``bytes.strip()`` does not strip, that padding was read as a field
+  *name* with no length prefix behind it -- so every journal entry of unaligned length raised
+  a bare ``struct.error``, measured on a 14-octet ``MESSAGE=hello`` entry. A NUL-only line now
+  ends the entry and a short prefix ends it with a warning; the separate silent loss of every
+  field after a binary one, from a ``read()`` that reaches EOF where it means to skip one
+  newline, is filed as #704 rather than fixed. The five deliberately unclamped non-packet
+  option areas keep the per-block framing assumption #676's note describes, which this does
+  not close. Also
   here because it is the fifth and last registrar in the package with no overwrite guard
   at all: ``Option.register`` now reports a displaced option schema as a
   ``RegistryWarning`` naming every namespace the ``ns='opt'`` fan-out displaced something
