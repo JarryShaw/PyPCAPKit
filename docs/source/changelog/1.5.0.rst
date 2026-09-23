@@ -2298,6 +2298,33 @@ pull requests between #326 and #509.
   names still passes -- the test detects a set that is wrong *at the moment it
   runs*, not hardcoding as a practice, which turns a permanent blind spot into
   a tripwire that fires on the next change to the tracked set (#708).
+* **Changed** -- reconciled which private (``_xxx``) attributes and methods
+  the Sphinx build documents, replacing an ad hoc mix with one stated rule:
+  document the contract, hide the recipe. A member every subclass must
+  implement, or one whose shape a caller genuinely depends on, stays
+  documented even though its name starts with an underscore; a private
+  helper that exists only to keep one method short does not. Seven
+  module-level directives naming pure implementation detail were dropped --
+  ``esp._resolve``, ``esp._CRYPTO``, ``ngap._convert``, ``ngap._revert``,
+  ``ngap._PYCRATE``, ``ngap._PDU_LOCK`` and ``pypcapfile._NamedStream``
+  (whose nested ``name``/``read`` members go with it, being reachable only
+  through a private class) -- while 39 ``autoattribute`` directives were
+  added for class-private state that *is* contract: ``Extractor._flag_f``,
+  the built-in and third-party engines' own ``_backend``, ``TraceFlow``'s
+  internal fields, and ``FieldBase``/``Field`` internals among them. The 128
+  runtime definitions of ``_missing_`` -- 121 under ``pcapkit.const``, the
+  other 7 inline in ``pcapkit.protocols`` -- gained one write-up apiece
+  instead of a directive per class: a new "Unrecognised Values" section in
+  ``docs/source/pcapkit/const/index.rst``, cross-referenced from
+  ``registry.rst``, since ``conf.py`` already excludes ``_missing_`` from
+  every ``automodule`` via ``exclude-members``. ``CONTRIBUTING.md`` gained the
+  rule itself as a named section, so the next directive gets judged against a
+  written test rather than against precedent. Verified with
+  ``sphinx-build -b html`` under ``PCAPKIT_SPHINX=1``: 55 warnings on ``main``
+  before this change, 56 after, the one addition being a pre-existing bare-
+  ``Type`` cross-reference ambiguity newly rendered by ``TraceFlow._foutio``'s
+  new directive rather than a defect this change introduced -- #709 tracks
+  it. No line under ``pcapkit/`` changed (#684).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
