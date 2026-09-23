@@ -866,6 +866,18 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
+    <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this link type is
+already registered against PCAP-NG blocks, naming the displaced
+entry and its replacement so a caller can tell <em>what</em> was lost.
+Note this registry is separate from the PCAP one, so
+<a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
+writing to both cannot make either warn about the other.</p>
+</dd>
 </dl>
 </dd></dl>
 

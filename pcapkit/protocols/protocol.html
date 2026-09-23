@@ -592,7 +592,36 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
+    <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is already
+registered. The warning names the displaced entry and its
+replacement, so a caller can tell <em>what</em> was lost rather than
+only that something was.</p>
+</dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The guard fires on the mere presence of <code class="docutils literal notranslate"><span class="pre">code</span></code>, including when the
+incumbent and the replacement denote the same protocol. That is
+deliberate, and differs from <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>, which
+additionally requires the incumbent to be a <em>different</em> class. Two
+things separate them. This
+registry is keyed on a <code class="docutils literal notranslate"><span class="pre">code</span></code> the caller supplies, independently of
+the value, so registering one class under two codes yields two keys
+and never reaches the same key twice – the spurious-warning case
+that motivated the narrower guard cannot arise here, while a repeat
+call for one code is a caller mistake worth reporting even when the
+value is unchanged. And the incumbent may still be an unresolved
+<a class="reference internal" href="../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> while the
+replacement is the very class it names, so “a different class” is not
+decidable here without resolving the descriptor – forcing the import
+that the descriptor exists to defer, purely to decide whether to
+warn.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1185,6 +1214,40 @@ none.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._info">
 <span class="sig-name descname"><span class="pre">_info</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.protocol.pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol.pcapkit.protocols.protocol._PT"><span class="pre">_PT</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._info" title="Link to this definition">¶</a></dt>
 <dd><p>Parsed packet data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._next">
+<span class="sig-name descname"><span class="pre">_next</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._next" title="Link to this definition">¶</a></dt>
+<dd><p>Next layer protocol instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._protos">
+<span class="sig-name descname"><span class="pre">_protos</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><span class="pre">ProtoChain</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._protos" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol chain instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._seekset">
+<span class="sig-name descname"><span class="pre">_seekset</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._seekset" title="Link to this definition">¶</a></dt>
+<dd><p>File pointer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._sigterm">
+<span class="sig-name descname"><span class="pre">_sigterm</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._sigterm" title="Link to this definition">¶</a></dt>
+<dd><p>If terminate parsing next layer of protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">

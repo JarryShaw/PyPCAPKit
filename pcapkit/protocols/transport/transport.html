@@ -503,6 +503,30 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 protocol map should be associated directly with specific
 transport layer protocol type.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>pcapkit.utilities.exceptions.UnsupportedCall</strong></a> – If called on
+    <a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a> itself.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
+    <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> subclass.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this port is already
+registered, naming the displaced entry and its replacement so a
+caller can tell <em>what</em> was lost. Fires on presence alone – see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for why that
+differs from <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">cls.__proto__</span></code> belongs to the concrete protocol, not to
+<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>, so <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> reaching this method
+twice for one call – once as <code class="docutils literal notranslate"><span class="pre">TCP</span></code>, once as <code class="docutils literal notranslate"><span class="pre">UDP</span></code> – inspects
+two different registries and cannot warn spuriously.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

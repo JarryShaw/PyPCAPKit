@@ -1008,7 +1008,40 @@ had been registered.</p>
 <li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span>) – Enumetaion schema.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is already
+registered, naming the displaced schema and its replacement.</p>
+</dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every public registrar in
+<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> that accepts a
+<code class="docutils literal notranslate"><span class="pre">schema</span></code> registers two halves of one binding – a parser class
+through e.g. <a class="reference internal" href="internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.register_option" title="pcapkit.protocols.internet.ipv4.IPv4.register_option"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4.register_option</span></code></a>, and a
+schema class through this method. The parser half has warned on an
+overwrite for as long as it has existed; this half assigned bare, so
+one <code class="docutils literal notranslate"><span class="pre">register_ipv4_option</span></code> call replacing a built-in reported the
+parser it displaced and said nothing about the schema. The guard
+here closes that asymmetry.</p>
+<p>It fires on the mere presence of <code class="docutils literal notranslate"><span class="pre">code</span></code>, as the code-keyed parser
+registries do and unlike <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>, whose key
+is derived from the value it stores. <code class="docutils literal notranslate"><span class="pre">code</span></code> here is supplied by the
+caller and is independent of <code class="docutils literal notranslate"><span class="pre">schema</span></code>, so a repeat is a caller
+mistake worth reporting even when the value is unchanged.</p>
+<p>Presence is a faithful “was this really registered” test only because
+<a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> returns a miss without recording it. A plain
+<a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would have inserted
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a> the first time any unregistered <code class="docutils literal notranslate"><span class="pre">code</span></code> was
+looked up, so parsing a single packet carrying an unknown code would
+have made the next legitimate registration for that code warn about
+an entry no caller ever asked for – the defect fixed for this layer
+in #555, and for the parser-layer <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> family in #421 and
+#425/#428. That fix is what makes this guard safe to add.</p>
+<p><a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option" title="pcapkit.protocols.schema.misc.pcapng.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.Option</span></code></a> overrides this
+method with a namespaced registry of its own and does not delegate
+here, so it is guarded separately.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1028,6 +1061,18 @@ or a list of enumerations.</p></li>
 <p>If <code class="docutils literal notranslate"><span class="pre">code</span></code> is provided, the subclass will be registered to the
 <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.registry" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> mapping with the given <code class="docutils literal notranslate"><span class="pre">code</span></code>. If <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 not given, the subclass will not be registered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If any of <code class="docutils literal notranslate"><span class="pre">code</span></code> is
+already registered, naming the displaced schema and its
+replacement. This is the same guard <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> applies,
+and it is here as well because a class declaration is the
+<em>other</em> way into <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> – <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">MyOption(Option,</span>
+<span class="pre">code=...)</span></code> writes the registry without any call to
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.register" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, so guarding only the method would leave the
+declaration path silently displacing a built-in schema.</p>
+</dd>
+</dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>If <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> is not yet defined at function call,

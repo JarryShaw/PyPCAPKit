@@ -473,13 +473,13 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <a class="reference external" href="https://scapy.net">Scapy</a>’s layer registries – <code class="docutils literal notranslate"><span class="pre">conf.l2types</span></code> and the <code class="docutils literal notranslate"><span class="pre">bind_layers</span></code>
 payload table, both of which exist only as import side effects of the layer
 modules. Importing a narrower submodule leaves them empty, and
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine dissected
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine dissected
 nothing at all and said so only on <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>. See
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Scapy.__init__()</span></code></a> for why naming the layer modules individually is not a
 cheaper route to the same place.</p>
 <p>One side effect is worth knowing about in advance: <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code> loads
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there
 triggers a <code class="docutils literal notranslate"><span class="pre">CryptographyDeprecationWarning</span></code> from <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code> about
 finite-field Diffie-Hellman. It concerns a key-exchange code path
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> never executes, but it subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UserWarning</span></code></a> rather
@@ -531,9 +531,9 @@ category (see <a class="reference internal" href="../../utilities/warnings.html#
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy.run" title="Link to this definition">¶</a></dt>
-<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
+<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator
-from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
+from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a> – which <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> binds to
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.all</span></code>, since that is the import that populates the layer
 registries <code class="docutils literal notranslate"><span class="pre">sniff</span></code> needs to dissect anything.</p>
@@ -555,7 +555,7 @@ protocol implementations.</p>
 <dd><p>Read frames with Scapy engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.7.1rc1.post254)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.7.1rc1.post259)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed frame instance.</p>
@@ -1096,6 +1096,12 @@ may both reach it, and <code class="xref py py-meth docutils literal notranslate
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._backend">
+<span class="sig-name descname"><span class="pre">_backend</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="pcapkit.foundation.engines._pcap_backend.Probe"><span class="pre">_pcap_backend.Probe</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._backend" title="Link to this definition">¶</a></dt>
+<dd><p>What the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> import actually found, c.f. <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.backend" title="pcapkit.foundation.engines.pypcap.PyPCAP.backend"><code class="xref py py-attr docutils literal notranslate"><span class="pre">backend</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcap.PyPCAP._dlink">
 <span class="sig-name descname"><span class="pre">_dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcap.PyPCAP._dlink" title="Link to this definition">¶</a></dt>
 <dd><p>Data link layer protocol, from the capture handle.</p>
@@ -1539,6 +1545,12 @@ so that <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._backend">
+<span class="sig-name descname"><span class="pre">_backend</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="pcapkit.foundation.engines._pcap_backend.Probe"><span class="pre">_pcap_backend.Probe</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._backend" title="Link to this definition">¶</a></dt>
+<dd><p>What the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcap</span></code> import actually found, c.f. <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.backend" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.backend"><code class="xref py py-attr docutils literal notranslate"><span class="pre">backend</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap_ct.PCAP_CT._dlink">
 <span class="sig-name descname"><span class="pre">_dlink</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_LinkType</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._dlink" title="Link to this definition">¶</a></dt>
 <dd><p>Data link layer protocol, from the capture handle.</p>
@@ -1732,48 +1744,6 @@ for more operational information.</p>
 
 <section id="internal-definitions">
 <h3>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Link to this heading">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_NamedStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#_NamedStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Read-only proxy that gives a stream the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> dereferences <code class="docutils literal notranslate"><span class="pre">input_file.name</span></code>
-unconditionally, on the way into its trace helper. That is fine for the
-<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
-normally holds, but not for the <a class="reference internal" href="../../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>
-it substitutes when the caller supplied a non-seekable stream – that class
-exposes no <code class="docutils literal notranslate"><span class="pre">name</span></code>, so the load would fail with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> before
-a single byte was read.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a></span>) – Underlying binary stream.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name to report as <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.name" title="pcapkit.foundation.engines.pypcapfile._NamedStream.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.name" title="Link to this definition">¶</a></dt>
-<dd><p>Name of the underlying stream.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile._NamedStream.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#_NamedStream.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile._NamedStream.read" title="Link to this definition">¶</a></dt>
-<dd><p>Read from the underlying stream.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of bytes to read; all remaining bytes if negative.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder">
 <span class="sig-prename descclassname"><span class="pre">PyPCAPFile.</span></span><span class="sig-name descname"><span class="pre">_get_decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linktype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pypcapfile.html#PyPCAPFile._get_decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder" title="Link to this definition">¶</a></dt>

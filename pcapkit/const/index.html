@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of pcapkit, which are automatically generated from the pcapkit.vendor module. Protocol Numbers: Protocol Type Registry Constant Enumerations- Link-Lay..." />
-<meta name="description" content="This module contains all constant enumerations of pcapkit, which are automatically generated from the pcapkit.vendor module. Protocol Numbers: Protocol Type Registry Constant Enumerations- Link-Lay..." />
+<meta property="og:description" content="This module contains all constant enumerations of pcapkit, which are automatically generated from the pcapkit.vendor module. Unrecognised Values: Every enumeration below departs from enum in one de..." />
+<meta name="description" content="This module contains all constant enumerations of pcapkit, which are automatically generated from the pcapkit.vendor module. Unrecognised Values: Every enumeration below departs from enum in one de..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Type Registry Constant Enumerations" href="reg.html"><link rel="prev" title="Character Set Detection" href="../utilities/chardet.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -465,6 +465,31 @@
 <span id="constant-enumerations"></span><h1>Constant Enumerations<a class="headerlink" href="#module-pcapkit.const" title="Link to this heading">¶</a></h1>
 <p>This module contains all constant enumerations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which are
 automatically generated from the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> module.</p>
+<section id="unrecognised-values">
+<span id="id1"></span><h2>Unrecognised Values<a class="headerlink" href="#unrecognised-values" title="Link to this heading">¶</a></h2>
+<p>Every enumeration below departs from <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> in one deliberate way, and it is
+the behaviour to know about before using any of them: looking one up by a value
+the registry does not define does <strong>not</strong> raise. Each class overrides
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> so that a value inside the registry’s valid range is minted into a
+new member on the fly – via <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code>, named for the unassigned or
+reserved band it falls in – and returned. Only a value outside that range, or of
+the wrong type, raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
+<p>That is what makes the enumerations usable against live capture data, where a
+protocol number assigned after this release was generated is a routine
+occurrence rather than an error. It also means an enumeration member is not a
+closed set: the identity of a minted member is stable for the life of the
+process, but it does not exist until something asks for it.</p>
+<p>The mechanism is uniform because it is generated – see
+<a class="reference internal" href="../vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>, whose template emits the <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> override
+for every registry – while the valid range and the names of the unassigned bands
+are per-registry, taken from that registry’s own IANA data. The individual
+overrides are therefore not documented per class.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../foundation/registry.html"><span class="doc">Registry Management</span></a> covers the other half of extending a registry:
+once a code exists, registering a parser class, schema or engine against it.</p>
+</div>
+</section>
 <section id="protocol-numbers">
 <h2>Protocol Numbers<a class="headerlink" href="#protocol-numbers" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -730,6 +755,7 @@ automatically generated from the <a class="reference internal" href="../vendor/i
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Constant Enumerations</a><ul>
+<li><a class="reference internal" href="#unrecognised-values">Unrecognised Values</a></li>
 <li><a class="reference internal" href="#protocol-numbers">Protocol Numbers</a></li>
 <li><a class="reference internal" href="#miscellanous">Miscellanous</a></li>
 <li><a class="reference internal" href="#link-layer">Link Layer</a></li>

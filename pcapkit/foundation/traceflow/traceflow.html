@@ -734,6 +734,75 @@ file; otherwise each direction is a flow of its own.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot">
+<span class="sig-name descname"><span class="pre">_fproot</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fproot" title="Link to this definition">¶</a></dt>
+<dd><p>Output root path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio">
+<span class="sig-name descname"><span class="pre">_foutio</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._foutio" title="Link to this definition">¶</a></dt>
+<dd><p>Dumper class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper">Dumper</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext">
+<span class="sig-name descname"><span class="pre">_fdpext</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._fdpext" title="Link to this definition">¶</a></dt>
+<dd><p>Output file extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._endian">
+<span class="sig-name descname"><span class="pre">_endian</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._endian" title="Link to this definition">¶</a></dt>
+<dd><p>Output file byte order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[‘little’, ‘big’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd">
+<span class="sig-name descname"><span class="pre">_nnsecd</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._nnsecd" title="Link to this definition">¶</a></dt>
+<dd><p>Output nanosecond-resolution file flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow._analyse">
+<span class="sig-name descname"><span class="pre">_analyse</span></span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow._analyse" title="Link to this definition">¶</a></dt>
+<dd><p>Application-layer analysis flag. If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, each
+flow reassembles the payload it carries so that its <code class="docutils literal notranslate"><span class="pre">packet</span></code> can be
+read; otherwise no payload is buffered and <code class="docutils literal notranslate"><span class="pre">packet</span></code> is
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.foundation.traceflow.traceflow.TraceFlow.__call__" title="Link to this definition">¶</a></dt>

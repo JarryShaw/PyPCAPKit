@@ -216,6 +216,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. autoattribute:: _expkg
    .. autoattribute:: _extmp
+   .. autoattribute:: _backend
    .. autoattribute:: _dlink
    .. autoattribute:: _closed
 
@@ -369,6 +370,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: _expkg
    .. autoattribute:: _handle
    .. autoattribute:: _extmp
+   .. autoattribute:: _backend
    .. autoattribute:: _dlink
    .. autoattribute:: _closed
 
@@ -414,13 +416,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 Internal Definitions
 --------------------
-
-.. autoclass:: pcapkit.foundation.engines.pypcapfile._NamedStream
-   :no-members:
-   :show-inheritance:
-
-   .. autoattribute:: name
-   .. automethod:: read
 
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder
 .. automethod:: pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode

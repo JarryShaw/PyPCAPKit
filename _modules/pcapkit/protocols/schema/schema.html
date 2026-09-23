@@ -463,7 +463,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolUnbound</span><span class="p">,</span> <span class="n">SchemaError</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span>
+                                        <span class="n">warn</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
@@ -1573,6 +1574,16 @@
 <span class="sd">        :attr:`registry` mapping with the given ``code``. If ``code`` is</span>
 <span class="sd">        not given, the subclass will not be registered.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If any of ``code`` is</span>
+<span class="sd">                already registered, naming the displaced schema and its</span>
+<span class="sd">                replacement. This is the same guard :meth:`register` applies,</span>
+<span class="sd">                and it is here as well because a class declaration is the</span>
+<span class="sd">                *other* way into :attr:`__enum__` -- ``class MyOption(Option,</span>
+<span class="sd">                code=...)`` writes the registry without any call to</span>
+<span class="sd">                :meth:`register`, so guarding only the method would leave the</span>
+<span class="sd">                declaration path silently displacing a built-in schema.</span>
+
 <span class="sd">        Notes:</span>
 <span class="sd">            If :attr:`__enum__` is not yet defined at function call,</span>
 <span class="sd">            it will automatically be defined as a :class:`_EnumRegistry`</span>
@@ -1603,11 +1614,18 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">manual</span><span class="p">,</span> <span class="s1">'default_factory'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">manual</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
-                    <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
+            <span class="c1"># One loop over both shapes, so the overwrite guard below is written</span>
+            <span class="c1"># once rather than once per branch. ``register`` cannot be delegated</span>
+            <span class="c1"># to here: :class:`pcapkit.protocols.schema.misc.pcapng.Option`</span>
+            <span class="c1"># overrides it with an incompatible signature, so ``cls.register``</span>
+            <span class="c1"># does not mean the same thing for every subclass.</span>
+            <span class="n">codes</span> <span class="o">=</span> <span class="n">code</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">code</span><span class="p">,)</span>
+            <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">:</span>
+                    <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">_code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
+                         <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="bp">cls</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
 
 
@@ -1621,7 +1639,49 @@
 <span class="sd">            code: Enumetaion code.</span>
 <span class="sd">            schema: Enumetaion schema.</span>
 
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already</span>
+<span class="sd">                registered, naming the displaced schema and its replacement.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Every public registrar in</span>
+<span class="sd">            :mod:`pcapkit.foundation.registry.protocols` that accepts a</span>
+<span class="sd">            ``schema`` registers two halves of one binding -- a parser class</span>
+<span class="sd">            through e.g. :meth:`IPv4.register_option</span>
+<span class="sd">            &lt;pcapkit.protocols.internet.ipv4.IPv4.register_option&gt;`, and a</span>
+<span class="sd">            schema class through this method. The parser half has warned on an</span>
+<span class="sd">            overwrite for as long as it has existed; this half assigned bare, so</span>
+<span class="sd">            one ``register_ipv4_option`` call replacing a built-in reported the</span>
+<span class="sd">            parser it displaced and said nothing about the schema. The guard</span>
+<span class="sd">            here closes that asymmetry.</span>
+
+<span class="sd">            It fires on the mere presence of ``code``, as the code-keyed parser</span>
+<span class="sd">            registries do and unlike :func:`register_protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.registry.protocols.register_protocol&gt;`, whose key</span>
+<span class="sd">            is derived from the value it stores. ``code`` here is supplied by the</span>
+<span class="sd">            caller and is independent of ``schema``, so a repeat is a caller</span>
+<span class="sd">            mistake worth reporting even when the value is unchanged.</span>
+
+<span class="sd">            Presence is a faithful "was this really registered" test only because</span>
+<span class="sd">            :class:`_EnumRegistry` returns a miss without recording it. A plain</span>
+<span class="sd">            :class:`collections.defaultdict` would have inserted</span>
+<span class="sd">            :attr:`__default__` the first time any unregistered ``code`` was</span>
+<span class="sd">            looked up, so parsing a single packet carrying an unknown code would</span>
+<span class="sd">            have made the next legitimate registration for that code warn about</span>
+<span class="sd">            an entry no caller ever asked for -- the defect fixed for this layer</span>
+<span class="sd">            in #555, and for the parser-layer ``__proto__`` family in #421 and</span>
+<span class="sd">            #425/#428. That fix is what makes this guard safe to add.</span>
+
+<span class="sd">            :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this</span>
+<span class="sd">            method with a namespaced registry of its own and does not delegate</span>
+<span class="sd">            here, so it is guarded separately.</span>
+
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">:</span>
+            <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+
         <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: ignore[index]</span></div>
 </div>
 

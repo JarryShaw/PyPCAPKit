@@ -1504,45 +1504,6 @@ because “no separate integrity algorithm” is a supported configuration –
 it is what an AEAD suite, and an unprotected SA, use.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.esp._resolve">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">_resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#_resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp._resolve" title="Link to this definition">¶</a></dt>
-<dd><p>Resolve <code class="docutils literal notranslate"><span class="pre">value</span></code> to a member of an IKEv2 transform registry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a>]</span>) – <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> or
-<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a>.</p></li>
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – A member of <code class="docutils literal notranslate"><span class="pre">registry</span></code>, an IKEv2 transform ID, or a
-transform name.</p></li>
-<li><p><strong>prefix</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Prefix the registry spells its names with, i.e. <code class="docutils literal notranslate"><span class="pre">'ENCR_'</span></code>
-or <code class="docutils literal notranslate"><span class="pre">'AUTH_'</span></code>.</p></li>
-<li><p><strong>kind</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Word naming the registry for the error message, i.e.
-<code class="docutils literal notranslate"><span class="pre">'encryption'</span></code> or <code class="docutils literal notranslate"><span class="pre">'integrity'</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The corresponding member of <code class="docutils literal notranslate"><span class="pre">registry</span></code>.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> names nothing the registry holds.</p>
-</dd>
-</dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>Both enumerations carry each transform’s prefix-stripped spelling as
-an alias, so a plain lookup already accepts <code class="docutils literal notranslate"><span class="pre">'AES_CBC'</span></code> as well as
-<code class="docutils literal notranslate"><span class="pre">'ENCR_AES_CBC'</span></code>. <code class="docutils literal notranslate"><span class="pre">prefix</span></code> is still needed for the few names that
-are no Python identifier once stripped, and so have no alias –
-<code class="docutils literal notranslate"><span class="pre">ENCR_3DES</span></code> and <code class="docutils literal notranslate"><span class="pre">ENCR_3IDEA</span></code>.</p>
-<p>Resolution is deliberately separate from <em>support</em>: it answers only
-whether IANA registered the transform. See <a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get()</span></code></a>.</p>
-</div>
-</dd></dl>
-
 </section>
 <section id="known-limitations">
 <h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Link to this heading">¶</a></h2>
@@ -1633,15 +1594,6 @@ e.g. because the optional <a class="reference external" href="https://cryptograp
 that a capture full of ESP packets does not pay for a failing import
 on every frame.</p>
 </div>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.esp._CRYPTO">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">_CRYPTO</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NotImplemented</span></span><a class="headerlink" href="#pcapkit.protocols.internet.esp._CRYPTO" title="Link to this definition">¶</a></dt>
-<dd><p>Cached <code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography</span></code> primitives, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.esp.load_cryptography" title="pcapkit.protocols.internet.esp.load_cryptography"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_cryptography()</span></code></a>.
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> means the import has not been attempted yet, and
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> that it was attempted and <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed –
-three states, so a missing dependency is not retried on every frame.</p>
 </dd></dl>
 
 </section>

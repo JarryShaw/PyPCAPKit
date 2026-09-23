@@ -1066,14 +1066,26 @@
 <span class="sd">            its :attr:`self.__proto__ &lt;SCTP.__proto__&gt;` registry is keyed by</span>
 <span class="sd">            PPID rather than by port number.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this PPID is already</span>
+<span class="sd">                registered, naming the displaced entry and its replacement so a</span>
+<span class="sd">                caller can tell *what* was lost. Fires on presence alone, as the</span>
+<span class="sd">                port-keyed :meth:`Transport.register</span>
+<span class="sd">                &lt;pcapkit.protocols.transport.transport.Transport.register&gt;` it</span>
+<span class="sd">                overrides does.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'payload protocol identifier </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span>
-                 <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'payload protocol identifier </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 

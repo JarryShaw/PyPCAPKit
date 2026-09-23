@@ -1219,13 +1219,43 @@
 <span class="sd">            protocol: module descriptor or a</span>
 <span class="sd">                :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
+<span class="sd">                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already</span>
+<span class="sd">                registered. The warning names the displaced entry and its</span>
+<span class="sd">                replacement, so a caller can tell *what* was lost rather than</span>
+<span class="sd">                only that something was.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The guard fires on the mere presence of ``code``, including when the</span>
+<span class="sd">            incumbent and the replacement denote the same protocol. That is</span>
+<span class="sd">            deliberate, and differs from :func:`register_protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.registry.protocols.register_protocol&gt;`, which</span>
+<span class="sd">            additionally requires the incumbent to be a *different* class. Two</span>
+<span class="sd">            things separate them. This</span>
+<span class="sd">            registry is keyed on a ``code`` the caller supplies, independently of</span>
+<span class="sd">            the value, so registering one class under two codes yields two keys</span>
+<span class="sd">            and never reaches the same key twice -- the spurious-warning case</span>
+<span class="sd">            that motivated the narrower guard cannot arise here, while a repeat</span>
+<span class="sd">            call for one code is a caller mistake worth reporting even when the</span>
+<span class="sd">            value is unchanged. And the incumbent may still be an unresolved</span>
+<span class="sd">            :class:`~pcapkit.corekit.module.ModuleDescriptor` while the</span>
+<span class="sd">            replacement is the very class it names, so "a different class" is not</span>
+<span class="sd">            decidable here without resolving the descriptor -- forcing the import</span>
+<span class="sd">            that the descriptor exists to defer, purely to decide whether to</span>
+<span class="sd">            warn.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ProtocolBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
 
     <span class="nd">@classmethod</span>

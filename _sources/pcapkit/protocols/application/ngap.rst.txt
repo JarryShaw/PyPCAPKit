@@ -106,15 +106,6 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.application.ngap.load_pycrate
 
-.. autodata:: pcapkit.protocols.application.ngap._PYCRATE
-
-.. autodata:: pcapkit.protocols.application.ngap._PDU_LOCK
-   :no-value:
-
-.. autofunction:: pcapkit.protocols.application.ngap._convert
-
-.. autofunction:: pcapkit.protocols.application.ngap._revert
-
 Auxiliary Data
 --------------
 

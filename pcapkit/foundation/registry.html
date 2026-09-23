@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/registry.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module ( pcapkit.foundation.registry) provides the registry management for pcapkit, as the module contains various registry points. Foundation Registries: Engine Registries: Dumper Registries:..." />
-<meta name="description" content="This module ( pcapkit.foundation.registry) provides the registry management for pcapkit, as the module contains various registry points. Foundation Registries: Engine Registries: Dumper Registries:..." />
+<meta property="og:description" content="This module ( pcapkit.foundation.registry) provides the registry management for pcapkit, as the module contains various registry points. Every registration below takes a code that is already an enu..." />
+<meta name="description" content="This module ( pcapkit.foundation.registry) provides the registry management for pcapkit, as the module contains various registry points. Every registration below takes a code that is already an enu..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Protocol Family" href="../protocols/index.html"><link rel="prev" title="Follow TCP Stream" href="traceflow/tcp.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -466,6 +466,11 @@
 <p>This module (<a class="reference internal" href="#module-pcapkit.foundation.registry" title="pcapkit.foundation.registry"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code></a>) provides the registry
 management for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, as the module contains various registry
 points.</p>
+<p>Every registration below takes a code that is already an enumeration member. For
+how a code the shipped registries do not define becomes one in the first place,
+see <a class="reference internal" href="../const/index.html#unrecognised-values"><span class="std std-ref">Unrecognised Values</span></a> – the constant enumerations mint an in-range
+unknown value rather than rejecting it, which is what makes registering against a
+newly assigned number possible without regenerating them.</p>
 <section id="module-pcapkit.foundation.registry.foundation">
 <span id="foundation-registries"></span><h2>Foundation Registries<a class="headerlink" href="#module-pcapkit.foundation.registry.foundation" title="Link to this heading">¶</a></h2>
 <section id="engine-registries">

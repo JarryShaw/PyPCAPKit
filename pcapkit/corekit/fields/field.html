@@ -479,6 +479,16 @@ an integer value and accept the current packet as its only argument.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field._length">
+<span class="sig-name descname"><span class="pre">_length</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.Field._length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field._length_callback">
+<span class="sig-name descname"><span class="pre">_length_callback</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.Field._length_callback" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.Field.template">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">template</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.field.Field.template" title="Link to this definition">¶</a></dt>
@@ -526,6 +536,26 @@ and the actual value provided for packing.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase._name">
+<span class="sig-name descname"><span class="pre">_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase._name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase._template">
+<span class="sig-name descname"><span class="pre">_template</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase._template" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase._default">
+<span class="sig-name descname"><span class="pre">_default</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.corekit.fields.field.pcapkit.corekit.fields.field._T" title="pcapkit.corekit.fields.field.pcapkit.corekit.fields.field._T"><span class="pre">_T</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><span class="pre">NoValueType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase._default" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase._callback">
+<span class="sig-name descname"><span class="pre">_callback</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><span class="pre">Self</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType.dict" title="pcapkit.const.reg.apptype.AppType.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase._callback" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.name">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.name" title="Link to this definition">¶</a></dt>

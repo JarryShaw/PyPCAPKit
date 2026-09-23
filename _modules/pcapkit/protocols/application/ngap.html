@@ -1330,8 +1330,6 @@
 <span class="c1">##############################################################################</span>
 
 
-<div class="viewcode-block" id="_convert">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._convert">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_convert</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert a |pycrate|_ decoded value into :mod:`pcapkit` data models.</span>
 
@@ -1365,12 +1363,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">Data_BitString</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_convert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">value</span></div>
+    <span class="k">return</span> <span class="n">value</span>
 
 
-
-<div class="viewcode-block" id="_revert">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap._revert">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_revert</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Convert :mod:`pcapkit` data models back into a |pycrate|_ value.</span>
 
@@ -1398,8 +1393,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">_revert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_revert</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">value</span></div>
-
+    <span class="k">return</span> <span class="n">value</span>
 
 
 <span class="c1">##############################################################################</span>

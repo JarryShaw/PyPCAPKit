@@ -690,8 +690,6 @@
 <span class="c1">##############################################################################</span>
 
 
-<div class="viewcode-block" id="_resolve">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp._resolve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'Type[Cipher] | Type[Integrity]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span>
              <span class="n">prefix</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Resolve ``value`` to a member of an IKEv2 transform registry.</span>
@@ -735,8 +733,7 @@
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">registry</span><span class="p">[</span><span class="n">candidate</span><span class="p">]</span>
-    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
-
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="CipherSuite">

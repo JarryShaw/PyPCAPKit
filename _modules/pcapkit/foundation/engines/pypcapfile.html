@@ -477,8 +477,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
 
-<div class="viewcode-block" id="_NamedStream">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile._NamedStream">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">_NamedStream</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read-only proxy that gives a stream the ``name`` attribute.</span>
 
@@ -501,8 +499,6 @@
         <span class="c1">#: Name of the underlying stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-<div class="viewcode-block" id="_NamedStream.read">
-<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile._NamedStream.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read from the underlying stream.</span>
 
@@ -510,9 +506,7 @@
 <span class="sd">            size: Number of bytes to read; all remaining bytes if negative.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span></div>
-</div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PyPCAPFile">
