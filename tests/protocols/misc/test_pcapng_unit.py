@@ -3180,5 +3180,405 @@ class PCAPNGUnitTests(unittest.TestCase):
                           'no tzdata installed, so this test proves nothing')
 
 
+#: An option code registered in no PCAP-NG namespace, so it selects
+#: ``UnknownOption``, whose payload is sized straight from its declared length.
+UNKNOWN_OPT = 0x00FA
+
+
+def epb_body(options: bytes, packet_data: bytes = bytes(4)) -> bytes:
+    """Build an Enhanced Packet Block body around ``options``.
+
+    The returned buffer is what :func:`block_body` wraps, i.e. the EPB without
+    its block type or either block total length. ``EnhancedPacketBlock`` sizes
+    its option area as ``length - 32 - captured_len - padding``, so wrapping
+    this makes the area exactly ``len(options)``.
+
+    """
+    padding = -len(packet_data) % 4
+    return (struct.pack('<IIIII', 0, 0, 0, len(packet_data), len(packet_data))
+            + packet_data + bytes(padding) + options)
+
+
+def over_declared(code: int, value: bytes, declared: int) -> bytes:
+    """An option whose length field claims ``declared`` octets of ``value``."""
+    return struct.pack('<HH', code, declared) + value
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PCAPNGOptionAreaBoundTests(unittest.TestCase):
+    """An option may not synthesise more payload than its area declares.
+
+    An option's length is a 16-bit wire field, so one four-octet option header
+    can declare 65,535 octets of payload. Nothing bounded that against the area
+    the option sits in, and every shortfall inside a 16-bit length is padded
+    unconditionally at the field layer -- deliberately, so that a capture cut
+    short by its snapshot length still parses. Repeating such an option across
+    blocks therefore amplified without limit. C.f. #594, and #593 for the
+    32-bit band the field layer's own budget already covers.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _unpack_epb(self, options: bytes, packet_data: bytes = bytes(4)):
+        """Unpack an EPB whose option area is exactly ``options``."""
+        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+
+        raw = block_body(epb_body(options, packet_data))
+        schema = EnhancedPacketBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.length, schema.length2)
+        self.assertEqual(schema.length, len(raw) + 4)
+        return schema
+
+    def _unpack_epb_declaring(self, options: bytes, declared: int,
+                              packet_data: bytes = bytes(4)):
+        """Unpack an EPB whose Block Total Length lies about its own size."""
+        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+
+        body = epb_body(options, packet_data)
+        raw = struct.pack('<I', declared) + body + struct.pack('<I', declared)
+        return EnhancedPacketBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+    @staticmethod
+    def _payload_octets(schema) -> int:
+        """Total octets the block's options report holding."""
+        total = 0
+        for option in schema.options:
+            for name in ('data', 'comment', 'name', 'description', 'os',
+                         'hardware', 'filter', 'value', 'resol'):
+                payload = getattr(option, name, None)
+                if isinstance(payload, (bytes, str)):
+                    total += len(payload)
+        return total
+
+    def test_an_option_declaring_more_than_its_area_reads_only_the_area(self) -> None:
+        """#594's vector, one block: 65,535 declared against a four-octet area.
+
+        The area is exactly the option header, so there is nothing left for the
+        payload. Before the bound this read ``b''`` off an exhausted stream and
+        zero-padded it to 65,535 octets -- from a 40-octet block.
+
+        """
+        schema = self._unpack_epb(over_declared(UNKNOWN_OPT, b'', 0xFFFF))
+
+        self.assertEqual(len(schema.options), 1)
+        self.assertEqual(schema.options[0].length, 0xFFFF)
+        self.assertEqual(schema.options[0].data, b'')
+        self.assertEqual(self._payload_octets(schema), 0)
+
+    def test_an_option_that_exactly_fills_its_area_is_untouched(self) -> None:
+        """Four octets declared and four present, in an eight-octet area.
+
+        This is the input a bound applied one header-width off would break: the
+        payload is available in full, and clamping it to the area *including*
+        the four octets of option header the payload sits behind would read zero
+        octets instead of four.
+
+        """
+        schema = self._unpack_epb(tlv(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd'))
+
+        self.assertEqual(len(schema.options), 1)
+        self.assertEqual(schema.options[0].length, 4)
+        self.assertEqual(schema.options[0].data, b'\xaa\xbb\xcc\xdd')
+
+    def test_an_option_over_declaring_by_one_octet_loses_only_that_octet(self) -> None:
+        """Five declared and four present, in an eight-octet area.
+
+        Before the bound the fifth octet was synthesised as a zero; the value
+        was five octets long for an option that held four. The bound reads the
+        four that are there. Paired with the exact-fit case above, this is what
+        separates "clamp to what the area has left" from either leaving the
+        shortfall padded or refusing the option outright.
+
+        """
+        schema = self._unpack_epb(over_declared(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd', 5))
+
+        self.assertEqual(len(schema.options), 1)
+        self.assertEqual(schema.options[0].length, 5)
+        self.assertEqual(schema.options[0].data, b'\xaa\xbb\xcc\xdd')
+
+    def test_an_option_over_declaring_by_four_octets_is_clamped_to_the_remainder(self) -> None:
+        """Eight declared and four present, in an eight-octet area.
+
+        The sharpest discriminator in this class. The option area is eight
+        octets and the option declares eight, so a bound taken against the
+        *area* leaves the declared length untouched and four zero octets are
+        still synthesised. The bound has to be taken against what the area has
+        left *at that field* -- four octets, the header having consumed the
+        other four -- which is what reads the four real octets and no more.
+
+        """
+        schema = self._unpack_epb(over_declared(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd', 8))
+
+        self.assertEqual(len(schema.options), 1)
+        self.assertEqual(schema.options[0].length, 8)
+        self.assertEqual(schema.options[0].data, b'\xaa\xbb\xcc\xdd')
+
+    def test_a_whole_sixteen_bit_option_the_block_declares_room_for_is_untouched(self) -> None:
+        """65,535 octets declared, 65,535 present, and the block says so.
+
+        This is the input that a constant ceiling on option payloads would
+        break, and the reason the bound is the area rather than a number: a
+        65,535-octet option is legitimate when the block reserves room for it,
+        and nothing here is short.
+
+        """
+        value = b'\xcd' * 0xFFFF
+        schema = self._unpack_epb(tlv(UNKNOWN_OPT, value))
+
+        self.assertEqual(len(schema.options), 1)
+        self.assertEqual(schema.options[0].length, 0xFFFF)
+        self.assertEqual(schema.options[0].data, value)
+
+    def test_a_tail_option_gets_only_what_the_options_before_it_left(self) -> None:
+        """Two options in a twelve-octet area, the second declaring 65,535.
+
+        The first option consumes eight of the twelve octets honestly, so the
+        second has four -- its own header -- and no payload. A bound taken
+        against the area as declared, rather than against the area as the
+        earlier options left it, would hand the second option twelve octets and
+        synthesise eight of them. This is the input that separates the two.
+
+        """
+        options = (tlv(UNKNOWN_OPT, b'\xaa\xaa\xaa\xaa')
+                   + over_declared(UNKNOWN_OPT + 1, b'', 0xFFFF))
+        schema = self._unpack_epb(options)
+
+        self.assertEqual(len(schema.options), 2)
+        self.assertEqual(schema.options[0].data, b'\xaa\xaa\xaa\xaa')
+        self.assertEqual(schema.options[1].length, 0xFFFF)
+        self.assertEqual(schema.options[1].data, b'')
+        self.assertEqual(self._payload_octets(schema), 4)
+
+    def test_the_payload_never_exceeds_the_area_for_any_declared_length(self) -> None:
+        """The bound itself, over the whole interesting space rather than one input.
+
+        For every option area size and every declared length, the octets the
+        area's options report holding must not exceed the area. That is the
+        property that bounds the amplification: a block's options can never
+        synthesise more than the block's own declared length, and the block's
+        declared length is what the reader advances the file by.
+
+        """
+        for area_options in (1, 2, 3):
+            for declared in (0, 1, 4, 5, 8, 12, 0x100, 0x1000, 0xFFFF):
+                with self.subTest(options=area_options, declared=declared):
+                    options = b''.join(
+                        over_declared(UNKNOWN_OPT + index, b'', declared)
+                        for index in range(area_options)
+                    )
+                    schema = self._unpack_epb(options)
+
+                    self.assertLessEqual(self._payload_octets(schema), len(options))
+                    self.assertLessEqual(self._payload_octets(schema), schema.length)
+
+    def test_the_amplification_does_not_grow_with_the_block_count(self) -> None:
+        """A bound, not an example: the ratio is flat in the number of blocks.
+
+        #594's crafted capture is 2,000 Enhanced Packet Blocks in 80,048
+        octets, each with one option declaring 65,535 against none present, and
+        it synthesised 131,070,000 octets -- 1,637x, linear in the block count
+        and so unbounded in the input size. Unpacking the same block repeatedly
+        is that capture's option path without the file: the total has to stay
+        inside the octets the blocks themselves declare, at every count.
+
+        """
+        options = over_declared(UNKNOWN_OPT, b'', 0xFFFF)
+        raw = block_body(epb_body(options))
+
+        ratios = set()
+        for blocks in (1, 8, 64, 512):
+            with self.subTest(blocks=blocks):
+                total = 0
+                for _ in range(blocks):
+                    total += self._payload_octets(self._unpack_epb(options))
+
+                declared = blocks * (len(raw) + 4)
+                self.assertLessEqual(total, declared)
+                ratios.add(total / declared)
+
+        self.assertEqual(len(ratios), 1, f'amplification varied with block count: {ratios}')
+
+    def test_the_same_option_area_answers_the_same_whatever_preceded_it(self) -> None:
+        """No history dependence, which a running budget alone would not give.
+
+        The bound reads only the block's own declared framing, so byte-identical
+        input produces byte-identical output regardless of what was parsed
+        before it. C.f. #593, whose own notes record a naive running threshold
+        answering four different ways across 40 byte-identical calls.
+
+        """
+        options = over_declared(UNKNOWN_OPT, b'', 0xFFFF)
+
+        first = self._unpack_epb(options)
+        expected = (first.options[0].length, first.options[0].data)
+
+        for index in range(200):
+            schema = self._unpack_epb(options)
+            self.assertEqual((schema.options[0].length, schema.options[0].data), expected,
+                             f'call {index + 2} answered differently from call 1')
+
+    def test_every_clamped_payload_is_bounded_and_none_was_missed(self) -> None:
+        """One subtest per option and record payload the bound is applied to.
+
+        Each is handed an area holding its own header and fixed fields and
+        nothing more, while declaring 65,535 octets of payload. Every one must
+        read an empty payload rather than synthesise the shortfall. The table is
+        the list of sites, so a payload added later without the bound shows up
+        here as a subtest that was never written -- and one that lost the bound
+        shows up as a subtest that fails.
+
+        """
+        from pcapkit.protocols.schema.misc import pcapng as schema_module
+
+        # (schema class, octets of fixed field between the header and the
+        #  payload, payload attribute)
+        cases = [
+            ('UnknownOption', b'', 'data'),
+            ('CommentOption', b'', 'comment'),
+            ('CustomOption', struct.pack('<I', 0), 'data'),
+            ('IF_NameOption', b'', 'name'),
+            ('IF_DescriptionOption', b'', 'description'),
+            ('IF_FilterOption', b'\x00', 'filter'),
+            ('IF_OSOption', b'', 'os'),
+            ('IF_HardwareOption', b'', 'hardware'),
+            ('EPB_HashOption', b'\x00', 'data'),
+            ('EPB_VerdictOption', b'\x00', 'value'),
+            ('NS_DNSNameOption', b'', 'name'),
+            ('PACK_HashOption', b'\x00', 'data'),
+            ('UnknownRecord', b'', 'data'),
+            ('IPv4Record', bytes(4), 'resol'),
+            ('IPv6Record', bytes(16), 'resol'),
+        ]
+
+        for name, prefix, payload in cases:
+            with self.subTest(schema=name, payload=payload):
+                schema_cls = getattr(schema_module, name)
+                raw = struct.pack('<HH', 0, 0xFFFF) + prefix
+
+                schema = schema_cls.unpack(raw, len(raw), {'byteorder': 'little'})
+
+                self.assertEqual(schema.length, 0xFFFF)
+                self.assertEqual(len(getattr(schema, payload)), 0)
+
+    def test_the_clamp_warns_rather_than_changing_bytes_in_silence(self) -> None:
+        """A clamped option is reported; an option that fits is not."""
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+            raw = struct.pack('<HH', UNKNOWN_OPT, 0xFFFF)
+            UnknownOption.unpack(raw, len(raw), {'byteorder': 'little'})
+        self.assertEqual(warn.call_count, 1)
+        self.assertIs(warn.call_args.args[1], SchemaWarning)
+        self.assertIn('65535', warn.call_args.args[0])
+
+        with mock.patch('pcapkit.protocols.schema.misc.pcapng.warn') as warn:
+            raw = tlv(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd')
+            UnknownOption.unpack(raw, len(raw), {'byteorder': 'little'})
+        self.assertEqual(warn.call_count, 0)
+
+    def test_packing_an_option_is_not_shortened_by_an_unknown_length(self) -> None:
+        """An option still packs when no length is known.
+
+        :meth:`Schema.pack` leaves ``__length__`` at ``-1`` when no length is
+        known. This passes with or without the bound's negative-remainder guard,
+        and the cross-review of #676 is what established that: both
+        :class:`~pcapkit.corekit.fields.strings.BytesField` and
+        :class:`~pcapkit.corekit.fields.strings.StringField` repair a negative
+        width in ``pre_process``, resetting it to ``len(value)``, so the pack
+        path cannot see the guard at all. It is kept as a no-regression check
+        rather than as a discriminator;
+        :meth:`test_a_negative_remainder_is_left_alone_rather_than_clamped_to` is
+        the input that actually exercises the guard.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+
+        value = b'\xaa' * 8
+        option = UnknownOption(type=UNKNOWN_OPT, length=len(value), data=value)
+
+        packed = option.pack()
+
+        self.assertEqual(packed, struct.pack('<HH', UNKNOWN_OPT, len(value)) + value)
+
+        parsed = UnknownOption.unpack(packed, len(packed), {'byteorder': 'little'})
+        self.assertEqual(parsed.data, value)
+
+    def test_a_negative_remainder_is_left_alone_rather_than_clamped_to(self) -> None:
+        """A remainder already past zero is the field's problem, not the bound's.
+
+        ``__length__`` can be negative by the time a payload sizes itself:
+        :meth:`Schema.unpack` warns and carries on when an earlier field has
+        over-consumed. A ten-octet area does it -- the first option takes eight,
+        leaving two, which is not a multiple of four, so the loop runs again with
+        two octets of area; the next option's type field takes both and its
+        length field short-reads to zero, putting ``__length__`` at -2 before the
+        payload's own callback is consulted.
+
+        Clamping to that would hand ``-2`` to the field, whose struct template is
+        then ``'-2s'`` and whose unpack raises ``struct.error: bad char in struct
+        format`` -- not one of :mod:`pcapkit.utilities.exceptions`, and a new
+        failure on input that parses today. Measured: this input parses with the
+        guard and raises without it, while the eight-octet control parses either
+        way, so it isolates the guard rather than the clamp.
+
+        """
+        options = (tlv(UNKNOWN_OPT, b'\xaa\xbb')
+                   + struct.pack('<H', UNKNOWN_OPT))
+        schema = self._unpack_epb(options)
+
+        self.assertEqual(len(schema.options), 2)
+        self.assertEqual(schema.options[0].data, b'\xaa\xbb')
+        self.assertEqual(schema.options[1].length, 0)
+        self.assertEqual(schema.options[1].data, b'')
+
+    def test_a_block_declaring_more_room_than_it_holds_bounds_by_what_it_holds(self) -> None:
+        """The area is clamped too, so the payload cannot outrun the real block.
+
+        Block Total Length is checked only against its own trailing copy, never
+        against the file, so a block may declare 1,000,000 octets while holding
+        36. Its option area is then sized at 999,964, an option declaring 65,535
+        is comfortably under that, and the payload bound alone does not fire:
+        before the area was clamped this synthesised 65,535 octets of zeros from
+        a 36-octet buffer -- 1,820x, with no warning at all. Found by the
+        cross-review of #676, which is why the area carries its own bound.
+
+        The block still parses, and reports the length it declared; what it
+        cannot do is manufacture a payload the buffer never held.
+
+        """
+        options = over_declared(UNKNOWN_OPT, b'', 0xFFFF)
+        schema = self._unpack_epb_declaring(options, 1_000_000)
+
+        self.assertEqual(schema.length, 1_000_000)
+        self.assertEqual(schema.options[0].length, 0xFFFF)
+        self.assertEqual(self._payload_octets(schema), 0)
+
+    def test_the_area_bound_does_not_touch_a_well_formed_block(self) -> None:
+        """Clamping the area is a no-op whenever the declared length is honest.
+
+        At the option field the only field still to come is the trailing Block
+        Total Length, so the octets left of the block are exactly the area plus
+        four and the minimum of the two is the area. Asserted over a range of
+        ``captured_len`` values, since the area expression subtracts
+        ``captured_len`` and its padding and the equality has to survive every
+        alignment.
+
+        """
+        for captured in range(1, 17):
+            with self.subTest(captured_len=captured):
+                value = bytes(range(captured))
+                options = tlv(UNKNOWN_OPT, b'\xaa\xbb\xcc\xdd')
+
+                schema = self._unpack_epb(options, packet_data=value)
+
+                self.assertEqual(len(schema.options), 1)
+                self.assertEqual(schema.options[0].data, b'\xaa\xbb\xcc\xdd')
+                self.assertEqual(schema.captured_len, captured)
+
+
 if __name__ == '__main__':
     unittest.main()

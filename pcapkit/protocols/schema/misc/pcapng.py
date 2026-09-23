@@ -29,7 +29,7 @@ from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, SchemaWarning, warn
 
 __all__ = [
     'PCAPNG',
@@ -205,6 +205,143 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     else:
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
     packet['byteorder'] = field._byteorder
+
+
+def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
+    """Clamp an option or record payload to the octets its area still declares.
+
+    Args:
+        length: Callback computing the payload's nominal length, as the option's
+            or record's own declared length field gives it.
+
+    Returns:
+        A callback returning that length, never past the octets the enclosing
+        option or record area has left to give.
+
+    An option's length is a 16-bit wire field, so it can declare up to 65,535
+    octets of payload from four octets of option header. Nothing bounds that
+    against the area the option sits in: :meth:`OptionField.unpack
+    <pcapkit.corekit.fields.collections.OptionField.unpack>` subtracts each
+    option's *parsed* size from the area it was given but never checks the
+    declared size against it, and :meth:`FieldBase.unpack
+    <pcapkit.corekit.fields.field.FieldBase.unpack>` zero-pads any shortfall
+    within :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`
+    unconditionally -- deliberately, since that ceiling is the full span of a
+    16-bit length and a capture cut short by its snapshot length must still
+    parse. Repeating such an option across many blocks therefore synthesised
+    padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each
+    with one option declaring 65,535 against none present, produced 131,070,000
+    octets of zero padding, an amplification of 1,637x linear in the block
+    count. See `#594 <https://github.com/JarryShaw/PyPCAPKit/issues/594>`__,
+    and `#593 <https://github.com/JarryShaw/PyPCAPKit/issues/593>`__ for the
+    32-bit band the field layer's own budget already covers.
+
+    The bound has to come from this layer because the field layer cannot see
+    it. What distinguishes the crafted case from the legitimate one is not the
+    shortfall's size -- both are inside a 16-bit length, which is why #571's
+    ``len(buffer) < length`` rejection was declined -- but whether the option
+    is inconsistent with the framing the block itself declares. Block Total
+    Length is authoritative and cross-checked against its own trailing copy, so
+    the area is ``length`` less the fixed fields, ``captured_len`` and its
+    padding; an option declaring more payload than that area has left is
+    malformed however complete the file behind it is. A snapshot-truncated
+    capture says so through ``captured_len`` instead, and leaves its options
+    whole, so it never trips this.
+
+    Clamping rather than refusing is what keeps the `#431
+    <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation: a
+    block read has no catch point above :meth:`FieldBase.unpack
+    <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
+    whole extraction rather than one block, and a truncated capture would stop
+    parsing at the cut instead of reporting the frames before it. The clamp is
+    also history-independent -- it reads only this block's own declared framing
+    -- which a running threshold would not be.
+
+    Note:
+        The clamp is skipped when ``__length__`` is absent or negative, which is
+        what :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
+        leaves it as when no length is known. That matters here in a way it does
+        not for :func:`pcapkit.protocols.schema.transport.sctp.bounded`, whose
+        list fields ignore their length while packing: these are
+        :class:`~pcapkit.corekit.fields.strings.BytesField` and
+        :class:`~pcapkit.corekit.fields.strings.StringField` payloads, and
+        :meth:`FieldBase.pack <pcapkit.corekit.fields.field.FieldBase.pack>`
+        packs them through ``struct.pack('<n>s', ...)``, which truncates
+        silently. A clamp applied while packing would therefore shorten a
+        perfectly good option rather than reject it.
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        nominal = length(pkt)
+
+        remaining = pkt.get('__length__')
+        if not isinstance(remaining, int) or remaining < 0 or nominal <= remaining:
+            return nominal
+
+        warn(f'PCAP-NG: option declares {nominal} octet(s) of payload with '
+             f'{remaining} octet(s) left in its area; reading {remaining}',
+             SchemaWarning, stacklevel=stacklevel())
+        return remaining
+    return callback
+
+
+def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
+    """Clamp a packet block's option area to the octets the block itself holds.
+
+    Args:
+        length: Callback computing the option area's nominal span, from the
+            block's own declared Block Total Length.
+
+    Returns:
+        A callback returning that span, never past the octets left of the block.
+
+    :func:`bounded_option` bounds a payload by the area, and the area by the
+    block's declared Block Total Length. That closes the band only while the
+    declared length is itself backed by real octets, and nothing checks that:
+    ``BlockType.post_process`` compares ``length`` against its own trailing copy
+    and never against the file. A block declaring 1,000,000 octets while holding
+    36 therefore sizes its option area at 999,964, an option inside it declaring
+    65,535 is under that and is not clamped, and 65,535 octets of zeros are
+    synthesised from 36 -- measured, 1,820x, with no warning. Clamping the area
+    to ``__length__`` as well removes the step: the payload is then bounded by
+    the octets the block was actually handed, whatever it declared.
+
+    This is a no-op on every well-formed block rather than a second guess at the
+    area. At the option field the only field still to come is the trailing Block
+    Total Length, so ``__length__`` is exactly the area plus that field's four
+    octets, and subtracting them makes the two equal. Taking ``__length__`` whole
+    over-grants by exactly four, which is not academic: the area then reaches the
+    trailing length itself and reads it as option payload, measured as four
+    octets of payload on a block that holds none.
+
+    Note:
+        The five non-packet blocks' option areas -- Section Header, Interface
+        Description, Name Resolution, Interface Statistics and Decryption
+        Secrets -- are deliberately left unclamped here, since each computes its
+        span with a different offset and the equality above has to be
+        re-established per block rather than assumed. The general fix is to stop
+        a declared length reaching a read at all, which is `#678
+        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        nominal = length(pkt)
+
+        remaining = pkt.get('__length__')
+        if not isinstance(remaining, int):
+            return nominal
+
+        # The trailing Block Total Length follows the option area in both packet
+        # block types, so it is not the area's to read.
+        available = remaining - 4
+        if available < 0 or nominal <= available:
+            return nominal
+
+        warn(f'PCAP-NG: block declares an option area of {nominal} octet(s) with '
+             f'{available} octet(s) left of the block; reading {available}',
+             SchemaWarning, stacklevel=stacklevel())
+        return available
+    return callback
 
 
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -491,7 +628,7 @@ class UnknownOption(_OPT_Option):
     """Header schema for unknown PCAP-NG file options."""
 
     #: Option value.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+    data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length']))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -512,7 +649,7 @@ class CommentOption(_OPT_Option, code=Enum_OptionType.opt_comment):
     """Header schema for PCAP-NG file ``opt_comment`` options."""
 
     #: Comment text.
-    comment: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    comment: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -530,7 +667,7 @@ class CustomOption(_OPT_Option, code=[Enum_OptionType.opt_custom_2988,
     #: Private enterprise number (PEN).
     pen: 'int' = UInt32Field(callback=byteorder_callback)
     #: Custom data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 4)
+    data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 4))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -642,7 +779,7 @@ class IF_NameOption(_IF_Option, code=Enum_OptionType.if_name):
     """Header schema for PCAP-NG file ``if_name`` options."""
 
     #: Interface name.
-    name: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -655,7 +792,7 @@ class IF_DescriptionOption(_IF_Option, code=Enum_OptionType.if_description):
     """Header schema for PCAP-NG file ``if_description`` options."""
 
     #: Interface description.
-    description: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    description: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -781,7 +918,7 @@ class IF_FilterOption(_IF_Option, code=Enum_OptionType.if_filter):
     #: Filter code.
     code: 'Enum_FilterType' = EnumField(length=1, namespace=Enum_FilterType, callback=byteorder_callback)
     #: Capture filter.
-    filter: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    filter: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -794,7 +931,7 @@ class IF_OSOption(_IF_Option, code=Enum_OptionType.if_os):
     """Header schema for PCAP-NG file ``if_os`` options."""
 
     #: OS information.
-    os: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    os: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -833,7 +970,7 @@ class IF_HardwareOption(_IF_Option, code=Enum_OptionType.if_hardware):
     """Header schema for PCAP-NG file ``if_hardware`` options."""
 
     #: Hardware information.
-    hardware: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    hardware: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']), encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -938,7 +1075,7 @@ class EPB_HashOption(_EPB_Option, code=Enum_OptionType.epb_hash):
     #: Hash algorithm.
     func: 'Enum_HashAlgorithm' = EnumField(length=1, namespace=Enum_HashAlgorithm, callback=byteorder_callback)
     #: Hash value.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -992,7 +1129,7 @@ class EPB_VerdictOption(_EPB_Option, code=Enum_OptionType.epb_verdict):
     #: Verdict type.
     verdict: 'Enum_VerdictType' = EnumField(length=1, namespace=Enum_VerdictType, callback=byteorder_callback)
     #: Verdict value.
-    value: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    value: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1028,7 +1165,8 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
         # ``padding_data``: a PaddingField is written straight into the schema
         # buffer while packing and never lands in the packet data, so its name
         # is not a key here on the packing path.
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - (4 - pkt['captured_len'] % 4) % 4,
+        length=bounded_area(lambda pkt: pkt['length'] - 32 - pkt['captured_len']
+                                        - (4 - pkt['captured_len'] % 4) % 4),
         base_schema=_EPB_Option,
         type_name='type',
         registry=Option.registry['epb'],
@@ -1086,7 +1224,7 @@ class UnknownRecord(NameResolutionRecord):
     """Header schema for PCAP-NG NRB unknown records."""
 
     #: Unknown record data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+    data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length']))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1109,7 +1247,7 @@ class IPv4Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv4):
     #: IPv4 address.
     ip: 'IPv4Address' = IPv4AddressField()
     #: Name resolution data.
-    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 4)
+    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 4))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1140,7 +1278,7 @@ class IPv6Record(NameResolutionRecord, code=Enum_RecordType.nrb_record_ipv6):
     #: IPv6 address.
     ip: 'IPv6Address' = IPv6AddressField()
     #: Name resolution data.
-    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 16)
+    resol: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length'] - 16))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1178,7 +1316,7 @@ class NS_DNSNameOption(_NS_Option, code=Enum_OptionType.ns_dnsname):
     """Header schema for PCAP-NG ``ns_dnsname`` option."""
 
     #: DNS name.
-    name: 'str' = StringField(length=lambda pkt: pkt['length'])
+    name: 'str' = StringField(length=bounded_option(lambda pkt: pkt['length']))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1689,7 +1827,7 @@ class PACK_HashOption(_PACK_Option, code=Enum_OptionType.pack_hash):
     #: Hash algorithm.
     func: 'Enum_HashAlgorithm' = EnumField(length=1, namespace=Enum_HashAlgorithm, callback=byteorder_callback)
     #: Hash value.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    data: 'bytes' = BytesField(length=bounded_option(lambda pkt: pkt['length'] - 1))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -1725,7 +1863,8 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     options: 'list[Option]' = OptionField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - (4 - pkt['captured_length'] % 4) % 4,
+        length=bounded_area(lambda pkt: pkt['length'] - 32 - pkt['captured_length']
+                                        - (4 - pkt['captured_length'] % 4) % 4),
         base_schema=_PACK_Option,
         type_name='type',
         registry=Option.registry['pack'],
