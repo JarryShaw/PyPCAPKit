@@ -7,15 +7,20 @@ import datetime
 import decimal
 import io
 from ipaddress import ip_address, ip_interface
+import json
 import os
 import struct
+import subprocess  # nosec: B404
 import sys
+import tempfile
+import textwrap
 import time
 import types
 import unittest
+import warnings
 from unittest import mock
 
-from tests._support import purge_modules, sample_path
+from tests._support import ROOT, purge_modules, sample_path
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
@@ -3612,6 +3617,880 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
                 self.assertEqual(len(schema.options), 1)
                 self.assertEqual(schema.options[0].data, b'\xaa\xbb\xcc\xdd')
                 self.assertEqual(schema.captured_len, captured)
+
+
+class NamedBuffer(io.BufferedReader):
+    """An in-memory capture with the two attributes :class:`Extractor` wants.
+
+    :class:`~pcapkit.foundation.extraction.Extractor` reads ``fin.name`` to
+    derive the output name and ``fin.peek`` to sniff the file magic, neither of
+    which a bare :class:`io.BytesIO` has. Wrapping one keeps a 1,509-level sweep
+    off the filesystem: the same sweep through
+    :class:`tempfile.NamedTemporaryFile` costs twice the wall clock and leaves
+    1,509 files behind if the process dies.
+
+    """
+
+    def __init__(self, data: bytes, name: str = 'truncated.pcapng') -> None:
+        super().__init__(io.BytesIO(data))
+        self._name = name
+
+    @property
+    def name(self) -> 'str':  # type: ignore[override]
+        return self._name
+
+
+class Unseekable(io.RawIOBase):
+    """A read-only stream that reports itself unseekable."""
+
+    def __init__(self, data: bytes) -> None:
+        super().__init__()
+        self._data = io.BytesIO(data)
+
+    def readable(self) -> 'bool':
+        return True
+
+    def seekable(self) -> 'bool':
+        return False
+
+    def readinto(self, buffer) -> 'int':  # type: ignore[no-untyped-def]
+        return self._data.readinto(buffer)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PCAPNGTruncatedFileTests(unittest.TestCase):
+    """A capture cut short must still report the frames before the cut.
+
+    Block Total Length is cross-checked against its own trailing copy and never
+    against the file, so a last block running past the real end left the reader
+    seeked *past* that end -- which is legal and silent. Every block read after
+    it then measured a negative remainder, and the negative reached
+    :meth:`io.RawIOBase.read` through ``pcapng_block_selector`` as a bare
+    ``ValueError`` that no handler in the frame loop catches. The whole
+    extraction was lost, not the one truncated block, which inverts the #431
+    accommodation exactly. Measured on ``dhcp.pcapng`` before the fix: of its
+    1,509 octet boundaries, **6** parsed and 1,489 raised something from outside
+    :mod:`pcapkit.utilities.exceptions` -- 1,479 ``ValueError`` and 10
+    ``struct.error``. C.f. #678, #431, #571, and #676 for the option-area bound
+    this was found beside.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+        with open(sample_path('dhcp.pcapng'), 'rb') as stream:
+            self.whole = stream.read()
+
+    def _extract(self, data: bytes):
+        """Extract ``data`` in memory, returning the extractor and its warnings."""
+        from pcapkit.foundation.extraction import Extractor
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            extractor = Extractor(NamedBuffer(data), nofile=True, store=True)
+        return extractor, caught
+
+    def _sweep(self) -> 'tuple[dict[int, int], dict[int, BaseException]]':
+        """Extract every truncation of the sample, one octet at a time.
+
+        Returns the frame count for each level that parsed and the exception for
+        each that did not. Sweeping every boundary rather than picking one is the
+        point: the levels that behave differently are not the ones anybody would
+        have chosen by hand -- 372 and 373 are where ``struct.error`` lived, and
+        376 is where the cut happens to land on a block boundary.
+
+        """
+        frames = {}  # type: dict[int, int]
+        failures = {}  # type: dict[int, BaseException]
+
+        for cut in range(len(self.whole) + 1):
+            data = self.whole[:len(self.whole) - cut]
+            try:
+                extractor, _ = self._extract(data)
+            except BaseException as error:  # noqa: BLE001 -- classifying, not handling
+                failures[cut] = error
+            else:
+                frames[cut] = len(extractor.frame)
+
+        self.assertEqual(len(frames) + len(failures), len(self.whole) + 1)
+        return frames, failures
+
+    def test_no_truncation_level_raises_from_outside_the_library(self) -> None:
+        """The whole of #678, asserted over every boundary rather than one.
+
+        A caller cannot tell a bare ``ValueError`` or ``struct.error`` from a bug
+        in its own code, and neither is an :exc:`EOFError`, so neither is caught
+        where the frame loop catches the end of a file. Every failure that is
+        left has to come from :mod:`pcapkit.utilities.exceptions`.
+
+        """
+        from pcapkit.utilities.exceptions import BaseError
+
+        _, failures = self._sweep()
+
+        foreign = {cut: error for cut, error in failures.items()
+                   if not isinstance(error, BaseError)}
+        self.assertEqual(
+            foreign, {},
+            f'{len(foreign)} truncation level(s) raised from outside '
+            f'pcapkit.utilities.exceptions: '
+            f'{sorted((cut, type(err).__name__) for cut, err in foreign.items())[:8]}'
+        )
+
+    def test_almost_every_truncation_level_parses(self) -> None:
+        """The #431 bar: a truncated capture parses, it does not fail.
+
+        Absence of a foreign exception would be satisfied by turning all 1,509
+        levels into a tidy in-library refusal, which is the failure this guards
+        against. Before the fix six levels parsed; the rest is what the fix is
+        for.
+
+        """
+        frames, failures = self._sweep()
+
+        self.assertGreater(len(frames), 0.98 * (len(self.whole) + 1))
+        self.assertLess(len(failures), 16)
+
+    def test_every_level_that_still_fails_fails_for_a_reason_of_its_own(self) -> None:
+        """The handful left are all cuts that reach the section header itself.
+
+        None of them costs a frame that was in the file: a cut that deep has
+        already removed every packet block. A file under twelve octets cannot
+        hold a block at all and is reported as end-of-stream; under four it
+        cannot even be identified as PCAP-NG.
+
+        """
+        from pcapkit.utilities.exceptions import (FormatError, ProtocolError,
+                                                  StreamEOFError)
+
+        frames, failures = self._sweep()
+
+        for cut, error in sorted(failures.items()):
+            with self.subTest(cut=cut, error=type(error).__name__):
+                self.assertIsInstance(error, (StreamEOFError, ProtocolError, FormatError))
+                self.assertGreater(cut, len(self.whole) - 64)
+
+        # every level that failed is deeper than every level that still had a
+        # frame to report, so no failure cost a frame that was in the file
+        deepest_with_a_frame = max(cut for cut, count in frames.items() if count)
+        self.assertLess(deepest_with_a_frame, min(failures))
+
+    def test_the_frame_count_never_rises_as_the_cut_deepens(self) -> None:
+        """Removing octets may lose frames; it may not invent them.
+
+        The structural property a zero-padded short read could break: padding a
+        shortfall out of nothing is how a block gets fabricated, and a fabricated
+        block would show up here as a frame count going *up* while the file got
+        smaller.
+
+        """
+        frames, _ = self._sweep()
+
+        levels = sorted(frames)
+        for deeper, shallower in zip(levels[1:], levels):
+            with self.subTest(cut=deeper):
+                self.assertLessEqual(frames[deeper], frames[shallower])
+
+        self.assertEqual(frames[0], 4)
+        self.assertEqual(frames[max(levels)], 0)
+
+    def test_a_truncated_last_block_keeps_the_frames_before_it(self) -> None:
+        """The levels the issue reports, with the frame counts they should give.
+
+        Four octets off the end truncates the fourth Enhanced Packet Block, whose
+        declared length then overruns the file; 376 removes it entirely, landing
+        the cut on a block boundary.
+
+        """
+        shallow, _ = self._extract(self.whole[:-4])
+        boundary, _ = self._extract(self.whole[:-376])
+
+        self.assertEqual(len(shallow.frame), 4)
+        self.assertEqual(len(boundary.frame), 3)
+
+    def test_a_block_overrunning_the_file_is_reported_and_leaves_the_reader_at_the_end(self) -> None:
+        """The root cause, on its own: the seek that used to go past the end.
+
+        ``_read_fileng`` stops at the end of the file, so the octets it returned
+        are the authority on where a truncated block really finishes -- and
+        landing the reader there is what lets the *next* read measure a remainder
+        of zero and report the quiet end-of-stream the frame loop already
+        handles, instead of a negative one.
+
+        """
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        _, caught = self._extract(self.whole[:-4])
+
+        overruns = [str(entry.message) for entry in caught
+                    if entry.category is ProtocolWarning
+                    and 'octet(s) left in the file' in str(entry.message)]
+        self.assertEqual(len(overruns), 1)
+        self.assertIn('block length 376 exceeds the 372 octet(s) left', overruns[0])
+
+    def test_a_tail_too_short_for_a_block_is_reported_as_end_of_stream(self) -> None:
+        """Twelve octets is the smallest block there is, so eleven is not one.
+
+        Reported as :exc:`~pcapkit.utilities.exceptions.StreamEOFError` rather
+        than clamped, because at the end of the file no block is being read: the
+        clamp-and-warn of #676 keeps a truncated *block* parsing, where inventing
+        a whole block out of zero padding would only fabricate a frame. It is the
+        same signal ``prepare`` already raises for a remainder of exactly zero --
+        one, two and three octets merely fell through it.
+
+        """
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.utilities.exceptions import StreamEOFError
+
+        for size in range(12):
+            with self.subTest(octets=size):
+                with self.assertRaises(StreamEOFError) as caught:
+                    PCAPNG(bytes(size), num=1, sct=1, ctx=None)
+
+                self.assertIn(f'{size} octet(s) left', str(caught.exception))
+                # an EOFError, which is what the frame loop catches
+                self.assertIsInstance(caught.exception, EOFError)
+
+    def test_the_smallest_possible_block_is_not_mistaken_for_the_end(self) -> None:
+        """Twelve octets is a block, so the floor may not reject it.
+
+        An off-by-one here would stop every well-formed
+        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock` of minimum
+        size, and ``__length_hint__`` reports the same twelve.
+
+        """
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        raw = struct.pack('<I', 0x0BAD0BAD) + struct.pack('<I', 12) + struct.pack('<I', 12)
+
+        block = PCAPNG(raw, num=1, sct=1, ctx=None)
+
+        self.assertEqual(block.info.length, 12)
+        self.assertEqual(PCAPNG.__length_hint__(PCAPNG), 12)
+
+    def test_the_floor_cannot_reach_a_stream_that_cannot_seek(self) -> None:
+        """Measuring the remainder needs a seek, and nothing here guards that.
+
+        It does not have to:
+        :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG.__post_init__` has already
+        called :meth:`~io.IOBase.tell` on the stream to record ``_seek_set``
+        before ``unpack`` runs, so an unseekable stream never reaches the floor.
+        Pinned rather than assumed, because a ``seekable()`` guard on the floor
+        would have been unreachable code -- and because the behaviour it would
+        have been protecting is unchanged by this fix.
+
+        """
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        stream = Unseekable(bytes(3))
+        self.assertFalse(stream.seekable())
+
+        with self.assertRaises(io.UnsupportedOperation):
+            PCAPNG(stream, num=1, sct=1, ctx=None)  # type: ignore[arg-type]
+
+    def test_the_block_floor_does_not_fire_while_constructing(self) -> None:
+        """Construction builds its own buffer, so the parsing floor is not its business.
+
+        ``PCAPNG(file=None, ...)`` packs the block and reads back what it packed.
+        A Section Header Block is 28 octets, comfortably over the floor, but the
+        floor is skipped there on principle rather than on size: a block short
+        enough to trip it is already reported by
+        :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG.read`'s own Block Total
+        Length check, which names the length and so says more than an
+        end-of-stream would.
+
+        """
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        block = PCAPNG(num=0, sct=1, ctx=None,
+                       type=BlockType.Section_Header_Block, block={})
+
+        self.assertEqual(block.info.length, 28)
+        self.assertEqual(len(bytes(block)), 28)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PCAPNGNegativeLengthTests(unittest.TestCase):
+    """No computed field length may reach :mod:`struct` or ``read()`` negative.
+
+    Every span in the PCAP-NG schema is a subtraction whose operands are wire
+    fields, and nothing made the difference non-negative. The field layer does
+    not either: ``_TextField.__call__`` builds its template as ``f'{length}s'``
+    unconditionally, so ``-8`` becomes the format ``'-8s'`` and
+    :func:`struct.calcsize` raises a bare :exc:`struct.error` -- which is neither
+    in :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so one
+    malformed block cost the whole extraction. The second manifestation on #678:
+    an Enhanced Packet Block declaring ``captured_len`` past its own end.
+
+    """
+
+    #: Every key a length callback in the module reads, set so that each
+    #: subtraction comes out negative: a Block Total Length of zero is under
+    #: every block's fixed-field floor, a ``captured_len`` of ``0xFFFFFF`` is
+    #: past the end of any real block, and ``-32`` is what ``OptionField``
+    #: reports as ``__option_padding__`` when its options overran their area.
+    #:
+    #: ``__length__`` stays non-negative deliberately. It is the one key that is
+    #: a measurement rather than a difference -- ``prepare`` sets it from what is
+    #: left of the stream, or from the length the enclosing
+    #: :class:`~pcapkit.corekit.fields.misc.SchemaField` declared -- so flooring a
+    #: field that reads it *whole* changes nothing on the parsing path and
+    #: truncates on the packing one, where ``Schema.pack`` leaves it at ``-1`` for
+    #: "unknown". See
+    #: :meth:`test_a_field_sized_by_the_remaining_length_whole_is_left_alone`.
+    HOSTILE = {
+        'length': 0,
+        'captured_len': 0xFFFFFF,
+        'captured_length': 0xFFFFFF,
+        'secrets_length': 0xFFFFFF,
+        '__option_padding__': -32,
+        '__length__': 0,
+        'packet_data': b'',
+        'snaplen': 0,
+    }
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _hostile_packet(self):
+        """``HOSTILE``, with zero for any key it does not name."""
+        class Hostile(dict):
+            def __missing__(self, key):
+                return 0
+
+        return Hostile(self.HOSTILE)
+
+    def test_every_length_callback_in_the_module_is_floored_at_zero(self) -> None:
+        """Exhaustive over the module, so a new unfloored subtraction is caught.
+
+        Walks every schema in
+        :mod:`pcapkit.protocols.schema.misc.pcapng` and drives every ``length``
+        callback with the hostile packet above. Measured on the parent commit: 28
+        of the 74 callbacks returned a negative, from ``-1`` on an ``epb_hash``
+        declaring no payload to ``-16777248`` on an Enhanced Packet Block's
+        option area.
+
+        """
+        from pcapkit.protocols.schema.misc import pcapng as module
+        from pcapkit.protocols.schema.schema import Schema
+
+        packet = self._hostile_packet()
+        exercised = []
+        negative = []
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            for name, obj in vars(module).items():
+                if not (isinstance(obj, type) and issubclass(obj, Schema)):
+                    continue
+                for field_name, field in getattr(obj, '__fields__', {}).items():
+                    callback = getattr(field, '_length_callback', None)
+                    if callback is None:  # a fixed-width field has nothing to compute
+                        continue
+                    label = f'{name}.{field_name}'
+                    value = callback(packet)
+                    exercised.append(label)
+                    if value < 0:
+                        negative.append((label, value))
+
+        self.assertEqual(negative, [])
+        # the sweep has to have found the callbacks at all: an import that
+        # renamed the module's schemas would otherwise pass by exercising none
+        self.assertGreaterEqual(len(exercised), 70)
+
+    def test_a_field_sized_by_the_remaining_length_whole_is_left_alone(self) -> None:
+        """The three decryption-secrets payloads are exempt, and measurably so.
+
+        ``UnknownSecrets.data``, ``TLSKeyLog.data`` and ``WireGuardKeyLog.data``
+        read ``__length__`` whole rather than subtracting from it, and
+        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` leaves
+        it at ``-1`` when no length is known -- so flooring them at zero packs
+        *nothing*. Measured: it emptied both secrets payloads, and the two
+        ``EXPECTED_FAILURES`` entries for them in
+        ``tests/protocols/test_option_roundtrip_unit.py`` then came back ``OK``
+        rather than ``MISMATCH``, because an empty payload compares equal to an
+        empty payload. A regression that reads as a fix, which is why this is
+        pinned rather than left to the reader.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, UnknownSecrets
+
+        for schema_cls, field_name in ((UnknownSecrets, 'data'), (TLSKeyLog, 'data')):
+            with self.subTest(schema=schema_cls.__name__):
+                callback = schema_cls.__fields__[field_name]._length_callback
+                self.assertEqual(callback({'__length__': -1}), -1)
+                self.assertEqual(callback({'__length__': 40}), 40)
+
+    def test_the_floor_warns_rather_than_shortening_a_read_in_silence(self) -> None:
+        """A negative length means the file is malformed, and that is worth saying.
+
+        The clamp is not a no-op the way :func:`bounded_area`'s is on a
+        well-formed block: it only ever fires on framing that contradicts itself,
+        so the warning cannot be routine noise.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import nonnegative
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        callback = nonnegative(lambda pkt: pkt['length'] - 12)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            clamped = callback({'length': 4})
+            untouched = callback({'length': 40})
+
+        self.assertEqual(clamped, 0)
+        self.assertEqual(untouched, 28)
+        self.assertEqual([entry.category for entry in caught], [SchemaWarning])
+        self.assertIn('-8', str(caught[0].message))
+
+    def test_an_epb_declaring_captured_len_past_its_block_does_not_reach_struct(self) -> None:
+        """#678's second manifestation, at the field that raised it.
+
+        ``length - 32 - captured_len - padding`` goes negative, and
+        :func:`bounded_area`'s own ``nominal <= available`` test was *true* for a
+        negative nominal, so it returned it unclamped.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import EnhancedPacketBlock
+
+        body = (struct.pack('<IIIII', 0, 0, 0, 0xFFFFFF, 0xFFFFFF) + bytes(8))
+        raw = block_body(body)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            schema = EnhancedPacketBlock.unpack(raw, len(raw), {'byteorder': 'little'})
+
+        self.assertEqual(schema.captured_len, 0xFFFFFF)
+        self.assertEqual(len(schema.options), 0)
+        self.assertEqual(schema.padding_opts, b'')
+        self.assertTrue(caught)
+
+    def test_a_block_total_length_below_its_own_floor_does_not_reach_struct(self) -> None:
+        """The other shape: a declared length under the block's fixed fields.
+
+        Each of these blocks sizes its option area or body as the declared length
+        less a different offset, so each subtraction has to be floored in its own
+        right -- 28 octets for a Section Header Block, 20 for an Interface
+        Description Block, 12 for a Name Resolution Block and a systemd journal
+        export, 24 for Interface Statistics, 16 for a Custom Block.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import (CustomBlock,
+                                                          InterfaceDescriptionBlock,
+                                                          InterfaceStatisticsBlock,
+                                                          NameResolutionBlock,
+                                                          SectionHeaderBlock,
+                                                          SystemdJournalExportBlock,
+                                                          UnknownBlock)
+
+        bodies = {
+            SectionHeaderBlock: struct.pack('<IHHq', 0x1A2B3C4D, 1, 0, -1),
+            InterfaceDescriptionBlock: struct.pack('<HHI', 1, 0, 0),
+            NameResolutionBlock: struct.pack('<HH', 0, 0),
+            InterfaceStatisticsBlock: struct.pack('<III', 0, 0, 0),
+            SystemdJournalExportBlock: b'',
+            CustomBlock: struct.pack('<I', 0),
+            UnknownBlock: b'',
+        }
+
+        for schema_cls, body in bodies.items():
+            with self.subTest(block=schema_cls.__name__):
+                # the trailing length pair lies: it declares four octets, which
+                # is under every floor above
+                raw = struct.pack('<I', 4) + body + struct.pack('<I', 4)
+
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    schema = schema_cls.unpack(raw, len(raw), {'byteorder': 'little'})
+
+                self.assertEqual(schema.length, 4)
+                self.assertTrue(caught)
+
+    @staticmethod
+    def _journal_block(entry: bytes) -> bytes:
+        """A systemd Journal Export Block carrying ``entry``, padded to 32 bits."""
+        body = entry + bytes(-len(entry) % 4)
+        length = 12 + len(body)
+        return struct.pack('<II', 0x00000009, length) + body + struct.pack('<I', length)
+
+    def _extract_journal(self, entry: bytes):
+        """Extract a one-block journal capture, returning its entries and warnings."""
+        from pcapkit.foundation.extraction import Extractor
+
+        shb = struct.pack('<IIIHHqI', 0x0A0D0D0A, 28, 0x1A2B3C4D, 1, 0, -1, 28)
+        idb = struct.pack('<IIHHII', 0x00000001, 20, 1, 0, 0, 20)
+        blob = shb + idb + self._journal_block(entry)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            extractor = Extractor(NamedBuffer(blob), nofile=True, store=True)
+        journals = extractor.engine._ctx_list[0].journals
+        self.assertEqual(len(journals), 1)
+        return journals[0].data, caught
+
+    def test_an_ordinary_journal_entry_is_not_broken_by_its_own_padding(self) -> None:
+        """A 32-bit-unaligned journal entry used to raise a bare ``struct.error``.
+
+        The block body is padded to a 32-bit boundary with NULs, and
+        ``bytes.strip()`` takes only ASCII whitespace -- so the padding survived
+        it and was read as the *name* of a binary field, whose 64-bit length
+        prefix then had nothing behind it. ``MESSAGE=hello\\n`` is 14 octets, so
+        two NULs follow it, and that is as ordinary as this block gets: the
+        failure was not confined to malformed input.
+
+        """
+        entries, caught = self._extract_journal(b'MESSAGE=hello\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['MESSAGE'], 'hello')
+        # and silently: nothing about a well-formed entry is worth warning over
+        self.assertEqual([entry.category.__name__ for entry in caught
+                          if entry.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_journal_binary_field_cut_short_of_its_length_is_reported(self) -> None:
+        """The reviewer's case: fewer than eight octets for a 64-bit length.
+
+        ``struct.unpack('<Q', ...)`` refuses a short buffer with a bare
+        :exc:`struct.error`, which is neither in
+        :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError` -- so it cost
+        the whole extraction rather than this one entry. Swept over every
+        shortfall, since the boundary is the whole point.
+
+        """
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        for supplied in range(8):
+            with self.subTest(prefix_octets=supplied):
+                entries, caught = self._extract_journal(b'MESSAGE\n' + bytes(supplied))
+
+                schema_warnings = [entry for entry in caught
+                                   if entry.category is SchemaWarning]
+                if supplied + (-(8 + supplied) % 4) >= 8:
+                    # the block's own padding made the prefix up to eight
+                    self.assertEqual(schema_warnings, [])
+                    continue
+                self.assertEqual(len(schema_warnings), 1)
+                self.assertIn('of the 8 it needs', str(schema_warnings[0].message))
+                self.assertEqual(len(entries), 1)
+                self.assertEqual(len(entries[0]), 0)
+
+    def test_a_well_formed_journal_binary_field_still_reads_its_value(self) -> None:
+        """The guard is a shortfall check, not a refusal of binary fields."""
+        entries, caught = self._extract_journal(
+            b'MESSAGE\n' + struct.pack('<Q', 3) + b'abc\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['MESSAGE'], b'abc')
+        self.assertEqual([entry for entry in caught
+                          if entry.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped(self) -> None:
+        """A 64-bit length was either fatal or invisible, by magnitude alone.
+
+        At ``2**63`` and above :meth:`io.BytesIO.read` refuses the length outright
+        with a bare :exc:`OverflowError`; below that it silently returned whatever
+        happened to be there. Both are the same malformed prefix, so both get the
+        same answer: clamp to the octets the entry has left, and say so.
+
+        """
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        # ``b'BINARY\n' + 8 octets + b'abc\n'`` is 19 octets, so the block pads it
+        # with one NUL and five octets follow the length prefix
+        for declared in (6, 1 << 10, 1 << 30, 1 << 62, 1 << 63, 2 ** 64 - 1):
+            with self.subTest(declared=declared, expect='clamped'):
+                entries, caught = self._extract_journal(
+                    b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
+
+                schema_warnings = [entry for entry in caught
+                                   if entry.category is SchemaWarning]
+                self.assertEqual(len(schema_warnings), 1)
+                self.assertIn(f'declares {declared} octet(s) with 5 left',
+                              str(schema_warnings[0].message))
+                self.assertEqual(entries[0]['BINARY'], b'abc\n\x00')
+
+        # and a length the entry can satisfy is read exactly, and silently --
+        # the clamp reaches only what the entry holds, padding included, so it
+        # must not fire on a field that fits
+        for declared in range(6):
+            with self.subTest(declared=declared, expect='untouched'):
+                entries, caught = self._extract_journal(
+                    b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
+
+                self.assertEqual([entry for entry in caught
+                                  if entry.category is SchemaWarning], [])
+                self.assertEqual(entries[0]['BINARY'], b'abc\n\x00'[:declared])
+
+    def test_a_journal_field_that_is_not_utf8_is_replaced_and_reported(self) -> None:
+        """One bad octet in one field used to cost the whole extraction.
+
+        :exc:`UnicodeDecodeError` is a :exc:`ValueError`, so it is neither in
+        :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`. Asserted for
+        all three sites that decode -- a field name, a key and a value.
+
+        """
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        cases = {
+            'key': (b'ME\xffSAGE=hello\n', 'ME�SAGE', 'hello'),
+            'value': (b'MESSAGE=hel\xfflo\n', 'MESSAGE', 'hel�lo'),
+            'binary field name': (b'BIN\xffARY\n' + struct.pack('<Q', 3) + b'abc\n',
+                                  'BIN�ARY', b'abc'),
+        }
+
+        for site, (entry, key, value) in cases.items():
+            with self.subTest(site=site):
+                entries, caught = self._extract_journal(entry)
+
+                schema_warnings = [item for item in caught
+                                   if item.category is SchemaWarning]
+                self.assertEqual(len(schema_warnings), 1)
+                self.assertIn('is not UTF-8', str(schema_warnings[0].message))
+                self.assertEqual(entries[0][key], value)
+
+    def test_the_captured_len_vector_parses_under_a_memory_cap(self) -> None:
+        """#594's amplification band, on the ``captured_len`` vector.
+
+        The issue's own measurement -- 200 Enhanced Packet Blocks declaring
+        ``captured_len`` ``0xFFFFFF`` over eight real octets, in 8,048 octets. Run
+        in a subprocess under :data:`resource.RLIMIT_AS`, because the failure mode
+        this area is guarded against is synthesising padding without bound: an
+        in-process regression would take the test host with it rather than
+        failing, and a cap that the parent cannot lift is the only way to tell
+        "parsed" from "did not run out of memory yet".
+
+        """
+        if importlib.util.find_spec('resource') is None:  # pragma: no cover
+            self.skipTest('the resource module is unavailable on this platform')
+
+        source = textwrap.dedent('''
+            import io, json, resource, struct, sys, warnings
+            sys.path.insert(0, sys.argv[1])
+            resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 ** 2,) * 2)
+
+            import pcapkit
+            from pcapkit.foundation.extraction import Extractor
+
+            # the tree under test is the one this was pointed at, not an
+            # installed copy: asserted here rather than compared across the
+            # process boundary, where the two can differ only in path form
+            assert pcapkit.__file__.startswith(sys.argv[1]), pcapkit.__file__
+
+            shb = struct.pack('<IIIHHqI', 0x0A0D0D0A, 28, 0x1A2B3C4D, 1, 0, -1, 28)
+            idb = struct.pack('<IIHHII', 0x00000001, 20, 1, 0, 0, 20)
+            epb = (struct.pack('<IIIIIII', 0x00000006, 40, 0, 0, 0, 0xFFFFFF, 0xFFFFFF)
+                   + bytes(8) + struct.pack('<I', 40))
+            blob = shb + idb + epb * 200
+
+            class NamedBuffer(io.BufferedReader):
+                name = 'crafted.pcapng'
+
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                extractor = Extractor(NamedBuffer(io.BytesIO(blob)), nofile=True, store=True)
+
+            print(json.dumps({'file': pcapkit.__file__, 'input': len(blob),
+                              'frames': len(extractor.frame)}))
+        ''')
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            script = os.path.join(tempdir, 'capped.py')
+            with open(script, 'w', encoding='utf-8') as handle:
+                handle.write(source)
+            status = os.path.join(tempdir, 'status')
+            output = os.path.join(tempdir, 'stdout')
+
+            with open(output, 'w', encoding='utf-8') as stdout:
+                completed = subprocess.run(  # nosec: B603
+                    (sys.executable, script, str(ROOT)),
+                    stdout=stdout, stderr=subprocess.DEVNULL, check=False, timeout=300,
+                )
+            # the exit code read back from a file rather than taken from a
+            # pipeline, where a wrapper's own status can be reported instead
+            with open(status, 'w', encoding='utf-8') as handle:
+                handle.write(str(completed.returncode))
+            with open(status, encoding='utf-8') as handle:
+                returncode = int(handle.read())
+            with open(output, encoding='utf-8') as handle:
+                payload = handle.read()
+
+        self.assertEqual(returncode, 0, payload)
+        result = json.loads(payload)
+        # the subprocess measured a tree under this repository, not an installed
+        # copy of pcapkit somewhere else
+        self.assertTrue(result['file'].startswith(str(ROOT)), result['file'])
+        self.assertEqual(result['input'], 8048)
+        self.assertEqual(result['frames'], 200)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
+    """Registering an option schema over another must say so.
+
+    ``Option.register`` wrote into its namespace dictionaries with no check at
+    all, so a second registration for the same code replaced the first in
+    silence and every later lookup got the replacement. #681 added the same guard
+    to ``register_protocol``; this is the sibling on the schema side.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _snapshot(self):
+        """Restore every namespace dictionary on teardown."""
+        from pcapkit.protocols.schema.misc.pcapng import Option
+
+        saved = {key: value.copy() for key, value in Option.registry.items()}
+        names = set(Option.registry)
+
+        def restore() -> 'None':
+            for key, value in saved.items():
+                Option.registry[key].clear()
+                Option.registry[key].update(value)
+            for key in set(Option.registry) - names:
+                del Option.registry[key]
+
+        self.addCleanup(restore)
+        return Option
+
+    def test_a_first_registration_is_silent(self) -> None:
+        """The guard may not fire on the path that builds the registry.
+
+        Every option schema in the module registers itself through
+        ``__init_subclass__``, so a guard that warns on a code nobody registered
+        would warn once per option at import -- and the filter that invites is
+        what would hide a real collision. Measured: importing
+        :mod:`pcapkit` emits no
+        :exc:`~pcapkit.utilities.warnings.RegistryWarning`.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        unregistered = OptionType.get(0x00FA, namespace='if')
+        self.assertNotIn(unregistered, option.registry['if'])
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(unregistered, UnknownOption, ns='if')
+
+        self.assertEqual([entry for entry in caught
+                          if entry.category is RegistryWarning], [])
+        self.assertIs(option.registry['if'][unregistered], UnknownOption)
+
+    def test_re_registering_an_option_code_reports_the_collision(self) -> None:
+        """Presence alone is the test, as it is for the seven sibling registrars.
+
+        #681 tested presence *and a different class* because it keys on a name
+        derived from the class, which the wrapper registrars reach twice with the
+        same class. This keys on a caller-supplied code that
+        ``__init_subclass__`` passes exactly once per subclass, so a second
+        arrival is a second deliberate call -- and reporting it is what the
+        ``ProtocolBase``, ``Frame``, ``Internet``, ``PCAPNG``, ``SCTP``,
+        ``Transport`` and ``Link`` registrars already do.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        incumbent = option.registry['if'][OptionType.if_name]
+        self.assertIsNot(incumbent, UnknownOption)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(OptionType.if_name, UnknownOption)
+
+        registry_warnings = [entry for entry in caught
+                             if entry.category is RegistryWarning]
+        self.assertEqual(len(registry_warnings), 1)
+        self.assertIn("namespace(s) 'if'", str(registry_warnings[0].message))
+        self.assertIs(option.registry['if'][OptionType.if_name], UnknownOption)
+
+    def test_an_opt_namespace_collision_names_every_namespace_it_displaced(self) -> None:
+        """``ns='opt'`` is one registration, so it gets one warning.
+
+        The ``opt`` namespace fans a single registration out across every
+        namespace there is, and a warning per namespace would report one mistake
+        seven times. Naming them in one message says the same thing and stays
+        greppable.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        namespaces = list(option.registry)
+        self.assertGreater(len(namespaces), 1)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(OptionType.opt_comment, UnknownOption, ns='opt')
+
+        registry_warnings = [entry for entry in caught
+                             if entry.category is RegistryWarning]
+        self.assertEqual(len(registry_warnings), 1)
+        for namespace in namespaces:
+            self.assertIn(repr(namespace), str(registry_warnings[0].message))
+        for namespace in namespaces:
+            self.assertIs(option.registry[namespace][OptionType.opt_comment],
+                          UnknownOption)
+
+    def test_a_namespace_created_by_the_registration_is_not_a_collision(self) -> None:
+        """A fresh namespace starts as a copy of ``opt``'s defaults.
+
+        Those defaults are not prior registrations, and putting an ``opt`` code
+        into a new namespace is exactly what the copy is for -- so warning there
+        would report the supported path as a mistake.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        self.assertNotIn('brand_new', option.registry)
+        self.assertIn(OptionType.opt_comment, option.registry['opt'])
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(OptionType.opt_comment, UnknownOption, ns='brand_new')
+
+        self.assertEqual([entry for entry in caught
+                          if entry.category is RegistryWarning], [])
+        self.assertIs(option.registry['brand_new'][OptionType.opt_comment],
+                      UnknownOption)
+
+    def test_the_collision_check_does_not_insert_a_default(self) -> None:
+        """Membership with ``in``, never by subscripting.
+
+        Only the outer registry is the miss-safe ``_EnumRegistry``; the
+        per-namespace ones are plain :class:`collections.defaultdict`\\ s, so
+        reading ``Option.registry[ns][code]`` to see whether a code is there
+        *inserts* ``UnknownOption`` for it -- the schema-layer form of the
+        #421/#425/#428 defect.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import UnknownOption
+
+        option = self._snapshot()
+        before = {key: len(value) for key, value in option.registry.items()}
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            option.register(OptionType.if_name, UnknownOption)
+
+        after = {key: len(value) for key, value in option.registry.items()}
+        self.assertEqual(after, before)
 
 
 if __name__ == '__main__':

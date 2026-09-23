@@ -176,7 +176,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
-from pcapkit.utilities.exceptions import (FormatError, ProtocolError, RegistryError,
+from pcapkit.utilities.exceptions import (FormatError, ProtocolError, RegistryError, StreamEOFError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
@@ -985,6 +985,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if cast('Optional[Schema_PCAPNG]', self.__header__) is None:
             packet = kwargs.get('__packet__', {})  # packet data
 
+            # NOTE: reached on the parsing path only, and not by a flag: the
+            # construction path sets ``__header__`` from ``make`` while packing
+            # its own buffer, so the branch above is already false by the time it
+            # gets here. An explicit ``_read`` guard would have been a branch
+            # that could never be taken.
+            self._check_block_floor(length)
+
             if self._ctx is not None:
                 self._byte = self._ctx.section.byteorder
                 packet['byteorder'] = self._byte
@@ -1064,6 +1071,29 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
             #: bytes: Raw block data.
             self._data = self._read_fileng(schema.block.length)
+
+            # NOTE: Block Total Length is cross-checked against its own trailing
+            # copy and never against the file, so on a capture cut short it runs
+            # past the real end -- and seeking past the end is legal and silent.
+            # The *next* block read then measures a negative remainder, since
+            # ``pcapkit.utilities.decorators.prepare`` derives it as the end of
+            # the stream less the current position, and a negative ``__length__``
+            # is what ``pcapng_block_selector`` hands to
+            # :class:`~pcapkit.corekit.fields.misc.SchemaField` for the bare
+            # ``ValueError: read length must be non-negative or -1`` of `#678
+            # <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__. That cost
+            # the whole extraction rather than the one truncated block, which is
+            # the `#431 <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__
+            # accommodation exactly inverted. ``_read_fileng`` already stopped at
+            # the end of the file, so the octets it returned are the authority on
+            # where the block really finishes.
+            read = len(self._data)
+            if read < schema.block.length:
+                warn(f'PCAP-NG: [Block {schema.type}] block length '
+                     f'{schema.block.length} exceeds the {read} octet(s) left in '
+                     f'the file; block truncated', ProtocolWarning,
+                     stacklevel=stacklevel())
+                seek_cur = min(seek_cur, _seek_set + read)
 
             # move backward to the beginning of next block
             self._file.seek(seek_cur, io.SEEK_SET)
@@ -1207,6 +1237,66 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _check_block_floor(self, length: 'Optional[int]') -> 'None':
+        """Reject a tail too short to hold any block at all.
+
+        Args:
+            length: Length of packet data, as the caller declared it, or
+                :obj:`None` to measure what is left in
+                :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`.
+
+        Raises:
+            StreamEOFError: If fewer than twelve octets are left to read.
+
+        A PCAP-NG block is twelve octets at its smallest -- Block Type, Block
+        Total Length and the trailing copy of it, over an empty body -- which is
+        what :meth:`__length_hint__` reports. A tail shorter than that is not a
+        block, so parsing one out of it can only invent fields from
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`'s
+        zero padding, and once the four octets of :attr:`PCAPNG.type
+        <pcapkit.protocols.schema.misc.pcapng.PCAPNG.type>` have been padded out
+        of nothing ``__length__`` is negative -- which
+        :func:`~pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector` hands
+        to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where
+        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of `#678
+        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+
+        Reporting the end of the stream instead is what keeps the `#431
+        <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation:
+        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an
+        :exc:`EOFError`, which :meth:`Extractor.record_frames
+        <pcapkit.foundation.extraction.Extractor.record_frames>` already catches
+        to stop with the frames read so far, so -- unlike a refusal inside
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`,
+        which has no catch point above it and would abort the whole extraction --
+        this costs no frame that was actually in the file. It is the same signal
+        :func:`~pcapkit.utilities.decorators.prepare` raises for a *derived*
+        remainder of exactly zero; only one, two or three stray octets fell
+        through it.
+
+        Note:
+            This runs on the parsing path only, since :meth:`unpack` reaches it
+            only when no schema has been built yet and the construction path
+            builds one from :meth:`make` while packing its own buffer. That is
+            what it should do: a constructed block short enough to trip this floor
+            is already reported by :meth:`read`'s own Block Total Length check,
+            which names the length and so says more than an end-of-stream would.
+
+            Measuring an undeclared length needs the stream to seek, and nothing
+            guards that here because :meth:`__post_init__` has already called
+            :meth:`~io.IOBase.tell` on it to record ``_seek_set``: a stream that
+            could not seek never reaches this method.
+
+        """
+        if length is None:
+            current = self._file.tell()
+            length = self._file.seek(0, io.SEEK_END) - current
+            self._file.seek(current, io.SEEK_SET)
+
+        if length < 12:
+            raise StreamEOFError(f'PCAP-NG: block truncated: {length} octet(s) left, '
+                                 'fewer than the 12 a block needs', quiet=True)
 
     def _get_payload(self) -> 'bytes':
         """Get payload of :attr:`self.__header__ <pcapkit.protocols.protocol.Protocol.__header__>`.

@@ -29,7 +29,7 @@ from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
-from pcapkit.utilities.warnings import ProtocolWarning, SchemaWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, SchemaWarning, warn
 
 __all__ = [
     'PCAPNG',
@@ -207,6 +207,89 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
     packet['byteorder'] = field._byteorder
 
 
+def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
+    """Floor a computed field length at zero.
+
+    Args:
+        length: Callback computing a field's length from the framing a block,
+            option or record declares.
+
+    Returns:
+        A callback returning that length, never below zero.
+
+    Every span in this module is a subtraction -- a block's own Block Total
+    Length less its fixed fields, an option's declared length less the part of
+    itself it describes, an option area's leftover -- and every operand of those
+    subtractions is a wire field that a malformed or truncated capture is free to
+    set to anything. Nothing made the difference non-negative, and the field
+    layer does not do it either: :meth:`_TextField.__call__
+    <pcapkit.corekit.fields.strings._TextField.__call__>` builds its
+    :mod:`struct` template as ``f'{length}s'`` unconditionally, so a negative
+    length becomes the format ``'-8s'`` and :func:`struct.calcsize` raises a bare
+    :exc:`struct.error`; a negative :class:`~pcapkit.corekit.fields.misc.SchemaField`
+    length reaches :meth:`io.RawIOBase.read` and raises a bare :exc:`ValueError`.
+    Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell
+    either from a bug in its own code, and neither is an :exc:`EOFError`, so
+    neither is caught by the frame loop -- one malformed block therefore cost the
+    whole extraction. See `#678
+    <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+
+    Two shapes reach here. A Block Total Length below the block's own fixed-field
+    floor -- 28 octets for a Section Header Block, 20 for an Interface
+    Description Block, 16 for a Custom Block -- makes the area negative directly.
+    And ``__option_padding__``, which :meth:`OptionField.unpack
+    <pcapkit.corekit.fields.collections.OptionField.unpack>` reports as the part
+    of a declared area its options did not consume, goes negative when they
+    consumed *more* than the area held: it subtracts each parsed option's real
+    size from the area without checking that it fits. Both mean the same thing
+    for a read -- there are no octets here -- and zero says that, where a
+    negative says something :mod:`struct` cannot express.
+
+    Clamping rather than refusing is the choice :func:`bounded_option` and
+    :func:`bounded_area` already made, for the reason their docstrings give: a
+    block read has no catch point above :meth:`FieldBase.unpack
+    <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
+    whole extraction rather than one block, which is what the `#431
+    <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation exists
+    to prevent. The end of the file is the one case that is *not* a clamp, since
+    there no block is being read at all -- see :meth:`PCAPNG._check_block_floor
+    <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>`, which reports it
+    as the :exc:`~pcapkit.utilities.exceptions.StreamEOFError` the frame loop
+    catches.
+
+    Note:
+        Unlike :func:`bounded_option` this needs no ``__length__`` opt-out for
+        the packing path, because it floors a *difference* rather than clamping
+        against the remaining area: a negative difference is not a legitimate
+        thing to pack either -- ``struct.pack('-8s', ...)`` raises exactly as
+        ``calcsize`` does -- where clamping against the remainder would have
+        shortened a perfectly good option.
+
+        That distinction is what keeps the three decryption-secrets payloads --
+        :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and
+        :attr:`WireGuardKeyLog.data` -- out of this. They read ``__length__``
+        *whole* rather than subtracting from it, and ``Schema.pack`` leaves it at
+        ``-1`` for "unknown", so flooring them packs nothing at all. Measured: it
+        emptied both secrets payloads, and the two ``EXPECTED_FAILURES`` entries
+        recording their round-trip mismatch then came back ``OK``, since an empty
+        payload compares equal to an empty payload. On the parsing path their
+        ``__length__`` is the length the enclosing
+        :class:`~pcapkit.corekit.fields.misc.SchemaField` declared from a 32-bit
+        ``secrets_length``, which cannot be negative, so there is nothing there to
+        floor.
+
+    """
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        nominal = length(pkt)
+        if nominal >= 0:
+            return nominal
+
+        warn(f'PCAP-NG: computed field length is negative ({nominal}); reading 0',
+             SchemaWarning, stacklevel=stacklevel())
+        return 0
+    return callback
+
+
 def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
     """Clamp an option or record payload to the octets its area still declares.
 
@@ -270,9 +353,18 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
         silently. A clamp applied while packing would therefore shorten a
         perfectly good option rather than reject it.
 
+        The nominal length still goes through :func:`nonnegative` first, on both
+        paths, since an option declaring less payload than the part of itself it
+        describes -- ``length`` below the four octets of an ``epb_hash`` or an
+        ``ns_dnsIP4addr`` record's own fields -- makes the subtraction negative
+        before there is anything to clamp it against, and a negative is not an
+        amount to read or to pack.
+
     """
+    floored = nonnegative(length)
+
     def callback(pkt: 'dict[str, Any]') -> 'int':
-        nominal = length(pkt)
+        nominal = floored(pkt)
 
         remaining = pkt.get('__length__')
         if not isinstance(remaining, int) or remaining < 0 or nominal <= remaining:
@@ -317,15 +409,26 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
     Note:
         The five non-packet blocks' option areas -- Section Header, Interface
         Description, Name Resolution, Interface Statistics and Decryption
-        Secrets -- are deliberately left unclamped here, since each computes its
-        span with a different offset and the equality above has to be
-        re-established per block rather than assumed. The general fix is to stop
-        a declared length reaching a read at all, which is `#678
-        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+        Secrets -- are deliberately left unclamped *against the block* here,
+        since each computes its span with a different offset and the equality
+        above has to be re-established per block rather than assumed. They do go
+        through :func:`nonnegative`, which is the part of `#678
+        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__ that stops a
+        declared length reaching a read at all; the per-block equality is still
+        open.
+
+        The nominal span goes through :func:`nonnegative` first here too. That
+        closes a hole in this function's own arithmetic: a ``captured_len`` past
+        the end of the block makes the span negative, and ``nominal <= available``
+        below is then *true*, so the negative was returned unclamped and reached
+        a :mod:`struct` template as ``f'{-N}s'``. Measured on 200 Enhanced Packet
+        Blocks declaring ``captured_len`` ``0xFFFFFF`` in 8,048 octets.
 
     """
+    floored = nonnegative(length)
+
     def callback(pkt: 'dict[str, Any]') -> 'int':
-        nominal = length(pkt)
+        nominal = floored(pkt)
 
         remaining = pkt.get('__length__')
         if not isinstance(remaining, int):
@@ -359,10 +462,27 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         * :class:`pcapkit.const.pcapng.block_type.BlockType`
         * :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`
 
+    Note:
+        ``__length__`` is what is left of the *stream*, not what the block
+        declares, and it is decremented by four for :attr:`PCAPNG.type` whether
+        or not those four octets were there to read --
+        :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+        zero-pads a short read rather than refusing it. A tail of one, two or
+        three octets therefore arrived here negative and
+        :meth:`io.RawIOBase.read` raised a bare ``ValueError``, which is `#678
+        <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__. The floor is a
+        backstop: :meth:`PCAPNG._check_block_floor
+        <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>` reports that
+        tail as end-of-stream before it gets here, and on the packing path
+        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` seeds
+        ``__length__`` as ``-1`` for "unknown", which
+        :meth:`SchemaField.pack <pcapkit.corekit.fields.misc.SchemaField.pack>`
+        does not read at all.
+
     """
     block_type = packet['type']  # type: Enum_BlockType
     schema = BlockType.registry[block_type]
-    return SchemaField(length=packet['__length__'], schema=schema)
+    return SchemaField(length=max(packet['__length__'], 0), schema=schema)
 
 
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -506,7 +626,7 @@ class UnknownBlock(BlockType):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Block body (including padding).
-    body: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 12)
+    body: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 12))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -594,18 +714,60 @@ class Option(EnumSchema[Enum_OptionType]):
             ns: Namespace of option type enumeration. If not given, the value
                 will be inferred from the option type code.
 
+        A registration that displaces another schema for the same code is
+        reported as a :exc:`~pcapkit.utilities.warnings.RegistryWarning`, as
+        every other registry in the package does -- the lookup that follows
+        cannot tell a deliberate replacement from an accidental one, so an
+        unreported overwrite is a parser silently swapped out for another. See
+        `#681 <https://github.com/JarryShaw/PyPCAPKit/issues/681>`__ for the same
+        guard on ``register_protocol``.
+
+        Presence alone is the test here, rather than #681's presence *and a
+        different class*: that one keys on a name **derived** from the class, so
+        the wrapper registrars reach it twice with the same class on a supported
+        path and warning there would be noise. This keys on a caller-supplied
+        ``code``, and :meth:`__init_subclass__` passes each code exactly once per
+        subclass, so a second arrival is a second deliberate call -- which is what
+        the seven sibling :meth:`register` methods on
+        :class:`~pcapkit.protocols.protocol.ProtocolBase` and friends already
+        assume.
+
+        Note:
+            ``ns='opt'`` fans one registration out across every namespace, so the
+            collision is reported once for the registration and names the
+            namespaces it displaced something in, rather than once per namespace.
+
+            A namespace created by this call starts as a copy of ``opt``'s
+            defaults, so nothing in it is a prior registration and it is exempt:
+            registering an ``opt``-namespace code into a brand-new namespace is
+            exactly what that copy is for.
+
+            Membership is tested with ``in``, never by subscripting. The
+            per-namespace registries are :class:`collections.defaultdict`\\ s --
+            only the outer one is the miss-safe
+            :class:`~pcapkit.protocols.schema.schema._EnumRegistry` -- so reading
+            ``Option.registry[key][code]`` to see whether it is there would
+            *insert* :class:`UnknownOption` for a code nobody registered.
+
         """
         if ns is None:
             ns = code.name.split('_')[0]
 
-        if ns == 'opt':
-            for key in Option.registry:
-                Option.registry[key][code] = cls
-        elif ns in Option.registry:
-            Option.registry[ns][code] = cls
-        else:
+        fresh = ns != 'opt' and ns not in Option.registry
+        if fresh:
             Option.registry[ns] = Option.registry['opt'].copy()
-            Option.registry[ns][code] = cls
+
+        targets = list(Option.registry) if ns == 'opt' else [ns]
+
+        if not fresh:
+            clash = [key for key in targets if code in Option.registry[key]]
+            if clash:
+                warn(f'PCAP-NG: [Option {code}] option already registered in '
+                     f'namespace(s) {", ".join(repr(key) for key in clash)}, '
+                     f'overwriting with {cls!r}', RegistryWarning, stacklevel=stacklevel())
+
+        for key in targets:
+            Option.registry[key][code] = cls
 
     if TYPE_CHECKING:
         #: Option type.
@@ -695,14 +857,15 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
     section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFF_FFFF_FFFF_FFFF)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 28,
+        length=nonnegative(lambda pkt: pkt['length'] - 28),
         base_schema=_OPT_Option,
         type_name='type',
         registry=Option.registry['opt'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=shb_byteorder_callback)
 
@@ -1018,14 +1181,15 @@ class InterfaceDescriptionBlock(BlockType, code=Enum_BlockType.Interface_Descrip
     snaplen: 'int' = UInt32Field(default=0, callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 20,
+        length=nonnegative(lambda pkt: pkt['length'] - 20),
         base_schema=_IF_Option,
         type_name='type',
         registry=Option.registry['if'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1173,7 +1337,8 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding_opts: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1354,7 +1519,7 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Name resolution records.
     records: 'list[NameResolutionRecord]' = OptionField(
-        length=lambda pkt: pkt['length'] - 12,
+        length=nonnegative(lambda pkt: pkt['length'] - 12),
         base_schema=NameResolutionRecord,
         type_name='type',
         registry=NameResolutionRecord.registry,
@@ -1362,14 +1527,15 @@ class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     )
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt.get('__option_padding__', 0),  # key from OptionField
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)),  # key from OptionField
         base_schema=_NS_Option,
         type_name='type',
         registry=Option.registry['ns'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1513,14 +1679,15 @@ class InterfaceStatisticsBlock(BlockType, code=Enum_BlockType.Interface_Statisti
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 24,
+        length=nonnegative(lambda pkt: pkt['length'] - 24),
         base_schema=_ISB_Option,
         type_name='type',
         registry=Option.registry['isb'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1537,7 +1704,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Journal entry.
-    entry: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 12)
+    entry: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 12))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1550,6 +1717,47 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
         Returns:
             Revised schema.
 
+        Note:
+            Two ways the entry data runs out mid-field are reported rather than
+            raised, for the reason :func:`nonnegative` gives: a bare
+            :exc:`struct.error` is neither one of
+            :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`, so it
+            aborted the whole extraction rather than this one entry. See `#678
+            <https://github.com/JarryShaw/PyPCAPKit/issues/678>`__.
+
+            A line of nothing but NUL octets is the block's own 32-bit padding
+            and ends the entry. ``bytes.strip()`` takes only ASCII whitespace,
+            so those octets survived it and were read as the *name* of a binary
+            field -- which made every journal entry whose length is not a
+            multiple of four raise, valid or not, since the padding that follows
+            it has no 64-bit length prefix behind it to unpack. Measured on a
+            14-octet ``MESSAGE=hello\\n`` entry, which is as ordinary as this
+            block gets.
+
+            A name line whose 64-bit length prefix is itself cut short ends the
+            entry too. There is nothing to read past the end of the entry, so
+            stopping at it is what keeps the truncated block parsing.
+
+            A binary field's length is the widest declared length in the format,
+            and nothing bounded it against the entry holding it: at ``2**63`` and
+            above :meth:`io.BytesIO.read` refuses it outright with a bare
+            :exc:`OverflowError` (``cannot fit 'int' into an index-sized
+            integer``), and below that it silently returned whatever was there --
+            so the same malformed prefix was either fatal or invisible depending
+            only on its magnitude. It is clamped to the octets the entry has left
+            and reported, which is :func:`nonnegative`'s rule at the other end of
+            the same range.
+
+            Field names, keys and values are decoded with ``errors='replace'``
+            rather than strictly. A non-UTF-8 octet in any of the three raised a
+            bare :exc:`UnicodeDecodeError` -- a :exc:`ValueError`, so foreign on
+            both counts, and fatal to the whole extraction over one bad octet in
+            one field. ``'replace'`` is the option this module's own
+            :class:`~pcapkit.corekit.fields.strings.StringField` already takes for
+            the same problem, and a value that is not text is a value the writer
+            should have emitted as a *binary* field, so the entry is malformed
+            however it is read.
+
         """
         self = cast('Self', super().post_process(packet))
 
@@ -1560,21 +1768,58 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             entry_data = io.BytesIO(entry_buffer)
             while True:
                 line = entry_data.readline().strip()
-                if not line:
+                if not line or not line.strip(b'\x00'):
                     break
 
                 line_split = line.split(b'=', maxsplit=1)
                 if len(line_split) == 2:
                     key, value = line_split
-                    entry.add(key.decode('utf-8'), value.decode('utf-8'))
+                    entry.add(self._decode_text(key), self._decode_text(value))
                 else:
-                    length = struct.unpack('<Q', entry_data.read(8))[0]  # type: int
-                    entry.add(line.decode('utf-8'), entry_data.read(length))
+                    prefix = entry_data.read(8)
+                    if len(prefix) < 8:
+                        warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                             f'declares its length in {len(prefix)} octet(s) of the 8 it '
+                             f'needs; ending the entry', SchemaWarning,
+                             stacklevel=stacklevel())
+                        break
+
+                    length = struct.unpack('<Q', prefix)[0]  # type: int
+                    available = len(entry_buffer) - entry_data.tell()
+                    if length > available:
+                        warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
+                             f'declares {length} octet(s) with {available} left in its '
+                             f'entry; reading {available}', SchemaWarning,
+                             stacklevel=stacklevel())
+                        length = available
+
+                    entry.add(self._decode_text(line), entry_data.read(length))
                     entry_data.read()  # Skip trailing newline.
 
             data.append(entry)
         self.data = data
         return self
+
+    @staticmethod
+    def _decode_text(octets: 'bytes') -> 'str':
+        """Decode a journal field name, key or value, reporting what did not decode.
+
+        Args:
+            octets: Field name, key or value, as it came off the wire.
+
+        Returns:
+            The decoded text, with any octet that is not UTF-8 replaced.
+
+        See :meth:`post_process` for why this replaces rather than raising.
+
+        """
+        try:
+            return octets.decode('utf-8')
+        except UnicodeDecodeError as error:
+            warn(f'PCAP-NG: [systemd Journal Export] {octets!r} is not UTF-8 '
+                 f'({error.reason} at position {error.start}); replacing what did not '
+                 f'decode', SchemaWarning, stacklevel=stacklevel())
+            return octets.decode('utf-8', errors='replace')
 
     if TYPE_CHECKING:
         #: Journal entry (decoded).
@@ -1742,14 +1987,16 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
     options: 'list[Option]' = OptionField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
-        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - (4 - pkt['secrets_length'] % 4) % 4,
+        length=nonnegative(lambda pkt: pkt['length'] - 20 - pkt['secrets_length']
+                           - (4 - pkt['secrets_length'] % 4) % 4),
         base_schema=_DSB_Option,
         type_name='type',
         registry=Option.registry['dsb'],
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding_opts: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1778,7 +2025,7 @@ class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_ca
     #: Private enterprise number.
     pen: 'int' = UInt32Field(callback=byteorder_callback)
     #: Custom data (incl. padding and options).
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 16)
+    data: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - 16))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1871,7 +2118,8 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
         eool=Enum_OptionType.opt_endofopt,
     )
     #: Padding, sized from the ``__option_padding__`` key that OptionField generates.
-    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    padding_opts: 'bytes' = PaddingField(
+        length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
