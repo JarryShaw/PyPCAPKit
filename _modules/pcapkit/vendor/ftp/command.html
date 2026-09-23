@@ -534,6 +534,8 @@
 <span class="s1">            value: Value to get enum item.</span>
 
 <span class="s1">        """</span>
+<span class="s1">        if not isinstance(value, str):</span>
+<span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
 <span class="s1">        return extend_enum(cls, value.upper(), value)</span>
 
 
@@ -548,6 +550,18 @@
 <span class="s1">    P = auto()</span>
 <span class="s1">    #: Service execution.</span>
 <span class="s1">    S = auto()</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _missing_(cls, value: 'int') -&gt; 'CommandType':</span>
+<span class="s1">        """Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        if not (isinstance(value, int) and 0 &lt;= value &lt;= 0x07):</span>
+<span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
+<span class="s1">        return super()._missing_(value)</span>
 
 
 <span class="s1">class ConformanceRequirement(IntEnum):</span>
@@ -618,6 +632,8 @@
 <span class="s1">                the canonical upper-case member names.</span>
 
 <span class="s1">        """</span>
+<span class="s1">        if not isinstance(value, str):</span>
+<span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
 <span class="s1">        name = value.upper()</span>
 <span class="s1">        if name in cls._member_map_:</span>
 <span class="s1">            return cls._member_map_[name]  # type: ignore[return-value]</span>

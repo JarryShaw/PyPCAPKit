@@ -644,6 +644,7 @@
     <span class="n">TransportFormatListParameter</span> <span class="k">as</span> <span class="n">Schema_TransportFormatListParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedParameter</span> <span class="k">as</span> <span class="n">Schema_UnassignedParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">ViaRVSParameter</span> <span class="k">as</span> <span class="n">Schema_ViaRVSParameter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">parameter_total_len</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
@@ -1268,7 +1269,7 @@
         <span class="n">unassigned</span> <span class="o">=</span> <span class="n">Data_UnassignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">contents</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">unassigned</span></div>
@@ -1314,7 +1315,7 @@
         <span class="n">esp_info</span> <span class="o">=</span> <span class="n">Data_ESPInfoParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
             <span class="n">old_spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">old_spi</span><span class="p">,</span>
             <span class="n">new_spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">new_spi</span><span class="p">,</span>
@@ -1363,7 +1364,7 @@
         <span class="n">r1_counter</span> <span class="o">=</span> <span class="n">Data_R1CounterParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">counter</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">r1_counter</span></div>
@@ -1472,6 +1473,12 @@
         <span class="n">locator_set</span> <span class="o">=</span> <span class="n">Data_LocatorSetParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
+            <span class="c1"># NOTE: The one reported record length in this module left on the</span>
+            <span class="c1"># pre-#651 expression, to match the one padding site left on it --</span>
+            <span class="c1"># see ``LocatorSetParameter.padding`` in</span>
+            <span class="c1"># :mod:`pcapkit.protocols.schema.internet.hip` for why touching</span>
+            <span class="c1"># either alone makes a conformant parameter non-conformant. #679</span>
+            <span class="c1"># fixes both together, and this line moves with them.</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
             <span class="n">locator_set</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_locs</span><span class="p">),</span>
         <span class="p">)</span>
@@ -1523,7 +1530,7 @@
         <span class="n">puzzle</span> <span class="o">=</span> <span class="n">Data_PuzzleParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">_numk</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">_time</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">_opak</span><span class="p">,</span>
@@ -1597,7 +1604,7 @@
         <span class="n">solution</span> <span class="o">=</span> <span class="n">Data_SolutionParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">_numk</span><span class="p">,</span>
             <span class="n">reserved</span><span class="o">=</span><span class="n">_resv</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">_opak</span><span class="p">,</span>
@@ -1651,7 +1658,7 @@
         <span class="n">seq</span> <span class="o">=</span> <span class="n">Data_SEQParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">_upid</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">seq</span></div>
@@ -1695,7 +1702,7 @@
         <span class="n">ack</span> <span class="o">=</span> <span class="n">Data_ACKParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">update_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">update_id</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ack</span></div>
@@ -1733,7 +1740,7 @@
         <span class="n">dh_group_list</span> <span class="o">=</span> <span class="n">Data_DHGroupListParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">group_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">groups</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">dh_group_list</span></div>
@@ -1773,7 +1780,7 @@
         <span class="n">diffie_hellman</span> <span class="o">=</span> <span class="n">Data_DiffieHellmanParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">group_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">group</span><span class="p">,</span>
             <span class="n">pub_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pub_len</span><span class="p">,</span>
             <span class="n">pub_val</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">pub_val</span><span class="p">,</span>
@@ -1821,7 +1828,7 @@
         <span class="n">hip_transform</span> <span class="o">=</span> <span class="n">Data_HIPTransformParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">suite_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suites</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hip_transform</span></div>
@@ -1871,7 +1878,7 @@
         <span class="n">hip_cipher</span> <span class="o">=</span> <span class="n">Data_HIPCipherParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">cipher_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ciphers</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hip_cipher</span></div>
@@ -1917,7 +1924,7 @@
         <span class="n">nat_traversal_mode</span> <span class="o">=</span> <span class="n">Data_NATTraversalModeParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">mode_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">modes</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">nat_traversal_mode</span></div>
@@ -1959,7 +1966,7 @@
         <span class="n">transaction_pacing</span> <span class="o">=</span> <span class="n">Data_TransactionPacingParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">min_ta</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">min_ta</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">transaction_pacing</span></div>
@@ -2004,7 +2011,7 @@
         <span class="n">encrypted</span> <span class="o">=</span> <span class="n">Data_EncryptedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">cipher</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cipher</span><span class="p">,</span>
             <span class="n">iv</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s1">'iv'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -2069,7 +2076,7 @@
         <span class="n">host_id</span> <span class="o">=</span> <span class="n">Data_HostIDParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">hi_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hi_len</span><span class="p">,</span>
             <span class="n">di_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">di_data</span><span class="p">[</span><span class="s1">'type'</span><span class="p">],</span>
             <span class="n">di_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">di_data</span><span class="p">[</span><span class="s1">'len'</span><span class="p">],</span>
@@ -2112,7 +2119,7 @@
         <span class="n">hit_suite_list</span> <span class="o">=</span> <span class="n">Data_HITSuiteListParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">suite_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suites</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hit_suite_list</span></div>
@@ -2152,7 +2159,7 @@
         <span class="n">cert</span> <span class="o">=</span> <span class="n">Data_CertParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">cert_group</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cert_group</span><span class="p">,</span>
             <span class="n">cert_count</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cert_count</span><span class="p">,</span>
             <span class="n">cert_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cert_id</span><span class="p">,</span>
@@ -2197,7 +2204,7 @@
         <span class="n">notification</span> <span class="o">=</span> <span class="n">Data_NotificationParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">msg_type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">msg_type</span><span class="p">,</span>
             <span class="n">msg</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2234,7 +2241,7 @@
         <span class="n">echo_request_signed</span> <span class="o">=</span> <span class="n">Data_EchoRequestSignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_request_signed</span></div>
@@ -2274,7 +2281,7 @@
         <span class="n">reg_info</span> <span class="o">=</span> <span class="n">Data_RegInfoParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">Data_Lifetime</span><span class="p">(</span>
                 <span class="nb">min</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">min_lifetime</span><span class="p">),</span>
                 <span class="nb">max</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">max_lifetime</span><span class="p">),</span>
@@ -2318,7 +2325,7 @@
         <span class="n">reg_request</span> <span class="o">=</span> <span class="n">Data_RegRequestParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">reg_type</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">reg_request</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2359,7 +2366,7 @@
         <span class="n">reg_response</span> <span class="o">=</span> <span class="n">Data_RegResponseParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">reg_type</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">reg_response</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2400,7 +2407,7 @@
         <span class="n">reg_failed</span> <span class="o">=</span> <span class="n">Data_RegFailedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span><span class="p">),</span>
             <span class="n">reg_type</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">reg_failed</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2448,7 +2455,7 @@
         <span class="n">reg_from</span> <span class="o">=</span> <span class="n">Data_RegFromParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
@@ -2486,7 +2493,7 @@
         <span class="n">echo_response_signed</span> <span class="o">=</span> <span class="n">Data_EchoResponseSignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_response_signed</span></div>
@@ -2530,7 +2537,7 @@
         <span class="n">transport_format_list</span> <span class="o">=</span> <span class="n">Data_TransportFormatListParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">tf_type</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">formats</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">transport_format_list</span></div>
@@ -2576,7 +2583,7 @@
         <span class="n">esp_transform</span> <span class="o">=</span> <span class="n">Data_ESPTransformParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">suite_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">suites</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">esp_transform</span></div>
@@ -2618,7 +2625,7 @@
         <span class="n">seq_data</span> <span class="o">=</span> <span class="n">Data_SeqDataParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">seq_data</span></div>
@@ -2661,7 +2668,7 @@
         <span class="n">ack_data</span> <span class="o">=</span> <span class="n">Data_AckDataParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">ack</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ack</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ack_data</span></div>
@@ -2704,7 +2711,7 @@
         <span class="n">payload_mic</span> <span class="o">=</span> <span class="n">Data_PayloadMICParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>
             <span class="n">mic</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">mic</span><span class="p">,</span>
@@ -2744,7 +2751,7 @@
         <span class="n">transaction_id</span> <span class="o">=</span> <span class="n">Data_TransactionIDParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">transaction_id</span></div>
@@ -2782,7 +2789,7 @@
         <span class="n">overlay_id</span> <span class="o">=</span> <span class="n">Data_OverlayIDParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">overlay_id</span></div>
@@ -2837,7 +2844,7 @@
         <span class="n">route_dst</span> <span class="o">=</span> <span class="n">Data_RouteDstParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
                 <span class="n">symmetric</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'symmetric'</span><span class="p">]),</span>
                 <span class="n">must_follow</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'must_follow'</span><span class="p">]),</span>
@@ -2887,7 +2894,7 @@
         <span class="n">hip_transport_mode</span> <span class="o">=</span> <span class="n">Data_HIPTransportModeParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">mode_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">mode</span><span class="p">),</span>
         <span class="p">)</span>
@@ -2928,7 +2935,7 @@
         <span class="n">hip_mac</span> <span class="o">=</span> <span class="n">Data_HIPMACParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hip_mac</span></div>
@@ -2968,7 +2975,7 @@
         <span class="n">hip_mac_2</span> <span class="o">=</span> <span class="n">Data_HIPMAC2Parameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">hip_mac_2</span></div>
@@ -3006,7 +3013,7 @@
         <span class="n">hip_signature_2</span> <span class="o">=</span> <span class="n">Data_HIPSignature2Parameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">algorithm</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span>
             <span class="n">signature</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span>
         <span class="p">)</span>
@@ -3045,7 +3052,7 @@
         <span class="n">hip_signature</span> <span class="o">=</span> <span class="n">Data_HIPSignatureParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">algorithm</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span>
             <span class="n">signature</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span>
         <span class="p">)</span>
@@ -3082,7 +3089,7 @@
         <span class="n">echo_request_unsigned</span> <span class="o">=</span> <span class="n">Data_EchoRequestUnsignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_request_unsigned</span></div>
@@ -3118,7 +3125,7 @@
         <span class="n">echo_response_unsigned</span> <span class="o">=</span> <span class="n">Data_EchoResponseUnsignedParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">opaque</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">echo_response_unsigned</span></div>
@@ -3168,7 +3175,7 @@
         <span class="n">relay_from</span> <span class="o">=</span> <span class="n">Data_RelayFromParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3220,7 +3227,7 @@
         <span class="n">relay_to</span> <span class="o">=</span> <span class="n">Data_RelayToParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">port</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
@@ -3264,7 +3271,7 @@
         <span class="n">overlay_ttl</span> <span class="o">=</span> <span class="n">Data_OverlayTTLParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">ttl</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">overlay_ttl</span></div>
@@ -3319,7 +3326,7 @@
         <span class="n">route_via</span> <span class="o">=</span> <span class="n">Data_RouteViaParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
                 <span class="n">symmetric</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'symmetric'</span><span class="p">]),</span>
                 <span class="n">must_follow</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'must_follow'</span><span class="p">]),</span>
@@ -3368,7 +3375,7 @@
         <span class="n">from_</span> <span class="o">=</span> <span class="n">Data_FromParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">from_</span></div>
@@ -3406,7 +3413,7 @@
         <span class="n">rvs_hmac</span> <span class="o">=</span> <span class="n">Data_RVSHMACParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">rvs_hmac</span></div>
@@ -3459,7 +3466,7 @@
         <span class="n">via_rvs</span> <span class="o">=</span> <span class="n">Data_ViaRVSParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">address</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">via_rvs</span></div>
@@ -3497,7 +3504,7 @@
         <span class="n">relay_hmac</span> <span class="o">=</span> <span class="n">Data_RelayHMACParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">critical</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="o">&amp;</span> <span class="mb">0b1</span><span class="p">),</span>
-            <span class="n">length</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">len</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">parameter_total_len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">),</span>
             <span class="n">hmac</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">hmac</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">relay_hmac</span></div>

@@ -922,7 +922,27 @@
     <span class="c1"># packet data</span>
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Packet'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Data_Packet data of the protocol."""</span>
+<span class="w">        </span><span class="sd">"""Data_Packet data of the protocol.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The split relies on :attr:`self.length &lt;length&gt;` being the length of</span>
+<span class="sd">            the octets *preceding* the payload, and on the payload running from</span>
+<span class="sd">            there to the end of the buffer. Both hold for a protocol laid out as</span>
+<span class="sd">            a header followed by its payload, which is nearly all of them.</span>
+
+<span class="sd">            A protocol that is not laid out that way has to override this: one</span>
+<span class="sd">            whose :attr:`~length` counts something else, or one carrying a</span>
+<span class="sd">            *trailer* after the payload, gets a header that eats the payload and</span>
+<span class="sd">            a payload of ``b''``. That is what</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` did to every packet</span>
+<span class="sd">            block -- its :attr:`~pcapkit.protocols.misc.pcapng.PCAPNG.length` is</span>
+<span class="sd">            the wire's Block Total Length and the captured octets sit ahead of</span>
+<span class="sd">            the option list and the trailing length field -- and</span>
+<span class="sd">            :meth:`ProtocolBase.__init__` injects this payload into every parsed</span>
+<span class="sd">            ``_info``, so the empty value reached the dumpers and corrupted the</span>
+<span class="sd">            files they wrote. See #646.</span>
+
+<span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">UnsupportedCall</span><span class="p">:</span>

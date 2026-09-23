@@ -530,6 +530,24 @@ utility arguments and methods of specified protocols.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.packet">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet" title="pcapkit.protocols.data.protocol.Packet"><span class="pre">Packet</span></a></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.packet" title="Link to this definition">¶</a></dt>
 <dd><p>Data_Packet data of the protocol.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The split relies on <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.length</span></code></a> being the length of
+the octets <em>preceding</em> the payload, and on the payload running from
+there to the end of the buffer. Both hold for a protocol laid out as
+a header followed by its payload, which is nearly all of them.</p>
+<p>A protocol that is not laid out that way has to override this: one
+whose <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length" title="pcapkit.protocols.protocol.Protocol.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> counts something else, or one carrying a
+<em>trailer</em> after the payload, gets a header that eats the payload and
+a payload of <code class="docutils literal notranslate"><span class="pre">b''</span></code>. That is what
+<a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG" title="pcapkit.protocols.misc.pcapng.PCAPNG"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></a> did to every packet
+block – its <a class="reference internal" href="misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.length" title="pcapkit.protocols.misc.pcapng.PCAPNG.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> is
+the wire’s Block Total Length and the captured octets sit ahead of
+the option list and the trailing length field – and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init__()</span></code> injects this payload into every parsed
+<code class="docutils literal notranslate"><span class="pre">_info</span></code>, so the empty value reached the dumpers and corrupted the
+files they wrote. See #646.</p>
+</div>
 </dd></dl>
 
 <dl class="py property">

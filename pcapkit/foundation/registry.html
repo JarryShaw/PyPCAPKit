@@ -743,9 +743,60 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <p>The protocol class must be a subclass of
 <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, and will be registered to
 the <a class="reference internal" href="../protocols/index.html#pcapkit.protocols.__proto__" title="pcapkit.protocols.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code></a> registry.</p>
+<p>The registry is keyed on <code class="docutils literal notranslate"><span class="pre">protocol.__name__.upper()</span></code>, which is <strong>not</strong>
+unique across this package: three dispatchable protocol classes are all
+named <code class="docutils literal notranslate"><span class="pre">HTTP</span></code> – the generic base
+<a class="reference internal" href="../protocols/application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a> and the two version
+implementations <a class="reference internal" href="../protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a> and
+<a class="reference internal" href="../protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv2.HTTP</span></code></a> – so all three compete
+for the single key <code class="docutils literal notranslate"><span class="pre">'HTTP'</span></code>. Registering one of them replaces whichever
+was there, and the replacement is observable through every reader of the
+registry, e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.expand_comp</span></code>, which resolves a
+bare protocol name through it.</p>
+<p>Per #675 the overwrite is now reported rather than silent, matching
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> and the other
+overwrite-warning registries.</p>
+<p>The guard here deliberately reads “key present <strong>and</strong> incumbent is a
+different class”, where every sibling registry warns on mere presence. The
+difference is in where the key comes from. A sibling is keyed on a <code class="docutils literal notranslate"><span class="pre">code</span></code>
+the caller passes, so a repeat call is a caller mistake worth reporting even
+when the value is identical. This registry’s key is <em>derived</em> from the class,
+and this function is the funnel every wrapper registrar calls –
+<a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_tcp" title="pcapkit.foundation.registry.protocols.register_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_tcp()</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_udp" title="pcapkit.foundation.registry.protocols.register_udp"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_udp()</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_apptype" title="pcapkit.foundation.registry.protocols.register_apptype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_apptype()</span></code></a>,
+<a class="reference internal" href="#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a> and the rest all end in
+<code class="docutils literal notranslate"><span class="pre">register_protocol(module)</span></code>. So registering one class under two codes, a
+supported and documented thing to do, reaches this function twice with the
+same class and nothing at stake; on a presence-only guard that would warn
+about an overwrite that overwrote nothing. Warning on the harmless case is
+not free: it is what teaches a caller to filter
+<a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> wholesale, and that
+filter is what would then hide the <code class="docutils literal notranslate"><span class="pre">HTTP</span></code> collision this warning exists to
+surface.</p>
+<p>Making the key itself unique would resolve the collision rather than
+merely reporting it, but it is a registry-format change that the bare-name
+readers outside this module cannot absorb on their own – the registry is a
+documented public attribute, and its readers look a bare name up and then
+degrade <em>silently</em> on a miss rather than raising, so a re-keying would not
+announce itself either. <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.expand_comp</span></code> falls back to the
+name as a plain string, and the <code class="docutils literal notranslate"><span class="pre">protocol</span></code> properties on
+<a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.ReassemblyMeta" title="pcapkit.foundation.reassembly.reassembly.ReassemblyMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyMeta</span></code></a> and
+<a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlowMeta" title="pcapkit.foundation.traceflow.traceflow.TraceFlowMeta"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowMeta</span></code></a> fall back to
+<a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>. Re-keying is therefore part of the
+registry redesign in #514, and reporting the collision here is the step that
+redesign is sequenced behind.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>]</span>) – Protocol class.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>pcapkit.utilities.exceptions.RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is not a
+    <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
+</dd>
+<dt class="field-odd">Warns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If the registry already
+holds a <em>different</em> class under this protocol’s name, i.e. the
+registration displaced another protocol class. Re-registering the
+same class under the same name is silent.</p>
 </dd>
 </dl>
 </dd></dl>

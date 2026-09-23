@@ -603,10 +603,17 @@ without calling <a class="reference internal" href="#pcapkit.corekit.io.Seekable
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.writeable">
-<span class="sig-name descname"><span class="pre">writeable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.writeable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.writeable" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.writable">
+<span class="sig-name descname"><span class="pre">writable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.writable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.writable" title="Link to this definition">¶</a></dt>
 <dd><p>Return <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> if the stream supports writing. If <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and
 <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This was spelled <code class="docutils literal notranslate"><span class="pre">writeable</span></code> until #645, which is not how the <a class="reference external" href="https://docs.python.org/3/library/io.html#module-io" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> protocol
+spells it, so it overrode nothing and <a class="reference external" href="https://docs.python.org/3/library/io.html#module-io" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> never consulted it – the inherited
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase.writable" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.IOBase.writable()</span></code></a> answered instead. Both returned <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, so there
+was no observable divergence to notice; the coincidence is what hid it.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
@@ -696,30 +703,25 @@ apply at all and the seek returned a negative position as if it had worked.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader.truncate">
 <span class="sig-name descname"><span class="pre">truncate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.truncate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.truncate" title="Link to this definition">¶</a></dt>
 <dd><p>Resize the stream to the given <code class="docutils literal notranslate"><span class="pre">size</span></code> in bytes (or the current position if <code class="docutils literal notranslate"><span class="pre">size</span></code> is
-not specified). The current stream position isn’t changed. This resizing can extend or
-reduce the current file size. In case of extension, the contents of the new file area
-depend on the platform (on most systems, additional bytes are zero-filled). The new file
-size is returned.</p>
+not specified).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedOperation" title="pcapkit.utilities.exceptions.UnsupportedOperation"><strong>UnsupportedOperation</strong></a> – Always, since the reader is not writable.</p>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Nothing here writes to the underlying stream – <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> raises – so what this
-resizes is the buffer, not the stream behind it. The buffer is a sliding window over a
-stream that cannot be seeked: its octet 0 sits at absolute offset <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code>, its
-content occupies <code class="docutils literal notranslate"><span class="pre">[0:_buffer_cur]</span></code>, and everything past that is padding never read.</p>
-<p>Two consequences for which octets survive. An extension appends its zero octets at
-the <strong>tail</strong>, the new area being by definition the region past the old end. A
-reduction below the content keeps the <strong>most recent</strong> <code class="docutils literal notranslate"><span class="pre">size</span></code> octets and advances
-<code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> past the ones it drops, because what this holds is lookback: the
-octets it can still answer for are the ones just read, and the stream is already
-beyond them. Padding is never kept in preference to content either way.</p>
-<p>Advancing <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> is what keeps <code class="docutils literal notranslate"><span class="pre">_buffer_set</span> <span class="pre">+</span> <span class="pre">_buffer_cur</span></code> equal to how far
-the stream has actually been consumed, which <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> relies on to decide whether
-it may read ahead to fill a gap. A reduction that shrank the window without moving its
-base would leave that sum short of the stream, and the next forward <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> would
-splice in octets from the wrong absolute offset without complaining.</p>
-<p>Octets dropped by a reduction are gone for good, since the stream cannot be rewound to
-re-supply them. A position left among them is then before the window, which
-<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> refuses as it refuses any other.</p>
+<p><a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase.writable" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.IOBase.writable()</span></code></a> gates this method as well as <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> – “If
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a> will raise <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>” – and
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.writable" title="pcapkit.corekit.io.SeekableReader.writable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">writable()</span></code></a> here returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>, so refusing is what the contract asks
+for. It is also what CPython’s own read-only buffered readers do: both the
+accelerated <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a> and the pure-Python
+<code class="docutils literal notranslate"><span class="pre">_pyio.BufferedReader</span></code> raise <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code></a>, the latter from
+<code class="docutils literal notranslate"><span class="pre">_BufferedIOMixin.truncate</span></code>’s <code class="docutils literal notranslate"><span class="pre">_checkWritable()</span></code> (#645).</p>
+<p>The resizing this used to perform is still reachable internally, as
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_truncate_buffer()</span></code>. It never touched the underlying stream in the first place
+– it resizes a private lookback window – which is why it survives under a private
+name rather than being removed with the public method’s behaviour.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>

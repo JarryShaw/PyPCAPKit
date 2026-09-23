@@ -585,9 +585,13 @@
         <span class="c1">#: Verbose flag. This is used to determine if the verbose callback</span>
         <span class="c1">#: function should be called at each frame.</span>
         <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: No EOF flag. It is useful when the input file is a live capture,</span>
-        <span class="c1">#: as the extraction process will not stop until the user interrupt</span>
-        <span class="c1">#: the process.</span>
+        <span class="c1">#: No EOF flag. It is useful when the input is a live capture on a pipe or</span>
+        <span class="c1">#: on standard input, where reaching the end of what has arrived so far</span>
+        <span class="c1">#: does not mean the capture is over: the extraction retries instead of</span>
+        <span class="c1">#: stopping. It retries only while the input is still producing, though --</span>
+        <span class="c1">#: see :meth:`~pcapkit.foundation.extraction.Extractor._note_eof_progress`</span>
+        <span class="c1">#: for the rule and for what it narrows, without which an exhausted stream</span>
+        <span class="c1">#: spins forever (#620).</span>
         <span class="n">_flag_n</span><span class="p">:</span> <span class="s1">'bool'</span>
         <span class="c1">#: Input filename flag. It indicates if the input file is a file</span>
         <span class="c1">#: name or a binary IO object. For the latter, we should not close</span>
@@ -632,6 +636,13 @@
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">'BufferedReader'</span>
         <span class="c1">#: Output file object.</span>
         <span class="n">_ofile</span><span class="p">:</span> <span class="s1">'Dumper | Type[Dumper]'</span>
+
+        <span class="c1">#: Position of the input stream at the previous end of stream, or</span>
+        <span class="c1">#: :data:`None` before the first one. Comparing it against the position</span>
+        <span class="c1">#: at the next end of stream is what tells a live capture that has paused</span>
+        <span class="c1">#: -- retry, more may arrive -- from one that is finished, which is the</span>
+        <span class="c1">#: termination condition ``no_eof`` was missing (#620).</span>
+        <span class="n">_eof_mark</span><span class="p">:</span> <span class="s1">'Optional[int]'</span>
 
         <span class="c1">#: Magic number.</span>
         <span class="n">_magic</span><span class="p">:</span> <span class="s1">'bytes'</span>
@@ -1176,7 +1187,9 @@
                 <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
                     <span class="n">warn</span><span class="p">(</span><span class="s1">'EOF reached'</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                    <span class="c1"># ``no_eof`` retries -- but only while the input is still</span>
+                    <span class="c1"># producing, or an exhausted stream spins here forever (#620).</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_eof_progress</span><span class="p">():</span>
                         <span class="k">continue</span>
 
                     <span class="c1"># quit when EOF</span>
@@ -1267,7 +1280,13 @@
 <span class="sd">            buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 <span class="sd">            buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
-<span class="sd">            no_eof: if not raise :exc:`EOFError` when reach EOF</span>
+<span class="sd">            no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,</span>
+<span class="sd">                which is what a live capture on a pipe or on standard input wants,</span>
+<span class="sd">                since a read there blocks until the writer produces more or closes.</span>
+<span class="sd">                Retrying stops as soon as one retry finds nothing new, so an</span>
+<span class="sd">                exhausted input finishes rather than spinning; on a *seekable*</span>
+<span class="sd">                input, where nothing blocks, that means a file still being appended</span>
+<span class="sd">                to ends at the data present when the extraction reached it</span>
 
 <span class="sd">            context: caller supplied parsing context for protocols that need</span>
 <span class="sd">                information not carried on the wire, keyed by protocol index</span>
@@ -1309,6 +1328,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_v</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># verbose flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_s</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># input filename flag</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="o">=</span> <span class="n">no_eof</span>                <span class="c1"># no EOF flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># stream position at the last EOF</span>
 
         <span class="c1"># verbose callback function</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -1510,7 +1530,9 @@
             <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="s1">'EOF reached'</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                <span class="c1"># See :meth:`_note_eof_progress`: ``no_eof`` retries a live capture</span>
+                <span class="c1"># that has merely paused, and gives up on an exhausted one (#620).</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_eof_progress</span><span class="p">():</span>
                     <span class="k">continue</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
@@ -1537,7 +1559,11 @@
                 <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
                     <span class="n">warn</span><span class="p">(</span><span class="s1">'EOF reached'</span><span class="p">,</span> <span class="n">ExtractionWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span><span class="p">:</span>
+                    <span class="c1"># See :meth:`_note_eof_progress`. Once the input is finished</span>
+                    <span class="c1"># there is no frame left to return, so the error is the only</span>
+                    <span class="c1"># truthful answer this form can give -- ``no_eof`` defers it</span>
+                    <span class="c1"># rather than suppressing it outright (#620).</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_n</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_eof_progress</span><span class="p">():</span>
                         <span class="k">continue</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
@@ -1641,6 +1667,70 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_flag_s'</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_note_eof_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record this end of stream, and say whether the input advanced to reach it.</span>
+
+<span class="sd">        This is the termination condition ``no_eof`` was missing. The flag means</span>
+<span class="sd">        "end of stream is not necessarily the end of the capture" -- which is true</span>
+<span class="sd">        of a live capture, and is why :mod:`pcapkit.__main__` sets it for</span>
+<span class="sd">        ``fin='-'`` -- so the extraction retries rather than stopping. What it had</span>
+<span class="sd">        no way to decide was when the stream is *genuinely* finished, and for an</span>
+<span class="sd">        exhausted one every retry raises end of stream again immediately, which is</span>
+<span class="sd">        the spin #620 reported.</span>
+
+<span class="sd">        The signal is the input's own position. End of stream is raised by</span>
+<span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` when the bytes remaining in</span>
+<span class="sd">        the stream measure zero, and it restores the position before raising, so</span>
+<span class="sd">        the position at end of stream is stable. Two consecutive ends of stream at</span>
+<span class="sd">        the *same* position therefore mean nothing arrived between them.</span>
+
+<span class="sd">        What "between them" covers, exactly</span>
+<span class="sd">        -----------------------------------</span>
+
+<span class="sd">        For a **pipe**, everything, and the live-capture case is safe. A blocking</span>
+<span class="sd">        read on a pipe whose writer is open but idle *blocks*; it does not report</span>
+<span class="sd">        end of stream. So a pipe reports it only once the writer has closed --</span>
+<span class="sd">        permanently -- and a capture that merely pauses never reaches here at all.</span>
+<span class="sd">        Measured: a pipe paused mid-capture for 1.5s blocked for the whole pause</span>
+<span class="sd">        and then delivered its remaining frames, with this method not consulted</span>
+<span class="sd">        until after the writer closed.</span>
+
+<span class="sd">        For a **seekable regular file**, only the microseconds between two</span>
+<span class="sd">        immediately consecutive probes, because such a file does not block -- it</span>
+<span class="sd">        reports end of stream at once. So an extraction over a file that is still</span>
+<span class="sd">        being appended to ends at the data present when it got there, rather than</span>
+<span class="sd">        following the writer. That is a deliberate narrowing of what ``no_eof``</span>
+<span class="sd">        used to do, and it is measured: on ``6c3d1b0d9`` a file gaining its last</span>
+<span class="sd">        record 0.6s in yielded all six frames, and here it yields five. The</span>
+<span class="sd">        previous behaviour was unbounded by construction -- it is the defect #620</span>
+<span class="sd">        reports -- so *some* stopping rule had to be chosen, and a timed grace</span>
+<span class="sd">        period would only make the cut-off intermittent rather than absent.</span>
+<span class="sd">        Following a growing file wants a deliberate policy of its own; see the</span>
+<span class="sd">        note in :file:`docs/source/changelog/1.5.0.rst`.</span>
+
+<span class="sd">        Warning:</span>
+<span class="sd">            **Not idempotent.** Each call consumes one end-of-stream observation</span>
+<span class="sd">            by overwriting :attr:`_eof_mark`, so calling it twice for one end of</span>
+<span class="sd">            stream spends the retry it would have granted. Call it exactly once</span>
+<span class="sd">            per handler, which is what the three call sites do.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :data:`True` when retrying may yet produce a frame -- this is the first</span>
+<span class="sd">            end of stream, or the input has advanced since the last one.</span>
+<span class="sd">            :data:`False` when the input is standing still and the loop should stop.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="c1"># An input that cannot say where it is cannot be shown to be making</span>
+            <span class="c1"># progress either, and stopping is the safe answer: the alternative</span>
+            <span class="c1"># is the unbounded loop this method exists to end.</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">previous</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span><span class="p">,</span> <span class="n">position</span>
+        <span class="k">return</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;</span> <span class="n">previous</span>
 
 <div class="viewcode-block" id="Extractor._cleanup">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._cleanup">[docs]</a>

@@ -476,7 +476,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PCAPNG'</span><span class="p">,</span>
@@ -670,6 +670,143 @@
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown byteorder magic: </span><span class="si">{</span><span class="n">magic</span><span class="si">:</span><span class="s1">#x</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">packet</span><span class="p">[</span><span class="s1">'byteorder'</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bounded_option</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Clamp an option or record payload to the octets its area still declares.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Callback computing the payload's nominal length, as the option's</span>
+<span class="sd">            or record's own declared length field gives it.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A callback returning that length, never past the octets the enclosing</span>
+<span class="sd">        option or record area has left to give.</span>
+
+<span class="sd">    An option's length is a 16-bit wire field, so it can declare up to 65,535</span>
+<span class="sd">    octets of payload from four octets of option header. Nothing bounds that</span>
+<span class="sd">    against the area the option sits in: :meth:`OptionField.unpack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.collections.OptionField.unpack&gt;` subtracts each</span>
+<span class="sd">    option's *parsed* size from the area it was given but never checks the</span>
+<span class="sd">    declared size against it, and :meth:`FieldBase.unpack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;` zero-pads any shortfall</span>
+<span class="sd">    within :data:`~pcapkit.corekit.fields.field._MAX_ZERO_PAD_SHORTFALL`</span>
+<span class="sd">    unconditionally -- deliberately, since that ceiling is the full span of a</span>
+<span class="sd">    16-bit length and a capture cut short by its snapshot length must still</span>
+<span class="sd">    parse. Repeating such an option across many blocks therefore synthesised</span>
+<span class="sd">    padding without limit: 2,000 Enhanced Packet Blocks in 80,048 octets, each</span>
+<span class="sd">    with one option declaring 65,535 against none present, produced 131,070,000</span>
+<span class="sd">    octets of zero padding, an amplification of 1,637x linear in the block</span>
+<span class="sd">    count. See `#594 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/594&gt;`__,</span>
+<span class="sd">    and `#593 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/593&gt;`__ for the</span>
+<span class="sd">    32-bit band the field layer's own budget already covers.</span>
+
+<span class="sd">    The bound has to come from this layer because the field layer cannot see</span>
+<span class="sd">    it. What distinguishes the crafted case from the legitimate one is not the</span>
+<span class="sd">    shortfall's size -- both are inside a 16-bit length, which is why #571's</span>
+<span class="sd">    ``len(buffer) &lt; length`` rejection was declined -- but whether the option</span>
+<span class="sd">    is inconsistent with the framing the block itself declares. Block Total</span>
+<span class="sd">    Length is authoritative and cross-checked against its own trailing copy, so</span>
+<span class="sd">    the area is ``length`` less the fixed fields, ``captured_len`` and its</span>
+<span class="sd">    padding; an option declaring more payload than that area has left is</span>
+<span class="sd">    malformed however complete the file behind it is. A snapshot-truncated</span>
+<span class="sd">    capture says so through ``captured_len`` instead, and leaves its options</span>
+<span class="sd">    whole, so it never trips this.</span>
+
+<span class="sd">    Clamping rather than refusing is what keeps the `#431</span>
+<span class="sd">    &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation: a</span>
+<span class="sd">    block read has no catch point above :meth:`FieldBase.unpack</span>
+<span class="sd">    &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`, so one refusal aborts the</span>
+<span class="sd">    whole extraction rather than one block, and a truncated capture would stop</span>
+<span class="sd">    parsing at the cut instead of reporting the frames before it. The clamp is</span>
+<span class="sd">    also history-independent -- it reads only this block's own declared framing</span>
+<span class="sd">    -- which a running threshold would not be.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The clamp is skipped when ``__length__`` is absent or negative, which is</span>
+<span class="sd">        what :meth:`Schema.pack &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;`</span>
+<span class="sd">        leaves it as when no length is known. That matters here in a way it does</span>
+<span class="sd">        not for :func:`pcapkit.protocols.schema.transport.sctp.bounded`, whose</span>
+<span class="sd">        list fields ignore their length while packing: these are</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.strings.BytesField` and</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.strings.StringField` payloads, and</span>
+<span class="sd">        :meth:`FieldBase.pack &lt;pcapkit.corekit.fields.field.FieldBase.pack&gt;`</span>
+<span class="sd">        packs them through ``struct.pack('&lt;n&gt;s', ...)``, which truncates</span>
+<span class="sd">        silently. A clamp applied while packing would therefore shorten a</span>
+<span class="sd">        perfectly good option rather than reject it.</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+        <span class="n">nominal</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">nominal</span> <span class="o">&lt;=</span> <span class="n">remaining</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nominal</span>
+
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: option declares </span><span class="si">{</span><span class="n">nominal</span><span class="si">}</span><span class="s1"> octet(s) of payload with '</span>
+             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1"> octet(s) left in its area; reading </span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">remaining</span>
+    <span class="k">return</span> <span class="n">callback</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bounded_area</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Clamp a packet block's option area to the octets the block itself holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Callback computing the option area's nominal span, from the</span>
+<span class="sd">            block's own declared Block Total Length.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A callback returning that span, never past the octets left of the block.</span>
+
+<span class="sd">    :func:`bounded_option` bounds a payload by the area, and the area by the</span>
+<span class="sd">    block's declared Block Total Length. That closes the band only while the</span>
+<span class="sd">    declared length is itself backed by real octets, and nothing checks that:</span>
+<span class="sd">    ``BlockType.post_process`` compares ``length`` against its own trailing copy</span>
+<span class="sd">    and never against the file. A block declaring 1,000,000 octets while holding</span>
+<span class="sd">    36 therefore sizes its option area at 999,964, an option inside it declaring</span>
+<span class="sd">    65,535 is under that and is not clamped, and 65,535 octets of zeros are</span>
+<span class="sd">    synthesised from 36 -- measured, 1,820x, with no warning. Clamping the area</span>
+<span class="sd">    to ``__length__`` as well removes the step: the payload is then bounded by</span>
+<span class="sd">    the octets the block was actually handed, whatever it declared.</span>
+
+<span class="sd">    This is a no-op on every well-formed block rather than a second guess at the</span>
+<span class="sd">    area. At the option field the only field still to come is the trailing Block</span>
+<span class="sd">    Total Length, so ``__length__`` is exactly the area plus that field's four</span>
+<span class="sd">    octets, and subtracting them makes the two equal. Taking ``__length__`` whole</span>
+<span class="sd">    over-grants by exactly four, which is not academic: the area then reaches the</span>
+<span class="sd">    trailing length itself and reads it as option payload, measured as four</span>
+<span class="sd">    octets of payload on a block that holds none.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The five non-packet blocks' option areas -- Section Header, Interface</span>
+<span class="sd">        Description, Name Resolution, Interface Statistics and Decryption</span>
+<span class="sd">        Secrets -- are deliberately left unclamped here, since each computes its</span>
+<span class="sd">        span with a different offset and the equality above has to be</span>
+<span class="sd">        re-established per block rather than assumed. The general fix is to stop</span>
+<span class="sd">        a declared length reaching a read at all, which is `#678</span>
+<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__.</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+        <span class="n">nominal</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">nominal</span>
+
+        <span class="c1"># The trailing Block Total Length follows the option area in both packet</span>
+        <span class="c1"># block types, so it is not the area's to read.</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="n">remaining</span> <span class="o">-</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">available</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">nominal</span> <span class="o">&lt;=</span> <span class="n">available</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nominal</span>
+
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: block declares an option area of </span><span class="si">{</span><span class="n">nominal</span><span class="si">}</span><span class="s1"> octet(s) with '</span>
+             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> octet(s) left of the block; reading </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+             <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">available</span>
+    <span class="k">return</span> <span class="n">callback</span>
 
 
 <div class="viewcode-block" id="pcapng_block_selector">
@@ -988,7 +1125,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for unknown PCAP-NG file options."""</span>
 
     <span class="c1">#: Option value.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1015,7 +1152,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``opt_comment`` options."""</span>
 
     <span class="c1">#: Comment text.</span>
-    <span class="n">comment</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1036,7 +1173,7 @@
     <span class="c1">#: Private enterprise number (PEN).</span>
     <span class="n">pen</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Custom data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1163,7 +1300,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``if_name`` options."""</span>
 
     <span class="c1">#: Interface name.</span>
-    <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1179,7 +1316,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``if_description`` options."""</span>
 
     <span class="c1">#: Interface description.</span>
-    <span class="n">description</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1332,7 +1469,7 @@
     <span class="c1">#: Filter code.</span>
     <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_FilterType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_FilterType</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Capture filter.</span>
-    <span class="nb">filter</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">filter</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1348,7 +1485,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``if_os`` options."""</span>
 
     <span class="c1">#: OS information.</span>
-    <span class="n">os</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="n">os</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1396,7 +1533,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG file ``if_hardware`` options."""</span>
 
     <span class="c1">#: Hardware information.</span>
-    <span class="n">hardware</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+    <span class="n">hardware</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1519,7 +1656,7 @@
     <span class="c1">#: Hash algorithm.</span>
     <span class="n">func</span><span class="p">:</span> <span class="s1">'Enum_HashAlgorithm'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HashAlgorithm</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Hash value.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1585,7 +1722,7 @@
     <span class="c1">#: Verdict type.</span>
     <span class="n">verdict</span><span class="p">:</span> <span class="s1">'Enum_VerdictType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_VerdictType</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Verdict value.</span>
-    <span class="n">value</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">value</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1624,7 +1761,8 @@
         <span class="c1"># ``padding_data``: a PaddingField is written straight into the schema</span>
         <span class="c1"># buffer while packing and never lands in the packet data, so its name</span>
         <span class="c1"># is not a key here on the packing path.</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span>
+                                        <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_len'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_EPB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'epb'</span><span class="p">],</span>
@@ -1691,7 +1829,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG NRB unknown records."""</span>
 
     <span class="c1">#: Unknown record data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1720,7 +1858,7 @@
     <span class="c1">#: IPv4 address.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv4Address'</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
     <span class="c1">#: Name resolution data.</span>
-    <span class="n">resol</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">resol</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1757,7 +1895,7 @@
     <span class="c1">#: IPv6 address.</span>
     <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address'</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="c1">#: Name resolution data.</span>
-    <span class="n">resol</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="n">resol</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">16</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -1804,7 +1942,7 @@
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG ``ns_dnsname`` option."""</span>
 
     <span class="c1">#: DNS name.</span>
-    <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">])</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -2399,7 +2537,7 @@
     <span class="c1">#: Hash algorithm.</span>
     <span class="n">func</span><span class="p">:</span> <span class="s1">'Enum_HashAlgorithm'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_HashAlgorithm</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Hash value.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">bounded_option</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -2438,7 +2576,8 @@
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">bounded_area</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span>
+                                        <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'captured_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_PACK_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'pack'</span><span class="p">],</span>

@@ -503,6 +503,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.udp</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -599,14 +600,78 @@
 <span class="sd">    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to</span>
 <span class="sd">    the :data:`pcapkit.protocols.__proto__` registry.</span>
 
+<span class="sd">    The registry is keyed on ``protocol.__name__.upper()``, which is **not**</span>
+<span class="sd">    unique across this package: three dispatchable protocol classes are all</span>
+<span class="sd">    named ``HTTP`` -- the generic base</span>
+<span class="sd">    :class:`pcapkit.protocols.application.http.HTTP` and the two version</span>
+<span class="sd">    implementations :class:`pcapkit.protocols.application.httpv1.HTTP` and</span>
+<span class="sd">    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so all three compete</span>
+<span class="sd">    for the single key ``'HTTP'``. Registering one of them replaces whichever</span>
+<span class="sd">    was there, and the replacement is observable through every reader of the</span>
+<span class="sd">    registry, e.g. :meth:`ProtocolBase.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;`, which resolves a</span>
+<span class="sd">    bare protocol name through it.</span>
+
+<span class="sd">    Per #675 the overwrite is now reported rather than silent, matching</span>
+<span class="sd">    :meth:`ProtocolBase.register</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` and the other</span>
+<span class="sd">    overwrite-warning registries.</span>
+
+<span class="sd">    The guard here deliberately reads "key present **and** incumbent is a</span>
+<span class="sd">    different class", where every sibling registry warns on mere presence. The</span>
+<span class="sd">    difference is in where the key comes from. A sibling is keyed on a ``code``</span>
+<span class="sd">    the caller passes, so a repeat call is a caller mistake worth reporting even</span>
+<span class="sd">    when the value is identical. This registry's key is *derived* from the class,</span>
+<span class="sd">    and this function is the funnel every wrapper registrar calls --</span>
+<span class="sd">    :func:`register_tcp`, :func:`register_udp`, :func:`register_apptype`,</span>
+<span class="sd">    :func:`register_linktype` and the rest all end in</span>
+<span class="sd">    ``register_protocol(module)``. So registering one class under two codes, a</span>
+<span class="sd">    supported and documented thing to do, reaches this function twice with the</span>
+<span class="sd">    same class and nothing at stake; on a presence-only guard that would warn</span>
+<span class="sd">    about an overwrite that overwrote nothing. Warning on the harmless case is</span>
+<span class="sd">    not free: it is what teaches a caller to filter</span>
+<span class="sd">    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that</span>
+<span class="sd">    filter is what would then hide the ``HTTP`` collision this warning exists to</span>
+<span class="sd">    surface.</span>
+
+<span class="sd">    Making the key itself unique would resolve the collision rather than</span>
+<span class="sd">    merely reporting it, but it is a registry-format change that the bare-name</span>
+<span class="sd">    readers outside this module cannot absorb on their own -- the registry is a</span>
+<span class="sd">    documented public attribute, and its readers look a bare name up and then</span>
+<span class="sd">    degrade *silently* on a miss rather than raising, so a re-keying would not</span>
+<span class="sd">    announce itself either. :meth:`ProtocolBase.expand_comp</span>
+<span class="sd">    &lt;pcapkit.protocols.protocol.ProtocolBase.expand_comp&gt;` falls back to the</span>
+<span class="sd">    name as a plain string, and the ``protocol`` properties on</span>
+<span class="sd">    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and</span>
+<span class="sd">    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the</span>
+<span class="sd">    registry redesign in #514, and reporting the collision here is the step that</span>
+<span class="sd">    redesign is sequenced behind.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        protocol: Protocol class.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a</span>
+<span class="sd">            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.</span>
+
+<span class="sd">    Warns:</span>
+<span class="sd">        pcapkit.utilities.warnings.RegistryWarning: If the registry already</span>
+<span class="sd">            holds a *different* class under this protocol's name, i.e. the</span>
+<span class="sd">            registration displaced another protocol class. Re-registering the</span>
+<span class="sd">            same class under the same name is silent.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
 
-    <span class="n">protocol_registry</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">protocol</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">incumbent</span> <span class="o">=</span> <span class="n">protocol_registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting </span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> '</span>
+             <span class="sa">f</span><span class="s1">'with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+
+    <span class="n">protocol_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered protocol: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 

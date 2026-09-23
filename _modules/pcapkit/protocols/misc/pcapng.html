@@ -552,6 +552,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLog</span> <span class="k">as</span> <span class="n">Data_WireGuardKeyLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeAPSKey</span> <span class="k">as</span> <span class="n">Data_ZigBeeAPSKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Data_ZigBeeNWKKey</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Schema_PCAPNG</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_BlockType</span>
@@ -1138,8 +1139,98 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Header length of corresponding protocol."""</span>
+<span class="w">        </span><span class="sd">"""Block total length of corresponding protocol.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This is the wire's *Block Total Length* -- the whole block, trailing</span>
+<span class="sd">            length field included -- and not a header length. The two are the</span>
+<span class="sd">            same thing for a protocol whose payload runs to the end of its</span>
+<span class="sd">            buffer, which is why</span>
+<span class="sd">            :attr:`ProtocolBase.length &lt;pcapkit.protocols.protocol.ProtocolBase.length&gt;`</span>
+<span class="sd">            does not distinguish them, but a PCAP-NG block carries a trailer.</span>
+<span class="sd">            :attr:`self.packet &lt;packet&gt;` is overridden accordingly; see there and</span>
+<span class="sd">            #646.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="c1"># NOTE: A plain property, where the inherited one is a</span>
+    <span class="c1"># :func:`~pcapkit.utilities.compat.cached_property`. That is deliberate and it</span>
+    <span class="c1"># is not an oversight of the base class's caching: the inherited one caches</span>
+    <span class="c1"># because it *reads the stream*, and a second read would consume octets that</span>
+    <span class="c1"># are no longer there, whereas this one only walks buffers the schema layer has</span>
+    <span class="c1"># already filled and so costs a handful of dict lookups.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Caching it would reintroduce, by a different route, the staleness this change</span>
+    <span class="c1"># exists to remove. :meth:`self.unpack &lt;unpack&gt;` now reports the payload</span>
+    <span class="c1"># through this property, so a cache would make a second ``unpack`` on the same</span>
+    <span class="c1"># instance return the *first* call's octets -- ``get_payload`` never even</span>
+    <span class="c1"># reached -- where the code before #646 recomputed from the schema every time.</span>
+    <span class="c1"># Nothing in the tree calls ``unpack`` twice on one instance today</span>
+    <span class="c1"># (``__post_init__`` is its only caller), so this is an invariant being kept</span>
+    <span class="c1"># rather than a bug being fixed; it was held before and there is no reason for</span>
+    <span class="c1"># it to stop holding. A data descriptor also wins over ``__dict__``, so a stale</span>
+    <span class="c1"># entry left by the inherited ``cached_property`` cannot shadow this either.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_Packet'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Header and payload octets of the current block.</span>
+
+<span class="sd">        A PCAP-NG block is not a header followed by a payload. The captured</span>
+<span class="sd">        octets sit in the *middle* of a packet block, ahead of the option list</span>
+<span class="sd">        and the trailing Block Total Length, so no single split point expresses</span>
+<span class="sd">        the shape and the inherited</span>
+<span class="sd">        :attr:`ProtocolBase.packet &lt;pcapkit.protocols.protocol.ProtocolBase.packet&gt;`</span>
+<span class="sd">        -- which reads :attr:`self.length &lt;length&gt;` octets of header and takes</span>
+<span class="sd">        everything after as payload -- cannot produce it. Since</span>
+<span class="sd">        :attr:`self.length &lt;length&gt;` is the Block Total Length, that split</span>
+<span class="sd">        consumed the entire block as header and left the payload empty: every</span>
+<span class="sd">        packet block reported ``packet == b''`` while ``captured_len`` declared</span>
+<span class="sd">        hundreds of octets, and dumping such a block through</span>
+<span class="sd">        :class:`~pcapkit.dumpkit.pcap.PCAPIO` wrote a record header promising</span>
+<span class="sd">        octets it then did not write. See #646.</span>
+
+<span class="sd">        The payload is therefore the block schema's</span>
+<span class="sd">        :attr:`~pcapkit.protocols.schema.schema.Schema.__payload__` field, which</span>
+<span class="sd">        is where the schema layer put the captured octets, and the header is the</span>
+<span class="sd">        block octets ahead of it. The three block types that carry captured</span>
+<span class="sd">        octets -- :attr:`PACKET_TYPES &lt;PCAPNG.PACKET_TYPES&gt;`, i.e. the Enhanced</span>
+<span class="sd">        Packet Block, the Simple Packet Block and the obsolete Packet Block --</span>
+<span class="sd">        each place the payload at a different offset, so the offset is summed</span>
+<span class="sd">        from the octets the schema actually unpacked rather than hard-coded per</span>
+<span class="sd">        block type. A block declaring no payload field is all header and no</span>
+<span class="sd">        payload, as before.</span>
+
+<span class="sd">        """</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span>
+        <span class="n">payload_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload_name</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">payload_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Data_Packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+
+        <span class="c1"># The octets ahead of the payload field, in wire order: the outer</span>
+        <span class="c1"># schema's fields up to the one holding the block -- its 4-octet Block</span>
+        <span class="c1"># Type -- and then the block's own fields up to the payload. The block is</span>
+        <span class="c1"># found by identity rather than by name so that renaming the field</span>
+        <span class="c1"># cannot silently fold the whole block body into the header; if it is not</span>
+        <span class="c1"># found at all, the header loses the Block Type and nothing else, leaving</span>
+        <span class="c1"># the payload -- the part #646 is about -- exact either way.</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="n">block</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">block_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+        <span class="c1"># Safe: ``_get_payload_name`` returned a name only because it is a field.</span>
+        <span class="n">block_stop</span> <span class="o">=</span> <span class="n">block_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">payload_name</span><span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">[:</span><span class="n">stop</span><span class="p">]:</span>
+            <span class="n">header</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">__buffer__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">block_names</span><span class="p">[:</span><span class="n">block_stop</span><span class="p">]:</span>
+            <span class="n">header</span> <span class="o">+=</span> <span class="n">block</span><span class="o">.</span><span class="n">__buffer__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Data_Packet</span><span class="p">(</span>
+            <span class="n">header</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">header</span><span class="p">),</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">get_payload</span><span class="p">(</span><span class="n">payload_name</span><span class="p">),</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Context'</span><span class="p">:</span>
@@ -1384,13 +1475,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_PCAPNG'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">block_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span>
-        <span class="n">payload_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block_schema</span><span class="p">,</span> <span class="s1">'__payload__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">payload_name</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block_schema</span><span class="p">,</span> <span class="s1">'__fields__'</span><span class="p">,</span> <span class="p">{}):</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="n">block_schema</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: One source of truth for the captured octets. This used to extract</span>
+        <span class="c1"># the payload here as well, and ``ProtocolBase.__init__`` then overwrote</span>
+        <span class="c1"># the result with ``self.packet.payload`` -- which was empty, because the</span>
+        <span class="c1"># inherited ``packet`` split the block at its Block Total Length. Reading</span>
+        <span class="c1"># it through the property instead means the value injected there is the</span>
+        <span class="c1"># value computed here, rather than a second attempt at it. See #646.</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
 
@@ -1627,6 +1719,26 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_payload_name</span><span class="p">(</span><span class="n">block</span><span class="p">:</span> <span class="s1">'Schema_BlockType | bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get the name of the field carrying a block's captured packet octets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block: Parsed block schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The name of the block schema's payload field, or :obj:`None` when the</span>
+<span class="sd">            block declares none -- which is every block type outside</span>
+<span class="sd">            :attr:`PACKET_TYPES &lt;PCAPNG.PACKET_TYPES&gt;`, and also a block whose</span>
+<span class="sd">            body was handed over as raw :obj:`bytes` at construction time rather</span>
+<span class="sd">            than as a schema.</span>
+
+<span class="sd">        """</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'__payload__'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'__fields__'</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">name</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_local_timezone</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'timezone'</span><span class="p">:</span>

@@ -561,8 +561,12 @@ which is automatically generating <a class="reference internal" href="../const/t
 <p>TCP Header Flags</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.tcp.flags.Flags.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">4</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">15'</span></span><a class="headerlink" href="#pcapkit.vendor.tcp.flags.Flags.FLAG" title="Link to this definition">¶</a></dt>
-<dd><p>Value limit checker.</p>
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></span><a class="headerlink" href="#pcapkit.vendor.tcp.flags.Flags.FLAG" title="Link to this definition">¶</a></dt>
+<dd><p>Value limit checker. The registry indexes <em>bit offsets</em> 4 through 15,
+but the members it generates are <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">offset</span></code>, so the value domain a
+lookup has to accept is the 16-bit field those bits live in – a
+composite such as <code class="docutils literal notranslate"><span class="pre">SYN</span> <span class="pre">|</span> <span class="pre">ACK</span></code> is a legitimate value and only the
+composite path reaches <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.flags.Flags._missing_" title="pcapkit.const.tcp.flags.Flags._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">

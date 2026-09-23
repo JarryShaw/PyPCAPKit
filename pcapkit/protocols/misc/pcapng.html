@@ -779,7 +779,18 @@ attribute:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.PCAPNG.length">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.PCAPNG.length" title="Link to this definition">¶</a></dt>
-<dd><p>Header length of corresponding protocol.</p>
+<dd><p>Block total length of corresponding protocol.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is the wire’s <em>Block Total Length</em> – the whole block, trailing
+length field included – and not a header length. The two are the
+same thing for a protocol whose payload runs to the end of its
+buffer, which is why
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.length</span></code>
+does not distinguish them, but a PCAP-NG block carries a trailer.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.packet</span></code> is overridden accordingly; see there and
+#646.</p>
+</div>
 </dd></dl>
 
 <dl class="py property">

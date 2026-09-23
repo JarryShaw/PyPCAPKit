@@ -625,7 +625,8 @@
 <span class="sd">            SeekError: If the position lies before the window, whose octets are then gone</span>
 <span class="sd">                for good -- the stream cannot be rewound to re-supply them. :meth:`seek`</span>
 <span class="sd">                refuses that position for the same reason; it is reachable here only through</span>
-<span class="sd">                a :meth:`truncate` that moved the window's base past a position already set.</span>
+<span class="sd">                a :meth:`_truncate_buffer` that moved the window's base past a position already</span>
+<span class="sd">                set.</span>
 
 <span class="sd">        """</span>
         <span class="n">buf_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span>
@@ -720,7 +721,7 @@
             <span class="k">elif</span> <span class="ow">not</span> <span class="n">size</span><span class="p">:</span>
                 <span class="c1"># NOTE: a request for no octets is answered without consulting the window,</span>
                 <span class="c1"># which has nothing to say about it. Asking anyway refuses a zero-length</span>
-                <span class="c1"># read from a position :meth:`truncate` has left behind the window -- a</span>
+                <span class="c1"># read from a position :meth:`_truncate_buffer` has left behind the window -- a</span>
                 <span class="c1"># refusal over data that was never wanted, and not what this used to do.</span>
                 <span class="c1">#</span>
                 <span class="c1"># Truthiness rather than ``size == 0`` on purpose. It is the same test for</span>
@@ -882,16 +883,43 @@
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.truncate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int | None'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resize the stream to the given ``size`` in bytes (or the current position if ``size`` is</span>
-<span class="sd">        not specified). The current stream position isn't changed. This resizing can extend or</span>
-<span class="sd">        reduce the current file size. In case of extension, the contents of the new file area</span>
-<span class="sd">        depend on the platform (on most systems, additional bytes are zero-filled). The new file</span>
-<span class="sd">        size is returned.</span>
+<span class="sd">        not specified).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedOperation: Always, since the reader is not writable.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what this</span>
-<span class="sd">            resizes is the buffer, not the stream behind it. The buffer is a sliding window over a</span>
-<span class="sd">            stream that cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its</span>
-<span class="sd">            content occupies ``[0:_buffer_cur]``, and everything past that is padding never read.</span>
+<span class="sd">            :meth:`io.IOBase.writable` gates this method as well as :meth:`write` -- "If</span>
+<span class="sd">            :data:`False`, :meth:`write` and :meth:`truncate` will raise :exc:`OSError`" -- and</span>
+<span class="sd">            :meth:`writable` here returns :data:`False`, so refusing is what the contract asks</span>
+<span class="sd">            for. It is also what CPython's own read-only buffered readers do: both the</span>
+<span class="sd">            accelerated :class:`io.BufferedReader` and the pure-Python</span>
+<span class="sd">            ``_pyio.BufferedReader`` raise :exc:`io.UnsupportedOperation`, the latter from</span>
+<span class="sd">            ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (#645).</span>
+
+<span class="sd">            The resizing this used to perform is still reachable internally, as</span>
+<span class="sd">            :meth:`_truncate_buffer`. It never touched the underlying stream in the first place</span>
+<span class="sd">            -- it resizes a private lookback window -- which is why it survives under a private</span>
+<span class="sd">            name rather than being removed with the public method's behaviour.</span>
+
+<span class="sd">        """</span>
+        <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s1">'truncate'</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_truncate_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int | None'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resize the lookback buffer to the given ``size`` in bytes (or the current position if</span>
+<span class="sd">        ``size`` is not specified). The current stream position isn't changed. This resizing can</span>
+<span class="sd">        extend or reduce the current buffer size. In case of extension, the new area is</span>
+<span class="sd">        zero-filled. The new buffer size is returned.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This is the internal half of what :meth:`truncate` used to do, which is all of it:</span>
+<span class="sd">            nothing here writes to the underlying stream -- :meth:`write` raises -- so what this</span>
+<span class="sd">            resizes is the buffer, not the stream behind it. That is why :meth:`truncate` refuses</span>
+<span class="sd">            (#645) while this remains: the operation is a private-window one, not an</span>
+<span class="sd">            :class:`io.IOBase` write. The buffer is a sliding window over a stream that cannot be</span>
+<span class="sd">            seeked: its octet 0 sits at absolute offset ``_buffer_set``, its content occupies</span>
+<span class="sd">            ``[0:_buffer_cur]``, and everything past that is padding never read.</span>
 
 <span class="sd">            Two consequences for which octets survive. An extension appends its zero octets at</span>
 <span class="sd">            the **tail**, the new area being by definition the region past the old end. A</span>
@@ -912,10 +940,10 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># NOTE: an unspecified size means the current position, per</span>
-            <span class="c1"># :meth:`io.IOBase.truncate`. The buffer is indexed relative to</span>
-            <span class="c1"># ``_buffer_set``, and the position may sit before it once a saved</span>
-            <span class="c1"># buffer has been rewound, in which case nothing is kept.</span>
+            <span class="c1"># NOTE: an unspecified size means the current position, following the</span>
+            <span class="c1"># :meth:`io.IOBase.truncate` convention this used to implement. The buffer</span>
+            <span class="c1"># is indexed relative to ``_buffer_set``, and the position may sit before it</span>
+            <span class="c1"># once a saved buffer has been rewound, in which case nothing is kept.</span>
             <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TruncateError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative size value </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
@@ -941,14 +969,21 @@
         <span class="c1"># point still reads correctly out of the pair.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+=</span> <span class="n">dropped</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">-</span> <span class="n">dropped</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span>
 
-
-<div class="viewcode-block" id="SeekableReader.writeable">
-<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.writeable">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">writeable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<div class="viewcode-block" id="SeekableReader.writable">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.writable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">writable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and</span>
-<span class="sd">        :meth:`truncate` will raise :exc:`OSError`."""</span>
+<span class="sd">        :meth:`truncate` will raise :exc:`OSError`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This was spelled ``writeable`` until #645, which is not how the :mod:`io` protocol</span>
+<span class="sd">            spells it, so it overrode nothing and :mod:`io` never consulted it -- the inherited</span>
+<span class="sd">            :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`, so there</span>
+<span class="sd">            was no observable divergence to notice; the coincidence is what hid it.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 

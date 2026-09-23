@@ -22,7 +22,7 @@ implementation to :class:`io.BufferedReader`.
    .. automethod:: readline
    .. automethod:: readlines
 
-   .. automethod:: writeable
+   .. automethod:: writable
    .. automethod:: write
 
    .. automethod:: seekable

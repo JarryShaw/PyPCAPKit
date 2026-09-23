@@ -582,7 +582,13 @@
 <span class="sd">        buffer_save: if save buffer to file (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 <span class="sd">        buffer_path: path name for buffer file if necessary (for :class:`~pcapkit.corekit.io.SeekableReader` only)</span>
 
-<span class="sd">        no_eof: if not raise :exc:`EOFError` when reach EOF</span>
+<span class="sd">        no_eof: if not raise :exc:`EOFError` when reach EOF -- retry instead,</span>
+<span class="sd">            which is what a live capture on a pipe or on standard input wants,</span>
+<span class="sd">            since a read there blocks until the writer produces more or closes.</span>
+<span class="sd">            Retrying stops as soon as one retry finds nothing new, so an</span>
+<span class="sd">            exhausted input finishes rather than spinning; on a *seekable*</span>
+<span class="sd">            input, where nothing blocks, that means a file still being appended</span>
+<span class="sd">            to ends at the data present when the extraction reached it</span>
 
 <span class="sd">        context: caller supplied parsing context for protocols that need</span>
 <span class="sd">            information not carried on the wire, keyed by protocol index ID --</span>
