@@ -2349,13 +2349,9 @@ pull requests between #326 and #509.
   is refused. The file goes from 1 failed / 5 passed / 16 subtests to 6
   passed / 64 subtests. A cross-review found that all seven guard
   ``raise`` lines this reaches -- ``tcp/flags.py``'s own included -- were
-  already covered by a passing test predating this fix, though not from one
-  PR: #677 itself supplies three of the seven guards (``CommandType``,
-  ``TransportProtocol`` and ``Flags``), and the other four are the ``mh.*``
-  flag guards #632 added for #623; #677's ``test_const_enum_builtin_parity.py``
-  sweeps all 123 registries, which is what reaches all seven regardless of
-  which PR guarded each. None was genuinely newly reached by this fix. No
-  line under ``pcapkit/`` changed (#702).
+  already covered by a passing test predating this fix; none was
+  genuinely newly reached by it. No line under ``pcapkit/`` changed
+  (#702).
 * **Changed** -- ``examples/captures/out.json``, ``out.plist``, ``out.txt``
   and ``pcapng.txt`` are no longer tracked in git; they are build output, not
   fixtures, and a tracked rendering with no reader goes stale silently every
@@ -2385,19 +2381,17 @@ pull requests between #326 and #509.
   ``~typing.Type[Dumper]``, the same form eight other files in the tree
   already use for the identical ambiguity. Line 146 (the first line of
   ``__output__``'s ``#:`` block, which continues through line 149) is fixed
-  for the same reason but is currently inert: ``__output__`` carries no
-  runtime annotation (``TraceFlowBase.__dict__['__annotations__']`` is
-  empty), and the ``# type:`` comment sixteen lines below, at line 162,
-  spells the identical bare ``Type[Dumper]`` -- so whatever eventually
-  renders this attribute's type still has the same ambiguity to resolve.
-  This half of the fix is insurance against the day something reads it
-  cleanly. **This does not close #709.** Four more
-  bare ``Type`` sites -- hand-written ``:type:`` fields at
+  for the same reason but is currently inert: the ``# type:`` comment
+  sixteen lines below, at line 162, spells the identical bare
+  ``Type[Dumper]`` -- so whatever eventually renders this attribute's type
+  still has the same ambiguity to resolve. This half of the fix is
+  insurance against the day something reads it cleanly. This pair of sites
+  is what closes #709. Four more bare ``Type`` sites -- hand-written
+  ``:type:`` fields at
   ``docs/source/pcapkit/foundation/engines/engine.rst:40``,
   ``.../reassembly/reassembly.rst:33`` and ``:43``, and
-  ``.../traceflow/traceflow.rst:40`` -- carry the same ambiguity and are not
-  touched here; #709 stays open for them, though PR #714 covers exactly
-  those four sites (#709).
+  ``.../traceflow/traceflow.rst:40`` -- carried the same ambiguity and are
+  fixed separately, by #714 (#709).
 * **Fixed** -- ``register_protocol``'s overwrite warning could claim a
   protocol was replaced with itself. The guard that decides *whether* to
   warn was already correct -- ``incumbent is not protocol``, an identity
