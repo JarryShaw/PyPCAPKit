@@ -2325,6 +2325,30 @@ pull requests between #326 and #509.
   ``Type`` cross-reference ambiguity newly rendered by ``TraceFlow._foutio``'s
   new directive rather than a defect this change introduced -- #709 tracks
   it. No line under ``pcapkit/`` changed (#684).
+* **Fixed** -- ``tests/dumpkit/test_nameless_enum_rendering_unit.py`` (added
+  by #670) swept every flag-enum registry against one fixed tuple ending in
+  ``65536``, on the assumption that every such registry is 16 bits wide.
+  Seven registries are not, at four distinct widths:
+  ``ftp.command.CommandType`` (3 bits), ``reg.apptype.TransportProtocol`` (4,
+  computed at runtime), ``mh.binding_ack_flag.BindingACKFlag``,
+  ``mh.handover_ack_flag.HandoverACKFlag`` and
+  ``mh.handover_initiate_flag.HandoverInitiateFlag`` (8 each), and
+  ``mh.binding_update_flag.BindingUpdateFlag`` with ``tcp.flags.Flags`` (16,
+  the two the old probe actually fit). ``tcp.flags.Flags(65536)`` correctly
+  raises -- its own ``_missing_`` bounds itself to ``0 <= value <= 0xFFFF`` --
+  so the sweep was failing on correct behaviour rather than reporting a
+  defect. A new ``_field_mask`` derives each registry's own all-ones bound
+  from its declared members, and ``_nameless_values`` returns the values that
+  bound admits but no member names -- zero, each undeclared bit alone, and
+  every undeclared bit combined -- in place of the one hard-coded tuple. A
+  new ``test_a_value_past_the_field_is_refused_rather_than_rendered`` pins
+  the boundary directly: the widest in-field value is accepted, one past it
+  is refused. The file goes from 1 failed / 5 passed / 16 subtests to 6
+  passed / 64 subtests. A cross-review found that of the seven guard
+  ``raise`` lines this newly reaches, six were already covered by passing
+  tests from #677, predating this fix; only ``tcp/flags.py``'s own guard line
+  was genuinely newly reached by it. No line under ``pcapkit/`` changed
+  (#702).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
