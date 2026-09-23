@@ -31,7 +31,52 @@ concurrency:
   group: create-release-${{ github.ref }}
   cancel-in-progress: false
 
+# Every job below with an effect outside this run declares a deployment
+# ``environment:``, which is what holds it at "Waiting" until a required reviewer
+# approves. Four jobs qualify, and they get four environments rather than one
+# shared ``release``:
+#
+#   github -> github-release  the public GitHub Release, and the ``v*`` tag that
+#                             ``action-gh-release``'s ``tag_name`` creates with it
+#   tag    -> conda-tag       a commit pushed to ``main``, and the ``conda-*`` tag
+#   pypi   -> pypi            an upload to PyPI, and to TestPyPI
+#   conda  -> anaconda        an upload to anaconda.org/jarryshaw
+#
+# One environment per distinct credential and blast radius, because approval is
+# granted to an *environment* and not to a job: a single ``release`` approved once
+# would release PyPI and Anaconda together, and those are different credentials
+# (OIDC trusted publishing versus ``ANACONDA_TOKEN``) reaching different indexes.
+# PyPI is the one that has to be answerable alone -- a version number it has
+# accepted cannot be reused, and ``skip-existing: true`` below means the re-upload
+# then *succeeds* having published nothing, so an unintended publish consumes the
+# number the intended release wanted. ``github`` and ``tag`` are split on the same
+# principle: ``github`` spends the run's own ``GITHUB_TOKEN``, whereas ``tag``
+# spends a long-lived PAT and a deploy key to write to the default branch.
+#
+# The cost is two approval waves, not four: ``github`` and ``tag`` need only
+# ``version_check`` so they arrive together, and ``pypi`` and ``conda`` then arrive
+# together too, each wave answerable in one visit to "Review pending deployments".
+#
+# Two things about this that are not self-enforcing, and #641 is the first of them:
+#
+#   * An ``environment:`` naming an environment that does not exist is created
+#     implicitly, with no protection rules, and the job proceeds unapproved. So
+#     these four lines are inert until each environment exists under
+#     Settings -> Environments with a required reviewer on it. This repository
+#     already ships the worked example of that failure: ``github-pages`` has
+#     existed since 2021 with ``"protection_rules": []``.
+#   * Leave each one's "Deployment branches and tags" as "No restriction". This
+#     workflow's ``push`` trigger is ``tags: v*``, and a branch policy that does
+#     not list that tag pattern does not pause the job for approval -- it fails it
+#     outright with "Branch is not allowed to deploy to <environment>".
+#
+# ``tests/project/test_release_gates.py`` asserts the first bullet's workflow half,
+# i.e. that no job here publishes without naming an environment. It cannot assert
+# the repository settings, which is why they are written down here.
+
 jobs:
+  # No ``environment:`` here, and none needed: this is a test gate with no outward
+  # effect, and a job that calls a reusable workflow may not declare one anyway.
   unit-tests:
     name: Release test gate
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
@@ -86,6 +131,9 @@ jobs:
   github:
     name: GitHub Release
     runs-on: ubuntu-latest
+    # Gated: publishes the Release, and creates the ``v*`` tag that every job
+    # below then checks out. See the note above ``jobs:``.
+    environment: github-release
     permissions:
       contents: write
     needs: [ version_check ]
@@ -174,6 +222,11 @@ jobs:
     # two check rows reading `Conda Tag` with nothing to tell them apart.
     name: Conda Tag (release)
     runs-on: ubuntu-latest
+    # Gated: pushes a commit to ``main`` and the ``conda-*`` tag. ``permissions: {}``
+    # does not constrain it -- the write goes through the deploy key and PAT below,
+    # not the run's token -- which is why it needs an approval of its own. See the
+    # note above ``jobs:``.
+    environment: conda-tag
     permissions: {}
     needs: [ version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
@@ -230,13 +283,15 @@ jobs:
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    ## Specifying a GitHub environment is optional, but strongly encouraged
-    #environment: release
-    #permissions:
-    #  # IMPORTANT: this permission is mandatory for trusted publishing
-    #  id-token: write
+    # Gated, and named ``pypi`` rather than the upstream snippet's ``release``: see
+    # the note above ``jobs:`` for why each target gets its own. #641 was that this
+    # line stayed commented while the rest of the same snippet did not -- the
+    # ``id-token: write`` that *enables* trusted publishing was re-added below, so
+    # the block read as disabled as a unit when only its gate still was.
+    environment: pypi
     permissions:
       contents: write
+      # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     needs: [ github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
@@ -317,6 +372,11 @@ jobs:
   conda:
     name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    # Gated: uploads to anaconda.org/jarryshaw with ``ANACONDA_TOKEN``. This job
+    # never had an ``environment:`` at all, not even a commented one, so it was the
+    # half of #641 that was not written down as a thing to turn on. See the note
+    # above ``jobs:``.
+    environment: anaconda
     permissions:
       contents: write
     needs: [ tag, github, version_check ]
