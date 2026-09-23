@@ -1758,11 +1758,33 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             should have emitted as a *binary* field, so the entry is malformed
             however it is read.
 
+            A binary field's value used to be followed by a bare
+            :meth:`io.BytesIO.read` with no length -- meant to skip the one
+            newline octet the format puts there, but reading with no argument
+            reads to *end of file* instead. The loop's next ``readline()`` then
+            found nothing and ended the entry, so every field behind a binary
+            one was silently gone, however well-formed. See `#704
+            <https://github.com/JarryShaw/PyPCAPKit/issues/704>`__. The skip is
+            now exactly that one octet, and a terminator that is missing or is
+            not a newline ends the entry with a warning -- the same shape as
+            the short length prefix above -- except when the value itself was
+            already clamped to what the entry held, since that shortfall was
+            reported already and nothing is left behind it to check.
+
         """
         self = cast('Self', super().post_process(packet))
 
         data = []  # type: list[OrderedMultiDict[str, str | bytes]]
-        for entry_buffer in self.entry.split(b'\n\n'):
+        segments = self.entry.split(b'\n\n')
+        for index, entry_buffer in enumerate(segments):
+            if index < len(segments) - 1:
+                # ``split`` consumes the blank line's own newline together
+                # with the one that terminates this entry's last field; put
+                # the latter back, or a binary last field's terminator check
+                # below sees an entry that ends one octet early and warns
+                # over a newline that was in the capture all along
+                entry_buffer += b'\n'
+
             entry = OrderedMultiDict()  # type: OrderedMultiDict[str, str | bytes]
 
             entry_data = io.BytesIO(entry_buffer)
@@ -1786,7 +1808,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
 
                     length = struct.unpack('<Q', prefix)[0]  # type: int
                     available = len(entry_buffer) - entry_data.tell()
-                    if length > available:
+                    clamped = length > available
+                    if clamped:
                         warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
                              f'declares {length} octet(s) with {available} left in its '
                              f'entry; reading {available}', SchemaWarning,
@@ -1794,7 +1817,19 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                         length = available
 
                     entry.add(self._decode_text(line), entry_data.read(length))
-                    entry_data.read()  # Skip trailing newline.
+
+                    if not clamped:
+                        # the one octet the format puts here to terminate the
+                        # field; a value already clamped to the entry's own
+                        # end left nothing behind to check, and was reported
+                        # above
+                        terminator = entry_data.read(1)
+                        if terminator != b'\n':
+                            warn(f'PCAP-NG: [systemd Journal Export] binary field '
+                                 f'{line!r} is not followed by the newline that '
+                                 f'terminates it; ending the entry', SchemaWarning,
+                                 stacklevel=stacklevel())
+                            break
 
             data.append(entry)
         self.data = data

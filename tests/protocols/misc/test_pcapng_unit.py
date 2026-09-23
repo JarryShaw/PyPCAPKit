@@ -4169,8 +4169,13 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                 schema_warnings = [entry for entry in caught
                                    if entry.category is SchemaWarning]
                 if supplied + (-(8 + supplied) % 4) >= 8:
-                    # the block's own padding made the prefix up to eight
-                    self.assertEqual(schema_warnings, [])
+                    # the block's own padding made the prefix up to eight,
+                    # giving a valid zero-length field -- but one with nothing
+                    # behind it in the buffer to hold its terminator
+                    self.assertEqual(len(schema_warnings), 1)
+                    self.assertIn('is not followed by', str(schema_warnings[0].message))
+                    self.assertEqual(len(entries), 1)
+                    self.assertEqual(entries[0]['MESSAGE'], b'')
                     continue
                 self.assertEqual(len(schema_warnings), 1)
                 self.assertIn('of the 8 it needs', str(schema_warnings[0].message))
@@ -4186,6 +4191,72 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertEqual(entries[0]['MESSAGE'], b'abc')
         self.assertEqual([entry for entry in caught
                           if entry.category.__name__ == 'SchemaWarning'], [])
+
+    def test_journal_fields_following_a_binary_field_are_not_discarded(self) -> None:
+        """#704: skipping a binary field's terminator used to skip everything.
+
+        ``entry_data.read()`` with no argument reads to *end of file*, not past
+        the one newline octet the format puts there, so the outer ``while
+        True`` loop's next ``readline()`` finds nothing and ends the entry.
+        A single binary field cannot show this -- there is nothing behind it
+        to lose -- so the entry needs a *second* binary field, and a text
+        field after that, to tell a length-bounded skip from an unbounded one.
+
+        """
+        entries, caught = self._extract_journal(
+            b'BEFORE=zero\n'
+            b'FIRST\n' + struct.pack('<Q', 3) + b'one\n' +
+            b'SECOND\n' + struct.pack('<Q', 3) + b'two\n' +
+            b'AFTER=three\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['BEFORE'], 'zero')
+        self.assertEqual(entries[0]['FIRST'], b'one')
+        self.assertEqual(entries[0]['SECOND'], b'two')
+        self.assertEqual(entries[0]['AFTER'], 'three')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_binary_last_field_before_a_trailing_separator_is_not_warned(self) -> None:
+        """A cross-review false positive on #722: the terminator check itself.
+
+        ``self.entry.split(b'\\n\\n')`` consumes an entry's last field's own
+        terminating newline together with the blank line that separates it
+        from whatever follows -- a trailing separator an entry *may* carry
+        per ``draft-richardson-opsawg-pcapng-extras-01``. A *text* last
+        field's ``readline()`` never notices; the terminator check added for
+        #704 did, and warned over a newline that was in the capture all
+        along. The split has to give that one octet back to the segment it
+        took it from.
+
+        """
+        entries, caught = self._extract_journal(
+            b'MESSAGE\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['MESSAGE'], b'abc')
+        self.assertEqual(len(entries[1]), 0)
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_binary_field_ending_the_first_of_two_entries_is_not_warned(self) -> None:
+        """The same false positive, with a second real entry behind the split.
+
+        Identical mechanism to the trailing-separator case above, just with
+        real content on the far side of the ``\\n\\n`` instead of nothing --
+        confirming the fix is the split giving back a stolen octet, not a
+        special case for an empty second entry.
+
+        """
+        entries, caught = self._extract_journal(
+            b'A=1\nBIN\n' + struct.pack('<Q', 3) + b'abc\n' + b'\n' + b'B=2\n')
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0]['A'], '1')
+        self.assertEqual(entries[0]['BIN'], b'abc')
+        self.assertEqual(entries[1]['B'], '2')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
 
     def test_a_journal_binary_field_declaring_more_than_its_entry_is_clamped(self) -> None:
         """A 64-bit length was either fatal or invisible, by magnitude alone.
@@ -4212,17 +4283,25 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                               str(schema_warnings[0].message))
                 self.assertEqual(entries[0]['BINARY'], b'abc\n\x00')
 
-        # and a length the entry can satisfy is read exactly, and silently --
-        # the clamp reaches only what the entry holds, padding included, so it
-        # must not fire on a field that fits
+        # and a length the entry can satisfy is read exactly -- the clamp
+        # reaches only what the entry holds, padding included, so it must not
+        # fire on a field that fits. Only ``declared == 3`` leaves the real
+        # trailing newline immediately behind the value; every other cut lands
+        # on "abc" itself or the pad octet, which the terminator check reports.
+        remainder = b'abc\n\x00'
         for declared in range(6):
             with self.subTest(declared=declared, expect='untouched'):
                 entries, caught = self._extract_journal(
                     b'BINARY\n' + struct.pack('<Q', declared) + b'abc\n')
 
-                self.assertEqual([entry for entry in caught
-                                  if entry.category is SchemaWarning], [])
-                self.assertEqual(entries[0]['BINARY'], b'abc\n\x00'[:declared])
+                schema_warnings = [entry for entry in caught
+                                   if entry.category is SchemaWarning]
+                if remainder[declared:declared + 1] == b'\n':
+                    self.assertEqual(schema_warnings, [])
+                else:
+                    self.assertEqual(len(schema_warnings), 1)
+                    self.assertIn('is not followed by', str(schema_warnings[0].message))
+                self.assertEqual(entries[0]['BINARY'], remainder[:declared])
 
     def test_a_journal_field_that_is_not_utf8_is_replaced_and_reported(self) -> None:
         """One bad octet in one field used to cost the whole extraction.
