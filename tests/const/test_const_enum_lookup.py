@@ -49,8 +49,12 @@ under :mod:`pcapkit.const`, including ones nothing else touches (e.g.
 :mod:`pcapkit.const.reg.apptype`). ``tests/cli/test_main.py`` stubs pieces of
 :mod:`pcapkit.utilities.compat` and :mod:`pcapkit.utilities.exceptions`
 straight into :data:`sys.modules` for its own isolation and, depending on
-suite order, that stub can still be sitting there when this module runs --
-purging first forces a clean re-import instead of tripping over it.
+suite order, those stubs used to still be sitting there when this module ran --
+purging first forces a clean re-import instead of tripping over them. That file
+has since been put under :func:`tests._support.isolate_modules` and puts them
+back itself (issue #688), so it is no longer the specific hazard; the purge stays
+because the convention is worth keeping and because the *next* stand-in written
+without the helpers would be.
 
 """
 from __future__ import annotations
