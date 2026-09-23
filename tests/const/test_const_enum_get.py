@@ -60,7 +60,7 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag
 
-from tests._support import purge_modules
+from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
 
 #: An integer no wire field in the library is wide enough to carry, so every
 #: registry that bounds its own domain rejects it. Deliberately far outside the
@@ -141,17 +141,24 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
         purge_modules(['pcapkit'])
         cls.enums = _iter_const_enums()
         # ``test_the_always_resolving_registries_have_nothing_to_fall_back_to``
         # probes registries whose ``_missing_`` extends for *any* integer, which
-        # permanently registers a junk member on a module-global class. Drop the
-        # whole package afterwards so that pollution cannot leak into another
-        # module, rather than relying on the next test's own ``setUp`` to purge
-        # it -- that protection is incidental, and this class should not depend
-        # on it. Class-level rather than per-test, so ``cls.enums`` stays valid
-        # for every test in this class.
-        cls.addClassCleanup(purge_modules, ['pcapkit'])
+        # permanently registers a junk member on a module-global class. Restore
+        # the region to what it held before this class purged it, so those
+        # polluted class objects are unreachable rather than merely dropped from
+        # :data:`sys.modules` -- purging again here (as this used to do, GitHub
+        # issue #720) does not achieve that: it only forces whoever imports
+        # ``pcapkit`` next to rebuild it from source, and until they do, the
+        # region sits empty for them exactly as it does for this class's own
+        # first test, which is the leak #720 reports. Restoring is exact and
+        # immediate, and does not depend on the next test's own ``setUp`` to
+        # purge -- that protection is incidental, and this class should not
+        # depend on it. Class-level rather than per-test, so ``cls.enums`` stays
+        # valid for every test in this class.
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
     def test_the_reported_case_returns_the_default(self) -> None:
         """#584's own repro, on the enum it was reported against."""

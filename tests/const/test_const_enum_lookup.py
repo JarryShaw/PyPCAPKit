@@ -69,7 +69,7 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag
 
-from tests._support import purge_modules
+from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
 
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
@@ -292,9 +292,16 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
         purge_modules(['pcapkit'])
         cls.flags = _iter_const_int_flags()
-        cls.addClassCleanup(purge_modules, ['pcapkit'])
+        # Same shape as the two ``addClassCleanup(purge_modules, ...)`` sites
+        # GitHub issue #720 named in :mod:`tests.const.test_const_enum_get` and
+        # :mod:`tests.const.test_const_enum_builtin_parity`: a second purge on
+        # the way out does not protect the next module, it just hands it an
+        # empty region to rebuild from source. Restoring to the pre-purge
+        # snapshot rebinds it straight back to the pristine modules instead.
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
     def test_the_sweep_size_is_pinned(self) -> None:
         """A flag enum added or removed needs a fresh look, not a silent pass."""

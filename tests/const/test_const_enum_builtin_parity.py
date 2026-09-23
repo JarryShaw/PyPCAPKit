@@ -56,7 +56,7 @@ from typing import TYPE_CHECKING
 
 import aenum
 
-from tests._support import purge_modules
+from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -191,12 +191,18 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
         purge_modules(['pcapkit'])
         cls.enums = _iter_const_registries()
         # The out-of-range probe below registers a junk member on the two
-        # auto-extending registries, which are module-global classes. Purge the
-        # package afterwards so that pollution cannot reach another module.
-        cls.addClassCleanup(purge_modules, ['pcapkit'])
+        # auto-extending registries, which are module-global classes. Restore
+        # the region to what it held before this class purged it, rather than
+        # purging again (as this used to do, GitHub issue #720): a second purge
+        # cannot achieve "pollution cannot reach another module" -- it just
+        # leaves the region empty for whoever runs next, exactly the gap #720
+        # reports, whereas restoring rebinds it straight back to the pristine,
+        # pre-purge modules so the polluted ones are unreachable.
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
     def test_the_sweep_size_is_pinned(self) -> None:
         """A registry added or removed needs a fresh look, not a silent pass."""
