@@ -428,6 +428,9 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.internet.hip.reg_info_list_len
 .. autofunction:: pcapkit.protocols.schema.internet.hip.two_octet_prefix_list_len
 .. autofunction:: pcapkit.protocols.schema.internet.hip.transport_format_list_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.encrypted_data_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_total_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_padding_len
 
 Data Models
 -----------

@@ -197,6 +197,7 @@ from pcapkit.protocols.schema.internet.hip import \
     TransportFormatListParameter as Schema_TransportFormatListParameter
 from pcapkit.protocols.schema.internet.hip import UnassignedParameter as Schema_UnassignedParameter
 from pcapkit.protocols.schema.internet.hip import ViaRVSParameter as Schema_ViaRVSParameter
+from pcapkit.protocols.schema.internet.hip import parameter_total_len
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
@@ -793,7 +794,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         unassigned = Data_UnassignedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             contents=schema.value,
         )
         return unassigned
@@ -836,7 +837,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         esp_info = Data_ESPInfoParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             index=schema.index,
             old_spi=schema.old_spi,
             new_spi=schema.new_spi,
@@ -882,7 +883,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         r1_counter = Data_R1CounterParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             counter=schema.counter,
         )
         return r1_counter
@@ -988,6 +989,12 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         locator_set = Data_LocatorSetParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
+            # NOTE: The one reported record length in this module left on the
+            # pre-#651 expression, to match the one padding site left on it --
+            # see ``LocatorSetParameter.padding`` in
+            # :mod:`pcapkit.protocols.schema.internet.hip` for why touching
+            # either alone makes a conformant parameter non-conformant. #679
+            # fixes both together, and this line moves with them.
             length=4 + schema.len + (8 - schema.len % 8) % 8,
             locator_set=tuple(_locs),
         )
@@ -1036,7 +1043,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         puzzle = Data_PuzzleParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             index=_numk,
             lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
@@ -1107,7 +1114,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         solution = Data_SolutionParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             index=_numk,
             reserved=_resv,
             opaque=_opak,
@@ -1158,7 +1165,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         seq = Data_SEQParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             id=_upid,
         )
         return seq
@@ -1199,7 +1206,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         ack = Data_ACKParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             update_id=tuple(schema.update_id),
         )
         return ack
@@ -1234,7 +1241,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         dh_group_list = Data_DHGroupListParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             group_id=tuple(schema.groups),
         )
         return dh_group_list
@@ -1271,7 +1278,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         diffie_hellman = Data_DiffieHellmanParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             group_id=schema.group,
             pub_len=schema.pub_len,
             pub_val=schema.pub_val,
@@ -1316,7 +1323,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_transform = Data_HIPTransformParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             suite_id=tuple(schema.suites),
         )
         return hip_transform
@@ -1363,7 +1370,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_cipher = Data_HIPCipherParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             cipher_id=tuple(schema.ciphers),
         )
         return hip_cipher
@@ -1406,7 +1413,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         nat_traversal_mode = Data_NATTraversalModeParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             mode_id=tuple(schema.modes),
         )
         return nat_traversal_mode
@@ -1445,7 +1452,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         transaction_pacing = Data_TransactionPacingParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             min_ta=schema.min_ta,
         )
         return transaction_pacing
@@ -1487,7 +1494,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         encrypted = Data_EncryptedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             cipher=schema.cipher,
             iv=getattr(schema, 'iv', None),
             data=schema.data,
@@ -1549,7 +1556,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         host_id = Data_HostIDParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             hi_len=schema.hi_len,
             di_type=schema.di_data['type'],
             di_len=schema.di_data['len'],
@@ -1589,7 +1596,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hit_suite_list = Data_HITSuiteListParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             suite_id=tuple(schema.suites),
         )
         return hit_suite_list
@@ -1626,7 +1633,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         cert = Data_CertParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             cert_group=schema.cert_group,
             cert_count=schema.cert_count,
             cert_id=schema.cert_id,
@@ -1668,7 +1675,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         notification = Data_NotificationParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             msg_type=schema.msg_type,
             msg=schema.msg,
         )
@@ -1702,7 +1709,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         echo_request_signed = Data_EchoRequestSignedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             opaque=schema.opaque,
         )
         return echo_request_signed
@@ -1739,7 +1746,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         reg_info = Data_RegInfoParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=schema.min_lifetime),
                 max=datetime.timedelta(seconds=schema.max_lifetime),
@@ -1780,7 +1787,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         reg_request = Data_RegRequestParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_request),
         )
@@ -1818,7 +1825,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         reg_response = Data_RegResponseParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_response),
         )
@@ -1856,7 +1863,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         reg_failed = Data_RegFailedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_failed),
         )
@@ -1901,7 +1908,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         reg_from = Data_RegFromParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             port=schema.port,
             protocol=schema.protocol,
             address=schema.address,
@@ -1936,7 +1943,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         echo_response_signed = Data_EchoResponseSignedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             opaque=schema.opaque,
         )
         return echo_response_signed
@@ -1977,7 +1984,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         transport_format_list = Data_TransportFormatListParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             tf_type=tuple(schema.formats),
         )
         return transport_format_list
@@ -2020,7 +2027,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         esp_transform = Data_ESPTransformParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             suite_id=tuple(schema.suites),
         )
         return esp_transform
@@ -2059,7 +2066,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         seq_data = Data_SeqDataParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             seq=schema.seq,
         )
         return seq_data
@@ -2099,7 +2106,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         ack_data = Data_AckDataParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             ack=tuple(schema.ack),
         )
         return ack_data
@@ -2139,7 +2146,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         payload_mic = Data_PayloadMICParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             next=schema.next,
             payload=schema.payload,
             mic=schema.mic,
@@ -2176,7 +2183,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         transaction_id = Data_TransactionIDParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             id=schema.id,
         )
         return transaction_id
@@ -2211,7 +2218,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         overlay_id = Data_OverlayIDParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             id=schema.id,
         )
         return overlay_id
@@ -2263,7 +2270,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         route_dst = Data_RouteDstParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
@@ -2310,7 +2317,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_transport_mode = Data_HIPTransportModeParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             port=schema.port,
             mode_id=tuple(schema.mode),
         )
@@ -2348,7 +2355,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_mac = Data_HIPMACParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             hmac=schema.hmac,
         )
         return hip_mac
@@ -2385,7 +2392,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_mac_2 = Data_HIPMAC2Parameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             hmac=schema.hmac,
         )
         return hip_mac_2
@@ -2420,7 +2427,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_signature_2 = Data_HIPSignature2Parameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             algorithm=schema.algorithm,
             signature=schema.signature,
         )
@@ -2456,7 +2463,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         hip_signature = Data_HIPSignatureParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             algorithm=schema.algorithm,
             signature=schema.signature,
         )
@@ -2490,7 +2497,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         echo_request_unsigned = Data_EchoRequestUnsignedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             opaque=schema.opaque,
         )
         return echo_request_unsigned
@@ -2523,7 +2530,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         echo_response_unsigned = Data_EchoResponseUnsignedParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             opaque=schema.opaque,
         )
         return echo_response_unsigned
@@ -2570,7 +2577,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         relay_from = Data_RelayFromParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
@@ -2619,7 +2626,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         relay_to = Data_RelayToParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
@@ -2660,7 +2667,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         overlay_ttl = Data_OverlayTTLParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             ttl=datetime.timedelta(seconds=schema.ttl),
         )
         return overlay_ttl
@@ -2712,7 +2719,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         route_via = Data_RouteViaParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
@@ -2758,7 +2765,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         from_ = Data_FromParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             address=schema.address,
         )
         return from_
@@ -2793,7 +2800,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         rvs_hmac = Data_RVSHMACParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             hmac=schema.hmac,
         )
         return rvs_hmac
@@ -2843,7 +2850,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         via_rvs = Data_ViaRVSParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             address=tuple(schema.address),
         )
         return via_rvs
@@ -2878,7 +2885,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         relay_hmac = Data_RelayHMACParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            length=parameter_total_len(schema.len),
             hmac=schema.hmac,
         )
         return relay_hmac
