@@ -61,6 +61,7 @@ extracts parametres from a PCAP file.
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d
    .. autoattribute:: _flag_e
+   .. autoattribute:: _flag_f
    .. autoattribute:: _flag_q
    .. autoattribute:: _flag_r
    .. autoattribute:: _flag_t
@@ -70,10 +71,22 @@ extracts parametres from a PCAP file.
 
    .. autoattribute:: _ifile
    .. autoattribute:: _ofile
+   .. autoattribute:: _ifnm
+   .. autoattribute:: _ofnm
+   .. autoattribute:: _fext
+   .. autoattribute:: _offmt
+   .. autoattribute:: _magic
 
    .. autoattribute:: _frnum
+   .. autoattribute:: _frame
    .. autoattribute:: _reasm
    .. autoattribute:: _trace
+   .. autoattribute:: _ipv4
+   .. autoattribute:: _ipv6
+   .. autoattribute:: _tcp
+
+   .. autoattribute:: _eof_mark
+   .. autoattribute:: _vfunc
 
    .. autoattribute:: _exnam
    .. autoattribute:: _exeng

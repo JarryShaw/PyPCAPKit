@@ -25,6 +25,11 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. automethod:: run
    .. automethod:: read_frame
 
+   .. autoattribute:: _gbhdr
+   .. autoattribute:: _vinfo
+   .. autoattribute:: _dlink
+   .. autoattribute:: _nnsec
+
 PCAP-NG Support
 ===============
 
@@ -42,6 +47,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. automethod:: run
    .. automethod:: read_frame
+
+   .. autoattribute:: _ctx
+   .. autoattribute:: _ctx_list
 
 Internal Definitions
 --------------------

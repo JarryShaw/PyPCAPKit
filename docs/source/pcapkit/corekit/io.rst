@@ -14,6 +14,9 @@ implementation to :class:`io.BufferedReader`.
    .. autoproperty:: raw
    .. autoproperty:: closed
 
+   .. autoattribute:: _stream
+   .. autoattribute:: _closed
+
    .. automethod:: read
    .. automethod:: read1
    .. automethod:: readinto

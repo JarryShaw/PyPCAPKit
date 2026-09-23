@@ -89,6 +89,58 @@ GitHub's own rendering and the release body rather than Sphinx. The issue and pu
 under `.github/` are Markdown for the same reason. The exception ends there: anything added under
 `docs/source/` is `.rst`.
 
+### What belongs in the API reference: document the contract, hide the recipe
+
+The tenet is to **keep the usage and extensibility clear and straightforward, while hiding the
+recipe**. A member earns an autodoc directive because a reader needs it, not because of its spelling —
+so a leading underscore is not by itself a reason to leave something out, and being public is not by
+itself a reason to put it in.
+
+**Contract — document it.** Anything a *caller* needs in order to use a class, and anything an
+*implementer* needs in order to subclass it:
+
+- **Per-option and per-parameter `_read_*` / `_make_*` pairs.** These publish the data format: the
+  keyword arguments a caller passes to construct that option, and the fields they get back when
+  parsing it. There is nowhere else to look it up, so they stay documented even though the dispatch
+  reaches them through `getattr` rather than by name.
+- **Most class private attributes.** A private attribute that carries a subclass's state, or that a
+  subclass sets or reads, is contract. Keep it unless there is a specific reason it is not.
+- **Anything abstract, or implemented across subclasses.** An `@abstractmethod`, or an overridable
+  hook a subclass is expected to provide — `_make_data` has a concrete base implementation on
+  `ProtocolBase` and is overridden in 28 protocol modules, which is exactly the case this covers.
+- **Members whose observable behaviour is documented**, such as a method whose docstring records the
+  warning it emits or a guarantee it makes. A reader who hits that warning looks it up here.
+
+**Recipe — leave it out.** The implementation detail that is on nobody's usage or extensibility
+surface. In practice this is chiefly **module-level privates**: a private helper function, a lazily
+imported backend flag, an internal lock, a private wrapper class nobody constructs or subclasses.
+Removing one of these takes its members with it, which is correct — a member of a private class is
+reachable only through that class.
+
+The sweep runs **in both directions**. A must-implement member with no directive is the same defect as
+a recipe body with one, only quieter: add the missing directive rather than aiming for a small diff.
+
+Two mechanical points that decide real cases:
+
+- **A private base class must stay documented when a documented subclass carries
+  `:show-inheritance:`.** Sphinx renders that subclass's `Bases:` line as a link into the private
+  class's page, so dropping the directive breaks a link a public page really does render. This is what
+  keeps `pcapkit.protocols.schema.misc.pcapng._OPT_Option` and its five siblings, plus `_IPField`,
+  `_IPInterfaceField` and `_TextField`.
+- **Dunders keep their directives.** A `__dunder__` is reached through public syntax rather than by
+  name — `__len__` is what `len()` calls, `__getitem__` is what `obj[key]` does — so overriding one
+  changes behaviour a caller observes without ever writing the name. PyPCAPKit's own `__proto__`,
+  `__option__`, `__schema__` and `__protocol_name__` family is the documented extension contract that
+  subclass authors and the `register_*` functions write to: public API in everything but spelling.
+
+One shape to know about because it is invisible: every const enum carries a `_missing_` fallback that
+resolves an unregistered value and registers it, rather than raising as a plain `enum` would. That is
+deliberate and it is the extensibility behaviour of the whole `pcapkit.const` package, so it is
+documented once on the package's landing page rather than restated on each of the 121 enumerations
+under `pcapkit/const/` that implement it. Note `docs/source/conf.py` already names `_missing_` in
+`autodoc_default_options['exclude-members']`, so a per-class directive would be arguing with the
+project's own configuration.
+
 ## Coding style
 
 [PEP 8](https://peps.python.org/pep-0008/) is the baseline, but the repository's own linters are the
