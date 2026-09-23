@@ -83,6 +83,17 @@ from tests._support import load_module, purge_modules
 #: rather than version-specific: the copy is made by ``from ._common import *`` at
 #: the top of every one of :mod:`aenum`'s own modules.
 #:
+#: Warming :mod:`aenum` is load-bearing below 3.11 too, which is not what issue
+#: #687 assumes. On 3.10 the *real* branch is also ``from aenum import StrEnum``,
+#: so ``setUp`` warms the cache honestly before any test fakes anything and this
+#: file passes -- but that is an ordering inside ``setUp``, not a guarantee. Faking
+#: the version around :mod:`aenum`'s first import in a fresh CPython 3.10.21
+#: process does not quietly poison a cache, it raises ``ImportError: cannot import
+#: name 'FlagBoundary' from 'enum'`` and then ``AttributeError: 'FlagBoundary'
+#: object has no attribute '__set_name__'`` from aenum's own fallback definition of
+#: that name. Measured on 3.10.21, 3.11.15, 3.12.13 and 3.14.7; the window is empty
+#: on all four once this list is warmed.
+#:
 #: The rest are here because the faked branches import them too. Whether each one
 #: memoises anything version-dependent is deliberately *not* the question: the
 #: invariant :meth:`CompatTests.load_compat_as_python35` asserts is that nothing
@@ -90,7 +101,26 @@ from tests._support import load_module, purge_modules
 #: which third-party caches are dangerous. A future interpreter or :mod:`aenum`
 #: release that pulls in one more module fails that assertion here, at the line
 #: that caused it, instead of poisoning something three directories away.
-WARM_BEFORE_FAKING = ('aenum', 'decimal', 'threading', 'typing', 'typing_extensions')
+#:
+#: The list is **read off** :file:`pcapkit/utilities/compat.py`, not arrived at by
+#: running the test until it stopped complaining, and that distinction is the
+#: point of having it. Every import statement on a branch reachable at ``(3, 5)``:
+#: :mod:`collections.abc` (line 34), :mod:`pathlib` (63), :mod:`threading` (67),
+#: :mod:`typing` (4, 68, 126), :mod:`aenum` (143), :mod:`typing_extensions` (148,
+#: 202), :mod:`contextlib` (153), :mod:`decimal` (154), :mod:`enum` (179).
+#:
+#: Four of those never actually surface, and *why* is the point. Three --
+#: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` -- are imported at
+#: module scope by :mod:`tests._support`, and :mod:`enum` by this module itself. It
+#: is not the runtime that keeps them warm: under ``python -S`` none of the four is
+#: in :data:`sys.modules` at all. So "some other module imports it for us" is
+#: precisely the unenforced ordering this file exists to stop relying on, which is
+#: why the four are on the list despite costing a :data:`sys.modules` lookup each
+#: and nothing else. Measured: with only the five that do surface warmed and
+#: :mod:`pathlib` forced cold, the window leaks ``['pathlib', 'pathlib._os']``;
+#: with the full list it is empty even with five of the nine forced cold.
+WARM_BEFORE_FAKING = ('aenum', 'collections.abc', 'contextlib', 'decimal', 'enum',
+                      'pathlib', 'threading', 'typing', 'typing_extensions')
 
 #: Prefix of the names the loaders themselves write, which are excluded from the
 #: "nothing was imported under the fake" check. :func:`tests._support.load_module`
