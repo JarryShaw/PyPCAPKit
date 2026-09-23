@@ -87,6 +87,8 @@ class FEATCode(StrEnum):
             value: Value to get enum item.
 
         """
+        if not isinstance(value, str):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         return extend_enum(cls, value.upper(), value)
 
 
@@ -101,6 +103,18 @@ class CommandType(IntFlag):
     P = auto()
     #: Service execution.
     S = auto()
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'CommandType':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= 0x07):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        return super()._missing_(value)
 
 
 class ConformanceRequirement(IntEnum):
@@ -171,6 +185,8 @@ class {NAME}(StrEnum):
                 the canonical upper-case member names.
 
         """
+        if not isinstance(value, str):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         name = value.upper()
         if name in cls._member_map_:
             return cls._member_map_[name]  # type: ignore[return-value]

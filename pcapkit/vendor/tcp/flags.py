@@ -34,7 +34,7 @@ DATA = {
 }
 
 #: Default constant template of enumerate registry from IANA CSV.
-LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
@@ -81,14 +81,30 @@ class {NAME}(IntFlag):
                     raise
                 return Flags(default)
         return {NAME}[key]  # type: ignore[misc]
-'''.strip()  # type: Callable[[str, str, str, str], str]
+
+    @classmethod
+    def _missing_(cls, value: 'int') -> '{NAME}':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not ({FLAG}):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        return super()._missing_(value)
+'''.strip()  # type: Callable[[str, str, str, str, str], str]
 
 
 class Flags(Vendor):
     """TCP Header Flags"""
 
-    #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 4 <= value <= 15'
+    #: Value limit checker. The registry indexes *bit offsets* 4 through 15,
+    #: but the members it generates are ``1 << offset``, so the value domain a
+    #: lookup has to accept is the 16-bit field those bits live in -- a
+    #: composite such as ``SYN | ACK`` is a legitimate value and only the
+    #: composite path reaches :meth:`~pcapkit.const.tcp.flags.Flags._missing_`.
+    FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFF'
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/tcp-parameters/tcp-header-flags.csv'
 
@@ -149,7 +165,7 @@ class Flags(Vendor):
         enum = self.process(data)
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum)).strip()
 
-        return LINE(self.NAME, self.DOCS, ENUM, self.__module__)
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, self.__module__)
 
 
 if __name__ == '__main__':

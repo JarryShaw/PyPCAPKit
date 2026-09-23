@@ -53,6 +53,18 @@ class TransportProtocol(IntFlag):
         max_val = max(TransportProtocol.__members__.values())
         return extend_enum(TransportProtocol, key.lower(), max_val * 2)
 
+    @classmethod
+    def _missing_(cls, value: 'int') -> 'TransportProtocol':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
+        if not (isinstance(value, int) and 0 <= value <= max(cls.__members__.values()) * 2 - 1):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        return super()._missing_(value)
+
 
 class AppType(StrEnum):
     """[AppType] Application Layer Protocol Numbers"""
