@@ -2065,6 +2065,43 @@ pull requests between #326 and #509.
   dropped payload moves the parse output of essentially every HTTP/2 capture on the
   success path, so anything holding a golden file or a regression baseline that recorded
   the empty value sees it change (#668).
+* **Fixed** -- the schema half of every option-like registrar overwrote
+  silently while the parser half of the very same call warned.
+  ``EnumSchema.register`` was a bare ``cls.__enum__[code] = schema``, and it is
+  the schema half of 14 public registrars, so one ``register_ipv4_option`` call
+  replacing a built-in named the parser it displaced and said nothing about the
+  schema. ``EnumSchema.__init_subclass__`` reaches the same registry without
+  calling ``register``, so a subclass declared with a ``code=`` keyword -- the
+  documented way to add a schema -- stayed silent too; both are guarded now,
+  and the declaration hook's two branches are folded into one loop so the guard
+  is written once. Presence is a faithful test there only because
+  ``_EnumRegistry.__missing__`` returns a miss without recording it, so parsing
+  one packet carrying an unknown code cannot make the next legitimate
+  registration for that code warn about an entry no caller ever asked for. The
+  seven code-keyed parser registrars -- on ``ProtocolBase``, ``Link``,
+  ``Internet``, ``Frame``, ``PCAPNG``, ``Transport`` and ``SCTP`` -- now name
+  the displaced entry and its replacement, where before they reported only that
+  something had been overwritten and never which class it was. Their
+  presence-only firing condition is deliberately unchanged, and is not
+  harmonised onto the narrower guard #681 gave ``register_protocol``: that one
+  is keyed on a name derived from the value it stores, whereas these seven take
+  a ``code`` the caller supplies independently of the value, so one class
+  registered under two codes yields two keys and never reaches one key twice.
+  These tables also ship pre-seeded with unresolved ``ModuleDescriptor``
+  values, so an incumbent may be a two-string descriptor while the replacement
+  is the very class it names, which leaves a different-class test undecidable
+  without resolving the descriptor and forcing the import it exists to defer.
+  ``ContextRegistry.register`` already raises on a duplicate, and the
+  reassembly and ESP registrars append to lists with no key at all -- duplicate
+  security-association SPIs being a designed feature there, resolved by scoring
+  rather than by replacement -- so none of those three takes a guard.
+  ``import pcapkit`` holds at one warning, a third-party deprecation, and no
+  ``RegistryWarning``, measured over the 326 registry writes it performs, none
+  of which lands on a key already present; ``tests/foundation/registry/`` goes
+  13 to 14 tests and 87 to 95 subtests, the schema module holds 99% coverage
+  with its 5 new statements covered and its misses flat at 1, mypy and pylint
+  are unmoved at 112 errors and 364 messages, and ``EXPECTED_FAILURES`` is
+  unmoved at 44 entries (#692).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
