@@ -1525,6 +1525,113 @@ the package first. A new gate asserts the committed file still names the package
 version, covering the version changes made by hand, which never run this script at
 all – 40 of the 159 commits that have moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code>, a quarter
 over the project’s life and 11 of the most recent 25 (#625).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">SeekableReader.truncate</span></code> put its padding where the reader’s own
+bookkeeping says the content is, and <code class="docutils literal notranslate"><span class="pre">read</span></code> then returned one octet fewer than
+the buffer held. Same family as #604, but two defects rather than one, and the
+padding side is only half of it. The buffer keeps its content at
+<code class="docutils literal notranslate"><span class="pre">[0:_buffer_cur]</span></code> with unwritten padding behind it, so a reduction has to keep
+the octets it has and an extension has to append at the <em>tail</em> – the latter is
+what <code class="docutils literal notranslate"><span class="pre">io.IOBase.truncate</span></code> means by “the contents of the new file area”, the area
+past the old end. It did neither: <code class="docutils literal notranslate"><span class="pre">temp[-size:]</span></code> sliced the buffer rather than
+the content, so it kept the trailing padding and discarded the octets actually
+read, and <code class="docutils literal notranslate"><span class="pre">temp.rjust(size)</span></code> prefixed the new zeros, displacing the content past
+where <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> and <code class="docutils literal notranslate"><span class="pre">_buffer_cur</span></code> address it. Separately, <code class="docutils literal notranslate"><span class="pre">read</span></code>
+capped a buffered read at <code class="docutils literal notranslate"><span class="pre">min(size,</span> <span class="pre">self._buffer_cur</span> <span class="pre">-</span> <span class="pre">1)</span></code>, a count less one
+measured from the start of the buffer rather than the run remaining from the
+position being read from – one octet short at the start of the buffer, and
+reaching past the content into the padding anywhere further in. The shortfall was
+then made up from the stream, <em>past</em> the octet that had been skipped, which both
+dropped that octet and left the return short. The reported symptom needed both:
+<code class="docutils literal notranslate"><span class="pre">read(4)</span></code>, <code class="docutils literal notranslate"><span class="pre">truncate(8)</span></code>, <code class="docutils literal notranslate"><span class="pre">seek(0)</span></code>, <code class="docutils literal notranslate"><span class="pre">read(8)</span></code> over <code class="docutils literal notranslate"><span class="pre">b'abcde'</span></code> returned
+<code class="docutils literal notranslate"><span class="pre">b'\x00\x00\x00e'</span></code>, four octets of an eight octet request with three of them
+padding, and returns <code class="docutils literal notranslate"><span class="pre">b'abcde'</span></code> now – five being the whole of what a five octet
+stream can answer with. Three more of the method’s contract were wrong and are
+fixed with it: the position was reset to the start of the buffer rather than left
+alone, so a read after a truncation resumed from the wrong octet; an omitted
+<code class="docutils literal notranslate"><span class="pre">size</span></code> resized to <code class="docutils literal notranslate"><span class="pre">0</span></code> rather than to the current position; and
+<code class="docutils literal notranslate"><span class="pre">_buffer_cur</span></code> was left addressing octets a reduced buffer no longer had, so the
+next read raised
+<code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">memoryview</span> <span class="pre">assignment:</span> <span class="pre">lvalue</span> <span class="pre">and</span> <span class="pre">rvalue</span> <span class="pre">have</span> <span class="pre">different</span> <span class="pre">structures</span></code>
+from <code class="docutils literal notranslate"><span class="pre">_write_buffer</span></code> rather than returning anything. <code class="docutils literal notranslate"><span class="pre">truncate(0)</span></code> raised the
+same <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> by a second route, and <code class="docutils literal notranslate"><span class="pre">_write_buffer</span></code> is fixed with it:
+<code class="docutils literal notranslate"><span class="pre">buf[-self._buffer_size:]</span></code> is <code class="docutils literal notranslate"><span class="pre">buf[-0:]</span></code> for a buffer of no size at all –
+the whole of the octets just read rather than none of them – so it is now counted
+from the front. That state is reachable only through <code class="docutils literal notranslate"><span class="pre">truncate</span></code>, since the
+constructor refuses a non-positive <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code>. A reduction also advances
+<code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> past the octets it drops, keeping <code class="docutils literal notranslate"><span class="pre">_buffer_set</span> <span class="pre">+</span> <span class="pre">_buffer_cur</span></code>
+equal to how far the stream has been consumed, which <code class="docutils literal notranslate"><span class="pre">seek</span></code> reads as its licence
+to fetch more. Clamping <code class="docutils literal notranslate"><span class="pre">_buffer_cur</span></code> alone made that sum <em>under</em>-report the
+stream, and the next forward <code class="docutils literal notranslate"><span class="pre">seek</span></code> then spliced in octets from the wrong
+absolute offset and said nothing: <code class="docutils literal notranslate"><span class="pre">read(8)</span></code>, <code class="docutils literal notranslate"><span class="pre">truncate(3)</span></code>, <code class="docutils literal notranslate"><span class="pre">seek(6)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">read(1)</span></code> over <code class="docutils literal notranslate"><span class="pre">b'abcdefghijklmnop'</span></code> returned <code class="docutils literal notranslate"><span class="pre">b'l'</span></code> where <code class="docutils literal notranslate"><span class="pre">b'g'</span></code> is the
+octet at offset 6 – worse than the <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> it replaced, being silent. All
+three came out of fuzzing random operation sequences against the buffer’s own
+invariants, none from reading the code: of 3000 rounds, 2372 left the bookkeeping
+inconsistent before and 683 raised an undocumented exception, and none of either
+do now. Latent in this library rather
+than live – nothing here calls <code class="docutils literal notranslate"><span class="pre">truncate</span></code>, confirmed by grep, though it is
+public on a public class – and invisible to the existing tests, which asserted
+the return value and never the content (#622).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> in the four Mobility Header flag enumerations ended in
+<code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">cls(value)</span></code>, the same constructor that had just failed to find the value,
+so every in-range value that is not already a member re-entered <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+unbounded and raised <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>. <code class="docutils literal notranslate"><span class="pre">BindingACKFlag</span></code>, <code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag</span></code>,
+<code class="docutils literal notranslate"><span class="pre">HandoverACKFlag</span></code> and <code class="docutils literal notranslate"><span class="pre">HandoverInitiateFlag</span></code> are <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code> types whose
+members are single bits, so the hole was not some exotic bit pattern: <code class="docutils literal notranslate"><span class="pre">F(0)</span></code> –
+no flags set, the most ordinary value a flag octet can carry – recursed on all
+four, and so did every composite of two defined bits, such as
+<code class="docutils literal notranslate"><span class="pre">BindingACKFlag(0x06)</span></code>. Defining <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> at all is what caused it, because
+it shadowed the <code class="docutils literal notranslate"><span class="pre">aenum</span></code> <code class="docutils literal notranslate"><span class="pre">Flag</span></code> machinery that resolves exactly those values;
+<code class="docutils literal notranslate"><span class="pre">pcapkit/const/tcp/flags.py</span></code> defines no <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and has never had the
+defect. All four now end in <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super()._missing_(value)</span></code>, which is what
+<code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/default.py</span></code> emits for every other generated enumeration and what
+75 of the 117 modules under <code class="docutils literal notranslate"><span class="pre">pcapkit/const/</span></code> already do, so <code class="docutils literal notranslate"><span class="pre">F(0)</span></code> is an empty
+flag and <code class="docutils literal notranslate"><span class="pre">BindingACKFlag(0x06)</span></code> is <code class="docutils literal notranslate"><span class="pre">S|D</span></code>. The <code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> idiom that
+<code class="docutils literal notranslate"><span class="pre">pcapkit/const/pcapng/record_type.py</span></code> and <code class="docutils literal notranslate"><span class="pre">secrets_type.py</span></code> use to mint a
+member for an unassigned integer – the only other two modules whose <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>
+ends in <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">cls(value)</span></code>, and which do not recurse precisely because that
+<code class="docutils literal notranslate"><span class="pre">extend_enum</span></code> runs first – was considered and rejected for a flag type: naming
+<code class="docutils literal notranslate"><span class="pre">0x06</span></code> <code class="docutils literal notranslate"><span class="pre">Unassigned_0x06</span></code> would hide the composite and pollute <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code>
+with an entry per bit pattern, up to 65536 of them for <code class="docutils literal notranslate"><span class="pre">BindingUpdateFlag</span></code>. The
+range guard above it is untouched, so an out-of-range or non-integer value is
+still the same <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>. Fixed in the four <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/mh/</span></code> templates
+and regenerated, the <code class="docutils literal notranslate"><span class="pre">pcapkit/const/mh/</span></code> modules being generated output that the
+next crawl would otherwise revert (#623).</p></li>
+<li><p><strong>Fixed</strong> – the HIP <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> builder sized the parameter with
+<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">math.ceil(max(random.bit_length(),</span> <span class="pre">solution.bit_length())</span> <span class="pre">/</span> <span class="pre">4)</span></code>, which is
+an invalid shorthand for the two fields it actually has to describe.
+<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html#section-5.2.5"><strong>RFC 7401 Section 5.2.5</strong></a> gives the parameter’s <code class="docutils literal notranslate"><span class="pre">Length</span></code> as
+<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">4</span></code> over a <code class="docutils literal notranslate"><span class="pre">Random</span> <span class="pre">#I</span></code> and a <code class="docutils literal notranslate"><span class="pre">Puzzle</span> <span class="pre">solution</span> <span class="pre">#J</span></code> of
+<code class="docutils literal notranslate"><span class="pre">RHASH_len</span> <span class="pre">/</span> <span class="pre">8</span></code> octets <strong>each</strong>, and <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">4</span></code> equals twice <code class="docutils literal notranslate"><span class="pre">/</span> <span class="pre">8</span></code> only because
+<code class="docutils literal notranslate"><span class="pre">RHASH_len</span></code> – the natural output length of a hash function, in bits – is a
+whole number of octets. Applied to an arbitrary <code class="docutils literal notranslate"><span class="pre">bit_length()</span></code> the identity
+fails, and the builder emitted an <em>odd</em> contents width, which its own reader then
+refused: <code class="docutils literal notranslate"><span class="pre">_read_param_solution</span></code>’s <code class="docutils literal notranslate"><span class="pre">(schema.len</span> <span class="pre">-</span> <span class="pre">4)</span> <span class="pre">%</span> <span class="pre">2</span></code> guard exists because
+<code class="docutils literal notranslate"><span class="pre">SolutionParameter</span></code> splits that width into two equal <code class="docutils literal notranslate"><span class="pre">(len</span> <span class="pre">-</span> <span class="pre">4)</span> <span class="pre">//</span> <span class="pre">2</span></code> halves,
+so an odd width cannot be framed at all. <code class="docutils literal notranslate"><span class="pre">random=0x1</span></code> with <code class="docutils literal notranslate"><span class="pre">solution=0xfff</span></code>
+declared <code class="docutils literal notranslate"><span class="pre">len=7</span></code> and raised
+<code class="docutils literal notranslate"><span class="pre">ProtocolError:</span> <span class="pre">HIPv2:</span> <span class="pre">[ParamNo</span> <span class="pre">321]</span> <span class="pre">invalid</span> <span class="pre">format</span></code> on input the library had
+itself produced. The undersized length was the
+worse half of it: because both fields take their width from that same <code class="docutils literal notranslate"><span class="pre">len</span></code>,
+<code class="docutils literal notranslate"><span class="pre">solution=0xfff</span></code> was packed into the one octet it allowed and came back as
+<code class="docutils literal notranslate"><span class="pre">0xff</span></code> – silent truncation, nothing raised. Fixed to
+<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">math.ceil(max(...)</span> <span class="pre">/</span> <span class="pre">8)</span></code>, the form the sibling <code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> builder
+already uses, which is even by construction and so can never trip the guard.
+Loosening the reader was rejected as the alternative: an odd contents width has
+no meaning in the wire format, since the RFC makes the two fields equal-width and
+says nothing about which would take an extra octet, and a laxer guard would still
+have truncated the value (#608).</p></li>
+<li><p><strong>Added</strong> – <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> parameter width coverage in
+<code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_hip_unit.py</span></code>: eight widths asserting the declared
+length, the reader’s acceptance and the construct-pack-parse cycle, plus a 57-bit
+case pinning the 20-octet length <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5201.html#section-5.2.5"><strong>RFC 5201 Section 5.2.5</strong></a> requires of HIPv1. Five
+of the eight widths – 1, 9, 12, 17 and 25 bits – are deliberately <em>not</em> multiples
+of eight, because at a multiple of eight the defective <code class="docutils literal notranslate"><span class="pre">ceil(bits</span> <span class="pre">/</span> <span class="pre">4)</span></code> coincides
+with the correct width, which is why every fixture that reached this builder passed
+through it unharmed; the round-trip case in <code class="docutils literal notranslate"><span class="pre">examples/generators/options.py</span></code>
+supplies no <code class="docutils literal notranslate"><span class="pre">random</span></code> or <code class="docutils literal notranslate"><span class="pre">solution</span></code> at all, so it exercised the formula at zero
+bits. 57 bits is what discriminates on the HIPv1 path for the same reason 64 does
+not: both formulas give 20 at a full-width value (#608).</p></li>
 <li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code>’s copyright notice began the term at 2018, a year after
 the work it covers. The repository’s first commit is <code class="docutils literal notranslate"><span class="pre">c57f7d0b7</span></code> “Initial
 commit”, dated 2017-11-07, so the notice understated the term and contradicted the
@@ -1533,12 +1640,19 @@ footer as <code class="docutils literal notranslate"><span class="pre">f'2017-{d
 for as long as it has existed. The two now agree on where the term starts. The
 wrong start year survived every maintenance pass the line has had, because each
 looked only at the other end of the range: <code class="docutils literal notranslate"><span class="pre">bc836cfa2</span></code> (2020-05-31) introduced
-<code class="docutils literal notranslate"><span class="pre">2018-2020</span></code> when the BSD-3-Clause text replaced MPL 2.0 – the file until then was
-stock MPL text carrying no author notice at all, so 2018 is the first start year the
-project ever asserted and it was already a year late when it was written – and the
-range was then bumped by hand three times, to <code class="docutils literal notranslate"><span class="pre">2018-2022</span></code>, <code class="docutils literal notranslate"><span class="pre">2018-2023</span></code> and
-<code class="docutils literal notranslate"><span class="pre">2018-2026</span></code> (#615), each bump correcting the end year and copying <code class="docutils literal notranslate"><span class="pre">2018</span></code>
-forward untouched. The end year is
+<code class="docutils literal notranslate"><span class="pre">2018-2020</span></code> when the BSD-3-Clause text replaced MPL 2.0, and the range was then
+bumped by hand three times, to <code class="docutils literal notranslate"><span class="pre">2018-2022</span></code>, <code class="docutils literal notranslate"><span class="pre">2018-2023</span></code> and <code class="docutils literal notranslate"><span class="pre">2018-2026</span></code>
+(#615), each bump correcting the end year and copying <code class="docutils literal notranslate"><span class="pre">2018</span></code> forward untouched.
+2017 is being <strong>restored</strong> rather than newly asserted. The project’s first
+<code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> – MIT, at <code class="docutils literal notranslate"><span class="pre">c57f7d0b7</span></code>, the initial commit – already read
+<code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">2017</span> <span class="pre">Jarry</span> <span class="pre">Shaw</span></code> on line 3, and the GPL v3 era that followed
+carried <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(C)</span> <span class="pre">2017</span> <span class="pre">Jarry</span> <span class="pre">Shaw</span></code> in its filled-in “how to apply”
+appendix. 2017 was lost on 2018-12-08, when <code class="docutils literal notranslate"><span class="pre">4f3e00d5f</span></code> relicensed to Apache 2.0
+under <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">2018</span> <span class="pre">Jarry</span> <span class="pre">Shaw</span></code> – a single year, correct for the year it was
+written – and <code class="docutils literal notranslate"><span class="pre">1c69341dc</span></code> replaced that with MPL 2.0 text the same day, which
+carried no author notice at all. <code class="docutils literal notranslate"><span class="pre">bc836cfa2</span></code> then picked <code class="docutils literal notranslate"><span class="pre">2018</span></code> back up as a
+range start in 2020, by which point it was two years stale and no longer described
+anything. The end year is
 <strong>dropped</strong> rather than automated, which is the other half of the change: the
 notice ships inside the sdist and the wheel, so its text is fixed at build time in
 every copy already downloaded and cannot be computed the way the docs footer is;
@@ -1552,10 +1666,63 @@ docs footer showing a range being both conventional and correct. The licence bod
 is unaltered: the whole-file diff is one hunk at line 3, and the remaining 28 lines
 carry the canonical BSD-3-Clause wording verbatim. Three things distinguish the
 file from SPDX’s bare <code class="docutils literal notranslate"><span class="pre">licenseText</span></code>, and all three predate this change – the
-<code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line, which the opensource.org template carries and
-SPDX omits; the <code class="docutils literal notranslate"><span class="pre">*</span></code> bullets in place of <code class="docutils literal notranslate"><span class="pre">1.</span></code>/<code class="docutils literal notranslate"><span class="pre">2.</span></code>/<code class="docutils literal notranslate"><span class="pre">3.</span></code>; and the extra
+<code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line, which the choosealicense.com template carries
+and SPDX omits; the <code class="docutils literal notranslate"><span class="pre">*</span></code> bullets in place of <code class="docutils literal notranslate"><span class="pre">1.</span></code>/<code class="docutils literal notranslate"><span class="pre">2.</span></code>/<code class="docutils literal notranslate"><span class="pre">3.</span></code>; and the extra
 <code class="docutils literal notranslate"><span class="pre">All</span> <span class="pre">rights</span> <span class="pre">reserved.</span></code> line – and the <code class="docutils literal notranslate"><span class="pre">DAMAGE.</span></code> that #615 repaired from a
 stray <code class="docutils literal notranslate"><span class="pre">DAMAGE.s</span></code> is still clean (#630).</p></li>
+<li><p><strong>Fixed</strong> – <code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> shipped in no source distribution. <code class="docutils literal notranslate"><span class="pre">MANIFEST.in</span></code>
+carries an <code class="docutils literal notranslate"><span class="pre">include</span></code> line each for <code class="docutils literal notranslate"><span class="pre">README.md</span></code>, <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> and
+<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> but had none for the citation file, and its two
+<code class="docutils literal notranslate"><span class="pre">global-include</span></code> patterns are <code class="docutils literal notranslate"><span class="pre">*.rst</span></code> and <code class="docutils literal notranslate"><span class="pre">*.py</span></code>, neither of which can match
+a <code class="docutils literal notranslate"><span class="pre">.cff</span></code> – so the file sat in the repository and in nothing published. Nor was
+there a default to fall back on. Removing all three of those <code class="docutils literal notranslate"><span class="pre">include</span></code> lines and
+rebuilding shows <code class="docutils literal notranslate"><span class="pre">README.md</span></code> and <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> shipping anyway, setuptools adding
+the latter from <code class="docutils literal notranslate"><span class="pre">license_files</span></code> and recording it as <code class="docutils literal notranslate"><span class="pre">License-File:</span> <span class="pre">LICENSE</span></code> in
+<code class="docutils literal notranslate"><span class="pre">PKG-INFO</span></code>, while <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> vanishes – so of the three only
+<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> is load-bearing, and a citation file, which no packaging default
+covers at all, is in the same position. The gap is invisible from the web UI,
+because GitHub renders the “Cite this repository”
+button from the repository itself; citation managers, Zenodo and dependency
+inventories read the published artifact, which is exactly the surface that was
+missing it, so the machine-readable half of the attribution stopped travelling
+with the code at the one point nobody can see the repository. #615 flagged the
+omission when it added the file and #619 did not address it. It matters now
+because #625 has just taught <code class="docutils literal notranslate"><span class="pre">util/bump_version.py</span></code> to keep the file’s
+<code class="docutils literal notranslate"><span class="pre">version</span></code> and <code class="docutils literal notranslate"><span class="pre">date-released</span></code> in step with the bump, and a release exercising
+that path would otherwise publish an sdist omitting the very artefact under test.
+It also lets <code class="docutils literal notranslate"><span class="pre">RepositoryCitationTests</span></code> in
+<code class="docutils literal notranslate"><span class="pre">tests/project/test_bump_version.py</span></code> – the gate #625 added for the hand-authored
+bumps that never run the script – execute against an unpacked sdist, where today
+it skips itself with “CITATION.cff is not shipped in the source distribution”.
+Measured both ways with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">build</span> <span class="pre">--sdist</span></code>: <code class="docutils literal notranslate"><span class="pre">tar</span> <span class="pre">tzf</span></code> found no
+<code class="docutils literal notranslate"><span class="pre">CITATION.cff</span></code> before and <code class="docutils literal notranslate"><span class="pre">pypcapkit-1.5.0b4/CITATION.cff</span></code> after, the two
+archive listings differ by that one added entry and nothing else – 860 against
+861 – the shipped copy is byte-identical to the repository’s, and
+<code class="docutils literal notranslate"><span class="pre">twine</span> <span class="pre">check</span> <span class="pre">--strict</span></code> reports <code class="docutils literal notranslate"><span class="pre">PASSED</span></code> on both archives (#631).</p></li>
+<li><p><strong>Fixed</strong> – two inaccurate claims in the #630 entry above, caught by review after
+#630 had already merged. Both were about the history of <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> rather than
+about the change itself, and <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> is untouched here: 2017 was and remains
+the right answer, so this is a changelog-prose correction only. The entry asserted
+that the file “until then was stock MPL text carrying no author notice at all, so
+2018 is the first start year the project ever asserted and it was already a year
+late when it was written”. Every clause of it is wrong as a description of the era,
+though each was true of the single blob <code class="docutils literal notranslate"><span class="pre">bc836cfa2</span></code> happened to replace, which is
+where the mistake came from. The pre-BSD file was MIT, then GPL v3, then Apache 2.0,
+and only then MPL 2.0 – four licences before BSD, not the one implied. The
+MIT and GPL texts both carried an author notice naming <strong>2017</strong>, the MIT one on
+line 3 of the initial commit. And <code class="docutils literal notranslate"><span class="pre">2018</span></code> first appeared in the Apache notice of
+2018-12-08 as a single year, current for the year it was written rather than late.
+The claim also contradicted the entry’s own opening sentence, which dates the first
+commit to 2017-11-07. What the history actually supports is a stronger argument for
+the change than the one that was written, which is why this is corrected rather than
+deleted: 2017 is the year the project asserted from its first commit, and #630
+restores it rather than asserting it anew. The <code class="docutils literal notranslate"><span class="pre">BSD</span> <span class="pre">3-Clause</span> <span class="pre">License</span></code> title line
+is reattributed too, from the opensource.org template – whose licence text begins
+at the copyright line – to choosealicense.com’s, whose first line is literally that
+title, and which also carries the <code class="docutils literal notranslate"><span class="pre">Copyright</span> <span class="pre">(c)</span> <span class="pre">[year],</span> <span class="pre">[fullname]</span></code> comma this
+file uses. The error came from generalising the pre-BSD era off two blobs that
+turned out to be the same file, <code class="docutils literal notranslate"><span class="pre">bc836cfa2^:LICENSE</span></code> and <code class="docutils literal notranslate"><span class="pre">1c69341dc:LICENSE</span></code>;
+enumerating all 14 commits that ever touched <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> is what caught it (#638).</p></li>
 </ul>
 <p>Preceded by <code class="docutils literal notranslate"><span class="pre">1.5.0a1</span></code> (2026-09-15), <code class="docutils literal notranslate"><span class="pre">1.5.0b1</span></code> and <code class="docutils literal notranslate"><span class="pre">1.5.0b2</span></code> (both
 2026-09-18) and <code class="docutils literal notranslate"><span class="pre">1.5.0b3</span></code> (2026-09-19), all published as prereleases and so

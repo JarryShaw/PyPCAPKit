@@ -580,7 +580,10 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buf_len</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:]</span>
+                <span class="c1"># NOTE: the last ``_buffer_size`` octets, counted from the front rather</span>
+                <span class="c1"># than as ``buf[-self._buffer_size:]``, which for a buffer of no size at</span>
+                <span class="c1"># all is ``buf[-0:]`` -- the whole of ``buf``, not none of it.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">buf_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[:</span><span class="o">-</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="n">old_ptr</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">-</span> <span class="n">buf_len</span><span class="p">):</span><span class="n">old_ptr</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="o">-</span><span class="n">buf_len</span><span class="p">:]</span> <span class="o">=</span> <span class="n">buf</span>
@@ -797,22 +800,62 @@
 <span class="sd">        not specified). The current stream position isn't changed. This resizing can extend or</span>
 <span class="sd">        reduce the current file size. In case of extension, the contents of the new file area</span>
 <span class="sd">        depend on the platform (on most systems, additional bytes are zero-filled). The new file</span>
-<span class="sd">        size is returned."""</span>
+<span class="sd">        size is returned.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what this</span>
+<span class="sd">            resizes is the buffer, not the stream behind it. The buffer is a sliding window over a</span>
+<span class="sd">            stream that cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its</span>
+<span class="sd">            content occupies ``[0:_buffer_cur]``, and everything past that is padding never read.</span>
+
+<span class="sd">            Two consequences for which octets survive. An extension appends its zero octets at</span>
+<span class="sd">            the **tail**, the new area being by definition the region past the old end. A</span>
+<span class="sd">            reduction below the content keeps the **most recent** ``size`` octets and advances</span>
+<span class="sd">            ``_buffer_set`` past the ones it drops, because what this holds is lookback: the</span>
+<span class="sd">            octets it can still answer for are the ones just read, and the stream is already</span>
+<span class="sd">            beyond them. Padding is never kept in preference to content either way.</span>
+
+<span class="sd">            Advancing ``_buffer_set`` is what keeps ``_buffer_set + _buffer_cur`` equal to how far</span>
+<span class="sd">            the stream has actually been consumed, which :meth:`seek` relies on to decide whether</span>
+<span class="sd">            it may read ahead to fill a gap. A reduction that shrank the window without moving its</span>
+<span class="sd">            base would leave that sum short of the stream, and the next forward :meth:`seek` would</span>
+<span class="sd">            splice in octets from the wrong absolute offset without complaining.</span>
+
+<span class="sd">            Octets dropped by a reduction are gone for good, since the stream cannot be rewound to</span>
+<span class="sd">            re-supply them. A position left among them is then before the window, which</span>
+<span class="sd">            :meth:`seek` refuses as it refuses any other.</span>
+
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># NOTE: an unspecified size means the current position, per</span>
+            <span class="c1"># :meth:`io.IOBase.truncate`. The buffer is indexed relative to</span>
+            <span class="c1"># ``_buffer_set``, and the position may sit before it once a saved</span>
+            <span class="c1"># buffer has been rewound, in which case nothing is kept.</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TruncateError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'negative size value </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: the position isn't changed by a truncation, but rebuilding the buffer</span>
+        <span class="c1"># resets it, so it is read here and put back below -- moved down by whatever</span>
+        <span class="c1"># the window's base moved up, so that it still denotes the same octet.</span>
+        <span class="n">buffer_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
-        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># keep the last ``size`` bytes</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="o">-</span><span class="n">size</span><span class="p">:]</span> <span class="k">if</span> <span class="n">size</span> <span class="k">else</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span>
+        <span class="c1"># NOTE: only ``[0:_buffer_cur]`` is content. Slicing the buffer itself would</span>
+        <span class="c1"># keep padding that was never read and count it as though it were data.</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span><span class="p">]</span>
+        <span class="n">dropped</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">-</span> <span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="n">dropped</span><span class="p">:]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">getbuffer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">buffer_pos</span> <span class="o">-</span> <span class="n">dropped</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="c1"># NOTE: ``_buffer_set + _buffer_cur`` is unchanged by construction -- the base</span>
+        <span class="c1"># gains exactly what the content pointer loses -- so the stream's consumption</span>
+        <span class="c1"># point still reads correctly out of the pair.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+=</span> <span class="n">dropped</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">-</span> <span class="n">dropped</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span></div>
 
 
@@ -862,7 +905,15 @@
                     <span class="n">temp_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
                     <span class="n">buf</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="c1"># NOTE: ``_buffer_cur`` counts the octets written into the buffer, so what</span>
+                <span class="c1"># is available from here is the run between the current position and the end</span>
+                <span class="c1"># of that content. That count less one is neither: at the start of the</span>
+                <span class="c1"># buffer it is one octet short, and the shortfall is then made up from the</span>
+                <span class="c1"># stream -- past the octet that was skipped, losing it -- while further in</span>
+                <span class="c1"># it reaches beyond the content and hands the padding behind it back as</span>
+                <span class="c1"># data, which is also what an uncapped read does.</span>
+                <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tell</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
 
             <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

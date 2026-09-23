@@ -718,8 +718,30 @@
             <span class="n">time</span><span class="o">=</span><span class="n">_time</span><span class="p">,</span>
             <span class="n">number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
             <span class="n">time_epoch</span><span class="o">=</span><span class="n">_epch</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
-            <span class="n">cap_len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
+            <span class="c1"># NOTE: ``len`` is the on-wire length and ``cap_len`` the captured</span>
+            <span class="c1"># one, i.e. ``orig_len`` and ``incl_len`` respectively -- not the</span>
+            <span class="c1"># other way round, which is what this reader used to do (see #618).</span>
+            <span class="c1">#</span>
+            <span class="c1"># The two only differ for a frame the snapshot length cut short, so</span>
+            <span class="c1"># until ``big_endian.pcap`` arrived with #614 no fixture here could</span>
+            <span class="c1"># tell the two assignments apart.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Worth knowing *why* this reader moved rather than the other one,</span>
+            <span class="c1"># because it was not the newer of the two: this convention dates to</span>
+            <span class="c1"># c43892af (2022-01-11) and the data model's docstrings agreed with</span>
+            <span class="c1"># it a day later, while the opposite convention in</span>
+            <span class="c1"># :func:`pcapkit.toolkit.pcapng.block2frame` arrived 15 months after</span>
+            <span class="c1"># that in 25f216f4 (2023-04-27). Both were internally consistent, so</span>
+            <span class="c1"># neither is a typo and seniority does not settle it. What settles it</span>
+            <span class="c1"># is that the names are Wireshark's, and its ``packet-frame.c``</span>
+            <span class="c1"># registers ``frame.len`` as "Frame length on the wire" and</span>
+            <span class="c1"># ``frame.cap_len`` as "Frame length stored into the capture file",</span>
+            <span class="c1"># and raises ``frame.len_lt_caplen`` -- ``PI_MALFORMED`` -- on</span>
+            <span class="c1"># ``frame_len &lt; cap_len``, which could not be malformed if ``len``</span>
+            <span class="c1"># were the smaller, captured one. So the later convention is the one</span>
+            <span class="c1"># that matches the names, and this one is brought into line with it.</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
+            <span class="n">cap_len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_read</span><span class="p">:</span>
@@ -754,7 +776,23 @@
             <span class="c1">#: io.BytesIO: Source data stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">len</span><span class="p">)</span></div>
+        <span class="c1"># NOTE: The dissector is handed the octets that are actually *present*,</span>
+        <span class="c1"># i.e. ``cap_len`` (``incl_len``), never the on-wire ``len``. For a frame</span>
+        <span class="c1"># the snapshot length cut short the latter is larger than the file holds,</span>
+        <span class="c1"># and handing it over is the declared-length-exceeds-available-octets</span>
+        <span class="c1"># fault of #554, #573 and #594. This read ``frame.len`` before #618, when</span>
+        <span class="c1"># that *was* the captured length -- so the value handed over here is the</span>
+        <span class="c1"># same one as before and the dissection is unchanged; only the spelling</span>
+        <span class="c1"># moved, to the attribute that now means what this call site needs.</span>
+        <span class="c1">#</span>
+        <span class="c1"># No test pins this line, and that is a known gap rather than an</span>
+        <span class="c1"># oversight: reverting just this argument to ``frame.len`` leaves the</span>
+        <span class="c1"># whole suite green. ``big_endian.pcap``'s truncated frame dissects to</span>
+        <span class="c1"># ``Ethernet:IPv4:UDP:Raw``, and :meth:`Raw.read` ignores the ``length``</span>
+        <span class="c1"># it is handed, so the over-long value never reaches anything that checks</span>
+        <span class="c1"># it. Catching a regression here needs a fixture whose truncation lands</span>
+        <span class="c1"># in a length-checked field instead of bottoming out in ``Raw``.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">cap_len</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Frame.make">

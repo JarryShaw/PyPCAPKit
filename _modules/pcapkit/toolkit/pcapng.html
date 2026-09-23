@@ -728,6 +728,14 @@
         <span class="n">time</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
         <span class="n">number</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
         <span class="n">time_epoch</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">timestamp_epoch</span><span class="p">,</span>
+        <span class="c1"># NOTE: ``len`` is the on-wire length and ``cap_len`` the captured one,</span>
+        <span class="c1"># which is the way round Wireshark's ``packet-frame.c`` registers the two</span>
+        <span class="c1"># field names this pair borrows. Do not swap them to match some other</span>
+        <span class="c1"># reader: #618 made this the reference and brought the PCAP reader in</span>
+        <span class="c1"># :mod:`pcapkit.protocols.misc.pcap.frame` into line with it, on the</span>
+        <span class="c1"># strength of those registered names rather than of which came first --</span>
+        <span class="c1"># this spelling is in fact the *later* of the two, and the note at the</span>
+        <span class="c1"># corresponding site over there records the dates.</span>
         <span class="nb">len</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">original_len</span><span class="p">,</span>
         <span class="n">cap_len</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">captured_len</span><span class="p">,</span>
     <span class="p">)</span>

@@ -1155,13 +1155,20 @@ frame index number of itself; else raises <code class="xref py py-exc docutils l
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcap.frame.Frame.len">
 <span class="sig-name descname"><span class="pre">len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcap.frame.Frame.len" title="Link to this definition">¶</a></dt>
-<dd><p>Number of octets of packet saved in file.</p>
+<dd><p>Actual length of the packet as it appeared on the wire, i.e. the record
+header’s <code class="docutils literal notranslate"><span class="pre">orig_len</span></code>. Larger than <a class="reference internal" href="#pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len" title="pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cap_len</span></code></a> for a frame the
+snapshot length cut short. Named after Wireshark’s <code class="docutils literal notranslate"><span class="pre">frame.len</span></code>,
+registered as “Frame length on the wire”.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len">
 <span class="sig-name descname"><span class="pre">cap_len</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len" title="Link to this definition">¶</a></dt>
-<dd><p>Actual length of packet.</p>
+<dd><p>Number of octets of packet data actually captured and saved in the file,
+i.e. the record header’s <code class="docutils literal notranslate"><span class="pre">incl_len</span></code>, and so the number of octets
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">packet</span></code> holds. Named
+after Wireshark’s <code class="docutils literal notranslate"><span class="pre">frame.cap_len</span></code>, registered as “Frame length stored
+into the capture file”.</p>
 </dd></dl>
 
 <dl class="py attribute">

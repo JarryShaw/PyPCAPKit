@@ -683,6 +683,27 @@ not specified). The current stream position isn’t changed. This resizing can e
 reduce the current file size. In case of extension, the contents of the new file area
 depend on the platform (on most systems, additional bytes are zero-filled). The new file
 size is returned.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nothing here writes to the underlying stream – <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> raises – so what this
+resizes is the buffer, not the stream behind it. The buffer is a sliding window over a
+stream that cannot be seeked: its octet 0 sits at absolute offset <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code>, its
+content occupies <code class="docutils literal notranslate"><span class="pre">[0:_buffer_cur]</span></code>, and everything past that is padding never read.</p>
+<p>Two consequences for which octets survive. An extension appends its zero octets at
+the <strong>tail</strong>, the new area being by definition the region past the old end. A
+reduction below the content keeps the <strong>most recent</strong> <code class="docutils literal notranslate"><span class="pre">size</span></code> octets and advances
+<code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> past the ones it drops, because what this holds is lookback: the
+octets it can still answer for are the ones just read, and the stream is already
+beyond them. Padding is never kept in preference to content either way.</p>
+<p>Advancing <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> is what keeps <code class="docutils literal notranslate"><span class="pre">_buffer_set</span> <span class="pre">+</span> <span class="pre">_buffer_cur</span></code> equal to how far
+the stream has actually been consumed, which <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> relies on to decide whether
+it may read ahead to fill a gap. A reduction that shrank the window without moving its
+base would leave that sum short of the stream, and the next forward <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> would
+splice in octets from the wrong absolute offset without complaining.</p>
+<p>Octets dropped by a reduction are gone for good, since the stream cannot be rewound to
+re-supply them. A position left among them is then before the window, which
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> refuses as it refuses any other.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>

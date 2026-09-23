@@ -495,9 +495,16 @@
     <span class="n">number</span><span class="p">:</span> <span class="s1">'int'</span>
     <span class="c1">#: UNIX timestamp.</span>
     <span class="n">time_epoch</span><span class="p">:</span> <span class="s1">'Decimal'</span>
-    <span class="c1">#: Number of octets of packet saved in file.</span>
+    <span class="c1">#: Actual length of the packet as it appeared on the wire, i.e. the record</span>
+    <span class="c1">#: header's ``orig_len``. Larger than :attr:`cap_len` for a frame the</span>
+    <span class="c1">#: snapshot length cut short. Named after Wireshark's ``frame.len``,</span>
+    <span class="c1">#: registered as "Frame length on the wire".</span>
     <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Actual length of packet.</span>
+    <span class="c1">#: Number of octets of packet data actually captured and saved in the file,</span>
+    <span class="c1">#: i.e. the record header's ``incl_len``, and so the number of octets</span>
+    <span class="c1">#: :attr:`~pcapkit.protocols.data.protocol.Protocol.packet` holds. Named</span>
+    <span class="c1">#: after Wireshark's ``frame.cap_len``, registered as "Frame length stored</span>
+    <span class="c1">#: into the capture file".</span>
     <span class="n">cap_len</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

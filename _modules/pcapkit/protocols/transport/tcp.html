@@ -929,7 +929,19 @@
         <span class="p">)</span>
 
         <span class="c1"># connection control flags</span>
-        <span class="n">_flag</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_Flags'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="c1"># NOTE: ``Enum_Flags(0)``, not ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a</span>
+        <span class="c1"># runtime no-op -- it returns its second argument unchanged -- so the accumulator</span>
+        <span class="c1"># used to stay the plain :class:`int` ``0`` for a segment whose flags octet is all</span>
+        <span class="c1"># zero. Nothing then promoted it, because the ``|=`` below is the only promotion and</span>
+        <span class="c1"># it never runs; ``Enum_Flags.SYN in self._flags`` raised ``TypeError: argument of</span>
+        <span class="c1"># type 'int' is not a container or iterable`` instead of answering. A segment with</span>
+        <span class="c1"># any flag set masked the defect entirely. :class:`Enum_Flags` is an</span>
+        <span class="c1"># :class:`aenum.IntFlag` and declares no ``_missing_`` of its own, so</span>
+        <span class="c1"># ``Enum_Flags(0)`` is a valid flagless member that still compares equal to ``0``</span>
+        <span class="c1"># and still ORs as before; only the type, and hence the ``repr``, differs. That is</span>
+        <span class="c1"># what :attr:`connection` already advertises it returns. C.f. #616.</span>
+        <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">_flag</span> <span class="o">|=</span> <span class="n">Enum_Flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
@@ -1034,11 +1046,12 @@
         <span class="c1"># so this keeps the newly reachable no-SYN-no-ACK case raising the library's</span>
         <span class="c1"># documented error rather than a bare Python one. :class:`Enum_Flags` is an</span>
         <span class="c1"># :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that</span>
-        <span class="c1"># still compares equal to ``0`` and still ORs as before. The read path keeps its</span>
-        <span class="c1"># ``cast`` at the top of ``read``: it cannot reach these branches, because</span>
+        <span class="c1"># still compares equal to ``0`` and still ORs as before. :meth:`read` seeds itself</span>
+        <span class="c1"># the same way; it kept the ``cast`` until #616, on the grounds that</span>
         <span class="c1"># ``mptcp_data_selector`` rejects a flagless MP_JOIN before ``_read_mptcp_join``</span>
-        <span class="c1"># runs, and changing it would alter the ``connection`` value reported for every</span>
-        <span class="c1"># flagless parsed segment. C.f. #587.</span>
+        <span class="c1"># runs, so no caller could reach the ``TypeError``. That made the read path latent</span>
+        <span class="c1"># rather than sound -- latent by virtue of a guard in another file -- which is a</span>
+        <span class="c1"># fragile reason for a ``TypeError`` not to happen. C.f. #587, #616.</span>
         <span class="n">_flag</span> <span class="o">=</span> <span class="n">Enum_Flags</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">flags</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

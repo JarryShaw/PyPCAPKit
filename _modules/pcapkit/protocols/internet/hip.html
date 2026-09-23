@@ -1577,7 +1577,11 @@
         <span class="n">_time</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">lifetime</span>
         <span class="n">_opak</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">opaque</span>
         <span class="n">_rand</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">random</span>
-        <span class="n">_solt</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">solution</span>  <span class="c1"># Length (schema.len) = 4 + RHASH_len / 4</span>
+        <span class="c1"># ``schema.len`` is ``4 + RHASH_len / 4`` per :rfc:`7401#section-5.2.5`, which</span>
+        <span class="c1"># is the same quantity as ``4 + 2 * (RHASH_len / 8)`` -- two equal-width fields</span>
+        <span class="c1"># of ``RHASH_len / 8`` octets -- only because ``RHASH_len`` is a whole number of</span>
+        <span class="c1"># octets. Do not reuse the ``/ 4`` shorthand on a width that is not; see #608.</span>
+        <span class="n">_solt</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">solution</span>
 
         <span class="n">solution</span> <span class="o">=</span> <span class="n">Data_SolutionParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -3837,7 +3841,15 @@
 
         <span class="k">return</span> <span class="n">Schema_SolutionParameter</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">bit_length</span><span class="p">(),</span> <span class="n">solution</span><span class="o">.</span><span class="n">bit_length</span><span class="p">())</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="c1"># Two equal-width fields, ``Random #I`` and ``Puzzle solution #J``, of</span>
+            <span class="c1"># ``RHASH_len / 8`` octets each -- so the contents length is</span>
+            <span class="c1"># ``4 + 2 * ceil(bits / 8)`` and is necessarily even after the 4-octet</span>
+            <span class="c1"># ``#K``/``Reserved``/``Opaque`` prefix. :rfc:`7401#section-5.2.5` spells</span>
+            <span class="c1"># the same quantity ``4 + RHASH_len / 4``, which is an identity only</span>
+            <span class="c1"># because a real ``RHASH_len`` is a whole number of octets; ``ceil(bits</span>
+            <span class="c1"># / 4)`` on an arbitrary :meth:`int.bit_length` is not that quantity and</span>
+            <span class="c1"># yields an odd width that :meth:`_read_param_solution` rejects. See #608.</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">bit_length</span><span class="p">(),</span> <span class="n">solution</span><span class="o">.</span><span class="n">bit_length</span><span class="p">())</span> <span class="o">/</span> <span class="mi">8</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
             <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime</span><span class="p">,</span>
             <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>

@@ -523,7 +523,7 @@
 <span class="s1">        """</span>
 <span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
 <span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
-<span class="s1">        return cls(value)</span>
+<span class="s1">        return super()._missing_(value)</span>
 <span class="s1">'''</span>  <span class="c1"># type: Callable[[str, str, str, str, str], str]</span>
 
 
