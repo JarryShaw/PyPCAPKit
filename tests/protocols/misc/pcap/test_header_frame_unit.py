@@ -207,8 +207,18 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         try:
             Frame.register(code, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
             self.assertIs(registry[code], Raw)
+
+            class Other(Raw):
+                pass
+
+            # ``register`` resolves a ``ModuleDescriptor`` before storing it,
+            # so the entry above is already the plain ``Raw`` class, not the
+            # descriptor -- passing ``Raw`` again would now be the same-object
+            # no-op GitHub issue #718 added an identity guard for (see
+            # ``test_frame_register_stays_quiet_on_same_object_reregistration``).
+            # A genuinely different class is needed to still warn here.
             with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
-                Frame.register(code, Raw)
+                Frame.register(code, Other)
             warn.assert_called_once()
             with self.assertRaises(RegistryError):
                 Frame.register(LinkType.USER1, object)  # type: ignore[arg-type]
@@ -315,6 +325,36 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         frame._import_next_layer = mock.Mock(return_value=fake_next_no_chain)
         self.assertIs(frame._decode_next_layer(decoded_no_chain, LinkType.NULL, 0), decoded_no_chain)
         self.assertEqual(decoded_no_chain['protocols'], '')
+
+    def test_frame_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so the *second* of
+        two calls registering the exact same class under the exact same code
+        warned about an overwrite that never happened. Matches the identity
+        guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.raw import Raw
+
+        registry = Frame.__dict__['__proto__']
+        code = LinkType.USER2
+        had_original = code in registry
+        original = registry.get(code)
+        try:
+            with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
+                Frame.register(code, Raw)
+                Frame.register(code, Raw)
+            warn.assert_not_called()
+        finally:
+            if had_original:
+                registry[code] = original
+            else:
+                registry.pop(code, None)
 
     def test_frame_data_holds_its_own_record_not_the_next(self) -> None:
         """A frame's raw data must be the record it parsed, at its own offset.

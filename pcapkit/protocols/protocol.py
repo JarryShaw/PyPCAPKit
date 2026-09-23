@@ -778,32 +778,30 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 only that something was.
 
         Note:
-            The guard fires on the mere presence of ``code``, including when the
-            incumbent and the replacement denote the same protocol. That is
-            deliberate, and differs from :func:`register_protocol
-            <pcapkit.foundation.registry.protocols.register_protocol>`, which
-            additionally requires the incumbent to be a *different* class. Two
-            things separate them. This
-            registry is keyed on a ``code`` the caller supplies, independently of
-            the value, so registering one class under two codes yields two keys
-            and never reaches the same key twice -- the spurious-warning case
-            that motivated the narrower guard cannot arise here, while a repeat
-            call for one code is a caller mistake worth reporting even when the
-            value is unchanged. And the incumbent may still be an unresolved
-            :class:`~pcapkit.corekit.module.ModuleDescriptor` while the
-            replacement is the very class it names, so "a different class" is not
-            decidable here without resolving the descriptor -- forcing the import
-            that the descriptor exists to defer, purely to decide whether to
-            warn.
+            The guard now matches :func:`register_protocol
+            <pcapkit.foundation.registry.protocols.register_protocol>`'s: it
+            fires only when the incumbent differs from the replacement, so
+            re-registering the exact same class object under the same ``code``
+            is a silent no-op rather than a warning about nothing displaced.
+            GitHub issue #718 corrected the previous presence-only guard here,
+            which read every repeat registration as a caller mistake even when
+            the value was unchanged. The identity check does not reintroduce
+            the concern that guard was written to avoid: it is a plain ``is``
+            comparison, so an incumbent left as an unresolved
+            :class:`~pcapkit.corekit.module.ModuleDescriptor` is never equal to
+            the resolved replacement without the descriptor being resolved --
+            the comparison itself resolves nothing, so the deferred import
+            stays deferred and such an incumbent still reports as different.
 
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if code in cls.__proto__:
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and incumbent is not protocol:
             warn(f'protocol {code} already registered, overwriting '
-                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
+                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod

@@ -61,9 +61,58 @@ class TransportUnitTests(unittest.TestCase):
 
         DummyTransport.register(82, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
         self.assertIs(DummyTransport.__dict__['__proto__'][82], Raw)
+
+        class Other(Raw):
+            pass
+
+        # GitHub issue #718 added an identity guard, so registering the same
+        # ``Raw`` object port 80 already holds -- what this used to do --
+        # would now be a silent no-op; see
+        # ``test_register_stays_quiet_on_same_object_reregistration`` for
+        # that case. A genuinely different class is needed to still warn.
+        with mock.patch('pcapkit.protocols.transport.transport.warn') as warn:
+            DummyTransport.register(80, Other)
+        warn.assert_called_once()
+
+    def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so registering port
+        80's ``Raw`` incumbent with the exact same ``Raw`` object -- what
+        ``test_register_validates_protocols_and_abstract_base`` used to do --
+        warned about an overwrite that never happened. Matches the identity
+        guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.transport import Transport
+
+        class DummyTransport(Transport):
+            __proto__ = collections.defaultdict(lambda: Raw, {80: Raw})
+
+            @property
+            def name(self) -> str:
+                return 'Dummy Transport'
+
+            @property
+            def length(self) -> int:
+                return 0
+
+            def read(self, length: int | None = None, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            def make(self, **kwargs: object) -> object:
+                raise NotImplementedError
+
+            @classmethod
+            def __index__(cls) -> int:
+                return 250
+
         with mock.patch('pcapkit.protocols.transport.transport.warn') as warn:
             DummyTransport.register(80, Raw)
-        warn.assert_called_once()
+        warn.assert_not_called()
 
     def test_analyze_prefers_source_port_match(self) -> None:
         from pcapkit.protocols.transport.transport import Transport

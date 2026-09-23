@@ -69,9 +69,39 @@ class InternetBaseUnitTests(unittest.TestCase):
         self.assertIs(DummyInternet.__dict__['__proto__'][TransType.get(251)], Raw)
         with self.assertRaises(RegistryError):
             DummyInternet.register(TransType.get(252), object)  # type: ignore[arg-type]
+
+        class Other(Raw):
+            pass
+
+        # GitHub issue #718 added an identity guard, so re-registering the
+        # exact same class at the same code -- what this used to do -- is now
+        # a silent no-op; see
+        # ``test_register_stays_quiet_on_same_object_reregistration`` for that
+        # case. A genuinely different class is needed to still warn here.
+        with mock.patch('pcapkit.protocols.internet.internet.warn') as warn:
+            DummyInternet.register(TransType.get(250), Other)
+        warn.assert_called_once()
+
+    def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so the *second* of
+        two calls registering the exact same class under the exact same code
+        warned about an overwrite that never happened. Matches the identity
+        guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.misc.raw import Raw
+
+        DummyInternet = self._make_internet_class()
+
         with mock.patch('pcapkit.protocols.internet.internet.warn') as warn:
             DummyInternet.register(TransType.get(250), Raw)
-        warn.assert_called_once()
+            DummyInternet.register(TransType.get(250), Raw)
+        warn.assert_not_called()
 
     def test_decode_next_layer_updates_info_and_protochain(self) -> None:
         from pcapkit.corekit.protochain import ProtoChain

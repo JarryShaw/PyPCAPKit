@@ -1053,16 +1053,43 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.protocols.transport import sctp as sctp_module
         from pcapkit.protocols.transport.sctp import SCTP
 
+        class Other(Raw):
+            pass
+
         # 4243 rather than 60: NGAP holds 60 by default, so registering it once
         # would already be the overwrite this test means to trigger on the
         # *second* call, and the assertion on the call count would pass for the
-        # wrong reason.
+        # wrong reason. The second call also has to use a genuinely different
+        # class from the first: GitHub issue #718 added an identity guard here
+        # (see ``test_register_stays_quiet_on_same_object_reregistration``), so
+        # replaying the first call's exact object would no longer warn.
+        with self._proto_registry():
+            SCTP.register(4243, Raw)
+            with mock.patch.object(sctp_module, 'warn') as warned:
+                SCTP.register(4243, Other)
+            self.assertEqual(warned.call_count, 1)
+            self.assertIn('payload protocol identifier', warned.call_args.args[0])
+
+    def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so the *second* of
+        two calls that register the exact same class under the exact same
+        code -- what this test performs -- warned about an overwrite that
+        never happened. Mirrors the identity guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport import sctp as sctp_module
+        from pcapkit.protocols.transport.sctp import SCTP
+
         with self._proto_registry():
             SCTP.register(4243, Raw)
             with mock.patch.object(sctp_module, 'warn') as warned:
                 SCTP.register(4243, Raw)
-            self.assertEqual(warned.call_count, 1)
-            self.assertIn('payload protocol identifier', warned.call_args.args[0])
+            self.assertEqual(warned.call_count, 0)
 
     def test_register_sctp_wrapper_writes_the_ppid_registry(self) -> None:
         from pcapkit.foundation.registry.protocols import register_sctp

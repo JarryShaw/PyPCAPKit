@@ -168,22 +168,22 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
     <pcapkit.protocols.protocol.ProtocolBase.register>` and the other
     overwrite-warning registries.
 
-    The guard here deliberately reads "key present **and** incumbent is a
-    different class", where every sibling registry warns on mere presence. The
-    difference is in where the key comes from. A sibling is keyed on a ``code``
-    the caller passes, so a repeat call is a caller mistake worth reporting even
-    when the value is identical. This registry's key is *derived* from the class,
-    and this function is the funnel every wrapper registrar calls --
-    :func:`register_tcp`, :func:`register_udp`, :func:`register_apptype`,
-    :func:`register_linktype` and the rest all end in
-    ``register_protocol(module)``. So registering one class under two codes, a
-    supported and documented thing to do, reaches this function twice with the
-    same class and nothing at stake; on a presence-only guard that would warn
-    about an overwrite that overwrote nothing. Warning on the harmless case is
-    not free: it is what teaches a caller to filter
-    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that
-    filter is what would then hide the ``HTTP`` collision this warning exists to
-    surface.
+    The guard here reads "key present **and** incumbent is a different
+    class" -- presence alone is not enough. This registry's key is *derived*
+    from the class rather than supplied by a caller, and this function is the
+    funnel every wrapper registrar calls -- :func:`register_tcp`,
+    :func:`register_udp`, :func:`register_apptype`, :func:`register_linktype`
+    and the rest all end in ``register_protocol(module)``. So registering one
+    class under two codes, a supported and documented thing to do, reaches
+    this function twice with the same class and nothing at stake; a
+    presence-only guard would warn about an overwrite that overwrote nothing.
+    Warning on the harmless case is not free: it is what teaches a caller to
+    filter :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and
+    that filter is what would then hide the ``HTTP`` collision this warning
+    exists to surface. The sibling ``register`` methods across the package --
+    each keyed on a caller-supplied ``code`` rather than a name derived from
+    the class -- apply the same identity criterion as of GitHub issue #718;
+    before that they warned on presence alone, and none of them does now.
 
     Making the key itself unique would resolve the collision rather than
     merely reporting it, but it is a registry-format change that the bare-name

@@ -616,8 +616,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this PPID is already
                 registered, naming the displaced entry and its replacement so a
-                caller can tell *what* was lost. Fires on presence alone, as the
-                port-keyed :meth:`Transport.register
+                caller can tell *what* was lost. Fires only when the incumbent
+                differs from the replacement, as the port-keyed
+                :meth:`Transport.register
                 <pcapkit.protocols.transport.transport.Transport.register>` it
                 overrides does.
 
@@ -626,9 +627,10 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             protocol = protocol.klass
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if code in cls.__proto__:
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and incumbent is not protocol:
             warn(f'payload protocol identifier {code} already registered, overwriting '
-                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
+                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod

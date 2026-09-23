@@ -243,9 +243,16 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         DummyProtocol.register(9, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
         self.assertIs(DummyProtocol.__proto__[9], Raw)
 
+        class Other(Raw):
+            pass
+
+        # GitHub issue #718 added an identity guard, so the second call needs
+        # a genuinely different class from the first to still warn -- see
+        # ``test_register_stays_quiet_on_same_object_reregistration`` for the
+        # same-object case this used to (incorrectly) exercise.
         with mock.patch('pcapkit.protocols.protocol.warn') as warn:
             DummyProtocol.register(1, Raw)
-            DummyProtocol.register(1, Raw)
+            DummyProtocol.register(1, Other)
         self.assertGreaterEqual(warn.call_count, 1)
 
         DummyProtocol.__proto__ = collections.defaultdict(
@@ -343,6 +350,26 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         no_stop._exlayer = None
         no_stop._exproto = 'raw'
         self.assertFalse(no_stop._check_term_threshold())
+
+    def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so the *second* of
+        two calls registering the exact same class under the exact same code
+        warned about an overwrite that never happened -- this is the case
+        ``test_register_analyze_and_next_layer_paths`` used to (incorrectly)
+        exercise. Matches the identity guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        DummyProtocol, _, _ = self._make_protocol_class()
+        from pcapkit.protocols.misc.raw import Raw
+
+        with mock.patch('pcapkit.protocols.protocol.warn') as warn:
+            DummyProtocol.register(1, Raw)
+            DummyProtocol.register(1, Raw)
+        self.assertEqual(warn.call_count, 0)
 
     def test_lookup_registry_reads_the_fallback_without_recording_it(self) -> None:
         """The non-recording lookup is generic over what the registry holds.

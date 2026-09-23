@@ -1122,8 +1122,16 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             # does not mean the same thing for every subclass.
             codes = code if isinstance(code, collections.abc.Iterable) else (code,)
             for _code in codes:
-                if _code in cls.__enum__:
-                    incumbent = cls.__enum__[_code]  # type: ignore[index]
+                # This loop visits every element of an iterable ``code``, so a
+                # repeated member -- or two members that are the same object,
+                # as an :class:`enum.Enum` alias makes possible -- reaches this
+                # twice for the same key with ``cls`` on both sides: incumbent
+                # on the first pass, replacement on the second. So ordinary
+                # subclassing syntax reaches this guard, e.g.
+                # ``class X(Base, code=[A, A])`` or ``code=[A, B]`` with
+                # ``A is B``, with no second call to this method needed.
+                incumbent = cls.__enum__.get(_code)  # type: ignore[arg-type]
+                if incumbent is not None and incumbent is not cls:
                     warn(f'schema {_code} already registered, overwriting '
                          f'{incumbent!r} with {cls!r}', RegistryWarning)
                 cls.__enum__[_code] = (cls)  # type: ignore[index]
@@ -1153,12 +1161,14 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             parser it displaced and said nothing about the schema. The guard
             here closes that asymmetry.
 
-            It fires on the mere presence of ``code``, as the code-keyed parser
-            registries do and unlike :func:`register_protocol
-            <pcapkit.foundation.registry.protocols.register_protocol>`, whose key
-            is derived from the value it stores. ``code`` here is supplied by the
-            caller and is independent of ``schema``, so a repeat is a caller
-            mistake worth reporting even when the value is unchanged.
+            It fires only when the incumbent differs from the replacement, the
+            same guard :func:`register_protocol
+            <pcapkit.foundation.registry.protocols.register_protocol>` applies,
+            even though ``code`` here -- unlike ``register_protocol``'s key --
+            is supplied by the caller and independent of ``schema``. GitHub
+            issue #718 corrected the previous presence-only guard: a repeat
+            call that names the exact same schema object is a caller replaying
+            a registration, not a mistake, so it is now a silent no-op.
 
             Presence is a faithful "was this really registered" test only because
             :class:`_EnumRegistry` returns a miss without recording it. A plain
@@ -1175,8 +1185,8 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             here, so it is guarded separately.
 
         """
-        if code in cls.__enum__:
-            incumbent = cls.__enum__[code]  # type: ignore[index]
+        incumbent = cls.__enum__.get(code)  # type: ignore[arg-type]
+        if incumbent is not None and incumbent is not schema:
             warn(f'schema {code} already registered, overwriting '
                  f'{incumbent!r} with {schema!r}', RegistryWarning)
 
