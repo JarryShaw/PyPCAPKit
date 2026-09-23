@@ -2035,20 +2035,40 @@ pull requests between #326 and #509.
   nothing to lose, while ``test_httpv2_frame_readers_cover_successful_frames`` drives the
   readers from hand-built schema stubs, so the callback never ran there either. The new
   ``tests/protocols/application/test_httpv2_payload_length_unit.py`` reads wire octets,
-  which is the gap: 15 tests and 9 subtests over the padded and unpadded shapes of all
-  three frames plus both ``PRIORITY`` combinations, asserting the payload *octets* and
-  never its length, because a length assertion survives a read of the right width from
-  the wrong offset. Its padded cases pad with a non-zero ``b'\xde\xad\xbe\xef'`` rather
-  than the zeros :rfc:`9113#section-6.1` tells a sender to use -- pcapkit does not police
-  padding content -- so that failing to subtract the padding yields a different byte
-  string instead of a coincidentally equal count. Four wrong fixes were written over the
-  schema to check the tests discriminate, and each is rejected: dropping the conditional
-  outright (caught by ``packet length < 0: -4``), subtracting ``pad_len + 1`` (caught as
+  which is the gap: 23 tests and 12 subtests over the padded, unpadded and padding-only
+  shapes of all three frames plus both ``PRIORITY`` combinations, asserting the payload
+  *octets* and never its length, because a length assertion survives a read of the right
+  width from the wrong offset. Its padded cases pad with a non-zero
+  ``b'\xde\xad\xbe\xef'`` rather than the zeros :rfc:`9113#section-6.1` tells a sender to
+  use -- pcapkit does not police padding content -- so that failing to subtract the
+  padding yields a different byte string instead of a coincidentally equal count. The
+  same lambda also governs **packing**, which neither the issue nor the first revision of
+  the fix noticed and a cross-review on a second model did: ``BytesField`` consults its
+  ``length`` callback on both paths, so the ``else`` arm did not merely discard a payload
+  on read, it declined to write one. Measured pre-fix, an unpadded ``DATA`` frame carrying
+  twelve octets of body packed to ``000015000000000001`` -- nine octets of header whose
+  length field declares **21**, with the body absent -- and unpadded ``HEADERS`` and
+  ``PUSH_PROMISE`` likewise declared 29 against 9 and 33 against 13. A frame overstating
+  its own length by its whole payload desynchronises any reader that walks a stream by
+  that field, so this was pcapkit *emitting* malformed HTTP/2 rather than only mis-reading
+  it, and ``HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests`` pins that half; a
+  ``make`` -> parse -> ``make`` cycle of a non-empty unpadded payload now closes
+  byte-for-byte where it could not before. Six wrong fixes were written over the schema to
+  check the tests discriminate, and each is rejected: dropping the conditional outright
+  (caught by ``packet length < 0: -4``), subtracting ``pad_len + 1`` (caught as
   ``b'{"ok":true}'`` against ``b'{"ok":true}\n'``), subtracting the padding on the arm
-  where it is absent, and fixing ``DataFrame`` while forgetting the other two. Four tests
-  and three subtests fail before the change and all pass after; 137 tests and 547
-  subtests pass across ``tests/protocols/application/``, the round-trip module and the
-  four other HTTP/2-touching modules. ``EXPECTED_FAILURES`` is unmoved, its one HTTP/2
+  where it is absent, fixing ``DataFrame`` while forgetting the other two, and
+  ``max(computed, 1)`` on the two ``fragment`` fields. That last one is the cross-review's
+  own construction and it **passed** the first revision's 15 tests and 9 subtests, because
+  every fixture then carried a non-empty payload and only ``DataFrame`` had a "frame of
+  only padding" case, so those two callbacks were never once asked for ``0``; under it a
+  padding-only ``HEADERS`` frame returned ``fragment=b'\xde'``, one padding octet leaked
+  in, alongside a swallowed ``SchemaWarning: packet length < 0: -1``. The three missing
+  padding-only cases and a callback-level ``test_the_padded_arm_reaches_zero_and_is_not_clamped``
+  close it -- ``0`` is a legitimate answer from these callbacks and has to be asserted as
+  one. Seven tests and three subtests fail before the change and all pass after; 145 tests
+  and 550 subtests pass across ``tests/protocols/application/``, the round-trip module and
+  the four other HTTP/2-touching modules. ``EXPECTED_FAILURES`` is unmoved, its one HTTP/2
   entry ``httpv2-frame/PRIORITY`` still failing with the same ``CONSTRUCT`` status and
   the same detail -- ``PriorityFrame`` has neither a payload field nor a ``PADDED`` flag,
   so this change cannot reach it -- and none of the 44 entries was deleted; that entry's
@@ -2056,15 +2076,22 @@ pull requests between #326 and #509.
   ``header.length != 9`` guard it describes now being at ``:562``. The schema module was
   already at 100% coverage and stays there, 101 statements and 4 branches either side
   with nothing missing or partial, because the changed lines did execute before -- just
-  with an empty payload -- so the number that moved is the suite: 73 to 88 tests and 399
-  to 408 subtests over the same targets. The construct side needed no change,
+  with an empty payload -- so the number that moved is the suite: 73 to 96 tests and 399
+  to 411 subtests over the same targets. The construct side needed no code change,
   ``_make_http_length`` having always computed the DATA payload as
   ``len(frame.data) + (pad_len + 1 if pad_len else 0)``, i.e. assuming ``data`` holds the
-  whole payload whether or not the frame is padded -- it was the read path that only
-  agreed with that when the frame *was* padded. Ships labelled breaking: restoring a
+  whole payload whether or not the frame is padded -- it was the shared length callback
+  that disagreed, on both paths at once. An AST sweep of all 496 files of the package
+  found one other site with the same syntactic shape,
+  ``pcapkit/protocols/schema/internet/ipv4.py:336`` (``TSOption.remainder``), and it is
+  correct rather than the same defect: its ``else 0`` is intentional because the sibling
+  ``ts_data`` field consumes the entire option data area in that arm, the two summing to
+  ``length - 4`` across all 2106 ``(length, pointer, flag)`` combinations, which is
+  exactly what was not true here. Ships labelled breaking on both counts: restoring a
   dropped payload moves the parse output of essentially every HTTP/2 capture on the
   success path, so anything holding a golden file or a regression baseline that recorded
-  the empty value sees it change (#668).
+  the empty value sees it change -- and constructed frames change byte-for-byte too, from
+  malformed to correct (#668).
 * **Fixed** -- the schema half of every option-like registrar overwrote
   silently while the parser half of the very same call warned.
   ``EnumSchema.register`` was a bare ``cls.__enum__[code] = schema``, and it is
