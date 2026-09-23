@@ -34,8 +34,7 @@ So this module answers, cheaply and without needing the fixtures themselves:
 * :func:`is_unit_tier` -- which tier does this module belong to?
 * :func:`committed_captures` -- which captures does *git* track? Asked of git
   rather than hardcoded, because a hardcoded list of names silently rots the
-  moment somebody commits another capture (there are six today, not the two
-  the rule started with).
+  moment somebody commits another capture, or stops committing one.
 * :func:`audit_module` -- does this module read a generated capture without
   handling its absence?
 * :func:`check_unit_tier_read` -- may this particular

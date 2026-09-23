@@ -12,7 +12,7 @@ Four things are worth pinning, and they are the four ways this could rot:
 * the tier rule here still matches the one CI runs
   (:class:`TierClassificationTests`, :class:`WorkflowAgreementTests`);
 * committedness comes from git rather than from a list of names that goes stale
-  the moment a seventh capture is committed (:class:`CommittedCaptureTests`);
+  the moment another capture is committed (:class:`CommittedCaptureTests`);
 * a violation is caught and explained, the legitimate reads next to it are not,
   and several violations in one module are listed in the order those violations
   appear in the file rather than in the order a tree walk happened to reach them
