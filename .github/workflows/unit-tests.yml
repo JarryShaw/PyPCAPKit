@@ -51,7 +51,7 @@ jobs:
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental == true }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -93,7 +93,7 @@ jobs:
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental == true }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -204,7 +204,7 @@ jobs:
     name: Gate (full suite, Python 3.14)
     if: ${{ inputs.gate-only == true }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v7
