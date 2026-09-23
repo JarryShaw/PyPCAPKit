@@ -2275,6 +2275,29 @@ pull requests between #326 and #509.
   fixtures -- some of them committed --...," and ``test_tier_guard.py`` drops
   its "seventh capture" phrasing the same way. Prose-only, verified with
   ``coverage.parser.PythonParser`` that no executable statement moved (#700).
+* **Fixed** -- ``test_every_tracked_name_exists_and_matches_git`` in
+  ``tests/test_tier_guard.py`` checked neither the git index nor the
+  filesystem despite its name: it asserted only that the tracked-capture list
+  was non-empty and that no name contained a ``/``, so a hardcoded list would
+  pass it whether or not it matched reality. Sibling
+  ``test_capture_suggestions_are_captures`` had the same gap. Found while
+  cross-reviewing #703, which is itself prose-only and left this out of
+  scope; the fix rides in as the second and third commits on that PR's
+  branch, whose own description names only #700. Both tests now re-derive the
+  expected set independently -- ``git ls-files -z`` under
+  ``examples/captures/`` -- and assert equality against it rather than
+  against themselves, plus a per-name ``Path.is_file()`` check the old
+  version never made. A cross-review of the first version of this fix found
+  it wrong twice over: a stale docstring in ``_tiers.py`` still claimed
+  ``test_tier_guard.py`` "only stats ``in.pcap``," falsified by the new
+  per-name loop; and the new ``assertEqual`` on
+  ``test_capture_suggestions_are_captures`` was vacuous on an empty tracked
+  set (``() == ()`` passes trivially), having dropped the non-emptiness guard
+  the other test kept. Both are corrected in a follow-up commit. Even after
+  the fix, a hardcoded literal that happens to match today's six tracked
+  names still passes -- the test detects a set that is wrong *at the moment it
+  runs*, not hardcoding as a practice, which turns a permanent blind spot into
+  a tripwire that fires on the next change to the tracked set (#708).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
