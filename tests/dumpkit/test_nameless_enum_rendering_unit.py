@@ -5,17 +5,20 @@ import importlib
 import importlib.util
 import pkgutil
 import unittest
+from typing import TYPE_CHECKING
 
 from tests._support import purge_modules
 
+if TYPE_CHECKING:
+    import aenum
+
+    #: Either enumeration library's flag class. :class:`aenum.Flag` is *not* an
+    #: :class:`enum.Flag` subclass -- which is why the sweep below tests for
+    #: both of them -- so neither one alone annotates a registry.
+    FlagRegistry = type[enum.Flag] | type[aenum.Flag]
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
-
-#: Flag values made up *entirely* of bits no member declares. Every one of these
-#: has ``name is None``, which is the whole point of #648: the defect is a
-#: property of "no declared bits", not of the number zero, so a guard written
-#: against ``value == 0`` would fix the first of these and leave the rest.
-NAMELESS_VALUES = (0, 1, 8, 9, 65536)
 
 
 class StdFlags(enum.IntFlag):
@@ -95,6 +98,16 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     * It needs no special case for zero, which matters because the defect never
       was about zero.
 
+    The values probed are derived from each enumeration's own declared bits
+    rather than written down, which is #702. This file used to sweep the literal
+    ``(0, 1, 8, 9, 65536)``, and ``65536`` is ``0x10000`` -- one bit past the
+    sixteen-bit field :class:`~pcapkit.const.tcp.flags.Flags` bounds its
+    :meth:`~enum.Enum._missing_` to. That guard is correct, so the probe was
+    what had to move: a value the registry is right to refuse cannot also be a
+    value the dumper renders. Every one of the library's seven flag registries
+    carries such a guard, at four distinct widths, so exempting the guarded ones
+    instead would have left this half of the sweep with nothing in it at all.
+
     """
 
     def setUp(self) -> None:
@@ -103,9 +116,14 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     def test_scalar_return_renders_a_nameless_member_as_its_value(self) -> None:
         """The plain ``return`` at the end of the enumeration branch.
 
-        Covers the nameless value *and* four non-zero ones, because a fix that
-        special-cased zero would pass on ``Flags(0)`` alone and still emit
-        ``'Flags::8 [8]'``'s predecessor ``'Flags::None [8]'``.
+        Covers the nameless zero *and* every non-zero nameless value the
+        registry admits, because a fix that special-cased zero would pass on
+        ``Flags(0)`` alone and still emit ``'Flags::8 [8]'``'s predecessor
+        ``'Flags::None [8]'``.
+
+        Both libraries are swept from the same derivation, so this is still the
+        demonstration that the rendering is not an :mod:`aenum` quirk -- stdlib
+        :class:`enum.IntFlag` spells a wholly-undeclared value the same way.
 
         """
         from pcapkit.const.tcp.flags import Flags
@@ -113,23 +131,24 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         dumper = make_dumper(BaseDumper)()
 
-        for value in NAMELESS_VALUES:
-            with self.subTest(library='aenum', value=value):
-                member = Flags(value)
-                # The premise: there is no name to interpolate.
-                self.assertIsNone(member.name)
-                rendered = dumper.object_hook(member)
-                self.assertEqual(rendered, f'Flags::{value} [{value}]')
-                # The defect, stated as what must no longer appear. Asserted
-                # separately from the equality above so a future change to the
-                # rendering cannot quietly reintroduce the literal.
-                self.assertNotIn('None', rendered)
+        for registry, library in ((Flags, 'aenum'), (StdFlags, 'enum')):
+            values = _nameless_values(registry)
+            # Without this the loop below could sweep nothing at all and still
+            # report a pass, which is how a derived probe set rots silently
+            # where a written-down one would not.
+            self.assertGreater(len(values), 1, (library, values))
 
-            with self.subTest(library='enum', value=value):
-                # Not an ``aenum`` quirk -- stdlib behaves identically.
-                std = StdFlags(value)
-                self.assertIsNone(std.name)
-                self.assertEqual(dumper.object_hook(std), f'StdFlags::{value} [{value}]')
+            for value in values:
+                with self.subTest(library=library, value=value):
+                    member = registry(value)
+                    # The premise: there is no name to interpolate.
+                    self.assertIsNone(member.name)
+                    rendered = dumper.object_hook(member)
+                    self.assertEqual(rendered, f'{registry.__name__}::{value} [{value}]')
+                    # The defect, stated as what must no longer appear. Asserted
+                    # separately from the equality above so a future change to
+                    # the rendering cannot quietly reintroduce the literal.
+                    self.assertNotIn('None', rendered)
 
     def test_named_members_are_untouched(self) -> None:
         """The control. Only the name half of a *nameless* member changes.
@@ -227,24 +246,17 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         Mobility Header flag registries. Naming them here would rot the moment
         an eighth is added, so they are discovered.
 
-        """
-        import aenum
+        Since #702 the sweep is over every nameless value each registry admits
+        rather than over ``registry(0)`` alone. Before that, the four Mobility
+        Header registries were only ever exercised at the one value they share,
+        so the sweep was broad across registries and one value deep in each.
 
+        """
         from pcapkit.dumpkit.common import make_dumper
 
         dumper = make_dumper(BaseDumper)()
 
-        registries = {}
-        for module in pkgutil.walk_packages(_const_path(), prefix='pcapkit.const.'):
-            try:
-                imported = importlib.import_module(module.name)
-            except ImportError:  # pragma: no cover - a registry that cannot import
-                continue
-            for attribute in vars(imported).values():
-                if not isinstance(attribute, type) or attribute.__module__ != module.name:
-                    continue
-                if issubclass(attribute, (enum.Flag, aenum.Flag)):
-                    registries[f'{module.name}.{attribute.__name__}'] = attribute
+        registries = _flag_registries()
 
         # A guard on the sweep itself: an empty mapping would make every
         # assertion below vacuous, and that is how this test would rot silently.
@@ -252,19 +264,84 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         nameless = []
         for label, registry in sorted(registries.items()):
-            with self.subTest(registry=label):
-                member = registry(0)
-                rendered = dumper.object_hook(member)
-                self.assertNotIn('::None [', rendered)
-                if member.name is None:
-                    nameless.append(label)
-                    self.assertEqual(rendered, f'{registry.__name__}::0 [0]')
-                else:
-                    self.assertEqual(rendered, f'{registry.__name__}::{member.name} [0]')
+            values = _nameless_values(registry)
+            if values:
+                nameless.append(label)
+
+            # ``0`` is rendered whether or not it is nameless. For the two
+            # registries that declare it -- ``CommandType`` and
+            # ``TransportProtocol``, the two with no undeclared bits left in
+            # their field -- it is the only thing there is to render, and it is
+            # the control showing the fix keys on the name and not on the value.
+            for value in dict.fromkeys((0, *values)):
+                with self.subTest(registry=label, value=value):
+                    member = registry(value)
+                    rendered = dumper.object_hook(member)
+                    self.assertNotIn('::None [', rendered)
+                    if member.name is None:
+                        # Cross-checks the derivation as well as the rendering:
+                        # a nameless value the helper did not return would mean
+                        # the sweep is skipping part of the field.
+                        self.assertIn(value, values)
+                        self.assertEqual(rendered, f'{registry.__name__}::{value} [{value}]')
+                    else:
+                        self.assertEqual(rendered,
+                                         f'{registry.__name__}::{member.name} [{value}]')
 
         # Not an incidental detail: if this ever drops to zero the test above
         # stops exercising the fix at all and would pass on unfixed code.
         self.assertGreaterEqual(len(nameless), 5, nameless)
+
+    def test_a_value_past_the_field_is_refused_rather_than_rendered(self) -> None:
+        """#702 -- the probe that was wrong, asserted the right way round.
+
+        All seven flag registries bound their :meth:`~enum.Enum._missing_` to
+        the width of their own field, and the widths differ: three bits for
+        :class:`~pcapkit.const.ftp.command.CommandType`, four for
+        :class:`~pcapkit.const.reg.apptype.TransportProtocol`, eight for three
+        of the Mobility Header flags, sixteen for ``BindingUpdateFlag`` and
+        :class:`~pcapkit.const.tcp.flags.Flags`. One literal therefore cannot
+        mean "past the field" for all of them, which is the whole reason
+        :func:`_field_mask` derives it per registry.
+
+        This also pins the derivation without parsing anybody's source: the
+        widest in-field value is accepted and the next one up is refused, which
+        holds only if the mask :func:`_field_mask` computes is exactly the bound
+        each registry wrote down for itself.
+
+        ``65536`` survives here, as the bound of the two sixteen-bit registries
+        -- asserted as the rejection it always was, rather than as a value the
+        dumper was expected to render. Which also keeps the ``raise`` in those
+        guards covered: six of the seven were never reached by any test, and the
+        seventh was reached only by this file failing on it.
+
+        """
+        registries = _flag_registries()
+        self.assertGreaterEqual(len(registries), 7, registries)
+
+        widths = set()
+        for label, registry in sorted(registries.items()):
+            mask = _field_mask(registry)
+            widths.add(mask.bit_length())
+
+            with self.subTest(registry=label, value=mask):
+                # The widest value the field holds is valid, named or not.
+                self.assertEqual(registry(mask).value, mask)
+
+            with self.subTest(registry=label, value=mask + 1):
+                with self.assertRaises(ValueError) as caught:
+                    registry(mask + 1)
+                # ``enum`` requires ``ValueError`` from a refused lookup, and
+                # #677 brought the last six divergent registries onto the bare
+                # built-in the rest of :mod:`pcapkit.const` already raised, so
+                # this asserts the message rather than a type of its own.
+                self.assertIn(str(mask + 1), str(caught.exception))
+                self.assertIn(registry.__name__, str(caught.exception))
+
+        # The literal could not have been right for all of them, and this is the
+        # measurement that says so: several distinct widths, and ``65536`` is
+        # outside every single one of them.
+        self.assertGreaterEqual(len(widths), 4, widths)
 
 
 def _const_path() -> 'list[str]':
@@ -280,6 +357,130 @@ def _const_path() -> 'list[str]':
     import pcapkit.const
 
     return list(pcapkit.const.__path__)
+
+
+def _flag_registries() -> 'dict[str, FlagRegistry]':
+    """Every flag enumeration declared under :mod:`pcapkit.const`.
+
+    Discovered rather than listed, so an eighth registry is swept the day it
+    lands instead of the day somebody remembers to add it here. Keyed by
+    ``<module>.<class>`` so a failing subtest names the registry it came from.
+
+    Both libraries are matched because the two are unrelated types --
+    :class:`aenum.Flag` is not an :class:`enum.Flag` subclass -- and the
+    generated registries use :mod:`aenum` while the stand-ins in this file use
+    the stdlib.
+
+    Returns:
+        The discovered registries, keyed by dotted path.
+
+    """
+    import aenum
+
+    registries: 'dict[str, FlagRegistry]' = {}
+    for module in pkgutil.walk_packages(_const_path(), prefix='pcapkit.const.'):
+        try:
+            imported = importlib.import_module(module.name)
+        except ImportError:  # pragma: no cover - a registry that cannot import
+            continue
+        for attribute in vars(imported).values():
+            if not isinstance(attribute, type) or attribute.__module__ != module.name:
+                continue
+            if issubclass(attribute, (enum.Flag, aenum.Flag)):
+                registries[f'{module.name}.{attribute.__name__}'] = attribute
+    return registries
+
+
+def _declared_bits(registry: 'FlagRegistry') -> int:
+    """The union of every bit *registry* declares a member for.
+
+    Iteration over a flag enumeration yields the canonical single-bit members,
+    skipping a zero member and any alias, which is what makes this the registry's
+    *declared bits* rather than a member count: ``Flags`` declares twelve members
+    from ``1 << 4`` upwards, so this is ``0xFFF0``.
+
+    Args:
+        registry: The flag enumeration to inspect.
+
+    Returns:
+        The bitwise OR of every member's value.
+
+    """
+    declared = 0
+    for member in registry:
+        declared |= member.value
+    return declared
+
+
+def _field_mask(registry: 'FlagRegistry') -> int:
+    """The width of *registry*'s field, as an all-ones mask.
+
+    Every flag registry in the library bounds its :meth:`~enum.Enum._missing_`
+    to the field its declared bits live in, and for all seven of them that bound
+    is exactly the smallest all-ones mask covering every declared bit --
+    ``0xFFFF`` for ``Flags``' ``1 << 4 .. 1 << 15``, ``0xFF`` for the eight-bit
+    Mobility Header flags, ``0x07`` for the three-bit
+    :class:`~pcapkit.const.ftp.command.CommandType`.
+    :class:`~pcapkit.const.reg.apptype.TransportProtocol` already spells it that
+    way in its own source, as ``max(cls.__members__.values()) * 2 - 1``, because
+    it extends itself at runtime and cannot hard-code a bound.
+
+    Derived rather than read off the source, so it cannot drift from the guard
+    and needs no table to maintain. That it does not drift is itself asserted, by
+    :meth:`NamelessEnumRenderingTests.test_a_value_past_the_field_is_refused_rather_than_rendered`.
+
+    Args:
+        registry: The flag enumeration to inspect.
+
+    Returns:
+        An all-ones mask as wide as the registry's field.
+
+    """
+    return (1 << _declared_bits(registry).bit_length()) - 1
+
+
+def _nameless_values(registry: 'FlagRegistry') -> 'tuple[int, ...]':
+    """The in-field values of *registry* that no member names.
+
+    A flag value made up *entirely* of bits no member declares has
+    ``name is None``, which is the whole point of #648: the defect is a property
+    of "no declared bits", not of the number zero, so a guard written against
+    ``value == 0`` would fix the first of these and leave the rest.
+
+    Three kinds of value come back and no more -- no bits at all, each single
+    undeclared bit on its own, and every undeclared bit at once. The last is the
+    multi-bit case, and it is the largest value the field admits with no declared
+    bit in it, which is what the old literal's ``9`` and its out-of-range
+    ``65536`` were each reaching for. Returning every subset would be exhaustive
+    and is not worth 8192 subtests for :class:`StdFlags`' thirteen undeclared
+    bits.
+
+    Nothing out of range is returned, which is #702: the values are all masked
+    into the registry's own field, so a registry that legitimately refuses
+    ``0x10000`` is never asked to mint a pseudo-member for it.
+
+    A registry whose declared bits fill its field has no nameless value at all
+    and yields an empty tuple. :class:`~pcapkit.const.ftp.command.CommandType`
+    and :class:`~pcapkit.const.reg.apptype.TransportProtocol` are both of that
+    shape, each declaring ``0`` as ``undefined``, which is why five of the seven
+    registries are nameless at zero rather than all seven.
+
+    Args:
+        registry: The flag enumeration to inspect.
+
+    Returns:
+        The registry's nameless values, smallest first.
+
+    """
+    undeclared = _field_mask(registry) & ~_declared_bits(registry)
+    singles = [1 << index for index in range(undeclared.bit_length())
+               if undeclared >> index & 1]
+
+    candidates = [0, *singles]
+    if len(singles) > 1:
+        candidates.append(undeclared)
+
+    return tuple(value for value in candidates if registry(value).name is None)
 
 
 if __name__ == '__main__':
