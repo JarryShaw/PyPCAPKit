@@ -56,6 +56,7 @@ from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import get_logger
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, Iterator, Optional, Type
@@ -150,14 +151,78 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
     :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to
     the :data:`pcapkit.protocols.__proto__` registry.
 
+    The registry is keyed on ``protocol.__name__.upper()``, which is **not**
+    unique across this package: three dispatchable protocol classes are all
+    named ``HTTP`` -- the generic base
+    :class:`pcapkit.protocols.application.http.HTTP` and the two version
+    implementations :class:`pcapkit.protocols.application.httpv1.HTTP` and
+    :class:`pcapkit.protocols.application.httpv2.HTTP` -- so all three compete
+    for the single key ``'HTTP'``. Registering one of them replaces whichever
+    was there, and the replacement is observable through every reader of the
+    registry, e.g. :meth:`ProtocolBase.expand_comp
+    <pcapkit.protocols.protocol.ProtocolBase.expand_comp>`, which resolves a
+    bare protocol name through it.
+
+    Per #675 the overwrite is now reported rather than silent, matching
+    :meth:`ProtocolBase.register
+    <pcapkit.protocols.protocol.ProtocolBase.register>` and the other
+    overwrite-warning registries.
+
+    The guard here deliberately reads "key present **and** incumbent is a
+    different class", where every sibling registry warns on mere presence. The
+    difference is in where the key comes from. A sibling is keyed on a ``code``
+    the caller passes, so a repeat call is a caller mistake worth reporting even
+    when the value is identical. This registry's key is *derived* from the class,
+    and this function is the funnel every wrapper registrar calls --
+    :func:`register_tcp`, :func:`register_udp`, :func:`register_apptype`,
+    :func:`register_linktype` and the rest all end in
+    ``register_protocol(module)``. So registering one class under two codes, a
+    supported and documented thing to do, reaches this function twice with the
+    same class and nothing at stake; on a presence-only guard that would warn
+    about an overwrite that overwrote nothing. Warning on the harmless case is
+    not free: it is what teaches a caller to filter
+    :exc:`~pcapkit.utilities.warnings.RegistryWarning` wholesale, and that
+    filter is what would then hide the ``HTTP`` collision this warning exists to
+    surface.
+
+    Making the key itself unique would resolve the collision rather than
+    merely reporting it, but it is a registry-format change that the bare-name
+    readers outside this module cannot absorb on their own -- the registry is a
+    documented public attribute, and its readers look a bare name up and then
+    degrade *silently* on a miss rather than raising, so a re-keying would not
+    announce itself either. :meth:`ProtocolBase.expand_comp
+    <pcapkit.protocols.protocol.ProtocolBase.expand_comp>` falls back to the
+    name as a plain string, and the ``protocol`` properties on
+    :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyMeta` and
+    :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowMeta` fall back to
+    :class:`~pcapkit.protocols.misc.raw.Raw`. Re-keying is therefore part of the
+    registry redesign in #514, and reporting the collision here is the step that
+    redesign is sequenced behind.
+
     Args:
         protocol: Protocol class.
+
+    Raises:
+        pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+            :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+    Warns:
+        pcapkit.utilities.warnings.RegistryWarning: If the registry already
+            holds a *different* class under this protocol's name, i.e. the
+            registration displaced another protocol class. Re-registering the
+            same class under the same name is silent.
 
     """
     if not issubclass(protocol, Protocol):
         raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
-    protocol_registry[protocol.__name__.upper()] = protocol
+    name = protocol.__name__.upper()
+    incumbent = protocol_registry.get(name)
+    if incumbent is not None and incumbent is not protocol:
+        warn(f'protocol {name} already registered, overwriting {incumbent!r} '
+             f'with {protocol!r}', RegistryWarning)
+
+    protocol_registry[name] = protocol
     logger.debug('registered protocol: %s', protocol.__name__)
 
 
