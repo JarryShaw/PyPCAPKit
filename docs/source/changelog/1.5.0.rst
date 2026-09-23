@@ -2364,6 +2364,27 @@ pull requests between #326 and #509.
   rather than implying they ship committed, and a new
   ``tests/project/test_capture_tracking.py`` (5 tests, 8 subtests) pins the
   invariant going forward, shown failing against the pre-change tree (#685).
+* **Fixed** -- two ``#:`` autodoc comments in
+  ``pcapkit/foundation/traceflow/traceflow.py`` named a bare ``Type``, which
+  Sphinx's cross-reference resolver resolves against every class named
+  ``Type`` in the project rather than against ``typing.Type`` -- there are
+  five -- and silently linked to ``pcapkit.const.l2tp.type.Type``, an L2TP
+  field-type enum with nothing to do with dumpers. Line 406
+  (``#: Type[Dumper]: Dumper class.``) is the live case: once #684 rendered
+  ``TraceFlow._foutio``, the built docs pointed a reader at the wrong class
+  with no warning that anything had gone sideways. Both sites now spell it
+  ``~typing.Type[Dumper]``, the same form eight other files in the tree
+  already use for the identical ambiguity. Line 146 (``__output__``'s ``#:``
+  comment) is fixed for the same reason but is currently inert: a separate,
+  correct ``# type:`` comment two lines below already drives that signature
+  through ``napoleon_attr_annotations``, so this half of the fix is insurance
+  against the day nothing else does. **This does not close #709.** Four more
+  bare ``Type`` sites -- hand-written ``:type:`` fields at
+  ``docs/source/pcapkit/foundation/engines/engine.rst:40``,
+  ``.../reassembly/reassembly.rst:33`` and ``:43``, and
+  ``.../traceflow/traceflow.rst:40`` -- carry the same ambiguity and are not
+  touched here; #709 stays open for them, with no PR yet filed against that
+  half (#709).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
