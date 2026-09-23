@@ -980,47 +980,63 @@ HIP_VERSION = {129: 2, 128: 1}
 #: statement available that the padding was what made a lone parameter
 #: unrepresentable -- 41 codes that could not survive alone now can.
 #:
-#: It is still *two*, though, because the four codes that fail at one copy fail
-#: for reasons that have nothing to do with padding. Three of them pack a number
-#: of contents octets that disagrees with the ``len`` they declare, so their
-#: record is not 8-aligned however the padding is computed, and a pair cancels
-#: that misalignment exactly as it used to cancel the padding error:
+#: What still fails at one copy fails for reasons that have nothing to do with
+#: padding. Two of the three pack a number of contents octets that disagrees with
+#: the ``len`` they declare, so their record is not 8-aligned however the padding
+#: is computed; the third never needed a pair at all:
 #:
-#: * ``R1_COUNTER`` (129) and ``R1_Counter`` (128) both declare ``len=12``,
-#:   which :rfc:`7401` Section 5.2.3 agrees with, but pack 12 octets in total
-#:   rather than 16 -- because ``counter`` is a
-#:   :class:`~pcapkit.corekit.fields.numbers.UInt32Field` where the RFC
-#:   specifies "R1 generation counter, 8 bytes", a 64-bit unsigned integer. Four
-#:   octets short, not filed anywhere yet, and found while measuring #651.
-#:
-#:   ``R1_COUNTER`` is the one code that round-tripped at one copy *before* #651
-#:   and does not after, and the reason is worth keeping: at ``len=12`` the old
-#:   contents-aligning rule appended exactly four surplus octets, which happened
-#:   to fill this parameter's four-octet shortfall and bring the record to 16.
-#:   Two defects cancelling, again. Correcting the padding removes the
-#:   compensation and leaves the shortfall visible, which is the right outcome
-#:   and not a regression in anything but this table's tally.
-#:
-#:   Once the width is fixed, ``R1_Counter`` will fail on its own second defect
-#:   instead: code 128 parses as an ``UnassignedParameter``, because the schema
-#:   registry is keyed on ``code=`` and ``R1CounterParameter`` declares only 129.
-#:   That is what ``hip-parameter/R1_Counter`` in the expected-failure table
-#:   records, and it is why this code fails at two copies as well as at one.
 #: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
 #:   ``hip-parameter/HOST_ID`` in that table.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
 #:   any other version -- while this table builds it at version 2. Nothing to do
 #:   with lengths at all, and it is the one whose recorded ``defect`` string in
 #:   that table names the header arithmetic rather than this.
+#: * ``R1_Counter`` (128) parses as an ``UnassignedParameter``: ``_read_param_*``
+#:   and ``_make_param_*`` are found by enumeration member name so both exist for
+#:   code 128, but the *schema* registry is keyed on the ``code=`` of the class
+#:   statement and ``R1CounterParameter`` declares only 129. Recorded as
+#:   ``hip-parameter/R1_Counter``, filed as #690, and it fails at two copies as
+#:   well as at one, so the pair never routed around it. Note that #672 widened
+#:   this parameter's ``counter`` to the eight octets :rfc:`7401` Section 5.2.3
+#:   requires and deliberately left this alone, so the entry is unchanged by it.
 #:
-#: Dropping to one copy would therefore trade this module's padding workaround
-#: for two freshly exposed expected-failure entries (``R1_COUNTER`` and a
-#: changed status on ``R1_Counter``) and the loss of ``R1_COUNTER`` from the
-#: round-tripping set -- a change about *those* defects rather than about this
-#: one, and one that belongs with their fixes. The
-#: single-parameter case is not lost in the meantime: it is asserted directly,
-#: and now positively, by
-#: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
+#: Two codes that used to be on that list are not on it any more, and the
+#: measurement is the point of saying so rather than quietly shortening the list.
+#: ``R1_COUNTER`` (129) packed 12 octets against the correct ``len=12`` where
+#: :rfc:`7401` Section 5.2.3's 8-octet counter makes the record 16; and
+#: ``LOCATOR_SET`` (193) declared its ``Length`` in 4-octet units where the RFC
+#: counts bytes, which at this table's default empty locator set produced a
+#: four-octet record. Both were fixed by #672 and #679, and at one copy the
+#: former went from ``CONSTRUCT`` (``ProtocolError: HIPv2: invalid format``) to
+#: ``OK`` while the latter went from ``MISMATCH`` to ``OK``. Measured over this
+#: table's 49 HIP codes on ``f0999858e`` and on the fix:
+#:
+#: ======================  ========  ==========
+#: tree                    one copy  two copies
+#: ======================  ========  ==========
+#: ``f0999858e`` (before)  44 OK     46 OK
+#: #672 + #679 (after)     46 OK     46 OK
+#: ======================  ========  ==========
+#:
+#: The 44 is one fewer than the 45 the #651 row above records at one copy, and
+#: the missing code is ``LOCATOR_SET``. #651 had corrected its padding along with
+#: the other 45 parameters, which made its empty record eight octets and let it
+#: round-trip alone; #664 then narrowed that correction back out of this one
+#: parameter, deliberately, so the four-octet record returned and with it the
+#: ``MISMATCH``. The row is not a regression in #664 -- it is the accidental
+#: conformance #679 documents, showing up in this table rather than on the wire.
+#:
+#: So **the two settings now agree**, on the same three codes above, and the
+#: reason this constant is still two is no longer that one copy fails. It is that
+#: changing it halves every ``hip-parameter`` frame in
+#: :file:`options-internet.pcap` -- which is the fixture the RFC-only
+#: conformance walk reads -- and that is a change about this table's test data
+#: rather than about either defect. #689 tracks making the drop, so that the
+#: before-and-after figures quoted for #672 and #679 stay comparable in the
+#: meantime.
+#:
+#: The single-parameter case is not lost while it waits: it is asserted directly,
+#: and positively, by ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
 #: :mod:`tests.protocols.test_option_roundtrip_unit`.
 HIP_COPIES = 2
 
@@ -1040,6 +1056,24 @@ def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
         Parameter.SOLUTION: {'lifetime': 1},
         # ``hi_curve=None`` falls through to an explicit raise.
         Parameter.HOST_ID: {'hi_curve': ECDSACurve.NIST_P_256},
+        # These two are not here because the default fails -- ``counter=0``
+        # constructs and parses perfectly well. They are here because a
+        # zero-valued field cannot discriminate a width defect from a correct
+        # one, and this parameter's width defect (#672) hid behind exactly that
+        # for as long as it did. The RFC-only walk over
+        # ``options-internet.pcap`` -- which takes its stride solely from
+        # :rfc:`7401` Section 5.2.1's ``Total Length = 11 + Length - (Length +
+        # 3) % 8`` -- read ``Length = 12``, advanced 16 over a 12-octet record,
+        # landed four octets inside the second copy, and found a phantom
+        # ``Type = 0, Length = 0`` record there whose "padding" was four zero
+        # octets. Every octet it mis-read was zero, so its zero-padding check
+        # passed and it reported no violation. Measured: patching one counter to
+        # ``aabbccdd`` turned that silence into ``type 0 padding not zeroed:
+        # aabbccdd``. With a non-zero counter the fixture can no longer conceal
+        # a mis-stride here, whether or not the width is right -- which is the
+        # reason to keep this override now that #672 has corrected the width.
+        Parameter.R1_COUNTER: {'counter': 0xaabbccdd},
+        Parameter.R1_Counter: {'counter': 0xaabbccdd},
     }
 
 

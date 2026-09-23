@@ -989,13 +989,12 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         locator_set = Data_LocatorSetParameter(
             type=schema.type,
             critical=bool(schema.type & 0b1),
-            # NOTE: The one reported record length in this module left on the
-            # pre-#651 expression, to match the one padding site left on it --
-            # see ``LocatorSetParameter.padding`` in
-            # :mod:`pcapkit.protocols.schema.internet.hip` for why touching
-            # either alone makes a conformant parameter non-conformant. #679
-            # fixes both together, and this line moves with them.
-            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            # NOTE: This was the one reported record length in this module left
+            # on the pre-#651 expression, held back to match the one padding
+            # site left on it. #679 moves both, together with the ``Length``
+            # unit they both read -- see ``LocatorSetParameter.padding`` in
+            # :mod:`pcapkit.protocols.schema.internet.hip`.
+            length=parameter_total_len(schema.len),
             locator_set=tuple(_locs),
         )
 
@@ -3142,7 +3141,20 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         return Schema_LocatorSetParameter(
             type=code,
-            len=sum(locator['len'] for locator in locators),
+            # NOTE: ``Locator.len`` is ``Locator Length``, which
+            # :rfc:`8046#section-4` gives "in 4-octet units" and which counts
+            # only the ``Locator`` field -- so a locator record is the eight
+            # fixed octets (traffic type, locator type, locator length,
+            # reserved-and-flags, lifetime) plus ``Locator Length`` * 4. This
+            # parameter's ``len`` is :rfc:`7401` Section 5.2.1's ``Length``,
+            # "length of the Contents, in bytes", so it is the sum of those
+            # record sizes. It was ``sum(locator['len'])`` until #679: ``4n``
+            # where the contents are ``24n`` octets for plain IPv6 locators,
+            # which both mis-declared the record on the wire and starved the
+            # reader's ``ListField`` of the octets it needed -- see
+            # ``LocatorSetParameter.locators`` in
+            # :mod:`pcapkit.protocols.schema.internet.hip`.
+            len=sum(8 + locator['len'] * 4 for locator in locators),
             locators=locators,
         )
 

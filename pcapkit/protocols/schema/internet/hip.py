@@ -26,7 +26,7 @@ from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
-                                            UInt32Field)
+                                            UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
@@ -452,6 +452,72 @@ def parameter_padding_len(pkt: 'dict[str, Any]') -> 'int':
     return parameter_total_len(length) - 4 - length
 
 
+#: Packet-context key under which :class:`LocatorSetParameter` keeps its own
+#: ``Length`` for the benefit of :func:`locator_set_padding_len`.
+#:
+#: It exists because ``LOCATOR_SET`` is the one parameter in this module whose
+#: contents are a :class:`~pcapkit.corekit.fields.collections.ListField` of
+#: nested schemas, and a nested schema packed through one **shares the
+#: enclosing packet context**: :meth:`Schema.pack
+#: <pcapkit.protocols.schema.schema.Schema.pack>` opens with
+#: ``packet.update(self.__dict__)``, and :class:`Locator` declares a ``len`` of
+#: its own. So by the time ``padding`` is evaluated -- after the list, since
+#: fields are packed in declaration order -- ``pkt['len']`` is the *last
+#: locator's* ``len``, not the parameter's. That is 4 for any IPv6 locator
+#: whatever the locator count, which is how the pre-#679 padding expression came
+#: to append exactly four octets to every ``LOCATOR_SET`` regardless of size.
+#:
+#: The shadowing is specific to the packing path. :meth:`Schema.unpack
+#: <pcapkit.protocols.schema.schema.Schema.unpack>` hands each field
+#: ``packet.copy()``, so nested writes do not propagate back and ``pkt['len']``
+#: stays the parameter's there. Snapshotting under a key no nested schema
+#: declares is what makes one callback correct on both paths rather than
+#: accidentally correct on one.
+LOCATOR_SET_LEN = '__locator_set_len__'
+
+
+def locator_set_len_callback(field: 'ListField',  # pylint: disable=unused-argument
+                             pkt: 'dict[str, Any]') -> 'None':
+    """Snapshot ``LOCATOR_SET``'s own ``Length`` before its locators shadow it.
+
+    Installed as the ``callback`` of :attr:`LocatorSetParameter.locators`, which
+    :meth:`ListField.__call__
+    <pcapkit.corekit.fields.collections.ListField.__call__>` runs when the field
+    is resolved against the packet -- i.e. before any nested :class:`Locator` has
+    been packed into it. See :data:`LOCATOR_SET_LEN` for why the snapshot is
+    needed at all.
+
+    Args:
+        field: The field being resolved. Unused; the signature is
+            :class:`~pcapkit.corekit.fields.collections.ListField`'s.
+        pkt: Parameter unpacked schema, modified in place.
+
+    """
+    pkt[LOCATOR_SET_LEN] = pkt['len']
+
+
+def locator_set_padding_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return the number of padding octets a ``LOCATOR_SET`` parameter needs.
+
+    The same arithmetic as :func:`parameter_padding_len` -- it defers to it
+    rather than repeating it -- but read off the snapshot
+    :func:`locator_set_len_callback` took, for the reason :data:`LOCATOR_SET_LEN`
+    gives.
+
+    Args:
+        pkt: Parameter unpacked schema.
+
+    Returns:
+        Padding length in octets, between 0 and 7 inclusive.
+
+    Raises:
+        FieldValueError: If the parameter's ``Length`` on the wire is
+            negative; see :func:`parameter_total_len`.
+
+    """
+    return parameter_padding_len({'len': pkt[LOCATOR_SET_LEN]})
+
+
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
@@ -503,7 +569,21 @@ class R1CounterParameter(Parameter, code=Enum_Parameter.R1_COUNTER):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)
     #: R1 counter.
-    counter: 'int' = UInt32Field()
+    #:
+    #: Eight octets, not four. :rfc:`7401#section-5.2.3` labels the field "R1
+    #: generation counter, 8 bytes" in its diagram and then says outright that
+    #: the parameter "contains a 64-bit unsigned integer in network byte
+    #: order", so the width is stated twice and inferred from neither.
+    #: :rfc:`5201#section-5.2.3` gives the same 4 + 8 layout, so there is no
+    #: version under which four octets is right, and both codes that reach this
+    #: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- are
+    #: affected. It was a :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
+    #: until #672: the parameter declared the correct ``len=12`` and packed 12
+    #: octets in total where :rfc:`7401` Section 5.2.1's arithmetic makes the
+    #: record 16, leaving it four short at ``4 (mod 8)``. Measured before the
+    #: fix, at ``counter=1``: ``00 80 00 0c 00 00 00 00 00 00 00 01`` for code
+    #: 128 and the same twelve octets under ``00 81`` for code 129.
+    counter: 'int' = UInt64Field()
     #: Padding.
     padding: 'bytes' = PaddingField(length=parameter_padding_len)
 
@@ -544,51 +624,64 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     """Header schema for HIP ``LOCATOR_SET`` parameters."""
 
     #: List of locators.
+    #:
+    #: The ``length`` callback is the parameter's own ``Length``, and that is
+    #: correct on the unpacking path for the reason :data:`LOCATOR_SET_LEN`
+    #: gives -- nothing has shadowed ``len`` yet when this field is resolved,
+    #: since ``type`` and ``len`` are the only fields ahead of it. What was
+    #: wrong until #679 is the *quantity* it was being handed:
+    #: :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set` wrote
+    #: ``Length`` as ``sum(Locator.len)``, in the 4-octet units
+    #: :rfc:`8046#section-4` gives ``Locator Length``, where :rfc:`7401`
+    #: Section 5.2.1's ``Length`` is a byte count. :meth:`Schema.unpack
+    #: <pcapkit.protocols.schema.schema.Schema.unpack>` reads exactly
+    #: ``field.length`` octets off the stream and hands only those to
+    #: :meth:`ListField.unpack
+    #: <pcapkit.corekit.fields.collections.ListField.unpack>`, so a set of *n*
+    #: plain IPv6 locators offered ``4n`` octets of a ``24n``-octet contents:
+    #: measured on ``f0999858e``, n = 2 and n = 5 both parsed **one** truncated
+    #: locator and left the rest of the record unconsumed, with
+    #: :exc:`~pcapkit.utilities.warnings.SchemaWarning` for the negative
+    #: remainder and a repack that did not match the octets read. With
+    #: ``Length`` a byte count the budget is the contents, each locator bills
+    #: the 8 + ``Locator Length`` * 4 octets it actually consumed, and the
+    #: count comes out exact.
     locators: 'list[Locator]' = ListField(
         length=lambda pkt: pkt['len'],
         item_type=SchemaField(schema=Locator),
+        callback=locator_set_len_callback,
     )
     #: Padding.
     #:
-    #: **This is the one parameter in this module that does not use**
-    #: :func:`parameter_padding_len`, **and the exclusion is deliberate. Do not
-    #: "finish" #651 by changing this line on its own: doing so takes a
-    #: conformant parameter to four octets short.** Two defects here cancel each
-    #: other exactly, and #679 tracks fixing them together:
+    #: Not :func:`parameter_padding_len`, which every other parameter in this
+    #: module uses, but :func:`locator_set_padding_len` -- the same arithmetic
+    #: read off a snapshot of this parameter's ``Length`` rather than off
+    #: ``pkt['len']`` directly. :data:`LOCATOR_SET_LEN` documents why the direct
+    #: read does not work here: the nested :class:`Locator` schemas share this
+    #: parameter's packet context while they pack, and their own ``len``
+    #: overwrites it before ``padding`` is reached.
     #:
-    #: 1. This callback does not receive the parameter's ``len`` at all. ``ListField``
-    #:    packs each nested :class:`Locator` into the shared packet context, whose
-    #:    own ``len`` key overwrites the parameter's, and ``padding`` is evaluated
-    #:    after the list -- so the value seen is the last locator's ``len``, which
-    #:    is 4 for any IPv6 locator. Measured by building this schema directly with
-    #:    a parameter ``len`` of 9 over a single locator of ``len`` 4: the record
-    #:    pads by the amount for 4, not the 3 that 9 would give.
-    #: 2. :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_locator_set` sets
-    #:    this parameter's ``len`` to ``sum(Locator.len)``, and ``Locator.len``
-    #:    counts 4-octet units where :rfc:`7401` Section 5.2.1's ``Length`` is a
-    #:    byte count -- so it writes ``4n`` where the contents are ``24n`` octets.
+    #: This is the site #651 deliberately left alone and #664 documented as an
+    #: exclusion, because two defects in this parameter cancelled at the shape
+    #: its tests sampled and correcting either alone made the wire output worse.
+    #: The shadowed ``len`` is 4 for any IPv6 locator, so the old expression
+    #: appended exactly four octets whatever the locator count; and the wrong
+    #: ``Length`` unit above made the declared ``Length`` ``4n`` where the
+    #: contents were ``24n``. ``4 + 24n + 4`` is ``24n + 8``, and since ``24n``
+    #: is a multiple of eight the RFC total for a byte-count ``Length`` of
+    #: ``24n`` is ``11 + 24n - 3``, the same ``24n + 8``. Hence 32, 56 and 128
+    #: octets at n = 1, 2, 5 -- conformant, by two wrongs.
     #:
-    #: Because the shadowed value is always 4 for a plain IPv6 locator, the old
-    #: expression always appends 4, giving ``4 + 24n + 4 = 24n + 8``; and because
-    #: ``24n`` is a multiple of 8, the RFC total for a byte-count ``Length`` of
-    #: ``24n`` is ``11 + 24n - 3``, the same ``24n + 8``. Measured at n = 1, 2, 5 as
-    #: 32, 56 and 128 octets, on this tree and on the tree before #651 alike. So the
-    #: wire output is right today, by two wrongs, and correcting only the padding
-    #: would leave ``24n + 4``.
-    #:
-    #: That cancellation holds for a set of **plain IPv6 locators only**, and the
-    #: reason to say so here is that it would be easy to read the paragraph above as
-    #: a guarantee about this parameter in general. It is not. A locator carrying an
-    #: SPI is 28 octets rather than 24, and an empty set has no locator to shadow
-    #: ``len`` at all, so measured on both trees: the empty set packs 4 octets where
-    #: :rfc:`7401` Section 5.2.1 wants 8; one SPI locator packs 35; two pack 63; and
-    #: a mixed plain-and-SPI pair packs 59 or 60 depending on order -- none of them a
-    #: multiple of eight. Those shapes are non-conformant *before and after* #651,
-    #: byte-identically, which is exactly why leaving this line alone is the safe
-    #: choice rather than the correct one: it ships nothing different. #679 owns
-    #: making them right, and has to account for all of these shapes, not just the
-    #: homogeneous one.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+    #: That cancellation was never general, which is why the pair had to move
+    #: together rather than one at a time. It needs every locator to be 24
+    #: octets and there to be at least one, and measured on ``f0999858e`` the
+    #: shapes that break it were non-conformant before this fix: an empty set
+    #: packed 4 octets where :rfc:`7401` Section 5.2.1 wants 8, one SPI-bearing
+    #: locator packed 35, two packed 63, and a mixed plain-and-SPI pair packed
+    #: 59 or 60 depending on order. Afterwards all seven shapes are the RFC's
+    #: own total: 8, 32, 56, 128, 32, 64, 56 and 56 respectively, with the three
+    #: plain figures unchanged.
+    padding: 'bytes' = PaddingField(length=locator_set_padding_len)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', locators: 'list[Locator]') -> 'None': ...
