@@ -176,7 +176,8 @@ class SeekableReader(io.BufferedReader):
             SeekError: If the position lies before the window, whose octets are then gone
                 for good -- the stream cannot be rewound to re-supply them. :meth:`seek`
                 refuses that position for the same reason; it is reachable here only through
-                a :meth:`truncate` that moved the window's base past a position already set.
+                a :meth:`_truncate_buffer` that moved the window's base past a position already
+                set.
 
         """
         buf_off = self._tell - self._buffer_set
@@ -254,7 +255,7 @@ class SeekableReader(io.BufferedReader):
             elif not size:
                 # NOTE: a request for no octets is answered without consulting the window,
                 # which has nothing to say about it. Asking anyway refuses a zero-length
-                # read from a position :meth:`truncate` has left behind the window -- a
+                # read from a position :meth:`_truncate_buffer` has left behind the window -- a
                 # refusal over data that was never wanted, and not what this used to do.
                 #
                 # Truthiness rather than ``size == 0`` on purpose. It is the same test for
@@ -401,16 +402,42 @@ class SeekableReader(io.BufferedReader):
 
     def truncate(self, size: 'int | None' = None, /) -> 'int':
         """Resize the stream to the given ``size`` in bytes (or the current position if ``size`` is
-        not specified). The current stream position isn't changed. This resizing can extend or
-        reduce the current file size. In case of extension, the contents of the new file area
-        depend on the platform (on most systems, additional bytes are zero-filled). The new file
-        size is returned.
+        not specified).
+
+        Raises:
+            UnsupportedOperation: Always, since the reader is not writable.
 
         Note:
-            Nothing here writes to the underlying stream -- :meth:`write` raises -- so what this
-            resizes is the buffer, not the stream behind it. The buffer is a sliding window over a
-            stream that cannot be seeked: its octet 0 sits at absolute offset ``_buffer_set``, its
-            content occupies ``[0:_buffer_cur]``, and everything past that is padding never read.
+            :meth:`io.IOBase.writable` gates this method as well as :meth:`write` -- "If
+            :data:`False`, :meth:`write` and :meth:`truncate` will raise :exc:`OSError`" -- and
+            :meth:`writable` here returns :data:`False`, so refusing is what the contract asks
+            for. It is also what CPython's own read-only buffered readers do: both the
+            accelerated :class:`io.BufferedReader` and the pure-Python
+            ``_pyio.BufferedReader`` raise :exc:`io.UnsupportedOperation`, the latter from
+            ``_BufferedIOMixin.truncate``'s ``_checkWritable()`` (#645).
+
+            The resizing this used to perform is still reachable internally, as
+            :meth:`_truncate_buffer`. It never touched the underlying stream in the first place
+            -- it resizes a private lookback window -- which is why it survives under a private
+            name rather than being removed with the public method's behaviour.
+
+        """
+        raise UnsupportedOperation('truncate')
+
+    def _truncate_buffer(self, size: 'int | None' = None, /) -> 'int':
+        """Resize the lookback buffer to the given ``size`` in bytes (or the current position if
+        ``size`` is not specified). The current stream position isn't changed. This resizing can
+        extend or reduce the current buffer size. In case of extension, the new area is
+        zero-filled. The new buffer size is returned.
+
+        Note:
+            This is the internal half of what :meth:`truncate` used to do, which is all of it:
+            nothing here writes to the underlying stream -- :meth:`write` raises -- so what this
+            resizes is the buffer, not the stream behind it. That is why :meth:`truncate` refuses
+            (#645) while this remains: the operation is a private-window one, not an
+            :class:`io.IOBase` write. The buffer is a sliding window over a stream that cannot be
+            seeked: its octet 0 sits at absolute offset ``_buffer_set``, its content occupies
+            ``[0:_buffer_cur]``, and everything past that is padding never read.
 
             Two consequences for which octets survive. An extension appends its zero octets at
             the **tail**, the new area being by definition the region past the old end. A
@@ -431,10 +458,10 @@ class SeekableReader(io.BufferedReader):
 
         """
         if size is None:
-            # NOTE: an unspecified size means the current position, per
-            # :meth:`io.IOBase.truncate`. The buffer is indexed relative to
-            # ``_buffer_set``, and the position may sit before it once a saved
-            # buffer has been rewound, in which case nothing is kept.
+            # NOTE: an unspecified size means the current position, following the
+            # :meth:`io.IOBase.truncate` convention this used to implement. The buffer
+            # is indexed relative to ``_buffer_set``, and the position may sit before it
+            # once a saved buffer has been rewound, in which case nothing is kept.
             size = max(self._tell - self._buffer_set, 0)
         if size < 0:
             raise TruncateError(f'negative size value {size}')
@@ -462,9 +489,17 @@ class SeekableReader(io.BufferedReader):
         self._buffer_cur = len(temp) - dropped
         return self._buffer_size
 
-    def writeable(self) -> 'bool':
+    def writable(self) -> 'bool':
         """Return :obj:`True` if the stream supports writing. If :obj:`False`, :meth:`write` and
-        :meth:`truncate` will raise :exc:`OSError`."""
+        :meth:`truncate` will raise :exc:`OSError`.
+
+        Note:
+            This was spelled ``writeable`` until #645, which is not how the :mod:`io` protocol
+            spells it, so it overrode nothing and :mod:`io` never consulted it -- the inherited
+            :meth:`io.IOBase.writable` answered instead. Both returned :data:`False`, so there
+            was no observable divergence to notice; the coincidence is what hid it.
+
+        """
         return False
 
     def writelines(self, lines: 'Iterable[Buffer]', /) -> 'None':
