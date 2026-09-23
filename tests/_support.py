@@ -12,7 +12,7 @@ import sys
 import time
 import types
 import unittest
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
@@ -158,8 +158,45 @@ def sample_path(name: str) -> str:
 
 
 def ensure_package(name: str, path: pathlib.Path) -> types.ModuleType:
+    """Make ``name`` importable as a package, with a bare stub if it is not.
+
+    :func:`load_module` executes one module of the package from source without
+    importing the package, so :mod:`importlib` has no parent package to resolve
+    the module's name against. This supplies one: a :class:`~types.ModuleType`
+    carrying nothing but a ``__path__``, which is the least that makes
+    ``pcapkit.corekit.multidict`` a resolvable name.
+
+    That stub is a stand-in over a real module name, and everything
+    :func:`isolate_modules` says about those applies to it. It is *emptier* than
+    the real package rather than differently-shaped, which is what made issue
+    #674 so quiet: a test left a bare ``pcapkit`` bound, and the next test to
+    walk ``pcapkit.__all__`` found no exports and reported the library as having
+    declared none, rather than failing on anything that looked like pollution.
+
+    Nothing is installed when the name already resolves -- a warm real package is
+    returned untouched, so a caller cannot shadow it by accident.
+
+    Args:
+        name: Dotted package name, e.g. ``'pcapkit.corekit'``.
+        path: Directory the package's ``__path__`` should point at.
+
+    Returns:
+        Whatever ``name`` now resolves to: the real package if it was already
+        imported, otherwise the stub just installed.
+
+    Raises:
+        RuntimeError: If a stub would have to be installed and nothing has
+            arranged for :data:`sys.modules` to be put back. See
+            :func:`restore_modules_after`.
+
+    """
     module = sys.modules.get(name)
     if module is None:
+        # Checked only on the path that actually writes to ``sys.modules``: a
+        # caller handed a name that already resolves has nothing to put back, and
+        # failing it would be a complaint about pollution that is not happening.
+        _require_arranged_restore('ensure_package')
+
         module = types.ModuleType(name)
         module.__path__ = [str(path)]
         module.__package__ = name
@@ -167,7 +204,41 @@ def ensure_package(name: str, path: pathlib.Path) -> types.ModuleType:
     return module
 
 
-def load_module(module_name: str, relative_path: str):
+def load_module(module_name: str, relative_path: str,
+                test: 'Optional[unittest.TestCase]' = None):
+    """Execute one module of :mod:`pcapkit` from source, without importing the package.
+
+    This is how the unit tier tests a single module against cheap stand-ins
+    instead of pulling the whole library in: the file is executed under its real
+    dotted name, with :func:`ensure_package` supplying stub parents for whatever
+    that name needs.
+
+    Both halves of that write to :data:`sys.modules` -- the stub parents, and
+    ``module_name`` itself -- so both are taken back off again when ``test``
+    finishes, via :func:`restore_modules_after`. Before issue #674 they were not,
+    and five test modules left a bare ``pcapkit`` bound for whatever ran next.
+
+    Args:
+        module_name: Dotted name to execute the file under, e.g.
+            ``'pcapkit.corekit.multidict'``.
+        relative_path: Path to the source file, relative to the repository root.
+        test: The running test, whose teardown puts :data:`sys.modules` back.
+            Found from the calling frames when omitted, which is what lets the
+            call sites stay as they are; pass it explicitly from a classmethod or
+            any other frame that has no ``self``.
+
+    Returns:
+        The executed module object.
+
+    Raises:
+        RuntimeError: If ``test`` is :data:`None` and no running test could be
+            found, or if the file cannot be loaded.
+
+    """
+    # The return value is what ``bootstrap_core_modules`` passes down; here there
+    # is nothing below to pass it to, so only the arranging matters.
+    _arrange_module_restore(test, 'load_module')
+
     parts = module_name.split('.')
     for index in range(1, len(parts)):
         package_name = '.'.join(parts[:index])
@@ -184,14 +255,42 @@ def load_module(module_name: str, relative_path: str):
     return module
 
 
-def bootstrap_core_modules() -> dict[str, object]:
-    load_module('pcapkit.utilities.logging', 'pcapkit/utilities/logging.py')
-    compat = load_module('pcapkit.utilities.compat', 'pcapkit/utilities/compat.py')
-    exceptions = load_module('pcapkit.utilities.exceptions', 'pcapkit/utilities/exceptions.py')
-    warnings = load_module('pcapkit.utilities.warnings', 'pcapkit/utilities/warnings.py')
-    multidict = load_module('pcapkit.corekit.multidict', 'pcapkit/corekit/multidict.py')
-    decorators = load_module('pcapkit.utilities.decorators', 'pcapkit/utilities/decorators.py')
-    protochain = load_module('pcapkit.corekit.protochain', 'pcapkit/corekit/protochain.py')
+def bootstrap_core_modules(test: 'Optional[unittest.TestCase]' = None) -> dict[str, object]:
+    """Execute the core :mod:`pcapkit` modules from source, in dependency order.
+
+    The seven modules the unit tier needs before it can test anything else, each
+    loaded by :func:`load_module` and so each restored when ``test`` finishes.
+    The restore is arranged here as well as in :func:`load_module`, and
+    deliberately: :func:`restore_modules_after` registers one cleanup per test
+    however many times it is called, so the snapshot kept is the one taken here,
+    before the first of the seven loads wrote anything.
+
+    Args:
+        test: The running test. Found from the calling frames when omitted, as in
+            :func:`load_module` -- including through an intermediate helper that
+            has no ``self`` of its own, which is how
+            :func:`tests.utilities._harness.bootstrap` reaches this.
+
+    Returns:
+        The loaded modules, keyed by their bare names.
+
+    Raises:
+        RuntimeError: If ``test`` is :data:`None` and no running test could be
+            found.
+
+    """
+    test = _arrange_module_restore(test, 'bootstrap_core_modules')
+
+    load_module('pcapkit.utilities.logging', 'pcapkit/utilities/logging.py', test)
+    compat = load_module('pcapkit.utilities.compat', 'pcapkit/utilities/compat.py', test)
+    exceptions = load_module('pcapkit.utilities.exceptions',
+                             'pcapkit/utilities/exceptions.py', test)
+    warnings = load_module('pcapkit.utilities.warnings', 'pcapkit/utilities/warnings.py', test)
+    multidict = load_module('pcapkit.corekit.multidict', 'pcapkit/corekit/multidict.py', test)
+    decorators = load_module('pcapkit.utilities.decorators',
+                             'pcapkit/utilities/decorators.py', test)
+    protochain = load_module('pcapkit.corekit.protochain',
+                             'pcapkit/corekit/protochain.py', test)
     return {
         'compat': compat,
         'exceptions': exceptions,
@@ -326,6 +425,16 @@ ISOLATED_PREFIXES = ('pcapkit',)
 #: outside this module should read it.
 _ISOLATION_FLAG = '_pcapkit_module_isolation'
 
+#: Attribute :func:`restore_modules_after` sets on the test it is given, so that
+#: several helpers arranging a restore for one test register exactly one cleanup.
+#:
+#: Deliberately *not* the same flag as :data:`_ISOLATION_FLAG`, because the two
+#: mean different things and the stand-in installers depend on the difference.
+#: This one promises only that the region will be put back; isolation promises
+#: that *and* that the region was purged on the way in, which is what makes a
+#: stand-in stand in for nothing left over from an earlier test.
+_RESTORE_FLAG = '_pcapkit_module_restore'
+
 
 def _under_prefix(name: str, prefixes: 'tuple[str, ...]') -> bool:
     """Whether ``name`` is one of ``prefixes`` or a submodule of one."""
@@ -392,6 +501,220 @@ def restore_modules(snapshot: 'dict[str, types.ModuleType]',
     _reset_abc_caches()
 
 
+#: Returned by :func:`_is_running_test` when a runtime has no ``_outcome`` at all,
+#: so that "cannot tell" is distinguishable from "not running". Any object that is
+#: not :data:`None` would do; a named sentinel says why.
+_NO_OUTCOME = object()
+
+
+def _is_running_test(test: 'unittest.TestCase') -> bool:
+    """Whether ``test`` is between the start and the end of its own ``run()``.
+
+    :meth:`unittest.TestCase.run` assigns ``_outcome`` before ``setUp`` and clears
+    it to :data:`None` in a ``finally``, so it is set throughout every phase a
+    loader can be reached from -- ``setUp``, the test method, ``tearDown``, and a
+    cleanup -- and unset on an instance that has never run or has finished.
+    Measured on CPython 3.10 through 3.14, in all four phases and both idle
+    states.
+
+    Private, but deliberately so rather than reluctantly: there is no public way
+    to ask a :class:`~unittest.TestCase` whether it is running, and the
+    alternative -- inspecting whether the frame is really a method call on the
+    candidate -- rejects a decorated test method, whose frame belongs to the
+    undecorated function while the class attribute is the wrapper. A false
+    rejection breaks a working test; this check cannot produce one.
+
+    ``_outcome`` is assigned in ``TestCase.__init__``, so its *absence* means a
+    runtime that has dropped it rather than a test that is idle. That case answers
+    :data:`True`, degrading to the unchecked behaviour instead of rejecting every
+    candidate and taking the suite down.
+
+    Args:
+        test: The candidate found on the stack.
+
+    Returns:
+        Whether it is the running test, as far as can be told.
+
+    """
+    return getattr(test, '_outcome', _NO_OUTCOME) is not None
+
+
+def _running_test_case() -> 'Optional[unittest.TestCase]':
+    """The nearest *running* :class:`~unittest.TestCase` on the stack above the caller.
+
+    Read out of the calling frames rather than passed in, for the reason
+    :func:`sample_path` reads the caller's module path that way: a helper that
+    has to be *handed* the running test is a helper every call site can forget to
+    hand it to, and forgetting is silent. Issue #674 is the bill for that --
+    :func:`bootstrap_core_modules` and :func:`load_module` left stub ``pcapkit``
+    entries in :data:`sys.modules` at five call sites, not one of which looked
+    wrong, and the resulting failures landed in a different directory.
+
+    The *nearest* enclosing ``self`` wins, and that is the right one rather than
+    merely the cheapest to find. Tests run one at a time, so ordinarily the only
+    :class:`~unittest.TestCase` on the stack is the running one; where there are
+    two, :mod:`tests.test_support_helpers` is why -- it runs a borrowed test case
+    inside one of its own -- and it is the borrowed, inner test whose teardown
+    should do the restoring.
+
+    A local named ``self`` is not proof of a method call, though, and that gap is
+    why :func:`_is_running_test` is consulted rather than the name alone. A *free
+    function* taking a parameter it happens to call ``self`` presents exactly the
+    same frame, so one handed some other, finished :class:`~unittest.TestCase`
+    would otherwise win the walk -- and a cleanup registered on a test that has
+    already finished is never run, which is the original leak with an extra step
+    and no error to show for it. Measured before the check was added: a ten-name
+    leak, silently. Skipping the idle candidate lets the walk continue to the
+    method frame above, which is the running test.
+
+    Returns:
+        The running test, or :data:`None` when the caller is not inside a running
+        :class:`~unittest.TestCase` method at all: a ``setUpClass`` or other
+        classmethod, a module-level call, a plain :mod:`pytest` function, or a
+        runtime without frame support. Callers turn that into a
+        :exc:`RuntimeError` naming the fix, rather than skipping the restore and
+        reintroducing #674.
+
+    """
+    frame = inspect.currentframe()
+    try:
+        # This function's own frame is never the answer, so start at its caller.
+        frame = frame.f_back if frame is not None else None
+        while frame is not None:
+            # ``f_locals`` is a plain dict up to 3.12 and a ``FrameLocalsProxy``
+            # from 3.13 (PEP 667); both answer ``get``.
+            candidate = frame.f_locals.get('self')
+            if isinstance(candidate, unittest.TestCase) and _is_running_test(candidate):
+                return candidate
+            frame = frame.f_back
+        return None
+    finally:
+        # A frame held by a local keeps its whole chain alive the moment a
+        # traceback references this one, and the callers of this function raise.
+        del frame
+
+
+def restore_modules_after(test: 'unittest.TestCase',
+                          prefixes: Iterable[str] = ISOLATED_PREFIXES) -> None:
+    """Snapshot the ``prefixes`` region now, and put it back when ``test`` ends.
+
+    :func:`isolate_modules` without the purge, and the right shape for a test
+    that *loads* modules rather than standing something in for one. The loaders
+    write to :data:`sys.modules` twice over -- the module asked for, and a bare
+    stub package per parent of its name -- and those writes are all this has to
+    take back off. Purging on the way in as well would be wrong here: a caller
+    that has already purged for its own reasons would find the state it set up
+    restored out from under it mid-test.
+
+    Exact in both directions, because :func:`restore_modules` is. Absence is the
+    direction a ``dict.update`` of the snapshot would silently get wrong, and it
+    is the direction issue #674 actually was: ``pcapkit``, ``pcapkit.corekit``
+    and ``pcapkit.utilities`` did not exist before
+    :func:`bootstrap_core_modules` ran, so they must not exist after it.
+
+    Registered **once per test** however many times this is called, and the
+    snapshot kept is the first one -- the only one taken before any of the loads
+    wrote anything. That is what lets :func:`bootstrap_core_modules` announce
+    itself and then make seven :func:`load_module` calls without registering
+    eight cleanups to eight successively more polluted snapshots.
+
+    Registered with :meth:`~unittest.TestCase.addCleanup` rather than done in a
+    ``tearDown``, for the reasons :func:`isolate_modules` gives: it runs even
+    when ``setUp`` raises part-way through loading, and no subclass can forget to
+    call ``super``.
+
+    Args:
+        test: The running test, or anything else exposing
+            :meth:`~unittest.TestCase.addCleanup`.
+        prefixes: Module-name prefixes to cover, matched as in
+            :func:`purge_modules`.
+
+    """
+    if getattr(test, _RESTORE_FLAG, False):
+        return
+
+    snapshot = snapshot_modules(prefixes)
+    setattr(test, _RESTORE_FLAG, True)
+    test.addCleanup(_release_module_restore, test, snapshot, tuple(prefixes))
+
+
+def _release_module_restore(test: 'unittest.TestCase',
+                            snapshot: 'dict[str, types.ModuleType]',
+                            prefixes: 'tuple[str, ...]') -> None:
+    """Restore ``snapshot``, and let ``test`` arrange a fresh restore again."""
+    try:
+        restore_modules(snapshot, prefixes)
+    finally:
+        setattr(test, _RESTORE_FLAG, False)
+
+
+def _arrange_module_restore(test: 'Optional[unittest.TestCase]',
+                            helper: str) -> 'unittest.TestCase':
+    """Resolve the test a loader should restore for, and arrange the restore.
+
+    Args:
+        test: What the caller was given, which is :data:`None` whenever the call
+            site did not name a test -- the usual case.
+        helper: Name of the calling helper, for the error message.
+
+    Returns:
+        The test the restore was arranged on, to pass down to nested loaders so
+        they neither repeat the stack walk nor find a different answer.
+
+    Raises:
+        RuntimeError: If no running test could be found.
+
+    """
+    if test is None:
+        test = _running_test_case()
+    if test is None:
+        raise RuntimeError(
+            f'{helper}() could not find the running unittest.TestCase to put '
+            f'sys.modules back for, so the stub packages it installs would outlive '
+            f'this test and break whatever imports pcapkit next -- see issue #674. '
+            f'Pass the test explicitly, {helper}(..., test=self), from a '
+            f'classmethod or any other frame with no `self` of its own.'
+        )
+    restore_modules_after(test)
+    return test
+
+
+def _require_arranged_restore(helper: str) -> None:
+    """Refuse to install a stub for a test that has not arranged its removal.
+
+    The counterpart of :func:`require_module_isolation` for the loaders, and
+    separate from it because the two guard different promises: a stand-in needs
+    the region purged *and* restored, whereas a stub parent package only needs
+    restoring.
+
+    Either promise satisfies this. :func:`isolate_modules` makes both, so a test
+    under isolation passes without also arranging a second restore.
+
+    Args:
+        helper: Name of the calling helper, for the error message.
+
+    Raises:
+        RuntimeError: If the running test has arranged neither, or if there is no
+            running test to have arranged anything.
+
+    """
+    test = _running_test_case()
+    if test is not None and (getattr(test, _RESTORE_FLAG, False)
+                             or getattr(test, _ISOLATION_FLAG, False)):
+        return
+
+    where = type(test).__name__ if test is not None else 'the calling code'
+    raise RuntimeError(
+        f'{helper}() is about to bind a bare stub package over a real pcapkit '
+        f'module name, but {where} has arranged nothing to put sys.modules back '
+        f'-- the stub would outlive this test and whatever imports pcapkit next '
+        f'would see a package with no exports. Call '
+        f'tests._support.restore_modules_after(self), or '
+        f'tests._support.isolate_modules(self) if a stand-in is also being bound. '
+        f'See issue #674.'
+    )
+
+
 def isolate_modules(test: 'unittest.TestCase',
                     prefixes: Iterable[str] = ISOLATED_PREFIXES) -> None:
     """Purge ``prefixes`` for the duration of ``test``, and restore them after.
@@ -418,6 +741,13 @@ def isolate_modules(test: 'unittest.TestCase',
     ``tearDown``, so it also runs when ``setUp`` itself raises part-way through
     installing the stand-ins, and so a subclass cannot forget to call ``super``.
 
+    A test under isolation needs no separate :func:`restore_modules_after`, and
+    this says so by setting that helper's flag as well: the one restore
+    registered here already covers every write the loaders go on to make, and to
+    a snapshot taken *earlier* than one of theirs would have been. A second,
+    narrower restore nested inside it would be redundant rather than wrong, but
+    the first thing a reader would have to work out is which of the two won.
+
     Args:
         test: The running test, or anything else exposing
             :meth:`~unittest.TestCase.addCleanup`.
@@ -426,6 +756,7 @@ def isolate_modules(test: 'unittest.TestCase',
     """
     snapshot = snapshot_modules(prefixes)
     setattr(test, _ISOLATION_FLAG, True)
+    setattr(test, _RESTORE_FLAG, True)
     # Registered *before* the purge, so the restore still happens if the purge
     # itself raises half-way through the table.
     test.addCleanup(_release_module_isolation, test, snapshot, tuple(prefixes))
@@ -439,7 +770,11 @@ def _release_module_isolation(test: 'unittest.TestCase',
     try:
         restore_modules(snapshot, prefixes)
     finally:
+        # Both flags, since ``isolate_modules`` set both. Cleared in a ``finally``
+        # so that a failing restore does not leave the test looking isolated to
+        # whatever runs next on the same instance.
         setattr(test, _ISOLATION_FLAG, False)
+        setattr(test, _RESTORE_FLAG, False)
 
 
 def require_module_isolation(test: 'unittest.TestCase', helper: str) -> None:
@@ -473,9 +808,20 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     pcapkit`` re-runs the package from source and then import nothing unusual --
     a re-imported real module is not pollution.
 
-    It is *not* enough for a test that binds a stand-in over a real module name.
-    Use :func:`isolate_modules` there, which snapshots first and restores on
-    teardown.
+    Purge-only is deliberate and stays that way, which is worth stating because
+    the asymmetry reads like an oversight. Dropping a real module is not a change
+    another test can observe: the next one that wants it imports it again and gets
+    the same thing from the same source. Binding something *else* over the name is
+    what cannot be undone by re-importing, so restoration is owed by the helpers
+    that bind, not by this one. Making ~120 call sites pay for a restore none of
+    them needs would also cost a re-import each, which
+    :func:`tests.conftest.pytest_sessionstart` exists to avoid.
+
+    It is *not* enough for a test that binds anything over a real module name.
+    Use :func:`isolate_modules` for a stand-in, which snapshots first and restores
+    on teardown; the loaders arrange :func:`restore_modules_after` for themselves,
+    so a caller that purges and then calls :func:`load_module` or
+    :func:`bootstrap_core_modules` is already covered (issue #674).
 
     Args:
         prefixes: Module-name prefixes. A name matches when it equals a prefix

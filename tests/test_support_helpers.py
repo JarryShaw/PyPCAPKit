@@ -32,6 +32,21 @@ which exist because issue #660 -- twelve failures in :mod:`tests.project`,
 visible only in some collection orders -- was a stand-in module left bound in
 :data:`sys.modules` by a test that had finished.
 
+:class:`LoadedModulesDoNotOutliveTheirTestTests` and
+:class:`ArrangedRestoreTests` are the same story one helper along, and are issue
+#674: :func:`~tests._support.load_module` and
+:func:`~tests._support.bootstrap_core_modules` left *bare stub packages* bound
+over ``pcapkit``, ``pcapkit.corekit`` and ``pcapkit.utilities``, so the next test
+to walk ``pcapkit.__all__`` saw a library that declared no exports. Three
+failures in :mod:`tests.project.test_public_api`, again only in some orders.
+
+Both of those run their polluting cases through :class:`unittest.TestResult`
+rather than letting :mod:`pytest` run them, and that is load-bearing rather than
+stylistic: :func:`tests.conftest.restore_module_table` repairs the region after
+every test, so under :mod:`pytest` the assertions pass whether or not the helper
+under test was ever fixed. A suite-wide net that hides one helper's bug hides the
+next one too, which is why the helpers are pinned against the bare runner.
+
 This module is unit-tier: it drives the helper with stand-ins rather than real
 extractors, so it reads no sample capture and needs no engine installed.
 
@@ -39,14 +54,18 @@ extractors, so it reads no sample capture and needs no engine installed.
 from __future__ import annotations
 
 import importlib
+import pathlib
 import signal
 import sys
+import threading
 import time
 import types
 import unittest
 
-from tests._support import (close_extractor, install_fake_protocol_module, isolate_modules,
-                            restore_modules, snapshot_modules, time_limit)
+from tests._support import (bootstrap_core_modules, close_extractor, ensure_package,
+                            install_fake_protocol_module, isolate_modules, purge_modules,
+                            restore_modules, restore_modules_after, snapshot_modules,
+                            time_limit)
 
 
 class Closeable:
@@ -357,18 +376,7 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
 
         after = snapshot_modules(['pcapkit'])
 
-        self.assertEqual(
-            sorted(set(after) - set(before)), [],
-            'the test left new pcapkit entries in sys.modules; whatever imports '
-            'pcapkit next inherits them (#660)')
-        self.assertEqual(
-            sorted(set(before) - set(after)), [],
-            'the test dropped pcapkit entries from sys.modules and did not put them back')
-        self.assertEqual(
-            sorted(name for name in before if before[name] is not after.get(name)), [],
-            'the test rebound a pcapkit name to a different module object and left it '
-            'rebound; a non-generic ProtocolBase stand-in left this way makes every '
-            'later `class X(Protocol[...])` raise TypeError (#660)')
+        _assert_module_table_unchanged(self, before, after)
         return result
 
     def test_protochain_leaves_no_fake_protocol_module_behind(self) -> None:
@@ -422,6 +430,330 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
             install_fake_protocol_module(Unisolated())
 
         self.assertIn('isolate_modules', str(caught.exception))
+
+
+class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
+    """A test that *loads* modules leaves :data:`sys.modules` as it found it.
+
+    The regression test for issue #674, and the sibling of
+    :class:`StandInsDoNotOutliveTheirTestTests` above: the same shape over a
+    different helper. :func:`~tests._support.load_module` writes to
+    :data:`sys.modules` twice over -- the module it was asked for, and a bare stub
+    package for each parent of that module's dotted name, via
+    :func:`~tests._support.ensure_package` -- and before the fix neither write was
+    taken back off again.
+
+    What that cost: ``pcapkit``, ``pcapkit.corekit`` and ``pcapkit.utilities``
+    stayed bound to stubs carrying nothing but a ``__path__``, so the next test to
+    walk ``pcapkit.__all__`` found no exports and reported the library as
+    declaring none. Measured on ``b34f132f6``, where each module passes alone::
+
+        $ python -m unittest tests.corekit.test_multidict tests.project.test_public_api
+        FAILED (failures=3)
+
+    Run through :class:`unittest.TestResult` rather than :mod:`pytest`, for the
+    reason the sibling class gives and with more force here:
+    :func:`tests.conftest.restore_module_table` repairs the region after every
+    test, so under :mod:`pytest` these assertions pass whether or not the helper
+    was ever fixed. That guard arrived with #662, it is why the two-file
+    :mod:`pytest` repro quoted in #674 no longer fails, and it is not a substitute
+    for the helper putting its own writes back -- the stdlib runner reads no
+    ``conftest.py`` at all, and a suite-wide net that hides a helper's bug also
+    hides the next one.
+
+    The polluting cases are *borrowed* rather than written here, so what is pinned
+    is the behaviour of call sites the suite actually has. All five leaked before
+    the fix, and none of them looked wrong.
+
+    """
+
+    #: Borrowed test cases, as ``module`` / ``class`` pairs. The first three reach
+    #: the loaders through :func:`~tests._support.bootstrap_core_modules`, the
+    #: last two through :func:`~tests._support.load_module` on its own. Both
+    #: routes installed stubs, so both are pinned -- fixing only the former would
+    #: have left :mod:`tests.utilities.test_compat` leaking.
+    BORROWED = (
+        ('tests.corekit.test_multidict', 'MultiDictTests'),
+        ('tests.corekit.test_io', 'SeekableReaderTests'),
+        ('tests.utilities.test_exceptions_warnings', 'ExceptionsWarningsTests'),
+        ('tests.corekit.test_module', 'ModuleDescriptorTests'),
+        ('tests.utilities.test_compat', 'CompatTests'),
+    )
+
+    def setUp(self) -> None:
+        # This test case compares a table it also re-imports pcapkit into, so it
+        # gets the same isolation it is asserting about.
+        isolate_modules(self)
+
+    def test_borrowed_loaders_leave_the_module_table_as_they_found_it(self) -> None:
+        """Every borrowed case, one subtest each, so one leak names itself."""
+        for module_name, class_name in self.BORROWED:
+            with self.subTest(case=f'{module_name}.{class_name}'):
+                case_class = getattr(importlib.import_module(module_name), class_name)
+                # One method is enough and is deliberately the first by name:
+                # every one of these classes does its loading in ``setUp``, so the
+                # body of the method chosen is beside the point, and running all of
+                # them would drag in whatever else they happen to exercise.
+                case = case_class(sorted(_method_names(case_class))[0])
+
+                before = snapshot_modules(['pcapkit'])
+                result = unittest.TestResult()
+                case.run(result)
+                after = snapshot_modules(['pcapkit'])
+
+                _assert_module_table_unchanged(self, before, after)
+
+                # Asserted after the leak check, so a genuine failure in the
+                # borrowed case is reported as its own failure rather than as a
+                # leak here.
+                self.assertEqual((len(result.failures), len(result.errors)), (0, 0),
+                                 f'the borrowed test case did not pass: '
+                                 f'{result.failures or result.errors}')
+
+    def test_the_stub_packages_are_absent_again_afterwards(self) -> None:
+        """The failure mode itself, rather than the table it came from.
+
+        The three names in question did not exist before the test ran, so
+        ``assertNotIn`` is the whole assertion -- and it is the one a restore
+        written as ``sys.modules.update(snapshot)`` would pass the other two
+        directions of while still failing this one.
+
+        """
+        # Defined here rather than at module scope so that neither runner collects
+        # it as a test of its own: :mod:`pytest` instantiates every
+        # ``unittest.TestCase`` subclass it finds in a module, underscore or not.
+        saw_stubs = []  # type: list[bool]
+
+        class Bootstrapping(unittest.TestCase):
+            def runTest(self) -> None:
+                purge_modules(['pcapkit'])
+                bootstrap_core_modules()
+                # Recorded rather than asserted, so that the *absence* assertions
+                # below cannot pass by the stubs never having been bound at all.
+                saw_stubs.append(all(name in sys.modules for name in
+                                     ('pcapkit', 'pcapkit.corekit', 'pcapkit.utilities')))
+
+        result = unittest.TestResult()
+        Bootstrapping().run(result)
+
+        self.assertEqual((len(result.failures), len(result.errors)), (0, 0),
+                         f'the probe did not pass: {result.failures or result.errors}')
+        self.assertEqual(saw_stubs, [True],
+                         'the probe never saw the stub packages it was meant to install, '
+                         'so its teardown had nothing to put back and this proves nothing')
+        for name in ('pcapkit', 'pcapkit.corekit', 'pcapkit.utilities'):
+            with self.subTest(name=name):
+                self.assertNotIn(
+                    name, sys.modules,
+                    f'{name} did not exist before the probe ran and must not exist '
+                    f'after it; a bare stub left here is #674')
+
+
+class ArrangedRestoreTests(unittest.TestCase):
+    """The guards and the bookkeeping around :func:`~tests._support.restore_modules_after`.
+
+    Four things that have to hold for the #674 fix to be more than a patch on
+    five call sites: the snapshot kept is the earliest one, the test found on the
+    stack is the running one rather than any object that happens to be called
+    ``self``, a loader that cannot find a test to restore for refuses rather than
+    proceeding, and :func:`~tests._support.ensure_package` refuses to bind a stub
+    for a test that has arranged nothing.
+
+    """
+
+    PROBE = 'pcapkit.__support_probe_arranged'
+
+    def setUp(self) -> None:
+        isolate_modules(self)
+        self.addCleanup(sys.modules.pop, self.PROBE, None)
+
+    def test_the_first_snapshot_is_the_one_kept(self) -> None:
+        """Repeated calls register one restore, to the table before any load.
+
+        :func:`~tests._support.bootstrap_core_modules` announces itself and then
+        makes seven :func:`~tests._support.load_module` calls, each of which
+        announces itself too. Re-snapshotting on the later calls would capture a
+        table that already held the earlier loads, and restoring to *that* would
+        leave them bound -- which is the original bug with more steps.
+
+        """
+        probe = _bare_case()
+
+        restore_modules_after(probe)
+        sys.modules[self.PROBE] = types.ModuleType(self.PROBE)
+        restore_modules_after(probe)
+
+        probe.doCleanups()
+
+        self.assertNotIn(self.PROBE, sys.modules,
+                         'the second call re-snapshotted, so the restore put back a '
+                         'module that was added after the first snapshot was taken')
+
+    def test_a_loader_with_no_test_case_on_the_stack_is_refused(self) -> None:
+        """A loader that cannot find a test to restore for raises, not loads.
+
+        Called on a fresh thread on purpose: the helper finds the nearest
+        :class:`~unittest.TestCase` on the stack, and *this* method's frame has
+        one, so a call made here would legitimately find it and succeed. A new
+        thread is the cheapest stack with no test on it, and it stands in for the
+        real cases -- a ``setUpClass``, or a module-level call.
+
+        """
+        outcome = []  # type: list[BaseException | None]
+
+        def attempt() -> None:
+            try:
+                bootstrap_core_modules()
+            except BaseException as exc:  # pylint: disable=broad-except
+                outcome.append(exc)
+            else:
+                outcome.append(None)
+
+        thread = threading.Thread(target=attempt)
+        thread.start()
+        thread.join()
+
+        self.assertEqual(len(outcome), 1)
+        self.assertIsInstance(
+            outcome[0], RuntimeError,
+            'bootstrap_core_modules() found no test to restore for and loaded the '
+            'modules anyway; the stubs it installed have nothing to take them off')
+        self.assertIn('#674', str(outcome[0]))
+        self.assertIn('test=self', str(outcome[0]),
+                      'the error has to name the way out, or the next author has to '
+                      'read tests/_support.py to find it')
+
+    def test_an_idle_test_case_in_a_local_named_self_is_not_used(self) -> None:
+        """A local called ``self`` is not proof that the frame is a method call.
+
+        A *free function* taking a parameter it happens to name ``self`` presents
+        the same frame as a method does. Handed some other, already-finished
+        :class:`~unittest.TestCase`, it would win the walk on the name alone --
+        and a cleanup registered on a test that has already finished is never run,
+        so the stubs outlive the test exactly as in #674 but with no error to show
+        for it. Measured before :func:`~tests._support._is_running_test` was
+        consulted: ten names left bound, silently.
+
+        Contrived, and deliberately so: no call site in the suite looks like this,
+        which is the point. The heuristic has to be sound for the call sites
+        nobody has written yet, since a wrong answer here is silent by
+        construction.
+
+        """
+        class Stranger(unittest.TestCase):
+            def runTest(self) -> None:  # pragma: no cover  # only ever run once, below
+                pass
+
+        stranger = Stranger()
+        # Run and finish it, so it is a genuinely idle instance rather than one
+        # that has merely never started.
+        stranger.run(unittest.TestResult())
+
+        # The unused ``self`` is the whole point: it is what puts a TestCase in a
+        # frame local of that name without the frame being a method call.
+        def free_function(self: 'unittest.TestCase') -> 'dict[str, object]':  # pylint: disable=unused-argument
+            """Not a method, whatever the parameter is called."""
+            return bootstrap_core_modules()
+
+        class Victim(unittest.TestCase):
+            def runTest(self) -> None:
+                free_function(stranger)
+
+        before = snapshot_modules(['pcapkit'])
+        result = unittest.TestResult()
+        Victim().run(result)
+        after = snapshot_modules(['pcapkit'])
+
+        self.assertEqual((len(result.failures), len(result.errors)), (0, 0),
+                         f'the probe did not pass: {result.failures or result.errors}')
+        _assert_module_table_unchanged(self, before, after)
+        self.assertFalse(
+            getattr(stranger, '_cleanups', None),
+            'the restore was registered on the finished test case the free function '
+            'was handed, where nothing will ever run it')
+
+    def test_binding_a_stub_without_an_arranged_restore_is_refused(self) -> None:
+        """The other half: the mistake cannot be made quietly again.
+
+        Mirrors
+        :meth:`StandInsDoNotOutliveTheirTestTests.test_installing_a_stand_in_without_isolation_is_refused`
+        for the stub packages. Run as a borrowed case rather than called directly,
+        because the guard reads the *running* test's bookkeeping and this method's
+        own test is isolated -- calling it from here would satisfy the guard and
+        assert nothing.
+
+        """
+        class UnarrangedStub(unittest.TestCase):
+            def runTest(self) -> None:
+                # The path is never read -- ``ensure_package`` only stores
+                # ``str(path)`` on the stub's ``__path__`` -- and the guard fires
+                # before the stub is built at all.
+                ensure_package('pcapkit.__support_probe_unarranged',
+                               pathlib.Path('/nonexistent'))
+
+        result = unittest.TestResult()
+        UnarrangedStub().run(result)
+
+        self.assertEqual(len(result.errors), 1,
+                         'ensure_package() bound a bare stub over a real pcapkit name '
+                         'for a test that had arranged nothing to put sys.modules back')
+        self.assertIn('RuntimeError', result.errors[0][1])
+        self.assertIn('restore_modules_after', result.errors[0][1],
+                      'the error has to name the helper that fixes it')
+
+
+def _bare_case() -> 'unittest.TestCase':
+    """A :class:`~unittest.TestCase` instance that is not being run.
+
+    Somewhere for :meth:`~unittest.TestCase.addCleanup` to put a cleanup that the
+    caller then runs itself with :meth:`~unittest.TestCase.doCleanups`.
+
+    """
+    class Bare(unittest.TestCase):
+        def runTest(self) -> None:  # pragma: no cover  # never run
+            pass
+
+    return Bare()
+
+
+def _assert_module_table_unchanged(test: 'unittest.TestCase',
+                                   before: 'dict[str, types.ModuleType]',
+                                   after: 'dict[str, types.ModuleType]') -> None:
+    """Assert ``after`` is the ``pcapkit`` region ``before`` was, exactly.
+
+    All three directions, because a restore that gets two of them right is still
+    a leak, and the two issues this guards turned on different ones:
+
+    * a name that was **added** has to be gone again. Absence is the direction a
+      ``dict.update`` of the snapshot silently gets wrong, and it is the whole of
+      issue #674 -- ``pcapkit`` did not exist before the test ran and was a bare
+      stub package carrying nothing but a ``__path__`` after it;
+    * a name that was **dropped** has to be back;
+    * a name that was **rebound** has to point at the object it pointed at
+      before, which is the direction issue #660 turned on.
+
+    Args:
+        test: The test to report through, for its assertion methods.
+        before: Snapshot taken before the borrowed test case ran.
+        after: Snapshot taken after it finished *and its cleanups had run* --
+            :meth:`unittest.TestCase.run` does both, which is what makes the
+            comparison a statement about the case's teardown rather than about
+            its body.
+
+    """
+    test.assertEqual(
+        sorted(set(after) - set(before)), [],
+        'the test left new pcapkit entries in sys.modules; whatever imports '
+        'pcapkit next inherits them -- a bare stub package here is #674, a '
+        'stand-in module is #660')
+    test.assertEqual(
+        sorted(set(before) - set(after)), [],
+        'the test dropped pcapkit entries from sys.modules and did not put them back')
+    test.assertEqual(
+        sorted(name for name in before if before[name] is not after.get(name)), [],
+        'the test rebound a pcapkit name to a different module object and left it '
+        'rebound; a non-generic ProtocolBase stand-in left this way makes every '
+        'later `class X(Protocol[...])` raise TypeError (#660)')
 
 
 def _method_names(case_class: type) -> 'list[str]':
