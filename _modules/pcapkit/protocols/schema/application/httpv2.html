@@ -675,7 +675,23 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">],</span>  <span class="c1"># PADDED</span>
     <span class="p">)</span>
     <span class="c1">#: Data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="c1"># NOTE: the conditional subtracts the padding length, it does not *replace*</span>
+    <span class="c1"># the whole expression. A conditional expression binds looser than ``-``, so</span>
+    <span class="c1"># writing ``pkt['__length__'] - pkt['pad_len'] if &lt;test&gt; else 0`` groups as</span>
+    <span class="c1"># ``(pkt['__length__'] - pkt['pad_len']) if &lt;test&gt; else 0`` and hands back ``0``</span>
+    <span class="c1"># -- "read no payload at all" -- for every frame without the ``PADDED``</span>
+    <span class="c1"># flag. ``__length__`` is the *remaining* declared length at this field, so</span>
+    <span class="c1"># the unpadded arm wants ``__length__`` itself, which is what subtracting a</span>
+    <span class="c1"># zero padding length gives. Padding is rare in HTTP/2, so the broken arm</span>
+    <span class="c1"># was the common one: an unpadded ``DATA`` frame parsed with ``data`` as</span>
+    <span class="c1"># ``b''`` and nothing raised or warned. The parentheses also keep</span>
+    <span class="c1"># ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where</span>
+    <span class="c1"># the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left</span>
+    <span class="c1"># it as :data:`~pcapkit.corekit.fields.field.NoValue`. See #668.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]),</span>
@@ -723,8 +739,14 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_5'</span><span class="p">],</span>  <span class="c1"># PRIORITY</span>
     <span class="p">)</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="c1">#</span>
+    <span class="c1"># NOTE: the conditional subtracts the padding length rather than replacing</span>
+    <span class="c1"># the whole expression -- see :attr:`DataFrame.data` for why the outer</span>
+    <span class="c1"># parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame</span>
+    <span class="c1"># read its header block fragment as ``b''``, which is exactly what HPACK</span>
+    <span class="c1"># decoding would need. See #668.</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
@@ -836,8 +858,13 @@
         <span class="s1">'sid'</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
     <span class="p">})</span>
     <span class="c1">#: Header block fragment.</span>
-    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="c1">#</span>
+    <span class="c1"># NOTE: the conditional subtracts the padding length rather than replacing</span>
+    <span class="c1"># the whole expression -- see :attr:`DataFrame.data` for why the outer</span>
+    <span class="c1"># parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``</span>
+    <span class="c1"># frame read its header block fragment as ``b''``. See #668.</span>
+    <span class="n">fragment</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
+        <span class="n">pkt</span><span class="p">[</span><span class="s1">'pad_len'</span><span class="p">]</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'bit_3'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="p">))</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
