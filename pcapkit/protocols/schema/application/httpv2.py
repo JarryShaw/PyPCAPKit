@@ -193,7 +193,23 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
         lambda pkt: pkt['flags']['bit_3'],  # PADDED
     )
     #: Data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0)
+    #
+    # NOTE: the conditional subtracts the padding length, it does not *replace*
+    # the whole expression. A conditional expression binds looser than ``-``, so
+    # writing ``pkt['__length__'] - pkt['pad_len'] if <test> else 0`` groups as
+    # ``(pkt['__length__'] - pkt['pad_len']) if <test> else 0`` and hands back ``0``
+    # -- "read no payload at all" -- for every frame without the ``PADDED``
+    # flag. ``__length__`` is the *remaining* declared length at this field, so
+    # the unpadded arm wants ``__length__`` itself, which is what subtracting a
+    # zero padding length gives. Padding is rare in HTTP/2, so the broken arm
+    # was the common one: an unpadded ``DATA`` frame parsed with ``data`` as
+    # ``b''`` and nothing raised or warned. The parentheses also keep
+    # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
+    # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
+    # it as :data:`~pcapkit.corekit.fields.field.NoValue`. See #668.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
+        pkt['pad_len'] if pkt['flags']['bit_3'] else 0
+    ))
     #: Padding.
     padding: 'bytes' = ConditionalField(
         PaddingField(length=lambda pkt: pkt['pad_len']),
@@ -235,8 +251,14 @@ class HeadersFrame(FrameType, code=Enum_Frame.HEADERS):
         lambda pkt: pkt['flags']['bit_5'],  # PRIORITY
     )
     #: Header block fragment.
-    fragment: 'bytes' = BytesField(length=lambda pkt: (
-        pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0
+    #
+    # NOTE: the conditional subtracts the padding length rather than replacing
+    # the whole expression -- see :attr:`DataFrame.data` for why the outer
+    # parentheses are load-bearing. Without them an unpadded ``HEADERS`` frame
+    # read its header block fragment as ``b''``, which is exactly what HPACK
+    # decoding would need. See #668.
+    fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
+        pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
     #: Padding.
     padding: 'bytes' = ConditionalField(
@@ -327,8 +349,13 @@ class PushPromiseFrame(FrameType, code=Enum_Frame.PUSH_PROMISE):
         'sid': (1, 31),
     })
     #: Header block fragment.
-    fragment: 'bytes' = BytesField(length=lambda pkt: (
-        pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0
+    #
+    # NOTE: the conditional subtracts the padding length rather than replacing
+    # the whole expression -- see :attr:`DataFrame.data` for why the outer
+    # parentheses are load-bearing. Without them an unpadded ``PUSH_PROMISE``
+    # frame read its header block fragment as ``b''``. See #668.
+    fragment: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
+        pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
     #: Padding.
     padding: 'bytes' = ConditionalField(
