@@ -188,14 +188,20 @@ class CommittedCaptureTests(unittest.TestCase):
         """The suggestion is the tracked set filtered to captures and sorted.
 
         Equality against a set built independently of
-        :func:`~tests._tiers.committed_capture_names` is the point: the two
-        example-name assertions below are satisfied by any list that happens to
-        contain ``in.pcap`` and omit ``out.txt``, hardcoded or not, so they stay
-        only as a readable sanity check on top of the real one.
+        :func:`~tests._tiers.committed_capture_names` is the point, but on an
+        empty tracked set it holds vacuously -- both sides would be ``()`` --
+        so the ``assertTrue`` guard below comes first, the same guard its
+        sibling ``test_every_tracked_name_exists_and_matches_git`` carries for
+        the same reason. Only past that guard do the two example-name
+        assertions add anything: they are satisfied by any list that happens
+        to contain ``in.pcap`` and omit ``out.txt``, hardcoded or not, so they
+        stay a readable sanity check on top of the real one rather than the
+        thing holding the test up.
 
         """
         tracked = _tiers.committed_captures()
         assert tracked is not None
+        self.assertTrue(tracked, 'git tracks no capture at all, which cannot be right')
         expected = tuple(sorted(name for name in tracked if name.endswith(_tiers.CAPTURE_SUFFIXES)))
 
         suggestions = _tiers.committed_capture_names()

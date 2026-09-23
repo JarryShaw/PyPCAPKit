@@ -63,9 +63,12 @@ claimed there, deliberately: fixture-tier modules join the directory freely and
 are entitled to, e.g. :file:`tests/protocols/test_option_coverage_runtime.py`,
 which imports :data:`SAMPLE_ROOT` from here and joins names onto it -- legal,
 because that tier runs only once the fixtures exist. The one unit-tier module that
-touches :data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, only stats
-:file:`in.pcap`, which is committed. But nothing stops the next unit-tier module
-from opening a *generated* capture that way, and the shape stays invisible here.
+touches :data:`SAMPLE_ROOT` at all, :file:`tests/test_tier_guard.py`, stats
+:file:`in.pcap` directly -- which is committed -- and separately loops over every
+name :func:`committed_captures` reports, each committed by construction, since that
+is git's own tracked listing rather than a name the test made up. But nothing stops
+the next unit-tier module from opening a *generated* capture that way, and the shape
+stays invisible here.
 
 Flagging it in general was considered and rejected, with a measurement behind the
 decision. A rule as broad as "any string literal ending in ``.pcap``" matches 18
