@@ -219,8 +219,21 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
     name = protocol.__name__.upper()
     incumbent = protocol_registry.get(name)
     if incumbent is not None and incumbent is not protocol:
-        warn(f'protocol {name} already registered, overwriting {incumbent!r} '
-             f'with {protocol!r}', RegistryWarning)
+        incumbent_repr, protocol_repr = repr(incumbent), repr(protocol)
+        if incumbent_repr == protocol_repr:
+            # #710: two *distinct* objects whose repr() -- for an ordinary
+            # class, its module plus qualname -- happens to coincide, e.g. a
+            # factory that builds a fresh closure-local class of the same
+            # name on every call. Appending __module__/__qualname__ would not
+            # help here: that is exactly what the coinciding repr() already
+            # renders, so both sides would still print identically. id() is
+            # the fallback that actually differs, so it is only added in this
+            # branch -- the common case, two genuinely different classes,
+            # keeps the plain repr() and stays free of the extra noise.
+            incumbent_repr = f'{incumbent_repr} (id={id(incumbent):#x})'
+            protocol_repr = f'{protocol_repr} (id={id(protocol):#x})'
+        warn(f'protocol {name} already registered, overwriting {incumbent_repr} '
+             f'with {protocol_repr}', RegistryWarning)
 
     protocol_registry[name] = protocol
     logger.debug('registered protocol: %s', protocol.__name__)

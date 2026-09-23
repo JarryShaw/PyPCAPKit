@@ -348,6 +348,61 @@ class ProtocolRegistryTests(unittest.TestCase):
                 self.assertLess(messages[0].index(repr(Raw)),
                                 messages[0].index(repr(NoPayload)))
 
+    def test_register_protocol_disambiguates_classes_sharing_a_repr(self) -> None:
+        """#710: two distinct classes whose ``repr()`` coincide still read as two.
+
+        :meth:`_unit_protocol` is itself a factory: each call executes the same
+        ``class UnitProtocol(ProtocolBase): pass`` statement afresh, so two calls
+        return two distinct class *objects* that share ``__module__`` and
+        ``__qualname__`` -- and therefore an identical default ``repr()``. That
+        is exactly the shape #710 reports in the wild, where
+        :func:`tests.protocols.test_construction_keyword_check_unit._protocol_class`
+        builds a closure-local ``DummyProtocol`` on every call and every call
+        after the first warns.
+
+        Before the fix the message was the same string for both operands --
+        ``overwriting <class '...UnitProtocol'> with <class '...UnitProtocol'>``
+        -- which is technically true and tells a reader nothing, because the
+        registry *did* overwrite one object with a different one, but nothing
+        in the message shows that. The identity guard this pins is #681's; this
+        test is about the text the guard emits, not about whether it fires.
+
+        """
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        first = self._unit_protocol()
+        second = self._unit_protocol()
+
+        # The premise the defect rests on: two distinct objects, identical repr.
+        self.assertIsNot(first, second)
+        self.assertEqual(repr(first), repr(second))
+
+        self._guard_registry(registry.protocol_registry, 'UNITPROTOCOL')
+        registry.protocol_registry['UNITPROTOCOL'] = first
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            registry.register_protocol(second)
+
+        # The guard's firing condition is unchanged: the overwrite still
+        # happens and is still reported exactly once.
+        self.assertIs(registry.protocol_registry['UNITPROTOCOL'], second)
+        messages = self._registry_warnings(caught, RegistryWarning)
+        self.assertEqual(len(messages), 1)
+
+        # The pre-fix message text must be gone...
+        self.assertNotIn(f'overwriting {first!r} with {second!r}', messages[0])
+
+        # ...replaced by something that tells the two objects apart. id() is
+        # the fallback used because module+qualname are exactly what the
+        # coinciding repr() already carries, so appending them would not help.
+        first_marker, second_marker = f'id={id(first):#x}', f'id={id(second):#x}'
+        self.assertNotEqual(first_marker, second_marker)
+        self.assertIn(first_marker, messages[0])
+        self.assertIn(second_marker, messages[0])
+        self.assertLess(messages[0].index(first_marker), messages[0].index(second_marker))
+
     def test_register_protocol_validates_and_updates_registry(self) -> None:
         from pcapkit.foundation.registry import protocols as registry
         from pcapkit.utilities.exceptions import RegistryError
