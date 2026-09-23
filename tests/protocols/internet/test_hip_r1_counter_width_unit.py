@@ -175,12 +175,12 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         both codes; the two-copy pairing in
         :mod:`examples.generators.options` is what concealed that.
 
-        Code 128 is deliberately not exercised here. It fails for an unrelated
-        reason that #672 does not touch -- the schema registry is keyed on the
-        ``code=`` of the class statement and ``R1CounterParameter`` declares only
-        129, so 128 parses as an ``UnassignedParameter`` -- which is #690, and
-        which ``hip-parameter/R1_Counter`` in
-        :mod:`tests.protocols.test_option_roundtrip_unit` records.
+        Code 128 is deliberately not exercised here. #690 registered
+        ``R1CounterParameter`` for 128 as well as 129, so it now reaches this
+        same class rather than parsing as an ``UnassignedParameter`` --
+        that coverage lives with the fix, in
+        :meth:`HIPUnitTests.test_hip_r1_counter_code_128_resolves_to_its_own_schema`,
+        not here; this module stays scoped to the width #672 fixed.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP

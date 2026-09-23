@@ -563,8 +563,28 @@ class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
 
 
 @schema_final
-class R1CounterParameter(Parameter, code=Enum_Parameter.R1_COUNTER):
-    """Header schema for HIP ``R1_COUNTER`` parameters."""
+class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
+                                          Enum_Parameter.R1_COUNTER]):
+    """Header schema for HIP ``R1_COUNTER`` parameters.
+
+    Registered under both codes, not 129 alone. :rfc:`5201#section-5.2.3`
+    (HIPv1) and :rfc:`7401#section-5.2.3` (HIPv2) give the identical 4 + 8
+    layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --
+    one parameter under two numbers, the difference being HIP's own C-bit
+    rather than an unrelated code -- and the field list below is that layout
+    exactly, since #696 widened :attr:`counter` to eight octets.
+    :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries
+    two hand-written entries -- not a name-normalisation rule; ``R1_Counter``
+    and ``R1_COUNTER`` differ only in case, and each needed its own line --
+    mapping both codes to the same ``_read_param_r1_counter``, and
+    ``_make_param_r1_counter`` already built this class for 128; it was only
+    the schema lookup this class's own ``code=`` feeds -- consulted on the
+    parse path by :class:`~pcapkit.corekit.fields.collections.OptionField`
+    -- that fell back to :class:`UnassignedParameter` for 128, since a
+    single-code ``code=`` registered 129 alone and left 128 unclaimed.
+    See #690.
+
+    """
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)

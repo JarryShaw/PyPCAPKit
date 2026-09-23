@@ -2303,6 +2303,108 @@ class HIPUnitTests(unittest.TestCase):
                 for copy in copies:
                     self.assertEqual(getattr(copy, attr), (1,))
 
+    def test_hip_r1_counter_code_128_resolves_to_its_own_schema(self) -> None:
+        """#690: HIPv1's ``R1_Counter`` (code 128) must not fall through to
+        ``UnassignedParameter`` on the parse path.
+
+        ``R1CounterParameter`` used to register itself with ``code=
+        Enum_Parameter.R1_COUNTER`` alone -- 129, the HIPv2 spelling.
+        :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already
+        carries two hand-written entries -- not a name-normalisation rule --
+        mapping both 128 and 129 to ``_read_param_r1_counter``, and
+        ``_make_param_r1_counter`` already built a real ``R1CounterParameter``
+        for 128 -- so construction worked and only parsing was broken. The
+        *schema* used to unpack a parameter off the wire is chosen by a
+        different mapping, :attr:`~pcapkit.protocols.schema.schema.EnumSchema.
+        registry`, wired into :class:`HIP`'s ``param`` field as
+        ``OptionField(..., registry=Parameter.registry)``, and that one is
+        keyed solely by the ``code=`` a schema class declares. So code 128
+        fell to ``Parameter.__default__`` -- ``UnassignedParameter``, whose
+        schema has ``value: bytes`` and no ``counter`` -- and
+        ``_read_param_r1_counter`` failed reading ``schema.counter`` off it
+        with ``AttributeError: 'UnassignedParameter' object has no attribute
+        'counter'``. Measured verbatim on the tree before this fix, with the
+        exact bytes this test builds.
+
+        The expected wire bytes below are derived from
+        ``R1CounterParameter.__fields__`` rather than a hex literal, on
+        purpose: a literal is exactly what made the first version of this
+        test fail the moment #696 widened ``counter`` from four octets to
+        eight (12-octet records became 16). Deriving from the field widths
+        keeps this test about the registry dispatch it names, rather than
+        about a wire width #696's own ``test_hip_r1_counter_width_unit.py``
+        already pins.
+
+        Two copies, matching
+        ``test_hip_nat_traversal_mode_and_esp_transform_survive_the_full_parser``'s
+        own reason: proving the reader's stride across repeated occurrences
+        of the same code, not working around any alignment defect. With #696
+        landed a lone ``R1_COUNTER`` record already packs to a self-aligned
+        16 octets and parses cleanly on its own -- measured directly, one
+        copy raises nothing and reads back the same counter -- so two copies
+        here are a stride check, not a workaround.
+
+        """
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.data.internet import hip as hip_data
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        # The schema registry itself: both codes now resolve to the same class.
+        self.assertIs(hip_schema.Parameter.registry[Parameter.R1_Counter],
+                      hip_schema.R1CounterParameter)
+        self.assertIs(hip_schema.Parameter.registry[Parameter.R1_COUNTER],
+                      hip_schema.R1CounterParameter)
+
+        proto = object.__new__(HIP)
+
+        r1_schema = proto._make_param_r1_counter(Parameter.R1_Counter, version=1,
+                                                 counter=0xaabbccdd)
+        r1_one = bytes(r1_schema)
+
+        # Derived from the schema's own declared field widths -- see the
+        # docstring above for why this is not a hex literal. This only agrees
+        # with the actual packed record because _make_param_r1_counter hard-
+        # codes len=12 (below) rather than deriving it the same way; the two
+        # would diverge the moment reserved + counter stopped summing to 12.
+        reserved_len = hip_schema.R1CounterParameter.__fields__['reserved'].length
+        counter_len = hip_schema.R1CounterParameter.__fields__['counter'].length
+        content_len = reserved_len + counter_len
+        self.assertEqual(content_len, 12)  # matches _make_param_r1_counter's len=12
+        total_len = hip_schema.parameter_total_len(content_len)
+        padding_len = total_len - 4 - content_len
+        expected = (
+            int(Parameter.R1_Counter).to_bytes(2, 'big')
+            + content_len.to_bytes(2, 'big')
+            + bytes(reserved_len)
+            + (0xaabbccdd).to_bytes(counter_len, 'big')
+            + bytes(padding_len)
+        )
+        self.assertEqual(r1_one, expected)
+        self.assertEqual(len(r1_one), total_len)
+        self.assertEqual(len(r1_one) % 8, 0)
+
+        param_area = r1_one * 2
+        self.assertEqual(len(param_area) % 8, 0)
+        hdr_len_units = 4 + len(param_area) // 8
+
+        # next(1)=0x3b len(1) pkt(1)=0x00 ver(1)=0x11 (version nibble 1, plus
+        # the reserved bit that must be 1) checksum(2) control(2) shit(16)
+        # rhit(16) -- the fixed 40-octet header, declaring HIPv1 and the
+        # parameter area to follow.
+        fixed = (bytes([0x3b, hdr_len_units, 0x00, 0x11]) + bytes(2) +
+                  bytes(2) + bytes(16) + bytes(16))
+        self.assertEqual(len(fixed), 40)
+        raw = fixed + param_area
+
+        parsed = HIP(raw, len(raw), extension=True)
+        self.assertEqual(parsed.info.version, 1)
+        copies = parsed.info.parameters.getlist(Parameter.R1_Counter)
+        self.assertEqual(len(copies), 2)
+        for copy in copies:
+            self.assertIsInstance(copy, hip_data.R1CounterParameter)
+            self.assertEqual(copy.counter, 0xaabbccdd)
+
     def test_hip_schema_selectors_and_encrypted_parameter_branches(self) -> None:
         from pcapkit.const.hip.cipher import Cipher
         from pcapkit.const.hip.hi_algorithm import HIAlgorithm
