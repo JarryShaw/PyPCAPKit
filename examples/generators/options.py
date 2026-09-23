@@ -948,10 +948,8 @@ HIP_VERSION = {129: 2, 128: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
-#: Two, and **no longer for the reason it used to be**, which is the whole point
-#: of this note: the same constant now routes around a different set of defects
-#: from the one it was introduced for, and reading it as still being about the
-#: padding rule would send the next person to a line that is already fixed.
+#: One, since #689. This note used to be a history of why the constant was two;
+#: it is now the history of why it no longer is.
 #:
 #: It was two because of the defect #651 fixed. ``HIP.make`` computes the
 #: header's ``len`` field as ``total_length // 8 + 4``, which is lossless only
@@ -962,83 +960,56 @@ HIP_VERSION = {129: 2, 128: 1}
 #: -- which compares the recovered length exactly -- rejected the library's own
 #: single-parameter packets. Two copies summed to a multiple of eight, so the
 #: arithmetic came out exact and the parameter constructors became reachable.
-#:
 #: #651 made the padding :rfc:`7401` Section 5.2.1's
 #: ``Total Length = 11 + Length - (Length + 3) % 8``, so each parameter is a
-#: multiple of eight on its own and the pair is no longer needed for that.
-#: Measured over this table's 49 HIP codes, on ``0c7f2b7c9`` and on the #651
-#: tree, by running the round trip at each setting:
+#: multiple of eight on its own and the pair stopped being needed for that --
+#: measured at the time as 45 OK of 49 at one copy against 46 at two.
 #:
-#: ======================  ========  ==========
-#: tree                    one copy  two copies
-#: ======================  ========  ==========
-#: ``0c7f2b7c9`` (before)  4 OK      45 OK
-#: #651 (after)            45 OK     46 OK
-#: ======================  ========  ==========
+#: What kept the pair afterwards was a short list of codes whose own packed
+#: length disagreed with the ``len`` they declared, so their record was not
+#: 8-aligned however the padding was computed, and a pair cancelled that
+#: misalignment the same way the pre-#651 padding rule once did. #672 and #679
+#: closed two of those -- ``R1_COUNTER`` (129), whose 8-octet :rfc:`7401`
+#: Section 5.2.3 counter had packed as four, and ``LOCATOR_SET`` (193), whose
+#: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
+#: which is what moved the one-copy figure from 44 to 46, level with two copies.
 #:
-#: So one copy went from unusable to very nearly usable, which is the strongest
-#: statement available that the padding was what made a lone parameter
-#: unrepresentable -- 41 codes that could not survive alone now can.
-#:
-#: What still fails at one copy fails for reasons that have nothing to do with
-#: padding. Two of the three pack a number of contents octets that disagrees with
-#: the ``len`` they declare, so their record is not 8-aligned however the padding
-#: is computed; the third never needed a pair at all:
+#: Three remain, none of them helped by a second copy since each fails at two
+#: copies as well as at one:
 #:
 #: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
-#:   ``hip-parameter/HOST_ID`` in that table.
+#:   ``hip-parameter/HOST_ID``.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
-#:   any other version -- while this table builds it at version 2. Nothing to do
-#:   with lengths at all, and it is the one whose recorded ``defect`` string in
-#:   that table names the header arithmetic rather than this.
+#:   any other version -- while this table builds it at version 2. Recorded as
+#:   ``hip-parameter/HIP_TRANSFORM``.
 #: * ``R1_Counter`` (128) parses as an ``UnassignedParameter``: ``_read_param_*``
 #:   and ``_make_param_*`` are found by enumeration member name so both exist for
 #:   code 128, but the *schema* registry is keyed on the ``code=`` of the class
 #:   statement and ``R1CounterParameter`` declares only 129. Recorded as
-#:   ``hip-parameter/R1_Counter``, filed as #690, and it fails at two copies as
-#:   well as at one, so the pair never routed around it. Note that #672 widened
-#:   this parameter's ``counter`` to the eight octets :rfc:`7401` Section 5.2.3
-#:   requires and deliberately left this alone, so the entry is unchanged by it.
+#:   ``hip-parameter/R1_Counter``, filed as #690.
 #:
-#: Two codes that used to be on that list are not on it any more, and the
-#: measurement is the point of saying so rather than quietly shortening the list.
-#: ``R1_COUNTER`` (129) packed 12 octets against the correct ``len=12`` where
-#: :rfc:`7401` Section 5.2.3's 8-octet counter makes the record 16; and
-#: ``LOCATOR_SET`` (193) declared its ``Length`` in 4-octet units where the RFC
-#: counts bytes, which at this table's default empty locator set produced a
-#: four-octet record. Both were fixed by #672 and #679, and at one copy the
-#: former went from ``CONSTRUCT`` (``ProtocolError: HIPv2: invalid format``) to
-#: ``OK`` while the latter went from ``MISMATCH`` to ``OK``. Measured over this
-#: table's 49 HIP codes on ``f0999858e`` and on the fix:
+#: So the pair was routing around nothing by the time #672 and #679 landed, and
+#: dropping to one copy does not change what round-trips. Measured over this
+#: table's 49 HIP codes on ``5f0a1aa90`` (after #696, which #689 itself waited
+#: on -- see the issue):
 #:
 #: ======================  ========  ==========
 #: tree                    one copy  two copies
 #: ======================  ========  ==========
-#: ``f0999858e`` (before)  44 OK     46 OK
-#: #672 + #679 (after)     46 OK     46 OK
+#: ``5f0a1aa90``           46 OK     46 OK
 #: ======================  ========  ==========
 #:
-#: The 44 is one fewer than the 45 the #651 row above records at one copy, and
-#: the missing code is ``LOCATOR_SET``. #651 had corrected its padding along with
-#: the other 45 parameters, which made its empty record eight octets and let it
-#: round-trip alone; #664 then narrowed that correction back out of this one
-#: parameter, deliberately, so the four-octet record returned and with it the
-#: ``MISMATCH``. The row is not a regression in #664 -- it is the accidental
-#: conformance #679 documents, showing up in this table rather than on the wire.
+#: The three gaps above are the only cases either setting fails, and neither
+#: their ``status`` nor their ``defect`` moves between settings, so
+#: :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` needed no
+#: change to keep recording them accurately at one copy.
 #:
-#: So **the two settings now agree**, on the same three codes above, and the
-#: reason this constant is still two is no longer that one copy fails. It is that
-#: changing it halves every ``hip-parameter`` frame in
-#: :file:`options-internet.pcap` -- which is the fixture the RFC-only
-#: conformance walk reads -- and that is a change about this table's test data
-#: rather than about either defect. #689 tracks making the drop, so that the
-#: before-and-after figures quoted for #672 and #679 stay comparable in the
-#: meantime.
-#:
-#: The single-parameter case is not lost while it waits: it is asserted directly,
-#: and positively, by ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
-#: :mod:`tests.protocols.test_option_roundtrip_unit`.
-HIP_COPIES = 2
+#: The single-parameter case is asserted directly, and positively, by
+#: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
+#: :mod:`tests.protocols.test_option_roundtrip_unit`, which is also where the
+#: two-copy shape is still exercised now that this constant no longer produces
+#: it.
+HIP_COPIES = 1
 
 
 def _hip_registry() -> 'Any':

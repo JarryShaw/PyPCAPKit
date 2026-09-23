@@ -61,13 +61,17 @@ a registry entry is renamed or removed.
 
 Nothing here is a workaround for the defects it records. Every ``_make_*``
 argument in the generator's tables is a legitimate value for that option, and
-none of the assertions below has been loosened to make a failing case pass. The
-one place where an argument was chosen to route *around* a defect rather than
-into it is HIP's ``HIP_COPIES``, which puts two copies of each parameter in a
-packet. One copy is representable since #651 and the constant is no longer about
-padding -- see its note in the generator for the four unrelated defects that
-keep it at two -- and the single-parameter case is asserted directly by
-:meth:`OptionRoundTripTests.test_a_hip_packet_carrying_one_parameter_round_trips`.
+none of the assertions below has been loosened to make a failing case pass. HIP's
+``HIP_COPIES`` used to be the one place where an argument was chosen to route
+*around* a defect rather than into it, putting two copies of each parameter in a
+packet so a lone one's unrepresentable length never had to be constructed. One
+copy has been representable since #651, and by the time #672 and #679 landed the
+pair was routing around nothing that a single copy did not already hit -- see the
+constant's note in the generator for the measurement -- so #689 dropped it to
+one. The single-parameter case is asserted directly by
+:meth:`OptionRoundTripTests.test_a_hip_packet_carrying_one_parameter_round_trips`,
+which is also where the two-copy shape is still exercised now that this table no
+longer produces it.
 
 This module is unit tier: it constructs its own octets and reads no capture, so
 it runs on a fresh checkout with nothing generated.
@@ -408,8 +412,9 @@ EXPECTED_FAILURES = {
     # a defect that is no longer there.
 
     # Two parameters whose own packed length is not what the header arithmetic
-    # can represent even in pairs -- see HIP_COPIES in the generator for why the
-    # pair is used at all.
+    # can represent, even at HIP_COPIES's old value of two -- see that
+    # constant's note in the generator for the measurement that dropped it to
+    # one without changing either of these.
     'hip-parameter/HIP_TRANSFORM': Gap(
         'CONSTRUCT', 'HIPv2: [ParamNo 577] invalid parameter',
         'pcapkit/protocols/internet/hip.py:698 -- the len check; HIP_TRANSFORM '
@@ -742,8 +747,8 @@ class OptionRoundTripTests(unittest.TestCase):
         This assertion used to run the other way, as
         ``test_a_single_hip_parameter_cannot_be_constructed``: it required the
         library to *reject* its own single-parameter packets, which it did, and
-        pinned the defect the generator's ``HIP_COPIES = 2`` routes around so
-        that routing around it did not also bury it.
+        pinned the defect the generator's ``HIP_COPIES`` (then ``2``) routed
+        around so that routing around it did not also bury it.
 
         ``HIP.make`` computes the header's ``len`` as ``total_length // 8 + 4``,
         which is lossless only when the parameter octets are a multiple of eight.
@@ -764,8 +769,17 @@ class OptionRoundTripTests(unittest.TestCase):
         were pure surplus rather than a shortfall, and a reader that pads by any
         non-zero amount lands in the wrong place at the start of the second copy.
 
-        ``HIP_COPIES`` itself stays at two, for reasons that are no longer this
-        one; its own note in the generator says which.
+        ``HIP_COPIES`` dropped to ``1`` in #689, once #672 and #679 had closed
+        the last two codes a second copy was still routing around -- see the
+        constant's note in the generator. That makes the ``copies=1`` subtest
+        below redundant with the main sweep, which now exercises
+        ``hip-parameter/SEQ`` at exactly one copy itself; it is kept anyway
+        because it pins the exact wire layout (``len(built)``, the header's
+        ``len`` byte, the reparsed count) rather than only the round-trip
+        identity the sweep checks. The ``copies=2`` subtest is no longer
+        redundant with anything -- the generator does not build that shape any
+        more -- so this is the one place left that still asserts the pair
+        round-trips.
 
         """
         from pcapkit.const.hip.parameter import Parameter
