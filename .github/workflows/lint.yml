@@ -74,10 +74,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
-      # 3.10-3.15 because they check that the package *runs* everywhere; these
-      # tools read the source, and running them five times over would produce
-      # five copies of the same findings for five times the runner cost.
+      # One interpreter, not a matrix. Unit Tests sweeps 3.10-3.14 and Python
+      # Compatibility sweeps the same plus a schedule-only 3.15 leg, because
+      # they check that the package *runs* everywhere; these tools read the
+      # source, and running them several times over would produce several
+      # copies of the same findings for several times the runner cost.
       #
       # 3.14 specifically, matching cron-vendor.yml, because it is the newest
       # non-experimental version in the test matrix and the version the recorded
