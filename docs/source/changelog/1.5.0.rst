@@ -2385,6 +2385,26 @@ pull requests between #326 and #509.
   ``.../traceflow/traceflow.rst:40`` -- carry the same ambiguity and are not
   touched here; #709 stays open for them, with no PR yet filed against that
   half (#709).
+* **Fixed** -- ``register_protocol``'s overwrite warning could claim a
+  protocol was replaced with itself. The guard that decides *whether* to
+  warn was already correct -- ``incumbent is not protocol``, an identity
+  check from #681 -- but the message built both operands with a bare
+  ``repr()``, and for an ordinary class that is just
+  ``<class 'module.qualname'>``. A factory that defines a same-named,
+  closure-local class on every call (as
+  ``tests/protocols/test_construction_keyword_check_unit.py``'s
+  ``_protocol_class`` does) produces two genuinely distinct classes sharing
+  one ``__module__`` and ``__qualname__``, so both reprs print identically
+  and a real, correct overwrite reads as "overwriting X with X." The message
+  now compares the two reprs first, and only when they coincide appends each
+  object's ``id()`` to tell them apart; the common case, where the two
+  classes are named differently, is untouched. ``__module__``/``__qualname__``
+  was considered as the disambiguator instead of ``id()`` and rejected: for
+  the reported shape those are exactly what the coinciding repr already
+  renders, so they discriminate nothing an ``id()`` does not already have to.
+  A new ``test_register_protocol_disambiguates_classes_sharing_a_repr`` fails
+  against the unfixed message and passes against the fix; the targeted suite
+  goes 49 to 50 passed, and the file's coverage holds at 97% (#710).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
