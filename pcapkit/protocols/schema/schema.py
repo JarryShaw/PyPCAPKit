@@ -16,7 +16,8 @@ from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
-from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
+from pcapkit.utilities.warnings import (RegistryWarning, SchemaWarning, UnknownFieldWarning,
+                                        warn)
 
 if TYPE_CHECKING:
     from collections import OrderedDict
@@ -1074,6 +1075,16 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
         :attr:`registry` mapping with the given ``code``. If ``code`` is
         not given, the subclass will not be registered.
 
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If any of ``code`` is
+                already registered, naming the displaced schema and its
+                replacement. This is the same guard :meth:`register` applies,
+                and it is here as well because a class declaration is the
+                *other* way into :attr:`__enum__` -- ``class MyOption(Option,
+                code=...)`` writes the registry without any call to
+                :meth:`register`, so guarding only the method would leave the
+                declaration path silently displacing a built-in schema.
+
         Notes:
             If :attr:`__enum__` is not yet defined at function call,
             it will automatically be defined as a :class:`_EnumRegistry`
@@ -1104,11 +1115,18 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             cls.__enum__ = _EnumRegistry(getattr(manual, 'default_factory', None), manual)
 
         if code is not None:
-            if isinstance(code, collections.abc.Iterable):
-                for _code in code:
-                    cls.__enum__[_code] = (cls)  # type: ignore[index]
-            else:
-                cls.__enum__[code] = (cls)  # type: ignore[index]
+            # One loop over both shapes, so the overwrite guard below is written
+            # once rather than once per branch. ``register`` cannot be delegated
+            # to here: :class:`pcapkit.protocols.schema.misc.pcapng.Option`
+            # overrides it with an incompatible signature, so ``cls.register``
+            # does not mean the same thing for every subclass.
+            codes = code if isinstance(code, collections.abc.Iterable) else (code,)
+            for _code in codes:
+                if _code in cls.__enum__:
+                    incumbent = cls.__enum__[_code]  # type: ignore[index]
+                    warn(f'schema {_code} already registered, overwriting '
+                         f'{incumbent!r} with {cls!r}', RegistryWarning)
+                cls.__enum__[_code] = (cls)  # type: ignore[index]
         super().__init_subclass__()
 
     @classmethod
@@ -1119,5 +1137,47 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             code: Enumetaion code.
             schema: Enumetaion schema.
 
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already
+                registered, naming the displaced schema and its replacement.
+
+        Note:
+            Every public registrar in
+            :mod:`pcapkit.foundation.registry.protocols` that accepts a
+            ``schema`` registers two halves of one binding -- a parser class
+            through e.g. :meth:`IPv4.register_option
+            <pcapkit.protocols.internet.ipv4.IPv4.register_option>`, and a
+            schema class through this method. The parser half has warned on an
+            overwrite for as long as it has existed; this half assigned bare, so
+            one ``register_ipv4_option`` call replacing a built-in reported the
+            parser it displaced and said nothing about the schema. The guard
+            here closes that asymmetry.
+
+            It fires on the mere presence of ``code``, as the code-keyed parser
+            registries do and unlike :func:`register_protocol
+            <pcapkit.foundation.registry.protocols.register_protocol>`, whose key
+            is derived from the value it stores. ``code`` here is supplied by the
+            caller and is independent of ``schema``, so a repeat is a caller
+            mistake worth reporting even when the value is unchanged.
+
+            Presence is a faithful "was this really registered" test only because
+            :class:`_EnumRegistry` returns a miss without recording it. A plain
+            :class:`collections.defaultdict` would have inserted
+            :attr:`__default__` the first time any unregistered ``code`` was
+            looked up, so parsing a single packet carrying an unknown code would
+            have made the next legitimate registration for that code warn about
+            an entry no caller ever asked for -- the defect fixed for this layer
+            in #555, and for the parser-layer ``__proto__`` family in #421 and
+            #425/#428. That fix is what makes this guard safe to add.
+
+            :class:`pcapkit.protocols.schema.misc.pcapng.Option` overrides this
+            method with a namespaced registry of its own and does not delegate
+            here, so it is guarded separately.
+
         """
+        if code in cls.__enum__:
+            incumbent = cls.__enum__[code]  # type: ignore[index]
+            warn(f'schema {code} already registered, overwriting '
+                 f'{incumbent!r} with {schema!r}', RegistryWarning)
+
         cls.__enum__[code] = schema  # type: ignore[index]

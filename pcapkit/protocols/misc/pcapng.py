@@ -866,13 +866,26 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             protocol: module descriptor or a
                 :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this link type is
+                already registered against PCAP-NG blocks, naming the displaced
+                entry and its replacement so a caller can tell *what* was lost.
+                Note this registry is separate from the PCAP one, so
+                :func:`~pcapkit.foundation.registry.protocols.register_linktype`
+                writing to both cannot make either warn about the other.
+
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, Protocol):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
-            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
+            warn(f'protocol {code} already registered, overwriting '
+                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod

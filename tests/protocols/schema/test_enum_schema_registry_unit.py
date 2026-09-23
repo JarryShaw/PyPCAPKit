@@ -18,6 +18,7 @@ import collections
 import enum
 import importlib.util
 import unittest
+import warnings
 
 from tests._support import purge_modules
 
@@ -156,3 +157,283 @@ class EnumSchemaRegistryRetentionTests(unittest.TestCase):
 
         self.assertIs(schema, UnassignedOption)
         self.assertNotIn(probe, Option.registry)
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
+    """The schema half of a registration reports an overwrite.
+
+    Every public registrar in :mod:`pcapkit.foundation.registry.protocols` that
+    takes a ``schema`` registers two halves of one binding: a parser class,
+    through e.g. :meth:`~pcapkit.protocols.internet.ipv4.IPv4.register_option`,
+    and a schema class, through :meth:`EnumSchema.register`. The parser half has
+    warned on an overwrite for as long as it has existed; the schema half
+    assigned bare. So one ``register_ipv4_option`` call replacing a built-in
+    named the parser it displaced and said nothing about the schema -- half a
+    report for one call.
+
+    The declaration path is covered as well, because ``class MyOption(Option,
+    code=...)`` reaches :attr:`EnumSchema.__enum__` without any call to
+    :meth:`register`; guarding only the method would leave it silent.
+
+    Generalises the guard GitHub issue #675 added to ``register_protocol`` in
+    #681. The condition here is presence alone, as the code-keyed parser
+    registries use, rather than #681's "present *and* a different class" -- that
+    narrower form is licensed by a key *derived* from the value, which this
+    registry's caller-supplied ``code`` is not.
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def _guard_registry(self, registry, key) -> None:
+        """Restore ``key`` in ``registry`` on teardown, absence included.
+
+        Mirrors the helper of the same name in
+        ``tests/foundation/registry/test_protocols.py``. Every registry in this
+        package is process-global and order-dependent, so a test that writes into
+        one has to put back exactly what it found -- and a key that was *absent*
+        has no value to restore, so writing one back would leave a stray entry
+        for the next test in the process to inherit. That is the class of defect
+        #674/#686 was about, hence the sentinel and the ``pop``.
+
+        ``tests/_support.py`` deliberately offers nothing for this: its own
+        ``restore_modules`` docstring notes that it restores which module object a
+        name refers to, not the *contents* of one, so a registry mutated in place
+        rebinds nothing and outlives the test unless undone here.
+
+        """
+        missing = object()
+        previous = registry.get(key, missing)
+
+        def restore() -> None:
+            if previous is missing:
+                registry.pop(key, None)
+            else:
+                registry[key] = previous
+
+        self.addCleanup(restore)
+
+    @staticmethod
+    def _registry_warnings(caught, category) -> 'list[str]':
+        """The messages of the captured warnings that are of ``category``.
+
+        Filtering by category matters: the parse and import paths raise other
+        warning types, and a bare count of everything captured would make an
+        assertion about "no warning" pass or fail for unrelated reasons.
+
+        """
+        return [str(item.message) for item in caught
+                if issubclass(item.category, category)]
+
+    @staticmethod
+    def _base_schema():
+        """A fresh ``EnumSchema`` hierarchy with its own registry.
+
+        Locally declared, so nothing here touches a process-global registry --
+        :meth:`EnumSchema.__init_subclass__` builds a new ``__enum__`` for the
+        first subclass in a chain.
+
+        """
+        from pcapkit.protocols.schema.schema import EnumSchema
+
+        class Code(enum.IntEnum):
+            one = 1
+            two = 2
+            three = 3
+
+        class DefaultSchema:
+            """Stand-in for the fallback schema."""
+
+        class BaseSchema(EnumSchema[Code]):
+            __default__ = lambda: DefaultSchema  # noqa: E731
+
+        return Code, BaseSchema
+
+    def test_register_warns_when_a_code_is_already_taken(self) -> None:
+        """The schema half now reports what it displaced.
+
+        Before this change the body was a bare ``cls.__enum__[code] = schema``:
+        the replacement happened, the read-side fell back to the new class, and
+        nothing connected that to the registration which caused it.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Incumbent(BaseSchema, code=Code.one):
+            pass
+
+        class Replacement(BaseSchema):
+            pass
+
+        # The premise: two *different* schemas, and the code really is taken.
+        self.assertIsNot(Incumbent, Replacement)
+        self.assertIs(BaseSchema.registry[Code.one], Incumbent)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            BaseSchema.register(Code.one, Replacement)
+
+        # The overwrite still happens. This reports the collision, it does not
+        # refuse it -- refusing would break the documented ability to replace a
+        # built-in schema.
+        self.assertIs(BaseSchema.registry[Code.one], Replacement)
+
+        messages = self._registry_warnings(caught, RegistryWarning)
+        self.assertEqual(len(messages), 1)
+
+        # Naming both is the point: 'schema 1 already registered' on its own does
+        # not say which schema was lost. Ordering asserted too, so the message
+        # cannot name them the wrong way round.
+        self.assertIn(repr(Incumbent), messages[0])
+        self.assertIn(repr(Replacement), messages[0])
+        self.assertLess(messages[0].index(repr(Incumbent)),
+                        messages[0].index(repr(Replacement)))
+
+    def test_register_stays_quiet_for_a_free_code(self) -> None:
+        """A first registration displaces nothing and must not warn.
+
+        Pins the other half of the guard. A registrar that warned here would
+        make every legitimate ``register_*`` call noisy, and the wholesale
+        ``RegistryWarning`` filter that invites is what would then hide a real
+        collision.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Replacement(BaseSchema):
+            pass
+
+        self.assertNotIn(Code.two, BaseSchema.registry)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            BaseSchema.register(Code.two, Replacement)
+
+        self.assertIs(BaseSchema.registry[Code.two], Replacement)
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+
+    def test_a_lookup_miss_still_does_not_make_a_later_register_warn(self) -> None:
+        """The #555 retention fix is what makes a presence-only guard safe here.
+
+        On a plain :class:`collections.defaultdict` a bare ``registry[code]`` for
+        an unregistered code inserted the default, so parsing one packet carrying
+        an unknown code would make the next legitimate registration for that code
+        warn about an entry no caller ever asked for. This asserts the two fixes
+        compose: read a miss, then register that code, and stay silent.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Replacement(BaseSchema):
+            pass
+
+        # The miss, exactly as every schema-layer call site performs it.
+        BaseSchema.registry[Code.three]
+        self.assertNotIn(Code.three, BaseSchema.registry)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            BaseSchema.register(Code.three, Replacement)
+
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+
+    def test_declaring_a_subclass_over_a_taken_code_warns(self) -> None:
+        """The declaration path reaches the registry without calling ``register``.
+
+        :meth:`EnumSchema.__init_subclass__` assigns ``cls.__enum__[code]``
+        directly, so a guard on :meth:`register` alone would leave
+        ``class MyOption(Option, code=...)`` -- the documented way to add a schema
+        -- silently displacing a built-in.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Incumbent(BaseSchema, code=Code.one):
+            pass
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+
+            class Replacement(BaseSchema, code=Code.one):
+                pass
+
+        self.assertIs(BaseSchema.registry[Code.one], Replacement)
+
+        messages = self._registry_warnings(caught, RegistryWarning)
+        self.assertEqual(len(messages), 1)
+        self.assertIn(repr(Incumbent), messages[0])
+        self.assertIn(repr(Replacement), messages[0])
+
+    def test_declaring_a_subclass_with_fresh_codes_stays_quiet(self) -> None:
+        """Every ordinary schema declaration must stay silent.
+
+        This is the case that governs whether ``import pcapkit`` is noisy: 326
+        registry writes happen during import, and a guard that warned on a
+        first-time declaration would fire on the great majority of them. Covers
+        the iterable form of ``code`` as well, which is the branch that shares
+        the guard.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+
+            class Single(BaseSchema, code=Code.one):
+                pass
+
+            class Several(BaseSchema, code=(Code.two, Code.three)):
+                pass
+
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+
+        # The iterable branch was restructured into a single loop to carry the
+        # guard once; assert it still registers every code it was given.
+        self.assertIs(BaseSchema.registry[Code.one], Single)
+        self.assertIs(BaseSchema.registry[Code.two], Several)
+        self.assertIs(BaseSchema.registry[Code.three], Several)
+
+    def test_the_guard_holds_on_a_real_shipped_registry(self) -> None:
+        """The same thing on :class:`...schema.transport.tcp.Option`.
+
+        The tests above build a local hierarchy, which proves the mechanism but
+        not that it is reachable on a registry the package actually ships. This
+        one displaces a real built-in schema and puts it back.
+
+        """
+        from pcapkit.const.tcp.option import Option as OptionNumber
+        from pcapkit.protocols.schema.transport.tcp import Option
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        code = OptionNumber.Maximum_Segment_Size
+        incumbent = Option.registry[code]
+
+        # Asserted rather than assumed: if this code were somehow unregistered,
+        # the warning below would not fire and the test would be vacuous.
+        self.assertIn(code, Option.registry)
+        self._guard_registry(Option.registry, code)
+
+        class Replacement(Option):
+            pass
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            Option.register(code, Replacement)
+
+        self.assertIs(Option.registry[code], Replacement)
+
+        messages = self._registry_warnings(caught, RegistryWarning)
+        self.assertEqual(len(messages), 1)
+        self.assertIn(repr(incumbent), messages[0])
+        self.assertIn(repr(Replacement), messages[0])

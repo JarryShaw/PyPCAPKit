@@ -85,6 +85,26 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
             protocol map should be associated directly with specific
             transport layer protocol type.
 
+        Raises:
+            pcapkit.utilities.exceptions.UnsupportedCall: If called on
+                :class:`Transport` itself.
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If this port is already
+                registered, naming the displaced entry and its replacement so a
+                caller can tell *what* was lost. Fires on presence alone -- see
+                :meth:`ProtocolBase.register
+                <pcapkit.protocols.protocol.ProtocolBase.register>` for why that
+                differs from ``register_protocol``.
+
+        Note:
+            ``cls.__proto__`` belongs to the concrete protocol, not to
+            :class:`Transport`, so ``register_apptype`` reaching this method
+            twice for one call -- once as ``TCP``, once as ``UDP`` -- inspects
+            two different registries and cannot warn spuriously.
+
         """
         if cls is Transport:
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
@@ -94,7 +114,8 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         if not issubclass(protocol, Protocol):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
-            warn(f'port {code} already registered, overwriting', RegistryWarning)
+            warn(f'port {code} already registered, overwriting '
+                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod

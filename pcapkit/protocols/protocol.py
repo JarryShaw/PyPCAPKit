@@ -767,13 +767,43 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             protocol: module descriptor or a
                 :class:`~pcapkit.protocols.protocol.Protocol` subclass
 
+        Raises:
+            pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If ``code`` is already
+                registered. The warning names the displaced entry and its
+                replacement, so a caller can tell *what* was lost rather than
+                only that something was.
+
+        Note:
+            The guard fires on the mere presence of ``code``, including when the
+            incumbent and the replacement denote the same protocol. That is
+            deliberate, and differs from :func:`register_protocol
+            <pcapkit.foundation.registry.protocols.register_protocol>`, which
+            additionally requires the incumbent to be a *different* class. Two
+            things separate them. This
+            registry is keyed on a ``code`` the caller supplies, independently of
+            the value, so registering one class under two codes yields two keys
+            and never reaches the same key twice -- the spurious-warning case
+            that motivated the narrower guard cannot arise here, while a repeat
+            call for one code is a caller mistake worth reporting even when the
+            value is unchanged. And the incumbent may still be an unresolved
+            :class:`~pcapkit.corekit.module.ModuleDescriptor` while the
+            replacement is the very class it names, so "a different class" is not
+            decidable here without resolving the descriptor -- forcing the import
+            that the descriptor exists to defer, purely to decide whether to
+            warn.
+
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         if code in cls.__proto__:
-            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
+            warn(f'protocol {code} already registered, overwriting '
+                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     @classmethod
