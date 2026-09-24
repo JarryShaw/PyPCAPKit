@@ -1758,39 +1758,59 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             should have emitted as a *binary* field, so the entry is malformed
             however it is read.
 
-            A binary field's value used to be followed by a bare
-            :meth:`io.BytesIO.read` with no length -- meant to skip the one
-            newline octet the format puts there, but reading with no argument
-            reads to *end of file* instead. The loop's next ``readline()`` then
-            found nothing and ended the entry, so every field behind a binary
-            one was silently gone, however well-formed. See `#704
-            <https://github.com/JarryShaw/PyPCAPKit/issues/704>`__. The skip is
-            now exactly that one octet, and a terminator that is missing or is
-            not a newline ends the entry with a warning -- the same shape as
-            the short length prefix above -- except when the value itself was
-            already clamped to what the entry held, since that shortfall was
-            reported already and nothing is left behind it to check.
+            Entries used to be split apart with ``self.entry.split(b'\\n\\n')``
+            before a single field was read -- delimiting a *length-prefixed*
+            format by content, which a binary field's own bytes need no
+            escaping to defeat. A value that itself contains ``b'\\n\\n'`` was
+            cut in the middle of its own data, turning what followed it into a
+            bogus field in a fabricated second entry; a value 2,570 octets long
+            is worse, since ``struct.pack('<Q', 2570) ==
+            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside
+            the length prefix itself*, so the split landed before a single
+            field was read. See `#723
+            <https://github.com/JarryShaw/PyPCAPKit/issues/723>`__. The entry is
+            now walked once, end to end: a length-prefixed field's bytes are
+            never inspected for structure, only counted out by the prefix that
+            names them, and a blank line -- found by *reading*, not by
+            splitting -- is what starts the next entry. The one-octet
+            terminator that must follow a binary field's value, and the warning
+            when it is missing, are unchanged from `#722
+            <https://github.com/JarryShaw/PyPCAPKit/issues/722>`__; walking the
+            buffer whole rather than pre-slicing it also retires that fix's
+            newline restoration, which existed only to undo what the slicing
+            itself had taken away.
+
+            A trailing separator -- a blank line with nothing behind it -- used
+            to be swallowed instead of ending the entry: with nothing left to
+            read, the walk stopped without recording that the separator had
+            been seen at all, so a rebuild lost that one octet and wrote a
+            :attr:`length` one short of what was read. It is now tracked
+            explicitly, so a blank line actually read, rather than the block's
+            own NUL padding or plain end of data, still starts the next entry --
+            even an empty one -- matching what splitting on it always did.
 
         """
         self = cast('Self', super().post_process(packet))
 
         data = []  # type: list[OrderedMultiDict[str, str | bytes]]
-        segments = self.entry.split(b'\n\n')
-        for index, entry_buffer in enumerate(segments):
-            if index < len(segments) - 1:
-                # ``split`` consumes the blank line's own newline together
-                # with the one that terminates this entry's last field; put
-                # the latter back, or a binary last field's terminator check
-                # below sees an entry that ends one octet early and warns
-                # over a newline that was in the capture all along
-                entry_buffer += b'\n'
-
+        total = len(self.entry)
+        entry_data = io.BytesIO(self.entry)
+        while True:
             entry = OrderedMultiDict()  # type: OrderedMultiDict[str, str | bytes]
+            # a blank line that was actually *read* -- as opposed to the
+            # block's own NUL padding, or simply running out of octets --
+            # is the separator the format puts between entries, so it
+            # starts another one, even an empty one, however little is
+            # left behind it
+            separator = False
 
-            entry_data = io.BytesIO(entry_buffer)
             while True:
-                line = entry_data.readline().strip()
-                if not line or not line.strip(b'\x00'):
+                raw_line = entry_data.readline()
+                line = raw_line.strip()
+                if not line:
+                    separator = bool(raw_line)
+                    break
+                if not line.strip(b'\x00'):
                     break
 
                 line_split = line.split(b'=', maxsplit=1)
@@ -1807,7 +1827,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                         break
 
                     length = struct.unpack('<Q', prefix)[0]  # type: int
-                    available = len(entry_buffer) - entry_data.tell()
+                    available = total - entry_data.tell()
                     clamped = length > available
                     if clamped:
                         warn(f'PCAP-NG: [systemd Journal Export] binary field {line!r} '
@@ -1820,9 +1840,16 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
 
                     if not clamped:
                         # the one octet the format puts here to terminate the
-                        # field; a value already clamped to the entry's own
-                        # end left nothing behind to check, and was reported
-                        # above
+                        # field; a value already clamped to the entry's own end
+                        # left nothing behind to check, and was reported above.
+                        # the reader's position is well defined either way --
+                        # exactly length + 1 octets past where the field name
+                        # started -- so a bad octet here ends only this
+                        # entry's field collection, matching #722: it does not
+                        # abort the walk, which keeps looking for the next
+                        # entry's separator from here. See #728's review for
+                        # why an outer abort was considered and rejected as
+                        # the default.
                         terminator = entry_data.read(1)
                         if terminator != b'\n':
                             warn(f'PCAP-NG: [systemd Journal Export] binary field '
@@ -1832,6 +1859,8 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                             break
 
             data.append(entry)
+            if entry_data.tell() >= total and not separator:
+                break
         self.data = data
         return self
 
