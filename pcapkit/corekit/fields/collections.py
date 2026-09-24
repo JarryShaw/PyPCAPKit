@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """container field class"""
 
-import copy
 import io
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -81,7 +80,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._callback(self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
