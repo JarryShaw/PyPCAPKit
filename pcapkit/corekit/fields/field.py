@@ -4,7 +4,6 @@
 import abc
 import contextlib
 import contextvars
-import copy
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -291,7 +290,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._callback(new_self, packet)
         return new_self
 
@@ -313,6 +312,19 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         costlier things an extraction did. This does what that path would have
         done, and only that: a new instance of the same class, its
         :attr:`~object.__dict__` shallow-updated from this one.
+
+        Note:
+            Every ``__call__`` override in this module calls ``self.__copy__()``
+            directly rather than :func:`copy.copy(self) <copy.copy>`.
+            :func:`copy.copy` still has to *find* this method before it can call
+            it -- ``getattr(cls, '__copy__', None)`` -- and that lookup alone
+            was profiled at 55,846 calls (~1.7% of an :func:`~pcapkit.interface.
+            core.extract` run) on ``examples/captures/http.pcap``, one per field
+            per packet, all from this exact path. Calling ``__copy__``
+            directly is exactly what :func:`copy.copy` would have done once it
+            found it, so this changes nothing about *when* a field is copied or
+            what the copy contains -- only the redundant dispatch is removed.
+            See GitHub issue #730.
 
         Returns:
             A new field instance sharing this one's attribute values.
@@ -576,7 +588,7 @@ class Field(FieldBase[_T], Generic[_T]):
         updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)

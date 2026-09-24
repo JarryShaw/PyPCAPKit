@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
-import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -145,7 +144,7 @@ class ConditionalField(FieldBase[_TC]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         if new_self._condition(packet):
             new_self._field = new_self._field(packet)
         return new_self
@@ -296,7 +295,7 @@ class PayloadField(FieldBase[_TP]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
@@ -424,7 +423,7 @@ class SwitchField(FieldBase[_TC]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._field = new_self._selector(packet)(packet)
         new_self._field.name = self.name
         return new_self
@@ -647,7 +646,7 @@ class SchemaField(FieldBase[_TS]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
@@ -779,7 +778,7 @@ class ForwardMatchField(FieldBase[_TC]):
         instead of updating the current instance.
 
         """
-        new_self = copy.copy(self)
+        new_self = self.__copy__()
         new_self._field = new_self._field(packet)
         return new_self
 
