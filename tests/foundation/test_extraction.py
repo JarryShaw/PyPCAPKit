@@ -246,6 +246,204 @@ class ExtractorTests(unittest.TestCase):
         Extractor.register_traceflow('unit-trace-descriptor',
                                      ModuleDescriptor('unit_extraction_trace_mod', 'UnitTraceFlow'))
 
+    def test_register_engine_identity_guard(self) -> None:
+        """GitHub issue #739: re-registering the same engine class is silent.
+
+        ``register_engine`` used a presence-only guard, so the *second* of two
+        calls registering the exact same class under the exact same name
+        warned about an overwrite that never happened. This mirrors the
+        identity guard GitHub issue #718 gave the code-keyed protocol
+        registrars (see ``test_register_stays_quiet_on_same_object_reregistration``
+        in ``tests/protocols/test_protocol_base_unit.py``): the guard now
+        fires only when the incumbent differs from the replacement, and the
+        registry write happens either way.
+
+        """
+        from pcapkit.foundation.engines.engine import Engine
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        class UnitEngineIdentityA(Engine[str]):
+            __engine_name__ = 'UnitEngineIdentityA'
+            __engine_module__ = __name__
+
+            def run(self) -> None:
+                pass
+
+            def read_frame(self) -> str:
+                return 'frame'
+
+        class UnitEngineIdentityB(Engine[str]):
+            __engine_name__ = 'UnitEngineIdentityB'
+            __engine_module__ = __name__
+
+            def run(self) -> None:
+                pass
+
+            def read_frame(self) -> str:
+                return 'frame'
+
+        with mock.patch('pcapkit.foundation.extraction.warn'):
+            Extractor.register_engine('unit-engine-identity', UnitEngineIdentityA)
+
+        # 1. Re-registering the same object is silent.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_engine('unit-engine-identity', UnitEngineIdentityA)
+        warn.assert_not_called()
+        # 3. The registry write still happens even when the guard stays quiet.
+        self.assertIs(Extractor.__engine__['unit-engine-identity'], UnitEngineIdentityA)
+
+        # 2. Replacing with a different object still warns, message unchanged.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_engine('unit-engine-identity', UnitEngineIdentityB)
+        warn.assert_called_once_with(
+            'engine unit-engine-identity already registered, overwriting', RegistryWarning)
+        # 3. And the write happens on the warning path too.
+        self.assertIs(Extractor.__engine__['unit-engine-identity'], UnitEngineIdentityB)
+
+    def test_register_reassembly_identity_guard(self) -> None:
+        """GitHub issue #739: re-registering the same reassembly class is silent.
+
+        Same defect and fix as ``test_register_engine_identity_guard``, for
+        ``register_reassembly``.
+
+        """
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.reassembly.reassembly import Reassembly
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly'):
+            class UnitReassemblyIdentityA(Reassembly[object, object, tuple[str], object],
+                                           protocol='unit-reassembly-identity-a'):
+                def reassembly(self, info: object) -> None:
+                    pass
+
+                def submit(self, buf: object, **kwargs: object) -> list[object]:
+                    return []
+
+            class UnitReassemblyIdentityB(Reassembly[object, object, tuple[str], object],
+                                           protocol='unit-reassembly-identity-b'):
+                def reassembly(self, info: object) -> None:
+                    pass
+
+                def submit(self, buf: object, **kwargs: object) -> list[object]:
+                    return []
+
+        with mock.patch('pcapkit.foundation.extraction.warn'):
+            Extractor.register_reassembly('unit-reassembly-identity', UnitReassemblyIdentityA)
+
+        # 1. Re-registering the same object is silent.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_reassembly('unit-reassembly-identity', UnitReassemblyIdentityA)
+        warn.assert_not_called()
+        # 3. The registry write still happens even when the guard stays quiet.
+        self.assertIs(Extractor.__reassembly__['unit-reassembly-identity'], UnitReassemblyIdentityA)
+
+        # 2. Replacing with a different object still warns, message unchanged.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_reassembly('unit-reassembly-identity', UnitReassemblyIdentityB)
+        warn.assert_called_once_with(
+            'reassembly unit-reassembly-identity already registered, overwriting', RegistryWarning)
+        # 3. And the write happens on the warning path too.
+        self.assertIs(Extractor.__reassembly__['unit-reassembly-identity'], UnitReassemblyIdentityB)
+
+    def test_register_traceflow_identity_guard(self) -> None:
+        """GitHub issue #739: re-registering the same traceflow class is silent.
+
+        Same defect and fix as ``test_register_engine_identity_guard``, for
+        ``register_traceflow``.
+
+        """
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.foundation.traceflow.traceflow import TraceFlow
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        with mock.patch('pcapkit.foundation.extraction.Extractor.register_traceflow'):
+            class UnitTraceFlowIdentityA(TraceFlow[str, object, object, object],
+                                          protocol='unit-traceflow-identity-a'):
+                def dump(self, packet: object) -> None:
+                    pass
+
+                def trace(self, packet: object, *, output: bool = False):
+                    return object() if output else 'trace'
+
+                def submit(self) -> tuple[object, ...]:
+                    return ()
+
+            class UnitTraceFlowIdentityB(TraceFlow[str, object, object, object],
+                                          protocol='unit-traceflow-identity-b'):
+                def dump(self, packet: object) -> None:
+                    pass
+
+                def trace(self, packet: object, *, output: bool = False):
+                    return object() if output else 'trace'
+
+                def submit(self) -> tuple[object, ...]:
+                    return ()
+
+        with mock.patch('pcapkit.foundation.extraction.warn'):
+            Extractor.register_traceflow('unit-traceflow-identity', UnitTraceFlowIdentityA)
+
+        # 1. Re-registering the same object is silent.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_traceflow('unit-traceflow-identity', UnitTraceFlowIdentityA)
+        warn.assert_not_called()
+        # 3. The registry write still happens even when the guard stays quiet.
+        self.assertIs(Extractor.__traceflow__['unit-traceflow-identity'], UnitTraceFlowIdentityA)
+
+        # 2. Replacing with a different object still warns, message unchanged.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_traceflow('unit-traceflow-identity', UnitTraceFlowIdentityB)
+        warn.assert_called_once_with(
+            'traceflow unit-traceflow-identity already registered, overwriting', RegistryWarning)
+        # 3. And the write happens on the warning path too.
+        self.assertIs(Extractor.__traceflow__['unit-traceflow-identity'], UnitTraceFlowIdentityB)
+
+    def test_register_dumper_identity_guard(self) -> None:
+        """GitHub issue #739: re-registering the same dumper class is silent.
+
+        Same defect and fix as ``test_register_engine_identity_guard``, for
+        ``register_dumper``. Unlike the other three, ``__output__`` maps each
+        format to a ``(dumper, ext)`` pair and is a
+        :class:`collections.defaultdict`, so this also pins that the
+        identity check compares the incumbent *dumper* (not the pair, which
+        would never compare equal once ``ext`` changes) and that the guard's
+        ``.get()`` does not trigger the default factory the way a subscript
+        access would.
+
+        """
+        from pcapkit.dumpkit.null import NotImplementedIO
+        from pcapkit.foundation.extraction import Extractor
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        class UnitDumperIdentityB(NotImplementedIO):
+            pass
+
+        with mock.patch('pcapkit.foundation.extraction.warn'):
+            Extractor.register_dumper('unit-dumper-identity', NotImplementedIO, '.unit-a')
+
+        # 1. Re-registering the same object is silent.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_dumper('unit-dumper-identity', NotImplementedIO, '.unit-a')
+        warn.assert_not_called()
+        # 3. The registry write still happens even when the guard stays quiet.
+        self.assertEqual(Extractor.__output__['unit-dumper-identity'], (NotImplementedIO, '.unit-a'))
+
+        # 2. Replacing with a different object still warns, message unchanged.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_dumper('unit-dumper-identity', UnitDumperIdentityB, '.unit-b')
+        warn.assert_called_once_with(
+            'dumper unit-dumper-identity already registered, overwriting', RegistryWarning)
+        # 3. And the write happens on the warning path too.
+        self.assertEqual(Extractor.__output__['unit-dumper-identity'], (UnitDumperIdentityB, '.unit-b'))
+
+        # Same dumper, only ``ext`` changes: still identity-equal on the
+        # dumper, so still silent -- but the write still updates ``ext``.
+        with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+            Extractor.register_dumper('unit-dumper-identity', UnitDumperIdentityB, '.unit-c')
+        warn.assert_not_called()
+        self.assertEqual(Extractor.__output__['unit-dumper-identity'], (UnitDumperIdentityB, '.unit-c'))
+
     def test_import_test_and_make_name_paths(self) -> None:
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.utilities.exceptions import FileNotFound, FormatError
