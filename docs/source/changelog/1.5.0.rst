@@ -2322,7 +2322,7 @@ pull requests between #326 and #509.
   ``sphinx-build -b html`` under ``PCAPKIT_SPHINX=1``: 55 warnings on ``main``
   before this change, 56 after, the one addition being a pre-existing bare
   ``Type`` cross-reference ambiguity newly rendered by ``TraceFlow._foutio``'s
-  new directive rather than a defect this change introduced -- #709 tracks
+  new directive rather than a defect this change introduced -- #709 tracked
   it. No line under ``pcapkit/`` changed (#684).
 * **Fixed** -- ``tests/dumpkit/test_nameless_enum_rendering_unit.py`` (added
   by #670) carried two probes on the same wrong assumption that every
@@ -2386,7 +2386,7 @@ pull requests between #326 and #509.
   ``Type[Dumper]`` -- so whatever eventually renders this attribute's type
   still has the same ambiguity to resolve. This half of the fix is
   insurance against the day something reads it cleanly. This pair of sites
-  is what closes #709. Four more bare ``Type`` sites -- hand-written
+  is part of #709. Four more bare ``Type`` sites -- hand-written
   ``:type:`` fields at
   ``docs/source/pcapkit/foundation/engines/engine.rst:40``,
   ``.../reassembly/reassembly.rst:33`` and ``:43``, and
