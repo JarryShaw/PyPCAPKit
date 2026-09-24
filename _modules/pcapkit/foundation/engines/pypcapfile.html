@@ -457,6 +457,7 @@
 <span class="sd">.. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
@@ -638,8 +639,11 @@
 <span class="sd">        as :mod:`pcapfile` and :attr:`self._extmp &lt;PyPCAPFile._extmp&gt;`</span>
 <span class="sd">        as an iterator over the lazily generated savefile packets.</span>
 
-<span class="sd">        The savefile is loaded with ``layers=0``, so that each frame arrives with</span>
-<span class="sd">        its bytes verbatim, and :meth:`read_frame` then decodes it to</span>
+<span class="sd">        The savefile is loaded with ``layers=0``. Per :func:`pcapfile.savefile</span>
+<span class="sd">        ._read_a_packet`, that does *not* hand back each frame's bytes verbatim --</span>
+<span class="sd">        it hexlifies the whole frame into ASCII text and stops there, exactly as it</span>
+<span class="sd">        would for any layer at which it runs out of layers left to descend. It is</span>
+<span class="sd">        :meth:`_decode` that un-hexlifies and then decodes each frame to</span>
 <span class="sd">        :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` -- the very</span>
 <span class="sd">        call :mod:`pcapfile` makes internally. Doing it this way round is what</span>
 <span class="sd">        lets the link layer type be inspected (and reported on) *before* the</span>
@@ -780,7 +784,8 @@
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If no decoder is available, as frames will then be</span>
-<span class="sd">                left as raw bytes and no reassembly or flow tracing is possible.</span>
+<span class="sd">                left hexlified -- see :meth:`run` -- and no reassembly or flow</span>
+<span class="sd">                tracing is possible.</span>
 
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
@@ -805,7 +810,10 @@
 <span class="sd">        given one mutated, so that a decoding failure leaves the original intact.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            packet: Undecoded savefile packet, i.e. as loaded with ``layers=0``.</span>
+<span class="sd">            packet: Undecoded savefile packet, i.e. as loaded with ``layers=0``,</span>
+<span class="sd">                whose :attr:`packet.packet &lt;pcapfile.structs.pcap_packet.packet&gt;`</span>
+<span class="sd">                is therefore the hexlified frame (see :meth:`run`), not the raw</span>
+<span class="sd">                bytes.</span>
 <span class="sd">            frnum: Frame number, for the warning message below.</span>
 
 <span class="sd">        Returns:</span>
@@ -822,7 +830,13 @@
             <span class="k">return</span> <span class="n">packet</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">LAYERS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># ``packet.packet`` is hexlified ASCII text, not raw bytes -- see</span>
+            <span class="c1"># :meth:`run`. ``self._declf`` (e.g. :class:`pcapfile.protocols</span>
+            <span class="c1"># .linklayer.ethernet.Ethernet`) unpacks its own header straight out</span>
+            <span class="c1"># of its first argument via :func:`struct.unpack`, so it must be</span>
+            <span class="c1"># un-hexlified back to raw bytes first, or every field it decodes</span>
+            <span class="c1"># comes out garbage despite raising nothing.</span>
+            <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span><span class="p">(</span><span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">packet</span><span class="p">),</span> <span class="n">layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">LAYERS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="si">!r}</span><span class="s1"> decoding failed (</span><span class="si">{</span><span class="n">error</span><span class="si">!r}</span><span class="s1">); '</span>
                  <span class="s1">'frame left undecoded'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>

@@ -1669,8 +1669,11 @@ installed <code class="xref py py-mod docutils literal notranslate"><span class=
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a>
 as <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> and <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a>
 as an iterator over the lazily generated savefile packets.</p>
-<p>The savefile is loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>, so that each frame arrives with
-its bytes verbatim, and <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.read_frame"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_frame()</span></code></a> then decodes it to
+<p>The savefile is loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>. Per <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile</span>
+<span class="pre">._read_a_packet()</span></code>, that does <em>not</em> hand back each frame’s bytes verbatim –
+it hexlifies the whole frame into ASCII text and stops there, exactly as it
+would for any layer at which it runs out of layers left to descend. It is
+<a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._decode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode()</span></code></a> that un-hexlifies and then decodes each frame to
 <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.LAYERS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LAYERS</span></code></a> depth using <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.linklayer.clookup()</span></code> – the very
 call <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapfile</span></code> makes internally. Doing it this way round is what
 lets the link layer type be inspected (and reported on) <em>before</em> the
@@ -1760,7 +1763,8 @@ for more operational information.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available, as frames will then be
-left as raw bytes and no reassembly or flow tracing is possible.</p>
+left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and no reassembly or flow
+tracing is possible.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1774,7 +1778,10 @@ given one mutated, so that a decoding failure leaves the original intact.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – Undecoded savefile packet, i.e. as loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – Undecoded savefile packet, i.e. as loaded with <code class="docutils literal notranslate"><span class="pre">layers=0</span></code>,
+whose <code class="xref py py-attr docutils literal notranslate"><span class="pre">packet.packet</span></code>
+is therefore the hexlified frame (see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>), not the raw
+bytes.</p></li>
 <li><p><strong>frnum</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Frame number, for the warning message below.</p></li>
 </ul>
 </dd>
