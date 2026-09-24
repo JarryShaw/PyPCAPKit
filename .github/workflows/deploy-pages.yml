@@ -1,8 +1,17 @@
 name: GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger already
+  # runs the full matrix for this commit; calling it again with `gate-only: true`
+  # below re-ran the single-version "Gate" job a second time for the same tree
+  # (#715). Chaining off `Unit Tests`' completion instead means the gate never
+  # runs twice, and this workflow simply waits for the verdict that already
+  # exists. `workflow_run` fires for *any* completion of that workflow, PR or
+  # push, so the jobs below filter on `.event == 'push'` themselves rather than
+  # trusting a `branches:` filter here to do it -- see the note on `deploy-pages`.
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types: [completed]
   schedule:
     - cron: '0 2 * * 6'
   pull_request:
@@ -25,13 +34,14 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Nothing is published on a pull request -- the Deploy step below is skipped
-  # -- so the gate only earns its runners when a real publish follows. The docs
-  # build still runs on pull requests, which is the part that actually
-  # validates a documentation change.
+  # Only earns its runners on the schedule trigger now: `Unit Tests` has no
+  # schedule trigger of its own, so Saturday's cron run is the one case left
+  # where nothing else has already verified this tree, and a gate is still
+  # needed. Pull requests never published anyway, and `workflow_run` carries
+  # its own verdict from the run that completed -- see `deploy-pages` below.
   unit-tests:
     name: Docs test gate
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_run' }}
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
@@ -40,17 +50,42 @@ jobs:
 
   deploy-pages:
     needs: [ unit-tests ]
-    # `needs` cannot itself be conditional, so a skipped gate (pull requests)
-    # has to be accepted explicitly -- by default this job would inherit the
-    # skip. `!cancelled()` rather than `always()` so that cancelling the run
-    # still cancels the docs build; a gate that actually failed still blocks.
-    if: ${{ !cancelled() && needs.unit-tests.result != 'failure' }}
+    # `needs` cannot itself be conditional, so a skipped gate (pull requests,
+    # and now `workflow_run`) has to be accepted explicitly -- by default this
+    # job would inherit the skip. `!cancelled()` rather than `always()` so that
+    # cancelling the run still cancels the docs build; a gate that actually
+    # failed still blocks.
+    #
+    # The `workflow_run` clause is the real gate for a push to main now: it
+    # reads the verdict `Unit Tests` already reached for this exact commit
+    # instead of re-running it. `.event == 'push'` and `.head_branch == 'main'`
+    # both matter -- `workflow_run` fires for *every* completion of that
+    # workflow, including one triggered by a pull request, and without this
+    # check a green PR would publish docs from that PR's tree.
+    if: >-
+      !cancelled() && needs.unit-tests.result != 'failure' &&
+      (github.event_name != 'workflow_run' || (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      ))
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: macos-latest
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v7
         with:
+          # Deliberately the default `github.sha` (main's tip), not
+          # `github.event.workflow_run.head_sha`. Pinning to the latter once
+          # ran here and CodeQL flagged it as "checkout of untrusted code in a
+          # privileged context" -- `workflow_run` can also be raised by a pull
+          # request's `Unit Tests` run, and that field would then be a fork's
+          # commit. The `if:` above already keeps that path from reaching this
+          # step, but making the ref itself always resolve to a trusted
+          # default-branch commit removes the pattern outright rather than
+          # relying on CodeQL tracing through the guard. `main`'s tip is also
+          # the *right* commit for docs, which should reflect current main,
+          # not a slightly older one -- so this is not a compromise here.
           persist-credentials: false
 
       - uses: actions/setup-python@v7

@@ -3,8 +3,25 @@ name: "Vendor Update"
 on:
   schedule:
     - cron: '0 10 * * 6' # everyday at 10am
-  push:
-    branches: [main]
+  # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger
+  # already runs the full matrix for this commit; calling it again below with
+  # `gate-only: true` re-ran the single-version "Gate" job a second time for
+  # the same tree (#715). Chaining off `Unit Tests`' completion means the gate
+  # never runs twice, and `vendor-update` below just reads the verdict that
+  # already exists. `.event == 'push'` is checked in that job's `if` rather
+  # than here, because `workflow_run` fires for a pull request's completion
+  # too and a `branches:` filter here would be the only thing stopping that.
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types: [completed]
+
+# Least privilege by default now that `workflow_run` is in the trigger list --
+# that event can be raised by a pull request's `Unit Tests` run completing, so
+# the ambient token this workflow gets should default to nothing rather than
+# whatever the repository's default is. Both jobs below already declare their
+# own narrower `permissions:`, so this changes nothing they rely on; it only
+# closes the gap for anything added later that forgets to.
+permissions: {}
 
 # This workflow commits and pushes, so a cancelled run can leave the bump
 # half-applied. Kept keyed on the ref, unlike the validation workflows: a dropped
@@ -20,8 +37,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Only earns its runners on the schedule trigger now: `Unit Tests` has no
+  # schedule trigger of its own, so Saturday's cron run is the one case left
+  # where nothing else has already verified this tree. `workflow_run` carries
+  # its own verdict instead -- see `vendor-update` below.
   unit-tests:
     name: Vendor test gate
+    if: ${{ github.event_name != 'workflow_run' }}
     permissions:
       contents: read
     uses: ./.github/workflows/unit-tests.yml
@@ -31,6 +53,24 @@ jobs:
   vendor-update:
     runs-on: macos-latest
     needs: [ unit-tests ]
+    # `needs` cannot itself be conditional, so a skipped gate (`workflow_run`)
+    # has to be accepted explicitly -- by default this job would inherit the
+    # skip. `!cancelled()` rather than `always()` so that cancelling the run
+    # still cancels the update; a gate that actually failed still blocks.
+    #
+    # The `workflow_run` clause is the real gate for a push to main now: it
+    # reads the verdict `Unit Tests` already reached for this exact commit
+    # instead of re-running it. `.event == 'push'` and `.head_branch == 'main'`
+    # both matter -- `workflow_run` fires for *every* completion of that
+    # workflow, including one triggered by a pull request, and without this
+    # check a green PR would push a vendor-registry commit from that PR's tree.
+    if: >-
+      !cancelled() && needs.unit-tests.result != 'failure' &&
+      (github.event_name != 'workflow_run' || (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      ))
     concurrency:
       group: repository-maintenance
       cancel-in-progress: false
@@ -43,6 +83,23 @@ jobs:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
       - uses: actions/checkout@v7
+        with:
+          # Deliberately the default `github.sha` (main's tip), not
+          # `github.event.workflow_run.head_sha`. Pinning to the latter once
+          # ran here and CodeQL flagged it as "checkout of untrusted code in a
+          # privileged context" -- `workflow_run` can also be raised by a pull
+          # request's `Unit Tests` run, and that field would then be a fork's
+          # commit. The `if:` above already keeps that path from reaching this
+          # step, but making the ref itself always resolve to a trusted
+          # default-branch commit removes the pattern outright rather than
+          # relying on CodeQL tracing through the guard. The push below rebases
+          # onto main's actual tip before writing regardless, so pinning to the
+          # exact tested sha would have bought nothing here either.
+          # The push below re-points `origin` at an SSH remote and authenticates
+          # with the loaded deploy key, not with this checkout's credential --
+          # so there is nothing here for a persisted token to do, and one less
+          # live credential for anything running in between to find.
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
