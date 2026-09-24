@@ -514,7 +514,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span><span class="p">,</span> <span class="n">WireGuardKeyLabel</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
@@ -1947,7 +1947,7 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">captured_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">,</span>
+                     <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes] | bytes'</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1974,7 +1974,7 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">original_len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">,</span>
+                     <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
                      <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -2912,7 +2912,7 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">drop_count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                      <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">captured_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
-                     <span class="n">original_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | Protocol | Schema'</span><span class="p">,</span>
+                     <span class="n">original_length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">packet_data</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option | bytes] | bytes'</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 </pre></div>

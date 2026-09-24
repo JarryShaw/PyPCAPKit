@@ -815,7 +815,7 @@ same class under the same name is silent.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -857,7 +857,7 @@ following registries:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -888,7 +888,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">LinkType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -922,7 +922,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">EtherType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">EtherType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">EtherType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -956,7 +956,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">TransType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">TransType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">TransType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -1142,8 +1142,8 @@ It should be a subclass of <a class="reference internal" href="../protocols/inte
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>proto</strong> (<span class="sphinx_autodoc_typehints-type">TransportProtocol | str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
@@ -1196,7 +1196,7 @@ number from the wrong registry. Use
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -1265,7 +1265,7 @@ It should be a subclass of <a class="reference internal" href="../protocols/tran
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | Enum_AppType</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>
@@ -1296,7 +1296,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dl class="field-list simple">
 <dt class="field-odd">Overloads<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | SCTP_PayloadProtocolIdentifier</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[Protocol] | Type[Protocol]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
+<li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | SCTP_PayloadProtocolIdentifier</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 <li><p><strong>code</strong> (<span class="sphinx_autodoc_typehints-type">int | SCTP_PayloadProtocolIdentifier</span>), <strong>module</strong> (<span class="sphinx_autodoc_typehints-type">str</span>), <strong>class_</strong> (<span class="sphinx_autodoc_typehints-type">str</span>) → <span class="sphinx_autodoc_typehints-type">None</span></p></li>
 </ul>
 </dd>

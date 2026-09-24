@@ -495,7 +495,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span> <span class="k">as</span> <span class="n">Protocol</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
     <span class="n">CallbackFn</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">_IT</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
 
@@ -514,7 +514,7 @@
         <span class="c1">#: Protocol name of current object.</span>
         <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="c1">#: Protocol of current object.</span>
-        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -524,7 +524,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Protocol]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Protocol of current object."""</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__protocol_type__'</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__protocol_type__</span>
@@ -583,7 +583,7 @@
         <span class="c1">#: Protocol name of current reassembly object.</span>
         <span class="n">__protocol_name__</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="c1">#: Protocol of current reassembly object.</span>
-        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">'Type[Protocol]'</span>
+        <span class="n">__protocol_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
 
         <span class="c1">#: List of callback functions upon reassembled datagram.</span>
         <span class="n">__callback_fn__</span><span class="p">:</span> <span class="s1">'list[CallbackFn]'</span>
@@ -631,7 +631,7 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Protocol]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[ProtocolBase]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Protocol of current flow tracing object.</span>
 
 <span class="sd">        Note:</span>
