@@ -210,6 +210,22 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             The full qualified class name of the new dumper class
             should be as ``{dumper.module}.{dumper.name}``.
 
+            The overwrite guard fires only when the incumbent dumper differs
+            from the replacement, so re-registering the exact same object is
+            a silent no-op rather than a warning about nothing displaced --
+            the identity guard GitHub issue #718 gave the code-keyed
+            registrars, extended here by GitHub issue #739. ``__output__``
+            maps each format to a ``(dumper, ext)`` pair, so the identity
+            check compares the incumbent *dumper* (index ``0``), not the
+            pair -- a re-registration that only changes ``ext`` is still
+            identity-equal on the dumper and stays silent, since the dumper
+            is what "the same object" means here, not the pair as a whole.
+            ``__output__`` is also a :class:`collections.defaultdict`,
+            unlike the other three
+            registrars this issue touches; :meth:`dict.get` does not invoke
+            the default factory the way ``cls.__output__[format]`` would, so
+            it stays non-inserting here as well.
+
         Arguments:
             format: format name
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
@@ -220,7 +236,9 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             dumper = dumper.klass
         if not issubclass(dumper, Dumper):
             raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
-        if format in cls.__output__:
+        incumbent_entry = cls.__output__.get(format)
+        incumbent = incumbent_entry[0] if incumbent_entry is not None else None
+        if incumbent is not None and incumbent is not dumper:
             warn(f'dumper {format} already registered, overwriting', RegistryWarning)
         cls.__output__[format] = (dumper, ext)
 

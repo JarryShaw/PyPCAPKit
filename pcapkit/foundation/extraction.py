@@ -373,6 +373,22 @@ class Extractor(Generic[_P]):
             The full qualified class name of the new dumper class
             should be as ``{dumper.module}.{dumper.name}``.
 
+            The overwrite guard fires only when the incumbent dumper differs
+            from the replacement, so re-registering the exact same object is
+            a silent no-op rather than a warning about nothing displaced --
+            the identity guard GitHub issue #718 gave the code-keyed
+            registrars, extended here by GitHub issue #739. ``__output__``
+            maps each format to a ``(dumper, ext)`` pair, so the identity
+            check compares the incumbent *dumper* (index ``0``), not the
+            pair -- a re-registration that only changes ``ext`` is still
+            identity-equal on the dumper and stays silent, since the dumper
+            is what "the same object" means here, not the pair as a whole.
+            ``__output__`` is also a :class:`collections.defaultdict`,
+            unlike the other three
+            registrars this issue touches; :meth:`dict.get` does not invoke
+            the default factory the way ``cls.__output__[format]`` would, so
+            it stays non-inserting here as well.
+
         Arguments:
             format: format name
             dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass
@@ -383,7 +399,9 @@ class Extractor(Generic[_P]):
             dumper = dumper.klass
         if not issubclass(dumper, Dumper):
             raise RegistryError(f'dumper must be a Dumper subclass, not {dumper!r}')
-        if format in cls.__output__:
+        incumbent_entry = cls.__output__.get(format)
+        incumbent = incumbent_entry[0] if incumbent_entry is not None else None
+        if incumbent is not None and incumbent is not dumper:
             warn(f'dumper {format} already registered, overwriting', RegistryWarning)
         cls.__output__[format] = (dumper, ext)
 
@@ -394,6 +412,12 @@ class Extractor(Generic[_P]):
         Notes:
             The full qualified class name of the new extraction engine
             should be as ``{engine.module}.{engine.name}``.
+
+            The overwrite guard fires only when the incumbent differs from
+            the replacement, so re-registering the exact same object is a
+            silent no-op rather than a warning about nothing displaced --
+            the identity guard GitHub issue #718 gave the code-keyed
+            registrars, extended here by GitHub issue #739.
 
         Arguments:
             name: engine name
@@ -410,7 +434,8 @@ class Extractor(Generic[_P]):
         # classes. ``Engine`` is itself an ``EngineBase``, so this only widens. See #513.
         if not issubclass(engine, EngineBase):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
-        if name in cls.__engine__:
+        incumbent = cls.__engine__.get(name)
+        if incumbent is not None and incumbent is not engine:
             warn(f'engine {name} already registered, overwriting', RegistryWarning)
         cls.__engine__[name] = engine
 
@@ -421,6 +446,12 @@ class Extractor(Generic[_P]):
         Notes:
             The full qualified class name of the new reassembly engine
             should be as ``{reassembly.module}.{reassembly.name}``.
+
+            The overwrite guard fires only when the incumbent differs from
+            the replacement, so re-registering the exact same object is a
+            silent no-op rather than a warning about nothing displaced --
+            the identity guard GitHub issue #718 gave the code-keyed
+            registrars, extended here by GitHub issue #739.
 
         Arguments:
             protocol: protocol name
@@ -434,7 +465,8 @@ class Extractor(Generic[_P]):
         # :meth:`register_engine` above -- see #513.
         if not issubclass(reassembly, ReassemblyBase):
             raise RegistryError(f'reassembly must be a Reassembly subclass, not {reassembly!r}')
-        if protocol in cls.__reassembly__:
+        incumbent = cls.__reassembly__.get(protocol)
+        if incumbent is not None and incumbent is not reassembly:
             warn(f'reassembly {protocol} already registered, overwriting', RegistryWarning)
         cls.__reassembly__[protocol] = reassembly
 
@@ -445,6 +477,12 @@ class Extractor(Generic[_P]):
         Notes:
             The full qualified class name of the new flow tracing engine
             should be as ``{traceflow.module}.{traceflow.name}``.
+
+            The overwrite guard fires only when the incumbent differs from
+            the replacement, so re-registering the exact same object is a
+            silent no-op rather than a warning about nothing displaced --
+            the identity guard GitHub issue #718 gave the code-keyed
+            registrars, extended here by GitHub issue #739.
 
         Arguments:
             protocol: protocol name
@@ -458,7 +496,8 @@ class Extractor(Generic[_P]):
         # :meth:`register_engine` above -- see #513.
         if not issubclass(traceflow, TraceFlowBase):
             raise RegistryError(f'traceflow must be a TraceFlow subclass, not {traceflow!r}')
-        if protocol in cls.__traceflow__:
+        incumbent = cls.__traceflow__.get(protocol)
+        if incumbent is not None and incumbent is not traceflow:
             warn(f'traceflow {protocol} already registered, overwriting', RegistryWarning)
         cls.__traceflow__[protocol] = traceflow
 

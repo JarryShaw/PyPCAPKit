@@ -111,6 +111,45 @@ class TraceFlowBaseTests(unittest.TestCase):
         trace(DummyPacket(1))
         self.assertEqual(trace.index[0].index, (1,))
 
+    def test_register_dumper_identity_guard(self) -> None:
+        """GitHub issue #739: re-registering the same dumper class is silent.
+
+        Same defect and fix as ``Extractor.register_dumper`` (see
+        ``tests/foundation/test_extraction.py``), for
+        ``TraceFlowBase.register_dumper``. This class keeps its own
+        ``__output__`` -- a separate :class:`collections.defaultdict` of
+        ``(dumper, ext)`` pairs from :class:`~pcapkit.foundation.extraction.
+        Extractor`'s -- so the same identity-on-the-dumper-not-the-pair
+        nuance applies here independently.
+
+        """
+        from pcapkit.dumpkit.null import NotImplementedIO
+        from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        class UnitTraceDumperIdentityB(NotImplementedIO):
+            pass
+
+        with mock.patch('pcapkit.foundation.traceflow.traceflow.warn'):
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, '.unit-a')
+
+        # 1. Re-registering the same object is silent.
+        with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', NotImplementedIO, '.unit-a')
+        warn.assert_not_called()
+        # 3. The registry write still happens even when the guard stays quiet.
+        self.assertEqual(TraceFlowBase.__output__['unit-trace-dumper-identity'],
+                         (NotImplementedIO, '.unit-a'))
+
+        # 2. Replacing with a different object still warns, message unchanged.
+        with mock.patch('pcapkit.foundation.traceflow.traceflow.warn') as warn:
+            TraceFlowBase.register_dumper('unit-trace-dumper-identity', UnitTraceDumperIdentityB, '.unit-b')
+        warn.assert_called_once_with(
+            'dumper unit-trace-dumper-identity already registered, overwriting', RegistryWarning)
+        # 3. And the write happens on the warning path too.
+        self.assertEqual(TraceFlowBase.__output__['unit-trace-dumper-identity'],
+                         (UnitTraceDumperIdentityB, '.unit-b'))
+
     def test_register_callback_and_subclass_registration(self) -> None:
         from pcapkit.corekit.infoclass import Info, info_final
         from pcapkit.foundation.traceflow.traceflow import TraceFlow, TraceFlowBase
