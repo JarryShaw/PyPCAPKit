@@ -19,11 +19,22 @@ including this one.
 * **the** :program:`tshark` **binary** -- ``pyshark`` shells out to it and parses
   nothing itself.
 
-What this host could and could not provide, stated plainly rather than left to a
-silent skip: :program:`tshark` is **not** installed here, so the "missing binary"
-path is exercised for real. The "binary present" path is exercised by patching
-``pyshark``'s own resolver, since installing Wireshark was not an option; and the
-interpreter is 3.14, so every version below the ceiling is reached by patching
+What the running host provides is no longer assumed either way, and that is worth
+stating plainly rather than leaving to a silent skip: :program:`tshark` is absent
+on most of this file's legs, but #751's ``engine-tests`` job -- which collects this
+same module -- installs it via ``apt-get``, so neither "present" nor "absent" can
+be relied on. The "missing binary" path is exercised for real by
+:meth:`PySharkUnsupportedReasonTests.test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous`,
+which self-skips wherever tshark turns out to be on this host's :envvar:`PATH`
+instead of assuming the answer; the "binary present" path is exercised mostly by
+patching ``pyshark``'s own resolver, since a real tshark is not guaranteed on
+every leg that collects this module. The one test that needs *both* states on
+demand --
+:meth:`PySharkUnsupportedReasonTests.test_a_config_ini_naming_an_off_path_tshark_is_not_read_as_missing`
+-- constructs them explicitly rather than depending on whatever the host
+happens to provide, which is what makes it pass on ``engine-tests`` (tshark on
+``PATH``) and everywhere else (no tshark on ``PATH``) alike. The interpreter is
+3.14, so every version below the ceiling is reached by patching
 :data:`sys.version_info`, which is the same technique
 :mod:`tests.foundation.engines.test_pypcapfile_engine` uses.
 
@@ -45,6 +56,34 @@ HAS_PYSHARK = importlib.util.find_spec('pyshark') is not None
 #: A version below the ceiling, used to reach the :program:`tshark` branch, which
 #: is otherwise unreachable on the 3.14 interpreter these tests run on.
 SUPPORTED_VERSION = (3, 11, 0, 'final', 0)
+
+
+def _tshark_missing() -> bool:
+    """Whether pyshark's own resolver cannot find :program:`tshark`, right now.
+
+    Deliberately not :func:`shutil.which`. ``PyShark.unsupported_reason``'s own
+    docstring says why the two disagree: pyshark reads ``tshark_path`` from a
+    ``config.ini`` on :func:`pathlib.Path.cwd` *before* consulting
+    :envvar:`PATH`, so a ``./config.ini`` naming an off-``PATH`` tshark makes
+    ``which`` report "absent" while pyshark finds it anyway. Probing with
+    ``which`` here would then disagree with what ``unsupported_reason`` itself
+    reports, and the tests below that rely on this would fail against a host
+    they were written to pass on.
+
+    """
+    try:
+        from pyshark.tshark.tshark import get_process_path  # isort:skip
+    except ImportError:
+        # Not installed; every caller of this function is gated on
+        # HAS_PYSHARK, so this is not expected, but ``unsupported_reason``
+        # treats it as "no reason to report here" rather than "tshark is
+        # missing", and this mirrors that.
+        return False
+    try:
+        get_process_path()
+    except Exception:  # pylint: disable=broad-except
+        return True
+    return False
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -107,11 +146,21 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
             self.assertIn('asyncio', reason)  # type: ignore[arg-type]
             self.assertIn(f'{sys.version_info[0]}.{sys.version_info[1]}',
                           reason)  # type: ignore[arg-type]
-        else:
-            # below the ceiling the verdict is about tshark, which this host does
-            # not have -- so still a reason, but a different one
+        elif _tshark_missing():
+            # below the ceiling the verdict is about tshark, on a host that does
+            # not have it -- so still a reason, but a different one. Probed the
+            # same way test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous
+            # is, and the same way PyShark.unsupported_reason() itself is --
+            # not shutil.which, which can disagree with it (see
+            # _tshark_missing's docstring): this test runs on whatever host it
+            # is given, tshark installed or not, rather than assuming the
+            # answer.
             self.assertIsNotNone(reason)
             self.assertIn('tshark', reason)  # type: ignore[arg-type]
+        else:
+            # tshark is on this host and the interpreter is supported: nothing
+            # is wrong, so there is no reason at all.
+            self.assertIsNone(reason)
 
     def test_the_ceiling_is_decided_by_version_not_by_an_import(self) -> None:
         """The verdict must not depend on whether ``pyshark`` is installed.
@@ -182,11 +231,9 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
         :meth:`test_a_present_binary_is_no_reason_at_all` is the real check.
 
         """
-        import shutil
-
         from pcapkit.foundation.engines.pyshark import PyShark
 
-        if shutil.which('tshark') is not None:
+        if not _tshark_missing():
             self.skipTest('tshark is installed on this host')
 
         with mock.patch.object(sys, 'version_info', SUPPORTED_VERSION):
@@ -194,6 +241,81 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
 
         self.assertIsNotNone(reason)
         self.assertIn('tshark', reason)  # type: ignore[arg-type]
+
+    @unittest.skipUnless(HAS_PYSHARK, 'pyshark not installed')
+    def test_a_config_ini_naming_an_off_path_tshark_is_not_read_as_missing(self) -> None:
+        """Regression for the cross-review's measured "2 failed".
+
+        pyshark's own ``get_process_path()`` reads ``tshark_path`` from a
+        ``config.ini`` on :func:`pathlib.Path.cwd` *before* it ever consults
+        :envvar:`PATH` -- see :func:`_tshark_missing`'s docstring. This pins the
+        exact case that makes :func:`shutil.which` the wrong probe: a tshark
+        stand-in that ``config.ini`` names but that sits in a directory never on
+        ``PATH``, so ``which`` cannot resolve *that* path while pyshark finds it
+        anyway. A probe keyed on ``which`` -- what this file used before -- would
+        call this "missing" and fail both
+        :meth:`test_the_reason_tracks_the_running_interpreter` and
+        :meth:`test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous`;
+        :func:`_tshark_missing` and ``PyShark.unsupported_reason`` must not.
+
+        Deliberately host-independent, and that is itself the regression: an
+        earlier version of this test asserted ``shutil.which('tshark') is
+        None``, i.e. that the *host* has no tshark anywhere on ``PATH`` at all
+        -- true on the machine it was written on, false on every
+        ``engine-tests`` CI leg once this PR's own ``apt-get install …
+        tshark`` step runs, which is exactly the asymmetry that escaped
+        review. The claim this test actually needs is narrower: that
+        ``which`` cannot resolve *the stand-in specifically*, because its
+        directory was never put on ``PATH`` -- true regardless of whether
+        some unrelated ``tshark`` happens to sit on ``PATH`` elsewhere. Both
+        worlds are constructed and checked below rather than left to
+        whatever the running host happens to provide.
+
+        """
+        import os
+        import pathlib
+        import shutil
+        import tempfile
+
+        import pyshark.config
+
+        from pcapkit.foundation.engines.pyshark import PyShark
+
+        with tempfile.TemporaryDirectory(prefix='pcapkit-pyshark-config-') as tmpdir, \
+                tempfile.TemporaryDirectory(prefix='pcapkit-pyshark-empty-path-') as empty_dir, \
+                tempfile.TemporaryDirectory(prefix='pcapkit-pyshark-host-path-') as host_dir:
+            stand_in = pathlib.Path(tmpdir) / 'tshark'
+            stand_in.touch()
+            config_path = pathlib.Path(tmpdir) / 'config.ini'
+            config_path.write_text(f'[tshark]\ntshark_path = {stand_in}\n', encoding='utf-8')
+
+            # A second, unrelated `tshark` that *is* on PATH -- standing in for
+            # the real one `engine-tests` apt-get installs. Executable, because
+            # shutil.which() on POSIX requires os.X_OK.
+            host_tshark = pathlib.Path(host_dir) / 'tshark'
+            host_tshark.touch()
+            host_tshark.chmod(0o755)
+
+            worlds = (
+                ('no tshark on PATH at all', empty_dir, None),
+                ('a different, real tshark on PATH', host_dir, str(host_tshark)),
+            )
+            for world, path_dir, expected_which in worlds:
+                with self.subTest(world=world):
+                    with mock.patch.dict(os.environ, {'PATH': path_dir}):
+                        # The premise this test depends on: `which` resolves to
+                        # whatever this world's PATH says (nothing, or the
+                        # unrelated host tshark) -- never to the stand-in,
+                        # because the stand-in's directory is not in PATH
+                        # either way.
+                        which_result = shutil.which('tshark')
+                        self.assertEqual(which_result, expected_which)
+                        self.assertNotEqual(which_result, str(stand_in))
+
+                        with mock.patch.object(pyshark.config, 'fp_config_path', config_path):
+                            self.assertFalse(_tshark_missing())
+                            with mock.patch.object(sys, 'version_info', SUPPORTED_VERSION):
+                                self.assertIsNone(PyShark.unsupported_reason())
 
     def test_an_absent_pyshark_is_left_to_the_import_test(self) -> None:
         from pcapkit.foundation.engines.pyshark import PyShark

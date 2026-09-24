@@ -91,23 +91,17 @@ jobs:
       # extra's comment in pyproject.toml) -- still cheap in wall time, just not
       # "a second" cheap.
       #
-      # PyPCAPFile (pypcapfile) is deliberately NOT here, or on either job
-      # below, despite #738 listing HAS_PYPCAPFILE among its cheap subset.
-      # Measured on 3.10 and 3.11 (where its `python_version < '3.12'` marker
-      # lets it actually install): installing it does not make the 10
-      # HAS_PYPCAPFILE-gated methods pass, it makes 7 of them *fail* --
-      # pcapkit/toolkit/pypcapfile.py assumes pypcapfile's `IP.src`/`IP.dst`
-      # are packed 4-byte addresses, but pypcapfile 0.12.0's real `IP` class
-      # (pcapfile/protocols/network/ip.py) hands back the dotted-decimal string
-      # as bytes instead (`ctypes.c_char_p`), so `struct.pack` and
-      # `ipaddress.IPv4Address(...)` both raise. That is a real, previously
-      # unexercised bug in the toolkit adapter, not a fixture or environment
-      # problem -- confirmed by reading pypcapfile's own source, reproduced
-      # identically across independent runs on both versions. Adding the extra
-      # would turn 7 invisible skips into 7 required-check failures on every
-      # 3.10/3.11 leg, which is a worse regression than the skips it would
-      # replace. Fixing pcapkit/toolkit/pypcapfile.py is out of scope for a
-      # CI-only change -- left for a follow-up once filed.
+      # PyPCAPFile (pypcapfile) is deliberately NOT here. It used to be kept off
+      # every job in this file: on 3.10/3.11 (where its
+      # `python_version < '3.12'` marker lets it install), installing it turned
+      # 7 of the 10 HAS_PYPCAPFILE-gated methods this comment used to count
+      # into failures, against a real bug in pcapkit/toolkit/pypcapfile.py's
+      # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #747 and #748 fixed
+      # that bug, and #751 gave the now-safe extra a home: the dedicated
+      # `engine-tests` and `pypcap-parity` jobs below install it (15
+      # HAS_PYPCAPFILE-gated methods between them), deliberately apart from
+      # this job rather than added to it -- see either job's own comment for
+      # why.
       - name: Install package and test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
@@ -174,10 +168,10 @@ jobs:
       # covered, across all five Python versions, by the `test` job above.
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
-      # methods -- see the `test` job's comment above for why: on 3.10/3.11,
-      # where the extra actually installs, 3 of those 6 fail for real against
-      # a genuine bug in pcapkit/toolkit/pypcapfile.py, not just the 4 that
-      # skip cleanly on 3.12+.
+      # methods -- see the `test` job's comment above for the bug that used to
+      # make installing it here a regression, now fixed by #747/#748. #751's
+      # `pypcap-parity` job below covers those 6 methods instead, on the same
+      # fixture-tier selection as this job but in a venv of its own.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
@@ -245,6 +239,215 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           python -m pytest -q -n auto --dist load $selection
 
+  # Per-engine coverage for the third-party capture engines (Scapy, PyShark,
+  # PyPCAPFile, pcap-ct) -- ruled onto its own job in #751 rather than one more
+  # install line on `test`, `integration` or `gate`: "per-engine's tests
+  # covered by a separate test step and on all supported Python versions...
+  # so they dont intertwine with the other major tests". `test` had already
+  # declined Scapy on cost grounds (see its own install-step comment above);
+  # asking that question three more times, once per engine, would only repeat
+  # it instead of answering it.
+  #
+  # Selection mirrors the `test` job's ignore flags exactly, so it reaches the
+  # same unit tier -- including
+  # tests/foundation/engines/test_runtime_engines.py, whose own HAS_RUNTIME
+  # reuses that name for the four core dependencies plus dpkt, scapy and
+  # pyshark (see tests/_dependency_gates.py's own exclusion for the history).
+  # Installing Scapy, PyShark and DPKT here closes that gap too, as a side
+  # effect of the engine extras rather than a separate install line.
+  #
+  # PyPCAPFile installs only on 3.10 and 3.11 here -- its own
+  # "python_version < '3.12'" marker -- so its 9 HAS_PYPCAPFILE-gated unit
+  # methods (tests/toolkit/test_pypcapfile_unit.py) run on two of these five
+  # legs and skip cleanly on the other three. tests/_dependency_gates.py's own
+  # guard cannot see that partial coverage -- it does not evaluate markers, by
+  # its own module docstring -- so this is recorded here instead: two legs of
+  # real coverage is the trade #751 asked to make, not a gap to hide. #747 and
+  # #748 are what make it worth taking at all -- they fixed the two bugs that
+  # used to turn those skips into 7 failures.
+  #
+  # pcap-ct needs a system libpcap present at run time (no compiler, no
+  # headers -- see the PCAP_CT extra in pyproject.toml), which is what the
+  # apt-get step below installs. It must never share a venv with PyPCAP: both
+  # distributions install a top-level `pcap` module, and pcap-ct's package
+  # shadows upstream's extension whenever both are importable -- measured in
+  # pcapkit/foundation/engines/_pcap_backend.py's own module docstring. That is
+  # why PyPCAP is not in this job's install line at all; it gets the
+  # `pypcap-parity` job below, entirely to itself.
+  engine-tests:
+    name: Engines Python ${{ matrix.python-version }}
+    if: ${{ inputs.gate-only != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          # See the `test` job above for why 3.15 is excluded here.
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # pcap-ct's ctypes loader calls find_library("pcap") at run time; without
+      # a system libpcap, PCAP_CT.unsupported_reason() degrades the engine to
+      # the default parser instead of running it, and the one HAS_PCAP_CT-gated
+      # test that exercises the real backend
+      # (test_the_real_backend_reads_a_committed_capture) would see that
+      # fallback and fail its own assertion that no EngineWarning was raised --
+      # not merely skip.
+      #
+      # tshark joins it per #751's later ruling, which asked the same "try it,
+      # rip it if CI is not a good fit" of PyShark's binary that it asked of
+      # PyPCAP's toolchain -- not merely "install the distribution and leave
+      # the binary out", which an earlier reading of this thread had settled
+      # for. One HAS_PYSHARK-gated method
+      # (test_the_reason_tracks_the_running_interpreter) used to hard-assert
+      # tshark's *absence*, which would have flipped from a pass to a failure
+      # the moment tshark was installed; that assertion now probes the same
+      # way PyShark.unsupported_reason() itself does -- pyshark's own
+      # get_process_path(), not shutil.which(), which config.ini precedence
+      # can make disagree with it -- the same oracle its sibling
+      # test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous already
+      # used, so the file no longer disagrees with itself about whether
+      # tshark is allowed to be present. `DEBIAN_FRONTEND=noninteractive` plus
+      # the debconf pre-seed below is what stops `tshark`'s postinst script
+      # from blocking on the "allow non-superusers to capture packets" prompt
+      # apt would otherwise show.
+      - name: Install system libpcap and tshark
+        run: |
+          sudo apt-get update
+          echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libpcap0.8 tshark
+
+      - name: Install package and per-engine test dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'
+
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
+      - name: Run unit tests
+        run: >-
+          python -m pytest -q -n auto --dist load
+          --ignore=tests/integration
+          --ignore-glob='*_runtime.py'
+          --ignore-glob='*_regression.py'
+
+  # Whether upstream PyPCAP is worth building in CI at all -- #751's own
+  # instruction was "try to build and if the CI is not a good suit, then we
+  # ripe it". This job is that attempt: a C toolchain plus libpcap headers, on
+  # the two Python versions its own marker allows
+  # ("pypcap; python_version < '3.12'", pyproject.toml:151). If a clean run of
+  # this job's install step goes red -- not a flake -- the fix is deleting this
+  # job and returning HAS_PYPCAP to
+  # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked as
+  # the reason, per the ruling.
+  #
+  # Kept apart from `engine-tests` above for two reasons: it needs a compiler
+  # that job has no other reason to carry, and its `pcap` module would collide
+  # with pcap-ct's if both were installed into the one venv (see
+  # `engine-tests`'s own comment on that). The HAS_PYPCAP-gated module this job
+  # targets, tests/foundation/engines/test_new_engine_parity_runtime.py, reads
+  # generated captures (arp.pcap, tcp.pcap, ipv4.pcap -- its own module
+  # docstring), so this mirrors the `integration` job's fixture-tier selection
+  # and Scapy/DPKT/cli baseline rather than `test`'s ignore-shape one, and pays
+  # that job's full run cost a second time on top -- accepted here rather than
+  # discovered, since tests/_dependency_gates.py's guard has no cheaper of its
+  # three known selection shapes for reaching one fixture-dependent module (see
+  # that module's own docstring). The same module also carries 6 of
+  # HAS_PYPCAPFILE's 15 gated methods, which come along for free once
+  # PyPCAPFile is on this job's install line too.
+  #
+  # The matrix is deliberately just 3.10 and 3.11, not the full five: PyPCAP's
+  # marker and PyPCAPFile's marker are both "python_version < '3.12'", so
+  # 3.12-3.14 would install neither extra here and pay this job's full
+  # fixture-tier run for zero new coverage.
+  pypcap-parity:
+    name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}
+    if: ${{ inputs.gate-only != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # pypcap ships no wheel: it compiles pcap.c against libpcap, so both the
+      # headers and the shared library have to be present before pip is asked
+      # to build it.
+      - name: Install libpcap headers and a C toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential libpcap-dev
+
+      - name: Install package, test and generator dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'
+
+      # See the `integration` job above for why this step is shaped the way it
+      # is.
+      - name: Regenerate sample captures
+        shell: bash
+        run: |
+          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
+            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
+            exit 1
+          fi
+
+          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
+            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
+            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
+          else
+            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
+          fi
+
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # See the `integration` job above for why this is asked of
+      # tests/_tiers.py directly rather than spelled out as literal flags.
+      - name: Run full test suite
+        shell: bash
+        run: |
+          if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
+            echo "::error title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
+            exit 1
+          fi
+          if [ -z "$selection" ]; then
+            echo "::error title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
+            exit 1
+          fi
+          echo "Fixture-dependent selection: $selection"
+          python -m pytest -q -n auto --dist load $selection
+
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
   # the moment an entry is edited without regenerating it. That is worth its own
@@ -252,8 +455,9 @@ jobs:
   # to the GitHub Release body: a drifted copy is not merely wrong in the tree, it
   # is published.
   #
-  # Deliberately *not* gated on ``gate-only``, unlike the three jobs above, and
-  # that is the point of putting it here at all. ``create-release.yml`` calls this
+  # Deliberately *not* gated on ``gate-only``, unlike the four jobs above
+  # (`test`, `integration`, `engine-tests`, `pypcap-parity`), and that is the
+  # point of putting it here at all. ``create-release.yml`` calls this
   # workflow as its release gate, so an ungated job runs on the release path and
   # the release body cannot be built from a file that has drifted. The matrix is
   # skipped per caller because it is expensive and already ran for the commit;
@@ -312,12 +516,13 @@ jobs:
       # --ignore, no tier selection) reaches every one of them regardless of
       # which tier they live in -- unlike the `test` and `integration` jobs
       # above, which each cover only the subset their own selection reaches.
-      # PyPCAPFile is deliberately NOT added, on this job or either of the
-      # others -- see the `test` job's comment above: it does not merely skip
-      # cleanly here, it fails for real on 3.10/3.11 against a genuine bug in
-      # pcapkit/toolkit/pypcapfile.py, and this job runs the full suite
-      # unfiltered on 3.14, where it would still be a correct no-op today but
-      # would misleadingly suggest the extra is safe to add everywhere.
+      # PyPCAPFile is deliberately NOT added here -- see the `test` job's
+      # comment above for the bug that used to make installing it a
+      # regression, now fixed by #747/#748. This job runs on 3.14 only, where
+      # PyPCAPFile's marker resolves to nothing regardless, so adding it here
+      # would be a no-op that misleadingly suggests the extra is exercised by
+      # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for
+      # real, on the 3.10-3.14 (and 3.10-3.11) legs where it actually installs.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
