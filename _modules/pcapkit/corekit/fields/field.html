@@ -451,7 +451,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -748,7 +747,7 @@
 <span class="sd">        updating the current instance.</span>
 
 <span class="sd">        """</span>
-        <span class="n">new_self</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">new_self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
@@ -773,6 +772,19 @@
 <span class="sd">        costlier things an extraction did. This does what that path would have</span>
 <span class="sd">        done, and only that: a new instance of the same class, its</span>
 <span class="sd">        :attr:`~object.__dict__` shallow-updated from this one.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Every ``__call__`` override in this module calls ``self.__copy__()``</span>
+<span class="sd">            directly rather than :func:`copy.copy(self) &lt;copy.copy&gt;`.</span>
+<span class="sd">            :func:`copy.copy` still has to *find* this method before it can call</span>
+<span class="sd">            it -- ``getattr(cls, '__copy__', None)`` -- and that lookup alone</span>
+<span class="sd">            was profiled at 55,846 calls (~1.7% of an :func:`~pcapkit.interface.</span>
+<span class="sd">            core.extract` run) on ``examples/captures/http.pcap``, one per field</span>
+<span class="sd">            per packet, all from this exact path. Calling ``__copy__``</span>
+<span class="sd">            directly is exactly what :func:`copy.copy` would have done once it</span>
+<span class="sd">            found it, so this changes nothing about *when* a field is copied or</span>
+<span class="sd">            what the copy contains -- only the redundant dispatch is removed.</span>
+<span class="sd">            See GitHub issue #730.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A new field instance sharing this one's attribute values.</span>
@@ -1057,7 +1069,7 @@
 <span class="sd">        updating the current instance.</span>
 
 <span class="sd">        """</span>
-        <span class="n">new_self</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">new_self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>

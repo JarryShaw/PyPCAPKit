@@ -2428,39 +2428,59 @@
 <span class="sd">            should have emitted as a *binary* field, so the entry is malformed</span>
 <span class="sd">            however it is read.</span>
 
-<span class="sd">            A binary field's value used to be followed by a bare</span>
-<span class="sd">            :meth:`io.BytesIO.read` with no length -- meant to skip the one</span>
-<span class="sd">            newline octet the format puts there, but reading with no argument</span>
-<span class="sd">            reads to *end of file* instead. The loop's next ``readline()`` then</span>
-<span class="sd">            found nothing and ended the entry, so every field behind a binary</span>
-<span class="sd">            one was silently gone, however well-formed. See `#704</span>
-<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/704&gt;`__. The skip is</span>
-<span class="sd">            now exactly that one octet, and a terminator that is missing or is</span>
-<span class="sd">            not a newline ends the entry with a warning -- the same shape as</span>
-<span class="sd">            the short length prefix above -- except when the value itself was</span>
-<span class="sd">            already clamped to what the entry held, since that shortfall was</span>
-<span class="sd">            reported already and nothing is left behind it to check.</span>
+<span class="sd">            Entries used to be split apart with ``self.entry.split(b'\\n\\n')``</span>
+<span class="sd">            before a single field was read -- delimiting a *length-prefixed*</span>
+<span class="sd">            format by content, which a binary field's own bytes need no</span>
+<span class="sd">            escaping to defeat. A value that itself contains ``b'\\n\\n'`` was</span>
+<span class="sd">            cut in the middle of its own data, turning what followed it into a</span>
+<span class="sd">            bogus field in a fabricated second entry; a value 2,570 octets long</span>
+<span class="sd">            is worse, since ``struct.pack('&lt;Q', 2570) ==</span>
+<span class="sd">            b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` puts the separator *inside</span>
+<span class="sd">            the length prefix itself*, so the split landed before a single</span>
+<span class="sd">            field was read. See `#723</span>
+<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/723&gt;`__. The entry is</span>
+<span class="sd">            now walked once, end to end: a length-prefixed field's bytes are</span>
+<span class="sd">            never inspected for structure, only counted out by the prefix that</span>
+<span class="sd">            names them, and a blank line -- found by *reading*, not by</span>
+<span class="sd">            splitting -- is what starts the next entry. The one-octet</span>
+<span class="sd">            terminator that must follow a binary field's value, and the warning</span>
+<span class="sd">            when it is missing, are unchanged from `#722</span>
+<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/722&gt;`__; walking the</span>
+<span class="sd">            buffer whole rather than pre-slicing it also retires that fix's</span>
+<span class="sd">            newline restoration, which existed only to undo what the slicing</span>
+<span class="sd">            itself had taken away.</span>
+
+<span class="sd">            A trailing separator -- a blank line with nothing behind it -- used</span>
+<span class="sd">            to be swallowed instead of ending the entry: with nothing left to</span>
+<span class="sd">            read, the walk stopped without recording that the separator had</span>
+<span class="sd">            been seen at all, so a rebuild lost that one octet and wrote a</span>
+<span class="sd">            :attr:`length` one short of what was read. It is now tracked</span>
+<span class="sd">            explicitly, so a blank line actually read, rather than the block's</span>
+<span class="sd">            own NUL padding or plain end of data, still starts the next entry --</span>
+<span class="sd">            even an empty one -- matching what splitting on it always did.</span>
 
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[OrderedMultiDict[str, str | bytes]]</span>
-        <span class="n">segments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">entry_buffer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">segments</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># ``split`` consumes the blank line's own newline together</span>
-                <span class="c1"># with the one that terminates this entry's last field; put</span>
-                <span class="c1"># the latter back, or a binary last field's terminator check</span>
-                <span class="c1"># below sees an entry that ends one octet early and warns</span>
-                <span class="c1"># over a newline that was in the capture all along</span>
-                <span class="n">entry_buffer</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
-
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+        <span class="n">entry_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">entry</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, str | bytes]</span>
+            <span class="c1"># a blank line that was actually *read* -- as opposed to the</span>
+            <span class="c1"># block's own NUL padding, or simply running out of octets --</span>
+            <span class="c1"># is the separator the format puts between entries, so it</span>
+            <span class="c1"># starts another one, even an empty one, however little is</span>
+            <span class="c1"># left behind it</span>
+            <span class="n">separator</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="n">entry_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">entry_buffer</span><span class="p">)</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">line</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+                <span class="n">raw_line</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">separator</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">raw_line</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
                     <span class="k">break</span>
 
                 <span class="n">line_split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'='</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -2477,7 +2497,7 @@
                         <span class="k">break</span>
 
                     <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: int</span>
-                    <span class="n">available</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry_buffer</span><span class="p">)</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                    <span class="n">available</span> <span class="o">=</span> <span class="n">total</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
                     <span class="n">clamped</span> <span class="o">=</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span>
                     <span class="k">if</span> <span class="n">clamped</span><span class="p">:</span>
                         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
@@ -2490,9 +2510,16 @@
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">clamped</span><span class="p">:</span>
                         <span class="c1"># the one octet the format puts here to terminate the</span>
-                        <span class="c1"># field; a value already clamped to the entry's own</span>
-                        <span class="c1"># end left nothing behind to check, and was reported</span>
-                        <span class="c1"># above</span>
+                        <span class="c1"># field; a value already clamped to the entry's own end</span>
+                        <span class="c1"># left nothing behind to check, and was reported above.</span>
+                        <span class="c1"># the reader's position is well defined either way --</span>
+                        <span class="c1"># exactly length + 1 octets past where the field name</span>
+                        <span class="c1"># started -- so a bad octet here ends only this</span>
+                        <span class="c1"># entry's field collection, matching #722: it does not</span>
+                        <span class="c1"># abort the walk, which keeps looking for the next</span>
+                        <span class="c1"># entry's separator from here. See #728's review for</span>
+                        <span class="c1"># why an outer abort was considered and rejected as</span>
+                        <span class="c1"># the default.</span>
                         <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
                             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field '</span>
@@ -2502,6 +2529,8 @@
                             <span class="k">break</span>
 
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">total</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">separator</span><span class="p">:</span>
+                <span class="k">break</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 

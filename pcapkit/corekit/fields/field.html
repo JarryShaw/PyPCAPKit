@@ -615,6 +615,19 @@ updating the current instance.</p>
 costlier things an extraction did. This does what that path would have
 done, and only that: a new instance of the same class, its
 <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a> shallow-updated from this one.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every <code class="docutils literal notranslate"><span class="pre">__call__</span></code> override in this module calls <code class="docutils literal notranslate"><span class="pre">self.__copy__()</span></code>
+directly rather than <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy(self)</span></code></a>.
+<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> still has to <em>find</em> this method before it can call
+it – <code class="docutils literal notranslate"><span class="pre">getattr(cls,</span> <span class="pre">'__copy__',</span> <span class="pre">None)</span></code> – and that lookup alone
+was profiled at 55,846 calls (~1.7% of an <code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code> run) on <code class="docutils literal notranslate"><span class="pre">examples/captures/http.pcap</span></code>, one per field
+per packet, all from this exact path. Calling <code class="docutils literal notranslate"><span class="pre">__copy__</span></code>
+directly is exactly what <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> would have done once it
+found it, so this changes nothing about <em>when</em> a field is copied or
+what the copy contains – only the redundant dispatch is removed.
+See GitHub issue #730.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
