@@ -13,6 +13,7 @@ claim being made and a stand-in cannot check it.
 """
 from __future__ import annotations
 
+import binascii
 import importlib.util
 import ipaddress
 import struct
@@ -93,8 +94,11 @@ class FakeIP:
         self.ttl = 64
         self.p = 6
         self.sum = 0xBEEF
-        self.src = int(ipaddress.IPv4Address('10.1.1.2'))
-        self.dst = int(ipaddress.IPv4Address('10.1.1.3'))
+        # Dotted-decimal ASCII bytes, PyPCAPFile 0.12.0's actual ``IP.src``/``.dst``
+        # form (see GH#743) -- not an ``int``, so this stand-in exercises the same
+        # parsing path the real decoder does instead of hiding behind a shortcut.
+        self.src = b'10.1.1.2'
+        self.dst = b'10.1.1.3'
         self.opt = b''
         self.payload = payload
         self.__dict__.update(fields)
@@ -179,8 +183,8 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
         self.assertEqual(info['packet_len'], 86)
 
         ethernet = info['ETHERNET']
-        self.assertEqual(ethernet['src'], b'\xa4\x5e\x60\xd9\x6b\x97')
-        self.assertEqual(ethernet['dst'], b'\x40\x33\x1a\xd1\x85\x1c')
+        self.assertEqual(ethernet['src'], 'a4:5e:60:d9:6b:97')
+        self.assertEqual(ethernet['dst'], '40:33:1a:d1:85:1c')
         self.assertEqual(ethernet['type'], 0x0800)
 
         network = ethernet['IP']
@@ -211,6 +215,103 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
         self.assertEqual(info['ETHERNET'], {'raw_len': 2, 'raw': b'\x01\x02'})
         self.assertEqual(packet2chain(make_packet(bytearray(b'\x01')),
                                       data_link=LinkType.ETHERNET), 'ETHERNET:Raw')
+
+    ##########################################################################
+    # Address and hex-text parsing helpers (see GH#743).
+    ##########################################################################
+
+    def test_parse_ipv4_address_decodes_dotted_decimal_ascii_bytes(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_ipv4_address
+
+        # PyPCAPFile 0.12.0's actual ``IP.src``/``IP.dst`` representation: a
+        # ``ctypes.c_char_p`` holding dotted-decimal ASCII text, not a packed
+        # 4-byte value.
+        self.assertEqual(_parse_ipv4_address(b'10.1.1.2'), ipaddress.IPv4Address('10.1.1.2'))
+        self.assertEqual(_parse_ipv4_address(b'255.255.255.255'),
+                         ipaddress.IPv4Address('255.255.255.255'))
+
+    def test_parse_ipv4_address_also_accepts_packed_bytes(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_ipv4_address
+
+        # Defensive acceptance for a differently-represented PyPCAPFile release
+        # or fork -- a packed 4-byte value is never a valid dotted-quad string,
+        # so the two forms cannot be confused with each other.
+        self.assertEqual(_parse_ipv4_address(b'\n\x01\x01\x02'),
+                         ipaddress.IPv4Address('10.1.1.2'))
+
+    def test_parse_ipv4_address_wraps_invalid_input(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_ipv4_address
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for label, value in (
+            ('not an address', b'not-an-ip'),
+            ('not ASCII', b'\xff\xff\xff\xff\xff'),
+            ('none', None),
+            # ``int`` is deliberately rejected, not merely unparsed: an earlier
+            # revision accepted it only to keep ``FakeIP``'s int-typed stand-in
+            # passing, which is exactly the fixture that hid GH#743 in the
+            # first place. See ``_parse_ipv4_address``'s docstring.
+            ('int', int(ipaddress.IPv4Address('10.1.1.2'))),
+        ):
+            with self.subTest(case=label):
+                with self.assertRaises(ProtocolError):
+                    _parse_ipv4_address(value)
+
+    def test_maybe_unhex_decodes_hex_ascii_text(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _maybe_unhex
+
+        # PyPCAPFile 0.12.0 stores ``IP.opt``/``IP.payload`` as hex-ASCII text
+        # too, once decoding stops short of the transport layer -- which is
+        # exactly how the PyPCAPFile engine calls it.
+        self.assertEqual(_maybe_unhex(b'94040000'), b'\x94\x04\x00\x00')
+        self.assertEqual(_maybe_unhex(b''), b'')
+
+    def test_maybe_unhex_leaves_already_raw_bytes_alone(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _maybe_unhex
+
+        self.assertEqual(_maybe_unhex(b'segment'), b'segment')          # odd length
+        self.assertEqual(_maybe_unhex(b'\x01\x01\x01\x00'), b'\x01\x01\x01\x00')  # non-hex bytes
+
+    def test_maybe_unhex_has_a_false_positive_on_all_hex_digit_raw_bytes(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _maybe_unhex
+
+        # Documents the residual risk called out in ``_maybe_unhex``'s docstring
+        # rather than a desired behaviour: this 24-byte value is a plausible raw
+        # TCP header (data offset 6, NS+ACK+FIN, ports 12336/12593) whose every
+        # byte happens to fall in the ASCII hex-digit range, so it is
+        # indistinguishable from real hex text and gets halved.
+        raw_header = b'001122223333aA4455660000'
+        self.assertEqual(_maybe_unhex(raw_header), binascii.unhexlify(raw_header))
+        self.assertNotEqual(_maybe_unhex(raw_header), raw_header)
+
+    def test_parse_mac_address_decodes_colon_ascii_text(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_mac_address
+
+        # PyPCAPFile 0.12.0's actual ``Ethernet.src``/``.dst`` representation:
+        # already colon-separated ASCII hex text, not a raw 6-byte value.
+        self.assertEqual(_parse_mac_address(b'01:00:5e:01:03:03'), '01:00:5e:01:03:03')
+
+    def test_parse_mac_address_also_accepts_raw_six_bytes(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_mac_address
+
+        # Defensive acceptance for a differently-represented PyPCAPFile release
+        # or fork, and for the raw-bytes stand-ins used in this module.
+        self.assertEqual(_parse_mac_address(b'\x01\x00\x5e\x01\x03\x03'), '01:00:5e:01:03:03')
+        self.assertEqual(_parse_mac_address(bytearray(b'\x01\x00\x5e\x01\x03\x03')),
+                         '01:00:5e:01:03:03')
+
+    def test_parse_mac_address_wraps_invalid_input(self) -> None:
+        from pcapkit.toolkit.pypcapfile import _parse_mac_address
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for label, value in (
+            ('not ASCII', b'\xff\xff\xff\xff\xff'),
+            ('none', None),
+            ('int', 42),
+        ):
+            with self.subTest(case=label):
+                with self.assertRaises(ProtocolError):
+                    _parse_mac_address(value)
 
     ##########################################################################
     # Reassembly and flow tracing.
@@ -358,6 +459,70 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
         self.assertEqual(data.dstport, 22)
         self.assertEqual(data.timestamp, 1511106545.471719)
         self.assertEqual(data.frame['ETHERNET']['IP']['src'], '10.1.1.2')
+
+    def test_ipv4_2dict_unhexes_the_options_field(self) -> None:
+        from pcapfile.protocols.network.ip import IP
+
+        from pcapkit.toolkit.pypcapfile import _ipv4_2dict
+
+        raw = make_ipv4(b'payload', options=b'\x94\x04\x00\x00')
+        info = _ipv4_2dict(IP(raw))
+        self.assertEqual(info['opt'], b'\x94\x04\x00\x00')
+
+    def test_ipv4_reassembly_unhexes_the_fragment_payload(self) -> None:
+        from pcapfile.protocols.network.ip import IP
+
+        from pcapkit.toolkit.pypcapfile import ipv4_reassembly
+
+        payload = b'fragment-body-bytes'
+        raw = make_ipv4(payload, flags=0b001)
+        packet = make_packet(FakeEthernet(IP(raw)))
+
+        data = ipv4_reassembly(packet, count=1)
+        self.assertIsNotNone(data)
+        self.assertEqual(bytes(data.payload), payload)
+
+    def test_layer2dict_keeps_opt_and_nested_payload_length_consistent(self) -> None:
+        from pcapfile.protocols.network.ip import IP
+
+        from pcapkit.toolkit.pypcapfile import _layer2dict
+
+        # Regression for the inconsistency a partial fix left behind: ``opt``
+        # correctly un-hexed while the nested ``'Raw'`` payload stayed
+        # hex-encoded (and twice its true length) in the very same dict.
+        payload = b'x' * 32
+        raw = make_ipv4(payload, options=b'\x94\x04\x00\x00')
+        info = _layer2dict(IP(raw))
+        self.assertEqual(info['opt'], b'\x94\x04\x00\x00')
+        self.assertEqual(info['Raw'], {'raw_len': 32, 'raw': payload})
+
+    def test_layer2dict_unhexes_an_undecoded_ethernet_payload(self) -> None:
+        from pcapfile.protocols.linklayer.ethernet import Ethernet
+
+        from pcapkit.toolkit.pypcapfile import _layer2dict
+
+        # PyPCAPFile hex-encodes an Ethernet frame's payload too, whenever the
+        # ethertype has no decoder of its own (e.g. ARP, which PyPCAPFile does
+        # not decode) -- the same defect class as the IP layer's, one class over.
+        body = b'unknown-ethertype-body'
+        frame = struct.pack('!6s6sH', b'\x01\x00\x5e\x01\x03\x03',
+                            b'\x00\x0c\x29\x3f\x1a\x07', 0x0806) + body
+        info = _layer2dict(Ethernet(frame))
+        self.assertEqual(info['Raw'], {'raw_len': len(body), 'raw': body})
+
+    def test_ethernet2dict_reports_the_default_engines_mac_format(self) -> None:
+        from pcapfile.protocols.linklayer.ethernet import Ethernet
+
+        from pcapkit.toolkit.pypcapfile import _ethernet2dict
+
+        # Against PyPCAPFile's real decoder: confirms ``_ethernet2dict`` reports
+        # the same lowercase colon-separated form the default engine's own
+        # ``Ethernet._read_mac_addr`` does, not PyPCAPFile's ASCII bytes as-is.
+        frame = struct.pack('!6s6sH', b'\x01\x00\x5e\x01\x03\x03',
+                            b'\x00\x0c\x29\x3f\x1a\x07', 0x0800) + b'\x00' * 20
+        info = _ethernet2dict(Ethernet(frame))
+        self.assertEqual(info['dst'], '01:00:5e:01:03:03')
+        self.assertEqual(info['src'], '00:0c:29:3f:1a:07')
 
 
 if __name__ == '__main__':

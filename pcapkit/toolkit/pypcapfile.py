@@ -28,15 +28,18 @@ its caller.
    reimplementation.
 
 """
+import binascii
 import ipaddress
 import struct
+import sys
+import textwrap
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -51,6 +54,11 @@ __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
 ]
+
+#: Whether :meth:`bytes.hex` supports the ``sep`` argument (Python 3.8+), as used
+#: below by :func:`_parse_mac_address` -- mirrors the same guard in
+#: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.
+py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 #: Minimum length of a TCP header, i.e. the fixed part with no options.
 TCP_MIN_HEADER_LEN = 20
@@ -84,6 +92,130 @@ def packet2timestamp(packet: 'Packet') -> 'float':
     return packet.timestamp + packet.timestamp_us / divisor
 
 
+def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
+    """Parse a raw PyPCAPFile IPv4 ``src``/``dst`` field.
+
+    Args:
+        value: Raw value of an :attr:`IP.src <pcapfile.protocols.network.ip.IP.src>`
+            or :attr:`IP.dst <pcapfile.protocols.network.ip.IP.dst>` field.
+
+    Returns:
+        The parsed address.
+
+    Note:
+        The released `PyPCAPFile`_ (0.12.0) stores ``src``/``dst`` as
+        dotted-decimal ASCII text in a :class:`ctypes.c_char_p` -- e.g.
+        ``b'10.1.1.2'`` -- rather than as a packed 4-byte value, which is all
+        :class:`ipaddress.IPv4Address` accepts from a :obj:`bytes` argument
+        (it raises :exc:`~ipaddress.AddressValueError` otherwise). This helper
+        also accepts a packed 4-byte :obj:`bytes` value directly, so a
+        differently-represented `PyPCAPFile`_ fork or release still works.
+        Anything that is not :obj:`bytes` is rejected outright: an earlier
+        revision also accepted a plain :obj:`int`, kept only because this
+        module's own unit test stand-ins modelled the field that way --
+        which meant production had been widened specifically to keep a
+        fixture passing that was hiding this very defect, so the stand-ins
+        were changed to use dotted-decimal :obj:`bytes` instead and the
+        ``int`` case was dropped.
+
+    Raises:
+        ProtocolError: If ``value`` cannot be parsed as an IPv4 address.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    if not isinstance(value, bytes):
+        raise ProtocolError(f'invalid PyPCAPFile IPv4 address: {value!r}')
+    try:
+        if len(value) != 4:
+            # Dotted-decimal ASCII text, the actual PyPCAPFile 0.12.0 form --
+            # a packed 4-byte address is never a valid dotted-quad string,
+            # since the shortest one (``0.0.0.0``) is already 7 bytes long.
+            return ipaddress.IPv4Address(value.decode('ascii'))
+        return ipaddress.IPv4Address(value)
+    except (ValueError, UnicodeDecodeError) as error:
+        raise ProtocolError(f'invalid PyPCAPFile IPv4 address: {value!r}') from error
+
+
+def _parse_mac_address(value: 'Any') -> 'str':
+    """Parse a raw PyPCAPFile Ethernet ``src``/``dst`` field.
+
+    Args:
+        value: Raw value of an :attr:`Ethernet.src
+            <pcapfile.protocols.linklayer.ethernet.Ethernet.src>` or
+            :attr:`Ethernet.dst <pcapfile.protocols.linklayer.ethernet.Ethernet.dst>`
+            field.
+
+    Returns:
+        Lowercase, colon-separated hex MAC address, e.g. ``'01:00:5e:01:03:03'``
+        -- the same form :meth:`~pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`
+        uses for the default engine.
+
+    Note:
+        The released `PyPCAPFile`_ (0.12.0) already stores ``src``/``dst`` pre-formatted
+        exactly this way, as ASCII text in a :class:`ctypes.c_char_p` -- not as a raw
+        6-byte value, which :func:`bytes` alone passes straight through unexamined. This
+        helper also accepts a raw 6-byte value directly, so a differently-represented
+        `PyPCAPFile`_ fork or release, and the stand-ins used in unit tests, keep working.
+
+    Raises:
+        ProtocolError: If ``value`` cannot be parsed as a MAC address.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    if not isinstance(value, (bytes, bytearray)):
+        raise ProtocolError(f'invalid PyPCAPFile MAC address: {value!r}')
+    raw = bytes(value)
+    if len(raw) == 6:
+        return raw.hex(':') if py38 else ':'.join(textwrap.wrap(raw.hex(), 2))
+    try:
+        return raw.decode('ascii')
+    except UnicodeDecodeError as error:
+        raise ProtocolError(f'invalid PyPCAPFile MAC address: {value!r}') from error
+
+
+def _maybe_unhex(value: 'bytes') -> 'bytes':
+    """Undo :func:`binascii.hexlify`, if ``value`` looks hex-encoded.
+
+    Args:
+        value: Raw bytes, possibly hex-encoded.
+
+    Returns:
+        ``value`` hex-decoded, if it is a valid even-length hex string;
+        otherwise ``value`` itself, unchanged.
+
+    Note:
+        The released `PyPCAPFile`_ (0.12.0) stores an IPv4 packet's options
+        (:attr:`IP.opt <pcapfile.protocols.network.ip.IP.opt>`) and payload
+        (:attr:`IP.payload <pcapfile.protocols.network.ip.IP.payload>`) as
+        :func:`binascii.hexlify`'d ASCII text once decoding stops short of the
+        transport layer -- which is exactly how
+        :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` calls it --
+        rather than as the raw bytes this module otherwise assumes. Both forms
+        are :obj:`bytes`, hex-encoded or not, which is why :func:`_is_raw`
+        cannot tell them apart, and falling back to the original value when
+        it does not decode as hex is what keeps this a no-op for the raw,
+        non-hex stand-ins used in unit tests.
+
+        This is **not** a guarantee against every false positive, only a
+        cheap and, in practice, reliable heuristic: a genuinely raw payload
+        whose every byte happens to fall in the ASCII hex-digit range (e.g. a
+        24-byte TCP header built entirely from digits and ``A``-``F``) is
+        indistinguishable from real hex text and gets silently halved. There
+        is no way to tell the two forms apart from the bytes alone; this is
+        acceptable here because that byte range is a small fraction of the
+        possible values a real header or payload can take.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
+
+    """
+    try:
+        return binascii.unhexlify(value)
+    except binascii.Error:
+        return value
+
+
 def ipv4_header(ipv4: 'IP') -> 'bytes':
     """Rebuild the raw header bytes of a PyPCAPFile IPv4 packet.
 
@@ -98,22 +230,26 @@ def ipv4_header(ipv4: 'IP') -> 'bytes':
         *every* IPv4 header field plus the options blob, so this reconstruction
         is byte-exact rather than approximate.
 
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
     .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     return struct.pack(
         '!BBHHHBBHII',
-        (ipv4.v << 4) | ipv4.hl,          # version and internet header length
-        ipv4.tos,                         # type of service
-        ipv4.len,                         # total length
-        ipv4.id,                          # identification
-        (ipv4.flags << 13) | ipv4.off,    # flags and fragment offset
-        ipv4.ttl,                         # time to live
-        ipv4.p,                           # payload protocol type
-        ipv4.sum,                         # header checksum
-        ipv4.src,                         # source IP address
-        ipv4.dst,                         # destination IP address
-    ) + bytes(ipv4.opt)
+        (ipv4.v << 4) | ipv4.hl,                 # version and internet header length
+        ipv4.tos,                                # type of service
+        ipv4.len,                                # total length
+        ipv4.id,                                 # identification
+        (ipv4.flags << 13) | ipv4.off,           # flags and fragment offset
+        ipv4.ttl,                                # time to live
+        ipv4.p,                                  # payload protocol type
+        ipv4.sum,                                # header checksum
+        int(_parse_ipv4_address(ipv4.src)),      # source IP address
+        int(_parse_ipv4_address(ipv4.dst)),      # destination IP address
+    ) + _maybe_unhex(bytes(ipv4.opt))
 
 
 def _is_raw(layer: 'Any') -> 'bool':
@@ -169,7 +305,7 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
     if not _is_raw(segment):
         return None
 
-    segment = bytes(segment)
+    segment = _maybe_unhex(bytes(segment))
     if len(segment) < TCP_MIN_HEADER_LEN:
         return None
     return segment
@@ -181,10 +317,14 @@ def _ethernet2dict(link: 'Any') -> 'dict[str, Any]':
     Args:
         link: PyPCAPFile Ethernet frame.
 
+    Raises:
+        ProtocolError: If ``link.src`` or ``link.dst`` cannot be parsed as a
+            MAC address.
+
     """
     return {
-        'dst': bytes(link.dst),
-        'src': bytes(link.src),
+        'dst': _parse_mac_address(link.dst),
+        'src': _parse_mac_address(link.src),
         'type': link.type,
     }
 
@@ -207,9 +347,9 @@ def _ipv4_2dict(ipv4: 'IP') -> 'dict[str, Any]':
         'ttl': ipv4.ttl,
         'p': ipv4.p,
         'sum': ipv4.sum,
-        'src': str(ipaddress.IPv4Address(ipv4.src)),
-        'dst': str(ipaddress.IPv4Address(ipv4.dst)),
-        'opt': bytes(ipv4.opt),
+        'src': str(_parse_ipv4_address(ipv4.src)),
+        'dst': str(_parse_ipv4_address(ipv4.dst)),
+        'opt': _maybe_unhex(bytes(ipv4.opt)),
     }
 
 
@@ -218,6 +358,21 @@ def _layer2dict(layer: 'Any') -> 'dict[str, Any]':
 
     Args:
         layer: Decoded PyPCAPFile layer, or raw bytes.
+
+    Note:
+        `PyPCAPFile`_'s own :class:`~pcapfile.protocols.linklayer.ethernet.Ethernet`
+        and :class:`~pcapfile.protocols.network.ip.IP` decoders hex-encode the
+        payload they retain rather than decoding it further (see
+        :func:`_maybe_unhex`), so a raw payload reached by recursing *from* one of
+        those two classes is un-hexed before being reported here. Without that,
+        an ``IP`` layer with options would report its own ``opt`` correctly
+        (:func:`_ipv4_2dict` already un-hexes it) while its nested ``'Raw'``
+        payload stayed hex-encoded and twice the true length -- an inconsistency
+        within the very same :obj:`dict`. Any other, unrecognised layer type's
+        raw payload is left untouched, since nothing here establishes that it is
+        `PyPCAPFile`_-hexlified rather than genuinely raw.
+
+    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     if _is_raw(layer):
@@ -235,6 +390,8 @@ def _layer2dict(layer: 'Any') -> 'dict[str, Any]':
 
     payload = getattr(layer, 'payload', None)
     if payload is not None:
+        if name in ('Ethernet', 'IP') and _is_raw(payload):
+            payload = _maybe_unhex(bytes(payload))
         dict_['Raw' if _is_raw(payload) else type(payload).__name__] = _layer2dict(payload)
     return dict_
 
@@ -279,6 +436,11 @@ def packet2dict(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'dict[str, A
     Returns:
         Dict[str, Any]: A :obj:`dict` mapping of packet data.
 
+    Raises:
+        ProtocolError: If a decoded IPv4 layer's ``src``/``dst`` cannot be
+            parsed as an IPv4 address, or a decoded Ethernet layer's
+            ``src``/``dst`` cannot be parsed as a MAC address.
+
     """
     return {
         'timestamp': packet2timestamp(packet),
@@ -304,6 +466,10 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
@@ -317,8 +483,8 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     header = ipv4_header(ipv4)
     return IP_Packet(
         bufid=(
-            ipaddress.IPv4Address(ipv4.src),        # source IP address
-            ipaddress.IPv4Address(ipv4.dst),        # destination IP address
+            _parse_ipv4_address(ipv4.src),          # source IP address
+            _parse_ipv4_address(ipv4.dst),          # destination IP address
             ipv4.id,                                # identification
             Enum_TransType.get(ipv4.p),             # payload protocol type
         ),
@@ -328,7 +494,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         mf=bool(ipv4.flags & IPV4_FLAG_MF),         # more fragment flag
         tl=ipv4.len,                                # total length, header includes
         header=header,                              # raw bytes type header
-        payload=bytearray(ipv4.payload),            # raw bytearray type payload
+        payload=bytearray(_maybe_unhex(bytes(ipv4.payload))),  # raw bytearray type payload
         timestamp=packet2timestamp(packet),         # capture timestamp
     )
 
@@ -366,6 +532,10 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
@@ -388,9 +558,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     return TCP_Packet(
         bufid=(
-            ipaddress.IPv4Address(ipv4.src),  # source IP address
+            _parse_ipv4_address(ipv4.src),    # source IP address
             tcp.src_port,                     # source port
-            ipaddress.IPv4Address(ipv4.dst),  # destination IP address
+            _parse_ipv4_address(ipv4.dst),    # destination IP address
             tcp.dst_port,                     # destination port
         ),
         num=count,                            # original packet range number
@@ -425,6 +595,10 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
+    Raises:
+        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
+            IPv4 address.
+
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
@@ -450,8 +624,8 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
         syn=bool(tcp.syn),                                  # TCP synchronise (SYN) flag
         fin=bool(tcp.fin),                                  # TCP finish (FIN) flag
         rst=bool(tcp.rst),                                  # TCP reset (RST) flag
-        src=ipaddress.IPv4Address(ipv4.src),                # source IP
-        dst=ipaddress.IPv4Address(ipv4.dst),                # destination IP
+        src=_parse_ipv4_address(ipv4.src),                  # source IP
+        dst=_parse_ipv4_address(ipv4.dst),                  # destination IP
         srcport=tcp.src_port,                               # TCP source port
         dstport=tcp.dst_port,                               # TCP destination port
         timestamp=packet2timestamp(packet),                 # timestamp
