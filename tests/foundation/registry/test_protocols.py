@@ -419,7 +419,13 @@ class ProtocolRegistryTests(unittest.TestCase):
             registry.register_protocol(object)  # type: ignore[arg-type]
 
     def test_top_level_link_internet_and_transport_protocol_wrappers(self) -> None:
-        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        # Members live in the per-transport registries GitHub issue #732 split
+        # AppType into; the base class itself holds none. 3com-amp3 is registered
+        # on both TCP and UDP, so either copy carries the multi-bit .proto this
+        # exercises -- the TCP one is used, arbitrarily.
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
+        from pcapkit.const.reg.apptype import UDP as AppType_UDP
+        from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.const.reg.transtype import TransType
@@ -467,7 +473,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:
                 with mock.patch.object(registry, 'register_protocol') as register_protocol:
-                    registry.register_apptype(AppType.AppType_3com_amp3, UnitProtocol)
+                    registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol)
         tcp_register.assert_called_once()
         udp_register.assert_called_once()
         register_protocol.assert_called_once_with(UnitProtocol)
@@ -475,7 +481,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:
                 with mock.patch.object(registry, 'register_protocol') as register_protocol:
-                    registry.register_apptype(AppType.AppType_3com_amp3, UnitProtocol,
+                    registry.register_apptype(AppType_TCP.TCP_3com_amp3, UnitProtocol,
                                               proto=TransportProtocol.udp)
         tcp_register.assert_not_called()
         udp_register.assert_called_once()
@@ -494,8 +500,8 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry, 'register_protocol') as register_protocol:
-                registry.register_tcp(AppType.AppType_3exmp, UnitProtocol)
-        tcp_register.assert_called_once_with(AppType.AppType_3exmp.port, UnitProtocol)
+                registry.register_tcp(AppType_TCP.TCP_3exmp, UnitProtocol)
+        tcp_register.assert_called_once_with(AppType_TCP.TCP_3exmp.port, UnitProtocol)
         register_protocol.assert_called_once_with(UnitProtocol)
 
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
@@ -506,8 +512,8 @@ class ProtocolRegistryTests(unittest.TestCase):
 
         with mock.patch.object(registry.UDP, 'register') as udp_register:
             with mock.patch.object(registry, 'register_protocol') as register_protocol:
-                registry.register_udp(AppType.AppType_2ping, UnitProtocol)
-        udp_register.assert_called_once_with(AppType.AppType_2ping.port, UnitProtocol)
+                registry.register_udp(AppType_UDP.UDP_2ping, UnitProtocol)
+        udp_register.assert_called_once_with(AppType_UDP.UDP_2ping.port, UnitProtocol)
         register_protocol.assert_called_once_with(UnitProtocol)
 
         with mock.patch.object(registry.UDP, 'register') as udp_register:

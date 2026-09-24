@@ -304,7 +304,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         ``register_apptype`` converts it to a port ``int`` before storing --
         so it must not be treated as inferable.
         """
-        from pcapkit.const.reg.apptype import AppType
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
         from pcapkit.foundation.registry.protocols import register_protocol_code
         from pcapkit.utilities.exceptions import RegistryError
 
@@ -312,7 +312,7 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
             pass
 
         with self.assertRaises(RegistryError) as caught:
-            register_protocol_code(FakeProtocol, AppType.tcpmux)
+            register_protocol_code(FakeProtocol, AppType_TCP.tcpmux)
         self.assertIn('no destination registry is known', str(caught.exception))
 
     def test_string_code_refuses_instead_of_iterating_characters(self) -> None:

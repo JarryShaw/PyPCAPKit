@@ -57,6 +57,7 @@ from pcapkit.vendor.vlan import *
 __all__ = [
     # Protocol Registration
     'EtherType', 'LinkType', 'TransType', 'AppType',
+    'AppType_TCP', 'AppType_UDP', 'AppType_SCTP', 'AppType_DCCP',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
     # ESP

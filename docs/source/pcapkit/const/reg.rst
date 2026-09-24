@@ -62,10 +62,47 @@ Application Layer Protocol Numbers
 
 .. module:: pcapkit.const.reg.apptype
 
-This module contains the constant enumeration for **Application Layer Protocol Numbers**,
-which is automatically generated from :class:`pcapkit.vendor.reg.apptype.AppType`.
+This package contains the constant enumerations for **Application Layer Protocol
+Numbers**, which are automatically generated from :mod:`pcapkit.vendor.reg.apptype`.
+IANA keys every assignment on a ``(service, port, transport)`` triple, so the
+registry is one enumeration per transport protocol sharing a memberless base.
 
-.. autoclass:: pcapkit.const.reg.apptype.AppType
+.. module:: pcapkit.const.reg.apptype.apptype
+
+.. autoclass:: pcapkit.const.reg.apptype.apptype.TransportProtocol
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.const.reg.apptype.apptype.AppType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. module:: pcapkit.const.reg.apptype.tcp
+
+.. autoclass:: pcapkit.const.reg.apptype.tcp.TCP
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. module:: pcapkit.const.reg.apptype.udp
+
+.. autoclass:: pcapkit.const.reg.apptype.udp.UDP
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. module:: pcapkit.const.reg.apptype.sctp
+
+.. autoclass:: pcapkit.const.reg.apptype.sctp.SCTP
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. module:: pcapkit.const.reg.apptype.dccp
+
+.. autoclass:: pcapkit.const.reg.apptype.dccp.DCCP
    :members:
    :undoc-members:
    :show-inheritance:
