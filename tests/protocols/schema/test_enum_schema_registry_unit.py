@@ -177,10 +177,11 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
     :meth:`register`; guarding only the method would leave it silent.
 
     Generalises the guard GitHub issue #675 added to ``register_protocol`` in
-    #681. The condition here is presence alone, as the code-keyed parser
-    registries use, rather than #681's "present *and* a different class" -- that
-    narrower form is licensed by a key *derived* from the value, which this
-    registry's caller-supplied ``code`` is not.
+    #681. GitHub issue #718 then brought the condition here in line with
+    #681's "present *and* a different class": a repeat call that names the
+    exact same schema object is a silent no-op, even though this registry's
+    ``code`` is caller-supplied rather than *derived* from the value the way
+    ``register_protocol``'s key is.
     """
 
     def setUp(self) -> None:
@@ -317,8 +318,107 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
         self.assertIs(BaseSchema.registry[Code.two], Replacement)
         self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
+    def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical schema is a no-op.
+
+        Before the fix the guard fired on presence alone, so a caller
+        idempotently re-asserting a binding it already made -- registering
+        the exact same schema object under the exact same code a second time
+        -- warned about an overwrite that never happened, exactly as
+        unhelpfully as a genuine collision. Matches the identity guard
+        :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Incumbent(BaseSchema, code=Code.one):
+            pass
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            BaseSchema.register(Code.one, Incumbent)
+
+        self.assertIs(BaseSchema.registry[Code.one], Incumbent)
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+
+    def test_declaring_the_same_class_twice_stays_quiet(self) -> None:
+        """The declaration path's identity guard, called directly a second time.
+
+        This calls :meth:`EnumSchema.__init_subclass__` a second time,
+        directly, on the class it already ran for, and pins that it stays
+        silent under GitHub issue #718's fix. It is not the only way to reach
+        this guard through the declaration path -- see
+        :meth:`test_a_repeated_code_in_the_declaration_list_stays_quiet` below
+        for the ordinary-syntax route, a repeated or aliased member in
+        ``code``'s iterable form.
+
+        """
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class Twice(BaseSchema, code=Code.one):
+            pass
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            Twice.__init_subclass__(code=Code.one)
+
+        self.assertIs(BaseSchema.registry[Code.one], Twice)
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+
+    def test_a_repeated_code_in_the_declaration_list_stays_quiet(self) -> None:
+        """Ordinary subclassing syntax reaches the guard too, via a repeated code.
+
+        :meth:`EnumSchema.__init_subclass__` loops over every element of an
+        iterable ``code``, so a member repeated in the list -- or two distinct
+        members that are the same object, as an :class:`enum.Enum` alias makes
+        possible -- reaches the same key twice with ``cls`` on both sides,
+        with no second call to ``__init_subclass__`` needed: this is a live
+        path through normal syntax, not merely the direct-call case pinned
+        above. Not a contrived shape either: GitHub issue #721 shipped
+        ``R1CounterParameter(Parameter, code=[R1_Counter, R1_COUNTER])``, and
+        several :mod:`pcapkit.const` enums (e.g. ``reg.linktype.LinkType``,
+        ``esp.cipher.Cipher``) declare real aliases that would make an
+        ``A is B`` pair like the alias case below invisible at the call site.
+
+        """
+        from pcapkit.protocols.schema.schema import EnumSchema
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        Code, BaseSchema = self._base_schema()
+
+        class AliasCode(enum.IntEnum):
+            one = 1
+            uno = 1  # alias of `one`
+
+        self.assertIs(AliasCode.uno, AliasCode.one)
+
+        class AliasBaseSchema(EnumSchema[AliasCode]):
+            __default__ = lambda: object  # noqa: E731
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+
+            class RepeatedMember(BaseSchema, code=[Code.one, Code.one]):
+                pass
+
+            class AliasPair(AliasBaseSchema, code=[AliasCode.one, AliasCode.uno]):
+                pass
+
+        # Both declarations reach the guard on the second element of their
+        # ``code`` list, with the class under construction as both incumbent
+        # and replacement -- so neither warns.
+        self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
+        self.assertIs(BaseSchema.registry[Code.one], RepeatedMember)
+        self.assertIs(AliasBaseSchema.registry[AliasCode.one], AliasPair)
+
     def test_a_lookup_miss_still_does_not_make_a_later_register_warn(self) -> None:
-        """The #555 retention fix is what makes a presence-only guard safe here.
+        """The #555 retention fix is what makes the identity guard safe here.
 
         On a plain :class:`collections.defaultdict` a bare ``registry[code]`` for
         an unregistered code inserted the default, so parsing one packet carrying

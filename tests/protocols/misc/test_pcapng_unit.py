@@ -509,8 +509,18 @@ class PCAPNGUnitTests(unittest.TestCase):
         try:
             PCAPNG.register(proto_code, ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'))
             self.assertIs(proto_map[proto_code], Raw)
+
+            class Other(Raw):
+                pass
+
+            # ``register`` resolves a ``ModuleDescriptor`` before storing it,
+            # so the entry above is already the plain ``Raw`` class, not the
+            # descriptor -- passing ``Raw`` again would now be the same-object
+            # no-op GitHub issue #718 added an identity guard for (see
+            # ``test_pcapng_register_stays_quiet_on_same_object_reregistration``).
+            # A genuinely different class is needed to still warn here.
             with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
-                PCAPNG.register(proto_code, Raw)
+                PCAPNG.register(proto_code, Other)
             warn.assert_called_once()
             with self.assertRaises(RegistryError):
                 PCAPNG.register(LinkType.USER1, object)  # type: ignore[arg-type]
@@ -634,6 +644,36 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._import_next_layer = mock.Mock(return_value=fake_next_no_chain)
         self.assertIs(pcapng._decode_next_layer(decoded_no_chain, LinkType.NULL, 0), decoded_no_chain)
         self.assertEqual(decoded_no_chain['protocols'], '')
+
+    def test_pcapng_register_stays_quiet_on_same_object_reregistration(self) -> None:
+        """GitHub issue #718: replaying a call with the identical class is a no-op.
+
+        Before the fix the guard fired on presence alone, so the *second* of
+        two calls registering the exact same class under the exact same code
+        warned about an overwrite that never happened. Matches the identity
+        guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` already
+        applies.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.raw import Raw
+
+        proto_map = PCAPNG.__dict__['__proto__']
+        code = LinkType.USER2
+        had_original = code in proto_map
+        original = proto_map.get(code)
+        try:
+            with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
+                PCAPNG.register(code, Raw)
+                PCAPNG.register(code, Raw)
+            warn.assert_not_called()
+        finally:
+            if had_original:
+                proto_map[code] = original
+            else:
+                proto_map.pop(code, None)
 
     def test_pcapng_interface_option_constructors_and_scope_guards(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
@@ -4603,15 +4643,13 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
         self.assertIs(option.registry['if'][unregistered], UnknownOption)
 
     def test_re_registering_an_option_code_reports_the_collision(self) -> None:
-        """Presence alone is the test, as it is for the seven sibling registrars.
+        """A genuine displacement -- a different class under the same code -- still warns.
 
-        #681 tested presence *and a different class* because it keys on a name
-        derived from the class, which the wrapper registrars reach twice with the
-        same class. This keys on a caller-supplied code that
-        ``__init_subclass__`` passes exactly once per subclass, so a second
-        arrival is a second deliberate call -- and reporting it is what the
-        ``ProtocolBase``, ``Frame``, ``Internet``, ``PCAPNG``, ``SCTP``,
-        ``Transport`` and ``Link`` registrars already do.
+        The guard is identity-based, matching every sibling registrar: presence
+        alone is not the test, only whether the incumbent differs from the
+        replacement. ``if_name`` already names ``IF_NameOption``, so replacing
+        it with ``UnknownOption`` is a real displacement, and it is reported
+        exactly as it was before the guard changed.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
@@ -4688,7 +4726,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
                       UnknownOption)
 
     def test_the_collision_check_does_not_insert_a_default(self) -> None:
-        """Membership with ``in``, never by subscripting.
+        """Membership is tested with ``.get()``, never by subscripting.
 
         Only the outer registry is the miss-safe ``_EnumRegistry``; the
         per-namespace ones are plain :class:`collections.defaultdict`\\ s, so
@@ -4709,6 +4747,64 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         after = {key: len(value) for key, value in option.registry.items()}
         self.assertEqual(after, before)
+
+    def test_repeated_code_list_registering_the_same_class_is_silent(self) -> None:
+        """GitHub issue #718's shape: ``code=[b, b]`` must not double-count.
+
+        ``__init_subclass__`` loops over ``code`` with no deduplication, so a
+        repeated entry reaches :meth:`Option.register` twice with the *same*
+        class -- the second call finds itself already the incumbent. Before
+        the identity guard this still hit the presence-only check and warned
+        about an overwrite that never happened, since the class was
+        overwriting itself.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import _IF_Option
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        fresh_code = OptionType.get(0x00FB, namespace='if')
+        self.assertNotIn(fresh_code, option.registry['if'])
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+
+            class _RepeatedCodeOption(_IF_Option, code=[fresh_code, fresh_code]):
+                pass
+
+        registry_warnings = [entry for entry in caught
+                             if entry.category is RegistryWarning]
+        self.assertEqual(registry_warnings, [])
+        self.assertIs(option.registry['if'][fresh_code], _RepeatedCodeOption)
+
+    def test_repeated_code_registration_still_warns_once_for_a_genuine_displacement(self) -> None:
+        """A real displacement inside a repeated-code call still warns -- exactly once.
+
+        Simulates what ``__init_subclass__`` does for ``code=[b, b]`` when ``b``
+        already names a different incumbent: two calls to :meth:`Option.register`
+        with the same new class. The first call genuinely displaces
+        ``IF_NameOption`` and must warn; the second finds itself already the
+        incumbent and must not warn again. The presence-only guard warned on
+        both, reporting the same displacement twice.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.protocols.schema.misc.pcapng import IF_NameOption, UnknownOption
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        option = self._snapshot()
+        self.assertIs(option.registry['if'][OptionType.if_name], IF_NameOption)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            option.register(OptionType.if_name, UnknownOption)
+            option.register(OptionType.if_name, UnknownOption)
+
+        registry_warnings = [entry for entry in caught
+                             if entry.category is RegistryWarning]
+        self.assertEqual(len(registry_warnings), 1)
+        self.assertIs(option.registry['if'][OptionType.if_name], UnknownOption)
 
 
 if __name__ == '__main__':

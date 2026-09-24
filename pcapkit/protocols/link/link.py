@@ -132,19 +132,21 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this EtherType is
                 already registered, naming the displaced entry and its
-                replacement so a caller can tell *what* was lost. Fires on
-                presence alone -- see :meth:`ProtocolBase.register
-                <pcapkit.protocols.protocol.ProtocolBase.register>` for why that
-                differs from ``register_protocol``.
+                replacement so a caller can tell *what* was lost. Fires only
+                when the incumbent differs from the replacement -- see
+                :meth:`ProtocolBase.register
+                <pcapkit.protocols.protocol.ProtocolBase.register>` for the
+                guard this shares with ``register_protocol``.
 
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
         if not issubclass(protocol, Protocol):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
-        if code in cls.__proto__:
+        incumbent = cls.__proto__.get(code)
+        if incumbent is not None and incumbent is not protocol:
             warn(f'protocol {code} already registered, overwriting '
-                 f'{cls.__proto__[code]!r} with {protocol!r}', RegistryWarning)
+                 f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
     ##########################################################################

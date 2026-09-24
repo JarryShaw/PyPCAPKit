@@ -719,18 +719,22 @@ class Option(EnumSchema[Enum_OptionType]):
         every other registry in the package does -- the lookup that follows
         cannot tell a deliberate replacement from an accidental one, so an
         unreported overwrite is a parser silently swapped out for another. See
-        `#681 <https://github.com/JarryShaw/PyPCAPKit/issues/681>`__ for the same
-        guard on ``register_protocol``.
+        `#681 <https://github.com/JarryShaw/PyPCAPKit/issues/681>`__ for the
+        guard ``register_protocol`` added first, which this one now matches.
 
-        Presence alone is the test here, rather than #681's presence *and a
-        different class*: that one keys on a name **derived** from the class, so
-        the wrapper registrars reach it twice with the same class on a supported
-        path and warning there would be noise. This keys on a caller-supplied
-        ``code``, and :meth:`__init_subclass__` passes each code exactly once per
-        subclass, so a second arrival is a second deliberate call -- which is what
-        the seven sibling :meth:`register` methods on
+        The guard is identity-based: it fires only when the incumbent differs
+        from ``cls``, so re-registering the exact same class under the same
+        ``code`` is a silent no-op -- in every namespace ``targets`` reaches --
+        rather than a warning about nothing displaced. That is what keeps
+        :meth:`__init_subclass__` honest: it loops over a ``code`` list with no
+        deduplication, so a repeated or aliased entry reaches this method twice
+        with the same class, and the second call now finds itself already the
+        incumbent. GitHub issue #718 corrected the previous presence-only
+        guard, which read every such repeat as a caller mistake whether or not
+        the value had actually changed -- the same fix the sibling
+        :meth:`register` methods on
         :class:`~pcapkit.protocols.protocol.ProtocolBase` and friends already
-        assume.
+        received.
 
         Note:
             ``ns='opt'`` fans one registration out across every namespace, so the
@@ -742,7 +746,7 @@ class Option(EnumSchema[Enum_OptionType]):
             registering an ``opt``-namespace code into a brand-new namespace is
             exactly what that copy is for.
 
-            Membership is tested with ``in``, never by subscripting. The
+            Membership is tested with ``.get()``, never by subscripting. The
             per-namespace registries are :class:`collections.defaultdict`\\ s --
             only the outer one is the miss-safe
             :class:`~pcapkit.protocols.schema.schema._EnumRegistry` -- so reading
@@ -760,7 +764,9 @@ class Option(EnumSchema[Enum_OptionType]):
         targets = list(Option.registry) if ns == 'opt' else [ns]
 
         if not fresh:
-            clash = [key for key in targets if code in Option.registry[key]]
+            clash = [key for key in targets
+                     if (incumbent := Option.registry[key].get(code)) is not None
+                     and incumbent is not cls]
             if clash:
                 warn(f'PCAP-NG: [Option {code}] option already registered in '
                      f'namespace(s) {", ".join(repr(key) for key in clash)}, '

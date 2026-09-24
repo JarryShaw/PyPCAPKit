@@ -172,11 +172,10 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_register_protocol_stays_quiet_when_nothing_is_displaced(self) -> None:
         """A fresh key and an identical re-registration are both silent.
 
-        This pins the one place this registrar deliberately departs from its
-        siblings, which warn on mere key presence. A sibling is keyed on a
-        ``code`` the caller passes, so a repeat call there is a caller mistake
-        worth reporting even when the value is identical. This registry's key is
-        *derived* from the class, and this function is the funnel every wrapper
+        Since #718, the code-keyed siblings share this identity guard too --
+        see ``test_sibling_registries_now_stay_quiet_on_an_identical_re_registration``
+        in this file. Here the key is *derived* from the class rather than
+        supplied by the caller, and this function is the funnel every wrapper
         registrar ends in, so registering one class under two codes -- supported,
         and exactly what :func:`~pcapkit.foundation.registry.protocols.register_tcp`
         followed by :func:`~pcapkit.foundation.registry.protocols.register_udp`
@@ -227,16 +226,20 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIs(udp_registry[udp_port], UnitProtocol)
         self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
-    def test_sibling_registries_still_warn_on_an_identical_re_registration(self) -> None:
-        """The presence-only guard elsewhere is left exactly as it was.
+    def test_sibling_registries_now_stay_quiet_on_an_identical_re_registration(self) -> None:
+        """GitHub issue #718: the siblings now share ``register_protocol``'s guard.
 
-        :func:`~pcapkit.foundation.registry.protocols.register_protocol` now
-        warns only when a *different* class is displaced. That relaxation must
-        not leak into the code-keyed registries, which report a repeat
-        registration even when the incumbent and the replacement are the same
-        object. Asserted with the same class twice, which is precisely the case
-        the two guards disagree about -- so this fails if anyone ever
-        "harmonises" the siblings onto the guard used above.
+        This test used to pin the opposite: the code-keyed registries warned
+        on presence alone, even when the incumbent and the replacement were
+        the same object, and #695's commit message argued that was
+        deliberate -- the key is caller-supplied rather than derived from the
+        value, so "present and different" supposedly had nothing to fix there.
+        #718 found that reasoning did not hold (a caller replaying a
+        registration is not a mistake merely because the key happens to be
+        explicit), added the identity guard, and this test now pins *that*: a
+        repeat registration naming the exact same class stays silent, exactly
+        as :func:`~pcapkit.foundation.registry.protocols.register_protocol`
+        already behaved.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -258,25 +261,26 @@ class ProtocolRegistryTests(unittest.TestCase):
                 self._guard_registry(sibling, code)
 
                 # Seed the incumbent, then register the very same class again.
-                # Nothing changes value, so only a presence-only guard warns.
+                # Nothing changes value, so the identity guard must stay quiet.
                 sibling[code] = Raw
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
                     owner.register(code, Raw)
 
                 self.assertIs(sibling[code], Raw)
-                self.assertEqual(
-                    len(self._registry_warnings(caught, RegistryWarning)), 1)
+                self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
     def test_sibling_registries_name_what_they_displaced(self) -> None:
         """Every code-keyed registrar says *what* it overwrote, not just that it did.
 
-        The presence-only condition is deliberately unchanged -- see the test
-        above -- but the message was ``'protocol {code} already registered,
-        overwriting'`` and stopped there, so a caller learned that something had
-        been displaced and never which class it was. That is the same diagnostic
-        gap #675 closed for :func:`~pcapkit.foundation.registry.protocols.\
-        register_protocol`, and it is the part of #681 that does generalise.
+        Independent of the identity guard the test above now pins (#718): a
+        genuine overwrite -- two different classes -- still warns and still
+        names both. The message used to be ``'protocol {code} already
+        registered, overwriting'`` and stop there, so a caller learned that
+        something had been displaced and never which class it was. That is the
+        same diagnostic gap #675 closed for
+        :func:`~pcapkit.foundation.registry.protocols.register_protocol`, and
+        it is the part of #681 that does generalise.
 
         All seven code-keyed registrars are covered, including the two that reach
         :meth:`Transport.register
