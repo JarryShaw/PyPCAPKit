@@ -233,6 +233,12 @@ docs = [
 ]
 test = [
     "pytest>=8",
+    # >=3.6.1, not >=3: the `shouldfail` forwarding tests/conftest.py's xdist fix
+    # depends on (xdist/remote.py:146-147) lands in 3.6.0, which PyPI has yanked,
+    # so 3.6.1 is the actual floor. Below it the fix silently reverts and
+    # test_xdist_run_reports_the_diagnostic_and_fails goes red rather than
+    # skipped, since `importlib.util.find_spec('xdist')` still succeeds.
+    "pytest-xdist>=3.6.1",
     "typing-extensions",
     # Enough of the ``vendor`` extra for a test to import a vendor crawler.
     # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports "9 skipped"
