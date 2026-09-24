@@ -39,7 +39,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
 from pcapkit.utilities.warnings import AttributeWarning, warn
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class Scapy(Engine['ScapyPacket']):
+class Scapy(EngineBase['ScapyPacket']):
     """Scapy engine support.
 
     Args:

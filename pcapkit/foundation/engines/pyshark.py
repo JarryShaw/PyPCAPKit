@@ -13,7 +13,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 import sys
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class PyShark(Engine['PySharkPacket']):
+class PyShark(EngineBase['PySharkPacket']):
     """PyShark engine support.
 
     Args:

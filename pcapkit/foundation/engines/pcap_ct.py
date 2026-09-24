@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines import _pcap_backend
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import FormatError, UnsupportedCall, stacklevel
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     RawFrame = tuple[float, bytes]
 
 
-class PCAP_CT(Engine['RawFrame']):
+class PCAP_CT(EngineBase['RawFrame']):
     """pcap-ct engine support.
 
     `pcap-ct`_ is a :mod:`ctypes` reimplementation of the `PyPCAP`_ API on top of

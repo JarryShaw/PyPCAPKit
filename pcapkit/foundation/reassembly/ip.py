@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Generic
 from pcapkit.foundation.reassembly.data.data import Completion
 from pcapkit.foundation.reassembly.data.ip import (_AT, Buffer, BufferID, Datagram, DatagramID,
                                                    Deferred, Packet)
-from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
+from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 
 if TYPE_CHECKING:
     from typing import Type
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 __all__ = ['IP']
 
 
-class IP(Reassembly[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
+class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Generic[_AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
     Args:

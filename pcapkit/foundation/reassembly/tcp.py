@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from pcapkit.foundation.reassembly.data.data import Completion, Deferred
 from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
                                                     Fragment, HoleDescriptor, Packet)
-from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
+from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 __all__ = ['TCP']
 
 
-class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
+class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     """Reassembly for TCP payload.
 
     Args:

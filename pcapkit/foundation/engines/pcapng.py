@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.logging import get_logger
@@ -84,7 +84,7 @@ class Context(Info):
         def __init__(self, section: 'Data_SectionHeaderBlock') -> 'None': ...
 
 
-class PCAPNG(Engine[P_PCAPNG]):
+class PCAPNG(EngineBase[P_PCAPNG]):
     """PCAP-NG file extraction support.
 
     Args:

@@ -13,7 +13,7 @@ import struct
 import sys
 from typing import TYPE_CHECKING
 
-from pcapkit.dumpkit.common import DumperBase as Dumper
+from pcapkit.dumpkit.common import DumperBase
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.misc.pcap.header import Header
 
@@ -49,7 +49,7 @@ _RECORD_HEADER = {
 _UINT32_MASK = 0xFFFF_FFFF
 
 
-class PCAPIO(Dumper):
+class PCAPIO(DumperBase):
     """PCAP file dumper.
 
     Args:

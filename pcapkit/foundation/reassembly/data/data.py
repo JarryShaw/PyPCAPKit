@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.foundation.reassembly.data.ip import Datagram as IP_Datagram
     from pcapkit.foundation.reassembly.data.tcp import Datagram as TCP_Datagram
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 class Completion(StrEnum):
@@ -130,13 +130,13 @@ class Deferred:
 
     __slots__ = ('analyze', 'proto', 'payload')
 
-    def __init__(self, analyze: 'Callable[[TransType, bytes], Protocol]',
+    def __init__(self, analyze: 'Callable[[TransType, bytes], ProtocolBase]',
                  proto: 'TransType', payload: 'bytes') -> 'None':
         self.analyze = analyze
         self.proto = proto
         self.payload = payload
 
-    def __call__(self) -> 'Protocol':
+    def __call__(self) -> 'ProtocolBase':
         """Run the postponed analysis.
 
         Returns:
@@ -171,7 +171,7 @@ class DeferredPacket:
     # supplies all three. Neither mypy nor pylint can see that from here, and
     # pylint calls it an *error* rather than a warning.
 
-    def __analyse__(self) -> 'Optional[Protocol]':
+    def __analyse__(self) -> 'Optional[ProtocolBase]':
         """Resolve a deferred analysis, at most once.
 
         Returns:

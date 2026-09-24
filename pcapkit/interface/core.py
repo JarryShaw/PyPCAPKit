@@ -18,7 +18,7 @@ from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.context import ContextRegistry, ProtocolContext
     from pcapkit.foundation.extraction import Engines, Formats, Layers, Protocols, VerboseHandler
-    from pcapkit.foundation.reassembly.reassembly import ReassemblyBase as Reassembly
-    from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
+    from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
+    from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions
@@ -73,7 +73,7 @@ PyPCAPFile = 'pypcapfile'
 def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,     # basic settings # pylint: disable=redefined-builtin
             auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
             files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
-            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[Protocol]' = None,                         # extraction settings # pylint: disable=line-too-long
+            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[ProtocolBase]' = None,                         # extraction settings # pylint: disable=line-too-long
             protocol: 'Optional[Protocols]' = None,                                                                        # extraction settings # pylint: disable=line-too-long
             reassembly: 'bool' = False, reasm_strict: 'bool' = True, reasm_store: 'bool' = True,                           # reassembly settings # pylint: disable=line-too-long
             reasm_timeout: 'Optional[float]' = None,                                                                       # reassembly settings # pylint: disable=line-too-long
@@ -157,7 +157,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
     """
-    if isinstance(layer, type) and issubclass(layer, Protocol):
+    if isinstance(layer, type) and issubclass(layer, ProtocolBase):
         layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
 
     return Extractor(fin=fin, fout=fout, format=format,
@@ -174,8 +174,8 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
                      no_eof=no_eof, context=context)
 
 
-def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False,
-               timeout: 'Optional[float]' = None) -> 'Reassembly':
+def reassemble(protocol: 'str | Type[ProtocolBase]', strict: 'bool' = False,
+               timeout: 'Optional[float]' = None) -> 'ReassemblyBase':
     """Reassemble fragmented datagrams.
 
     Arguments:
@@ -191,7 +191,7 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False,
         FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.
 
     """
-    if isinstance(protocol, type) and issubclass(protocol, Protocol):
+    if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
 
     if protocol == 'IPv4':
@@ -203,10 +203,10 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False,
     raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
+def trace(protocol: 'str | Type[ProtocolBase]', fout: 'Optional[str]',
           format: 'Optional[str]',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
-          nanosecond: bool = False, bidirectional: 'bool' = True) -> 'TraceFlow':
+          nanosecond: bool = False, bidirectional: 'bool' = True) -> 'TraceFlowBase':
     """Trace flows.
 
     Arguments:
@@ -225,7 +225,7 @@ def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
         FormatError: If ``protocol`` is **NOT** TCP.
 
     """
-    if isinstance(protocol, type) and issubclass(protocol, Protocol):
+    if isinstance(protocol, type) and issubclass(protocol, ProtocolBase):
         protocol = protocol.id()[0]
 
     if protocol == 'TCP':

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
@@ -106,7 +106,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed TCP payload. Analysed on first read rather than at construction;
     #: a :class:`Deferred` may be passed in its place, and reading this
     #: attribute then runs it and keeps the result.
-    packet: 'Optional[Protocol]'
+    packet: 'Optional[ProtocolBase]'
     #: Sequence ranges on which two segments disagreed, i.e. where an arriving
     #: segment overlapped bytes already buffered but did not repeat them.
     #: Each entry is ``(first, last)``, absolute TCP sequence numbers and both
@@ -127,7 +127,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # :class:`~pcapkit.foundation.reassembly.data.ip.Datagram`, which applies
         # here identically: ``strict=False`` reports an incomplete payload buffer as
         # one contiguous ``bytes`` and analyses it.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 @info_final
