@@ -10,6 +10,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 """
+import binascii
 import struct
 import sys
 from typing import TYPE_CHECKING, cast
@@ -184,8 +185,11 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
         as :mod:`pcapfile` and :attr:`self._extmp <PyPCAPFile._extmp>`
         as an iterator over the lazily generated savefile packets.
 
-        The savefile is loaded with ``layers=0``, so that each frame arrives with
-        its bytes verbatim, and :meth:`read_frame` then decodes it to
+        The savefile is loaded with ``layers=0``. Per :func:`pcapfile.savefile
+        ._read_a_packet`, that does *not* hand back each frame's bytes verbatim --
+        it hexlifies the whole frame into ASCII text and stops there, exactly as it
+        would for any layer at which it runs out of layers left to descend. It is
+        :meth:`_decode` that un-hexlifies and then decodes each frame to
         :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` -- the very
         call :mod:`pcapfile` makes internally. Doing it this way round is what
         lets the link layer type be inspected (and reported on) *before* the
@@ -320,7 +324,8 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
 
         Warns:
             AttributeWarning: If no decoder is available, as frames will then be
-                left as raw bytes and no reassembly or flow tracing is possible.
+                left hexlified -- see :meth:`run` -- and no reassembly or flow
+                tracing is possible.
 
         """
         try:
@@ -342,7 +347,10 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
         given one mutated, so that a decoding failure leaves the original intact.
 
         Args:
-            packet: Undecoded savefile packet, i.e. as loaded with ``layers=0``.
+            packet: Undecoded savefile packet, i.e. as loaded with ``layers=0``,
+                whose :attr:`packet.packet <pcapfile.structs.pcap_packet.packet>`
+                is therefore the hexlified frame (see :meth:`run`), not the raw
+                bytes.
             frnum: Frame number, for the warning message below.
 
         Returns:
@@ -359,7 +367,13 @@ class PyPCAPFile(Engine['PCAPFilePacket']):
             return packet
 
         try:
-            decoded = self._declf(packet.packet, layers=self.LAYERS - 1)
+            # ``packet.packet`` is hexlified ASCII text, not raw bytes -- see
+            # :meth:`run`. ``self._declf`` (e.g. :class:`pcapfile.protocols
+            # .linklayer.ethernet.Ethernet`) unpacks its own header straight out
+            # of its first argument via :func:`struct.unpack`, so it must be
+            # un-hexlified back to raw bytes first, or every field it decodes
+            # comes out garbage despite raising nothing.
+            decoded = self._declf(binascii.unhexlify(packet.packet), layers=self.LAYERS - 1)
         except (struct.error, AssertionError, ValueError, IndexError, KeyError) as error:
             warn(f'Frame {frnum}: {self._dlink!r} decoding failed ({error!r}); '
                  'frame left undecoded', AttributeWarning, stacklevel=stacklevel())

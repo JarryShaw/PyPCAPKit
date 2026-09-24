@@ -12,6 +12,7 @@ installed. End-to-end agreement with the ``default`` engine lives in
 """
 from __future__ import annotations
 
+import binascii
 import importlib.util
 import io
 import struct
@@ -29,6 +30,16 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 PCAP_MAGIC = b'\xd4\xc3\xb2\xa1'
 #: Magic number of a PCAP-NG section header block.
 PCAPNG_MAGIC = b'\x0a\x0d\x0d\x0a'
+
+#: Raw bytes of a not-yet-decoded frame.
+RAW_FRAME = b'payload'
+#: The hex-ASCII form :func:`pcapfile.savefile._read_a_packet` actually hands
+#: back as ``packet.packet`` for a savefile loaded with ``layers=0`` -- see
+#: :meth:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run`. Stand-in
+#: packets below carry this, not :data:`RAW_FRAME` itself, so that a decoder
+#: fixture receiving :data:`RAW_FRAME` is proof that :meth:`~pcapkit.foundation
+#: .engines.pypcapfile.PyPCAPFile._decode` un-hexlified it first (see #746).
+HEXLIFIED_FRAME = binascii.hexlify(RAW_FRAME)
 
 
 class OutputSink:
@@ -118,7 +129,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
 
         if savefile is None:
-            savefile = FakeSaveFile([FakePacket(None, 1, 500000, 7, 7, b'payload')])
+            savefile = FakeSaveFile([FakePacket(None, 1, 500000, 7, 7, HEXLIFIED_FRAME)])
 
         engine = PyPCAPFile.__new__(PyPCAPFile)
         engine._expkg = types.SimpleNamespace(
@@ -247,7 +258,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
     def prepared(self, packets=None, decoder=FakeDecoded, **overrides):
         if packets is None:
             packets = [FakePacket(types.SimpleNamespace(ns_resolution=False),
-                                  1, 500000, 7, 7, b'payload')]
+                                  1, 500000, 7, 7, HEXLIFIED_FRAME)]
         extractor, sink = self.make_extractor(**overrides)
         engine = self.engine(extractor, savefile=FakeSaveFile(iter(packets)), decoder=decoder)
         with mock.patch('pcapkit.foundation.engines.pypcapfile.warn'):
@@ -261,7 +272,9 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             frame = engine.read_frame()
 
         self.assertIsInstance(frame.packet, FakeDecoded)
-        self.assertEqual(frame.packet.raw, b'payload')
+        # the decoder must see the un-hexlified raw bytes, not the hex-ASCII
+        # ``packet.packet`` a ``layers=0`` load actually hands back -- #746
+        self.assertEqual(frame.packet.raw, RAW_FRAME)
         self.assertEqual(frame.packet.layers, engine.LAYERS - 1)
         self.assertEqual((frame.timestamp, frame.timestamp_us), (1, 500000))
         self.assertEqual((frame.capture_len, frame.packet_len), (7, 7))
@@ -275,10 +288,37 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         with self.assertRaises(StopIteration):
             engine.read_frame()
 
+    def test_decode_unhexlifies_the_savefile_bytes_before_calling_the_decoder(self) -> None:
+        """``_decode()`` must undo the ``layers=0`` load's hexlifying (#746).
+
+        :func:`pcapfile.savefile._read_a_packet` hexlifies the whole frame into
+        ASCII text when ``layers=0`` (see :meth:`PyPCAPFile.run`), so
+        ``packet.packet`` is :data:`HEXLIFIED_FRAME`, never :data:`RAW_FRAME`.
+        Handing that straight to the link layer decoder -- which unpacks its own
+        header with :func:`struct.unpack` -- makes every field it decodes
+        garbage without raising anything, so this has to be asserted on the
+        decoder's actual input rather than on some raised error.
+        """
+        from pcapkit.foundation.engines.pypcapfile import PyPCAPFile
+
+        engine = PyPCAPFile.__new__(PyPCAPFile)
+        engine._declf = mock.Mock(return_value=FakeDecoded(RAW_FRAME))
+        engine._expkg = types.SimpleNamespace(
+            structs=types.SimpleNamespace(pcap_packet=FakePacket),
+        )
+        engine._dlink = None
+
+        packet = FakePacket(types.SimpleNamespace(ns_resolution=False),
+                            1, 0, 7, 7, HEXLIFIED_FRAME)
+        decoded = engine._decode(packet, frnum=1)
+
+        engine._declf.assert_called_once_with(RAW_FRAME, layers=engine.LAYERS - 1)
+        self.assertIsInstance(decoded.packet, FakeDecoded)
+
     def test_read_frame_leaves_the_frame_alone_with_no_decoder(self) -> None:
         extractor, _, engine = self.prepared(decoder=None, _flag_q=True)
         frame = engine.read_frame()
-        self.assertEqual(frame.packet, b'payload')
+        self.assertEqual(frame.packet, HEXLIFIED_FRAME)
 
     def test_read_frame_warns_and_falls_back_when_decoding_fails(self) -> None:
         from pcapkit.utilities.warnings import AttributeWarning
@@ -291,7 +331,38 @@ class PyPCAPFileEngineTests(unittest.TestCase):
                 )
                 with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
                     frame = engine.read_frame()
-                self.assertEqual(frame.packet, b'payload')
+                self.assertEqual(frame.packet, HEXLIFIED_FRAME)
+                self.assertIn('decoding failed', warn.call_args.args[0])
+                self.assertIn('Frame 1', warn.call_args.args[0])
+                self.assertIs(warn.call_args.args[1], AttributeWarning)
+
+    def test_read_frame_warns_and_falls_back_when_unhexlifying_fails(self) -> None:
+        """The un-hexlifying itself, not just the decoder, must stay inside the
+        ``try`` (#746).
+
+        A ``packet.packet`` that is not valid hex can never reach a real
+        savefile -- :func:`pcapfile.savefile._read_a_packet` produced it with
+        :func:`binascii.hexlify` -- but nothing stops a future refactor from
+        hoisting :func:`binascii.unhexlify` out of :meth:`PyPCAPFile._decode`'s
+        ``try``, which would turn this per-frame :class:`AttributeWarning` into
+        an uncaught :exc:`binascii.Error` instead. The decoder must never be
+        reached: un-hexlifying fails before it is called.
+        """
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        # non-hex characters, and valid hex digits at an odd length
+        for bad in (b'not-hex-at-all', b'abc'):
+            with self.subTest(bad=bad):
+                decoder = mock.Mock()
+                extractor, _, engine = self.prepared(
+                    packets=[FakePacket(types.SimpleNamespace(ns_resolution=False),
+                                        1, 0, len(bad), len(bad), bad)],
+                    decoder=decoder, _flag_q=True,
+                )
+                with mock.patch('pcapkit.foundation.engines.pypcapfile.warn') as warn:
+                    frame = engine.read_frame()
+                decoder.assert_not_called()
+                self.assertEqual(frame.packet, bad)
                 self.assertIn('decoding failed', warn.call_args.args[0])
                 self.assertIn('Frame 1', warn.call_args.args[0])
                 self.assertIs(warn.call_args.args[1], AttributeWarning)
