@@ -26,6 +26,7 @@ modules it needs are written into a temporary directory and audited by path.
 """
 from __future__ import annotations
 
+import ast
 import pathlib
 import re
 import subprocess
@@ -57,6 +58,39 @@ def write_module(directory: 'pathlib.Path', name: 'str', source: 'str') -> 'path
     path = directory / name
     path.write_text(textwrap.dedent(source).lstrip('\n'), encoding='utf-8')
     return path
+
+
+def job_section(text: 'str', name: 'str') -> 'str':
+    """The YAML text of job ``name``, from its header to the next top-level job.
+
+    A plain slice rather than a real YAML parse: :class:`WorkflowAgreementTests`
+    and :class:`FixtureTierSelectionTests` both need to know what one job's
+    steps say without tripping over another job that happens to mention the
+    same words, and a two-space-indented ``key:`` line is what marks a job
+    boundary in this file however its body is written.
+
+    """
+    match = re.search(rf'(?m)^  {re.escape(name)}:\n(.*?)(?=^  \w[\w-]*:\n|\Z)', text, re.DOTALL)
+    if match is None:
+        raise AssertionError(f'no job named {name!r} found in the workflow')
+    return match.group(1)
+
+
+def step_run_block(section: 'str', step_name: 'str') -> 'str':
+    """The ``run:`` block of the step named ``step_name`` within a job section.
+
+    Scoped to one step, not just one job, because a job can hold several
+    steps and only one of them is the one a test cares about -- see
+    :func:`job_section` for why a text slice rather than a YAML parse.
+
+    """
+    match = re.search(
+        rf'(?m)^      - name: {re.escape(step_name)}\n(.*?)(?=^      - name:|\Z)',
+        section, re.DOTALL,
+    )
+    if match is None:
+        raise AssertionError(f'no step named {step_name!r} found in this job')
+    return match.group(1)
 
 
 class TierClassificationTests(unittest.TestCase):
@@ -108,6 +142,297 @@ class WorkflowAgreementTests(unittest.TestCase):
 
         self.assertEqual(globs, set(_tiers.FIXTURE_TIER_SUFFIXES))
         self.assertEqual(directories, set(_tiers.FIXTURE_TIER_DIRS))
+
+    def test_integration_job_selects_positively_by_asking_tiers_for_it(self) -> None:
+        """The ``integration`` job's selection runs the other direction, so it
+        is checked the other way.
+
+        The ``test`` job above is checked by parsing its ``--ignore`` /
+        ``--ignore-glob`` flags out of the workflow text and comparing them to
+        :data:`~tests._tiers.FIXTURE_TIER_DIRS` /
+        :data:`~tests._tiers.FIXTURE_TIER_SUFFIXES` -- a *negative* selection,
+        so those two regexes are what could drift from this module. The
+        ``integration`` job instead *selects* the fixture-dependent tier
+        positively, and a positive selection spelled out as literal paths
+        would be invisible to those same regexes: nothing would stop it from
+        drifting from :func:`~tests._tiers.skip_idiom_modules` while this test
+        stayed green.
+
+        So the ``integration`` job does not spell the selection out. Its "Run
+        full test suite" step has to call
+        :func:`~tests._tiers.fixture_tier_paths` directly instead of
+        reimplementing the answer -- which makes drift structurally
+        impossible rather than merely checked for, and is what this asserts.
+
+        """
+        if not WORKFLOW.is_file():
+            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
+
+        text = WORKFLOW.read_text(encoding='utf-8')
+        section = job_section(text, 'integration')
+        run_block = step_run_block(section, 'Run full test suite')
+
+        self.assertIn(
+            'fixture_tier_paths', run_block,
+            "the integration job's \"Run full test suite\" step no longer calls "
+            "tests._tiers.fixture_tier_paths() -- see this test's docstring for why a "
+            "hand-written selection here can drift silently"
+        )
+        self.assertIn('pytest', run_block)
+
+
+class EnclosingScopeTests(unittest.TestCase):
+    """:func:`~tests._tiers._enclosing_scope`, on synthetic sources.
+
+    Needs no git and no real module -- it is a pure function of an
+    :mod:`ast` tree and a line number, so it is pinned the same way
+    :class:`AuditTests` pins :func:`~tests._tiers.audit_module`: against
+    source written for the purpose, not against whatever the suite happens to
+    contain today.
+
+    """
+
+    def test_a_method_on_a_class_reports_both_names(self) -> None:
+        tree = ast.parse(textwrap.dedent("""
+            class Tests:
+                def test_it(self):
+                    line_two = 2
+            """))
+        # Line 3 is `def test_it(self):` itself; line 4 is its body.
+        self.assertEqual(_tiers._enclosing_scope(tree, 4), ('Tests', 'test_it'))
+
+    def test_a_module_level_function_reports_no_class(self) -> None:
+        tree = ast.parse(textwrap.dedent("""
+            def test_it():
+                line_two = 2
+            """))
+        self.assertEqual(_tiers._enclosing_scope(tree, 3), (None, 'test_it'))
+
+    def test_a_line_outside_every_function_reports_nothing(self) -> None:
+        tree = ast.parse(textwrap.dedent("""
+            class Tests:
+                def test_it(self):
+                    pass
+            """))
+        self.assertIsNone(_tiers._enclosing_scope(tree, 1))
+
+    def test_the_innermost_function_wins_over_its_enclosing_method(self) -> None:
+        """A nested helper's line belongs to the helper, not the test method.
+
+        Not a shape the suite's own skip idiom uses today, but
+        :func:`~tests._tiers.skip_idiom_test_ids` documents that "most tightly
+        wrapping" is the rule, and this is what pins it.
+
+        """
+        tree = ast.parse(textwrap.dedent("""
+            class Tests:
+                def test_it(self):
+                    def helper():
+                        line_four = 4
+                    helper()
+            """))
+        self.assertEqual(_tiers._enclosing_scope(tree, 5), ('Tests', 'helper'))
+
+    def test_two_sibling_classes_are_not_confused(self) -> None:
+        tree = ast.parse(textwrap.dedent("""
+            class First:
+                def test_a(self):
+                    pass
+
+            class Second:
+                def test_b(self):
+                    line_seven = 7
+            """))
+        self.assertEqual(_tiers._enclosing_scope(tree, 8), ('Second', 'test_b'))
+
+
+class FixtureTierSelectionTests(unittest.TestCase):
+    """:func:`~tests._tiers.skip_idiom_modules` and :func:`~tests._tiers.fixture_tier_paths`.
+
+    Together these are what the ``integration`` job runs instead of the whole
+    suite -- see :class:`WorkflowAgreementTests` for the half of the guarantee
+    that lives in the workflow file itself.
+
+    """
+
+    def setUp(self) -> None:
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+    def test_skip_idiom_modules_matches_an_independent_scan(self) -> None:
+        """Built from the same lower-level facts, but not by calling the function.
+
+        Re-derived here from :func:`~tests._tiers.sample_path_calls` and
+        :func:`~tests._tiers.committed_captures` directly, the same way
+        :class:`CommittedCaptureTests`'s
+        ``test_every_tracked_name_exists_and_matches_git`` re-derives the
+        committed set independently of
+        :func:`~tests._tiers.committed_captures` -- calling
+        :func:`~tests._tiers.skip_idiom_modules` a second time would only show
+        that it agrees with itself.
+
+        """
+        tracked = _tiers.committed_captures()
+        assert tracked is not None
+
+        expected = set()
+        for path in sorted(_tiers.TESTS_ROOT.rglob('*.py')):
+            if not _tiers.is_unit_tier(path):
+                continue
+            for call in _tiers.sample_path_calls(str(path)):
+                if call.handled and call.name is not None and not _tiers._is_committed(call.name, tracked):
+                    expected.add(path)
+                    break
+
+        self.assertEqual(set(_tiers.skip_idiom_modules()), expected)
+
+    def test_skip_idiom_modules_matches_a_grep_based_scan(self) -> None:
+        """A second, textually independent check, catching a bug the first one could not.
+
+        The scan above is re-derived from :func:`~tests._tiers.sample_path_calls`
+        and :func:`~tests._tiers.committed_captures`, so a bug shared by those two
+        primitives and :func:`~tests._tiers.skip_idiom_modules` would pass it
+        undetected -- all three would agree with each other and still be wrong.
+        This check shares nothing with them: it is a plain substring scan of the
+        file text, no :mod:`ast` involved.
+
+        Two files are excluded on purpose, not overlooked: :file:`tests/_tiers.py`
+        itself and :file:`tests/test_tier_guard.py`, this module. Both mention
+        ``sample_path(`` and ``except FileNotFoundError`` freely -- in
+        docstrings, in error messages, and in source strings ``write_module()``
+        writes out for other tests to audit -- without containing a single real
+        call to either. A first version of this check included them and failed
+        immediately for exactly that reason, which is the point: a check that
+        cannot fail is not a check.
+
+        Restricted to ``test_*.py`` for the same reason :mod:`pytest` itself
+        is (see ``python_files`` in :file:`pyproject.toml`): a module outside
+        that pattern is not a test module regardless of what
+        :func:`~tests._tiers.is_unit_tier` says about its path, and
+        :file:`tests/_tiers.py` is the case in point.
+
+        """
+        grep_matches = set()
+        for path in sorted(_tiers.TESTS_ROOT.rglob('test_*.py')):
+            if path == _tiers.TESTS_ROOT / 'test_tier_guard.py':
+                continue
+            if not _tiers.is_unit_tier(path):
+                continue
+            text = path.read_text(encoding='utf-8')
+            if 'sample_path(' in text and 'except FileNotFoundError' in text:
+                grep_matches.add(path)
+
+        self.assertEqual(set(_tiers.skip_idiom_modules()), grep_matches)
+
+    def test_every_handled_call_names_a_literal_capture(self) -> None:
+        """A computed name inside a handler would be invisible to the scan above.
+
+        Pins today's fact that no unit-tier module needs the computed case, so
+        that the day one does, this fails loudly instead of that module's
+        fixture-backed coverage silently dropping out of
+        :func:`~tests._tiers.fixture_tier_paths` -- see
+        :func:`~tests._tiers.skip_idiom_modules`'s docstring for the mechanism.
+
+        """
+        for path in sorted(_tiers.TESTS_ROOT.rglob('*.py')):
+            if not _tiers.is_unit_tier(path):
+                continue
+            for call in _tiers.sample_path_calls(str(path)):
+                if call.handled and call.name is None:
+                    self.fail(
+                        f'{path.relative_to(_tiers.ROOT)}:{call.lineno} handles a computed '
+                        f'sample_path() call -- skip_idiom_modules() cannot tell whether it '
+                        f'reads a generated capture and may need including by hand'
+                    )
+
+    def test_skip_idiom_test_ids_resolve_to_a_real_method_in_a_skip_idiom_module(self) -> None:
+        """Every node ID names a method that really exists, in a module the
+        module-level scan above also flagged.
+
+        Checked by parsing the module independently with :mod:`ast` rather
+        than by importing it -- unit-tier modules are not meant to be imported
+        outside pytest collecting them, and a static check is enough to prove
+        the node ID is not simply wrong.
+
+        """
+        skip_idiom = {module.relative_to(_tiers.ROOT).as_posix() for module in _tiers.skip_idiom_modules()}
+
+        for node_id in _tiers.skip_idiom_test_ids():
+            with self.subTest(node_id=node_id):
+                parts = node_id.split('::')
+                self.assertGreaterEqual(len(parts), 2, f'{node_id!r} is not a module::function node ID')
+                relative, *scope = parts
+                self.assertIn(relative, skip_idiom, f'{relative} was not flagged by skip_idiom_modules()')
+
+                tree = ast.parse((_tiers.ROOT / relative).read_text(encoding='utf-8'))
+                node = tree  # type: ast.AST
+                for name in scope:
+                    found = next(
+                        (child for child in ast.walk(node)
+                         if isinstance(child, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+                         and child.name == name),
+                        None,
+                    )
+                    self.assertIsNotNone(found, f'{node_id}: no definition named {name!r} in {relative}')
+                    node = found
+
+    def test_fixture_tier_paths_includes_every_component(self) -> None:
+        """The directory, suffix, and skip-idiom components are all present."""
+        paths = _tiers.fixture_tier_paths()
+        self.assertIn('tests/integration', paths)
+
+        for path in sorted(_tiers.TESTS_ROOT.rglob('*.py')):
+            relative_to_tests = path.relative_to(_tiers.TESTS_ROOT)
+            under_fixture_dir = not _tiers.FIXTURE_TIER_DIRS.isdisjoint(relative_to_tests.parts[:-1])
+            if under_fixture_dir:
+                continue
+            if path.name.endswith(_tiers.FIXTURE_TIER_SUFFIXES):
+                with self.subTest(module=str(relative_to_tests)):
+                    self.assertIn(path.relative_to(_tiers.ROOT).as_posix(), paths)
+
+        for node_id in _tiers.skip_idiom_test_ids():
+            with self.subTest(node_id=node_id):
+                self.assertIn(node_id, paths)
+
+    def test_fixture_tier_paths_never_selects_a_pure_unit_tier_module(self) -> None:
+        """The property the whole partition depends on: nothing runs twice.
+
+        Every entry is either outside the unit tier by
+        :func:`~tests._tiers.is_unit_tier`, or is a
+        :func:`~tests._tiers.skip_idiom_test_ids` node ID scoped to one method
+        of a :func:`~tests._tiers.skip_idiom_modules` module -- never a
+        unit-tier module, or a bare unit-tier module path with no ``::``
+        scope, or the ``test`` and ``integration`` jobs would be back to
+        running the same test twice.
+
+        """
+        skip_idiom = set(_tiers.skip_idiom_modules())
+        node_ids = set(_tiers.skip_idiom_test_ids())
+        paths = _tiers.fixture_tier_paths()
+        self.assertTrue(paths, 'fixture_tier_paths() returned nothing')
+
+        for entry in paths:
+            with self.subTest(entry=entry):
+                if '::' in entry:
+                    # A skip-idiom node ID: legal only when it is one of the
+                    # exact IDs skip_idiom_test_ids() names -- not merely a
+                    # module skip_idiom_modules() flagged, which would still
+                    # pull the whole file in and reintroduce the duplication
+                    # this split exists to avoid.
+                    self.assertIn(entry, node_ids)
+                    continue
+
+                candidate = _tiers.ROOT / entry
+                if candidate.is_dir():
+                    continue  # a directory argument, e.g. tests/integration
+                self.assertTrue(candidate.is_file(), f'{entry} does not exist')
+                if _tiers.is_unit_tier(candidate):
+                    self.assertIn(
+                        candidate, skip_idiom,
+                        f'{entry} is a bare unit-tier module path, not a node ID scoped to one '
+                        f'of its methods -- it would run in both the test and integration jobs'
+                    )
 
 
 class CommittedCaptureTests(unittest.TestCase):
