@@ -30,28 +30,53 @@ jobs:
     # and one a three-minute test run, with nothing to tell them apart.
     name: Compat Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
         python-version:
+          # 3.15 deliberately excluded: ruleset 23497679's required checks
+          # only cover 3.10-3.14, so it cannot block a merge here either. Its
+          # replacement is the `compatibility-nightly` job below, which runs
+          # only on this workflow's existing weekly schedule.
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
-        experimental:
-          - false
-        include:
-          - python-version: "3.15"
-            experimental: true
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: ${{ matrix.experimental }}
+
+      - name: Install package
+        run: |
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e .
+
+      - name: Verify package
+        run: |
+          python -m compileall -q pcapkit
+          python -c 'import pcapkit; print(pcapkit.__version__)'
+
+  # 3.15 is not in ruleset 23497679's required-checks list, so running it on
+  # every push/PR was queue contention with no gating signal (it was already
+  # `continue-on-error`). This job keeps early warning of a 3.15-only
+  # regression -- import and compileall only, ~14s -- without paying for it on
+  # every push: it fires solely on the schedule trigger above (line 9).
+  compatibility-nightly:
+    name: Compat Python 3.15 (scheduled)
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.15"
+          allow-prereleases: true
 
       - name: Install package
         run: |

@@ -50,22 +50,20 @@ jobs:
     name: Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental == true }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         python-version:
+          # 3.15 deliberately excluded: ruleset 23497679's required checks
+          # only cover 3.10-3.14, so a 3.15 leg here cannot block a merge and
+          # was pure queue contention -- see python-compatibility.yml for its
+          # (non-blocking, schedule-only) replacement.
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
-        experimental:
-          - false
-        include:
-          - python-version: "3.15"
-            experimental: true
 
     steps:
       - uses: actions/checkout@v7
@@ -73,7 +71,6 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: ${{ matrix.experimental }}
           cache: pip
 
       - name: Install package and test dependencies
@@ -81,9 +78,21 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test]'
 
+      # `-n auto` resolves to whatever this runner reports, and nothing else in
+      # the log says what that was -- print it so the number `-n auto` picked
+      # is a measured fact instead of an assumption about runner size.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
       - name: Run unit tests
+        # `--dist load` is pinned explicitly rather than left to default: a
+        # future change to xdist's own default, or someone "optimising" to
+        # `loadfile`/`loadscope`, cannot silently change how this suite is
+        # distributed.
         run: >-
-          python -m pytest -q
+          python -m pytest -q -n auto --dist load
           --ignore=tests/integration
           --ignore-glob='*_runtime.py'
           --ignore-glob='*_regression.py'
@@ -92,22 +101,17 @@ jobs:
     name: Integration Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental == true }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         python-version:
+          # See the `test` job above for why 3.15 is excluded here.
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
-        experimental:
-          - false
-        include:
-          - python-version: "3.15"
-            experimental: true
 
     steps:
       - uses: actions/checkout@v7
@@ -115,7 +119,6 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: ${{ matrix.experimental }}
           cache: pip
 
       # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
@@ -152,6 +155,12 @@ jobs:
             echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
           fi
 
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
       # The ``test`` job above already ran every unit-tier test for real, on this
       # same commit. Re-running them here (a bare ``pytest -q`` used to) bought
       # no signal and cost ~21.75 minutes per Python version -- ~130 minutes per
@@ -167,7 +176,8 @@ jobs:
       # A failure to compute the selection intentionally does not fall back to
       # a bare `pytest -q` -- that would silently re-introduce the whole-suite
       # duplication this change exists to remove, with nothing in the log to
-      # say so.
+      # say so. `--dist load` is pinned explicitly; see the `test` job above
+      # for why.
       - name: Run full test suite
         shell: bash
         run: |
@@ -180,7 +190,7 @@ jobs:
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
-          python -m pytest -q $selection
+          python -m pytest -q -n auto --dist load $selection
 
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
@@ -262,6 +272,12 @@ jobs:
             echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
           fi
 
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
       # Deliberately still the whole suite, unlike the `integration` job above:
       # this is the shipping gate's own independent re-verification (see the
       # job comment above), not the same accidental duplication #715 measured
@@ -272,6 +288,7 @@ jobs:
       # Whether `gate` should run at all on a commit the matrix already
       # covered is #715's separate item 2 ("stop the gate re-running on main
       # pushes"), a trigger-frequency question, not a selection one -- out of
-      # scope here.
+      # scope here. `--dist load` is pinned explicitly; see the `test` job
+      # above for why.
       - name: Run full test suite
-        run: python -m pytest -q
+        run: python -m pytest -q -n auto --dist load

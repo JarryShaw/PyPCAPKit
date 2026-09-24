@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Suite-wide :program:`pytest` configuration.
 
-Holds two things. The first is :func:`restore_module_table`, the guard that puts
-the :mod:`pcapkit` region of :data:`sys.modules` back after every test; see its
-own docstring for why it is here rather than left to each test file.
+Holds three things. The first is :func:`restore_module_table`, the guard that
+puts the :mod:`pcapkit` region of :data:`sys.modules` back after every test; see
+its own docstring for why it is here rather than left to each test file.
 
 The second is the collection-time half of the tier guard described in
 :mod:`tests._tiers`. Every unit-tier module about to be run is read and checked
@@ -24,11 +24,22 @@ runs (skipped for a missing optional engine, say) but only when the capture name
 is a literal, while the runtime one sees any name however it was computed but
 only when the call is reached.
 
+The third is :func:`_tier_guard_lock` and :func:`_tier_guard_reader_lock`, a
+readers-writer mutex that keeps
+:class:`tests.test_tier_guard.SuiteIsCleanTests`'s live filesystem scan from
+observing :class:`tests.test_tier_guard_xdist.XdistSubprocessTests`'s
+deliberately-violating probe module while it is momentarily on disk. See
+:func:`_tier_guard_lock`'s docstring for the race and why a mutex is what closes
+it.
+
 """
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import importlib
 import pathlib
+import tempfile
 import types
 import warnings
 from typing import TYPE_CHECKING
@@ -36,8 +47,13 @@ from typing import TYPE_CHECKING
 import pytest
 
 from tests._support import ISOLATED_PREFIXES, restore_modules, snapshot_modules
-from tests._tiers import (TierGuardWarning, audit_module, guard_unavailable_reason,
+from tests._tiers import (ROOT, TierGuardWarning, audit_module, guard_unavailable_reason,
                           is_unit_tier)
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover -- POSIX-only
+    fcntl = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from typing import Iterable, Iterator, Optional
@@ -264,7 +280,7 @@ def _audit(items: 'Iterable[pytest.Item]') -> 'list[str]':
     return findings
 
 
-def pytest_collection_modifyitems(config: 'pytest.Config',
+def pytest_collection_modifyitems(session: 'pytest.Session', config: 'pytest.Config',
                                   items: 'list[pytest.Item]') -> 'None':
     """Refuse to run a unit-tier module that depends on a generated fixture."""
     reason = None  # type: Optional[str]
@@ -293,7 +309,144 @@ def pytest_collection_modifyitems(config: 'pytest.Config',
         return
 
     if findings:
-        raise pytest.UsageError(
+        message = (
             f'{len(findings)} read(s) of a generated sample capture from a unit-tier test '
             f'module; see tests/_tiers.py for the tier rule.\n\n' + '\n\n'.join(findings)
         )
+        # Under pytest-xdist this hook runs inside each worker's own nested
+        # session (xdist/remote.py), and that session's `pytest_collection_finish`
+        # fires from a `finally:` regardless of the UsageError below, so the
+        # controller sees a normal collection and may schedule a test to a worker
+        # that is already unwinding. The controller then reports that test as
+        # crashed -- `assert not crashitem` in xdist/dsession.py -- swallowing
+        # this message and printing an INTERNALERROR instead. Measured against
+        # pytest-xdist 3.8.0/pytest 9.1.1: setting `shouldfail` first is what the
+        # controller already knows how to shut a worker down on cleanly, no
+        # crash-item assertion, and the message still comes through -- as
+        # ``xdist.dsession.Interrupted: <message>`` rather than ``ERROR:
+        # <message>``, which is the one visible difference from the serial path.
+        # A no-op outside a worker, so serial behaviour is unchanged.
+        if hasattr(config, 'workerinput'):
+            session.shouldfail = message
+        raise pytest.UsageError(message)
+
+
+#: Reserved name for the probe module
+#: :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` writes to disk to
+#: reproduce a real tier violation under a real :program:`pytest` run. Defined
+#: here rather than duplicated as a literal in that module because
+#: :func:`_tier_guard_reader_lock` below has to recognise it without importing
+#: that module: the nested :program:`pytest` subprocess the probe test spawns
+#: loads this conftest but never collects ``test_tier_guard_xdist.py`` at all.
+PROBE_MODULE_NAME = 'test_zzz_xdist_guard_probe_unit.py'
+
+#: Module names whose own tests manage :func:`_tier_guard_lock` themselves and
+#: must not also take the shared hold :func:`_tier_guard_reader_lock` puts on
+#: every other unit-tier test.
+#:
+#: :data:`PROBE_MODULE_NAME` is excluded because it runs *inside* the writer's
+#: exclusive hold by construction (that hold is what protects it), so taking a
+#: shared one too would be a self-deadlock: the same lock file, opened twice by
+#: the one process tree that also has to wait on itself to finish before either
+#: side would let go. ``test_tier_guard_xdist.py`` is excluded for the same
+#: reason -- :class:`~tests.test_tier_guard_xdist.XdistSubprocessTests` takes
+#: the exclusive hold directly in its own ``setUp``, so the generic shared hold
+#: below would collide with it in exactly the same way.
+#:
+#: This covers every test that manages the lock *directly*. It does not
+#: generalise to a unit-tier test that spawns its own nested ``pytest``
+#: subprocess while holding the outer shared hold --
+#: :mod:`tests.project.test_module_isolation` is exactly such a test, and if
+#: its selection ever grew to include this module or the probe, its outer
+#: shared hold (spanning the whole test, including the blocking
+#: ``subprocess.run``) would wait on an inner exclusive request that cannot be
+#: granted until the outer test finishes: the same deadlock shape as above, one
+#: level removed. Today it never selects either, so nothing here triggers it;
+#: a future change to that selection should keep it that way, or add the
+#: module in question here too.
+_LOCK_MANAGED_ELSEWHERE = frozenset({PROBE_MODULE_NAME, 'test_tier_guard_xdist.py'})
+
+
+def _tier_guard_lock_path() -> 'pathlib.Path':
+    """Where the probe/scan mutex lives, one file per checkout.
+
+    Keyed by :data:`tests._tiers.ROOT` rather than a fixed name, so two
+    worktrees of this repository each running their own ``-n auto`` session on
+    the same host never share a lock file neither of them needs shared.
+
+    """
+    digest = hashlib.sha1(str(ROOT).encode('utf-8')).hexdigest()[:16]
+    return pathlib.Path(tempfile.gettempdir()) / f'pcapkit-tier-guard-probe-{digest}.lock'
+
+
+@contextlib.contextmanager
+def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
+    """Hold the probe/scan mutex, shared or exclusive, for the block's duration.
+
+    :class:`~tests.test_tier_guard.SuiteIsCleanTests` walks every unit-tier
+    module on disk with :meth:`pathlib.Path.rglob`, which is sound against a
+    committed tree but not against a concurrent write:
+    :class:`~tests.test_tier_guard_xdist.XdistSubprocessTests` deliberately
+    writes a real violation to disk, under :data:`PROBE_MODULE_NAME`, to
+    reproduce the tier guard's own collection-time diagnostic end to end.
+    Serially the two never overlap; under the ``-n auto --dist load`` this
+    suite's CI jobs now use, pytest-xdist may hand the two tests to different
+    worker processes at the same moment, and the scan can then observe the
+    probe mid-life and report a violation nobody committed -- a real defect in
+    the test suite's own concurrency, not a false positive, since the guard is
+    doing exactly what its docstring says: looking at everything on disk.
+
+    The fix is an ordinary readers-writer mutex over one lock file every
+    process opens independently: :class:`XdistSubprocessTests` holds it
+    exclusively for as long as the probe module sits on disk (see its
+    ``setUp``), and :func:`_tier_guard_reader_lock` below holds it shared, for
+    the duration of the test, on behalf of every other unit-tier test --
+    including :class:`SuiteIsCleanTests`, without that file having to change at
+    all. :func:`fcntl.flock` enforces shared-vs-exclusive across processes as
+    well as threads of one process, which is what makes the two truly unable to
+    overlap rather than merely unlikely to.
+
+    A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, where
+    nothing in this suite's CI turns ``-n auto`` on either (every job that does
+    runs ``ubuntu-latest``; see :file:`.github/workflows/unit-tests.yml` and
+    :file:`.github/workflows/python-compatibility.yml`), so a platform this
+    cannot protect is exactly as exposed to the race as it always was, not more.
+
+    Args:
+        exclusive: :data:`True` for the writer's hold, :data:`False` for a
+            reader's.
+
+    """
+    if fcntl is None:
+        yield
+        return
+    path = _tier_guard_lock_path()
+    with open(path, 'a', encoding='utf-8') as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+@pytest.fixture(autouse=True)
+def _tier_guard_reader_lock(request: 'pytest.FixtureRequest') -> 'Iterator[None]':
+    """Hold the probe/scan mutex shared, for every unit-tier test but the two
+    that self-manage it.
+
+    See :func:`_tier_guard_lock` for the race this closes. Deciding by
+    :func:`tests._tiers.is_unit_tier` rather than by this one test's name is
+    deliberate: every unit-tier test is a potential
+    :class:`~tests.test_tier_guard.SuiteIsCleanTests`, so the protection is
+    structural and covers a similarly-scanning test written later without this
+    fixture changing at all -- and it never has to touch that module's own
+    source to do it.
+
+    """
+    location = getattr(request.node, 'path', None) or getattr(request.node, 'fspath', None)
+    path = pathlib.Path(str(location)) if location is not None else None
+    if path is None or path.name in _LOCK_MANAGED_ELSEWHERE or not is_unit_tier(path):
+        yield
+        return
+    with _tier_guard_lock(exclusive=False):
+        yield
