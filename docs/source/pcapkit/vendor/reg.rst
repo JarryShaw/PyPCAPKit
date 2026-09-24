@@ -59,11 +59,40 @@ Application Layer Protocol Numbers
 
 .. module:: pcapkit.vendor.reg.apptype
 
-This module contains the vendor crawler for **Application Layer Protocol Numbers**,
-which is automatically generating :class:`pcapkit.const.reg.apptype.AppType`.
+This package contains the vendor crawlers for **Application Layer Protocol
+Numbers**, which are automatically generating :mod:`pcapkit.const.reg.apptype`.
+IANA keys every assignment on a ``(service, port, transport)`` triple, so the
+registry is one crawler per transport protocol alongside the base they all
+render against.
 
-.. autoclass:: pcapkit.vendor.reg.apptype.AppType
-   :members: FLAG, LINK
+.. module:: pcapkit.vendor.reg.apptype.apptype
+
+.. autoclass:: pcapkit.vendor.reg.apptype.apptype.AppType
+   :members: FLAG, LINK, TRANSPORT
+   :show-inheritance:
+
+.. module:: pcapkit.vendor.reg.apptype.tcp
+
+.. autoclass:: pcapkit.vendor.reg.apptype.tcp.TCP
+   :members: TRANSPORT
+   :show-inheritance:
+
+.. module:: pcapkit.vendor.reg.apptype.udp
+
+.. autoclass:: pcapkit.vendor.reg.apptype.udp.UDP
+   :members: TRANSPORT
+   :show-inheritance:
+
+.. module:: pcapkit.vendor.reg.apptype.sctp
+
+.. autoclass:: pcapkit.vendor.reg.apptype.sctp.SCTP
+   :members: TRANSPORT
+   :show-inheritance:
+
+.. module:: pcapkit.vendor.reg.apptype.dccp
+
+.. autoclass:: pcapkit.vendor.reg.apptype.dccp.DCCP
+   :members: TRANSPORT
    :show-inheritance:
 
 .. rubric:: Footnotes

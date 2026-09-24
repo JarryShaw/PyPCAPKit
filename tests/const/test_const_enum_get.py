@@ -96,7 +96,7 @@ EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
     'pcapkit.const.ftp.command.ConformanceRequirement',
     'pcapkit.const.ftp.return_code.GroupingInformation',
     'pcapkit.const.ftp.return_code.ResponseKind',
-    'pcapkit.const.reg.apptype.TransportProtocol',
+    'pcapkit.const.reg.apptype.apptype.TransportProtocol',
 })
 
 

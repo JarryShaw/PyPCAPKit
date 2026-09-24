@@ -75,7 +75,7 @@ ISSUE_647_OUTLIERS = (
      'returned 65520, the OR of every declared TCP header flag'),
     ('pcapkit.const.ftp.command', 'CommandType',
      'returned 7, the OR of A|P|S'),
-    ('pcapkit.const.reg.apptype', 'TransportProtocol',
+    ('pcapkit.const.reg.apptype.apptype', 'TransportProtocol',
      'returned 15, the OR of tcp|udp|sctp|dccp'),
     ('pcapkit.const.ftp.command', 'Command',
      "raised AttributeError: 'int' object has no attribute 'upper'"),
@@ -102,7 +102,7 @@ BESPOKE_TEMPLATES = (
     'pcapkit.vendor.tcp.flags',
     'pcapkit.vendor.ftp.command',
     'pcapkit.vendor.http.method',
-    'pcapkit.vendor.reg.apptype',
+    'pcapkit.vendor.reg.apptype.apptype',
 )
 
 
@@ -216,11 +216,17 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # in step with the three narrower ones it overlaps: 111 non-flag IntEnum
         # and 7 IntFlag in tests.const.test_const_enum_lookup, and 118 -- their
         # sum -- in tests.const.test_const_enum_get.
+        #
+        # Five of the nine string registries are the application layer one, which
+        # GitHub issue #732 split into a package: the memberless
+        # pcapkit.const.reg.apptype.apptype.AppType base plus one registry per
+        # transport protocol. It is discovered exactly like a member-bearing
+        # registry, since this sweep is structural and never looks at members.
         self.assertEqual(len(ints), 111)
         self.assertEqual(len(flags), 7)
-        self.assertEqual(len(strs), 5)
-        self.assertEqual(len(self.enums), 123)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 117)
+        self.assertEqual(len(strs), 9)
+        self.assertEqual(len(self.enums), 127)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 121)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.

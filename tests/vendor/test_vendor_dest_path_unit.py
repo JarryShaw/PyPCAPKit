@@ -162,12 +162,21 @@ def _old_algorithm(module_file: 'str') -> 'str':
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class ExistingCrawlerDestPathTests(unittest.TestCase):
-    """Every depth-one crawler on disk still resolves to its current path.
+    """Every crawler on disk resolves to the constant file it actually owns.
 
     The regression guard: :meth:`Vendor._dest_path` must not move a single
     existing crawler's output, enumerated from the filesystem rather than
     sampled by name so that adding a crawler without adding it here cannot
     silently go unchecked.
+
+    A depth-one crawler is held to the pre-fix formula, which is what "must not
+    move" means for the 116 that predate the fix. The five nested ones GitHub
+    issue #732 added -- :mod:`pcapkit.vendor.reg.apptype` and its four
+    per-transport modules -- are held to the mirrored path instead, since the
+    pre-fix formula is precisely what cannot express them: it would put
+    ``vendor/reg/apptype/tcp.py`` at ``vendor/const/apptype/tcp.py``, inside
+    ``vendor/`` itself. Both arms end at the same assertion, that the file is
+    really there, which is the half of this test the formula cannot fake.
 
     """
 
@@ -230,11 +239,18 @@ class ExistingCrawlerDestPathTests(unittest.TestCase):
                 dest = instance._dest_path()  # pylint: disable=protected-access
 
                 module_file = os.path.abspath(inspect.getfile(cls))
-                temp, file_name = os.path.split(module_file)
-                root, stem = os.path.split(temp)
-                # The pre-fix formula, for the depth the real tree has today:
-                # both must agree, because nothing on disk is nested yet.
-                expected = os.path.normpath(os.path.join(root, os.pardir, 'const', stem, file_name))
+                vendor_root = os.path.dirname(os.path.abspath(self.vendor.__file__))
+                rel_path = os.path.relpath(module_file, vendor_root)
+
+                if len(rel_path.split(os.sep)) == 2:
+                    # The pre-fix formula. Every crawler that predates #732 sits
+                    # at this depth and must still land exactly where it did.
+                    expected = os.path.normpath(_old_algorithm(module_file))
+                else:
+                    # #732's nested crawlers, which the pre-fix formula cannot
+                    # express -- mirrored under const/ at whatever depth they sit.
+                    expected = os.path.normpath(os.path.join(
+                        os.path.dirname(vendor_root), 'const', rel_path))
 
                 self.assertEqual(dest, expected,
                                  f'{qualname} would move from its current const/ path')
