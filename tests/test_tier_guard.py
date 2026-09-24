@@ -20,6 +20,14 @@ Four things are worth pinning, and they are the four ways this could rot:
 * the suite as it stands is clean (:class:`SuiteIsCleanTests`), and a checkout
   without git degrades instead of failing (:class:`DegradationTests`).
 
+A fifth invariant lives next door and is checked here for the same reason, from
+:class:`DependencyRequirementTests` onwards: the tier rule decides *which* job
+collects a test, and :mod:`tests._dependency_gates` decides whether that job
+installs what the test is gated on. A ``skipUnless(HAS_CRYPTO, ...)`` reached
+only by a job that does not install ``cryptography`` is a test that never runs
+and never says so -- #729 and #738 were that defect, and #745 is the ticket for
+stopping the third instance.
+
 This module is itself unit-tier, so it reads no capture at all: the violating
 modules it needs are written into a temporary directory and audited by path.
 
@@ -35,7 +43,7 @@ import textwrap
 import unittest
 import unittest.mock
 
-from tests import _tiers
+from tests import _dependency_gates, _tiers
 
 #: The unit-tier workflow job, for :class:`WorkflowAgreementTests`. Absent from a
 #: source distribution, which is why that test skips rather than fails.
@@ -57,6 +65,27 @@ def write_module(directory: 'pathlib.Path', name: 'str', source: 'str') -> 'path
     """
     path = directory / name
     path.write_text(textwrap.dedent(source).lstrip('\n'), encoding='utf-8')
+    return path
+
+
+def doctored_workflow(case: 'unittest.TestCase', old: 'str', new: 'str') -> 'pathlib.Path':
+    """A throwaway copy of the unit-test workflow, with ``old`` replaced by ``new``.
+
+    The only honest way to show a guard works is to break the thing it guards
+    and watch it fire, and the thing
+    :class:`DependencyGateFalsifiabilityTests` guards is a file no test may edit
+    in place -- so the break happens on a copy and
+    :func:`~tests._dependency_gates.dependency_gate_gaps` is pointed at that.
+    ``old`` has to still be present, or the test would be proving nothing about
+    a workflow that has since been rewritten.
+
+    """
+    text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+    case.assertIn(old, text, f'{old!r} is no longer in the workflow')
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-doctored-workflow-')
+    case.addCleanup(tmpdir.cleanup)
+    path = pathlib.Path(tmpdir.name) / 'unit-tests.yml'
+    path.write_text(text.replace(old, new, 1), encoding='utf-8')
     return path
 
 
@@ -861,3 +890,866 @@ class DegradationTests(unittest.TestCase):
             with self.subTest(failure=type(failure).__name__):
                 with unittest.mock.patch('subprocess.run', side_effect=failure):
                     self.assertIsNone(_tiers._git('rev-parse', '--show-toplevel'))
+
+
+class DependencyRequirementTests(unittest.TestCase):
+    """Reading :file:`pyproject.toml`, and deciding what an extra provides.
+
+    The interesting case is an extra *of a requirement*: the ``test`` extra
+    carries plain ``beautifulsoup4`` and the ``vendor`` extra carries
+    ``beautifulsoup4[html5lib]``, and the difference between them is exactly the
+    difference between ``HAS_CRAWLER_DEPS``, which CI satisfies, and
+    ``HAS_VENDOR_DEPS``, which it does not. Collapse the two and the guard
+    reports one of them wrongly.
+
+    """
+
+    def test_a_requirement_splits_into_name_extras_and_marker(self) -> None:
+        cases = {
+            'dpkt': ('dpkt', frozenset(), None),
+            'cryptography>=3.4': ('cryptography', frozenset(), None),
+            "pypcapfile; python_version < '3.12'":
+                ('pypcapfile', frozenset(), "python_version < '3.12'"),
+            'requests[socks]': ('requests', frozenset({'socks'}), None),
+            'beautifulsoup4[html5lib]': ('beautifulsoup4', frozenset({'html5lib'}), None),
+            "pcap-ct>=1.3.0b3; python_version >= '3.10'":
+                ('pcap-ct', frozenset(), "python_version >= '3.10'"),
+        }
+        for text, expected in cases.items():
+            with self.subTest(requirement=text):
+                requirement = _dependency_gates.requirement_key(text)
+                self.assertEqual(
+                    (requirement.name, requirement.extras, requirement.marker), expected)
+                self.assertEqual(requirement.text, text)
+
+    def test_names_compare_per_pep_503(self) -> None:
+        """``pcap_ct``, ``PCAP.CT`` and ``pcap-ct`` are one distribution."""
+        for spelling in ('pcap_ct', 'PCAP.CT', 'pcap--ct', 'Pcap-CT'):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(_dependency_gates.requirement_key(spelling).name, 'pcap-ct')
+
+    def test_asking_for_an_extra_of_a_requirement_is_not_symmetric(self) -> None:
+        """The asymmetry the whole ``HAS_VENDOR_DEPS`` verdict rests on.
+
+        ``beautifulsoup4[html5lib]`` installs ``beautifulsoup4``, so it provides
+        it. Plain ``beautifulsoup4`` does not install ``html5lib``, so it does
+        not provide ``beautifulsoup4[html5lib]``. A matcher that compared only
+        distribution names would call the ``test`` extra sufficient for the four
+        vendor modules that need :mod:`html5lib`, and the 41 methods they hold
+        would read as covered while they went on skipping.
+
+        """
+        plain = (_dependency_gates.requirement_key('beautifulsoup4'),)
+        with_extra = (_dependency_gates.requirement_key('beautifulsoup4[html5lib]'),)
+
+        self.assertTrue(_dependency_gates.provided_by(with_extra, 'beautifulsoup4'))
+        self.assertTrue(_dependency_gates.provided_by(with_extra, 'beautifulsoup4[html5lib]'))
+        self.assertTrue(_dependency_gates.provided_by(plain, 'beautifulsoup4'))
+        self.assertFalse(_dependency_gates.provided_by(plain, 'beautifulsoup4[html5lib]'))
+
+    def test_a_version_specifier_and_a_marker_do_not_defeat_matching(self) -> None:
+        requirements = (_dependency_gates.requirement_key("pypcapfile; python_version < '3.12'"),
+                        _dependency_gates.requirement_key('cryptography>=3.4'))
+        self.assertTrue(_dependency_gates.provided_by(requirements, 'pypcapfile'))
+        self.assertTrue(_dependency_gates.provided_by(requirements, 'cryptography'))
+        self.assertFalse(_dependency_gates.provided_by(requirements, 'dpkt'))
+
+    def test_the_extras_read_back_what_pyproject_declares(self) -> None:
+        """Spot checks on the four extras the rest of this suite reasons about."""
+        declared = _dependency_gates.declared_requirements()
+
+        self.assertEqual([requirement.text for requirement in declared['crypto']],
+                         ['cryptography>=3.4'])
+        self.assertTrue(_dependency_gates.provided_by(declared['NGAP'], 'pycrate'))
+        self.assertTrue(_dependency_gates.provided_by(declared['cli'], 'emoji'))
+        # The `test` extra carries requests and bs4 (#507) but not html5lib.
+        self.assertTrue(_dependency_gates.provided_by(declared['test'], 'requests'))
+        self.assertTrue(_dependency_gates.provided_by(declared['test'], 'beautifulsoup4'))
+        self.assertFalse(
+            _dependency_gates.provided_by(declared['test'], 'beautifulsoup4[html5lib]'))
+        self.assertTrue(
+            _dependency_gates.provided_by(declared['vendor'], 'beautifulsoup4[html5lib]'))
+
+    def test_a_bracket_inside_a_requirement_does_not_end_the_array(self) -> None:
+        """``vendor`` is the case a "slice to the first ``]``" parse gets wrong.
+
+        ``vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]`` holds two
+        closing brackets before its own, so a naive scan stops inside the first
+        requirement and reports an extra with one malformed entry.
+
+        """
+        declared = _dependency_gates.declared_requirements()
+        self.assertEqual({requirement.name for requirement in declared['vendor']},
+                         {'requests', 'beautifulsoup4'})
+
+    def test_the_core_dependencies_are_read_from_project_not_build_system(self) -> None:
+        """``[build-system] requires`` also holds ``setuptools``; this is not it."""
+        core = _dependency_gates.declared_requirements()[_dependency_gates.CORE]
+        names = {requirement.name for requirement in core}
+        self.assertLessEqual({'dictdumper', 'chardet', 'aenum', 'tbtrim'}, names)
+        self.assertNotIn('setuptools', names)
+
+    def test_every_extra_any_pytest_job_installs_is_declared(self) -> None:
+        """An install line naming an extra that no longer exists resolves to nothing."""
+        if not _dependency_gates.WORKFLOW.is_file():
+            self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
+
+        declared = _dependency_gates.declared_requirements()
+        jobs = _dependency_gates.pytest_jobs()
+        self.assertTrue(jobs, 'no job in the workflow runs pytest, which cannot be right')
+        for job in jobs:
+            self.assertTrue(job.extras, f'the {job.name!r} job installs no extra at all')
+            for extra in job.extras:
+                with self.subTest(job=job.name, extra=extra):
+                    self.assertIn(extra, declared)
+
+
+class DependencyGateScanTests(unittest.TestCase):
+    """Finding the gates, and resolving what each flag requires.
+
+    Driven against modules written for the purpose rather than against the
+    suite, for :class:`AuditTests`' reason: each shape needs a case that fails
+    without the code handling it, and several of these shapes appear exactly
+    once in the real tree.
+
+    """
+
+    def setUp(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-dependency-gates-')
+        self.addCleanup(tmpdir.cleanup)
+        self.tmp_path = pathlib.Path(tmpdir.name)
+
+    def test_class_level_and_method_level_gates_are_both_found(self) -> None:
+        """The claim #745 makes: a text search misses most of them.
+
+        Both decorators below gate tests on ``HAS_DPKT``, and the class-level
+        one gates two methods through a single line. Counting decorators that
+        sit next to a ``def`` finds one of the two; counting both finds the gate
+        on ``Two`` that darkens ``test_a`` and ``test_b`` together.
+
+        The line reported is the decorated ``class`` or ``def``, not the
+        decorator above it -- 5 and 15 below, where the decorators are on 4 and
+        14 -- because that is the line a reader is being sent to.
+
+        """
+        module = write_module(self.tmp_path, 'test_gates_unit.py', """
+            import unittest
+
+
+            @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+            class Two(unittest.TestCase):
+                def test_a(self):
+                    pass
+
+                def test_b(self):
+                    pass
+
+
+            class One(unittest.TestCase):
+                @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
+                def test_c(self):
+                    pass
+            """)
+
+        gates = _dependency_gates.module_gates(module, 'test_gates_unit.py')
+        self.assertEqual(
+            [(gate.flag, gate.lineno, gate.class_name, gate.func_name) for gate in gates],
+            [('HAS_DPKT', 5, 'Two', None), ('HAS_DPKT', 15, 'One', 'test_c')],
+        )
+
+    def test_a_decorator_that_is_not_skip_unless_is_ignored(self) -> None:
+        """``skipIf`` inverts the condition, and ``expectedFailure`` is unrelated."""
+        module = write_module(self.tmp_path, 'test_other_unit.py', """
+            import unittest
+
+
+            class Tests(unittest.TestCase):
+                @unittest.skipIf(HAS_DPKT, 'dpkt is installed')
+                def test_a(self):
+                    pass
+
+                @unittest.expectedFailure
+                def test_b(self):
+                    pass
+            """)
+        self.assertEqual(_dependency_gates.module_gates(module, 'test_other_unit.py'), ())
+
+    def test_a_module_level_function_gate_reports_no_class(self) -> None:
+        module = write_module(self.tmp_path, 'test_bare_unit.py', """
+            import unittest
+
+
+            @unittest.skipUnless(HAS_EMOJI, 'emoji not installed')
+            def test_it():
+                pass
+            """)
+        gates = _dependency_gates.module_gates(module, 'test_bare_unit.py')
+        self.assertEqual([(gate.class_name, gate.func_name) for gate in gates],
+                         [(None, 'test_it')])
+
+    def test_every_shape_the_suite_writes_a_flag_in_resolves(self) -> None:
+        """Five spellings, all in use, none of them interchangeable.
+
+        Each of these is the only shape some real module uses, so a resolver
+        that handled only the obvious ``find_spec('x') is not None`` would
+        silently report four of the five as gating on nothing -- and a flag that
+        requires nothing can never be a gap, which is failure by silence again.
+
+        """
+        module = write_module(self.tmp_path, 'test_shapes_unit.py', """
+            import importlib
+            import importlib.util
+
+            RUNTIME_DEPS = ('tbtrim', 'aenum')
+
+
+            def _importable(*modules):
+                for module in modules:
+                    try:
+                        importlib.import_module(module)
+                    except ImportError:
+                        return False
+                return True
+
+
+            def _has_pypcapfile():
+                importlib.import_module('pcapfile.savefile')
+                return True
+
+
+            HAS_PLAIN = importlib.util.find_spec('dpkt') is not None
+            HAS_TUPLE = all(importlib.util.find_spec(n) is not None for n in RUNTIME_DEPS)
+            HAS_INLINE = all(importlib.util.find_spec(n) is not None
+                             for n in ('requests', 'bs4'))
+            HAS_HELPER_ARGS = _importable('pcap._pcap')
+            HAS_HELPER_BODY = _has_pypcapfile()
+            """)
+
+        self.assertEqual(_dependency_gates.module_flag_requirements(module), {
+            'HAS_PLAIN': frozenset({'dpkt'}),
+            'HAS_TUPLE': frozenset({'tbtrim', 'aenum'}),
+            'HAS_INLINE': frozenset({'requests', 'bs4'}),
+            'HAS_HELPER_ARGS': frozenset({'pcap._pcap'}),
+            'HAS_HELPER_BODY': frozenset({'pcapfile.savefile'}),
+        })
+
+    def test_a_negated_probe_is_not_a_requirement(self) -> None:
+        """``HAS_PYPCAP``'s shape, and why the walk tracks polarity.
+
+        ``_importable('pcap') and not _importable('pcap._pcap')`` is how the
+        suite tells upstream ``pypcap`` from ``pcap-ct``: both ship a top-level
+        ``pcap``, and only ``pcap-ct``'s is a package with that submodule. A
+        flat :func:`ast.walk` would report the flag as *needing* ``pcap._pcap``
+        -- the one module whose presence makes it false.
+
+        """
+        module = write_module(self.tmp_path, 'test_negated_unit.py', """
+            import importlib
+
+
+            def _importable(*modules):
+                for module in modules:
+                    try:
+                        importlib.import_module(module)
+                    except ImportError:
+                        return False
+                return True
+
+
+            HAS_PYPCAP = _importable('pcap') and not _importable('pcap._pcap')
+            """)
+        self.assertEqual(_dependency_gates.module_flag_requirements(module),
+                         {'HAS_PYPCAP': frozenset({'pcap'})})
+
+    def test_a_flag_that_asks_about_something_pip_cannot_install_requires_nothing(self) -> None:
+        """``HAS_PROC_FD``'s shape: no probe, so no requirement, so no gap.
+
+        The empty set is the signal, and
+        :class:`DependencyGateCoverageTests` is what insists such a flag be
+        named in :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS` with a
+        reason rather than passing because it resolved to nothing.
+
+        """
+        module = write_module(self.tmp_path, 'test_procfd_unit.py', """
+            import os
+
+            HAS_PROC_FD = os.path.isdir('/proc/self/fd')
+            """)
+        self.assertEqual(_dependency_gates.module_flag_requirements(module),
+                         {'HAS_PROC_FD': frozenset()})
+
+    def test_a_flag_gated_where_it_is_not_defined_resolves_through_the_import(self) -> None:
+        """``HAS_EMOJI`` is defined in a helper and gated two modules away.
+
+        Checked against the real suite rather than a synthetic pair, because the
+        import has to resolve to a path on disk and that is the part which
+        breaks: :file:`tests/integration/test_cli_subprocess.py` gates on a flag
+        whose only definition is in :file:`tests/integration/_helpers.py`, which
+        is not a ``test_*.py`` and so is never scanned for gates.
+
+        """
+        requirements = _dependency_gates.flag_requirements()
+        self.assertEqual(
+            requirements[('tests/integration/test_cli_subprocess.py', 'HAS_EMOJI')],
+            frozenset({'emoji'}),
+        )
+
+    def test_one_flag_name_may_mean_two_things_and_is_resolved_per_module(self) -> None:
+        """``HAS_RUNTIME`` is the four core dependencies, except in one module.
+
+        :file:`tests/foundation/engines/test_runtime_engines.py` reuses the name
+        for those four plus ``dpkt``, ``scapy`` and ``pyshark``. Resolved by
+        name instead of per module, either that module's three extra
+        requirements would be demanded of the hundred-odd others, or the
+        hundred-odd would excuse it -- and it is the one HAS_RUNTIME gate in the
+        suite that really does go dark.
+
+        """
+        requirements = _dependency_gates.flag_requirements()
+        wide = requirements[('tests/foundation/engines/test_runtime_engines.py', 'HAS_RUNTIME')]
+        narrow = requirements[('tests/corekit/test_infoclass.py', 'HAS_RUNTIME')]
+
+        self.assertEqual(narrow, frozenset({'tbtrim', 'aenum', 'chardet', 'dictdumper'}))
+        self.assertEqual(wide - narrow, frozenset({'dpkt', 'scapy', 'pyshark'}))
+
+    def test_the_suite_scan_only_looks_at_modules_pytest_collects(self) -> None:
+        """A gate in a helper module gates nothing, because nothing collects it."""
+        modules = {gate.module for gate in _dependency_gates.gated_scopes()}
+        self.assertTrue(modules, 'the suite has no dependency gates at all, which cannot be right')
+        for module in sorted(modules):
+            with self.subTest(module=module):
+                self.assertTrue(pathlib.PurePosixPath(module).name.startswith('test_'))
+
+
+class DependencyGateSelectionTests(unittest.TestCase):
+    """Which :program:`pytest` jobs there are, and which gates each reaches."""
+
+    def setUp(self) -> None:
+        if not _dependency_gates.WORKFLOW.is_file():
+            self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
+
+    def test_only_the_jobs_that_run_pytest_are_considered(self) -> None:
+        """Keyed on running the suite, not on holding an install line.
+
+        The ``changelog`` job of this workflow installs nothing and runs a
+        generator, and six of the seven other workflows install ``.[all]``
+        somewhere -- which carries ``pypcapfile``, ``pyshark`` and ``scapy`` --
+        without ever invoking :program:`pytest`. A guard that looked at install
+        lines anywhere in :file:`.github/workflows/` would find nearly every
+        extra it wanted and pass without checking anything.
+
+        """
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        jobs = _dependency_gates.pytest_jobs()
+
+        self.assertIn('changelog', _dependency_gates.job_sections(text))
+        self.assertNotIn('changelog', {job.name for job in jobs})
+        for job in jobs:
+            with self.subTest(job=job.name):
+                self.assertIn('python -m pytest', job_section(text, job.name))
+
+    def test_job_sections_agrees_with_the_single_job_slice(self) -> None:
+        """Two slicers over the same YAML, checked against each other.
+
+        :func:`job_section` above answers for one named job and
+        :func:`~tests._dependency_gates.job_sections` enumerates them all. They
+        are separate because one is needed where the other cannot be imported,
+        so this is what stops the pair from drifting.
+
+        """
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        for name, section in _dependency_gates.job_sections(text).items():
+            with self.subTest(job=name):
+                self.assertEqual(section, job_section(text, name))
+
+    def test_each_job_selection_is_one_of_the_three_recognised_shapes(self) -> None:
+        """A fourth shape has to fail here rather than be guessed at.
+
+        The three are the three the workflow uses: subtract ``--ignore`` flags
+        from the whole suite (``test``), ask
+        :func:`~tests._tiers.fixture_tier_paths` (``integration``), or pass no
+        selection at all (``gate``). A new job selecting some fourth way would
+        otherwise be classified ``'whole-suite'`` by the fallback and credited
+        with reaching gates it does not run.
+
+        """
+        for job in _dependency_gates.pytest_jobs():
+            with self.subTest(job=job.name):
+                self.assertIn(job.selection, ('ignore', 'fixture-tier', 'whole-suite'))
+
+        selections = {job.name: job.selection for job in _dependency_gates.pytest_jobs()}
+        self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
+                                      'gate': 'whole-suite'})
+
+    def test_the_selection_is_read_off_the_step_that_runs_pytest(self) -> None:
+        """Not off the job, whose comments contradict it.
+
+        The ``gate`` job's comment says "an unfiltered ``pytest`` run (no
+        ``--ignore``, no tier selection)" and the ``integration`` job's names
+        :func:`~tests._tiers.fixture_tier_paths`. Classified on the whole job
+        section, ``gate`` reads as an ignore-selection job and is credited with
+        reaching only the unit tier -- which would quietly excuse every
+        fixture-tier gate it really does run.
+
+        """
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        gate = job_section(text, 'gate')
+        self.assertIn('--ignore', gate, 'the comment this test is about has been reworded')
+        self.assertEqual(
+            next(job.selection for job in _dependency_gates.pytest_jobs()
+                 if job.name == 'gate'),
+            'whole-suite')
+
+    def test_a_job_whose_pytest_step_is_renamed_is_still_classified(self) -> None:
+        """The step is found by what it runs, not by what it is called."""
+        doctored = doctored_workflow(self, '- name: Run unit tests',
+                                     '- name: Execute the unit tier')
+        selections = {job.name: job.selection
+                      for job in _dependency_gates.pytest_jobs(doctored)}
+        self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
+                                      'gate': 'whole-suite'})
+
+    def test_two_install_lines_in_one_pytest_job_is_refused(self) -> None:
+        """Ambiguity fails loudly instead of the first line winning."""
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP]'\n"
+            "          python -m pip install -e '.[Scapy]'",
+        )
+        with self.assertRaises(AssertionError) as caught:
+            _dependency_gates.pytest_jobs(doctored)
+        self.assertIn('2', str(caught.exception))
+
+    def test_two_pytest_steps_in_one_job_is_refused(self) -> None:
+        """A second selection in the same job is not silently ignored.
+
+        Two ``pytest`` invocations in one job means two selections under one
+        install line, and the guard reads the selection off exactly one step. It
+        has no basis for choosing, so it says so.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            '      - name: Run unit tests',
+            '      - name: Run the unit tier first\n'
+            '        run: python -m pytest -q\n'
+            '\n'
+            '      - name: Run unit tests',
+        )
+        with self.assertRaises(AssertionError) as caught:
+            _dependency_gates.pytest_jobs(doctored)
+        self.assertIn('steps', str(caught.exception))
+
+    def test_the_ignore_selection_is_exactly_the_unit_tier(self) -> None:
+        """Answered by :func:`~tests._tiers.is_unit_tier`, not by a second copy."""
+        job = next(job for job in _dependency_gates.pytest_jobs() if job.selection == 'ignore')
+        cases = {
+            'tests/protocols/internet/test_esp_unit.py': True,
+            'tests/integration/test_cli_subprocess.py': False,
+            'tests/foundation/engines/test_new_engine_parity_runtime.py': False,
+        }
+        for module, expected in cases.items():
+            with self.subTest(module=module):
+                gate = _dependency_gates.Gate('HAS_CRYPTO', module, 1, 'Tests', None)
+                self.assertIs(_dependency_gates.job_reaches(job, gate), expected)
+
+    def test_the_whole_suite_selection_reaches_everything(self) -> None:
+        job = next(job for job in _dependency_gates.pytest_jobs()
+                   if job.selection == 'whole-suite')
+        for module in ('tests/protocols/internet/test_esp_unit.py',
+                       'tests/integration/test_cli_subprocess.py',
+                       'tests/foundation/engines/test_new_engine_parity_runtime.py'):
+            with self.subTest(module=module):
+                gate = _dependency_gates.Gate('HAS_CRYPTO', module, 1, 'Tests', None)
+                self.assertTrue(_dependency_gates.job_reaches(job, gate))
+
+    def test_a_node_id_selection_reaches_that_method_and_not_its_neighbours(self) -> None:
+        """The granularity that stops the ``integration`` job being over-credited.
+
+        Its selection names two methods of :file:`tests/toolkit/test_dpkt_unit.py`
+        rather than the file, because the rest of that file runs in the ``test``
+        job. A gate on one of the two named methods' classes is reached; a gate
+        on some other class of the same file is not, and crediting it would let
+        a dependency the ``test`` job stopped installing look covered.
+
+        Note which way round the class-level case goes, since it reads as
+        over-broad and is not: a node ID naming *one* method of a gated class
+        does reach that class's gate, because one selected test under the gate is
+        enough for the job's install line to decide whether it runs. What must
+        not be reached is a gate on a method the selection does not name --
+        ``sibling`` below -- and that is the assertion doing the work here.
+
+        """
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+        job = next(job for job in _dependency_gates.pytest_jobs()
+                   if job.selection == 'fixture-tier')
+        node_ids = [entry for entry in _tiers.fixture_tier_paths()
+                    if entry.startswith('tests/toolkit/test_dpkt_unit.py::')]
+        self.assertTrue(node_ids, 'the selection no longer names a node ID in that module')
+
+        module, _, scope = node_ids[0].partition('::')
+        selected_class, selected_method = scope.split('::')
+
+        reached = _dependency_gates.Gate('HAS_DPKT', module, 1, selected_class, None)
+        also = _dependency_gates.Gate('HAS_DPKT', module, 1, selected_class, selected_method)
+        elsewhere = _dependency_gates.Gate('HAS_DPKT', module, 1, 'NotSelectedTests', None)
+        sibling = _dependency_gates.Gate('HAS_DPKT', module, 1, selected_class, 'test_not_selected')
+
+        self.assertTrue(_dependency_gates.job_reaches(job, reached))
+        self.assertTrue(_dependency_gates.job_reaches(job, also))
+        self.assertFalse(_dependency_gates.job_reaches(job, elsewhere))
+        self.assertFalse(_dependency_gates.job_reaches(job, sibling))
+
+    def test_a_directory_entry_reaches_what_is_under_it(self) -> None:
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+        job = next(job for job in _dependency_gates.pytest_jobs()
+                   if job.selection == 'fixture-tier')
+        self.assertIn('tests/integration', _tiers.fixture_tier_paths())
+
+        inside = _dependency_gates.Gate('HAS_EMOJI', 'tests/integration/test_cli_subprocess.py',
+                                        1, 'CommandLineTests', None)
+        outside = _dependency_gates.Gate('HAS_CRYPTO',
+                                         'tests/protocols/internet/test_esp_unit.py',
+                                         1, 'ESPProtocolTests', None)
+        self.assertTrue(_dependency_gates.job_reaches(job, inside))
+        self.assertFalse(_dependency_gates.job_reaches(job, outside))
+
+
+class DependencyGateCoverageTests(unittest.TestCase):
+    """The assertion #745 asked for, and the checks that keep it honest."""
+
+    def setUp(self) -> None:
+        if not _dependency_gates.WORKFLOW.is_file():
+            self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+    def test_every_gate_a_job_reaches_has_its_dependency_installed(self) -> None:
+        """The guard itself: no unrecorded gap between a gate and an install line."""
+        unexplained = [
+            gap for gap in _dependency_gates.dependency_gate_gaps()
+            if gap.flag not in _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS
+        ]
+        self.assertEqual(
+            unexplained, [],
+            '\n\n'.join(_dependency_gates.describe_gap(gap) for gap in unexplained))
+
+    def test_the_four_gates_737_and_740_fixed_are_covered_on_every_job_reaching_them(self) -> None:
+        """What this guard exists to stop regressing, named one flag at a time.
+
+        #737 added ``DPKT`` and #740 added ``crypto``, ``cli`` and ``NGAP`` to
+        the install lines. Nothing held those four in place, which is #745's
+        whole complaint -- deleting ``crypto`` from the ``test`` job would
+        re-dark 14 ESP methods and go green.
+
+        """
+        gaps = {gap.flag for gap in _dependency_gates.dependency_gate_gaps()}
+        for flag in ('HAS_DPKT', 'HAS_CRYPTO', 'HAS_EMOJI', 'HAS_PYCRATE'):
+            with self.subTest(flag=flag):
+                self.assertNotIn(flag, gaps)
+                self.assertNotIn(flag, _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
+
+    def test_the_crawler_dependencies_are_satisfied_by_the_test_extra(self) -> None:
+        """Not an exclusion, which is the correction this test records.
+
+        #745's own text lists ``HAS_CRAWLER_DEPS`` alongside ``HAS_VENDOR_DEPS``
+        as ruled onto a non-blocking leg. It is not: it asks only for
+        ``requests`` and ``bs4``, both of which the ``test`` extra has carried
+        since #507, so every job installs it. Only ``HAS_VENDOR_DEPS`` -- which
+        additionally wants :mod:`html5lib`, and so
+        ``beautifulsoup4[html5lib]`` -- is genuinely dark.
+
+        """
+        gaps = {gap.flag for gap in _dependency_gates.dependency_gate_gaps()}
+        self.assertNotIn('HAS_CRAWLER_DEPS', gaps)
+        self.assertNotIn('HAS_CRAWLER_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
+        self.assertIn('HAS_VENDOR_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
+
+    def test_each_exclusion_still_describes_a_gap_that_is_really_there(self) -> None:
+        """The anti-rot half, and the reason this is an allowlist and not a skip list.
+
+        #745 is explicit that "a bare skip list rots into the same
+        invisibility": an entry kept after its gap is closed silences a future
+        regression of the same dependency, and nothing would say so. So the
+        declared jobs and packages have to match what is derived *exactly*, in
+        both directions -- a gap that widens, narrows, moves to another job or
+        disappears entirely fails here.
+
+        """
+        derived = {}  # type: dict[str, dict[str, tuple[str, ...]]]
+        for gap in _dependency_gates.dependency_gate_gaps():
+            derived.setdefault(gap.flag, {})[gap.job] = gap.missing
+
+        for flag, exclusion in sorted(_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS.items()):
+            with self.subTest(flag=flag):
+                self.assertIn(
+                    flag, derived,
+                    f'{flag} is excluded but no job reaches a gate on it without the '
+                    f'dependency -- the gap is closed, so delete the entry'
+                )
+                self.assertEqual(
+                    dict(exclusion.dark), derived[flag],
+                    f"{flag}'s exclusion no longer matches the gap it describes"
+                )
+
+    def test_each_exclusion_gives_a_reason_worth_reading(self) -> None:
+        """A one-word reason is how a skip list is born."""
+        for flag, exclusion in sorted(_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS.items()):
+            with self.subTest(flag=flag):
+                self.assertGreater(
+                    len(exclusion.reason), 120,
+                    f"{flag}'s reason is too short to say why the dependency is absent"
+                )
+                self.assertTrue(
+                    re.search(r'#\d+', exclusion.reason)
+                    or re.search(r'wheel|toolchain|libpcap|marker|cost|network|tshark',
+                                 exclusion.reason),
+                    f"{flag}'s reason names neither a ticket nor a concrete obstacle"
+                )
+
+    def test_every_gated_flag_is_classified(self) -> None:
+        """A newly gated dependency cannot slip through unmapped.
+
+        Three ways to be classified, and no fourth: the flag probes modules that
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` maps, or it is named in
+        :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS` because no extra
+        could ever satisfy it, or the scan could not resolve it at all -- which
+        is a failure, because an unresolved flag requires nothing and so can
+        never be reported as a gap.
+
+        """
+        requirements = _dependency_gates.flag_requirements()
+        gates = _dependency_gates.gated_scopes()
+        # Without this the whole loop passes on an empty scan, which is the one
+        # way a classification check can be wrong and silent at the same time.
+        self.assertGreater(len(gates), 200, 'the gate scan found almost nothing')
+
+        for gate in gates:
+            with self.subTest(flag=gate.flag, module=gate.module, line=gate.lineno):
+                if gate.flag in _dependency_gates.NON_DISTRIBUTION_FLAGS:
+                    continue
+                modules = requirements.get((gate.module, gate.flag))
+                self.assertTrue(
+                    modules,
+                    f'{gate.module}:{gate.lineno} gates on {gate.flag}, whose requirements '
+                    f'this scan could not resolve -- teach tests._dependency_gates the '
+                    f'shape it is written in, or name it in NON_DISTRIBUTION_FLAGS'
+                )
+                assert modules is not None
+                for module in sorted(modules):
+                    self.assertIn(module.partition('.')[0],
+                                  _dependency_gates.MODULE_PROVIDERS,
+                                  f'{module} has no MODULE_PROVIDERS entry, so nothing '
+                                  f'knows which extra installs it')
+
+    def test_no_provider_mapping_or_exclusion_is_vestigial(self) -> None:
+        """Both tables are exactly as wide as the suite needs them to be."""
+        requirements = _dependency_gates.flag_requirements()
+        gated = {gate.flag for gate in _dependency_gates.gated_scopes()}
+        needed = {module.partition('.')[0]
+                  for (_, flag), modules in requirements.items() if flag in gated
+                  for module in modules}
+
+        self.assertEqual(set(_dependency_gates.MODULE_PROVIDERS), needed)
+        self.assertLessEqual(set(_dependency_gates.NON_DISTRIBUTION_FLAGS),
+                             {flag for (_, flag) in requirements})
+        self.assertEqual(
+            set(_dependency_gates.NON_DISTRIBUTION_FLAGS)
+            & set(_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS), set(),
+            'a flag no extra could satisfy does not also need an exclusion')
+
+
+class DependencyGateFalsifiabilityTests(unittest.TestCase):
+    """Break the install lines on a copy, and watch the guard fire.
+
+    These are the only tests here that prove the guard is capable of failing at
+    all: every assertion in :class:`DependencyGateCoverageTests` passes today on
+    a tree that is correct, and a wrong analysis would pass just as quietly on
+    one that had been broken.
+
+    """
+
+    def setUp(self) -> None:
+        if not _dependency_gates.WORKFLOW.is_file():
+            self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+    def test_removing_crypto_from_the_test_job_is_caught(self) -> None:
+        """#745's worked example, verbatim: "deleting ``crypto`` ... would go green"."""
+        doctored = doctored_workflow(self, "'.[test,DPKT,crypto,NGAP]'", "'.[test,DPKT,NGAP]'")
+
+        gaps = {(gap.flag, gap.job): gap
+                for gap in _dependency_gates.dependency_gate_gaps(doctored)}
+        self.assertIn(('HAS_CRYPTO', 'test'), gaps)
+
+        gap = gaps[('HAS_CRYPTO', 'test')]
+        self.assertEqual(gap.missing, ('cryptography',))
+        self.assertEqual(len(gap.gates), 14)
+        self.assertEqual({gate.module for gate in gap.gates},
+                         {'tests/protocols/internet/test_esp_unit.py'})
+
+        message = _dependency_gates.describe_gap(gap)
+        self.assertIn("the 'test' job", message)
+        self.assertIn('cryptography', message)
+        self.assertIn('crypto', message)
+        self.assertIn('test_esp_unit.py', message)
+
+        self.assertNotIn(
+            'HAS_CRYPTO', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,
+            'the exclusion list would swallow the gap this test relies on'
+        )
+
+    def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
+        """#729's defect, restaged. Three jobs install ``DPKT``; all three go dark."""
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        doctored = doctored_workflow(self, text, text.replace('DPKT,', '').replace(',DPKT', ''))
+
+        gaps = {gap.job: gap for gap in _dependency_gates.dependency_gate_gaps(doctored)
+                if gap.flag == 'HAS_DPKT'}
+        self.assertEqual(sorted(gaps), ['gate', 'integration', 'test'])
+        for job, gap in sorted(gaps.items()):
+            with self.subTest(job=job):
+                self.assertEqual(gap.missing, ('dpkt',))
+
+    def test_removing_cli_only_darkens_the_jobs_that_reach_the_emoji_gates(self) -> None:
+        """Precision, not just detection.
+
+        Every ``HAS_EMOJI`` gate is in :file:`tests/integration/test_cli_subprocess.py`,
+        which the ``test`` job ignores wholesale. So dropping ``cli`` must be
+        reported against ``integration`` and ``gate`` and *not* against
+        ``test``: a guard that flagged all three would be noise, and noise is
+        what gets a guard allowlisted into uselessness.
+
+        """
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        doctored = doctored_workflow(self, text, text.replace(',cli', ''))
+
+        jobs = sorted(gap.job for gap in _dependency_gates.dependency_gate_gaps(doctored)
+                      if gap.flag == 'HAS_EMOJI')
+        self.assertEqual(jobs, ['gate', 'integration'])
+
+    def test_the_undoctored_workflow_produces_no_unexplained_gap(self) -> None:
+        """The control: the three tests above fail for the doctoring, not by default."""
+        unexplained = [gap for gap in _dependency_gates.dependency_gate_gaps()
+                       if gap.flag not in _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS]
+        self.assertEqual(unexplained, [])
+
+
+class DependencyGateDegradationTests(unittest.TestCase):
+    """What happens when an input is malformed, missing, or not what was assumed.
+
+    Same posture as :class:`DegradationTests` above with one deliberate
+    difference: a module this scan cannot read is a reason to stay quiet, but a
+    :file:`pyproject.toml` or workflow it cannot read is a reason to fail. The
+    first can happen in a checkout that is mid-edit; the second means the guard
+    would be reasoning about extras or jobs it never found, which is precisely
+    the vacuous pass #745 is about.
+
+    """
+
+    def setUp(self) -> None:
+        tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-dependency-gates-')
+        self.addCleanup(tmpdir.cleanup)
+        self.tmp_path = pathlib.Path(tmpdir.name)
+
+    def test_an_unparseable_module_is_skipped_rather_than_crashing_the_scan(self) -> None:
+        """One broken file must not take the whole guard with it -- pytest reports it."""
+        module = write_module(self.tmp_path, 'test_broken_unit.py', """
+            @unittest.skipUnless(HAS_DPKT,
+            class Tests(:
+            """)
+        self.assertEqual(_dependency_gates.module_gates(module, 'test_broken_unit.py'), ())
+        self.assertEqual(_dependency_gates.module_flag_requirements(module), {})
+
+    def test_a_missing_module_is_skipped_too(self) -> None:
+        absent = self.tmp_path / 'test_absent_unit.py'
+        self.assertEqual(_dependency_gates.module_gates(absent, 'test_absent_unit.py'), ())
+        self.assertEqual(_dependency_gates.module_flag_requirements(absent), {})
+
+    def test_an_unrecognised_flag_shape_resolves_to_nothing(self) -> None:
+        """And :class:`DependencyGateCoverageTests` is what makes that a failure.
+
+        A flag written in some shape this scan does not understand resolves to no
+        requirements, and a flag that requires nothing can never be reported as
+        a gap. Resolving to nothing is therefore the *safe* answer only because
+        ``test_every_gated_flag_is_classified`` refuses to let an unresolved flag
+        stay unresolved.
+
+        """
+        module = write_module(self.tmp_path, 'test_odd_unit.py', """
+            HAS_ODD = (lambda name: True)('dpkt')
+            """)
+        self.assertEqual(_dependency_gates.module_flag_requirements(module),
+                         {'HAS_ODD': frozenset()})
+
+    def test_a_requirement_string_that_cannot_be_split_matches_nothing(self) -> None:
+        """Failing to match is safe; guessing a name would not be."""
+        for text in ('', '  ', '[weird]'):
+            with self.subTest(requirement=text):
+                requirement = _dependency_gates.requirement_key(text)
+                self.assertFalse(
+                    _dependency_gates.provided_by((requirement,), 'beautifulsoup4'))
+
+    def test_a_pyproject_without_the_table_being_read_fails_loudly(self) -> None:
+        """Not "no extras declared", which would satisfy nothing and flag everything."""
+        self.addCleanup(_dependency_gates.declared_requirements.cache_clear)
+        self.addCleanup(_dependency_gates.extras_providing.cache_clear)
+        _dependency_gates.declared_requirements.cache_clear()
+
+        broken = self.tmp_path / 'pyproject.toml'
+        broken.write_text('[build-system]\nrequires = [ "setuptools" ]\n', encoding='utf-8')
+        with unittest.mock.patch.object(_dependency_gates, 'PYPROJECT', broken):
+            with self.assertRaises(AssertionError) as caught:
+                _dependency_gates.declared_requirements()
+        self.assertIn('project', str(caught.exception))
+
+    def test_a_project_table_with_no_dependencies_fails_loudly(self) -> None:
+        self.addCleanup(_dependency_gates.declared_requirements.cache_clear)
+        self.addCleanup(_dependency_gates.extras_providing.cache_clear)
+        _dependency_gates.declared_requirements.cache_clear()
+
+        broken = self.tmp_path / 'pyproject.toml'
+        broken.write_text('[project]\nname = "x"\n\n[project.optional-dependencies]\n',
+                          encoding='utf-8')
+        with unittest.mock.patch.object(_dependency_gates, 'PYPROJECT', broken):
+            with self.assertRaises(AssertionError) as caught:
+                _dependency_gates.declared_requirements()
+        self.assertIn('dependencies', str(caught.exception))
+
+    def test_a_workflow_with_no_jobs_block_fails_loudly(self) -> None:
+        with self.assertRaises(AssertionError) as caught:
+            _dependency_gates.job_sections('name: Unit Tests\non:\n  push:\n')
+        self.assertIn('jobs', str(caught.exception))
+
+    def test_a_flag_no_extra_could_satisfy_is_not_reported_as_a_gap(self) -> None:
+        """:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, exercised.
+
+        No flag in the suite is *gated* on something pip cannot install today --
+        ``HAS_PROC_FD`` asks whether :file:`/proc/self/fd` exists and is consulted
+        inline rather than through a decorator -- so this stands a real gated flag
+        in for one, to pin that naming a flag there suppresses its gap instead of
+        merely documenting it.
+
+        """
+        if not _dependency_gates.WORKFLOW.is_file():
+            self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
+        reason = _tiers.guard_unavailable_reason()
+        if reason is not None:
+            self.skipTest(f'git cannot answer here: {reason}')
+
+        self.assertIn('HAS_PYSHARK',
+                      {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
+        with unittest.mock.patch.dict(_dependency_gates.NON_DISTRIBUTION_FLAGS,
+                                      {'HAS_PYSHARK': 'stood in for this test'}):
+            self.assertNotIn('HAS_PYSHARK',
+                             {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
