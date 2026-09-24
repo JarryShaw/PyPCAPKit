@@ -4809,6 +4809,61 @@ the parsed schema.</p>
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Two ways the entry data runs out mid-field are reported rather than
+raised, for the reason <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code> gives: a bare
+<a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> is neither one of
+<a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> nor an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so it
+aborted the whole extraction rather than this one entry. See <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>.</p>
+<p>A line of nothing but NUL octets is the block’s own 32-bit padding
+and ends the entry. <code class="docutils literal notranslate"><span class="pre">bytes.strip()</span></code> takes only ASCII whitespace,
+so those octets survived it and were read as the <em>name</em> of a binary
+field – which made every journal entry whose length is not a
+multiple of four raise, valid or not, since the padding that follows
+it has no 64-bit length prefix behind it to unpack. Measured on a
+14-octet <code class="docutils literal notranslate"><span class="pre">MESSAGE=hello\n</span></code> entry, which is as ordinary as this
+block gets.</p>
+<p>A name line whose 64-bit length prefix is itself cut short ends the
+entry too. There is nothing to read past the end of the entry, so
+stopping at it is what keeps the truncated block parsing.</p>
+<p>A binary field’s length is the widest declared length in the format,
+and nothing bounded it against the entry holding it: at <code class="docutils literal notranslate"><span class="pre">2**63</span></code> and
+above <code class="xref py py-meth docutils literal notranslate"><span class="pre">io.BytesIO.read()</span></code> refuses it outright with a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OverflowError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">fit</span> <span class="pre">'int'</span> <span class="pre">into</span> <span class="pre">an</span> <span class="pre">index-sized</span>
+<span class="pre">integer</span></code>), and below that it silently returned whatever was there –
+so the same malformed prefix was either fatal or invisible depending
+only on its magnitude. It is clamped to the octets the entry has left
+and reported, which is <code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code>’s rule at the other end of
+the same range.</p>
+<p>Field names, keys and values are decoded with <code class="docutils literal notranslate"><span class="pre">errors='replace'</span></code>
+rather than strictly. A non-UTF-8 octet in any of the three raised a
+bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UnicodeDecodeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a> – a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so foreign on
+both counts, and fatal to the whole extraction over one bad octet in
+one field. <code class="docutils literal notranslate"><span class="pre">'replace'</span></code> is the option this module’s own
+<a class="reference internal" href="../../corekit/fields/strings.html#pcapkit.corekit.fields.strings.StringField" title="pcapkit.corekit.fields.strings.StringField"><code class="xref py py-class docutils literal notranslate"><span class="pre">StringField</span></code></a> already takes for
+the same problem, and a value that is not text is a value the writer
+should have emitted as a <em>binary</em> field, so the entry is malformed
+however it is read.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock._decode_text">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_decode_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">octets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#SystemdJournalExportBlock._decode_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock._decode_text" title="Link to this definition">¶</a></dt>
+<dd><p>Decode a journal field name, key or value, reporting what did not decode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>octets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Field name, key or value, as it came off the wire.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decoded text, with any octet that is not UTF-8 replaced.</p>
+</dd>
+</dl>
+<p>See <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.post_process" title="pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> for why this replaces rather than raising.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -5053,6 +5108,38 @@ will be inferred from the option type code.</p></li>
 </ul>
 </dd>
 </dl>
+<p>A registration that displaces another schema for the same code is
+reported as a <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a>, as
+every other registry in the package does – the lookup that follows
+cannot tell a deliberate replacement from an accidental one, so an
+unreported overwrite is a parser silently swapped out for another. See
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/681">#681</a> for the same
+guard on <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
+<p>Presence alone is the test here, rather than #681’s presence <em>and a
+different class</em>: that one keys on a name <strong>derived</strong> from the class, so
+the wrapper registrars reach it twice with the same class on a supported
+path and warning there would be noise. This keys on a caller-supplied
+<code class="docutils literal notranslate"><span class="pre">code</span></code>, and <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__" title="pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> passes each code exactly once per
+subclass, so a second arrival is a second deliberate call – which is what
+the seven sibling <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.register" title="pcapkit.protocols.schema.misc.pcapng.Option.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> methods on
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and friends already
+assume.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">ns='opt'</span></code> fans one registration out across every namespace, so the
+collision is reported once for the registration and names the
+namespaces it displaced something in, rather than once per namespace.</p>
+<p>A namespace created by this call starts as a copy of <code class="docutils literal notranslate"><span class="pre">opt</span></code>’s
+defaults, so nothing in it is a prior registration and it is exempt:
+registering an <code class="docutils literal notranslate"><span class="pre">opt</span></code>-namespace code into a brand-new namespace is
+exactly what that copy is for.</p>
+<p>Membership is tested with <code class="docutils literal notranslate"><span class="pre">in</span></code>, never by subscripting. The
+per-namespace registries are <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>s –
+only the outer one is the miss-safe
+<a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> – so reading
+<code class="docutils literal notranslate"><span class="pre">Option.registry[key][code]</span></code> to see whether it is there would
+<em>insert</em> <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.UnknownOption" title="pcapkit.protocols.schema.misc.pcapng.UnknownOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownOption</span></code></a> for a code nobody registered.</p>
+</div>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6459,6 +6546,22 @@ subclass instance.</p>
 <li><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.block_type.BlockType</span></code></a></p></li>
 <li><p><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.BlockType" title="pcapkit.protocols.schema.misc.pcapng.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.BlockType</span></code></a></p></li>
 </ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">__length__</span></code> is what is left of the <em>stream</em>, not what the block
+declares, and it is decremented by four for <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.PCAPNG.type" title="pcapkit.protocols.schema.misc.pcapng.PCAPNG.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PCAPNG.type</span></code></a> whether
+or not those four octets were there to read –
+<a class="reference internal" href="../../corekit/fields/field.html#pcapkit.corekit.fields.field.FieldBase.unpack" title="pcapkit.corekit.fields.field.FieldBase.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FieldBase.unpack</span></code></a>
+zero-pads a short read rather than refusing it. A tail of one, two or
+three octets therefore arrived here negative and
+<a class="reference external" href="https://docs.python.org/3/library/io.html#io.RawIOBase.read" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">io.RawIOBase.read()</span></code></a> raised a bare <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, which is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/678">#678</a>. The floor is a
+backstop: <code class="xref py py-meth docutils literal notranslate"><span class="pre">PCAPNG._check_block_floor</span></code> reports that
+tail as end-of-stream before it gets here, and on the packing path
+<a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> seeds
+<code class="docutils literal notranslate"><span class="pre">__length__</span></code> as <code class="docutils literal notranslate"><span class="pre">-1</span></code> for “unknown”, which
+<a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField.pack" title="pcapkit.corekit.fields.misc.SchemaField.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SchemaField.pack</span></code></a>
+does not read at all.</p>
 </div>
 </dd></dl>
 

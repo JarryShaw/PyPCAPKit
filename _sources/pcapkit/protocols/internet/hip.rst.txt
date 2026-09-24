@@ -431,6 +431,10 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.internet.hip.encrypted_data_len
 .. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_total_len
 .. autofunction:: pcapkit.protocols.schema.internet.hip.parameter_padding_len
+.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_set_len_callback
+.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_set_padding_len
+
+.. autodata:: pcapkit.protocols.schema.internet.hip.LOCATOR_SET_LEN
 
 Data Models
 -----------

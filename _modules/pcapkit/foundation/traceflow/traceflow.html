@@ -595,7 +595,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | Type[Dumper], str | None]]:</span>
+    <span class="c1">#: DefaultDict[str, tuple[ModuleDescriptor[Dumper] | ~typing.Type[Dumper], str | None]]:</span>
     <span class="c1">#: Format dumper mapping for writing output files. The values should be a</span>
     <span class="c1">#: tuple representing the module name and class name, or a</span>
     <span class="c1">#: :class:`dictdumper.dumper.Dumper` subclass, and corresponding file extension.</span>
@@ -855,7 +855,7 @@
 
         <span class="c1"># dump I/O object</span>
         <span class="n">fio</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_fout</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
-        <span class="c1">#: Type[Dumper]: Dumper class.</span>
+        <span class="c1">#: ~typing.Type[Dumper]: Dumper class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span> <span class="o">=</span> <span class="n">fio</span>
         <span class="c1">#: Optional[str]: Output file extension.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>

@@ -690,6 +690,12 @@ means unsigned.</p></li>
 </ul>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>A wire value the <code class="docutils literal notranslate"><span class="pre">namespace</span></code> registry has no member for resolves to a
+nameless pseudo-member rather than failing the parse – see
+<a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField.post_process" title="pcapkit.corekit.fields.numbers.EnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>.</p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.EnumField.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#EnumField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.EnumField.post_process" title="Link to this definition">¶</a></dt>
@@ -705,9 +711,69 @@ means unsigned.</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Processed field value.</p>
+<dd class="field-odd"><p>Processed field value – the registry member declared for the value,
+or a nameless pseudo-member carrying the value itself when the
+registry declares none.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><strong>BaseError</strong></a> – Whatever in-library error the registry raised for the
+    value, re-raised untouched.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The registry is consulted through its constructor, which raises for
+a value no member and no <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> rule accounts for. That raise
+used to propagate, and it is <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s own bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>: not one of <a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>,
+so a caller cannot tell it from a bug of its own, and not an
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#EOFError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EOFError</span></code></a>, so <a class="reference internal" href="../../foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames" title="pcapkit.foundation.extraction.Extractor.record_frames"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.record_frames</span></code></a> does not
+catch it. One unassigned code therefore cost the whole extraction.</p>
+<p>It also made the “unknown” reader the formats require unreachable
+for any genuinely unassigned code – PCAP-NG’s
+<a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.UnknownBlock" title="pcapkit.protocols.schema.misc.pcapng.UnknownBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownBlock</span></code></a>, and the
+<code class="docutils literal notranslate"><span class="pre">unassigned</span></code> option readers of IPv4, TCP, HOPOPT, MH and HIP –
+because the lookup failed several frames before the dispatch that
+would have selected it. PCAP-NG repeats a block’s total length at
+both ends precisely so that a reader can skip a block type it does
+not recognise; that skip is what this fallback restores. See GitHub
+issue #701.</p>
+<p>The fallback is the same nameless pseudo-member this method already
+builds for a field carrying no registry at all, so it is a value
+shape the package already produces and the dump layer already
+renders – as <code class="docutils literal notranslate"><span class="pre">&lt;unknown&gt;::&lt;unassigned&gt;</span> <span class="pre">[28]</span></code>, through
+<a class="reference internal" href="../../dumpkit/common.html#pcapkit.dumpkit.common.render_enum" title="pcapkit.dumpkit.common.render_enum"><code class="xref py py-func docutils literal notranslate"><span class="pre">render_enum()</span></code></a>, not through the
+<code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">is</span> <span class="pre">None</span></code> branch #648 added, which a member named
+<code class="docutils literal notranslate"><span class="pre">&lt;unassigned&gt;</span></code> never takes – and one an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-keyed
+dispatch registry looks up by value like any declared member. It is
+built per value rather than grafted onto
+the registry with <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>, for two reasons: a
+capture carrying many distinct unassigned codes would otherwise grow
+a process-global registry without bound, which is the growth
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase._lookup_registry</span></code> exists
+to avoid; and a stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></a> registry is then
+handled exactly like an <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> one.</p>
+<p>Only a <em>foreign</em> rejection is absorbed. A registry rejecting a value
+with one of <a class="reference internal" href="../../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> has made a
+deliberate decision that this layer – which sees only that the value
+arrived in a field of some width – is in no position to overrule, so
+an in-library error propagates unchanged and it is only <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s
+and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s “no member has this value” that becomes a
+pseudo-member. That is what keeps the fallback from being an
+unconditional <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError:</span> <span class="pre">pass</span></code>.</p>
+<p>No registry under <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> raises an in-library error
+from its guard today, and deliberately so: a generated guard raises a
+bare, unlogged <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> precisely because the generated
+<code class="docutils literal notranslate"><span class="pre">get()</span></code>’s <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> fallback has to keep catching it
+(GitHub issues #584 and #647). The registries that <em>do</em> bound
+themselves to a width and reject outside it are the bit-flag ones –
+<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.flags.Flags</span></code></a> among them – and none of
+those is named as the namespace of a plain <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a>
+anywhere in the package, so no in-library guard loses its force
+through this method. The distinction is therefore for a registry
+registered from outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no such
+obligation to stay quiet.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

@@ -455,7 +455,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">IntError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">IntError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'NumberField'</span><span class="p">,</span>
@@ -968,6 +968,11 @@
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
+<span class="sd">    Notes:</span>
+<span class="sd">        A wire value the ``namespace`` registry has no member for resolves to a</span>
+<span class="sd">        nameless pseudo-member rather than failing the parse -- see</span>
+<span class="sd">        :meth:`post_process`.</span>
+
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span><span class="p">,</span>
@@ -991,16 +996,88 @@
 <span class="sd">            packet: Packet data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Processed field value.</span>
+<span class="sd">            Processed field value -- the registry member declared for the value,</span>
+<span class="sd">            or a nameless pseudo-member carrying the value itself when the</span>
+<span class="sd">            registry declares none.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            BaseError: Whatever in-library error the registry raised for the</span>
+<span class="sd">                value, re-raised untouched.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The registry is consulted through its constructor, which raises for</span>
+<span class="sd">            a value no member and no ``_missing_`` rule accounts for. That raise</span>
+<span class="sd">            used to propagate, and it is :mod:`aenum`'s own bare</span>
+<span class="sd">            :exc:`ValueError`: not one of :mod:`pcapkit.utilities.exceptions`,</span>
+<span class="sd">            so a caller cannot tell it from a bug of its own, and not an</span>
+<span class="sd">            :exc:`EOFError`, so :meth:`Extractor.record_frames</span>
+<span class="sd">            &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` does not</span>
+<span class="sd">            catch it. One unassigned code therefore cost the whole extraction.</span>
+
+<span class="sd">            It also made the "unknown" reader the formats require unreachable</span>
+<span class="sd">            for any genuinely unassigned code -- PCAP-NG's</span>
+<span class="sd">            :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownBlock`, and the</span>
+<span class="sd">            ``unassigned`` option readers of IPv4, TCP, HOPOPT, MH and HIP --</span>
+<span class="sd">            because the lookup failed several frames before the dispatch that</span>
+<span class="sd">            would have selected it. PCAP-NG repeats a block's total length at</span>
+<span class="sd">            both ends precisely so that a reader can skip a block type it does</span>
+<span class="sd">            not recognise; that skip is what this fallback restores. See GitHub</span>
+<span class="sd">            issue #701.</span>
+
+<span class="sd">            The fallback is the same nameless pseudo-member this method already</span>
+<span class="sd">            builds for a field carrying no registry at all, so it is a value</span>
+<span class="sd">            shape the package already produces and the dump layer already</span>
+<span class="sd">            renders -- as ``&lt;unknown&gt;::&lt;unassigned&gt; [28]``, through</span>
+<span class="sd">            :func:`~pcapkit.dumpkit.common.render_enum`, not through the</span>
+<span class="sd">            ``name is None`` branch #648 added, which a member named</span>
+<span class="sd">            ``&lt;unassigned&gt;`` never takes -- and one an :class:`int`-keyed</span>
+<span class="sd">            dispatch registry looks up by value like any declared member. It is</span>
+<span class="sd">            built per value rather than grafted onto</span>
+<span class="sd">            the registry with :func:`aenum.extend_enum`, for two reasons: a</span>
+<span class="sd">            capture carrying many distinct unassigned codes would otherwise grow</span>
+<span class="sd">            a process-global registry without bound, which is the growth</span>
+<span class="sd">            :meth:`ProtocolBase._lookup_registry</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;` exists</span>
+<span class="sd">            to avoid; and a stdlib :class:`enum.IntEnum` registry is then</span>
+<span class="sd">            handled exactly like an :class:`aenum.IntEnum` one.</span>
+
+<span class="sd">            Only a *foreign* rejection is absorbed. A registry rejecting a value</span>
+<span class="sd">            with one of :mod:`pcapkit.utilities.exceptions` has made a</span>
+<span class="sd">            deliberate decision that this layer -- which sees only that the value</span>
+<span class="sd">            arrived in a field of some width -- is in no position to overrule, so</span>
+<span class="sd">            an in-library error propagates unchanged and it is only :mod:`aenum`'s</span>
+<span class="sd">            and :mod:`enum`'s "no member has this value" that becomes a</span>
+<span class="sd">            pseudo-member. That is what keeps the fallback from being an</span>
+<span class="sd">            unconditional ``except ValueError: pass``.</span>
+
+<span class="sd">            No registry under :mod:`pcapkit.const` raises an in-library error</span>
+<span class="sd">            from its guard today, and deliberately so: a generated guard raises a</span>
+<span class="sd">            bare, unlogged :exc:`ValueError` precisely because the generated</span>
+<span class="sd">            ``get()``'s ``except ValueError`` fallback has to keep catching it</span>
+<span class="sd">            (GitHub issues #584 and #647). The registries that *do* bound</span>
+<span class="sd">            themselves to a width and reject outside it are the bit-flag ones --</span>
+<span class="sd">            :class:`pcapkit.const.tcp.flags.Flags` among them -- and none of</span>
+<span class="sd">            those is named as the namespace of a plain :class:`EnumField`</span>
+<span class="sd">            anywhere in the package, so no in-library guard loses its force</span>
+<span class="sd">            through this method. The distinction is therefore for a registry</span>
+<span class="sd">            registered from outside :mod:`pcapkit.const`, which has no such</span>
+<span class="sd">            obligation to stay quiet.</span>
 
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">unknown</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">(</span><span class="s1">'&lt;unknown&gt;'</span><span class="p">,</span> <span class="p">{</span>
-                <span class="s1">'&lt;unassigned&gt;'</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
-            <span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s1">'pcapkit.const'</span><span class="p">,</span> <span class="n">qualname</span><span class="o">=</span><span class="s1">'pcapkit.const.&lt;unknown&gt;'</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unknown</span><span class="p">,</span> <span class="s1">'&lt;unassigned&gt;'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="c1"># NOTE: An in-library rejection is pcapkit's own decision about</span>
+                <span class="c1"># the value, rather than the enumeration library reporting that</span>
+                <span class="c1"># no member carries it, so it is not this layer's to absorb.</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
+                    <span class="k">raise</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">(</span><span class="s1">'&lt;unknown&gt;'</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s1">'&lt;unassigned&gt;'</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+        <span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s1">'pcapkit.const'</span><span class="p">,</span> <span class="n">qualname</span><span class="o">=</span><span class="s1">'pcapkit.const.&lt;unknown&gt;'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">unknown</span><span class="p">,</span> <span class="s1">'&lt;unassigned&gt;'</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

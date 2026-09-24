@@ -623,7 +623,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span> <span class="n">StreamEOFError</span><span class="p">,</span>
                                           <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
@@ -1482,6 +1482,13 @@
         <span class="k">if</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[Schema_PCAPNG]'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># packet data</span>
 
+            <span class="c1"># NOTE: reached on the parsing path only, and not by a flag: the</span>
+            <span class="c1"># construction path sets ``__header__`` from ``make`` while packing</span>
+            <span class="c1"># its own buffer, so the branch above is already false by the time it</span>
+            <span class="c1"># gets here. An explicit ``_read`` guard would have been a branch</span>
+            <span class="c1"># that could never be taken.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_block_floor</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">byteorder</span>
                 <span class="n">packet</span><span class="p">[</span><span class="s1">'byteorder'</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byte</span>
@@ -1564,6 +1571,29 @@
 
             <span class="c1">#: bytes: Raw block data.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: Block Total Length is cross-checked against its own trailing</span>
+            <span class="c1"># copy and never against the file, so on a capture cut short it runs</span>
+            <span class="c1"># past the real end -- and seeking past the end is legal and silent.</span>
+            <span class="c1"># The *next* block read then measures a negative remainder, since</span>
+            <span class="c1"># ``pcapkit.utilities.decorators.prepare`` derives it as the end of</span>
+            <span class="c1"># the stream less the current position, and a negative ``__length__``</span>
+            <span class="c1"># is what ``pcapng_block_selector`` hands to</span>
+            <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SchemaField` for the bare</span>
+            <span class="c1"># ``ValueError: read length must be non-negative or -1`` of `#678</span>
+            <span class="c1"># &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__. That cost</span>
+            <span class="c1"># the whole extraction rather than the one truncated block, which is</span>
+            <span class="c1"># the `#431 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__</span>
+            <span class="c1"># accommodation exactly inverted. ``_read_fileng`` already stopped at</span>
+            <span class="c1"># the end of the file, so the octets it returned are the authority on</span>
+            <span class="c1"># where the block really finishes.</span>
+            <span class="n">read</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">read</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] block length '</span>
+                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> exceeds the </span><span class="si">{</span><span class="n">read</span><span class="si">}</span><span class="s1"> octet(s) left in '</span>
+                     <span class="sa">f</span><span class="s1">'the file; block truncated'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="n">seek_cur</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="n">read</span><span class="p">)</span>
 
             <span class="c1"># move backward to the beginning of next block</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
@@ -1717,6 +1747,66 @@
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_block_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reject a tail too short to hold any block at all.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data, as the caller declared it, or</span>
+<span class="sd">                :obj:`None` to measure what is left in</span>
+<span class="sd">                :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            StreamEOFError: If fewer than twelve octets are left to read.</span>
+
+<span class="sd">        A PCAP-NG block is twelve octets at its smallest -- Block Type, Block</span>
+<span class="sd">        Total Length and the trailing copy of it, over an empty body -- which is</span>
+<span class="sd">        what :meth:`__length_hint__` reports. A tail shorter than that is not a</span>
+<span class="sd">        block, so parsing one out of it can only invent fields from</span>
+<span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`'s</span>
+<span class="sd">        zero padding, and once the four octets of :attr:`PCAPNG.type</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.misc.pcapng.PCAPNG.type&gt;` have been padded out</span>
+<span class="sd">        of nothing ``__length__`` is negative -- which</span>
+<span class="sd">        :func:`~pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector` hands</span>
+<span class="sd">        to :class:`~pcapkit.corekit.fields.misc.SchemaField`, where</span>
+<span class="sd">        :meth:`io.RawIOBase.read` raises the bare ``ValueError`` of `#678</span>
+<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/678&gt;`__.</span>
+
+<span class="sd">        Reporting the end of the stream instead is what keeps the `#431</span>
+<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/431&gt;`__ accommodation:</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.StreamEOFError` is an</span>
+<span class="sd">        :exc:`EOFError`, which :meth:`Extractor.record_frames</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.record_frames&gt;` already catches</span>
+<span class="sd">        to stop with the frames read so far, so -- unlike a refusal inside</span>
+<span class="sd">        :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`,</span>
+<span class="sd">        which has no catch point above it and would abort the whole extraction --</span>
+<span class="sd">        this costs no frame that was actually in the file. It is the same signal</span>
+<span class="sd">        :func:`~pcapkit.utilities.decorators.prepare` raises for a *derived*</span>
+<span class="sd">        remainder of exactly zero; only one, two or three stray octets fell</span>
+<span class="sd">        through it.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This runs on the parsing path only, since :meth:`unpack` reaches it</span>
+<span class="sd">            only when no schema has been built yet and the construction path</span>
+<span class="sd">            builds one from :meth:`make` while packing its own buffer. That is</span>
+<span class="sd">            what it should do: a constructed block short enough to trip this floor</span>
+<span class="sd">            is already reported by :meth:`read`'s own Block Total Length check,</span>
+<span class="sd">            which names the length and so says more than an end-of-stream would.</span>
+
+<span class="sd">            Measuring an undeclared length needs the stream to seek, and nothing</span>
+<span class="sd">            guards that here because :meth:`__post_init__` has already called</span>
+<span class="sd">            :meth:`~io.IOBase.tell` on it to record ``_seek_set``: a stream that</span>
+<span class="sd">            could not seek never reaches this method.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: block truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
+                                 <span class="s1">'fewer than the 12 a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PCAPNG._get_payload">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._get_payload">[docs]</a>

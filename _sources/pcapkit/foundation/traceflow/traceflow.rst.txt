@@ -37,7 +37,7 @@ which is an abstract base class for all flow tracing classes.
          value can be set by :attr:`__protocol_type__` class attribute.
 
    .. property:: registry
-      :type: dict[str, ModuleDescriptor[TraceFlowBase] | Type[TraceFlowBase]]
+      :type: dict[str, ModuleDescriptor[TraceFlowBase] | typing.Type[TraceFlowBase]]
 
       Mapping of protocol names to flow tracing classes.
 
