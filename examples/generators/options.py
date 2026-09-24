@@ -974,32 +974,37 @@ HIP_VERSION = {129: 2, 128: 1}
 #: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
 #: which is what moved the one-copy figure from 44 to 46, level with two copies.
 #:
-#: Three remain, none of them helped by a second copy since each fails at two
-#: copies as well as at one:
+#: Two remain, neither helped by a second copy since each fails at two copies
+#: as well as at one:
 #:
 #: * ``HOST_ID`` declares ``len=8`` and packs 18. Recorded as
 #:   ``hip-parameter/HOST_ID``.
 #: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
 #:   any other version -- while this table builds it at version 2. Recorded as
 #:   ``hip-parameter/HIP_TRANSFORM``.
-#: * ``R1_Counter`` (128) parses as an ``UnassignedParameter``: ``_read_param_*``
-#:   and ``_make_param_*`` are found by enumeration member name so both exist for
-#:   code 128, but the *schema* registry is keyed on the ``code=`` of the class
-#:   statement and ``R1CounterParameter`` declares only 129. Recorded as
-#:   ``hip-parameter/R1_Counter``, filed as #690.
 #:
-#: So the pair was routing around nothing by the time #672 and #679 landed, and
-#: dropping to one copy does not change what round-trips. Measured over this
-#: table's 49 HIP codes on ``5f0a1aa90`` (after #696, which #689 itself waited
-#: on -- see the issue):
+#: A third gap here, ``R1_Counter`` (128), was closed separately by #690 and was
+#: never one of the pair's cancellations above: it parsed as an
+#: ``UnassignedParameter`` because the *schema* registry is keyed on the
+#: ``code=`` of the class statement and ``R1CounterParameter`` declared only
+#: 129 -- even though ``__parameter__``'s ``_read_param_*``/``_make_param_*``
+#: entries already existed for both codes, as two hand-written dict entries,
+#: not because of any name-normalisation rule. No longer recorded as of #690,
+#: which registered ``R1CounterParameter`` for 128 too.
+#:
+#: So the pair was routing around nothing by the time #672, #679 and #690 had
+#: all landed, and dropping to one copy does not change what round-trips.
+#: Measured over this table's 49 HIP codes on ``5f0a1aa90`` (after #696, which
+#: #689 itself waited on -- see the issue) and again after #690:
 #:
 #: ======================  ========  ==========
 #: tree                    one copy  two copies
 #: ======================  ========  ==========
 #: ``5f0a1aa90``           46 OK     46 OK
+#: after #690              47 OK     47 OK
 #: ======================  ========  ==========
 #:
-#: The three gaps above are the only cases either setting fails, and neither
+#: The two gaps above are the only cases either setting fails, and neither
 #: their ``status`` nor their ``defect`` moves between settings, so
 #: :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` needed no
 #: change to keep recording them accurately at one copy.

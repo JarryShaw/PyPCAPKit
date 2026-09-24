@@ -388,14 +388,14 @@ EXPECTED_FAILURES = {
 
     # -- HIP ------------------------------------------------------------------
 
-    # ``_read_param_*`` and ``_make_param_*`` are found by enumeration member
-    # name, so both exist for code 128; but the *schema* registry is keyed by
-    # the ``code=`` of the class statement, and ``R1CounterParameter`` declares
-    # only 129. So code 128 parses as an ``UnassignedParameter``.
-    'hip-parameter/R1_Counter': Gap(
-        'PARSE', "no attribute 'counter'",
-        'pcapkit/protocols/internet/hip.py:822 -- Parameter.registry[128] is '
-        'UnassignedParameter, because R1CounterParameter declares code=129 only'),
+    # ``hip-parameter/R1_Counter`` used to be here: ``HIP.__parameter__``'s
+    # hand-written dict entries already mapped both 128 and 129 to
+    # ``_read_param_r1_counter``/``_make_param_r1_counter`` (not a
+    # name-normalisation rule -- each code has its own literal entry), so both
+    # existed for code 128. But the *schema* registry was keyed by the
+    # ``code=`` of the class statement, and ``R1CounterParameter`` declared
+    # only 129 -- so code 128 parsed as an ``UnassignedParameter``. Fixed by
+    # #690, registering ``R1CounterParameter`` under both codes.
 
     # ``ENCRYPTED`` used to have an entry here, for two defects at once: that
     # ``_make_param_encrypted`` passed ``cipher=``, a keyword
