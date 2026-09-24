@@ -477,7 +477,7 @@ implementations. Available vendor crawlers include:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.transtype.TransType" title="pcapkit.vendor.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></a></p></td>
 <td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id7" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.apptype.AppType" title="pcapkit.vendor.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">APPTYPE</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">APPTYPE</span></code></p></td>
 <td><p>Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) <a class="footnote-reference brackets" href="#id8" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
@@ -557,23 +557,85 @@ which is automatically generating <a class="reference internal" href="../const/r
 </section>
 <section id="module-pcapkit.vendor.reg.apptype">
 <span id="application-layer-protocol-numbers"></span><h2>Application Layer Protocol Numbers<a class="headerlink" href="#module-pcapkit.vendor.reg.apptype" title="Link to this heading">¶</a></h2>
-<p>This module contains the vendor crawler for <strong>Application Layer Protocol Numbers</strong>,
-which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype.AppType</span></code></a>.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.AppType">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.AppType" title="Link to this definition">¶</a></dt>
+<p>This package contains the vendor crawlers for <strong>Application Layer Protocol
+Numbers</strong>, which are automatically generating <a class="reference internal" href="../const/reg.html#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>.
+IANA keys every assignment on a <code class="docutils literal notranslate"><span class="pre">(service,</span> <span class="pre">port,</span> <span class="pre">transport)</span></code> triple, so the
+registry is one crawler per transport protocol alongside the base they all
+render against.</p>
+<dl class="py class" id="module-pcapkit.vendor.reg.apptype.apptype">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.apptype.AppType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Application Layer Protocol Numbers</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.AppType.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.AppType.FLAG" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.apptype.AppType.TRANSPORT">
+<span class="sig-name descname"><span class="pre">TRANSPORT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.apptype.AppType.TRANSPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Transport protocol whose assignments this crawler renders; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> for
+the base registry, which renders the rows belonging to no transport.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.apptype.AppType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.apptype.AppType.FLAG" title="Link to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.AppType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.AppType.LINK" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.apptype.AppType.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.apptype.AppType.LINK" title="Link to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-pcapkit.vendor.reg.apptype.tcp">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.tcp.TCP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/tcp.html#TCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.tcp.TCP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="pcapkit.vendor.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p>
+<p>Application Layer Protocol Numbers (TCP)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.tcp.TCP.TRANSPORT">
+<span class="sig-name descname"><span class="pre">TRANSPORT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tcp'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.tcp.TCP.TRANSPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Transport protocol whose assignments this crawler renders.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-pcapkit.vendor.reg.apptype.udp">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.udp.UDP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.udp.</span></span><span class="sig-name descname"><span class="pre">UDP</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/udp.html#UDP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.udp.UDP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="pcapkit.vendor.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p>
+<p>Application Layer Protocol Numbers (UDP)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.udp.UDP.TRANSPORT">
+<span class="sig-name descname"><span class="pre">TRANSPORT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'udp'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.udp.UDP.TRANSPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Transport protocol whose assignments this crawler renders.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-pcapkit.vendor.reg.apptype.sctp">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.sctp.SCTP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.sctp.</span></span><span class="sig-name descname"><span class="pre">SCTP</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/sctp.html#SCTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.sctp.SCTP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="pcapkit.vendor.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p>
+<p>Application Layer Protocol Numbers (SCTP)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.sctp.SCTP.TRANSPORT">
+<span class="sig-name descname"><span class="pre">TRANSPORT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sctp'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.sctp.SCTP.TRANSPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Transport protocol whose assignments this crawler renders.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-pcapkit.vendor.reg.apptype.dccp">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.dccp.DCCP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.apptype.dccp.</span></span><span class="sig-name descname"><span class="pre">DCCP</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/apptype/dccp.html#DCCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.apptype.dccp.DCCP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.vendor.reg.apptype.apptype.AppType" title="pcapkit.vendor.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p>
+<p>Application Layer Protocol Numbers (DCCP)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.reg.apptype.dccp.DCCP.TRANSPORT">
+<span class="sig-name descname"><span class="pre">TRANSPORT</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dccp'</span></span><a class="headerlink" href="#pcapkit.vendor.reg.apptype.dccp.DCCP.TRANSPORT" title="Link to this definition">¶</a></dt>
+<dd><p>Transport protocol whose assignments this crawler renders.</p>
 </dd></dl>
 
 </dd></dl>

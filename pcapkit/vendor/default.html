@@ -682,7 +682,7 @@ rather than printing instructions nobody will read. See #522.</p>
 <p><code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> sits somewhere under the <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>
 package – today always exactly one level down, e.g.
 <a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype" title="pcapkit.vendor.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype</span></code></a>, but #732 needs deeper nesting such as
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype.tcp</span></code>. The output file mirrors that same
+<a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype.tcp" title="pcapkit.vendor.reg.apptype.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype.tcp</span></code></a>. The output file mirrors that same
 position, whatever its depth, under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> instead.</p>
 <p>This used to split the module’s absolute path into exactly two levels
 (<code class="docutils literal notranslate"><span class="pre">ROOT,</span> <span class="pre">STEM</span> <span class="pre">=</span> <span class="pre">os.path.split(temp)</span></code>) and assume the second was always
