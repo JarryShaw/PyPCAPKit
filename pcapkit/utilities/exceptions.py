@@ -45,6 +45,7 @@ __all__ = [
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
     'FieldValueError', 'SchemaError', 'SeekError', 'TruncateError', # ValueError
+    'VendorPathNotFound',                                           # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'StreamEOFError',                                               # EOFError
@@ -384,6 +385,10 @@ class SeekError(BaseError, ValueError):
 
 class TruncateError(BaseError, ValueError):
     """Invalid truncate size."""
+
+
+class VendorPathNotFound(BaseError, ValueError):
+    """Crawler module is not inside the ``vendor`` package root."""
 
 
 ##############################################################################

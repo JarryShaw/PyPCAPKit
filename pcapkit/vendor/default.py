@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 import requests
 
 from pcapkit import __version__
-from pcapkit.utilities.exceptions import VendorNotImplemented
+from pcapkit.utilities.exceptions import VendorNotImplemented, VendorPathNotFound
 from pcapkit.utilities.logging import BOOLEAN_STATES
 from pcapkit.utilities.warnings import VendorRequestWarning, warn
 
@@ -446,12 +446,79 @@ class Vendor(metaclass=VendorMeta):
                 temp_ctx.append(line)
         context = '\n'.join(temp_ctx)
 
-        temp, FILE = os.path.split(os.path.abspath(inspect.getfile(type(self))))
-        ROOT, STEM = os.path.split(temp)
-
-        os.makedirs(os.path.join(ROOT, '..', 'const', STEM), exist_ok=True)
-        with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:  # pylint: disable=unspecified-encoding
+        const_file = self._dest_path()
+        os.makedirs(os.path.dirname(const_file), exist_ok=True)
+        with open(const_file, 'w') as file:  # pylint: disable=unspecified-encoding
             print(context, file=file)
+
+    def _dest_path(self) -> 'str':
+        """Resolve the ``const/`` file this crawler's module mirrors.
+
+        :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`
+        package -- today always exactly one level down, e.g.
+        :mod:`pcapkit.vendor.reg.apptype`, but #732 needs deeper nesting such as
+        :mod:`pcapkit.vendor.reg.apptype.tcp`. The output file mirrors that same
+        position, whatever its depth, under :mod:`pcapkit.const` instead.
+
+        This used to split the module's absolute path into exactly two levels
+        (``ROOT, STEM = os.path.split(temp)``) and assume the second was always
+        the module's one-and-only position under ``vendor/``. That holds for the
+        flat ``vendor/<stem>/<file>.py`` layout every crawler has today, but
+        breaks for any deeper nesting -- e.g. ``vendor/reg/apptype/tcp.py``
+        resolved to ``vendor/const/apptype/tcp.py``, *inside* ``vendor/`` itself
+        rather than under ``pcapkit/const/`` at all.
+
+        Anchoring on the ``vendor`` package's own ``__file__`` instead of a fixed
+        split count handles arbitrary nesting: whatever path a module sits at
+        *relative to* ``vendor/``, the same relative path is mirrored under
+        ``const/``, which also happens to be what the flat case already did --
+        so every crawler that exists today keeps writing to exactly the file it
+        writes to now.
+
+        ``pcapkit.vendor`` is imported here, inside the method, rather than at
+        module scope: it imports *this* module while it is still initialising
+        (see ``pcapkit/vendor/__init__.py``), so a module-level import would have
+        to reason about that partial state. By the time any concrete
+        :class:`Vendor` subclass is instantiated, ``pcapkit.vendor`` has always
+        finished importing.
+
+        That relative-path mirroring is only safe once the module is confirmed
+        to actually sit *under* ``vendor_root`` -- ``const/`` and ``vendor/`` are
+        siblings at equal depth, so for a module ``m`` that is *not* under
+        ``vendor_root``, ``os.path.relpath(m, vendor_root)`` starts with enough
+        ``..`` segments that re-joining them under ``const_root`` cancels back
+        out to ``m`` itself. That is reachable: every crawler ends
+        ``sys.exit(SomeCrawler())``, so running one from a second checkout, or
+        from a module that never sits under ``vendor/`` at all, resolves
+        :mod:`pcapkit.vendor` from wherever it is installed while
+        ``inspect.getfile(type(self))`` names a file elsewhere entirely --  and
+        ``Vendor.__init__`` then opens that path with ``'w'``, silently
+        truncating whatever :attr:`~Vendor.__module__` actually names instead of
+        raising. So the escape is rejected outright, rather than trusted to
+        produce a harmless-looking wrong path.
+
+        Returns:
+            Absolute path of the constant module this crawler should write.
+
+        Raises:
+            VendorPathNotFound: If this crawler's own module is not located
+                under the :mod:`pcapkit.vendor` package root, so mirroring it
+                under :mod:`pcapkit.const` cannot be done safely.
+
+        """
+        import pcapkit.vendor  # pylint: disable=import-outside-toplevel
+
+        vendor_root = os.path.dirname(os.path.abspath(pcapkit.vendor.__file__))
+        module_file = os.path.abspath(inspect.getfile(type(self)))
+
+        rel_path = os.path.relpath(module_file, vendor_root)
+        if rel_path.split(os.sep, 1)[0] == os.pardir:
+            raise VendorPathNotFound(
+                f'{module_file!r} is not inside the vendor package root {vendor_root!r}; '
+                f'refusing to derive a const/ path for it')
+
+        const_root = os.path.join(os.path.dirname(vendor_root), 'const')
+        return os.path.join(const_root, rel_path)
 
     def _request(self) -> 'list[str]':
         """Fetch CSV data from :attr:`~Vendor.LINK`.

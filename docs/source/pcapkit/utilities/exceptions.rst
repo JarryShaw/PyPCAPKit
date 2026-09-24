@@ -216,6 +216,10 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
    :no-members:
    :show-inheritance:
 
+.. autoexception:: pcapkit.utilities.exceptions.VendorPathNotFound
+   :no-members:
+   :show-inheritance:
+
 :exc:`NotImplementedError` Category
 -----------------------------------
 
