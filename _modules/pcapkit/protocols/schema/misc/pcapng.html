@@ -2428,11 +2428,33 @@
 <span class="sd">            should have emitted as a *binary* field, so the entry is malformed</span>
 <span class="sd">            however it is read.</span>
 
+<span class="sd">            A binary field's value used to be followed by a bare</span>
+<span class="sd">            :meth:`io.BytesIO.read` with no length -- meant to skip the one</span>
+<span class="sd">            newline octet the format puts there, but reading with no argument</span>
+<span class="sd">            reads to *end of file* instead. The loop's next ``readline()`` then</span>
+<span class="sd">            found nothing and ended the entry, so every field behind a binary</span>
+<span class="sd">            one was silently gone, however well-formed. See `#704</span>
+<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/704&gt;`__. The skip is</span>
+<span class="sd">            now exactly that one octet, and a terminator that is missing or is</span>
+<span class="sd">            not a newline ends the entry with a warning -- the same shape as</span>
+<span class="sd">            the short length prefix above -- except when the value itself was</span>
+<span class="sd">            already clamped to what the entry held, since that shortfall was</span>
+<span class="sd">            reported already and nothing is left behind it to check.</span>
+
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[OrderedMultiDict[str, str | bytes]]</span>
-        <span class="k">for</span> <span class="n">entry_buffer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">):</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">entry_buffer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">segments</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># ``split`` consumes the blank line's own newline together</span>
+                <span class="c1"># with the one that terminates this entry's last field; put</span>
+                <span class="c1"># the latter back, or a binary last field's terminator check</span>
+                <span class="c1"># below sees an entry that ends one octet early and warns</span>
+                <span class="c1"># over a newline that was in the capture all along</span>
+                <span class="n">entry_buffer</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
+
             <span class="n">entry</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, str | bytes]</span>
 
             <span class="n">entry_data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">entry_buffer</span><span class="p">)</span>
@@ -2456,7 +2478,8 @@
 
                     <span class="n">length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">'&lt;Q'</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: int</span>
                     <span class="n">available</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry_buffer</span><span class="p">)</span> <span class="o">-</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span><span class="p">:</span>
+                    <span class="n">clamped</span> <span class="o">=</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">available</span>
+                    <span class="k">if</span> <span class="n">clamped</span><span class="p">:</span>
                         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
                              <span class="sa">f</span><span class="s1">'declares </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) with </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1"> left in its '</span>
                              <span class="sa">f</span><span class="s1">'entry; reading </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
@@ -2464,7 +2487,19 @@
                         <span class="n">length</span> <span class="o">=</span> <span class="n">available</span>
 
                     <span class="n">entry</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-                    <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># Skip trailing newline.</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">clamped</span><span class="p">:</span>
+                        <span class="c1"># the one octet the format puts here to terminate the</span>
+                        <span class="c1"># field; a value already clamped to the entry's own</span>
+                        <span class="c1"># end left nothing behind to check, and was reported</span>
+                        <span class="c1"># above</span>
+                        <span class="n">terminator</span> <span class="o">=</span> <span class="n">entry_data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">terminator</span> <span class="o">!=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] binary field '</span>
+                                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> is not followed by the newline that '</span>
+                                 <span class="sa">f</span><span class="s1">'terminates it; ending the entry'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span>
+                                 <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                            <span class="k">break</span>
 
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>

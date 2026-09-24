@@ -1072,8 +1072,28 @@
 <div class="viewcode-block" id="R1CounterParameter">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.R1CounterParameter">[docs]</a>
 <span class="nd">@schema_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">R1CounterParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_COUNTER</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Header schema for HIP ``R1_COUNTER`` parameters."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">R1CounterParameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_Counter</span><span class="p">,</span>
+                                          <span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">R1_COUNTER</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">"""Header schema for HIP ``R1_COUNTER`` parameters.</span>
+
+<span class="sd">    Registered under both codes, not 129 alone. :rfc:`5201#section-5.2.3`</span>
+<span class="sd">    (HIPv1) and :rfc:`7401#section-5.2.3` (HIPv2) give the identical 4 + 8</span>
+<span class="sd">    layout to code 128 (``R1_Counter``) and code 129 (``R1_COUNTER``) --</span>
+<span class="sd">    one parameter under two numbers, the difference being HIP's own C-bit</span>
+<span class="sd">    rather than an unrelated code -- and the field list below is that layout</span>
+<span class="sd">    exactly, since #696 widened :attr:`counter` to eight octets.</span>
+<span class="sd">    :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already carries</span>
+<span class="sd">    two hand-written entries -- not a name-normalisation rule; ``R1_Counter``</span>
+<span class="sd">    and ``R1_COUNTER`` differ only in case, and each needed its own line --</span>
+<span class="sd">    mapping both codes to the same ``_read_param_r1_counter``, and</span>
+<span class="sd">    ``_make_param_r1_counter`` already built this class for 128; it was only</span>
+<span class="sd">    the schema lookup this class's own ``code=`` feeds -- consulted on the</span>
+<span class="sd">    parse path by :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
+<span class="sd">    -- that fell back to :class:`UnassignedParameter` for 128, since a</span>
+<span class="sd">    single-code ``code=`` registered 129 alone and left 128 unclaimed.</span>
+<span class="sd">    See #690.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Reserved.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
