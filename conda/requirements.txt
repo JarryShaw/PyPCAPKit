@@ -17,7 +17,7 @@ pysocks==1.7.1
 requests==2.34.2
 scapy==2.7.0
 six==1.17.0
-soupsieve==2.9.2
+soupsieve==2.10
 tbtrim==0.3.1
 termcolor==3.3.0
 typing-extensions==4.16.0; python_version < "3.11"
