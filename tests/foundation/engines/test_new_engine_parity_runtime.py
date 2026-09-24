@@ -201,9 +201,14 @@ class NewEngineParityTests(unittest.TestCase):
                     src, dst, ethertype = ethernet_of(expected)
                     ethernet = packet.packet
                     self.assertEqual(type(ethernet).__name__, 'Ethernet')
-                    self.assertEqual(mac(ethernet.dst), dst,
+                    # ``pypcapfile``'s ``Ethernet.dst``/``.src`` are already
+                    # colon-separated ASCII (see ``Ethernet.__init__`` in
+                    # ``pcapfile/protocols/linklayer/ethernet.py``), unlike the
+                    # raw 6-byte slices ``mac()`` exists to format above -- so
+                    # they only need decoding, not another hex pass.
+                    self.assertEqual(ethernet.dst.decode('ascii'), dst,
                                      f'{capture} frame {index + 1}: ethernet dst')
-                    self.assertEqual(mac(ethernet.src), src,
+                    self.assertEqual(ethernet.src.decode('ascii'), src,
                                      f'{capture} frame {index + 1}: ethernet src')
                     self.assertEqual(ethernet.type, ethertype,
                                      f'{capture} frame {index + 1}: ethertype')
