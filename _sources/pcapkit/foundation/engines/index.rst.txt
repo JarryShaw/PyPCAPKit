@@ -21,7 +21,7 @@ support.
    builtin
    3rdparty
 
-All engines are implemented as :class:`~pcapkit.foundation.engines.engine.Engine`
+All engines are implemented as :class:`~pcapkit.foundation.engines.engine.EngineBase`
 subclasses, which are responsible for parsing the input files and extracting
 the network packets for further processing. Below is a brief diagram of the
 class hierarchy of :mod:`pcapkit.foundation.engines`:

@@ -459,7 +459,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.block_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -536,7 +536,7 @@
 
 <div class="viewcode-block" id="PCAPNG">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="n">P_PCAPNG</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PCAPNG</span><span class="p">(</span><span class="n">EngineBase</span><span class="p">[</span><span class="n">P_PCAPNG</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""PCAP-NG file extraction support.</span>
 
 <span class="sd">    Args:</span>

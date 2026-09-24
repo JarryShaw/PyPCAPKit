@@ -469,7 +469,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines</span><span class="w"> </span><span class="kn">import</span> <span class="n">_pcap_backend</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span> <span class="k">as</span> <span class="n">Engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceFlowManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
@@ -493,7 +493,7 @@
 
 <div class="viewcode-block" id="PyPCAP">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PyPCAP</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">'RawFrame'</span><span class="p">]):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyPCAP</span><span class="p">(</span><span class="n">EngineBase</span><span class="p">[</span><span class="s1">'RawFrame'</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""PyPCAP engine support.</span>
 
 <span class="sd">    `PyPCAP`_ is a binding over :manpage:`libpcap(3)`, primarily aimed at live</span>

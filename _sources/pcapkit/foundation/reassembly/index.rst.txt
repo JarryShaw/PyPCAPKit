@@ -20,7 +20,7 @@ of IP and TCP packets.
    ip/index
    tcp
 
-All reassembly classes are implemented as :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`
+All reassembly classes are implemented as :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
 subclasses, which are responsible for processing extracted packets and
 reassemble the datagrams to a nonfragmented packet. Below is a brief
 diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
