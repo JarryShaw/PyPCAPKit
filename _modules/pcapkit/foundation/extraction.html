@@ -824,6 +824,22 @@
 <span class="sd">            The full qualified class name of the new dumper class</span>
 <span class="sd">            should be as ``{dumper.module}.{dumper.name}``.</span>
 
+<span class="sd">            The overwrite guard fires only when the incumbent dumper differs</span>
+<span class="sd">            from the replacement, so re-registering the exact same object is</span>
+<span class="sd">            a silent no-op rather than a warning about nothing displaced --</span>
+<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue #739. ``__output__``</span>
+<span class="sd">            maps each format to a ``(dumper, ext)`` pair, so the identity</span>
+<span class="sd">            check compares the incumbent *dumper* (index ``0``), not the</span>
+<span class="sd">            pair -- a re-registration that only changes ``ext`` is still</span>
+<span class="sd">            identity-equal on the dumper and stays silent, since the dumper</span>
+<span class="sd">            is what "the same object" means here, not the pair as a whole.</span>
+<span class="sd">            ``__output__`` is also a :class:`collections.defaultdict`,</span>
+<span class="sd">            unlike the other three</span>
+<span class="sd">            registrars this issue touches; :meth:`dict.get` does not invoke</span>
+<span class="sd">            the default factory the way ``cls.__output__[format]`` would, so</span>
+<span class="sd">            it stays non-inserting here as well.</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            format: format name</span>
 <span class="sd">            dumper: module descriptor or a :class:`dictdumper.dumper.Dumper` subclass</span>
@@ -834,7 +850,9 @@
             <span class="n">dumper</span> <span class="o">=</span> <span class="n">dumper</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper must be a Dumper subclass, not </span><span class="si">{</span><span class="n">dumper</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">:</span>
+        <span class="n">incumbent_entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="n">incumbent_entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">incumbent_entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dumper</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'dumper </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
 
@@ -848,6 +866,12 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new extraction engine</span>
 <span class="sd">            should be as ``{engine.module}.{engine.name}``.</span>
+
+<span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
+<span class="sd">            the replacement, so re-registering the exact same object is a</span>
+<span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
+<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue #739.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            name: engine name</span>
@@ -864,7 +888,8 @@
         <span class="c1"># classes. ``Engine`` is itself an ``EngineBase``, so this only widens. See #513.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be an Engine subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span></div>
 
@@ -879,6 +904,12 @@
 <span class="sd">            The full qualified class name of the new reassembly engine</span>
 <span class="sd">            should be as ``{reassembly.module}.{reassembly.name}``.</span>
 
+<span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
+<span class="sd">            the replacement, so re-registering the exact same object is a</span>
+<span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
+<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue #739.</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
 <span class="sd">            reassembly: module descriptor or a</span>
@@ -891,7 +922,8 @@
         <span class="c1"># :meth:`register_engine` above -- see #513.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reassembly</span><span class="p">,</span> <span class="n">ReassemblyBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly must be a Reassembly subclass, not </span><span class="si">{</span><span class="n">reassembly</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">reassembly</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'reassembly </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__reassembly__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">reassembly</span></div>
 
@@ -906,6 +938,12 @@
 <span class="sd">            The full qualified class name of the new flow tracing engine</span>
 <span class="sd">            should be as ``{traceflow.module}.{traceflow.name}``.</span>
 
+<span class="sd">            The overwrite guard fires only when the incumbent differs from</span>
+<span class="sd">            the replacement, so re-registering the exact same object is a</span>
+<span class="sd">            silent no-op rather than a warning about nothing displaced --</span>
+<span class="sd">            the identity guard GitHub issue #718 gave the code-keyed</span>
+<span class="sd">            registrars, extended here by GitHub issue #739.</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            protocol: protocol name</span>
 <span class="sd">            traceflow: module descriptor or a</span>
@@ -918,7 +956,8 @@
         <span class="c1"># :meth:`register_engine` above -- see #513.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">traceflow</span><span class="p">,</span> <span class="n">TraceFlowBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow must be a TraceFlow subclass, not </span><span class="si">{</span><span class="n">traceflow</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">protocol</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">traceflow</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'traceflow </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__traceflow__</span><span class="p">[</span><span class="n">protocol</span><span class="p">]</span> <span class="o">=</span> <span class="n">traceflow</span></div>
 

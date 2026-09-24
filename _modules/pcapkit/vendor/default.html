@@ -473,7 +473,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorNotImplemented</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorNotImplemented</span><span class="p">,</span> <span class="n">VendorPathNotFound</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">BOOLEAN_STATES</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -922,12 +922,82 @@
                 <span class="n">temp_ctx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
         <span class="n">context</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_ctx</span><span class="p">)</span>
 
-        <span class="n">temp</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))))</span>
-        <span class="n">ROOT</span><span class="p">,</span> <span class="n">STEM</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'const'</span><span class="p">,</span> <span class="n">STEM</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'const'</span><span class="p">,</span> <span class="n">STEM</span><span class="p">,</span> <span class="n">FILE</span><span class="p">),</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>  <span class="c1"># pylint: disable=unspecified-encoding</span>
+        <span class="n">const_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dest_path</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">const_file</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">const_file</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>  <span class="c1"># pylint: disable=unspecified-encoding</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vendor._dest_path">
+<a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor._dest_path">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve the ``const/`` file this crawler's module mirrors.</span>
+
+<span class="sd">        :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`</span>
+<span class="sd">        package -- today always exactly one level down, e.g.</span>
+<span class="sd">        :mod:`pcapkit.vendor.reg.apptype`, but #732 needs deeper nesting such as</span>
+<span class="sd">        :mod:`pcapkit.vendor.reg.apptype.tcp`. The output file mirrors that same</span>
+<span class="sd">        position, whatever its depth, under :mod:`pcapkit.const` instead.</span>
+
+<span class="sd">        This used to split the module's absolute path into exactly two levels</span>
+<span class="sd">        (``ROOT, STEM = os.path.split(temp)``) and assume the second was always</span>
+<span class="sd">        the module's one-and-only position under ``vendor/``. That holds for the</span>
+<span class="sd">        flat ``vendor/&lt;stem&gt;/&lt;file&gt;.py`` layout every crawler has today, but</span>
+<span class="sd">        breaks for any deeper nesting -- e.g. ``vendor/reg/apptype/tcp.py``</span>
+<span class="sd">        resolved to ``vendor/const/apptype/tcp.py``, *inside* ``vendor/`` itself</span>
+<span class="sd">        rather than under ``pcapkit/const/`` at all.</span>
+
+<span class="sd">        Anchoring on the ``vendor`` package's own ``__file__`` instead of a fixed</span>
+<span class="sd">        split count handles arbitrary nesting: whatever path a module sits at</span>
+<span class="sd">        *relative to* ``vendor/``, the same relative path is mirrored under</span>
+<span class="sd">        ``const/``, which also happens to be what the flat case already did --</span>
+<span class="sd">        so every crawler that exists today keeps writing to exactly the file it</span>
+<span class="sd">        writes to now.</span>
+
+<span class="sd">        ``pcapkit.vendor`` is imported here, inside the method, rather than at</span>
+<span class="sd">        module scope: it imports *this* module while it is still initialising</span>
+<span class="sd">        (see ``pcapkit/vendor/__init__.py``), so a module-level import would have</span>
+<span class="sd">        to reason about that partial state. By the time any concrete</span>
+<span class="sd">        :class:`Vendor` subclass is instantiated, ``pcapkit.vendor`` has always</span>
+<span class="sd">        finished importing.</span>
+
+<span class="sd">        That relative-path mirroring is only safe once the module is confirmed</span>
+<span class="sd">        to actually sit *under* ``vendor_root`` -- ``const/`` and ``vendor/`` are</span>
+<span class="sd">        siblings at equal depth, so for a module ``m`` that is *not* under</span>
+<span class="sd">        ``vendor_root``, ``os.path.relpath(m, vendor_root)`` starts with enough</span>
+<span class="sd">        ``..`` segments that re-joining them under ``const_root`` cancels back</span>
+<span class="sd">        out to ``m`` itself. That is reachable: every crawler ends</span>
+<span class="sd">        ``sys.exit(SomeCrawler())``, so running one from a second checkout, or</span>
+<span class="sd">        from a module that never sits under ``vendor/`` at all, resolves</span>
+<span class="sd">        :mod:`pcapkit.vendor` from wherever it is installed while</span>
+<span class="sd">        ``inspect.getfile(type(self))`` names a file elsewhere entirely --  and</span>
+<span class="sd">        ``Vendor.__init__`` then opens that path with ``'w'``, silently</span>
+<span class="sd">        truncating whatever :attr:`~Vendor.__module__` actually names instead of</span>
+<span class="sd">        raising. So the escape is rejected outright, rather than trusted to</span>
+<span class="sd">        produce a harmless-looking wrong path.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Absolute path of the constant module this crawler should write.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            VendorPathNotFound: If this crawler's own module is not located</span>
+<span class="sd">                under the :mod:`pcapkit.vendor` package root, so mirroring it</span>
+<span class="sd">                under :mod:`pcapkit.const` cannot be done safely.</span>
+
+<span class="sd">        """</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit.vendor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+        <span class="n">vendor_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">pcapkit</span><span class="o">.</span><span class="n">vendor</span><span class="o">.</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="n">module_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+
+        <span class="n">rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">module_file</span><span class="p">,</span> <span class="n">vendor_root</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">VendorPathNotFound</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">module_file</span><span class="si">!r}</span><span class="s1"> is not inside the vendor package root </span><span class="si">{</span><span class="n">vendor_root</span><span class="si">!r}</span><span class="s1">; '</span>
+                <span class="sa">f</span><span class="s1">'refusing to derive a const/ path for it'</span><span class="p">)</span>
+
+        <span class="n">const_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">vendor_root</span><span class="p">),</span> <span class="s1">'const'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">const_root</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Vendor._request">
 <a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor._request">[docs]</a>

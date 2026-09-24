@@ -1259,6 +1259,10 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 </ul>
 </p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
+    IPv4 address.</p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1310,6 +1314,10 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp.htm
 </ul>
 </p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
+    IPv4 address.</p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1341,6 +1349,10 @@ if it contains an IPv4 layer carrying a TCP segment.</p></li>
 flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.html#term-trace.tcp.packet"><span class="xref std std-term">trace.tcp.packet</span></a>) will be returned; otherwise, returns <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
+    IPv4 address.</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -1396,6 +1408,12 @@ savefile header as <code class="docutils literal notranslate"><span class="pre">
 <em>every</em> IPv4 header field plus the options blob, so this reconstruction
 is byte-exact rather than approximate.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv4.src</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv4.dst</span></code> cannot be parsed as an
+    IPv4 address.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1440,6 +1458,11 @@ see the module notes.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If a decoded IPv4 layer’s <code class="docutils literal notranslate"><span class="pre">src</span></code>/<code class="docutils literal notranslate"><span class="pre">dst</span></code> cannot be
+    parsed as an IPv4 address, or a decoded Ethernet layer’s
+    <code class="docutils literal notranslate"><span class="pre">src</span></code>/<code class="docutils literal notranslate"><span class="pre">dst</span></code> cannot be parsed as a MAC address.</p>
 </dd>
 </dl>
 </dd></dl>

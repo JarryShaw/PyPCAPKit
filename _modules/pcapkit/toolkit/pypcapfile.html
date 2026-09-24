@@ -475,15 +475,18 @@
 <span class="sd">   reimplementation.</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.ip</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -498,6 +501,11 @@
     <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'ipv4_header'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
 <span class="p">]</span>
+
+<span class="c1">#: Whether :meth:`bytes.hex` supports the ``sep`` argument (Python 3.8+), as used</span>
+<span class="c1">#: below by :func:`_parse_mac_address` -- mirrors the same guard in</span>
+<span class="c1">#: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.</span>
+<span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
 <span class="c1">#: Minimum length of a TCP header, i.e. the fixed part with no options.</span>
 <span class="n">TCP_MIN_HEADER_LEN</span> <span class="o">=</span> <span class="mi">20</span>
@@ -534,6 +542,130 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_ipv4_address</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv4Address'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Parse a raw PyPCAPFile IPv4 ``src``/``dst`` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Raw value of an :attr:`IP.src &lt;pcapfile.protocols.network.ip.IP.src&gt;`</span>
+<span class="sd">            or :attr:`IP.dst &lt;pcapfile.protocols.network.ip.IP.dst&gt;` field.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The parsed address.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The released `PyPCAPFile`_ (0.12.0) stores ``src``/``dst`` as</span>
+<span class="sd">        dotted-decimal ASCII text in a :class:`ctypes.c_char_p` -- e.g.</span>
+<span class="sd">        ``b'10.1.1.2'`` -- rather than as a packed 4-byte value, which is all</span>
+<span class="sd">        :class:`ipaddress.IPv4Address` accepts from a :obj:`bytes` argument</span>
+<span class="sd">        (it raises :exc:`~ipaddress.AddressValueError` otherwise). This helper</span>
+<span class="sd">        also accepts a packed 4-byte :obj:`bytes` value directly, so a</span>
+<span class="sd">        differently-represented `PyPCAPFile`_ fork or release still works.</span>
+<span class="sd">        Anything that is not :obj:`bytes` is rejected outright: an earlier</span>
+<span class="sd">        revision also accepted a plain :obj:`int`, kept only because this</span>
+<span class="sd">        module's own unit test stand-ins modelled the field that way --</span>
+<span class="sd">        which meant production had been widened specifically to keep a</span>
+<span class="sd">        fixture passing that was hiding this very defect, so the stand-ins</span>
+<span class="sd">        were changed to use dotted-decimal :obj:`bytes` instead and the</span>
+<span class="sd">        ``int`` case was dropped.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``value`` cannot be parsed as an IPv4 address.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># Dotted-decimal ASCII text, the actual PyPCAPFile 0.12.0 form --</span>
+            <span class="c1"># a packed 4-byte address is never a valid dotted-quad string,</span>
+            <span class="c1"># since the shortest one (``0.0.0.0``) is already 7 bytes long.</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'ascii'</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_mac_address</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Parse a raw PyPCAPFile Ethernet ``src``/``dst`` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Raw value of an :attr:`Ethernet.src</span>
+<span class="sd">            &lt;pcapfile.protocols.linklayer.ethernet.Ethernet.src&gt;` or</span>
+<span class="sd">            :attr:`Ethernet.dst &lt;pcapfile.protocols.linklayer.ethernet.Ethernet.dst&gt;`</span>
+<span class="sd">            field.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Lowercase, colon-separated hex MAC address, e.g. ``'01:00:5e:01:03:03'``</span>
+<span class="sd">        -- the same form :meth:`~pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`</span>
+<span class="sd">        uses for the default engine.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The released `PyPCAPFile`_ (0.12.0) already stores ``src``/``dst`` pre-formatted</span>
+<span class="sd">        exactly this way, as ASCII text in a :class:`ctypes.c_char_p` -- not as a raw</span>
+<span class="sd">        6-byte value, which :func:`bytes` alone passes straight through unexamined. This</span>
+<span class="sd">        helper also accepts a raw 6-byte value directly, so a differently-represented</span>
+<span class="sd">        `PyPCAPFile`_ fork or release, and the stand-ins used in unit tests, keep working.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``value`` cannot be parsed as a MAC address.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span> <span class="k">if</span> <span class="n">py38</span> <span class="k">else</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'ascii'</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">UnicodeDecodeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_maybe_unhex</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Undo :func:`binascii.hexlify`, if ``value`` looks hex-encoded.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Raw bytes, possibly hex-encoded.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``value`` hex-decoded, if it is a valid even-length hex string;</span>
+<span class="sd">        otherwise ``value`` itself, unchanged.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The released `PyPCAPFile`_ (0.12.0) stores an IPv4 packet's options</span>
+<span class="sd">        (:attr:`IP.opt &lt;pcapfile.protocols.network.ip.IP.opt&gt;`) and payload</span>
+<span class="sd">        (:attr:`IP.payload &lt;pcapfile.protocols.network.ip.IP.payload&gt;`) as</span>
+<span class="sd">        :func:`binascii.hexlify`'d ASCII text once decoding stops short of the</span>
+<span class="sd">        transport layer -- which is exactly how</span>
+<span class="sd">        :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` calls it --</span>
+<span class="sd">        rather than as the raw bytes this module otherwise assumes. Both forms</span>
+<span class="sd">        are :obj:`bytes`, hex-encoded or not, which is why :func:`_is_raw`</span>
+<span class="sd">        cannot tell them apart, and falling back to the original value when</span>
+<span class="sd">        it does not decode as hex is what keeps this a no-op for the raw,</span>
+<span class="sd">        non-hex stand-ins used in unit tests.</span>
+
+<span class="sd">        This is **not** a guarantee against every false positive, only a</span>
+<span class="sd">        cheap and, in practice, reliable heuristic: a genuinely raw payload</span>
+<span class="sd">        whose every byte happens to fall in the ASCII hex-digit range (e.g. a</span>
+<span class="sd">        24-byte TCP header built entirely from digits and ``A``-``F``) is</span>
+<span class="sd">        indistinguishable from real hex text and gets silently halved. There</span>
+<span class="sd">        is no way to tell the two forms apart from the bytes alone; this is</span>
+<span class="sd">        acceptable here because that byte range is a small fraction of the</span>
+<span class="sd">        possible values a real header or payload can take.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
 <div class="viewcode-block" id="ipv4_header">
 <a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile.ipv4_header">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ipv4_header</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
@@ -550,22 +682,26 @@
 <span class="sd">        *every* IPv4 header field plus the options blob, so this reconstruction</span>
 <span class="sd">        is byte-exact rather than approximate.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
+<span class="sd">            IPv4 address.</span>
+
 <span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
         <span class="s1">'!BBHHHBBHII'</span><span class="p">,</span>
-        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span><span class="p">,</span>          <span class="c1"># version and internet header length</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">tos</span><span class="p">,</span>                         <span class="c1"># type of service</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                         <span class="c1"># total length</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                          <span class="c1"># identification</span>
-        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&lt;&lt;</span> <span class="mi">13</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>    <span class="c1"># flags and fragment offset</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>                         <span class="c1"># time to live</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>                           <span class="c1"># payload protocol type</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>                         <span class="c1"># header checksum</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                         <span class="c1"># source IP address</span>
-        <span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                         <span class="c1"># destination IP address</span>
-    <span class="p">)</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">)</span></div>
+        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">v</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hl</span><span class="p">,</span>                 <span class="c1"># version and internet header length</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">tos</span><span class="p">,</span>                                <span class="c1"># type of service</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                <span class="c1"># total length</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                 <span class="c1"># identification</span>
+        <span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&lt;&lt;</span> <span class="mi">13</span><span class="p">)</span> <span class="o">|</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>           <span class="c1"># flags and fragment offset</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>                                <span class="c1"># time to live</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>                                  <span class="c1"># payload protocol type</span>
+        <span class="n">ipv4</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>                                <span class="c1"># header checksum</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>      <span class="c1"># source IP address</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>      <span class="c1"># destination IP address</span>
+    <span class="p">)</span> <span class="o">+</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">))</span></div>
 
 
 
@@ -622,7 +758,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">segment</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">segment</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="n">segment</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">segment</span><span class="p">))</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">segment</span>
@@ -634,10 +770,14 @@
 <span class="sd">    Args:</span>
 <span class="sd">        link: PyPCAPFile Ethernet frame.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``link.src`` or ``link.dst`` cannot be parsed as a</span>
+<span class="sd">            MAC address.</span>
+
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">'dst'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
-        <span class="s1">'src'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
+        <span class="s1">'dst'</span><span class="p">:</span> <span class="n">_parse_mac_address</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>
+        <span class="s1">'src'</span><span class="p">:</span> <span class="n">_parse_mac_address</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>
         <span class="s1">'type'</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
     <span class="p">}</span>
 
@@ -660,9 +800,9 @@
         <span class="s1">'ttl'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">ttl</span><span class="p">,</span>
         <span class="s1">'p'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
         <span class="s1">'sum'</span><span class="p">:</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>
-        <span class="s1">'src'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>
-        <span class="s1">'dst'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>
-        <span class="s1">'opt'</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">),</span>
+        <span class="s1">'src'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>
+        <span class="s1">'dst'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>
+        <span class="s1">'opt'</span><span class="p">:</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">opt</span><span class="p">)),</span>
     <span class="p">}</span>
 
 
@@ -671,6 +811,21 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        layer: Decoded PyPCAPFile layer, or raw bytes.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        `PyPCAPFile`_'s own :class:`~pcapfile.protocols.linklayer.ethernet.Ethernet`</span>
+<span class="sd">        and :class:`~pcapfile.protocols.network.ip.IP` decoders hex-encode the</span>
+<span class="sd">        payload they retain rather than decoding it further (see</span>
+<span class="sd">        :func:`_maybe_unhex`), so a raw payload reached by recursing *from* one of</span>
+<span class="sd">        those two classes is un-hexed before being reported here. Without that,</span>
+<span class="sd">        an ``IP`` layer with options would report its own ``opt`` correctly</span>
+<span class="sd">        (:func:`_ipv4_2dict` already un-hexes it) while its nested ``'Raw'``</span>
+<span class="sd">        payload stayed hex-encoded and twice the true length -- an inconsistency</span>
+<span class="sd">        within the very same :obj:`dict`. Any other, unrecognised layer type's</span>
+<span class="sd">        raw payload is left untouched, since nothing here establishes that it is</span>
+<span class="sd">        `PyPCAPFile`_-hexlified rather than genuinely raw.</span>
+
+<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
@@ -688,6 +843,8 @@
 
     <span class="n">payload</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="s1">'payload'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'Ethernet'</span><span class="p">,</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">payload</span><span class="p">):</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
         <span class="n">dict_</span><span class="p">[</span><span class="s1">'Raw'</span> <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">_layer2dict</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dict_</span>
 
@@ -737,6 +894,11 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Dict[str, Any]: A :obj:`dict` mapping of packet data.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If a decoded IPv4 layer's ``src``/``dst`` cannot be</span>
+<span class="sd">            parsed as an IPv4 address, or a decoded Ethernet layer's</span>
+<span class="sd">            ``src``/``dst`` cannot be parsed as a MAC address.</span>
+
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="s1">'timestamp'</span><span class="p">:</span> <span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
@@ -765,6 +927,10 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
+<span class="sd">            IPv4 address.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`</span>
 
@@ -778,8 +944,8 @@
     <span class="n">header</span> <span class="o">=</span> <span class="n">ipv4_header</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">IP_Packet</span><span class="p">(</span>
         <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>        <span class="c1"># source IP address</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>        <span class="c1"># destination IP address</span>
+            <span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>          <span class="c1"># source IP address</span>
+            <span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>          <span class="c1"># destination IP address</span>
             <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                <span class="c1"># identification</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">),</span>             <span class="c1"># payload protocol type</span>
         <span class="p">),</span>
@@ -789,7 +955,7 @@
         <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">IPV4_FLAG_MF</span><span class="p">),</span>         <span class="c1"># more fragment flag</span>
         <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                <span class="c1"># total length, header includes</span>
         <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>                              <span class="c1"># raw bytes type header</span>
-        <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">),</span>            <span class="c1"># raw bytearray type payload</span>
+        <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">payload</span><span class="p">))),</span>  <span class="c1"># raw bytearray type payload</span>
         <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>         <span class="c1"># capture timestamp</span>
     <span class="p">)</span></div>
 
@@ -833,6 +999,10 @@
 <span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
+<span class="sd">            IPv4 address.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
 
@@ -855,9 +1025,9 @@
 
     <span class="k">return</span> <span class="n">TCP_Packet</span><span class="p">(</span>
         <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>  <span class="c1"># source IP address</span>
+            <span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>    <span class="c1"># source IP address</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">src_port</span><span class="p">,</span>                     <span class="c1"># source port</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>  <span class="c1"># destination IP address</span>
+            <span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>    <span class="c1"># destination IP address</span>
             <span class="n">tcp</span><span class="o">.</span><span class="n">dst_port</span><span class="p">,</span>                     <span class="c1"># destination port</span>
         <span class="p">),</span>
         <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                            <span class="c1"># original packet range number</span>
@@ -895,6 +1065,10 @@
 <span class="sd">        * If the ``packet`` can be traced, then the :obj:`dict` mapping of data for TCP</span>
 <span class="sd">          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
 
+<span class="sd">    Raises:</span>
+<span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
+<span class="sd">            IPv4 address.</span>
+
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
 
@@ -920,8 +1094,8 @@
         <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">syn</span><span class="p">),</span>                                  <span class="c1"># TCP synchronise (SYN) flag</span>
         <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">fin</span><span class="p">),</span>                                  <span class="c1"># TCP finish (FIN) flag</span>
         <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">rst</span><span class="p">),</span>                                  <span class="c1"># TCP reset (RST) flag</span>
-        <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                <span class="c1"># source IP</span>
-        <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                <span class="c1"># destination IP</span>
+        <span class="n">src</span><span class="o">=</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                  <span class="c1"># source IP</span>
+        <span class="n">dst</span><span class="o">=</span><span class="n">_parse_ipv4_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                  <span class="c1"># destination IP</span>
         <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">src_port</span><span class="p">,</span>                               <span class="c1"># TCP source port</span>
         <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dst_port</span><span class="p">,</span>                               <span class="c1"># TCP destination port</span>
         <span class="n">timestamp</span><span class="o">=</span><span class="n">packet2timestamp</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                 <span class="c1"># timestamp</span>

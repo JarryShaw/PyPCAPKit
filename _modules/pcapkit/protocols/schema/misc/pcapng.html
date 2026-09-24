@@ -1209,18 +1209,22 @@
 <span class="sd">        every other registry in the package does -- the lookup that follows</span>
 <span class="sd">        cannot tell a deliberate replacement from an accidental one, so an</span>
 <span class="sd">        unreported overwrite is a parser silently swapped out for another. See</span>
-<span class="sd">        `#681 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/681&gt;`__ for the same</span>
-<span class="sd">        guard on ``register_protocol``.</span>
+<span class="sd">        `#681 &lt;https://github.com/JarryShaw/PyPCAPKit/issues/681&gt;`__ for the</span>
+<span class="sd">        guard ``register_protocol`` added first, which this one now matches.</span>
 
-<span class="sd">        Presence alone is the test here, rather than #681's presence *and a</span>
-<span class="sd">        different class*: that one keys on a name **derived** from the class, so</span>
-<span class="sd">        the wrapper registrars reach it twice with the same class on a supported</span>
-<span class="sd">        path and warning there would be noise. This keys on a caller-supplied</span>
-<span class="sd">        ``code``, and :meth:`__init_subclass__` passes each code exactly once per</span>
-<span class="sd">        subclass, so a second arrival is a second deliberate call -- which is what</span>
-<span class="sd">        the seven sibling :meth:`register` methods on</span>
+<span class="sd">        The guard is identity-based: it fires only when the incumbent differs</span>
+<span class="sd">        from ``cls``, so re-registering the exact same class under the same</span>
+<span class="sd">        ``code`` is a silent no-op -- in every namespace ``targets`` reaches --</span>
+<span class="sd">        rather than a warning about nothing displaced. That is what keeps</span>
+<span class="sd">        :meth:`__init_subclass__` honest: it loops over a ``code`` list with no</span>
+<span class="sd">        deduplication, so a repeated or aliased entry reaches this method twice</span>
+<span class="sd">        with the same class, and the second call now finds itself already the</span>
+<span class="sd">        incumbent. GitHub issue #718 corrected the previous presence-only</span>
+<span class="sd">        guard, which read every such repeat as a caller mistake whether or not</span>
+<span class="sd">        the value had actually changed -- the same fix the sibling</span>
+<span class="sd">        :meth:`register` methods on</span>
 <span class="sd">        :class:`~pcapkit.protocols.protocol.ProtocolBase` and friends already</span>
-<span class="sd">        assume.</span>
+<span class="sd">        received.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            ``ns='opt'`` fans one registration out across every namespace, so the</span>
@@ -1232,7 +1236,7 @@
 <span class="sd">            registering an ``opt``-namespace code into a brand-new namespace is</span>
 <span class="sd">            exactly what that copy is for.</span>
 
-<span class="sd">            Membership is tested with ``in``, never by subscripting. The</span>
+<span class="sd">            Membership is tested with ``.get()``, never by subscripting. The</span>
 <span class="sd">            per-namespace registries are :class:`collections.defaultdict`\\ s --</span>
 <span class="sd">            only the outer one is the miss-safe</span>
 <span class="sd">            :class:`~pcapkit.protocols.schema.schema._EnumRegistry` -- so reading</span>
@@ -1250,7 +1254,9 @@
         <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">)</span> <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="s1">'opt'</span> <span class="k">else</span> <span class="p">[</span><span class="n">ns</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fresh</span><span class="p">:</span>
-            <span class="n">clash</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span> <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+            <span class="n">clash</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">targets</span>
+                     <span class="k">if</span> <span class="p">(</span><span class="n">incumbent</span> <span class="o">:=</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                     <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">clash</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Option </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] option already registered in '</span>
                      <span class="sa">f</span><span class="s1">'namespace(s) </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">clash</span><span class="p">)</span><span class="si">}</span><span class="s1">, '</span>

@@ -675,6 +675,63 @@ rather than printing instructions nobody will read. See #522.</p>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor._dest_path">
+<span class="sig-name descname"><span class="pre">_dest_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#Vendor._dest_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor._dest_path" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve the <code class="docutils literal notranslate"><span class="pre">const/</span></code> file this crawler’s module mirrors.</p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> sits somewhere under the <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>
+package – today always exactly one level down, e.g.
+<a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.apptype" title="pcapkit.vendor.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype</span></code></a>, but #732 needs deeper nesting such as
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.reg.apptype.tcp</span></code>. The output file mirrors that same
+position, whatever its depth, under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> instead.</p>
+<p>This used to split the module’s absolute path into exactly two levels
+(<code class="docutils literal notranslate"><span class="pre">ROOT,</span> <span class="pre">STEM</span> <span class="pre">=</span> <span class="pre">os.path.split(temp)</span></code>) and assume the second was always
+the module’s one-and-only position under <code class="docutils literal notranslate"><span class="pre">vendor/</span></code>. That holds for the
+flat <code class="docutils literal notranslate"><span class="pre">vendor/&lt;stem&gt;/&lt;file&gt;.py</span></code> layout every crawler has today, but
+breaks for any deeper nesting – e.g. <code class="docutils literal notranslate"><span class="pre">vendor/reg/apptype/tcp.py</span></code>
+resolved to <code class="docutils literal notranslate"><span class="pre">vendor/const/apptype/tcp.py</span></code>, <em>inside</em> <code class="docutils literal notranslate"><span class="pre">vendor/</span></code> itself
+rather than under <code class="docutils literal notranslate"><span class="pre">pcapkit/const/</span></code> at all.</p>
+<p>Anchoring on the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> package’s own <code class="docutils literal notranslate"><span class="pre">__file__</span></code> instead of a fixed
+split count handles arbitrary nesting: whatever path a module sits at
+<em>relative to</em> <code class="docutils literal notranslate"><span class="pre">vendor/</span></code>, the same relative path is mirrored under
+<code class="docutils literal notranslate"><span class="pre">const/</span></code>, which also happens to be what the flat case already did –
+so every crawler that exists today keeps writing to exactly the file it
+writes to now.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code> is imported here, inside the method, rather than at
+module scope: it imports <em>this</em> module while it is still initialising
+(see <code class="docutils literal notranslate"><span class="pre">pcapkit/vendor/__init__.py</span></code>), so a module-level import would have
+to reason about that partial state. By the time any concrete
+<a class="reference internal" href="#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a> subclass is instantiated, <code class="docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code> has always
+finished importing.</p>
+<p>That relative-path mirroring is only safe once the module is confirmed
+to actually sit <em>under</em> <code class="docutils literal notranslate"><span class="pre">vendor_root</span></code> – <code class="docutils literal notranslate"><span class="pre">const/</span></code> and <code class="docutils literal notranslate"><span class="pre">vendor/</span></code> are
+siblings at equal depth, so for a module <code class="docutils literal notranslate"><span class="pre">m</span></code> that is <em>not</em> under
+<code class="docutils literal notranslate"><span class="pre">vendor_root</span></code>, <code class="docutils literal notranslate"><span class="pre">os.path.relpath(m,</span> <span class="pre">vendor_root)</span></code> starts with enough
+<code class="docutils literal notranslate"><span class="pre">..</span></code> segments that re-joining them under <code class="docutils literal notranslate"><span class="pre">const_root</span></code> cancels back
+out to <code class="docutils literal notranslate"><span class="pre">m</span></code> itself. That is reachable: every crawler ends
+<code class="docutils literal notranslate"><span class="pre">sys.exit(SomeCrawler())</span></code>, so running one from a second checkout, or
+from a module that never sits under <code class="docutils literal notranslate"><span class="pre">vendor/</span></code> at all, resolves
+<a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> from wherever it is installed while
+<code class="docutils literal notranslate"><span class="pre">inspect.getfile(type(self))</span></code> names a file elsewhere entirely –  and
+<code class="docutils literal notranslate"><span class="pre">Vendor.__init__</span></code> then opens that path with <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, silently
+truncating whatever <code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> actually names instead of
+raising. So the escape is rejected outright, rather than trusted to
+produce a harmless-looking wrong path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Absolute path of the constant module this crawler should write.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.VendorPathNotFound" title="pcapkit.utilities.exceptions.VendorPathNotFound"><strong>VendorPathNotFound</strong></a> – If this crawler’s own module is not located
+    under the <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> package root, so mirroring it
+    under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> cannot be done safely.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <section id="internal-definitions">

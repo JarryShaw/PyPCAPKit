@@ -1024,11 +1024,13 @@ overwrite for as long as it has existed; this half assigned bare, so
 one <code class="docutils literal notranslate"><span class="pre">register_ipv4_option</span></code> call replacing a built-in reported the
 parser it displaced and said nothing about the schema. The guard
 here closes that asymmetry.</p>
-<p>It fires on the mere presence of <code class="docutils literal notranslate"><span class="pre">code</span></code>, as the code-keyed parser
-registries do and unlike <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a>, whose key
-is derived from the value it stores. <code class="docutils literal notranslate"><span class="pre">code</span></code> here is supplied by the
-caller and is independent of <code class="docutils literal notranslate"><span class="pre">schema</span></code>, so a repeat is a caller
-mistake worth reporting even when the value is unchanged.</p>
+<p>It fires only when the incumbent differs from the replacement, the
+same guard <a class="reference internal" href="../foundation/registry.html#pcapkit.foundation.registry.protocols.register_protocol" title="pcapkit.foundation.registry.protocols.register_protocol"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_protocol</span></code></a> applies,
+even though <code class="docutils literal notranslate"><span class="pre">code</span></code> here – unlike <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>’s key –
+is supplied by the caller and independent of <code class="docutils literal notranslate"><span class="pre">schema</span></code>. GitHub
+issue #718 corrected the previous presence-only guard: a repeat
+call that names the exact same schema object is a caller replaying
+a registration, not a mistake, so it is now a silent no-op.</p>
 <p>Presence is a faithful “was this really registered” test only because
 <a class="reference internal" href="#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> returns a miss without recording it. A plain
 <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a> would have inserted

@@ -27,6 +27,7 @@ only, which is the base meta class for all vendor crawlers.
 
    .. automethod:: request
    .. automethod:: _request
+   .. automethod:: _dest_path
 
 Internal Definitions
 --------------------

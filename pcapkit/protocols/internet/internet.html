@@ -565,8 +565,9 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this transport-layer
 protocol number is already registered, naming the displaced
 entry and its replacement so a caller can tell <em>what</em> was lost.
-Fires on presence alone – see <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for why that
-differs from <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
+Fires only when the incumbent differs from the replacement –
+see <code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.register</span></code> for the
+guard this shares with <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>

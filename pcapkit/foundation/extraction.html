@@ -663,6 +663,21 @@ engines ignore it.</p></li>
 <p class="admonition-title">Notes</p>
 <p>The full qualified class name of the new dumper class
 should be as <code class="docutils literal notranslate"><span class="pre">{dumper.module}.{dumper.name}</span></code>.</p>
+<p>The overwrite guard fires only when the incumbent dumper differs
+from the replacement, so re-registering the exact same object is
+a silent no-op rather than a warning about nothing displaced –
+the identity guard GitHub issue #718 gave the code-keyed
+registrars, extended here by GitHub issue #739. <code class="docutils literal notranslate"><span class="pre">__output__</span></code>
+maps each format to a <code class="docutils literal notranslate"><span class="pre">(dumper,</span> <span class="pre">ext)</span></code> pair, so the identity
+check compares the incumbent <em>dumper</em> (index <code class="docutils literal notranslate"><span class="pre">0</span></code>), not the
+pair – a re-registration that only changes <code class="docutils literal notranslate"><span class="pre">ext</span></code> is still
+identity-equal on the dumper and stays silent, since the dumper
+is what “the same object” means here, not the pair as a whole.
+<code class="docutils literal notranslate"><span class="pre">__output__</span></code> is also a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>,
+unlike the other three
+registrars this issue touches; <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict.get" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dict.get()</span></code></a> does not invoke
+the default factory the way <code class="docutils literal notranslate"><span class="pre">cls.__output__[format]</span></code> would, so
+it stays non-inserting here as well.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -683,6 +698,11 @@ should be as <code class="docutils literal notranslate"><span class="pre">{dumpe
 <p class="admonition-title">Notes</p>
 <p>The full qualified class name of the new extraction engine
 should be as <code class="docutils literal notranslate"><span class="pre">{engine.module}.{engine.name}</span></code>.</p>
+<p>The overwrite guard fires only when the incumbent differs from
+the replacement, so re-registering the exact same object is a
+silent no-op rather than a warning about nothing displaced –
+the identity guard GitHub issue #718 gave the code-keyed
+registrars, extended here by GitHub issue #739.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -703,6 +723,11 @@ should be as <code class="docutils literal notranslate"><span class="pre">{engin
 <p class="admonition-title">Notes</p>
 <p>The full qualified class name of the new reassembly engine
 should be as <code class="docutils literal notranslate"><span class="pre">{reassembly.module}.{reassembly.name}</span></code>.</p>
+<p>The overwrite guard fires only when the incumbent differs from
+the replacement, so re-registering the exact same object is a
+silent no-op rather than a warning about nothing displaced –
+the identity guard GitHub issue #718 gave the code-keyed
+registrars, extended here by GitHub issue #739.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -723,6 +748,11 @@ should be as <code class="docutils literal notranslate"><span class="pre">{reass
 <p class="admonition-title">Notes</p>
 <p>The full qualified class name of the new flow tracing engine
 should be as <code class="docutils literal notranslate"><span class="pre">{traceflow.module}.{traceflow.name}</span></code>.</p>
+<p>The overwrite guard fires only when the incumbent differs from
+the replacement, so re-registering the exact same object is a
+silent no-op rather than a warning about nothing displaced –
+the identity guard GitHub issue #718 gave the code-keyed
+registrars, extended here by GitHub issue #739.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

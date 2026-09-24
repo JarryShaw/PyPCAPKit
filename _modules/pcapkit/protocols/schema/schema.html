@@ -1621,8 +1621,16 @@
             <span class="c1"># does not mean the same thing for every subclass.</span>
             <span class="n">codes</span> <span class="o">=</span> <span class="n">code</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">code</span><span class="p">,)</span>
             <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">_code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">:</span>
-                    <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
+                <span class="c1"># This loop visits every element of an iterable ``code``, so a</span>
+                <span class="c1"># repeated member -- or two members that are the same object,</span>
+                <span class="c1"># as an :class:`enum.Enum` alias makes possible -- reaches this</span>
+                <span class="c1"># twice for the same key with ``cls`` on both sides: incumbent</span>
+                <span class="c1"># on the first pass, replacement on the second. So ordinary</span>
+                <span class="c1"># subclassing syntax reaches this guard, e.g.</span>
+                <span class="c1"># ``class X(Base, code=[A, A])`` or ``code=[A, B]`` with</span>
+                <span class="c1"># ``A is B``, with no second call to this method needed.</span>
+                <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
                     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">_code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
                          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="bp">cls</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
@@ -1655,12 +1663,14 @@
 <span class="sd">            parser it displaced and said nothing about the schema. The guard</span>
 <span class="sd">            here closes that asymmetry.</span>
 
-<span class="sd">            It fires on the mere presence of ``code``, as the code-keyed parser</span>
-<span class="sd">            registries do and unlike :func:`register_protocol</span>
-<span class="sd">            &lt;pcapkit.foundation.registry.protocols.register_protocol&gt;`, whose key</span>
-<span class="sd">            is derived from the value it stores. ``code`` here is supplied by the</span>
-<span class="sd">            caller and is independent of ``schema``, so a repeat is a caller</span>
-<span class="sd">            mistake worth reporting even when the value is unchanged.</span>
+<span class="sd">            It fires only when the incumbent differs from the replacement, the</span>
+<span class="sd">            same guard :func:`register_protocol</span>
+<span class="sd">            &lt;pcapkit.foundation.registry.protocols.register_protocol&gt;` applies,</span>
+<span class="sd">            even though ``code`` here -- unlike ``register_protocol``'s key --</span>
+<span class="sd">            is supplied by the caller and independent of ``schema``. GitHub</span>
+<span class="sd">            issue #718 corrected the previous presence-only guard: a repeat</span>
+<span class="sd">            call that names the exact same schema object is a caller replaying</span>
+<span class="sd">            a registration, not a mistake, so it is now a silent no-op.</span>
 
 <span class="sd">            Presence is a faithful "was this really registered" test only because</span>
 <span class="sd">            :class:`_EnumRegistry` returns a miss without recording it. A plain</span>
@@ -1677,8 +1687,8 @@
 <span class="sd">            here, so it is guarded separately.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">:</span>
-            <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">schema</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
                  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
 

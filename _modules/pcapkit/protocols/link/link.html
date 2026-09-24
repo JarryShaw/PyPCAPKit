@@ -583,19 +583,21 @@
 <span class="sd">        Warns:</span>
 <span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If this EtherType is</span>
 <span class="sd">                already registered, naming the displaced entry and its</span>
-<span class="sd">                replacement so a caller can tell *what* was lost. Fires on</span>
-<span class="sd">                presence alone -- see :meth:`ProtocolBase.register</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for why that</span>
-<span class="sd">                differs from ``register_protocol``.</span>
+<span class="sd">                replacement so a caller can tell *what* was lost. Fires only</span>
+<span class="sd">                when the incumbent differs from the replacement -- see</span>
+<span class="sd">                :meth:`ProtocolBase.register</span>
+<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase.register&gt;` for the</span>
+<span class="sd">                guard this shares with ``register_protocol``.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">klass</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol must be a Protocol subclass, not </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">:</span>
+        <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'protocol </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
-                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 

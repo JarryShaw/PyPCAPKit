@@ -492,6 +492,7 @@
     <span class="s1">'VersionError'</span><span class="p">,</span> <span class="s1">'IndexNotFound'</span><span class="p">,</span> <span class="s1">'ProtocolError'</span><span class="p">,</span>               <span class="c1"># ValueError</span>
     <span class="s1">'EndianError'</span><span class="p">,</span> <span class="s1">'KeyExists'</span><span class="p">,</span> <span class="s1">'NoDefaultValue'</span><span class="p">,</span>                   <span class="c1"># ValueError</span>
     <span class="s1">'FieldValueError'</span><span class="p">,</span> <span class="s1">'SchemaError'</span><span class="p">,</span> <span class="s1">'SeekError'</span><span class="p">,</span> <span class="s1">'TruncateError'</span><span class="p">,</span> <span class="c1"># ValueError</span>
+    <span class="s1">'VendorPathNotFound'</span><span class="p">,</span>                                           <span class="c1"># ValueError</span>
     <span class="s1">'ProtocolNotImplemented'</span><span class="p">,</span> <span class="s1">'VendorNotImplemented'</span><span class="p">,</span>               <span class="c1"># NotImplementedError</span>
     <span class="s1">'StructError'</span><span class="p">,</span>                                                  <span class="c1"># struct.error</span>
     <span class="s1">'StreamEOFError'</span><span class="p">,</span>                                               <span class="c1"># EOFError</span>
@@ -947,6 +948,13 @@
 <a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.TruncateError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TruncateError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Invalid truncate size."""</span></div>
+
+
+
+<div class="viewcode-block" id="VendorPathNotFound">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.VendorPathNotFound">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VendorPathNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Crawler module is not inside the ``vendor`` package root."""</span></div>
 
 
 

@@ -874,7 +874,9 @@ should be as <code class="docutils literal notranslate"><span class="pre">{proto
 <dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this link type is
 already registered against PCAP-NG blocks, naming the displaced
 entry and its replacement so a caller can tell <em>what</em> was lost.
-Note this registry is separate from the PCAP one, so
+Fires only when the incumbent differs from the replacement, so
+re-registering the same class is a silent no-op. Note this
+registry is separate from the PCAP one, so
 <a class="reference internal" href="../../foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype" title="pcapkit.foundation.registry.protocols.register_linktype"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_linktype()</span></code></a>
 writing to both cannot make either warn about the other.</p>
 </dd>
@@ -5140,17 +5142,21 @@ reported as a <a class="reference internal" href="../../utilities/warnings.html#
 every other registry in the package does – the lookup that follows
 cannot tell a deliberate replacement from an accidental one, so an
 unreported overwrite is a parser silently swapped out for another. See
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/681">#681</a> for the same
-guard on <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code>.</p>
-<p>Presence alone is the test here, rather than #681’s presence <em>and a
-different class</em>: that one keys on a name <strong>derived</strong> from the class, so
-the wrapper registrars reach it twice with the same class on a supported
-path and warning there would be noise. This keys on a caller-supplied
-<code class="docutils literal notranslate"><span class="pre">code</span></code>, and <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__" title="pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> passes each code exactly once per
-subclass, so a second arrival is a second deliberate call – which is what
-the seven sibling <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.register" title="pcapkit.protocols.schema.misc.pcapng.Option.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> methods on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/681">#681</a> for the
+guard <code class="docutils literal notranslate"><span class="pre">register_protocol</span></code> added first, which this one now matches.</p>
+<p>The guard is identity-based: it fires only when the incumbent differs
+from <code class="docutils literal notranslate"><span class="pre">cls</span></code>, so re-registering the exact same class under the same
+<code class="docutils literal notranslate"><span class="pre">code</span></code> is a silent no-op – in every namespace <code class="docutils literal notranslate"><span class="pre">targets</span></code> reaches –
+rather than a warning about nothing displaced. That is what keeps
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__" title="pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> honest: it loops over a <code class="docutils literal notranslate"><span class="pre">code</span></code> list with no
+deduplication, so a repeated or aliased entry reaches this method twice
+with the same class, and the second call now finds itself already the
+incumbent. GitHub issue #718 corrected the previous presence-only
+guard, which read every such repeat as a caller mistake whether or not
+the value had actually changed – the same fix the sibling
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.Option.register" title="pcapkit.protocols.schema.misc.pcapng.Option.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> methods on
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> and friends already
-assume.</p>
+received.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">ns='opt'</span></code> fans one registration out across every namespace, so the
@@ -5160,7 +5166,7 @@ namespaces it displaced something in, rather than once per namespace.</p>
 defaults, so nothing in it is a prior registration and it is exempt:
 registering an <code class="docutils literal notranslate"><span class="pre">opt</span></code>-namespace code into a brand-new namespace is
 exactly what that copy is for.</p>
-<p>Membership is tested with <code class="docutils literal notranslate"><span class="pre">in</span></code>, never by subscripting. The
+<p>Membership is tested with <code class="docutils literal notranslate"><span class="pre">.get()</span></code>, never by subscripting. The
 per-namespace registries are <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>s –
 only the outer one is the miss-safe
 <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema._EnumRegistry" title="pcapkit.protocols.schema.schema._EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">_EnumRegistry</span></code></a> – so reading
