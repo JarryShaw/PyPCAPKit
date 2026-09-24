@@ -13,7 +13,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['IPX']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
@@ -37,4 +37,4 @@ class IPX(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, chksum: 'bytes', len: 'int', count: 'int', type: 'Enum_Packet',
-                     dst: 'bytes', src: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     dst: 'bytes', src: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

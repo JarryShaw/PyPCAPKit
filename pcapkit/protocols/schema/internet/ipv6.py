@@ -17,7 +17,7 @@ __all__ = ['IPv6']
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -68,4 +68,4 @@ class IPv6(Schema):
         def __init__(self, hextet: 'IPv6Hextet', length: 'int', next: 'Enum_TransType',
                      limit: 'int', src: 'IPv6Address | bytes | str | int',
                      dst: 'IPv6Address | bytes | str | int',
-                     payload: 'bytes | Protocol | Schema') -> None: ...
+                     payload: 'bytes | ProtocolBase | Schema') -> None: ...

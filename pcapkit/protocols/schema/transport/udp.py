@@ -16,7 +16,7 @@ __all__ = ['UDP']
 if TYPE_CHECKING:
     from typing import Any
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 class PortEnumField(EnumField):
@@ -87,4 +87,4 @@ class UDP(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', len: 'int',
-                     checksum: 'bytes', payload: 'bytes | Schema | Protocol') -> 'None': ...
+                     checksum: 'bytes', payload: 'bytes | Schema | ProtocolBase') -> 'None': ...

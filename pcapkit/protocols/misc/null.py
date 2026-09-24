@@ -15,7 +15,7 @@ import io
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.protocols.data.misc.null import NoPayload as Data_NoPayload
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 __all__ = ['NoPayload']
 
 
-class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload],
+class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
                 schema=Schema_NoPayload, data=Data_NoPayload):
     """This class implements no-payload protocol."""
 

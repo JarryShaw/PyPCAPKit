@@ -34,7 +34,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import RegistryError, UnsupportedCall, stacklevel
@@ -56,7 +56,7 @@ __all__ = ['Frame']
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
-class Frame(Protocol[Data_Frame, Schema_Frame],
+class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             schema=Schema_Frame, data=Data_Frame):
     """Per packet frame header extractor.
 
@@ -82,7 +82,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for
+    #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name, or
@@ -94,7 +94,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
             Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
-    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]
+    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     ##########################################################################
     # Properties.
@@ -120,7 +120,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -148,7 +148,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
@@ -156,7 +156,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
                  f'{incumbent!r} with {protocol!r}', RegistryWarning)
         cls.__proto__[code] = protocol
 
-    def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
+    def index(self, name: 'str | ProtocolBase | Type[ProtocolBase]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
 
         Args:
@@ -355,7 +355,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
              ts_usec: 'Optional[int]' = None,
              incl_len: 'Optional[int]' = None,
              orig_len: 'Optional[int]' = None,
-             packet: 'bytes | Protocol | Schema' = b'',
+             packet: 'bytes | ProtocolBase | Schema' = b'',
              nanosecond: 'bool' = False,
              **kwargs: 'Any') -> 'Schema_Frame':
         """Make frame packet data.
@@ -546,7 +546,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             protocol chain of the current packet (frame).
 
         """
-        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
+        next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

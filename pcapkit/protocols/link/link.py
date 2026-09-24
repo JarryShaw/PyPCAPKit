@@ -21,8 +21,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
 __all__ = ['Link']
 
 
-class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
+class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for link layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
@@ -70,7 +69,7 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
     #: Layer of protocol.
     __layer__ = 'Link'  # type: Literal['Link']
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
@@ -96,7 +95,7 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
             # c.f., https://en.wikipedia.org/wiki/EtherType#Values
             0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx',  'IPX'),
         },
-    )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[Protocol] | Type[Protocol]]
+    )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     ##########################################################################
     # Properties.
@@ -113,7 +112,7 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_EtherType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_EtherType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -141,7 +140,7 @@ class Link(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-m
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:

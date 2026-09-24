@@ -222,7 +222,7 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
@@ -451,7 +451,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -580,7 +580,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
              shit: 'int' = 0,
              rhit: 'int' = 0,
              parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HIP':
         """Make (construct) packet data.
 

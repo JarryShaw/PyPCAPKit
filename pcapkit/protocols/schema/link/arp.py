@@ -15,7 +15,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['ARP']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
@@ -36,4 +36,4 @@ class ARP(Schema):
     if TYPE_CHECKING:
         def __init__(self, htype: 'int', ptype: 'int', hlen: 'int', plen: 'int',
                      oper: 'int', sha: 'bytes', spa: 'bytes', tha: 'bytes',
-                     tpa: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     tpa: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

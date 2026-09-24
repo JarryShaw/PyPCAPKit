@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -87,4 +87,4 @@ class OSPF(Schema):
                      area_id: 'IPv4Address | bytes | str | int',
                      checksum: 'bytes', auth_type: 'Enum_Authentication',
                      auth_data: 'bytes | CrytographicAuthentication',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

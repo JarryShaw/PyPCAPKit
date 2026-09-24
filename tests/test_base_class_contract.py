@@ -32,12 +32,13 @@ years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
 built-ins for three years). These two tests replace the convention with
 something that fails.
 
-The sweep is complete but the migration is not: 28 of the 82 sites are renamed,
-and the other 54 sit in paths that open pull requests own -- see
-:data:`PENDING_ALIAS_PATHS`, which is the whole of the remaining work and
-shrinks to nothing as those land. The four non-``protocols`` families
-(``Engine`` 8 sites, ``Reassembly`` 3, ``Dumper`` 2, ``TraceFlow`` 2) are
-finished; every one of the 54 outstanding is a ``ProtocolBase`` site.
+The sweep and the migration are both complete: all 82 sites are renamed, the
+last 54 (all ``ProtocolBase``, across ``pcapkit/protocols/`` and three
+``pcapkit/foundation/`` modules) having landed in #514 part (c) once #726 and
+#742 merged. :data:`PENDING_ALIAS_PATHS` is therefore empty -- its intended end
+state -- and :func:`is_pending` is trivially ``False`` for every path; the dict
+stays as a mechanism rather than being deleted, in case a future ``*Base``
+family needs the same transitional carve-out.
 
 :class:`RegistrationGateTests` is a regression pin, not a new behaviour. Every
 assertion in it already held before part (c), because parts (a) and (b)
@@ -108,13 +109,10 @@ NOT_IN_SCOPE = frozenset({'FieldBase'})
 #: the alias comes out and the entry goes with it. **An empty dict is the end
 #: state**, and :meth:`BaseClassAliasTests.test_no_library_module_imports_a_base_under_its_public_name`
 #: fails on an entry that has stopped matching anything, so a stale promise
-#: cannot sit here unnoticed once its pull request merges.
-PENDING_ALIAS_PATHS = {
-    'pcapkit/protocols/': 726,
-    'pcapkit/foundation/registry/protocols.py': 726,
-    'pcapkit/foundation/extraction.py': 742,
-    'pcapkit/foundation/traceflow/traceflow.py': 742,
-}
+#: cannot sit here unnoticed once its pull request merges. #514 part (c) landed
+#: the last 54 sites, so this is now empty and every alias check below runs
+#: unconditionally.
+PENDING_ALIAS_PATHS = {}  # type: dict[str, int]
 
 
 def is_pending(rel: 'str') -> 'bool':

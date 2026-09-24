@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.apptype import AppType as Enum_AppType
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['UDP']
@@ -81,7 +81,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol
+    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol
     #: index mapping for decoding next layer, c.f.
     #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
@@ -184,7 +184,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
              srcport: 'Enum_AppType | int' = 0,
              dstport: 'Enum_AppType | int' = 0,
              checksum: 'bytes' = b'\x00\x00',
-             payload: 'bytes | Schema | Protocol' = b'',
+             payload: 'bytes | Schema | ProtocolBase' = b'',
              **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 

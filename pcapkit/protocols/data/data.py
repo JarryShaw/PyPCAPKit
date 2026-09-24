@@ -10,7 +10,7 @@ __all__ = ['Data']
 if TYPE_CHECKING:
     from typing import Type
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 class Data(Info):
@@ -22,4 +22,4 @@ class Data(Info):
         #: Next field name, i.e., the name of the payload field.
         __next_name__: 'str'
         #: Next field type, i.e., the type of the payload field.
-        __next_type__: 'Type[Protocol]'
+        __next_type__: 'Type[ProtocolBase]'

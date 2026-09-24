@@ -33,7 +33,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
@@ -59,7 +59,7 @@ _MAGIC_NUM = {
 }
 
 
-class Header(Protocol[Data_Header, Schema_Header],
+class Header(ProtocolBase[Data_Header, Schema_Header],
              schema=Schema_Header, data=Data_Header):
     """PCAP file global header extractor."""
 

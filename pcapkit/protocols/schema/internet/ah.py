@@ -13,7 +13,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['AH']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
@@ -37,4 +37,4 @@ class AH(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'Enum_TransType', len: 'int', spi: 'int', seq: 'int',
-                     icv: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     icv: 'bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

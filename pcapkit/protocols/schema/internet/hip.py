@@ -64,7 +64,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
     from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
@@ -1644,4 +1644,4 @@ class HIP(Schema):
         def __init__(self, next: 'Enum_TransType', len: 'int', pkt: 'PacketType',
                      ver: 'VersionType', checksum: 'bytes', control: 'ControlsType',
                      shit: 'int', rhit: 'int', param: 'bytes | list[bytes | Parameter]',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

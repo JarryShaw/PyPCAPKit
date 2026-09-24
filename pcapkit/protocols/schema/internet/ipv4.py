@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -744,4 +744,4 @@ class IPv4(Schema):
         def __init__(self, vihl: 'VerIHLField', tos: 'ToSField', length: 'int', id: 'int',
                      flags: 'Flags', ttl: 'int', proto: 'Enum_TransType', chksum: 'bytes',
                      src: 'IPv4Address | str | bytes | int', dst: 'IPv4Address | str | bytes | int',
-                     options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     options: 'list[Option | bytes] | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

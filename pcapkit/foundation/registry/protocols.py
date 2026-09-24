@@ -33,7 +33,7 @@ from pcapkit.protocols.internet.mh import MH
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP_FrameType
 from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
 from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
@@ -144,7 +144,7 @@ NULL = '(null)'
 
 
 # NOTE: pcapkit.protocols.__proto__
-def register_protocol(protocol: 'Type[Protocol]') -> 'None':
+def register_protocol(protocol: 'Type[ProtocolBase]') -> 'None':
     """Registered protocol class.
 
     The protocol class must be a subclass of
@@ -213,7 +213,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
             same class under the same name is silent.
 
     """
-    if not issubclass(protocol, Protocol):
+    if not issubclass(protocol, ProtocolBase):
         raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
 
     name = protocol.__name__.upper()
@@ -249,7 +249,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 #: hand, moved into one table so :func:`register_protocol_code` can consult
 #: it. ``LinkType`` naming two classes is deliberate, not ambiguous --
 #: :func:`register_linktype` already fans out to both.
-_CODE_DESTINATIONS: 'dict[type, tuple[Type[Protocol], ...]]' = {
+_CODE_DESTINATIONS: 'dict[type, tuple[Type[ProtocolBase], ...]]' = {
     Enum_EtherType: (Link,),
     Enum_TransType: (Internet,),
     Enum_PayloadProtocolIdentifier: (SCTP,),
@@ -257,7 +257,7 @@ _CODE_DESTINATIONS: 'dict[type, tuple[Type[Protocol], ...]]' = {
 }
 
 
-def _iter_code_targets(code: 'Any') -> 'Iterator[tuple[Type[Protocol], Any]]':
+def _iter_code_targets(code: 'Any') -> 'Iterator[tuple[Type[ProtocolBase], Any]]':
     """Flatten a ``code=`` argument into ``(destination, key)`` pairs.
 
     Args:
@@ -300,7 +300,7 @@ linktype.LinkType` member yields both :class:`Frame` and :class:`PCAPNG`.
                         f'explicit destination, e.g. code={{TCP: {code!r}}}')
 
 
-def register_protocol_code(protocol: 'Type[Protocol]', code: 'Any') -> 'None':
+def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None':
     r"""Register ``protocol`` into the next-layer dispatch registry (or
     registries) named by ``code``.
 
@@ -377,12 +377,12 @@ def register_protocol_code(protocol: 'Type[Protocol]', code: 'Any') -> 'None':
 
 
 @overload
-def register_linktype(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_linktype(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
-def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                       class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -408,7 +408,7 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     Frame.register(code, module)
     PCAPNG.register(code, module)
@@ -421,13 +421,13 @@ def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol
 
 
 @overload
-def register_pcap(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_pcap(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__
-def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -446,7 +446,7 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | 
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     Frame.register(code, module)
     logger.debug('registered PCAP linktype protocol: %s', code.name)
@@ -458,13 +458,13 @@ def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | 
 
 
 @overload
-def register_pcapng(code: 'LinkType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_pcapng(code: 'LinkType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__
-def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                     class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -483,7 +483,7 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] 
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     PCAPNG.register(code, module)
     logger.debug('registered PCAP-NG linktype protocol: %s', code.name)
@@ -500,13 +500,13 @@ def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[Protocol] 
 
 
 @overload
-def register_ethertype(code: 'EtherType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_ethertype(code: 'EtherType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.link.link.Link.__proto__
-def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                        class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -525,7 +525,7 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     Link.register(code, module)
     logger.debug('registered ethertype protocol: %s', code.name)
@@ -542,13 +542,13 @@ def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[Protoc
 
 
 @overload
-def register_transtype(code: 'TransType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_transtype(code: 'TransType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.internet.internet.Internet.__proto__
-def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                        class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -567,7 +567,7 @@ def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[Protoc
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     Internet.register(code, module)
     logger.debug('registered transtype protocol: %s', code.name)
@@ -784,16 +784,16 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 
 
 @overload
-def register_apptype(code: 'int', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str') -> 'None': ...
+def register_apptype(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *, proto: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
 @overload
 def register_apptype(code: 'int', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str') -> 'None': ...
 @overload
 def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
 
 
-def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                      class_: 'str' = NULL, *, proto: 'TransportProtocol | str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -833,13 +833,13 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             proto = code.proto
         code = code.port
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     _reg = False
     if isinstance(proto, str):
         proto = TransportProtocol.get(proto.lower())
 
-    for test, cls in cast('dict[TransportProtocol, Type[Protocol]]', {
+    for test, cls in cast('dict[TransportProtocol, Type[ProtocolBase]]', {
         TransportProtocol.tcp: TCP,
         TransportProtocol.udp: UDP,
     }).items():
@@ -860,13 +860,13 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
 
 
 @overload
-def register_tcp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_tcp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_tcp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__
-def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                  class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -887,7 +887,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     TCP.register(code, module)
     logger.debug('registered TCP port: %s', code)
@@ -949,13 +949,13 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
 
 
 @overload
-def register_udp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_udp(code: 'int | Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_udp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.transport.udp.UDP.__proto__
-def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                  class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -976,7 +976,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
     if isinstance(code, Enum_AppType):
         code = code.port
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     UDP.register(code, module)
     logger.debug('registered UDP port: %s', code)
@@ -988,13 +988,13 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
 
 
 @overload
-def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None': ...
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None': ...
 @overload
 def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str', class_: 'str') -> 'None': ...
 
 
 # NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__
-def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[Protocol] | Type[Protocol]',
+def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
                   class_: 'str' = NULL) -> 'None':
     r"""Register a new protocol class.
 
@@ -1020,7 +1020,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
 
     """
     if isinstance(module, str):
-        module = cast('ModuleDescriptor[Protocol]', ModuleDescriptor(module, class_))
+        module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
     SCTP.register(code, module)
     logger.debug('registered SCTP payload protocol identifier: %s', code)

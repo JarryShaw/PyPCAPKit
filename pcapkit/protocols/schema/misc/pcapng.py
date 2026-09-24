@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -1351,7 +1351,7 @@ class EnhancedPacketBlock(BlockType, code=Enum_BlockType.Enhanced_Packet_Block):
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', timestamp_high: 'int',
                      timestamp_low: 'int', captured_len: 'int', original_len: 'int',
-                     packet_data: 'bytes | Protocol | Schema',
+                     packet_data: 'bytes | ProtocolBase | Schema',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
@@ -1375,7 +1375,7 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', original_len: 'int',
-                     packet_data: 'bytes | Protocol | Schema',
+                     packet_data: 'bytes | ProtocolBase | Schema',
                      length2: 'int') -> 'None': ...
 
 
@@ -2196,5 +2196,5 @@ class PacketBlock(BlockType, code=Enum_BlockType.Packet_Block):
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', drop_count: 'int',
                      timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int',
-                     original_length: 'int', packet_data: 'bytes | Protocol | Schema',
+                     original_length: 'int', packet_data: 'bytes | ProtocolBase | Schema',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...

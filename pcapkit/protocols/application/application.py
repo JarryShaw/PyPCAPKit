@@ -16,8 +16,7 @@ from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
 __all__ = ['Application']
 
 
-class Application(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
+class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     ##########################################################################

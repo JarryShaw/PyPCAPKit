@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6']
@@ -88,7 +88,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         return self._info.dst
 
     @property
-    def extension_headers(self) -> 'OrderedMultiDict[Enum_ExtensionHeader, Protocol]':
+    def extension_headers(self) -> 'OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase]':
         """IPv6 extension header records."""
         return self._exthdr
 
@@ -172,7 +172,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
              hop_limit: 'int' = 64,  # reasonable default
              src: 'IPv6Address | str | bytes | int' = '::1',
              dst: 'IPv6Address | str | bytes | int' = '::',
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6':
         """Make (construct) packet data.
 
@@ -304,7 +304,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         """
         #: Extension headers.
-        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init
+        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, ProtocolBase] # pylint: disable=attribute-defined-outside-init
 
         hdr_len = self.length       # header length
         raw_len = ipv6.payload      # payload length
@@ -372,7 +372,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                            packet: 'Optional[dict[str, Any]]' = None, version: 'Literal[4, 6]' = 4,
-                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'Protocol':
+                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'ProtocolBase':
         """Import next layer extractor.
 
         Arguments:
@@ -389,7 +389,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         """
         if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
+            protocol: 'Type[ProtocolBase]'
 
         if payload is None:
             file_ = self.__header__.get_payload()

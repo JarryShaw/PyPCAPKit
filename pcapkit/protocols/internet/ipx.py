@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPX']
@@ -120,7 +120,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
              type_reversed: 'bool' = False,
              dst: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
              src: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPX':
         """Make (construct) packet data.
 

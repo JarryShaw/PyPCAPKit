@@ -15,7 +15,7 @@ __all__ = ['Ethernet']
 if TYPE_CHECKING:
     from typing import Any
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
@@ -68,4 +68,4 @@ class Ethernet(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, dst: 'bytes', src: 'bytes', type: 'Enum_EtherType',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

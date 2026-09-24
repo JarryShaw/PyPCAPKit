@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['ARP', 'InARP']
@@ -224,7 +224,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
              spa: 'IPv4Address | IPv6Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
              tha: 'str | bytes | bytearray' = '00:00:00:00:00:00',
              tpa: 'IPv4Address | IPv6Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_ARP':
         """Make (construct) packet data.
 

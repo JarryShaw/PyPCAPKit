@@ -106,7 +106,7 @@ from pcapkit.protocols.data.misc.pcapng import WireGuardKeyLog as Data_WireGuard
 from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption
@@ -293,7 +293,7 @@ class WireGuardKeyLabel(StrEnum):
     PRESHARED_KEY = 'PRESHARED_KEY'
 
 
-class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
+class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
              schema=Schema_PCAPNG, data=Data_PCAPNG):
     """PCAP-NG file block extractor.
 
@@ -549,7 +549,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_LinkType, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for
+    #: DefaultDict[Enum_LinkType, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for
     #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name,
@@ -561,7 +561,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Enum_LinkType.IPV4:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv4'),
             Enum_LinkType.IPV6:     ModuleDescriptor('pcapkit.protocols.internet', 'IPv6'),
         },
-    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[Protocol] | Type[Protocol]]
+    )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]: Block
     #: type to method mapping. Method names are expected to be referred
@@ -854,7 +854,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_LinkType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -883,7 +883,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
@@ -944,7 +944,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             warn(f'PCAP-NG: [Secrets {code}] decryption secrets already registered', RegistryWarning)
         cls.__secrets__[code] = meth
 
-    def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
+    def index(self, name: 'str | ProtocolBase | Type[ProtocolBase]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
 
         Args:
@@ -1680,7 +1680,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             protocol chain of the current packet (frame).
 
         """
-        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
+        next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -3710,7 +3710,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                         timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
                         captured_len: 'Optional[int]' = None,
                         original_len: 'Optional[int]' = None,
-                        packet_data: 'bytes | Protocol | Schema' = b'',
+                        packet_data: 'bytes | ProtocolBase | Schema' = b'',
                         options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
                         **kwargs: 'Any') -> 'Schema_EnhancedPacketBlock':
         """Make PCAP-NG enhanced packet block (EPB).
@@ -3766,7 +3766,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _make_block_spb(self, block: 'Optional[Data_SimplePacketBlock]' = None, *,
                         original_len: 'Optional[int]' = None,
-                        packet_data: 'bytes | Protocol | Schema' = b'',
+                        packet_data: 'bytes | ProtocolBase | Schema' = b'',
                         **kwargs: 'Any') -> 'Schema_SimplePacketBlock':
         """Make PCAP-NG simple packet block (SPB).
 
@@ -4042,7 +4042,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                            timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
                            captured_len: 'Optional[int]' = None,
                            original_len: 'Optional[int]' = None,
-                           packet_data: 'bytes | Protocol | Schema' = b'',
+                           packet_data: 'bytes | ProtocolBase | Schema' = b'',
                            options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
                            **kwargs: 'Any') -> 'Schema_PacketBlock':
         """Make PCAP-NG packet block (obsolete).

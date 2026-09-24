@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Ethernet']
@@ -144,7 +144,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
              type_default: 'Optional[int]' = None,
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_Ethernet':
         """Make (construct) packet data.
 

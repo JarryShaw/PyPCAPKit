@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import ProtocolBase
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Protocol[Data_Raw, Schema_Raw],
+class Raw(ProtocolBase[Data_Raw, Schema_Raw],
           schema=Schema_Raw, data=Data_Raw):
     """This class implements universal unknown protocol."""
 

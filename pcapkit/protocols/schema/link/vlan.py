@@ -23,7 +23,7 @@ from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 __all__ = ['VLAN', 'TCI']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -74,4 +74,4 @@ class VLAN(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, tci: 'TCIType', type: 'Enum_EtherType',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 
     TypeParser = Callable[[Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
@@ -132,7 +132,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -264,7 +264,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
              type_reversed: 'bool' = False,
              seg_left: 'int' = 0,
              data: 'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
-             payload: 'Protocol | Schema | bytes' = b'',
+             payload: 'ProtocolBase | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Route':
         """Make (construct) packet data.
 
