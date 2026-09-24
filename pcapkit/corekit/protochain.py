@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = ['ProtoChain']
 
@@ -36,14 +36,14 @@ class ProtoChain(collections.abc.Sequence):
     """
 
     #: Internal data storage for protocol chain.
-    __data__: 'tuple[tuple[str, Type[Protocol]], ...]'
+    __data__: 'tuple[tuple[str, Type[ProtocolBase]], ...]'
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @cached_property
-    def protocols(self) -> 'tuple[Type[Protocol], ...]':
+    def protocols(self) -> 'tuple[Type[ProtocolBase], ...]':
         """List of protocols in the chain."""
         return tuple(data[1] for data in self.__data__)
 
@@ -62,7 +62,7 @@ class ProtoChain(collections.abc.Sequence):
     ##########################################################################
 
     @classmethod
-    def from_list(cls, data: 'list[Protocol | Type[Protocol]]') -> 'Self':
+    def from_list(cls, data: 'list[ProtocolBase | Type[ProtocolBase]]') -> 'Self':
         """Create a protocol chain from a list.
 
         Args:
@@ -70,11 +70,11 @@ class ProtoChain(collections.abc.Sequence):
 
         """
         from pcapkit.protocols.protocol import \
-            ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
+            ProtocolBase  # pylint: disable=import-outside-toplevel
 
         temp_data = []
         for proto in data:
-            if isinstance(proto, Protocol):
+            if isinstance(proto, ProtocolBase):
                 alias = proto.alias
                 proto = type(proto)
             else:
@@ -86,7 +86,7 @@ class ProtoChain(collections.abc.Sequence):
         obj.__data__ = tuple(temp_data)
         return obj
 
-    def index(self, value: 'str | Protocol | Type[Protocol]',
+    def index(self, value: 'str | ProtocolBase | Type[ProtocolBase]',
               start: 'Optional[int]' = None, stop: 'Optional[int]' = None) -> 'int':
         """First index of ``value``.
 
@@ -109,8 +109,8 @@ class ProtoChain(collections.abc.Sequence):
 
         # prepare comparison values
         from pcapkit.protocols.protocol import \
-            ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
-        comp = Protocol.expand_comp(value)
+            ProtocolBase  # pylint: disable=import-outside-toplevel
+        comp = ProtocolBase.expand_comp(value)
 
         pool = self.__data__[start:stop]
         for idx, (alias, proto) in enumerate(pool):
@@ -120,7 +120,7 @@ class ProtoChain(collections.abc.Sequence):
                     return start + idx
         raise IndexNotFound(f'{value!r} is not in {self.__class__.__name__!r}')
 
-    def count(self, value: 'str | Protocol | Type[Protocol]') -> int:
+    def count(self, value: 'str | ProtocolBase | Type[ProtocolBase]') -> int:
         """Number of occurrences of ``value``.
 
         Args:
@@ -129,8 +129,8 @@ class ProtoChain(collections.abc.Sequence):
         """
         # prepare comparison values
         from pcapkit.protocols.protocol import \
-            ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
-        comp = Protocol.expand_comp(value)
+            ProtocolBase  # pylint: disable=import-outside-toplevel
+        comp = ProtocolBase.expand_comp(value)
 
         cnt = 0
         for alias, proto in self.__data__:
@@ -145,7 +145,7 @@ class ProtoChain(collections.abc.Sequence):
     # Data models.
     ##########################################################################
 
-    def __init__(self, proto: 'Protocol | Type[Protocol]', alias: 'Optional[str]' = None, *,
+    def __init__(self, proto: 'ProtocolBase | Type[ProtocolBase]', alias: 'Optional[str]' = None, *,
                  basis: 'Optional[ProtoChain]' = None):
         """Initialisation.
 
@@ -156,8 +156,8 @@ class ProtoChain(collections.abc.Sequence):
 
         """
         from pcapkit.protocols.protocol import \
-            ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
-        if isinstance(proto, Protocol):
+            ProtocolBase  # pylint: disable=import-outside-toplevel
+        if isinstance(proto, ProtocolBase):
             if alias is None:
                 alias = proto.alias
             proto = type(proto)
@@ -192,7 +192,7 @@ class ProtoChain(collections.abc.Sequence):
         """
         return ':'.join(map(lambda p: p[0], self.__data__))
 
-    def __contains__(self, name: 'str | Protocol | Type[Protocol]') -> 'bool':  # type: ignore[override]
+    def __contains__(self, name: 'str | ProtocolBase | Type[ProtocolBase]') -> 'bool':  # type: ignore[override]
         """Returns if ``name`` is in the chain.
 
         Args:
@@ -203,8 +203,8 @@ class ProtoChain(collections.abc.Sequence):
 
         """
         from pcapkit.protocols.protocol import \
-            ProtocolBase as Protocol  # pylint: disable=import-outside-toplevel
-        comp = Protocol.expand_comp(name)
+            ProtocolBase  # pylint: disable=import-outside-toplevel
+        comp = ProtocolBase.expand_comp(name)
 
         for alias, proto in self.__data__:
             test_comp = (proto, alias.upper(), *(name.upper() for name in proto.id()))
@@ -232,7 +232,7 @@ class ProtoChain(collections.abc.Sequence):
             return tuple(data[0] for data in self.__data__[index])
         return self.__data__[index][0]
 
-    def __iter__(self) -> 'Iterator[tuple[str, Type[Protocol]]]':
+    def __iter__(self) -> 'Iterator[tuple[str, Type[ProtocolBase]]]':
         """Iterator support.
 
         Returns:

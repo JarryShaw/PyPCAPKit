@@ -10,7 +10,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.utilities.logging import get_logger
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class PCAP(Engine[Frame]):
+class PCAP(EngineBase[Frame]):
     """PCAP file extraction support.
 
     Args:

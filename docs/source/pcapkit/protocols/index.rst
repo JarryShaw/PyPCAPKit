@@ -18,7 +18,7 @@ with detailed implementation and methods.
    application/index
    misc/index
 
-All protocol classes are implemented as :class:`~pcapkit.protocols.protocol.Protocol`
+All protocol classes are implemented as :class:`~pcapkit.protocols.protocol.ProtocolBase`
 subclasses, which are responsible for processing extracted binary packet data
 and/or construct protocol packet from given information. Below is a brief
 diagram of the class hierarchy of :mod:`pcapkit.protocols`:

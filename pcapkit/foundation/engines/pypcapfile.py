@@ -16,7 +16,7 @@ import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.foundation.engines.engine import EngineBase as Engine
+from pcapkit.foundation.engines.engine import EngineBase
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, warn
@@ -63,7 +63,7 @@ class _NamedStream:
         return self._stream.read(size)
 
 
-class PyPCAPFile(Engine['PCAPFilePacket']):
+class PyPCAPFile(EngineBase['PCAPFilePacket']):
     """PyPCAPFile engine support.
 
     `PyPCAPFile`_ is a pure Python savefile reader. It decodes Ethernet, IPv4,

@@ -25,7 +25,7 @@ for :mod:`pcapkit` package.
    traceflow
    tcp
 
-All flow tracing classes are implemented as :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow`
+All flow tracing classes are implemented as :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase`
 subclasses, which are responsible for processing extracted packets and
 follow the flow and/or stream to provide more insights. Below is a brief
 diagram of the class hierarchy of :mod:`pcapkit.foundation.traceflow`:

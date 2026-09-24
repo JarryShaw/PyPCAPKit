@@ -19,12 +19,12 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import NoValueType
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')
 _TS = TypeVar('_TS', bound='Schema')
-_TP = TypeVar('_TP', bound='Protocol')
+_TP = TypeVar('_TP', bound='ProtocolBase')
 _TN = TypeVar('_TN', bound='NoValueType')
 
 

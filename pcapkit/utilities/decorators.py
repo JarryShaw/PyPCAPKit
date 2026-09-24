@@ -25,12 +25,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
     P = ParamSpec('P')
     R_seekset = TypeVar('R_seekset')
-    R_beholder = TypeVar('R_beholder', bound=Protocol)
+    R_beholder = TypeVar('R_beholder', bound=ProtocolBase)
     R_prepare = TypeVar('R_prepare', bound=Schema)
 
 __all__ = ['seekset', 'beholder', 'prepare']
@@ -41,7 +41,7 @@ __all__ = ['seekset', 'beholder', 'prepare']
 logger = get_logger(__name__)
 
 
-def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[P, R_seekset]':
+def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Callable[P, R_seekset]':
     """Read file from start then set back to original.
 
     Important:
@@ -67,7 +67,7 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[
     @functools.wraps(func)
     def seekcur(*args: 'P.args', **kw: 'P.kwargs') -> 'R_seekset':
         # extract self object
-        self = cast('Protocol', args[0])
+        self = cast('ProtocolBase', args[0])
 
         # move file pointer
         seek_cur = self._file.tell()
@@ -82,7 +82,9 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[
     return seekcur
 
 
-def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beholder]') -> 'Callable[P, R_beholder]':
+def beholder(
+    func: 'Callable[Concatenate[ProtocolBase, int, Optional[int], P], R_beholder]',
+) -> 'Callable[P, R_beholder]':
     """Behold extraction procedure.
 
     Important:

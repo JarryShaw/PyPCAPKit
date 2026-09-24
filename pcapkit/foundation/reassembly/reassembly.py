@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.infoclass import Info
     from pcapkit.corekit.module import ModuleDescriptor
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
     CallbackFn = Callable[[list[_DT]], None]
 
@@ -64,7 +64,7 @@ class ReassemblyMeta(abc.ABCMeta):
         #: Protocol name of current reassembly object.
         __protocol_name__: 'str'
         #: Protocol of current reassembly object.
-        __protocol_type__: 'Type[Protocol]'
+        __protocol_type__: 'Type[ProtocolBase]'
 
     @property
     def name(cls) -> 'str':
@@ -74,7 +74,7 @@ class ReassemblyMeta(abc.ABCMeta):
         return cls.__name__
 
     @property
-    def protocol(cls) -> 'Type[Protocol]':
+    def protocol(cls) -> 'Type[ProtocolBase]':
         """Protocol of current reassembly object."""
         if hasattr(cls, '__protocol_type__'):
             return cls.__protocol_type__
@@ -128,7 +128,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         #: Protocol name of current reassembly object.
         __protocol_name__: 'str'
         #: Protocol of current reassembly object.
-        __protocol_type__: 'Type[Protocol]'
+        __protocol_type__: 'Type[ProtocolBase]'
 
         #: List of callback functions upon reassembled datagram.
         __callback_fn__: 'list[CallbackFn]'
@@ -181,7 +181,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         return type(self).name  # type: ignore[return-value]
 
     @property
-    def protocol(self) -> 'Type[Protocol]':
+    def protocol(self) -> 'Type[ProtocolBase]':
         """Protocol of current reassembly object.
 
         Note:

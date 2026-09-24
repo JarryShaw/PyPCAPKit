@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
@@ -104,7 +104,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
     #: Parsed IP payload. Analysed on first read, not at construction time; a
     #: :class:`Deferred` may be passed in its place, and reading this attribute
     #: then runs it and keeps the result.
-    packet: 'Optional[Protocol]'
+    packet: 'Optional[ProtocolBase]'
     #: Octet ranges, absolute into the reassembled payload and both
     #: **inclusive** -- the same convention as :attr:`Packet.fo` combined with
     #: its length -- on which two fragments disagreed, i.e. an arriving
@@ -146,7 +146,7 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # from. Overloads keyed on a literal cannot be selected from a ``completed``
         # computed at runtime anyway, so they only made the reassemblers' own calls
         # untypeable while promising a correlation the code does not keep.
-        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 @info_final
 class Buffer(Info, Generic[_AT]):

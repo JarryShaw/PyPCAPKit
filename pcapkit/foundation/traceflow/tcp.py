@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.foundation.traceflow.data.data import Deferred
 from pcapkit.foundation.traceflow.data.tcp import _AT, Buffer, BufferID, Index, Packet
-from pcapkit.foundation.traceflow.traceflow import TraceFlowBase as TraceFlow
+from pcapkit.foundation.traceflow.traceflow import TraceFlowBase
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 from pcapkit.utilities.logging import get_logger
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class TCP(TraceFlow[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]):
+class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]):
     """Trace TCP flows.
 
     Args:
