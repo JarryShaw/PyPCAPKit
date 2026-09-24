@@ -15,7 +15,7 @@ __all__ = ['IPv6_Frag']
 if TYPE_CHECKING:
     from typing_extensions import TypedDict
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
     class Flags(TypedDict):
         """Fragment offset and flags."""
@@ -45,4 +45,4 @@ class IPv6_Frag(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, next:'Enum_TransType', flags: 'Flags', id: 'int', payload: 'bytes | Schema | Protocol') -> 'None': ...
+        def __init__(self, next:'Enum_TransType', flags: 'Flags', id: 'int', payload: 'bytes | Schema | ProtocolBase') -> 'None': ...

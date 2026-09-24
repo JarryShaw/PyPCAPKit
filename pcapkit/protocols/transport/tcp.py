@@ -150,7 +150,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags
     from pcapkit.protocols.schema.transport.tcp import MPTCPJoin as Schema_MPTCPJoin
@@ -307,7 +307,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol
+    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol
     #: index mapping for decoding next layer, c.f.
     #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
@@ -526,7 +526,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
              checksum: 'bytes' = b'\x00\x00',
              urgent: 'int' = 0,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_TCP':
         """Make (construct) packet data.
 

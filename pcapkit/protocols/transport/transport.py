@@ -17,8 +17,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.apptype import AppType as Enum_AppType
 from pcapkit.corekit.module import ModuleDescriptor
-from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.exceptions import RegistryError, StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, get_logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -38,14 +37,14 @@ __all__ = ['Transport']
 logger = get_logger(__name__)
 
 
-class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
+class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     if TYPE_CHECKING:
         #: Protocol index mapping for decoding next layer,
         #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
         #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-        __proto__: 'DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]'
+        __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'
 
     ##########################################################################
     # Defaults.
@@ -69,7 +68,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'int', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':
+    def register(cls, code: 'int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':
         """Register a new protocol class.
 
         Notes:
@@ -112,7 +111,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
 
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
@@ -121,7 +120,7 @@ class Transport(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstr
         cls.__proto__[code] = protocol
 
     @classmethod
-    def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'Protocol':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'ProtocolBase':  # type: ignore[override] # pylint: disable=arguments-renamed
         """Analyse packet payload.
 
         Args:

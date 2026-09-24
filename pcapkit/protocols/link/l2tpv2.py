@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['L2TPv2']
@@ -254,7 +254,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
              ns: 'Optional[int]' = None,
              nr: 'Optional[int]' = None,
              offset: 'Optional[int]' = None,
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_L2TP':  # pylint: disable=unused-argument
         """Make (construct) packet data.
 

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -134,7 +134,7 @@ class IPv6_Route(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Routing',
-                     seg_left: 'int', data: 'bytes | RoutingType', payload: 'Protocol | Schema | bytes') -> 'None': ...
+                     seg_left: 'int', data: 'bytes | RoutingType', payload: 'ProtocolBase | Schema | bytes') -> 'None': ...
 
 
 class RoutingType(EnumSchema[Enum_Routing]):

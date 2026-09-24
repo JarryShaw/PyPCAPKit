@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -803,4 +803,4 @@ class IPv6_Opts(Schema):
     if TYPE_CHECKING:
         def __init__(self, next: 'Enum_TransType', len: 'int',
                      options: 'bytes | list[bytes | Option]',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['AH']
@@ -65,7 +65,7 @@ class AH(IPsec[Data_AH, Schema_AH],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -160,7 +160,7 @@ class AH(IPsec[Data_AH, Schema_AH],
              spi: 'int' = 0,
              seq: 'int' = 0,
              icv: 'bytes' = b'',
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_AH':
         """Make (construct) packet data.
 

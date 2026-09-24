@@ -15,7 +15,7 @@ __all__ = ['L2TP']
 if TYPE_CHECKING:
     from typing import Optional
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import Literal, TypedDict
@@ -85,4 +85,4 @@ class L2TP(Schema):
     if TYPE_CHECKING:
         def __init__(self, flags: 'FlagsType', length: 'Optional[int]', tunnel_id: 'int',
                      session_id: 'int', ns: 'Optional[int]', nr: 'Optional[int]',
-                     offset: 'Optional[int]', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     offset: 'Optional[int]', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

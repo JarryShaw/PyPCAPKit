@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6_Frag']
@@ -70,7 +70,7 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
         return 8
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -161,7 +161,7 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
              offset: 'int' = 0,
              mf: 'bool' = False,
              id: 'int' = 0,
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Frag':
         """Make (construct) packet data.
 

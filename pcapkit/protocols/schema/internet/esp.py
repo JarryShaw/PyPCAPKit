@@ -11,7 +11,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['ESP']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
@@ -43,4 +43,4 @@ class ESP(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, spi: 'int', seq: 'int',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

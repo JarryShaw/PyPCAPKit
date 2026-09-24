@@ -10,7 +10,7 @@ from pcapkit.protocols.schema.schema import Schema, schema_final
 __all__ = ['Raw']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
@@ -21,4 +21,4 @@ class Raw(Schema):
     packet: 'bytes' = PayloadField(length=lambda x: x['__length__'], default=b'')
 
     if TYPE_CHECKING:
-        def __init__(self, packet: 'bytes | Schema | Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, packet: 'bytes | Schema | ProtocolBase') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

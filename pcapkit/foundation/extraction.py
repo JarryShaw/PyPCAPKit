@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
     from pcapkit.protocols.misc.pcap.frame import Frame
     from pcapkit.protocols.misc.pcapng import PCAPNG
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
     #: Every key registered in :attr:`Extractor.__output__` and in
     #: :attr:`TraceFlowBase.__output__
@@ -82,7 +82,7 @@ if TYPE_CHECKING:
     Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket,
                    PCAPFilePacket, tuple[float, bytes]]
 
-    Protocols = Union[str, Protocol, Type[Protocol]]
+    Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
     VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']

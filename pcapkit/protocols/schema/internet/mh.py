@@ -134,7 +134,7 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -574,7 +574,7 @@ class MH(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'Enum_TransType | int', length: 'int', type: 'Enum_Packet | int',
-                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...
 
 
 class Option(EnumSchema[Enum_Option]):

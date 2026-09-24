@@ -113,7 +113,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.internet.ipv4 import Option as Data_Option
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
@@ -363,7 +363,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              src: 'IPv4Address | str | int | bytes' = '127.0.0.1',
              dst: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
              options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv4':
         """Make (construct) packet data.
 

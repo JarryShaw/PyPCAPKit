@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import FieldBase as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -1106,4 +1106,4 @@ class TCP(Schema):
     if TYPE_CHECKING:
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', seq: 'int', ack: 'int',
                      offset: 'OffsetFlag', flags: 'Flags', window: 'int', checksum: 'bytes',
-                     urgent: 'int', options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     urgent: 'int', options: 'list[Option | bytes] | bytes', payload: 'bytes | ProtocolBase | Schema') -> 'None': ...

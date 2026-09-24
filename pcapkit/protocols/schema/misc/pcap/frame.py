@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.numbers import NumberField as Field
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 
 def byteorder_callback(field: 'Field', packet: 'dict[str, Any]') -> 'None':
@@ -62,4 +62,4 @@ class Frame(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, ts_sec: 'int', ts_usec: 'int', incl_len: 'int',
-                     orig_len: 'int', packet: 'bytes | Protocol | Schema') -> 'None': ...
+                     orig_len: 'int', packet: 'bytes | ProtocolBase | Schema') -> 'None': ...

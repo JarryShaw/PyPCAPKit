@@ -107,7 +107,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.hopopt import Option as Data_Option
     from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
     from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as Data_SMFDPDOption
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.hopopt import Option as Schema_Option
     from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
     from pcapkit.protocols.schema.internet.hopopt import SMFDPDOption as Schema_SMFDPDOption
@@ -228,7 +228,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -314,7 +314,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              next_reversed: 'bool' = False,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HOPOPT':
         """Make (construct) packet data.
 

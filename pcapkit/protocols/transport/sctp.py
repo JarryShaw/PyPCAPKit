@@ -170,7 +170,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.sctp import Chunk as Data_Chunk
     from pcapkit.protocols.data.transport.sctp import ErrorCause as Data_ErrorCause
     from pcapkit.protocols.data.transport.sctp import Parameter as Data_Parameter
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.transport.sctp import Chunk as Schema_Chunk
     from pcapkit.protocols.schema.transport.sctp import ErrorCause as Schema_ErrorCause
     from pcapkit.protocols.schema.transport.sctp import Parameter as Schema_Parameter
@@ -343,7 +343,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #: Payload protocol identifier of the first DATA chunk found in the packet.
     _ppid = None  # type: Optional[Enum_PayloadProtocolIdentifier]
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol
+    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol
     #: index mapping for decoding next layer, c.f.
     #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
@@ -363,7 +363,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP
             Enum_PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP: ModuleDescriptor('pcapkit.protocols.application.ngap', 'NGAP'),  # NGAP over DTLS
         },
-    )  # type: DefaultDict[int, ModuleDescriptor[Protocol] | Type[Protocol]]
+    )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: DefaultDict[Enum_Chunk, str | tuple[ChunkParser, ChunkConstructor]]: Chunk
     #: type to method mapping, c.f. :meth:`_read_sctp_chunks` and
@@ -590,7 +590,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return schema
 
     @classmethod
-    def register(cls, code: 'Enum_PayloadProtocolIdentifier | int', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override] # pylint: disable=line-too-long
+    def register(cls, code: 'Enum_PayloadProtocolIdentifier | int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override] # pylint: disable=line-too-long
         r"""Register a new protocol class for a payload protocol identifier.
 
         Notes:

@@ -110,7 +110,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.ipv6_opts import Option as Data_Option
     from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as Data_QuickStartOption
     from pcapkit.protocols.data.internet.ipv6_opts import SMFDPDOption as Data_SMFDPDOption
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_Option
     from pcapkit.protocols.schema.internet.ipv6_opts import \
         QuickStartOption as Schema_QuickStartOption
@@ -238,7 +238,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -325,7 +325,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              next_reversed: 'bool' = False,
              options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Opts':
         """Make (construct) packet data.
 

@@ -192,7 +192,7 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
 
 #: Cached :mod:`cryptography` primitives, c.f. :func:`load_cryptography`.
 #: :data:`NotImplemented` means the import has not been attempted yet, and
@@ -1149,7 +1149,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
              iv: 'Optional[bytes]' = None,
              pad_len: 'Optional[int]' = None,
              icv: 'bytes' = b'',
-             payload: 'bytes | Protocol | Schema' = b'',
+             payload: 'bytes | ProtocolBase | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_ESP':
         """Make (construct) packet data.
 
@@ -1319,7 +1319,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
         }
 
     @staticmethod
-    def _payload_bytes(payload: 'bytes | Protocol | Schema') -> 'bytes':
+    def _payload_bytes(payload: 'bytes | ProtocolBase | Schema') -> 'bytes':
         """Render ``payload`` as :obj:`bytes`.
 
         Args:

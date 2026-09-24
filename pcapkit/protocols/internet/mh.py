@@ -504,7 +504,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.mh import Option as Data_Option
-    from pcapkit.protocols.protocol import ProtocolBase as Protocol
+    from pcapkit.protocols.protocol import ProtocolBase
     from pcapkit.protocols.schema.internet.mh import Option as Schema_Option
     from pcapkit.protocols.schema.internet.mh import Packet as Schema_Packet
     from pcapkit.protocols.schema.schema import Schema
@@ -1283,7 +1283,7 @@ class MH(Internet[Data_MH, Schema_MH],
         return self._info.length
 
     @property
-    def payload(self) -> 'Protocol | NoReturn':
+    def payload(self) -> 'ProtocolBase | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -1407,7 +1407,7 @@ class MH(Internet[Data_MH, Schema_MH],
              type_reversed: 'bool' = False,
              chksum: 'bytes' = b'',
              data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
-             payload: 'Protocol | Schema | bytes' = b'',
+             payload: 'ProtocolBase | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_MH':
         """Make (construct) packet data.
 

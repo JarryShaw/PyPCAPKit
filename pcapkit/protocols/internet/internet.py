@@ -17,8 +17,7 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import _PT, _ST
-from pcapkit.protocols.protocol import ProtocolBase as Protocol
+from pcapkit.protocols.protocol import _PT, _ST, ProtocolBase
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.warnings import RegistryWarning, warn
@@ -31,7 +30,7 @@ if TYPE_CHECKING:
 __all__ = ['Internet']
 
 
-class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
+class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
@@ -85,7 +84,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: Layer of protocol.
     __layer__ = 'Internet'  # type: Literal['Internet']
 
-    #: DefaultDict[int, ModuleDescriptor[Protocol] | ~typing.Type[Protocol]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
@@ -133,7 +132,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_TransType', protocol: 'ModuleDescriptor[Protocol] | Type[Protocol]') -> 'None':  # type: ignore[override]
+    def register(cls, code: 'Enum_TransType', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -161,7 +160,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
         """
         if isinstance(protocol, ModuleDescriptor):
             protocol = protocol.klass
-        if not issubclass(protocol, Protocol):
+        if not issubclass(protocol, ProtocolBase):
             raise RegistryError(f'protocol must be a Protocol subclass, not {protocol!r}')
         incumbent = cls.__proto__.get(code)
         if incumbent is not None and incumbent is not protocol:
@@ -213,7 +212,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
         """
-        next_ = cast('Protocol',  # type: ignore[redundant-cast]
+        next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]
                      self._import_next_layer(proto, length, packet=packet, version=version,
                                              payload=payload))  # type: ignore[arg-type,misc,call-arg]
         info, chain = next_.info, next_.protochain
@@ -240,7 +239,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                            packet: 'Optional[dict[str, Any]]' = None, version: 'Literal[4, 6]' = 4,
-                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'Protocol':
+                           extension: 'bool' = False, payload: 'Optional[bytes]' = None) -> 'ProtocolBase':
         """Import next layer extractor.
 
         Arguments:
@@ -257,7 +256,7 @@ class Internet(Protocol[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
 
         """
         if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
+            protocol: 'Type[ProtocolBase]'
 
         if payload is None:
             file_ = self.__header__.get_payload()
