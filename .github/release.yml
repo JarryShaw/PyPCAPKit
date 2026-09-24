@@ -8,19 +8,116 @@
 # entry of its own -- they are the whole of the notes.
 #
 # Categorisation keys on pull-request *labels*, and on nothing else. There is no
-# matching on the `type(scope):` subject prefix this project actually uses, so the
-# type a pull request announces in its title cannot reach this file. In practice
-# only Dependabot labels anything, which is why the catch-all is no longer titled
-# "Features": across the last 40 merged pull requests 24 were `fix`, 6 `test`,
-# 6 `docs`, 2 `feat` and 1 `perf`, so a Features heading described two of them and
-# mislabelled the rest.
+# matching on the `type(scope):` subject prefix this project actually uses, so
+# the type a pull request announces in its title cannot reach this file.
 #
-# `*` catches the pull requests that "didn't match any of the previous
-# categories", so it has to come last. With the dependency category ahead of it,
-# no `exclude` is needed to keep the two apart.
+# A labelling programme has since put a type label on every merged pull request
+# (zero exceptions, and every new one too), so the old survey this file cited --
+# 40 pull requests, mostly untyped, hence a bare Dependencies/catch-all split --
+# is stale, and a category per label is now possible. Sampling 334 merged pull
+# requests (`gh pr list --state merged --limit 400`) gives the frequency below;
+# zero carry no type label:
+#
+#   fix 124, dependencies 97, breaking 50, ci 41, test 31, docs 28, feat 12,
+#   release 10, chore 9, perf 7, const 2, refactor 2
+#
+# GitHub files a pull request under the *first* category whose `labels` it
+# matches, so category order is what resolves the 69 pull requests that carry
+# more than one type label. This order is derived from those overlaps, traced
+# against the actual pull requests, not guessed:
+#
+#   * `breaking` is first, full stop. It co-occurs with `fix` (39x, +5 more with
+#     `test` too), `feat` (3x), `ci`+`release` (2x, +1 more with `fix` too) and
+#     `refactor` (1x) -- e.g. #25 "New distribution [0.14.0]" carries
+#     breaking+ci+fix+release. Any other position buries a breaking change
+#     under "Fixed" or "Release", which is the one mistake this file exists to
+#     avoid.
+#   * `release` is second. Its overlaps with `ci` (3x) and with `ci`+
+#     `dependencies` (1x) are all old "New distribution [x]" pull requests
+#     (#9, #11, #21, #22) -- a version bump that happens to also touch a
+#     workflow file or a lockfile is still, in substance, a release. `release`
+#     also wins its one overlap with `fix` (#14, "New distribution [0.13.3]").
+#   * `feat` and `fix` follow, in that order by convention: neither overlaps
+#     with anything ranked above, so nothing in the data forces this half.
+#     `refactor` comes next; its only overlap is with `breaking`, above.
+#   * `ci` beats `perf` (#727, subject `ci(unit-tests):`, labelled ci+perf),
+#     `const` (#12 "Update Makefile", labelled ci+const) and `dependencies`
+#     (#41 "Config file for pyup.io", labelled ci+dependencies) -- in each case
+#     the pull request is a build/workflow change first and the second label
+#     is incidental to it.
+#   * `docs` beats `chore` (#637, subject `docs(github):`) and `test` (#703,
+#     subject `docs(tests):`); `chore` in turn beats `test` (#697, subject
+#     `chore(examples):`; also #340).
+#   * `test` beats `const` (#15 "Update test branch", its only overlap, and a
+#     weak one -- an old pull request with no `type(scope):` subject to check
+#     against).
+#   * `dependencies` sits second-to-last rather than first -- see below.
+#
+# `dependencies` used to be the first category, and is 97 of the 334 sampled
+# pull requests, all Dependabot noise. Moving it down is a judgement call, not
+# a data requirement: nothing in the overlaps above forces its position
+# relative to anything except `release` and `ci`, both of which already rank
+# ahead of it regardless of where it sits. The case for moving it here: a
+# future pull request that mixes a real change with a `dependencies` label
+# (say, a fix prompted by a dependency bump) surfaces under that real category
+# instead of being swallowed by bot noise -- which is also, concretely, what
+# keeps #22 ("New distribution [0.13.3.post2]", ci+dependencies+release) filed
+# under Release rather than Dependencies. The case for leaving it first, as
+# before: it keeps the highest-volume, lowest-interest category out of the way
+# of everything else on a first read. This file takes the former; flip its
+# position in the list below if that judgement is wrong.
+#
+# `*` catches whatever matches none of the categories above -- currently
+# nothing, since every merged pull request carries a type label, but it stays
+# last regardless so an unlabelled future pull request still lands somewhere
+# instead of silently vanishing from the notes.
+#
+# `review: pending` / `review: needs-changes` / `review: good-to-go` are
+# cross-review process metadata, not a change type, and must never key a
+# category here, and must never appear in `changelog.exclude.labels` (which
+# would drop the whole pull request from every release's notes) or in a
+# category's own `exclude.labels` (which would drop it from just that
+# category). Either one applied to these labels would make every reviewed pull
+# request vanish from the generated notes -- the opposite of the intent.
+# Nothing enforces this except that no category below keys on them; this
+# comment is what should stop a future maintainer from adding one that
+# accidentally does.
 
 changelog:
   categories:
+    - title: 💥 Breaking Changes
+      labels:
+        - breaking
+    - title: 🚀 Release
+      labels:
+        - release
+    - title: ✨ Features
+      labels:
+        - feat
+    - title: 🐛 Fixes
+      labels:
+        - fix
+    - title: ♻️ Refactoring
+      labels:
+        - refactor
+    - title: ⚙️ CI & Build
+      labels:
+        - ci
+    - title: ⚡ Performance
+      labels:
+        - perf
+    - title: 📝 Documentation
+      labels:
+        - docs
+    - title: 🧹 Chores
+      labels:
+        - chore
+    - title: 🧪 Tests
+      labels:
+        - test
+    - title: 🔢 Constants
+      labels:
+        - const
     - title: 👒 Dependencies
       labels:
         - dependencies
