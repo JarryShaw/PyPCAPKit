@@ -73,10 +73,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
+      # The DPKT extra is here so the tests gated on it (test_dpkt_unit.py,
+      # test_misc.py, test_extraction.py, test_core.py) actually execute
+      # instead of skipping -- see #729. It is a small, pure-Python
+      # dependency (measured clean installs on 3.10-3.14), so it costs
+      # nothing per leg and adds no new job or leg, unlike Scapy below.
       - name: Install package and test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test]'
+          python -m pip install -e '.[test,DPKT]'
 
       # `-n auto` resolves to whatever this runner reports, and nothing else in
       # the log says what that was -- print it so the number `-n auto` picked
@@ -124,11 +129,14 @@ jobs:
       # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
       # which build their captures with scapy; examples/generators/pcapng.py needs
       # nothing beyond the standard library and pcapkit itself, which it uses to
-      # parse each fixture back.
+      # parse each fixture back. DPKT joins it so the two dpkt-gated methods
+      # living under tests/integration/ (test_engine_parity.py,
+      # test_engine_runtime.py) actually run here instead of skipping -- see
+      # #729; same reasoning as the `test` job above.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy]'
+          python -m pip install -e '.[test,Scapy,DPKT]'
 
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
@@ -251,10 +259,13 @@ jobs:
           python-version: "3.14"
           cache: pip
 
+      # DPKT joins Scapy here for the same reason as the `integration` job
+      # above -- this is the full, unfiltered suite, so it is the one place
+      # where skipping the dpkt-gated tests would be most misleading.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy]'
+          python -m pip install -e '.[test,Scapy,DPKT]'
 
       # See the integration job above for why this step is shaped the way it is.
       - name: Regenerate sample captures
