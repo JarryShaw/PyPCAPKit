@@ -78,10 +78,40 @@ jobs:
       # instead of skipping -- see #729. It is a small, pure-Python
       # dependency (measured clean installs on 3.10-3.14), so it costs
       # nothing per leg and adds no new job or leg, unlike Scapy below.
+      #
+      # crypto (cryptography) and NGAP (pycrate) join it for the same reason,
+      # covering two of #738's remaining gates -- HAS_CRYPTO (test_esp_unit.py,
+      # 14 methods) and HAS_PYCRATE (test_ngap_unit.py, 10 methods), both plain
+      # unit-tier. `cli` (emoji) is deliberately NOT added here: its only
+      # HAS_EMOJI-gated tests are in tests/integration/test_cli_subprocess.py,
+      # which this job ignores wholesale, so installing it here would unlock
+      # nothing. cryptography is the one compiled wheel of the two; measured
+      # clean installs on 3.10-3.14 (manylinux wheels, no build step). pycrate
+      # is pure Python but its distribution is large (~238MB, see the NGAP
+      # extra's comment in pyproject.toml) -- still cheap in wall time, just not
+      # "a second" cheap.
+      #
+      # PyPCAPFile (pypcapfile) is deliberately NOT here, or on either job
+      # below, despite #738 listing HAS_PYPCAPFILE among its cheap subset.
+      # Measured on 3.10 and 3.11 (where its `python_version < '3.12'` marker
+      # lets it actually install): installing it does not make the 10
+      # HAS_PYPCAPFILE-gated methods pass, it makes 7 of them *fail* --
+      # pcapkit/toolkit/pypcapfile.py assumes pypcapfile's `IP.src`/`IP.dst`
+      # are packed 4-byte addresses, but pypcapfile 0.12.0's real `IP` class
+      # (pcapfile/protocols/network/ip.py) hands back the dotted-decimal string
+      # as bytes instead (`ctypes.c_char_p`), so `struct.pack` and
+      # `ipaddress.IPv4Address(...)` both raise. That is a real, previously
+      # unexercised bug in the toolkit adapter, not a fixture or environment
+      # problem -- confirmed by reading pypcapfile's own source, reproduced
+      # identically across independent runs on both versions. Adding the extra
+      # would turn 7 invisible skips into 7 required-check failures on every
+      # 3.10/3.11 leg, which is a worse regression than the skips it would
+      # replace. Fixing pcapkit/toolkit/pypcapfile.py is out of scope for a
+      # CI-only change -- left for a follow-up once filed.
       - name: Install package and test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,DPKT]'
+          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
 
       # `-n auto` resolves to whatever this runner reports, and nothing else in
       # the log says what that was -- print it so the number `-n auto` picked
@@ -133,10 +163,25 @@ jobs:
       # living under tests/integration/ (test_engine_parity.py,
       # test_engine_runtime.py) actually run here instead of skipping -- see
       # #729; same reasoning as the `test` job above.
+      #
+      # `cli` (emoji) joins it for one of #738's remaining gates. This job's
+      # selection (tests/_tiers.py's fixture_tier_paths()) always includes the
+      # whole of tests/integration/ -- which is where every HAS_EMOJI-gated
+      # method lives (test_cli_subprocess.py, 14 methods). `crypto` and `NGAP`
+      # are deliberately NOT added here: test_esp_unit.py and test_ngap_unit.py
+      # are plain unit-tier and never enter this job's selection, so installing
+      # cryptography/pycrate here would unlock nothing -- they are already
+      # covered, across all five Python versions, by the `test` job above.
+      # PyPCAPFile is NOT added here either, even though this job's selection
+      # also reaches test_new_engine_parity_runtime.py's 6 HAS_PYPCAPFILE
+      # methods -- see the `test` job's comment above for why: on 3.10/3.11,
+      # where the extra actually installs, 3 of those 6 fail for real against
+      # a genuine bug in pcapkit/toolkit/pypcapfile.py, not just the 4 that
+      # skip cleanly on 3.12+.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT]'
+          python -m pip install -e '.[test,Scapy,DPKT,cli]'
 
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
@@ -261,11 +306,22 @@ jobs:
 
       # DPKT joins Scapy here for the same reason as the `integration` job
       # above -- this is the full, unfiltered suite, so it is the one place
-      # where skipping the dpkt-gated tests would be most misleading.
+      # where skipping the dpkt-gated tests would be most misleading. crypto,
+      # cli and NGAP join it for the same reason and cover the three of #738's
+      # remaining gates this change fixes, since an unfiltered `pytest` run (no
+      # --ignore, no tier selection) reaches every one of them regardless of
+      # which tier they live in -- unlike the `test` and `integration` jobs
+      # above, which each cover only the subset their own selection reaches.
+      # PyPCAPFile is deliberately NOT added, on this job or either of the
+      # others -- see the `test` job's comment above: it does not merely skip
+      # cleanly here, it fails for real on 3.10/3.11 against a genuine bug in
+      # pcapkit/toolkit/pypcapfile.py, and this job runs the full suite
+      # unfiltered on 3.14, where it would still be a correct no-op today but
+      # would misleadingly suggest the extra is safe to add everywhere.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT]'
+          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP]'
 
       # See the integration job above for why this step is shaped the way it is.
       - name: Regenerate sample captures
