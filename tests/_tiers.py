@@ -41,11 +41,27 @@ So this module answers, cheaply and without needing the fixtures themselves:
   :func:`~tests._support.sample_path` call go ahead?
 * :func:`explain` -- the message that says what is wrong and what to do about
   it.
+* :func:`skip_idiom_modules`, :func:`skip_idiom_test_ids`, and
+  :func:`fixture_tier_paths` -- which unit-tier modules (and, more precisely,
+  which of their test methods) skip a generated capture rather than reading it
+  for real, and the complete pytest selection the fixture-dependent tier needs
+  in order to still exercise them.
 
 :file:`tests/conftest.py` drives the first four at collection time, and
 :func:`tests._support.sample_path` consults :func:`check_unit_tier_read` on
 every call. Both paths no-op when git cannot answer, so an unpacked source
 tarball still runs its tests.
+
+:func:`fixture_tier_paths` is what the ``integration`` job of
+:file:`.github/workflows/unit-tests.yml` runs directly, rather than embedding
+its own copy of the selection: the job calls this module at run time (``python
+-c "from tests._tiers import fixture_tier_paths; ..."``, see
+:data:`FIXTURE_TIER_SELECTOR`) instead of spelling out ``tests/integration``
+and the two globs itself. That closes the same gap :data:`UNIT_TIER_SELECTION`
+leaves open in the other direction: a workflow that asks this module for the
+answer cannot drift from it, whereas one that repeats the answer as literal
+flags always can. See :func:`fixture_tier_paths`'s docstring for why the
+selection is more than just the complement of the unit tier.
 
 The two halves cover each other. The collection-time audit is static, so it sees
 a violation in a test that never runs -- one skipped for a missing optional
@@ -113,10 +129,11 @@ if TYPE_CHECKING:
 __all__ = [
     'GeneratedFixtureInUnitTierError', 'TierGuardWarning', 'SampleCall',
     'ROOT', 'TESTS_ROOT', 'SAMPLE_ROOT', 'REGENERATE_SAMPLES_CMD', 'UNIT_TIER_SELECTION',
-    'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS',
+    'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
     'guard_unavailable_reason', 'handled_lines', 'sample_path_calls',
     'audit_module', 'check_unit_tier_read', 'explain',
+    'skip_idiom_modules', 'skip_idiom_test_ids', 'fixture_tier_paths',
 ]
 
 #: Repository root, i.e. the parent of the directory holding this file. The
@@ -143,6 +160,18 @@ FIXTURE_TIER_SUFFIXES = ('_runtime.py', '_regression.py')
 #: Directories under :file:`tests/` that are fixture-dependent in their entirety,
 #: matching the ``--ignore`` arguments above.
 FIXTURE_TIER_DIRS = frozenset({'integration'})
+#: The fixture-dependent tier's selector, verbatim from the ``integration`` job of
+#: :file:`.github/workflows/unit-tests.yml`. Unlike :data:`UNIT_TIER_SELECTION` this
+#: cannot be written as a fixed list of flags: which paths belong in the
+#: selection depends on git (which captures are committed) and on which unit-tier
+#: modules use the skip idiom, neither of which is stable source text pytest
+#: flags could name. So the workflow does not repeat the answer -- it asks this
+#: module for it at run time, with this exact invocation, quoted here so a reader
+#: can run precisely what CI runs. See :func:`fixture_tier_paths`.
+FIXTURE_TIER_SELECTOR = (
+    'python -c "from tests._tiers import fixture_tier_paths; '
+    'print(\' \'.join(fixture_tier_paths()))"'
+)
 #: Suffixes that make a tracked file worth suggesting as a replacement capture.
 #: Committedness itself is whatever git says -- this filter only keeps the
 #: suggestion in :func:`explain` from offering :file:`out.txt` as a capture.
@@ -637,3 +666,220 @@ def check_unit_tier_read(name: 'str', module_path: 'Optional[str]',
         return None
 
     return explain(name, module_path, lineno)
+
+
+@functools.lru_cache(maxsize=1)
+def skip_idiom_modules() -> 'tuple[pathlib.Path, ...]':
+    """Unit-tier modules that skip rather than read, when a capture is absent.
+
+    A unit-tier module is allowed to read a generated capture provided it
+    handles the capture's absence at the call site -- the sanctioned
+    ``try``/``except FileNotFoundError`` idiom :data:`SKIP_IDIOM_EXAMPLE`
+    demonstrates. On the ``test`` job, which never runs
+    :data:`REGENERATE_SAMPLES_CMD`, such a call always finds the capture
+    missing and the test skips; :func:`~tests._support.sample_path` raises a
+    bare :exc:`FileNotFoundError` rather than
+    :exc:`GeneratedFixtureInUnitTierError` for exactly this reason. So the
+    call's *real* body -- the assertions that run once the capture is actually
+    read -- is only ever exercised on a run that has built the fixtures
+    first, i.e. the fixture-dependent tier.
+
+    That makes this function's result the missing half of the fixture
+    tier's selection: :data:`FIXTURE_TIER_DIRS` and
+    :data:`FIXTURE_TIER_SUFFIXES` name the modules that are fixture-dependent
+    *in their entirety*, but these modules are unit-tier by every other
+    measure and would never be selected by that rule alone. Leaving them out
+    of the fixture tier's selection would mean their skip-idiom reads are
+    exercised nowhere at all once the unit and fixture tiers stop overlapping.
+    See :func:`fixture_tier_paths`, which folds this in.
+
+    Only literal capture names are seen here, the same limitation
+    :func:`audit_module` carries and for the same reason: a name computed at
+    call time, e.g. ``sample_path(sample)`` in a parametrised loop, is
+    invisible to a static pass. No module in the suite does this inside a
+    handled call today -- see ``test_every_handled_call_names_a_literal_capture``
+    in :file:`tests/test_tier_guard.py`, which exists to catch the day one does,
+    since such a call would silently drop out of this function's result and
+    its fixture-backed coverage would quietly stop running anywhere.
+
+    Returns:
+        Absolute paths, sorted, to every unit-tier module with at least one
+        handled read of a capture git does not track. Empty when git cannot
+        answer :func:`committed_captures` -- with no committed-capture list to
+        compare against, nothing can be told apart from a committed read, and
+        claiming otherwise would be a guess.
+
+    """
+    tracked = committed_captures()
+    if tracked is None:
+        return ()
+
+    modules = []
+    for path in sorted(TESTS_ROOT.rglob('*.py')):
+        if not is_unit_tier(path):
+            continue
+        for call in sample_path_calls(str(path)):
+            if call.handled and call.name is not None and not _is_committed(call.name, tracked):
+                modules.append(path)
+                break
+    return tuple(modules)
+
+
+def _enclosing_scope(tree: 'ast.Module', lineno: 'int') -> 'Optional[tuple[Optional[str], str]]':
+    """The ``(class name or None, function name)`` most tightly wrapping ``lineno``.
+
+    A manual recursive descent rather than :func:`ast.walk`: the answer needs
+    the *nesting path* down to a line -- which function, and which class (if
+    any) that function is a method of -- and a breadth-first walk does not
+    carry that context as it goes. "Most tightly" is decided by span, so a
+    helper function defined inside a test method and containing the line in
+    question would win over the test method itself; nothing in this suite's
+    skip idiom does that today, but the rule is stated so a future one is
+    handled the same way :func:`sample_path_calls` already treats nesting.
+
+    Returns:
+        :data:`None` if no function definition contains ``lineno`` at all --
+        a module-level call, which does not happen in this suite today.
+
+    """
+    best = None  # type: Optional[tuple[Optional[str], str, int]]
+
+    def visit(node: 'ast.AST', class_name: 'Optional[str]') -> None:
+        nonlocal best
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                start = child.lineno
+                end = getattr(child, 'end_lineno', None) or start
+                if start <= lineno <= end:
+                    span = end - start
+                    if best is None or span < best[2]:
+                        best = (class_name, child.name, span)
+                visit(child, class_name)
+            elif isinstance(child, ast.ClassDef):
+                visit(child, child.name)
+            else:
+                visit(child, class_name)
+
+    visit(tree, None)
+    if best is None:
+        return None
+    return best[0], best[1]
+
+
+@functools.lru_cache(maxsize=1)
+def skip_idiom_test_ids() -> 'tuple[str, ...]':
+    """Precise pytest node IDs for every call :func:`skip_idiom_modules` counts.
+
+    :func:`skip_idiom_modules` names the *files* that need to run again in the
+    fixture-dependent tier; this names the individual test methods inside
+    them. The difference matters because those files are not small --
+    :file:`tests/protocols/misc/test_pcapng_unit.py`'s
+    ``PCAPNGUnitTests`` alone runs to thousands of lines and dozens of
+    unrelated methods -- and pulling in the whole module to reach the one that
+    actually needs the fixtures would reintroduce, for just these modules, the
+    same duplication :func:`fixture_tier_paths` exists to remove everywhere
+    else. Each :class:`unittest.TestCase` method here gets its own ``setUp``,
+    with no ``setUpClass`` state shared across siblings in the classes this
+    has been checked against, so selecting one by node ID runs it exactly as
+    it would run as part of the whole file.
+
+    Falls back to the *module* path when a handled call cannot be resolved to
+    one enclosing function -- :func:`_enclosing_scope` returns :data:`None` for
+    a module-level call, which is not a shape this suite's skip idiom uses
+    today, but a fallback that still runs the file is safer than one that
+    drops the call's coverage entirely.
+
+    Returns:
+        Node IDs (``path/to/module.py::TestClass::test_method``) and/or plain
+        module paths, sorted, relative to :data:`ROOT` and POSIX-separated.
+        Empty under the same condition as :func:`skip_idiom_modules`.
+
+    """
+    tracked = committed_captures()
+    if tracked is None:
+        return ()
+
+    ids = []
+    for path in sorted(TESTS_ROOT.rglob('*.py')):
+        if not is_unit_tier(path):
+            continue
+
+        relevant = [
+            call for call in sample_path_calls(str(path))
+            if call.handled and call.name is not None and not _is_committed(call.name, tracked)
+        ]
+        if not relevant:
+            continue
+
+        relative = path.relative_to(ROOT).as_posix()
+        tree = _parse(str(path))
+        if tree is None:
+            # sample_path_calls() above already parsed this module successfully,
+            # so this should not happen -- but if it somehow does, run the whole
+            # file rather than claim no coverage is needed.
+            ids.append(relative)
+            continue
+
+        for call in relevant:
+            scope = _enclosing_scope(tree, call.lineno)
+            if scope is None:
+                ids.append(relative)
+                continue
+            class_name, func_name = scope
+            ids.append(f'{relative}::{class_name}::{func_name}' if class_name else f'{relative}::{func_name}')
+
+    return tuple(sorted(set(ids)))
+
+
+@functools.lru_cache(maxsize=1)
+def fixture_tier_paths() -> 'tuple[str, ...]':
+    """The complete pytest selection the fixture-dependent tier needs to run.
+
+    Three things go into it:
+
+    * one directory argument per :data:`FIXTURE_TIER_DIRS` entry, e.g.
+      ``'tests/integration'``, rather than every file under it individually;
+    * every module under :file:`tests/` whose name matches
+      :data:`FIXTURE_TIER_SUFFIXES` and is not already reachable through one
+      of those directory arguments, found on disk rather than assumed, so a
+      new ``*_runtime.py`` module is picked up the moment it is added; and
+    * :func:`skip_idiom_test_ids`, without which those calls' fixture-backed
+      reads would never run for real anywhere -- see its docstring and
+      :func:`skip_idiom_modules`'s.
+
+    The third component is node IDs, not module paths, deliberately: it is
+    added by :func:`skip_idiom_test_ids` rather than by
+    :func:`skip_idiom_modules` directly, so that pulling in one skip-idiom test
+    does not also pull in every unrelated method the same module happens to
+    hold. Without that, the two files this suite has today would add roughly a
+    hundred tests back into this selection to reach the two or three that
+    actually need it.
+
+    This is deliberately *not* "the complement of :func:`is_unit_tier`"
+    expressed as a single predicate the way :func:`is_unit_tier` itself is: the
+    third component is not part of the fixture tier by path, only by the
+    coverage gap leaving it out would open. Combining them here, once, is what
+    lets the ``integration`` job of :file:`.github/workflows/unit-tests.yml`
+    ask a single function for its selection instead of re-deriving it -- see
+    :data:`FIXTURE_TIER_SELECTOR`.
+
+    Returns:
+        Paths and/or node IDs relative to :data:`ROOT`, POSIX-separated,
+        sorted, and deduplicated -- ready to hand to ``pytest`` as positional
+        arguments. Never empty while :data:`FIXTURE_TIER_DIRS` is non-empty:
+        the directory arguments do not depend on git, so they are always
+        present even when :func:`skip_idiom_test_ids` cannot answer.
+
+    """
+    paths = {f'tests/{name}' for name in FIXTURE_TIER_DIRS}
+
+    for path in sorted(TESTS_ROOT.rglob('*.py')):
+        relative_to_tests = path.relative_to(TESTS_ROOT)
+        if not FIXTURE_TIER_DIRS.isdisjoint(relative_to_tests.parts[:-1]):
+            continue  # already reachable through a directory argument above
+        if path.name.endswith(FIXTURE_TIER_SUFFIXES):
+            paths.add(path.relative_to(ROOT).as_posix())
+
+    paths.update(skip_idiom_test_ids())
+
+    return tuple(sorted(paths))
