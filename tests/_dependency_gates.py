@@ -159,6 +159,20 @@ MODULE_PROVIDERS = {
     'chardet': (CORE,),
     'dictdumper': (CORE,),
     'tbtrim': (CORE,),
+    # The one entry no extra carries, and deliberately so. ``mypy`` is a
+    # lint-tier tool: it ships as a :file:`Pipfile` ``[dev-packages]`` entry
+    # (``mypy = "*"``), :file:`.github/workflows/lint.yml` installs it directly
+    # (``pip install -U vermin pylint mypy bandit``), and no
+    # :file:`pyproject.toml` extra declares it at all -- so
+    # :func:`extras_providing` resolves it to the empty set and every pytest
+    # job reaching a ``HAS_MYPY`` gate is reported as a :class:`Gap`. That is
+    # the honest answer rather than the :exc:`KeyError` a missing entry used to
+    # raise: the gate really is dark in CI, and
+    # :data:`DEPENDENCY_GATE_EXCLUSIONS`'s ``HAS_MYPY`` entry is where the reason
+    # for declining to close it lives (#779). Spelled as a requirement string
+    # anyway, so the day some extra does carry mypy the gap closes itself
+    # rather than needing this table rewritten.
+    'mypy': ('mypy',),
     # ``beautifulsoup4`` ships ``bs4``; ``html5lib`` is an *extra of* that
     # distribution, so ``beautifulsoup4`` alone does not provide it. That
     # distinction is the whole reason ``HAS_CRAWLER_DEPS`` is satisfied in CI
@@ -453,6 +467,42 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'do.'
         ),
     ),
+    'HAS_MYPY': Exclusion(
+        dark={'test': ('mypy',), 'engine-tests': ('mypy',), 'gate': ('mypy',)},
+        reason=(
+            'The one entry here that is not a missing *runtime* dependency, and the only '
+            'one whose fix is not an install line. mypy is a type checker: the single '
+            'method it gates runs mypy over the generated '
+            'pcapkit/const/reg/apptype/apptype.py and requires a clean result (#770), '
+            'which is a lint question asked from a unit test rather than a code path '
+            'pcapkit executes. It belongs to the lint tier accordingly -- a Pipfile '
+            '[dev-packages] entry that `make mypy` resolves, and a direct '
+            '"pip install -U vermin pylint mypy bandit" in lint.yml -- and no '
+            'pyproject.toml extra declares it at all.\n\n'
+            'So the fix this guard would otherwise propose -- put an extra carrying mypy '
+            "on a pytest job's install line -- is the wrong one, and declining it is what "
+            'this entry records. A pytest leg that installed mypy would pay for a second, '
+            'slower copy of a check lint.yml already runs across the whole package, and it '
+            'would make every unit-test leg depend on the type checker resolving. Note too '
+            'that lint.yml runs no pytest at all, so pytest_jobs() never sees the one job '
+            'that does install mypy: an extra added for its benefit would satisfy this '
+            'guard without changing what runs anywhere. What the gate buys instead is that '
+            'the check runs wherever mypy happens to be importable -- a developer '
+            "checkout, `make mypy`'s own environment -- and skips *visibly* where it is "
+            'not. Visibly is the whole point of #779: the gate was an inline '
+            'try/except ImportError skipTest until then, which works but is invisible to '
+            'this module by construction, since _gates_of() walks a decorator list and '
+            'never a function body. That is the dark-test hazard #745 exists to stop, and '
+            '#766 carries the same shape for the sibling isort check.\n\n'
+            'test, engine-tests and gate are exactly the three jobs whose selection '
+            'reaches tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the two '
+            'ignore-shape legs and the whole-suite one. integration and pypcap-parity '
+            'select by fixture tier and never collect that module, which is why they are '
+            'not listed, the same reason they are absent from HAS_VENDOR_DEPS above. If a '
+            'lint extra is ever declared in pyproject.toml, the right change is to delete '
+            'this entry and let the gap close on its own rather than to widen it.'
+        ),
+    ),
 }
 
 
@@ -658,6 +708,35 @@ def declared_requirements() -> 'dict[str, tuple[Requirement, ...]]':
     return declared
 
 
+def _top_level_providers(module: 'str') -> 'tuple[str, ...]':
+    """:data:`MODULE_PROVIDERS`'s entry for ``module``'s top-level package.
+
+    The one place that table is subscripted, so that a module nobody has mapped
+    fails with a message naming it and naming the fix rather than with a bare
+    ``KeyError: 'mypy'`` out of a dict lookup three call sites deep. Auditing
+    gates is the whole purpose of this module, so crashing opaquely on the first
+    unrecognised one is the worst answer available; #779 is what that cost, and
+    :func:`_disqualified_providers` below is the message shape this follows.
+
+    Unchanged for a mapped module: the same tuple the subscript returned, so the
+    lookup is a diagnostic improvement and not a semantic one.
+
+    """
+    top_level = module.partition('.')[0]
+    try:
+        return MODULE_PROVIDERS[top_level]
+    except KeyError:
+        raise AssertionError(
+            f'{module!r} has no MODULE_PROVIDERS entry (looked up under its top-level '
+            f'{top_level!r}), so nothing here knows which distribution ships it or which '
+            f'extra would install it. Add a MODULE_PROVIDERS[{top_level!r}] entry naming '
+            f'the requirement string(s) that provide it -- and, when no pyproject.toml '
+            f'extra carries any of them, a DEPENDENCY_GATE_EXCLUSIONS entry for the flag '
+            f'saying why the jobs reaching its gates decline it. A flag whose condition no '
+            f'extra could ever satisfy belongs in NON_DISTRIBUTION_FLAGS instead.'
+        ) from None
+
+
 def module_providers(module: 'str') -> 'frozenset[str]':
     """Every distribution (or :data:`CORE`) :data:`MODULE_PROVIDERS` says could ship ``module``.
 
@@ -667,8 +746,10 @@ def module_providers(module: 'str') -> 'frozenset[str]':
     alone rather than falling back to plain ``pcap``'s two-wide entry. Falls
     back to the top-level package otherwise, the same rule
     :func:`extras_providing` always uses, which is what makes an unmapped
-    module a failure there rather than a silent pass here too (the fallback
-    can raise :exc:`KeyError` exactly as that function's own lookup does).
+    module a failure there rather than a silent pass here too (the fallback goes
+    through :func:`_top_level_providers`, so it raises the same
+    :exc:`AssertionError` naming the module that that function's own lookup
+    does).
 
     :func:`ambiguous_satisfactions` is the reason this exists: it needs the
     narrower, exact-path answer to tell a distribution that genuinely,
@@ -676,7 +757,7 @@ def module_providers(module: 'str') -> 'frozenset[str]':
     top-level package -- see that function's own docstring.
 
     """
-    return frozenset(MODULE_PROVIDERS.get(module, MODULE_PROVIDERS[module.partition('.')[0]]))
+    return frozenset(MODULE_PROVIDERS.get(module, _top_level_providers(module)))
 
 
 def contested_imports() -> 'frozenset[str]':
@@ -719,11 +800,15 @@ def contested_imports() -> 'frozenset[str]':
 def extras_providing(module: 'str') -> 'frozenset[str]':
     """Every extra (or :data:`CORE`) whose requirements make ``module`` importable.
 
-    Raises :exc:`KeyError` for a module with no :data:`MODULE_PROVIDERS` entry,
-    which is what makes a newly gated dependency a failure rather than a pass.
+    Raises :exc:`AssertionError` -- through :func:`_top_level_providers`, which
+    names the module and the table to add it to -- for a module with no
+    :data:`MODULE_PROVIDERS` entry, which is what makes a newly gated dependency
+    a failure rather than a pass. An entry no extra carries is a different thing
+    and is *not* an error: it resolves to the empty set, so every job reaching
+    the gate is reported as a :class:`Gap`, which is what ``mypy`` is.
 
     """
-    providers = MODULE_PROVIDERS[module.partition('.')[0]]
+    providers = _top_level_providers(module)
     declared = declared_requirements()
     satisfying = set()  # type: set[str]
     for provider in providers:
@@ -1356,7 +1441,7 @@ def ambiguous_satisfactions(
                 excluded_modules = exclusions.get((gate.module, gate.flag), frozenset())
                 disqualified = _disqualified_providers(excluded_modules)
 
-                providers = MODULE_PROVIDERS[module.partition('.')[0]]
+                providers = _top_level_providers(module)
                 satisfied = frozenset(
                     provider for provider in providers
                     if provider == CORE or any(

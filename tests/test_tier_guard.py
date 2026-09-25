@@ -1513,6 +1513,58 @@ class DependencyGateCoverageTests(unittest.TestCase):
         self.assertNotIn('engine-tests', exclusion.dark)
         self.assertEqual(set(exclusion.dark), {'test', 'gate'})
 
+    def test_the_mypy_gate_is_visible_and_dark_on_every_job_that_reaches_it(self) -> None:
+        """#779: a lint-tier tool gated visibly, and declining the install line anyway.
+
+        ``mypy`` is a :file:`Pipfile` ``[dev-packages]`` entry and is in no
+        :file:`pyproject.toml` extra, so before #779 it had no
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry at all and an
+        ``@unittest.skipUnless`` gate on it was not merely undesirable but
+        *impossible*: adding one to
+        :file:`tests/vendor/test_vendor_reg_apptype_generator_unit.py` and
+        nothing else made this class report 2 failures and 5 errors of its 10
+        tests, every one of those errors a bare ``KeyError: 'mypy'`` out of
+        :func:`~tests._dependency_gates.extras_providing`, upstream of any
+        :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` filtering.
+        (#779 reports 4 errors of 9 tests for the same mutation; it was written
+        before #774 added
+        :meth:`test_the_vendor_extra_closes_engine_tests_but_not_test_or_gate`,
+        which is the tenth and the fifth error. Re-measured here rather than
+        copied.)
+        The entry is what makes the gate expressible; the exclusion is what
+        records that *closing* the gap would be the wrong fix, since a type
+        checker belongs to :file:`.github/workflows/lint.yml` rather than to a
+        pytest install line.
+
+        So the outcome pinned here is deliberately not "no gap". It is a gap on
+        exactly the three jobs that collect the module, explained rather than
+        closed -- and, which is the part #745 cares about, countable at all
+        rather than hidden in a function body.
+
+        """
+        gates = {(gate.flag, gate.module) for gate in _dependency_gates.gated_scopes()}
+        self.assertIn(
+            ('HAS_MYPY', 'tests/vendor/test_vendor_reg_apptype_generator_unit.py'), gates,
+            'the mypy gate is invisible to the scan again -- an inline skipTest in a '
+            'function body is exactly the shape _gates_of() cannot see')
+
+        # An empty answer, not a raised exception: no extra carries mypy, which
+        # is why the gap below is real rather than a mapping mistake.
+        self.assertEqual(_dependency_gates.extras_providing('mypy'), frozenset())
+
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
+        for job in ('test', 'engine-tests', 'gate'):
+            with self.subTest(reaches=job):
+                self.assertIn(('HAS_MYPY', job), gaps)
+        # Both select by fixture tier and never collect tests/vendor/ at all --
+        # the same reason they are absent from HAS_VENDOR_DEPS above.
+        for job in ('integration', 'pypcap-parity'):
+            with self.subTest(does_not_reach=job):
+                self.assertNotIn(('HAS_MYPY', job), gaps)
+
+        exclusion = _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS['HAS_MYPY']
+        self.assertEqual(set(exclusion.dark), {'test', 'engine-tests', 'gate'})
+
     def test_each_exclusion_still_describes_a_gap_that_is_really_there(self) -> None:
         """The anti-rot half, and the reason this is an allowlist and not a skip list.
 
@@ -1566,15 +1618,23 @@ class DependencyGateCoverageTests(unittest.TestCase):
         never be reported as a gap.
 
         A *required* module missing from :data:`~tests._dependency_gates.MODULE_PROVIDERS`
-        fails right here, with this message naming it. An *excluded* one --
-        the modules :func:`~tests._dependency_gates.flag_exclusions` reads off
-        a negated probe -- had neither: nothing looped over them at all, so
-        the same gap surfaced only as a bare :exc:`KeyError` out of
-        :func:`~tests._dependency_gates.module_providers`, wherever
-        :func:`~tests._dependency_gates.ambiguous_satisfactions` happened to
-        call it. Looping over both here is what gives an excluded module the
-        same deliberate contract a required one already has, instead of an
-        accident of whichever caller reaches it first.
+        fails right here, with this message naming it *and the gate's own file
+        and line*. An *excluded* one -- the modules
+        :func:`~tests._dependency_gates.flag_exclusions` reads off a negated
+        probe -- had neither: nothing looped over them at all, so the same gap
+        surfaced only out of :func:`~tests._dependency_gates.module_providers`,
+        wherever :func:`~tests._dependency_gates.ambiguous_satisfactions`
+        happened to call it. Looping over both here is what gives an excluded
+        module the same deliberate contract a required one already has, instead
+        of an accident of whichever caller reaches it first.
+
+        Both messages below still earn their place now that
+        :func:`~tests._dependency_gates._top_level_providers` names the module
+        and the fix on its own (#779): what that cannot say is *which gate*
+        wanted the module, and the location is most of what makes the failure
+        actionable. This test is also the only one that reaches the excluded
+        half without depending on a job's selection happening to collect the
+        gate.
 
         """
         requirements = _dependency_gates.flag_requirements()
@@ -1607,8 +1667,8 @@ class DependencyGateCoverageTests(unittest.TestCase):
                                   _dependency_gates.MODULE_PROVIDERS,
                                   f'{module} is excluded by {gate.flag}\'s own negated probe '
                                   f'but has no MODULE_PROVIDERS entry, so '
-                                  f'ambiguous_satisfactions() would raise a bare KeyError '
-                                  f'resolving it rather than fail with this message')
+                                  f'ambiguous_satisfactions() would fail resolving it '
+                                  f'somewhere that cannot name this gate')
 
     def test_no_provider_mapping_or_exclusion_is_vestigial(self) -> None:
         """Both tables are exactly as wide as the suite needs them to be --
@@ -2125,6 +2185,65 @@ class DependencyGateDegradationTests(unittest.TestCase):
                                       {'HAS_PYSHARK': 'stood in for this test'}):
             self.assertNotIn('HAS_PYSHARK',
                              {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
+
+    def test_an_unmapped_module_names_itself_and_the_table_to_add_it_to(self) -> None:
+        """#779's second defect: the table lookup used to die on a bare ``KeyError``.
+
+        Auditing gates is this module's whole purpose, so the worst available
+        answer to an unrecognised one was the one it gave: ``KeyError: 'mypy'``
+        raised from a dict subscript three call sites deep, naming neither the
+        fix nor even the table that wanted the entry. All three subscripts now
+        go through :func:`~tests._dependency_gates._top_level_providers`, so
+        every entry point fails the same way and says the same thing --
+        :func:`~tests._dependency_gates.extras_providing` (which
+        :func:`~tests._dependency_gates.dependency_gate_gaps` reaches),
+        :func:`~tests._dependency_gates.module_providers` (which
+        :func:`~tests._dependency_gates.ambiguous_satisfactions` reaches), and
+        the helper itself.
+
+        The message has to name the *dotted* module as given as well as the
+        top-level key actually looked up, because those differ exactly when the
+        truncation is what a reader would otherwise have to work out for
+        themselves.
+
+        """
+        unmapped = 'nosuchlinter.plugins'
+        for resolve in (_dependency_gates.extras_providing,
+                        _dependency_gates.module_providers,
+                        _dependency_gates._top_level_providers):
+            with self.subTest(resolve=resolve.__name__):
+                with self.assertRaises(AssertionError) as caught:
+                    resolve(unmapped)
+                message = str(caught.exception)
+                self.assertIn(repr(unmapped), message)
+                self.assertIn(repr('nosuchlinter'), message)
+                for table in ('MODULE_PROVIDERS', 'DEPENDENCY_GATE_EXCLUSIONS',
+                              'NON_DISTRIBUTION_FLAGS'):
+                    self.assertIn(table, message)
+
+    def test_a_mapped_module_still_resolves_through_the_same_truncation(self) -> None:
+        """The control for the test above: #779 changed the diagnostic, not the answer.
+
+        :func:`~tests._dependency_gates._top_level_providers` truncates to the
+        top-level package unconditionally -- so ``pcap._pcap`` gets plain
+        ``pcap``'s two-wide entry there, exactly as the bare subscript it
+        replaced did -- while
+        :func:`~tests._dependency_gates.module_providers` keeps its own
+        exact-key preference on top of that, which is what makes ``pcap._pcap``
+        resolve to ``pcap-ct`` alone. Those two answers differing for the same
+        module is load-bearing for #762, so a "harmless" unification of the two
+        lookups has to fail here.
+
+        """
+        self.assertEqual(_dependency_gates._top_level_providers('dpkt'), ('dpkt',))
+        self.assertEqual(_dependency_gates._top_level_providers('pcapfile.savefile'),
+                         ('pypcapfile',))
+        self.assertEqual(_dependency_gates._top_level_providers('mypy'), ('mypy',))
+
+        self.assertEqual(_dependency_gates._top_level_providers('pcap._pcap'),
+                         ('pypcap', 'pcap-ct'))
+        self.assertEqual(_dependency_gates.module_providers('pcap._pcap'),
+                         frozenset({'pcap-ct'}))
 
     def test_an_excluded_module_outside_any_contested_scope_is_ignored(self) -> None:
         """:func:`~tests._dependency_gates._disqualified_providers`, the safe default.

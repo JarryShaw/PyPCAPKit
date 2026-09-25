@@ -61,29 +61,53 @@ pinned against that same base module -- a plain source-text assertion that the
 member stays wrapped in ``cast`` rather than reverting to a bare literal, plus
 a direct run through mypy's own API when :mod:`mypy` is importable, since the
 source-text shape alone cannot tell a correct fix from a differently-worded
-one that stops mypy agreeing. That second pin skips outright when mypy is not
-importable, the same shape
-:class:`~tests.project.test_isort_clean.TestIsortIsCleanOnThePackage` uses for
-isort: mypy is a :file:`Pipfile` ``[dev-packages]`` entry (line 48) and is in
-no :file:`pyproject.toml` extra, so no ``pytest`` job in
-:file:`.github/workflows/unit-tests.yml` -- every one installs ``.[test,...]``
--- ever has it importable, and this test skips there rather than erroring.
-That inline skip is, by #766's own description of the shape, invisible to
-:mod:`tests._dependency_gates`'s own guard: gating it instead with a
-``HAS_MYPY`` flag and ``@unittest.skipUnless`` was measured and rejected, not
-merely not attempted -- ``mypy`` has no entry in that module's
-``MODULE_PROVIDERS`` table and is in no :file:`pyproject.toml` extra to add
-one for, so doing so breaks
-:class:`~tests.test_tier_guard.DependencyGateCoverageTests` outright: a
-``KeyError`` from :func:`~tests._dependency_gates.extras_providing` plus two
-more failures raising ``AssertionError``, measured as 4 errors and 2 failures
-of its 9 tests. #779 tracks closing that gap generally.
+one that stops mypy agreeing.
+
+That second pin is gated the way :mod:`tests._dependency_gates` can actually
+see: a module-level ``HAS_MYPY`` flag and an ``@unittest.skipUnless``
+decorator. It was written as an inline
+``try``/``except ImportError: self.skipTest(...)`` instead when #770 landed,
+for an obstacle that was real at the time -- ``mypy`` had no
+:data:`~tests._dependency_gates.MODULE_PROVIDERS` entry, so adding the
+decorator without one made
+:class:`~tests.test_tier_guard.DependencyGateCoverageTests` report 2 failures
+and 5 errors of its 10 tests, every one of those errors a bare
+``KeyError: 'mypy'`` out of
+:func:`~tests._dependency_gates.extras_providing` -- re-measured on this
+change's own base; #779 reports 4 errors of 9 tests because it was written
+before #774 added the tenth. #779 closed that end:
+``mypy`` is mapped now and its gap is recorded as a deliberate exclusion, so
+the gate can take the visible shape. The inline form worked, but was invisible
+to the guard *by construction* --
+:func:`~tests._dependency_gates._gates_of` walks a definition's decorator list
+and never its body -- which is the "dark test" hazard #745 exists to stop, and
+which #766 carries for the sibling isort check.
+
+What the gate is worth has not changed. mypy is a :file:`Pipfile`
+``[dev-packages]`` entry (line 48) and is in no :file:`pyproject.toml` extra,
+so no ``pytest`` job in :file:`.github/workflows/unit-tests.yml` -- every one
+installs ``.[test,...]`` -- ever has it importable, and this test skips on all
+of them; it runs where mypy is installed, which is a developer checkout and
+``make mypy``'s own environment. The difference is that the skip is now
+counted: it is a :class:`~tests._dependency_gates.Gap` on each job that
+reaches it, and
+:data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`\\ ``['HAS_MYPY']``
+carries the reason for declining to close it -- a type checker belongs to the
+lint tier, not to a pytest install line.
 
 """
 
+import importlib.util
 import unittest
 
 __all__ = ['AppTypeGeneratorShapeTests']
+
+#: Whether :mod:`mypy` is importable, for the one test that runs it. A visible
+#: ``skipUnless`` flag rather than an inline ``skipTest``, so
+#: :func:`~tests._dependency_gates.gated_scopes` counts the gate and
+#: :mod:`tests.test_tier_guard` can audit which CI jobs it darkens (#779); see
+#: this module's own docstring for what that replaced and why.
+HAS_MYPY = importlib.util.find_spec('mypy') is not None
 
 
 class AppTypeGeneratorShapeTests(unittest.TestCase):
@@ -194,6 +218,7 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
             self.fail('found a bare literal near: %r'
                      % source[max(0, match.start() - 40):match.end() + 40])
 
+    @unittest.skipUnless(HAS_MYPY, 'mypy is not installed')
     def test_undefined_member_infers_as_transport_protocol_under_mypy(self) -> None:
         """GitHub issue #770, run directly through mypy's own API.
 
@@ -211,14 +236,12 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         This is not in :file:`.github/workflows/unit-tests.yml`'s reach --
         mypy is a :file:`Pipfile` ``[dev-packages]`` entry, not a
         :file:`pyproject.toml` extra, so no ``pytest`` job there ever has it
-        importable -- and skips outright rather than erroring when it is not
-        installed. See this module's own docstring for why that inline skip,
-        rather than a tracked ``HAS_MYPY`` gate, is the deliberate choice.
+        importable -- and the ``HAS_MYPY`` gate above skips it there rather
+        than erroring. That gate is a decorator precisely so
+        :mod:`tests._dependency_gates` can count the skip instead of it being
+        invisible; see this module's own docstring.
         """
-        try:
-            from mypy import api as mypy_api
-        except ImportError:
-            self.skipTest('mypy is not installed')
+        from mypy import api as mypy_api
 
         import pcapkit.const.reg.apptype.apptype as base_mod
 
