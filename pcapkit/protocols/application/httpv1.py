@@ -139,7 +139,20 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         schema = self.__header__
 
         packet = schema.data
-        header, body = packet.split(b'\r\n\r\n', maxsplit=1)
+
+        # NOTE: A payload carrying no header/body separator at all unpacks short
+        # here, and the bare ``ValueError`` that used to escape is what made
+        # ``HTTP._guess_version``'s HTTP/2 arm unreachable: that dispatcher falls
+        # through on ``ProtocolError`` alone, so an HTTP/1 attempt on HTTP/2 wire
+        # bytes aborted the guess rather than failing it, and the HTTP/2 attempt
+        # never ran (#787). ``ProtocolError`` is what the ``Raises:`` section
+        # above already promises for a malformed packet, and the same conversion
+        # the explicit ``version=`` path performs at ``http.py:119``; chained, so
+        # the underlying unpacking error stays reachable as ``__cause__``.
+        try:
+            header, body = packet.split(b'\r\n\r\n', maxsplit=1)
+        except ValueError as error:
+            raise ProtocolError('HTTP: invalid format') from error
 
         header_line, header_unpacked = self._read_http_header(header)
         body_unpacked = self._read_http_body(body, headers=header_unpacked) or None
@@ -285,10 +298,63 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             ProtocolError: If the packet is malformed.
 
         """
-        startline, headerfield = header.split(b'\r\n', 1)
-        para1, para2, para3 = re.split(rb'\s+', startline, 2)
-        fields = headerfield.split(b'\r\n')
-        lists = (re.split(rb'\s*:\s*', field, 1) for field in fields)
+        # NOTE: Both unpackings are short for input that is not an HTTP/1
+        # message: a header of one line with no CRLF -- the HTTP/2 connection
+        # preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that
+        # -- and a start line of fewer than three whitespace-separated tokens.
+        # Raised as ``ProtocolError`` for the reason ``read`` gives above, and
+        # to the same message this method already uses below for a start line it
+        # cannot recognise (#787).
+        try:
+            startline, headerfield = header.split(b'\r\n', 1)
+            para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
+        except ValueError as error:
+            raise ProtocolError('HTTP: invalid format') from error
+
+        # NOTE: A field line beginning with SP or HTAB is an ``obs-fold``
+        # continuation of the line before it (:rfc:`9112#section-5.2`), and is
+        # unfolded here -- the RFC's own remedy -- rather than treated as a field
+        # line of its own. Deprecated, but present in real captures, and the two
+        # ways it used to come out were both wrong: a continuation carrying no
+        # colon left the split below one element long and ``item[1]`` raised
+        # :exc:`IndexError`, which is neither a :exc:`ValueError` nor a
+        # ``ProtocolError`` and so escaped ``HTTP._guess_version``'s suppression
+        # exactly as the bare :exc:`ValueError` of #787 did; a continuation that
+        # happened to contain one was worse, parsing silently into a spurious
+        # extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``)
+        # with nothing raised at all. Unfolded, a folded message parses to the
+        # field it actually carries, so this input class stops reaching the
+        # HTTP/2 arm by accident instead of merely failing more politely.
+        fields = []  # type: list[bytes]
+        for line in headerfield.split(b'\r\n'):
+            if line.startswith((b' ', b'\t')):
+                # A continuation with nothing to continue -- the first field line
+                # folded -- is malformed rather than unfoldable.
+                if not fields:
+                    raise ProtocolError('HTTP: invalid format')
+                # NOTE: The accumulator is right-stripped as well as the
+                # continuation, because the production is ``obs-fold = OWS CRLF
+                # RWS`` and it is the *whole* obs-fold that is replaced by a
+                # single space -- the OWS before the CRLF belongs to the fold,
+                # not to the value. Stripping only the continuation left that OWS
+                # in place, so ``X: a \t\r\n\tb`` unfolded to ``'a \t  b'``
+                # rather than ``'a b'``: four of five folded/literal pairs
+                # disagreed, and a HTAB survived where the RFC prescribes SP.
+                fields[-1] = fields[-1].rstrip() + b' ' + line.strip()
+                continue
+            fields.append(line)
+
+        # NOTE: Checked rather than left to ``item[1]``, and refused rather than
+        # skipped: a field line with no colon is not a header field, and dropping
+        # it would hand back a message whose fields are quietly not the ones on
+        # the wire. ``ProtocolError`` for the reason the start-line split above
+        # gives, and to the same message.
+        lists = []  # type: list[list[bytes]]
+        for field in fields:
+            item = re.split(rb'\s*:\s*', field, maxsplit=1)
+            if len(item) != 2:
+                raise ProtocolError('HTTP: invalid format')
+            lists.append(item)
 
         if TYPE_CHECKING:
             header_line: 'Data_Header'
