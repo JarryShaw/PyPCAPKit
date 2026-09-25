@@ -36,4 +36,4 @@ Type Variables
 --------------
 
 .. data:: pcapkit.corekit.fields.strings._T
-   :type: str | bytes | dict[str, typing.Any]
+   :type: str | bytes | python:dict[str, typing.Any]

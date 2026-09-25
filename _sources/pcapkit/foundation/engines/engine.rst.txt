@@ -37,7 +37,7 @@ all engine support functionality.
          value can be set by :attr:`__engine_module__` class attribute.
 
    .. property:: registry
-      :type: dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
+      :type: python:dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
 
       Mapping of engine names to engine classes.
 

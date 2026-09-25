@@ -40,7 +40,7 @@ implements datagram reassembly of IP and TCP packets.
          value can be set by :attr:`__protocol_type__` class attribute.
 
    .. property:: registry
-      :type: dict[str, ModuleDescriptor[ReassemblyBase] | typing.Type[ReassemblyBase]]
+      :type: python:dict[str, ModuleDescriptor[ReassemblyBase] | typing.Type[ReassemblyBase]]
 
       Mapping of protocol names to reassembly classes.
 
