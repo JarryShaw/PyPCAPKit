@@ -540,7 +540,7 @@
 
 <span class="s1">        """</span>
 <span class="s1">        if not isinstance(value, str):</span>
-<span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is not a valid </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">')</span>
 <span class="s1">        name = value.upper()</span>
 <span class="s1">        if name in cls._member_map_:</span>
 <span class="s1">            return cls._member_map_[name]  # type: ignore[return-value]</span>

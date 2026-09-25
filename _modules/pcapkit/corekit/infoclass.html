@@ -461,10 +461,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -485,7 +485,17 @@
     <span class="n">NONE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
     <span class="c1">#: Base class.</span>
     <span class="n">BASE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-    <span class="c1">#: Finalised.</span>
+    <span class="c1">#: Finalised. A class reaching this state is also handed to</span>
+    <span class="c1">#: :func:`~pcapkit.utilities.compat.final`, so a correctly finalised class</span>
+    <span class="c1">#: carries *both* markers -- and they answer two different questions, which</span>
+    <span class="c1">#: is why both are read rather than one standing in for the other.</span>
+    <span class="c1">#: ``__final__`` answers "may this be subclassed?", for</span>
+    <span class="c1">#: :meth:`Info.__init_subclass__`; this state answers "has</span>
+    <span class="c1">#: :func:`info_final` already generated the attributes?", for</span>
+    <span class="c1">#: :func:`info_final`'s own re-entry check. Carrying ``__final__``</span>
+    <span class="c1">#: *without* this state is the mismatch :meth:`Info.__new__` refuses:</span>
+    <span class="c1">#: marked final by hand, never finalised, and so missing the generated</span>
+    <span class="c1">#: ``__init__`` that makes the class usable at all.</span>
     <span class="n">FINAL</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 
 
@@ -500,9 +510,22 @@
 <span class="sd">    time as well as caching already generated attributes.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        The decorator should only be used on the *final*</span>
-<span class="sd">        class, otherwise, any subclasses derived from a</span>
-<span class="sd">        finalised info class will not be re-finalised.</span>
+<span class="sd">        The decorator should only be used on the *final* class. Applying it</span>
+<span class="sd">        with ``_finalised=True`` seals the class against *subclassing*, which</span>
+<span class="sd">        :meth:`Info.__init_subclass__` enforces, and marks it with</span>
+<span class="sd">        :func:`~pcapkit.utilities.compat.final` -- so ``@info_final`` implies</span>
+<span class="sd">        ``@final`` and there is never a reason to write both. Writing both is</span>
+<span class="sd">        harmless in either order, though; what is not is ``@final`` *without*</span>
+<span class="sd">        this decorator, which :meth:`Info.__new__` refuses -- provided ``@final``</span>
+<span class="sd">        is :func:`~pcapkit.utilities.compat.final` (or, on Python 3.11 and up,</span>
+<span class="sd">        :func:`typing.final` directly). Below 3.11, plain :func:`typing.final`</span>
+<span class="sd">        does not set ``__final__`` at all (gh-90500), so a class marked with a</span>
+<span class="sd">        user's own ``from typing import final`` on 3.10 is not refused: there is</span>
+<span class="sd">        nothing on the class for :meth:`Info.__new__` to read.</span>
+
+<span class="sd">        Applying this decorator to the same class a second time only warns: the</span>
+<span class="sd">        first application already did the work, so the duplicate is redundant</span>
+<span class="sd">        rather than wrong, and the class comes back finalised and usable.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Info class.</span>
@@ -511,11 +534,45 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Finalised info class.</span>
 
+<span class="sd">    Warns:</span>
+<span class="sd">        pcapkit.utilities.warnings.InfoWarning: If ``cls`` has already been</span>
+<span class="sd">            finalised *by this function*, i.e. it carries</span>
+<span class="sd">            :attr:`FinalisedState.FINAL` in its own ``__dict__``. The class is</span>
+<span class="sd">            returned untouched.</span>
+
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
+    <span class="c1"># NOTE: keyed on ``__finalised__`` rather than on</span>
+    <span class="c1"># :func:`~pcapkit.utilities.compat.final`'s ``__final__``, because the two</span>
+    <span class="c1"># record different facts and only this one records *this function having</span>
+    <span class="c1"># run*. Decorators apply bottom-up, so ``@info_final`` over ``@final``</span>
+    <span class="c1"># reaches here with ``__final__`` already set by a decorator that generated</span>
+    <span class="c1"># nothing: a ``__final__`` test would read that as "already finalised", skip</span>
+    <span class="c1"># the generation, and hand back precisely the ``__init__``-less class</span>
+    <span class="c1"># :meth:`Info.__new__` now refuses -- while the opposite order worked. Keying</span>
+    <span class="c1"># on ``__finalised__`` is what makes the two orders agree.</span>
+    <span class="c1">#</span>
+    <span class="c1"># ``cls.__dict__`` rather than ``getattr``: ``__finalised__`` is an ordinary</span>
+    <span class="c1"># class attribute and so inherited, and a subclass declared *before* its</span>
+    <span class="c1"># parent was finalised reads FINAL through ``getattr`` while never having</span>
+    <span class="c1"># been finalised itself. Skipping it would skip the one operation it still</span>
+    <span class="c1"># needs -- silently, since this path only warns.</span>
+    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: info class has been finalised; now skipping'</span><span class="p">,</span>
              <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="c1"># NOTE: ``Info`` itself never reaches ``FinalisedState.BASE`` (see the</span>
+    <span class="c1"># ``cls is not Info`` guard below), so a bare ``Info()`` re-enters this</span>
+    <span class="c1"># function on *every* call rather than once -- and every line below this</span>
+    <span class="c1"># point, not just the ``__excluded__`` write, would otherwise redo the same</span>
+    <span class="c1"># ``dir()``-over-the-MRO scan each time. ``__base_ready__`` is a marker of</span>
+    <span class="c1"># its own, separate from ``__finalised__``, that records only "this base</span>
+    <span class="c1"># class's one-time setup already ran" -- checked and set in ``Info``'s own</span>
+    <span class="c1"># ``__dict__`` alone, so it is invisible to every check keyed on</span>
+    <span class="c1"># ``__finalised__`` staying ``NONE``. A subclass is never affected: it is</span>
+    <span class="c1"># promoted to ``BASE`` on its own first call and never reaches here again.</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">Info</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__base_ready__'</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
     <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span> <span class="s1">'__finalised__'</span><span class="p">]</span>
@@ -583,7 +640,26 @@
         <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__'</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_finalised</span><span class="p">:</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
+        <span class="c1"># NOTE: ``Info`` itself must never receive this promotion. ``__finalised__``</span>
+        <span class="c1"># is an ordinary class attribute, and this branch is only ever reached with</span>
+        <span class="c1"># ``cls`` bound to ``Info`` when something bare-constructs ``Info()``</span>
+        <span class="c1"># directly -- every real subclass reaches :meth:`Info.__new__` with ``cls``</span>
+        <span class="c1"># bound to itself. Writing ``BASE`` onto ``Info.__dict__`` would therefore</span>
+        <span class="c1"># make *every* subclass declared afterwards inherit ``BASE`` from ``Info``,</span>
+        <span class="c1"># so its own ``cls.__finalised__ == FinalisedState.NONE`` test in</span>
+        <span class="c1"># :meth:`Info.__new__` would never see ``NONE`` again -- silently defeating</span>
+        <span class="c1"># both that one-shot auto-finalisation and the bare-``@final`` guard nested</span>
+        <span class="c1"># inside it, for every class declared after the first bare ``Info()``</span>
+        <span class="c1"># anywhere in the process. See GitHub issue #778's cross-review, which</span>
+        <span class="c1"># demonstrated the bypass with a class declared after such a call.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``__base_ready__`` is set instead, for the short-circuit at the top of</span>
+        <span class="c1"># this function -- own-``__dict__`` only, so it neither inherits nor</span>
+        <span class="c1"># touches ``__finalised__``.</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__base_ready__</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
     <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span>
@@ -684,6 +760,52 @@
     <span class="c1">#: List of names to be excluded from :obj:`dict` conversion.</span>
     <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
 
+<div class="viewcode-block" id="Info.__init_subclass__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__init_subclass__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse to derive from a finalised info class.</span>
+
+<span class="sd">        :func:`~pcapkit.utilities.compat.final` is a promise to the type</span>
+<span class="sd">        checker and nothing more: it records ``__final__`` on the class and</span>
+<span class="sd">        leaves the interpreter free to subclass it anyway. Every class</span>
+<span class="sd">        :func:`info_final` finalises carries a generated ``__init__`` built</span>
+<span class="sd">        from the annotations that were visible at that moment, so a subclass</span>
+<span class="sd">        added afterwards inherits a constructor that does not know about its</span>
+<span class="sd">        own fields -- silently, and with the ``__builtin__`` and</span>
+<span class="sd">        ``__excluded__`` sets of its parent. This turns that promise into a</span>
+<span class="sd">        rule the interpreter keeps.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments in class definition.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InfoError: If any class in ``cls``'s ancestry carries the</span>
+<span class="sd">                ``__final__`` marker in its own ``__dict__``.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: the whole ancestry rather than ``cls.__bases__``, because the</span>
+        <span class="c1"># direct bases alone leave a one-line way round the rule: declare the</span>
+        <span class="c1"># subclass *before* applying the decorator to its parent, and every</span>
+        <span class="c1"># further descendant of that subclass is then unguarded, since the</span>
+        <span class="c1"># marker sits two levels up rather than one. Walking the MRO costs one</span>
+        <span class="c1"># dict lookup per ancestor, once per class declaration.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``base.__dict__`` rather than ``getattr`` for the reason given in</span>
+        <span class="c1"># :func:`info_final`: ``__final__`` is inherited, so a ``getattr`` here</span>
+        <span class="c1"># would read it off every descendant and reject declarations that</span>
+        <span class="c1"># predate the marker rather than the ones the rule is about.</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InfoError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: cannot subclass </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, '</span>
+                                <span class="s1">'which is final'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: ``*args`` and ``**kwargs`` are forwarded rather than swallowed, so</span>
+        <span class="c1"># that a class keyword nobody accepts still reaches ``object`` and still</span>
+        <span class="c1"># fails there, as it did before this hook existed.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="Info.__new__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'VT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -697,8 +819,66 @@
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            InfoError: If ``cls`` was marked with</span>
+<span class="sd">                :func:`~pcapkit.utilities.compat.final` but never finalised by</span>
+<span class="sd">                :func:`info_final`, i.e. it carries ``__final__`` in its own</span>
+<span class="sd">                ``__dict__`` without :attr:`FinalisedState.FINAL`.</span>
+
+<span class="sd">        Warning:</span>
+<span class="sd">            Out of scope, deliberately: a ``@final`` class descending from a</span>
+<span class="sd">            :attr:`FinalisedState.BASE` ancestor is not caught. ``__finalised__``</span>
+<span class="sd">            inherits, and a ``BASE`` ancestor means some earlier bare</span>
+<span class="sd">            construction already walked this branch for the chain -- so the</span>
+<span class="sd">            subclass's own ``cls.__finalised__`` reads ``BASE`` too, the branch</span>
+<span class="sd">            below is skipped entirely, and the marker on ``cls`` itself is never</span>
+<span class="sd">            inspected. Closing this means re-finalising every descendant of a</span>
+<span class="sd">            ``BASE`` class on each subclassing, which is the auto-finalisation</span>
+<span class="sd">            behaviour ``test_an_unfinalised_descendant_is_not_mistaken_for_a_</span>
+<span class="sd">            mismarked_class`` deliberately leaves alone. In the tree today no</span>
+<span class="sd">            ``BASE``-state class is ever marked ``@final`` by hand, so the escape</span>
+<span class="sd">            is theoretical rather than live.</span>
+
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: ``final`` is applied *after* the class object exists, so</span>
+        <span class="c1"># :meth:`__init_subclass__` has already run and returned by the time a</span>
+        <span class="c1"># bare ``@final`` lands -- it cannot see the mistake, and no other</span>
+        <span class="c1"># class-creation hook fires later. First instantiation is the next event</span>
+        <span class="c1"># in the class's life this library controls, and it is also where the</span>
+        <span class="c1"># damage surfaced: an unfinalised class has no generated ``__init__``, so</span>
+        <span class="c1"># construction fell through to :meth:`__update__` and failed with</span>
+        <span class="c1"># ``TypeError: 'int' object is not iterable``, naming neither the class</span>
+        <span class="c1"># nor the mistake.</span>
+        <span class="c1">#</span>
+        <span class="c1"># It is nested inside the NONE branch rather than run ahead of it, and</span>
+        <span class="c1"># that placement is what makes it free on the hot path: a finalised class</span>
+        <span class="c1"># never enters the branch at all, so it never evaluates the nested</span>
+        <span class="c1"># ``cls.__dict__.get('__final__')`` either -- ``dis.dis(Info.__new__)``</span>
+        <span class="c1"># shows the ``FinalisedState.NONE`` comparison compiles to a single</span>
+        <span class="c1"># ``POP_JUMP_IF_FALSE`` that, for a ``FINAL`` class, jumps straight past</span>
+        <span class="c1"># this whole block to ``super().__new__``: zero of the added bytecode</span>
+        <span class="c1"># executes, which is a property of the compiled branch rather than of</span>
+        <span class="c1"># any particular timing run, and is the reason to trust here rather than</span>
+        <span class="c1"># a timer. The raise also leaves ``__finalised__`` at NONE, so a second</span>
+        <span class="c1"># attempt re-enters and fails again rather than the error firing once.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``cls.__dict__`` rather than ``getattr``: not because a class that</span>
+        <span class="c1"># inherits ``__final__`` from a *finalised* ancestor would be misread --</span>
+        <span class="c1"># such a class also inherits ``__finalised__ == FINAL``, so the outer</span>
+        <span class="c1"># ``if`` above already excludes it before this line is ever reached,</span>
+        <span class="c1"># regardless of which lookup is used here. The case ``getattr`` gets</span>
+        <span class="c1"># wrong is an ancestor hand-marked bare ``@final`` and *never finalised*:</span>
+        <span class="c1"># its own ``__finalised__`` stays ``NONE`` and so, inherited, does every</span>
+        <span class="c1"># subclass declared before the marker landed -- so such a subclass still</span>
+        <span class="c1"># reaches this line, and ``getattr`` would read the marker it merely</span>
+        <span class="c1"># inherits and blame it for a mismarking that is its ancestor's, not its</span>
+        <span class="c1"># own. ``OwnDictRuleTests.test_a_subclass_that_predates_an_unfinalised_</span>
+        <span class="c1"># ancestors_bare_final_is_not_blamed_for_it`` pins exactly this shape --</span>
+        <span class="c1"># mutating this line to ``getattr`` fails it.</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InfoError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
+                                <span class="s1">'__init__; apply info_final, which applies final itself, not final alone'</span><span class="p">)</span>
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_finalised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 

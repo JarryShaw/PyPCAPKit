@@ -1215,6 +1215,16 @@
 <span class="sd">            - :class:`pcapkit.const.pcapng.option_type.OptionType`</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: the base hook goes first, before any of the registration work</span>
+        <span class="c1"># below -- see :meth:`EnumSchema.__init_subclass__`, which makes the same</span>
+        <span class="c1"># move for the same reason. :meth:`Schema.__init_subclass__` is what</span>
+        <span class="c1"># refuses to derive from a finalised schema, and a refusal has to land</span>
+        <span class="c1"># before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling</span>
+        <span class="c1"># this last, as this method used to, let a raise discard the class object</span>
+        <span class="c1"># while leaving the registry pointing at it, so a rejected declaration</span>
+        <span class="c1"># still displaced a built-in option schema for the rest of the process.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span> <span class="o">=</span> <span class="n">ns</span>
 
@@ -1226,8 +1236,7 @@
                 <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
                     <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
+                <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Option.register">

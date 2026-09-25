@@ -637,6 +637,78 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HTTP'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unpack (parse) packet data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the packet is malformed.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            This guards ahead of :meth:`Schema.unpack</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` rather than</span>
+<span class="sd">            leaving the same check to :meth:`read`, because a buffer shorter</span>
+<span class="sd">            than the fixed 9-octet header is not merely invalid -- it can</span>
+<span class="sd">            crash the schema layer outright. ``pkt['__length__']`` there is</span>
+<span class="sd">            decremented by each field's *nominal* width regardless of how</span>
+<span class="sd">            many octets the buffer actually had, so it goes negative, and the</span>
+<span class="sd">            frame payload's length-derived fields (e.g. an unpadded ``DATA``</span>
+<span class="sd">            frame's ``data: BytesField(length=lambda pkt: pkt['__length__'])``)</span>
+<span class="sd">            resolve to that negative number. A negative field length becomes</span>
+<span class="sd">            a struct template such as ``'-5s'``, and :func:`struct.calcsize`</span>
+<span class="sd">            raises :exc:`struct.error` for it -- uncaught, since nothing</span>
+<span class="sd">            downstream expects a :exc:`ProtocolError` to be spelled that way.</span>
+<span class="sd">            Rejecting here, before :meth:`Schema.unpack` ever runs, keeps a</span>
+<span class="sd">            frame too short to hold a header from reaching that arithmetic at</span>
+<span class="sd">            all. This closes the *outer*-header class only -- an inner payload</span>
+<span class="sd">            field can still drive ``pkt['__length__']`` negative on a buffer</span>
+<span class="sd">            that clears nine (e.g. a ``GOAWAY`` frame at 9-16 octets, whose</span>
+<span class="sd">            fixed ``stream`` and ``error`` fields alone consume eight); that</span>
+<span class="sd">            residual is why :meth:`HTTP._guess_version</span>
+<span class="sd">            &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;` still</span>
+<span class="sd">            suppresses :exc:`struct.error` on its last arm. See #799.</span>
+
+<span class="sd">            ``length`` is resolved against :func:`len` only for *this*</span>
+<span class="sd">            method's own check, and the *original* argument -- ``None``</span>
+<span class="sd">            included -- is what is actually forwarded to :meth:`Protocol.unpack</span>
+<span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`. Collapsing</span>
+<span class="sd">            ``None`` to a concrete ``0`` before forwarding would change what</span>
+<span class="sd">            :meth:`Schema.unpack`'s own ``prepare`` decorator does with a</span>
+<span class="sd">            now-exhausted stream: it raises</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.StreamEOFError` (an</span>
+<span class="sd">            :exc:`EOFError`, the documented "no more packets" signal) only when</span>
+<span class="sd">            the *caller* left ``length`` unspecified, and forwarding a resolved</span>
+<span class="sd">            ``0`` instead would report an exhausted stream as a malformed</span>
+<span class="sd">            packet. A *non-zero* short buffer is unambiguously malformed either</span>
+<span class="sd">            way, so it is rejected here regardless of whether ``length`` was</span>
+<span class="sd">            given explicitly.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># ``0 &lt; ... &lt; 9`` rather than ``... &lt; 9``: an exhausted stream</span>
+            <span class="c1"># (``len(self) == 0``) is left alone here, so ``length`` reaches</span>
+            <span class="c1"># :meth:`Protocol.unpack &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`</span>
+            <span class="c1"># still ``None`` and its ``prepare`` decorator raises</span>
+            <span class="c1"># :exc:`StreamEOFError` as documented above -- only a *non-empty*</span>
+            <span class="c1"># short stream is rejected as malformed here.</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
+                                    <span class="sa">f</span><span class="s1">'shorter than the 9-octet frame header'</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="c1"># An *explicit* length, zero included, is a caller assertion about</span>
+            <span class="c1"># how much data this frame has -- not the "figure it out"</span>
+            <span class="c1"># ``None`` above -- so every value under nine is rejected the same</span>
+            <span class="c1"># way, with no exhaustion signal to preserve.</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
+                                <span class="sa">f</span><span class="s1">'shorter than the 9-octet frame header'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 <div class="viewcode-block" id="HTTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HTTP'</span><span class="p">:</span>
@@ -671,7 +743,23 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="c1"># NOTE: ``schema.length`` is the *declared* length off the wire -- the</span>
+        <span class="c1"># 24-bit field a hostile or truncated capture controls outright -- and</span>
+        <span class="c1"># checking only it lets a frame whose buffer holds far fewer octets than</span>
+        <span class="c1"># it claims sail through this guard and report a length nothing backs.</span>
+        <span class="c1"># ``length`` is the actual number of octets available for this frame</span>
+        <span class="c1"># (``Protocol.__len__`` returns ``len(self._data)``, and a caller that</span>
+        <span class="c1"># supplies ``length`` explicitly means the same thing by it), so both</span>
+        <span class="c1"># have to clear the minimum header size for the frame to be viable at</span>
+        <span class="c1"># all, *and* the declared value must not exceed what is actually</span>
+        <span class="c1"># available -- this library's convention (see ``_make_http_length``)</span>
+        <span class="c1"># is that ``length`` counts the whole frame, header included, so the</span>
+        <span class="c1"># two are directly comparable. Without the third clause a frame that</span>
+        <span class="c1"># declares far more than its buffer holds -- the headline case in</span>
+        <span class="c1"># #799, e.g. a nine-octet buffer declaring 16777215 -- still passed</span>
+        <span class="c1"># this guard and reported the declared, attacker-controlled length as</span>
+        <span class="c1"># if the capture actually contained it. See #799.</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">9</span> <span class="ow">or</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">,</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">)</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">stream</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: [Type </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format'</span><span class="p">)</span>

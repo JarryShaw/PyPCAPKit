@@ -539,7 +539,7 @@
 <span class="c1">#: lookup, and no members at all.</span>
 <span class="n">BASE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">TABLE</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
-<span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="s1"># pylint: disable=line-too-long</span>
 <span class="s1">"""</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ['</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
 <span class="si">{</span><span class="s1">'='</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
 
@@ -695,7 +695,7 @@
 
 <span class="s1">    def __new__(cls, value: 'int', name: 'str' = '&lt;null&gt;',</span>
 <span class="s1">                proto: 'TransportProtocol' = TransportProtocol.undefined) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
-<span class="s1">        temp = '%s [%d - %s]' % (name, value, proto.name)</span>
+<span class="s1">        temp = f'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">proto.name</span><span class="se">}}</span><span class="s1">]'</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
 <span class="s1">        obj._value_ = temp</span>
@@ -715,10 +715,10 @@
 <span class="s1">        return obj</span>
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
-<span class="s1">        return "&lt;%s.%s: %d [%s]&gt;" % (self.__class__.__name__, self.svc, self.port, self.proto.name)</span>
+<span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1">.</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1">: </span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]&gt;'</span>
 
 <span class="s1">    def __str__(self) -&gt; 'str':</span>
-<span class="s1">        return '%s [%d - %s]' % (self.svc, self.port, self.proto.name)</span>
+<span class="s1">        return f'</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]'</span>
 
 <span class="s1">    def __int__(self) -&gt; 'int':</span>
 <span class="s1">        return self.port</span>
@@ -772,7 +772,7 @@
 <span class="s1">        # protocol, so a name never matched and the miss path minted a brand-new</span>
 <span class="s1">        # member with port -1 -- GitHub issue #734's silent junk. Rejecting a</span>
 <span class="s1">        # non-port outright is the honest answer, and it has to happen before the</span>
-<span class="s1">        # miss path, which formats ``key`` with ``%d``.</span>
+<span class="s1">        # miss path, which formats ``key`` into an f-string.</span>
 <span class="s1">        if not isinstance(key, int):</span>
 <span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">key!r</span><span class="se">}}</span><span class="s1"> is not a valid port number for </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">')</span>
 <span class="s1">        if cls.__registry__ is not None:</span>
@@ -883,7 +883,7 @@
 <span class="s1">        # propagates, so both entry points answer an out-of-range port identically.</span>
 <span class="s1">        ret = owner._missing_(key)</span>
 <span class="s1">        if ret is None:</span>
-<span class="s1">            ret = extend_enum(owner, 'PORT_%d_%s' % (key, owner.__transport__.name),</span>
+<span class="s1">            ret = extend_enum(owner, f'PORT_</span><span class="se">{{</span><span class="s1">key</span><span class="se">}}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">owner.__transport__.name</span><span class="se">}}</span><span class="s1">',</span>
 <span class="s1">                              key, 'unknown', owner.__transport__)</span>
 <span class="s1">        return ret</span>
 
@@ -1225,7 +1225,7 @@
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}{</span><span class="n">claim</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">svc</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d' % value, "</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, f'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">svc</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">value</span><span class="se">}}</span><span class="s2">', "</span>
                             <span class="sa">f</span><span class="s2">"value, </span><span class="si">{</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">line</span><span class="p">,</span> <span class="n">miss</span>

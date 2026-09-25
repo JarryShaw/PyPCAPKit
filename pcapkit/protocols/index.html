@@ -707,6 +707,32 @@ for more information.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.__init_subclass__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.__init_subclass__" title="Link to this definition">¶</a></dt>
+<dd><p>Refuse to derive from a finalised schema.</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> is a promise to the type
+checker and nothing more: it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> on the class and
+leaves the interpreter free to subclass it anyway. Every schema
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
+from the <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__fields__" title="pcapkit.protocols.schema.schema.Schema.__fields__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__fields__</span></code></a> that were declared at that moment, so a
+subclass adding a field afterwards inherits a constructor that cannot
+set it – which is #422’s failure shape, reached by a different route.
+This turns that promise into a rule the interpreter keeps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments in class definition.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If any class in <code class="docutils literal notranslate"><span class="pre">cls</span></code>’s ancestry carries the
+    <code class="docutils literal notranslate"><span class="pre">__final__</span></code> marker in its own <code class="docutils literal notranslate"><span class="pre">__dict__</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.__new__">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.__new__" title="Link to this definition">¶</a></dt>
 <dd><p>Create a new instance.</p>
@@ -720,8 +746,25 @@ which is inspired by <span class="target" id="index-1"></span><a class="pep refe
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_VT</span></code>)</span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.SchemaError" title="pcapkit.utilities.exceptions.SchemaError"><strong>SchemaError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> was marked with
+    <code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> but never finalised by
+    <a class="reference internal" href="#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a>, i.e. it carries <code class="docutils literal notranslate"><span class="pre">__final__</span></code> in its own
+    <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> without
+    <code class="xref py py-attr docutils literal notranslate"><span class="pre">FINAL</span></code>.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span>
+Out of scope, deliberately – see
+<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__" title="pcapkit.corekit.infoclass.Info.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass.Info.__new__()</span></code></a>, which documents the
+identical gap: a <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> class descending from a
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">BASE</span></code> ancestor
+inherits <code class="docutils literal notranslate"><span class="pre">BASE</span></code> rather than <code class="docutils literal notranslate"><span class="pre">NONE</span></code> and so never reaches the
+branch below at all, regardless of its own marker. No <code class="docutils literal notranslate"><span class="pre">BASE</span></code>-state
+schema in the tree is marked <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> by hand today, so the escape
+is theoretical rather than live.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1103,9 +1146,22 @@ class. It can be useful to reduce runtime generation
 time as well as caching already generated attributes.</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>The decorator should only be used on the <em>final</em>
-class, otherwise, any subclasses derived from a
-finalised schema class will not be re-finalised.</p>
+<p>The decorator should only be used on the <em>final</em> class. Applying it
+with <code class="docutils literal notranslate"><span class="pre">_finalised=True</span></code> seals the class against <em>subclassing</em>, which
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__init_subclass__" title="pcapkit.protocols.schema.schema.Schema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__init_subclass__()</span></code></a> enforces, and marks it with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> – so <code class="docutils literal notranslate"><span class="pre">&#64;schema_final</span></code> implies
+<code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> and there is never a reason to write both. Writing both is
+harmless in either order, though; what is not is <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> <em>without</em>
+this decorator, which <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__new__" title="pcapkit.protocols.schema.schema.Schema.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a> refuses – provided
+<code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> is <code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> (or, on Python
+3.11 and up, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> directly). Below 3.11, plain
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> does not set <code class="docutils literal notranslate"><span class="pre">__final__</span></code> at all (gh-90500), so a
+class marked with a user’s own <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">typing</span> <span class="pre">import</span> <span class="pre">final</span></code> on 3.10 is
+not refused: there is nothing on the class for <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__new__" title="pcapkit.protocols.schema.schema.Schema.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a> to
+read.</p>
+<p>Applying this decorator to the same class a second time only warns: the
+first application already did the work, so the duplicate is redundant
+rather than wrong, and the class comes back finalised and usable.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1119,6 +1175,12 @@ finalised schema class will not be re-finalised.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Finalised schema class.</p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pcapkit.utilities.warnings.SchemaWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> has already been
+finalised <em>by this function</em>, i.e. it carries
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">FINAL</span></code> in its own
+<code class="docutils literal notranslate"><span class="pre">__dict__</span></code>. The class is returned untouched.</p>
 </dd>
 </dl>
 </dd></dl>

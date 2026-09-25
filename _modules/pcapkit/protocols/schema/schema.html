@@ -453,14 +453,14 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">NoValue</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">FinalisedState</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolUnbound</span><span class="p">,</span> <span class="n">SchemaError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">UnknownFieldWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -490,9 +490,23 @@
 <span class="sd">    time as well as caching already generated attributes.</span>
 
 <span class="sd">    Notes:</span>
-<span class="sd">        The decorator should only be used on the *final*</span>
-<span class="sd">        class, otherwise, any subclasses derived from a</span>
-<span class="sd">        finalised schema class will not be re-finalised.</span>
+<span class="sd">        The decorator should only be used on the *final* class. Applying it</span>
+<span class="sd">        with ``_finalised=True`` seals the class against *subclassing*, which</span>
+<span class="sd">        :meth:`Schema.__init_subclass__` enforces, and marks it with</span>
+<span class="sd">        :func:`~pcapkit.utilities.compat.final` -- so ``@schema_final`` implies</span>
+<span class="sd">        ``@final`` and there is never a reason to write both. Writing both is</span>
+<span class="sd">        harmless in either order, though; what is not is ``@final`` *without*</span>
+<span class="sd">        this decorator, which :meth:`Schema.__new__` refuses -- provided</span>
+<span class="sd">        ``@final`` is :func:`~pcapkit.utilities.compat.final` (or, on Python</span>
+<span class="sd">        3.11 and up, :func:`typing.final` directly). Below 3.11, plain</span>
+<span class="sd">        :func:`typing.final` does not set ``__final__`` at all (gh-90500), so a</span>
+<span class="sd">        class marked with a user's own ``from typing import final`` on 3.10 is</span>
+<span class="sd">        not refused: there is nothing on the class for :meth:`Schema.__new__` to</span>
+<span class="sd">        read.</span>
+
+<span class="sd">        Applying this decorator to the same class a second time only warns: the</span>
+<span class="sd">        first application already did the work, so the duplicate is redundant</span>
+<span class="sd">        rather than wrong, and the class comes back finalised and usable.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Schema class.</span>
@@ -501,11 +515,34 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Finalised schema class.</span>
 
+<span class="sd">    Warns:</span>
+<span class="sd">        pcapkit.utilities.warnings.SchemaWarning: If ``cls`` has already been</span>
+<span class="sd">            finalised *by this function*, i.e. it carries</span>
+<span class="sd">            :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL` in its own</span>
+<span class="sd">            ``__dict__``. The class is returned untouched.</span>
+
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
+    <span class="c1"># NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,</span>
+    <span class="c1"># and read out of ``cls.__dict__`` rather than through ``getattr``. See</span>
+    <span class="c1"># :func:`pcapkit.corekit.infoclass.info_final`, which makes both choices for</span>
+    <span class="c1"># the same two reasons: only ``__finalised__`` records *this function* having</span>
+    <span class="c1"># run, so a ``__final__`` test would make ``@schema_final`` over ``@final``</span>
+    <span class="c1"># skip the generation while the opposite order did the work; and</span>
+    <span class="c1"># ``__finalised__`` is inherited, so ``getattr`` would skip a subclass</span>
+    <span class="c1"># declared before its parent was finalised.</span>
+    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__finalised__'</span><span class="p">)</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: schema has been finalised; now skipping'</span><span class="p">,</span>
              <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="c1"># NOTE: short-circuit for ``Schema`` itself -- see the identical NOTE in</span>
+    <span class="c1"># :func:`pcapkit.corekit.infoclass.info_final`, which makes the same fix for</span>
+    <span class="c1"># the same reason: ``Schema`` never reaches ``FinalisedState.BASE`` now, so a</span>
+    <span class="c1"># bare ``Schema()`` would otherwise re-enter this function, and redo the</span>
+    <span class="c1"># ``dir()``-over-the-MRO scan below, on *every* call. ``__base_ready__`` is</span>
+    <span class="c1"># its own marker, own-``__dict__`` only, so it never touches ``__finalised__``.</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">Schema</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__base_ready__'</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
     <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__map__'</span><span class="p">,</span> <span class="s1">'__map_reverse__'</span><span class="p">,</span> <span class="s1">'__builtin__'</span><span class="p">,</span>
@@ -574,7 +611,22 @@
         <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__'</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_finalised</span><span class="p">:</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
+        <span class="c1"># NOTE: ``Schema`` itself must never receive this promotion, for the same</span>
+        <span class="c1"># reason ``Info`` must not -- see :func:`pcapkit.corekit.infoclass.info_final`,</span>
+        <span class="c1"># which makes the identical fix. This branch binds ``cls`` to ``Schema``</span>
+        <span class="c1"># only when something bare-constructs ``Schema()`` directly, and writing</span>
+        <span class="c1"># ``BASE`` onto ``Schema.__dict__`` there would make every subclass declared</span>
+        <span class="c1"># afterwards inherit ``BASE`` and skip :meth:`Schema.__new__`'s own</span>
+        <span class="c1"># ``FinalisedState.NONE`` branch -- silently defeating the bare-``@final``</span>
+        <span class="c1"># guard nested inside it for the rest of the process.</span>
+        <span class="c1">#</span>
+        <span class="c1"># ``__base_ready__`` is set instead, for the short-circuit at the top of</span>
+        <span class="c1"># this function -- own-``__dict__`` only, so it neither inherits nor</span>
+        <span class="c1"># touches ``__finalised__``.</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Schema</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">BASE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__base_ready__</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">cls</span>
 
     <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">FINAL</span>
@@ -795,6 +847,48 @@
     <span class="c1">#: List of names to be excluded from :obj:`dict` conversion.</span>
     <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
 
+<div class="viewcode-block" id="Schema.__init_subclass__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.__init_subclass__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse to derive from a finalised schema.</span>
+
+<span class="sd">        :func:`~pcapkit.utilities.compat.final` is a promise to the type</span>
+<span class="sd">        checker and nothing more: it records ``__final__`` on the class and</span>
+<span class="sd">        leaves the interpreter free to subclass it anyway. Every schema</span>
+<span class="sd">        :func:`schema_final` finalises carries a generated ``__init__`` built</span>
+<span class="sd">        from the :attr:`__fields__` that were declared at that moment, so a</span>
+<span class="sd">        subclass adding a field afterwards inherits a constructor that cannot</span>
+<span class="sd">        set it -- which is #422's failure shape, reached by a different route.</span>
+<span class="sd">        This turns that promise into a rule the interpreter keeps.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments in class definition.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            SchemaError: If any class in ``cls``'s ancestry carries the</span>
+<span class="sd">                ``__final__`` marker in its own ``__dict__``.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: the whole ancestry rather than ``cls.__bases__``, and</span>
+        <span class="c1"># ``base.__dict__`` rather than ``getattr`` -- see</span>
+        <span class="c1"># :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__`, which makes</span>
+        <span class="c1"># the same two choices for the same two reasons.</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: cannot subclass </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, '</span>
+                                  <span class="s1">'which is final'</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: forwarded rather than swallowed, so that a class keyword nobody</span>
+        <span class="c1"># accepts still reaches ``object`` and still fails there, as it did before</span>
+        <span class="c1"># this hook existed. :meth:`EnumSchema.__init_subclass__` is the one caller</span>
+        <span class="c1"># that reaches here with nothing: it consumes its own ``code`` keyword and</span>
+        <span class="c1"># discards the rest, which is why a stray class keyword is tolerated on an</span>
+        <span class="c1"># :class:`EnumSchema` subclass and rejected on a plain one. That asymmetry</span>
+        <span class="c1"># predates this method and is left alone.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="Schema.__new__">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.__new__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'_VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -808,8 +902,36 @@
 <span class="sd">            *args: Arbitrary positional arguments.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            SchemaError: If ``cls`` was marked with</span>
+<span class="sd">                :func:`~pcapkit.utilities.compat.final` but never finalised by</span>
+<span class="sd">                :func:`schema_final`, i.e. it carries ``__final__`` in its own</span>
+<span class="sd">                ``__dict__`` without</span>
+<span class="sd">                :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.</span>
+
+<span class="sd">        Warning:</span>
+<span class="sd">            Out of scope, deliberately -- see</span>
+<span class="sd">            :meth:`pcapkit.corekit.infoclass.Info.__new__`, which documents the</span>
+<span class="sd">            identical gap: a ``@final`` class descending from a</span>
+<span class="sd">            :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor</span>
+<span class="sd">            inherits ``BASE`` rather than ``NONE`` and so never reaches the</span>
+<span class="sd">            branch below at all, regardless of its own marker. No ``BASE``-state</span>
+<span class="sd">            schema in the tree is marked ``@final`` by hand today, so the escape</span>
+<span class="sd">            is theoretical rather than live.</span>
+
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: first instantiation is the earliest point a bare ``@final`` can</span>
+        <span class="c1"># be caught -- ``final`` runs after the class object exists, so</span>
+        <span class="c1"># :meth:`__init_subclass__` has already returned. Nested inside the NONE</span>
+        <span class="c1"># branch, which is already one-shot per class, so a finalised schema pays</span>
+        <span class="c1"># nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,</span>
+        <span class="c1"># which carries the full reasoning and the measurement; on this side the</span>
+        <span class="c1"># missing generated ``__init__`` is the one built from</span>
+        <span class="c1"># :attr:`__fields__`, so the damage is #422's shape.</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">==</span> <span class="n">FinalisedState</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__final__'</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">SchemaError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: marked final but never finalised, so it has no generated '</span>
+                                  <span class="s1">'__init__; apply schema_final, which applies final itself, not final alone'</span><span class="p">)</span>
             <span class="bp">cls</span> <span class="o">=</span> <span class="n">schema_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_finalised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
@@ -1598,6 +1720,16 @@
 <span class="sd">            anything else can hold a reference to the original object.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: the base hook goes first, before any of the registry work below.</span>
+        <span class="c1"># :meth:`Schema.__init_subclass__` is what refuses to derive from a</span>
+        <span class="c1"># finalised schema, and a refusal has to land before this method writes</span>
+        <span class="c1"># ``cls`` into ``__enum__``: raising afterwards would discard the class</span>
+        <span class="c1"># object while leaving the registry pointing at it, so a rejected</span>
+        <span class="c1"># declaration would still have displaced a built-in schema. It took no</span>
+        <span class="c1"># arguments when it was the last statement here and still takes none --</span>
+        <span class="c1"># ``code`` is this method's own and the rest are deliberately dropped.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'__enum__'</span><span class="p">):</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">_EnumRegistry</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
         <span class="k">elif</span> <span class="s1">'__enum__'</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__enum__'</span><span class="p">],</span> <span class="n">_EnumRegistry</span><span class="p">):</span>
@@ -1632,8 +1764,7 @@
                 <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
                     <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'schema </span><span class="si">{</span><span class="n">_code</span><span class="si">}</span><span class="s1"> already registered, overwriting '</span>
                          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">incumbent</span><span class="si">!r}</span><span class="s1"> with </span><span class="si">{</span><span class="bp">cls</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span></div>
 
 
 <div class="viewcode-block" id="EnumSchema.register">

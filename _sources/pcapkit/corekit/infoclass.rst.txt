@@ -15,6 +15,7 @@ in :pep:`557`.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+   .. automethod:: __init_subclass__
    .. automethod:: __post_init__
 
    .. autoattribute:: __additional__
