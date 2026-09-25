@@ -2,6 +2,7 @@
 """numerical field class"""
 
 import enum
+import functools
 import math
 from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 
@@ -584,7 +585,223 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
                 # no member carries it, so it is not this layer's to absorb.
                 if isinstance(error, BaseError):
                     raise
+        return self._pseudo_member(value)
+
+    def _pseudo_member(self, value: 'int') -> 'StdlibEnum | AenumEnum':
+        """Build the bounded nameless pseudo-member this method falls back to
+        when ``value`` is a foreign miss rather than an in-library rejection.
+
+        Returns:
+            A single-member, throwaway :class:`enum.IntEnum` instance, built
+            fresh per call rather than :func:`~aenum.extend_enum`-ed onto
+            ``self._namespace``, per this method's own docstring above.
+
+        """
         unknown = enum.IntEnum('<unknown>', {
             '<unassigned>': value,
         }, module='pcapkit.const', qualname='pcapkit.const.<unknown>')
         return getattr(unknown, '<unassigned>')
+
+    @staticmethod
+    def _unregistered_member(namespace: 'Type[StdlibEnum] | Type[AenumEnum]',
+                             value: 'Any', name: 'str' = '<unassigned>',
+                             **attrs: 'Any') -> 'Any':
+        """Build a member of ``namespace``, absent from every one of its own
+        lookup tables, for a value a *parse* -- rather than a direct call to
+        the registry's own ``get()`` -- resolved without anyone asking for a
+        name.
+
+        GitHub issue #575: the owner's ruling is that an unassigned wire value
+        should resolve to a real member of the registry the field names --
+        ``isinstance`` against it and every ancestor holds, and it renders and
+        dispatches exactly like a declared one -- provided building it never
+        grows the registry, which is the whole reason the field stopped
+        calling ``get()`` unconditionally in the first place. This is what
+        gets there: it calls ``namespace``'s own storage base's ``__new__``
+        directly -- :class:`str` or :class:`int`, whichever ``namespace``
+        derives from -- which skips ``namespace``'s *own* ``__new__``
+        entirely, and with it the ``cls.__registry__.add(...)`` /
+        ``cls.__members_ns__[...] = ...`` line every registry in this package
+        uses to record a member it mints. No entry is added to
+        ``_member_map_`` or ``_value2member_map_`` either, since those are
+        only ever touched by the metaclass machinery :func:`aenum.extend_enum`
+        drives, which this bypasses completely.
+
+        Note:
+            Building a member this way, rather than as some other type
+            altogether, is why :meth:`~pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`
+            and its siblings need this rather than :meth:`_pseudo_member`:
+            the result answers ``isinstance(result, AppType)`` truthfully,
+            which matters to at least seven ``isinstance`` sites elsewhere in
+            :mod:`pcapkit.protocols` (see ``test_a_member_is_still_an_apptype``
+            in ``tests/const/test_const_apptype_split_unit.py``), and a value
+            that fails all of them would be a second defect standing in for
+            the one this fix removes.
+
+            The member this returns is absent from ``_value2member_map_``, so
+            a *value*-keyed lookup on it -- ``self._namespace(value)`` --
+            still raises exactly as it did before this existed. Nothing on the
+            parse or reconstruction path does that to a value it just resolved
+            this way, which is what keeps this safe to return from
+            ``post_process``. A direct call to
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` for the same port
+            is a different matter and deliberately unchanged: asking the
+            registry for a name is an explicit request for a named member, so
+            it still mints one -- measured on this tree,
+            ``AppType.get(54321, proto=tcp)`` returns ``PORT_54321_tcp`` and
+            takes ``TCP.__members__`` from 6147 to 6148, and a second call
+            with the same port returns that member rather than raising. Two
+            unregistered members for the same value also compare equal
+            without being identical, since
+            :class:`~pcapkit.const.reg.apptype.AppType` and
+            :class:`~pcapkit.const.pcapng.option_type.OptionType` both define
+            ``__eq__``/``__hash__`` off an attribute (``.port`` /
+            ``.opt_value``) rather than object identity -- harmless for every
+            reader in this package, since none compares one with ``is`` or
+            keys a mapping on it expecting identity, but worth knowing before
+            reusing this elsewhere.
+
+            :mod:`pickle` and :func:`copy.copy`/:func:`copy.deepcopy` all
+            reduce an :class:`~enum.Enum` member through
+            ``Enum.__reduce_ex__``, which returns ``(cls, (value,))`` -- the
+            one lookup this member is deliberately absent from. Left alone
+            that is a genuine regression rather than a pre-existing
+            limitation, because the call sites used to *mint*, so the member
+            was registered and a round-trip worked. Measured on CPython
+            3.14.7, resolving port 53406 through
+            :class:`~pcapkit.protocols.schema.transport.tcp.PortEnumField`:
+            on ``83b58ebda`` ``pickle.loads(pickle.dumps(member))`` returned
+            the member, and with the mint removed and nothing in its place it
+            raised ``ValueError: 'unknown [53406 - tcp]' is not a valid TCP``
+            -- while ``pickle.dumps`` still succeeded, so the failure
+            surfaced only on read-back rather than where it was caused.
+
+            So ``__reduce_ex__`` is set on the member itself, reducing it to
+            ``_rebuild_unregistered_member`` instead of to a value lookup.
+            Both :mod:`pickle` and :mod:`copy` fetch that attribute with
+            :func:`getattr` on the object rather than on its type, so a
+            per-instance override is honoured: verified against the C
+            :mod:`pickle` accelerator on every protocol from 0 to 5, against
+            the pure-Python ``pickle._Pickler``, and against
+            :func:`copy.copy`/:func:`copy.deepcopy` both as they are on 3.11+
+            and with CPython's ``Enum.__copy__``/``__deepcopy__`` deleted to
+            emulate 3.10, where those two do not exist. Rebuilding re-enters
+            this method rather than ``namespace.__new__``, so an unpickled
+            member is unregistered exactly as the original was and the
+            registry does not grow -- ``TCP.__members__`` measured at 6147
+            before and after. On 3.11+ ``copy``/``deepcopy`` still return the
+            member itself, since ``Enum.__copy__`` short-circuits ahead of
+            any reduction; on 3.10 they return an equal rebuilt one, which is
+            the same answer for an immutable value.
+
+        Args:
+            namespace: The concrete registry class to build the member as an
+                instance of. ``isinstance`` holds against it and every
+                ancestor; it never gains an entry in any of its own tables.
+            value: The value ``namespace``'s own constructor would have
+                wrapped -- e.g. the crafted string
+                :meth:`~pcapkit.const.reg.apptype.AppType.__new__` builds from
+                a name, a port and a transport, or
+                :meth:`~pcapkit.const.pcapng.option_type.OptionType.__new__`'s
+                equivalent -- kept the same shape here so a rendered or
+                re-keyed member reads the same either way.
+            name: The member's own ``.name``; ``'<unassigned>'`` matches every
+                other nameless value this package produces.
+            **attrs: Extra attributes to set on the returned member, matching
+                the shape the caller's registry gives its real members --
+                :class:`~pcapkit.const.reg.apptype.AppType`'s ``.port``,
+                ``.svc`` and ``.proto``, or
+                :class:`~pcapkit.const.pcapng.option_type.OptionType`'s
+                ``.opt_name`` and ``.opt_value``.
+
+        Returns:
+            The unregistered member.
+
+        Raises:
+            TypeError: If ``namespace`` derives from neither :class:`str` nor
+                :class:`int` -- every registry this package builds does one or
+                the other, and guessing wrong for some future one would ship
+                a member silently missing whatever its storage base provides,
+                rather than saying plainly that this needs extending first.
+
+        """
+        obj: 'Any'
+        if issubclass(namespace, str):
+            obj = str.__new__(namespace, value)
+        elif issubclass(namespace, int):
+            obj = int.__new__(namespace, value)
+        else:
+            raise TypeError(
+                f'{namespace!r} derives from neither str nor int; '
+                '_unregistered_member does not know how to build one of its members')
+        # NOTE: setting the enum protocol's own name/value attributes
+        # directly, rather than through namespace's own __new__, is what
+        # skips the registration that __new__ would otherwise have done.
+        obj._name_ = name  # pylint: disable=protected-access
+        obj._value_ = value  # pylint: disable=protected-access
+        for attr_name, attr_value in attrs.items():
+            setattr(obj, attr_name, attr_value)
+        # NOTE: ``Enum.__reduce_ex__`` reduces a member to ``(cls, (value,))``,
+        # i.e. to the one lookup this member is deliberately absent from, so
+        # pickle and copy would both raise on it without this. Overriding it
+        # per instance -- which pickle and copy both honour, since both fetch
+        # it with getattr on the object rather than on its type -- rebuilds an
+        # equivalent unregistered member instead. functools.partial rather
+        # than a closure keeps this off obj itself, so the member does not
+        # become part of a reference cycle merely by being reducible.
+        obj.__reduce_ex__ = functools.partial(
+            _reduce_unregistered_member, namespace, value, name, attrs)
+        return obj
+
+
+def _rebuild_unregistered_member(namespace: 'Type[StdlibEnum] | Type[AenumEnum]',
+                                 value: 'Any', name: 'str',
+                                 attrs: 'dict[str, Any]') -> 'Any':
+    """Rebuild the member :meth:`EnumField._unregistered_member` returned.
+
+    This is what :mod:`pickle` and :mod:`copy` reconstruct through, in place of
+    the value lookup ``Enum.__reduce_ex__`` would otherwise have reduced the
+    member to. It is a module-level function rather than a method so that every
+    :mod:`pickle` protocol can name it: protocols below 4 cannot reference a
+    callable nested inside a class.
+
+    Args:
+        namespace: The registry class to rebuild the member as an instance of.
+        value: The member's ``_value_``.
+        name: The member's ``_name_``.
+        attrs: The extra attributes the member carried.
+
+    Returns:
+        A member equal to the original and, like it, absent from every one of
+        ``namespace``'s lookup tables -- rebuilding goes back through
+        :meth:`EnumField._unregistered_member` and never through
+        ``namespace.__new__``, so it cannot register anything either.
+
+    """
+    return EnumField._unregistered_member(  # pylint: disable=protected-access
+        namespace, value, name, **attrs)
+
+
+def _reduce_unregistered_member(  # pylint: disable=unused-argument
+        namespace: 'Type[StdlibEnum] | Type[AenumEnum]',
+        value: 'Any', name: 'str', attrs: 'dict[str, Any]',
+        protocol: 'int') -> 'tuple[Callable[..., Any], tuple[Any, ...]]':
+    """The ``__reduce_ex__`` :meth:`EnumField._unregistered_member` installs.
+
+    Bound to its first four arguments with :func:`functools.partial`, so that
+    the reducer holds the ingredients of the member rather than the member
+    itself.
+
+    Args:
+        namespace: The registry class the member is an instance of.
+        value: The member's ``_value_``.
+        name: The member's ``_name_``.
+        attrs: The extra attributes the member carries.
+        protocol: The :mod:`pickle` protocol version, ignored -- the reduction
+            is the same for all of them, and :mod:`copy` passes 4 here.
+
+    Returns:
+        A two-tuple of ``_rebuild_unregistered_member`` and its arguments.
+
+    """
+    return (_rebuild_unregistered_member, (namespace, value, name, attrs))

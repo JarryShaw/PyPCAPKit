@@ -18,7 +18,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
                                             UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
-from pcapkit.utilities.exceptions import FieldError
+from pcapkit.utilities.exceptions import BaseError, FieldError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -387,11 +387,86 @@ class PortEnumField(EnumField):
             packet: Packet data.
 
         Returns:
-            Processed field value.
+            Processed field value -- the registry member declared for the
+            port, or an unregistered member of the same registry, carrying
+            the port itself, when the registry declares none. See GitHub
+            issue #575.
+
+        Notes:
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` mints a fresh
+            member -- via :func:`aenum.extend_enum` -- for any port neither an
+            existing row nor one of :meth:`_missing_`'s documented IANA spans
+            accounts for, which in practice means the ephemeral/dynamic range.
+            Calling it unconditionally on every parsed port therefore grew the
+            registry without bound. This peeks at the registry
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` itself would
+            consult -- its per-port rows via ``__registry__.getlist``, then
+            its documented spans via ``_missing_`` -- and only calls
+            :meth:`~pcapkit.const.reg.apptype.AppType.get` once one of those is
+            already known to hold, so a genuine miss gets
+            :meth:`EnumField._unregistered_member` instead of a mint.
+
+            A port outside this field's own width is rejected *before* any of
+            that, rather than being let through to :meth:`_missing_` and
+            caught alongside a genuine miss. Both are a bare :exc:`ValueError`
+            with nothing to tell them apart by type, and GitHub issue #764
+            gave the out-of-range case a deliberate, ``breaking``-tagged
+            rejection specifically so it would stop being minted over -- a
+            catch keyed on exception type alone cannot see the difference
+            between that and :mod:`aenum`'s own "no member has this value",
+            so it would absorb both and quietly revert #764 for these four
+            fields. Checking the width first needs no exception-based
+            distinction at all: it asks the same question :meth:`_missing_`
+            would eventually ask, and asks it in a way that never manufactures
+            the bare :exc:`ValueError` this method would otherwise have to
+            tell apart from a foreign one. ``self.length`` is the field's own
+            declared byte width (``2`` for every caller of this class, hence
+            ``0``-``65535``) rather than a hard-coded ``65535`` borrowed from
+            :meth:`~pcapkit.const.reg.apptype.AppType._missing_`'s own guard,
+            so the two stay in lockstep by construction: whatever width this
+            field is ever given, the range checked here is exactly the range a
+            value of that width can hold, no more permissive and no more
+            restrictive.
 
         """
         value = super(EnumField, self).post_process(value, packet)
-        return self._namespace.get(value, proto=Enum_TransportProtocol.tcp)
+        proto = Enum_TransportProtocol.tcp
+        if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
+            # NOTE: lets AppType.get() -- unmodified -- raise #764's rejection
+            # for a port this field's own width cannot represent, rather than
+            # risking it being absorbed below as a foreign miss.
+            return self._namespace.get(value, proto=proto)
+        owner = self._namespace._dispatch(value, proto)  # pylint: disable=protected-access
+        if not owner.__registry__.getlist(value):  # type: ignore[union-attr]
+            try:
+                declared = owner._missing_(value)  # pylint: disable=protected-access
+            except ValueError as error:
+                # NOTE: value is already known to be in-width here, so this
+                # ValueError is aenum's own "no member has this value" for an
+                # in-range but unassigned port -- a foreign miss, absorbed --
+                # never #764's out-of-range rejection, which never reaches
+                # this branch. A pcapkit.utilities.exceptions error is still a
+                # deliberate registry decision and propagates unchanged.
+                if isinstance(error, BaseError):
+                    raise
+                declared = None
+            if declared is None:
+                # NOTE: an unregistered member of ``owner`` itself, per GitHub
+                # issue #575's owner ruling -- see EnumField._unregistered_member
+                # -- rather than a foreign pseudo-enum. ``.port``, ``.svc`` and
+                # ``.proto`` are what a real AppType member carries -- read
+                # unconditionally by e.g. Transport._decode_next_layer's
+                # ``srcport.port`` -- and ``svc='unknown'`` matches what the
+                # mint this replaces used to name it. They are passed in the
+                # order AppType.__new__ sets them, because
+                # DictDumper.object_hook renders a member's addon keys straight
+                # out of its ``__dict__`` in insertion order -- so any other
+                # order here would make an unassigned port dump ``port`` before
+                # ``svc`` while every declared one dumps ``svc`` first.
+                return self._unregistered_member(
+                    owner, f'unknown [{value:d} - {proto.name}]',
+                    svc='unknown', port=value, proto=proto)
+        return self._namespace.get(value, proto=proto)
 
 
 class Option(EnumSchema[Enum_Option]):

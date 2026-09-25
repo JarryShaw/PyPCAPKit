@@ -15,10 +15,12 @@ import datetime
 import decimal
 import enum
 import ipaddress
+import xml.sax.saxutils
 from typing import TYPE_CHECKING
 
 import aenum
 import dictdumper.dumper
+import dictdumper.plist
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
@@ -229,6 +231,22 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
         Customised :class:`~dictdumper.dumper.Dumper` object.
 
     """
+    # NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what
+    # :attr:`Extractor.__output__ <pcapkit.foundation.extraction.Extractor.__output__>`
+    # maps the ``'xml'`` format to, so the two are the same writer under two
+    # names here -- interpolates every ``<string>``/``<key>`` value into its
+    # XML-shaped markup with no entity escaping at all: neither ``&``, ``<``
+    # nor ``>`` is escaped anywhere in :mod:`dictdumper`. Filed upstream as
+    # JarryShaw/DictDumper#125 and tracked here as GitHub issue #772. ``json``,
+    # ``tree`` and ``text`` have no such defect and all three characters are
+    # legal in their output, so escaping is conditioned on the output class
+    # rather than done unconditionally in :func:`render_enum`, which would
+    # double-escape those three. :class:`~dictdumper.xml.XML` itself defines
+    # no ``_append_string`` of its own -- its own module docstring says not to
+    # use it directly -- so :class:`~dictdumper.plist.PLIST` is the only
+    # concrete writer this applies to today.
+    escape_strings = issubclass(output, dictdumper.plist.PLIST)
+
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
@@ -240,35 +258,55 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 o: object to convert
 
             Returns:
-                Converted object.
+                Converted object, escaped for XML-shaped output where needed.
+
+            Notes:
+                :meth:`~dictdumper.dumper.Dumper._encode_value` -- and so this
+                method -- is called once per node the dumper writes, however
+                deeply nested, so escaping the :class:`str` result here on the
+                way out reaches every string the writer will ever interpolate
+                raw, not merely the ones built directly in this method. The
+                one exception is a :class:`~pcapkit.corekit.multidict.MultiDict`
+                key: :meth:`~dictdumper.dumper.Dumper._append_dict` writes a
+                dict's keys straight from the mapping without ever calling
+                this method on them, so a key built from :func:`render_enum`
+                is escaped inline, right where it is built, instead.
 
             """
             if isinstance(o, decimal.Decimal):
-                return str(o)
-            if isinstance(o, datetime.timedelta):
-                return o.total_seconds()
-            if isinstance(o, (Info, Schema)):
-                return o.to_dict()
-            if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-                return str(o)
-            if isinstance(o, (MultiDict, OrderedMultiDict)):
+                result = str(o)  # type: Any
+            elif isinstance(o, datetime.timedelta):
+                result = o.total_seconds()
+            elif isinstance(o, (Info, Schema)):
+                result = o.to_dict()
+            elif isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+                result = str(o)
+            elif isinstance(o, (MultiDict, OrderedMultiDict)):
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
                 for key, val in o.items(multi=True):
                     if isinstance(key, (enum.Enum, aenum.Enum)):
                         key = render_enum(key)
+                        if escape_strings:
+                            key = xml.sax.saxutils.escape(key)
                     temp[key].append(val)
-                return temp
-            if isinstance(o, dict):
-                return o
-            if isinstance(o, (enum.Enum, aenum.Enum)):
+                result = temp
+            elif isinstance(o, dict):
+                result = o
+            elif isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                 if addon:
-                    return {
+                    result = {
                         'enum': render_enum(o),
                         **addon,
                     }
-                return render_enum(o)
-            return super(type(self), self).object_hook(o)  # type: ignore[unreachable]
+                else:
+                    result = render_enum(o)
+            else:
+                result = super(type(self), self).object_hook(o)
+
+            if escape_strings and isinstance(result, str):
+                return xml.sax.saxutils.escape(result)
+            return result
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
             """Check content type for function call.
