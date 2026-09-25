@@ -578,6 +578,17 @@ and the actual value provided for packing.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field.FieldBase.length">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.field.FieldBase.length" title="Link to this definition">¶</a></dt>
 <dd><p>Field size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> resolves to a negative count
+    (e.g. <code class="docutils literal notranslate"><span class="pre">'-5s'</span></code>, from a <code class="docutils literal notranslate"><span class="pre">length</span></code> callback such as
+    <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">pkt:</span> <span class="pre">pkt['__length__']</span></code> resolving below zero once
+    the buffer ran short of what the schema declared).
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size such a template and would
+    otherwise raise a bare <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, uncatchable as a
+    pcapkit-specific error. See #805.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

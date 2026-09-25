@@ -455,7 +455,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">NoDefaultValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">NoDefaultValue</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Field'</span><span class="p">]</span>
 
@@ -724,8 +724,25 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Field size."""</span>
-        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Field size.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If :attr:`template` resolves to a negative count</span>
+<span class="sd">                (e.g. ``'-5s'``, from a ``length`` callback such as</span>
+<span class="sd">                ``lambda pkt: pkt['__length__']`` resolving below zero once</span>
+<span class="sd">                the buffer ran short of what the schema declared).</span>
+<span class="sd">                :func:`struct.calcsize` cannot size such a template and would</span>
+<span class="sd">                otherwise raise a bare :exc:`struct.error`, uncatchable as a</span>
+<span class="sd">                pcapkit-specific error. See #805.</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                <span class="sa">f</span><span class="s1">'template=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="si">!r}</span><span class="s1">'</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
