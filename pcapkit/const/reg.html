@@ -6862,7 +6862,9 @@ on any device: simply with a swÿp.</p></td>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number the caller is looking up, validated here so that
 every entry point rejects a non-port identically.</p></li>
-<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Transport protocol, as a flag or its name.</p></li>
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Transport protocol, as a flag or its name. Exactly one, on
+the delegating path – see <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>
+below.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -6872,8 +6874,14 @@ every entry point rejects a non-port identically.</p></li>
 <dd class="field-odd"><p>The registry class to search.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> is not a port number, or if <code class="docutils literal notranslate"><span class="pre">cls</span></code> holds no
-    members and <code class="docutils literal notranslate"><span class="pre">proto</span></code> names no registry to delegate to.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> is not a port number, or if <code class="docutils literal notranslate"><span class="pre">cls</span></code> holds no
+    members and <code class="docutils literal notranslate"><span class="pre">proto</span></code> names no registry to delegate to.</p></li>
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> holds no members and <code class="docutils literal notranslate"><span class="pre">proto</span></code> names more
+    than one transport protocol, which names more than one registry
+    and so no single answer. Itself a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a caller
+    catching that keeps catching this.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -6903,7 +6911,10 @@ Never empty: a port with no assignment goes through <code class="xref py py-meth
 is minted rather than answered with an empty result.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

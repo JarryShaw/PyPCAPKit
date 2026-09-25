@@ -554,6 +554,7 @@
 <span class="s1">from aenum import IntFlag, StrEnum, auto, extend_enum</span>
 
 <span class="s1">from pcapkit.utilities.compat import show_flag_values</span>
+<span class="s1">from pcapkit.utilities.exceptions import ProtocolError</span>
 
 <span class="s1">__all__ = ['TransportProtocol', '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -750,7 +751,9 @@
 <span class="s1">        Args:</span>
 <span class="s1">            key: Port number the caller is looking up, validated here so that</span>
 <span class="s1">                every entry point rejects a non-port identically.</span>
-<span class="s1">            proto: Transport protocol, as a flag or its name.</span>
+<span class="s1">            proto: Transport protocol, as a flag or its name. Exactly one, on</span>
+<span class="s1">                the delegating path -- see :exc:`~pcapkit.utilities.exceptions.ProtocolError`</span>
+<span class="s1">                below.</span>
 
 <span class="s1">        Returns:</span>
 <span class="s1">            The registry class to search.</span>
@@ -758,6 +761,10 @@
 <span class="s1">        Raises:</span>
 <span class="s1">            ValueError: If ``key`` is not a port number, or if ``cls`` holds no</span>
 <span class="s1">                members and ``proto`` names no registry to delegate to.</span>
+<span class="s1">            ProtocolError: If ``cls`` holds no members and ``proto`` names more</span>
+<span class="s1">                than one transport protocol, which names more than one registry</span>
+<span class="s1">                and so no single answer. Itself a :exc:`ValueError`, so a caller</span>
+<span class="s1">                catching that keeps catching this.</span>
 
 <span class="s1">        """</span>
 <span class="s1">        # NOTE: this registry resolves ports, not service names. The old string</span>
@@ -773,8 +780,43 @@
 
 <span class="s1">        if isinstance(proto, str):</span>
 <span class="s1">            proto = TransportProtocol.get(proto.lower())</span>
-<span class="s1">        for namespace in show_flag_values(proto):</span>
-<span class="s1">            subclass = cls.__registries__.get(TransportProtocol(namespace))</span>
+<span class="s1">        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member</span>
+<span class="s1">        # carries the *whole* transport protocol set IANA assigned the service, so</span>
+<span class="s1">        # ``tcp | udp`` is an ordinary value to read off one and therefore an</span>
+<span class="s1">        # ordinary thing to pass back in. It names two registries, though, holding</span>
+<span class="s1">        # two different services for the same port -- and a lookup answers with one</span>
+<span class="s1">        # member, so there is no answer to which of them the composite meant.</span>
+<span class="s1">        # Resolving it picked the lowest set bit: :func:`~enum.show_flag_values`</span>
+<span class="s1">        # iterates LSB-first and ``tcp`` is the lowest, so every composite</span>
+<span class="s1">        # containing it dispatched into the TCP registry whatever else it named.</span>
+<span class="s1">        # Measured on fe80b8525, that answered 46 of the 10,625 multi-transport</span>
+<span class="s1">        # members' own ``get(m.port, proto=m.proto)`` with a service other than the</span>
+<span class="s1">        # member's own, of which 23 -- the UDP-declared half -- came back as a</span>
+<span class="s1">        # member of the *TCP* registry, carrying the wrong type and a narrower</span>
+<span class="s1">        # ``proto``. Two of those named a service UDP does not answer for the port</span>
+<span class="s1">        # at all, and they are the whole blast radius: ``AppType.get(888, proto=tcp</span>
+<span class="s1">        # | udp)`` gave ``cddbp`` for ``&lt;UDP.accessbuilder: 888 [tcp|udp]&gt;``, and</span>
+<span class="s1">        # 999 gave ``garcon`` against UDP's ``applix``. The other 44 differ from</span>
+<span class="s1">        # ``m.svc`` only in that the member is not its port's canonical, which a</span>
+<span class="s1">        # single-bit lookup does too and which ``get`` documents. All of it silent,</span>
+<span class="s1">        # and undetectable to a caller checking equality, since ``__eq__`` compares</span>
+<span class="s1">        # on ``port`` alone. GitHub issue #759, whose body found 888 and</span>
+<span class="s1">        # generalised from it.</span>
+<span class="s1">        #</span>
+<span class="s1">        # Refusing the composite is the honest answer and costs</span>
+<span class="s1">        # nothing: a caller resolving a parsed port knows which transport carried</span>
+<span class="s1">        # it and passes that one bit, which is what every call site in</span>
+<span class="s1">        # :mod:`pcapkit` does, and one that wants every service on a port asks each</span>
+<span class="s1">        # registry in turn. This is the delegating path only -- a registry subclass</span>
+<span class="s1">        # returned above already knows its own transport and documents ``proto`` as</span>
+<span class="s1">        # ignored, so nothing there is ambiguous to begin with.</span>
+<span class="s1">        namespaces = show_flag_values(proto)</span>
+<span class="s1">        if len(namespaces) &gt; 1:</span>
+<span class="s1">            raise ProtocolError(f'</span><span class="se">{{</span><span class="s1">proto!r</span><span class="se">}}</span><span class="s1"> names </span><span class="se">{{</span><span class="s1">len(namespaces)</span><span class="se">}}</span><span class="s1"> transport protocols, and so '</span>
+<span class="s1">                                f'</span><span class="se">{{</span><span class="s1">len(namespaces)</span><span class="se">}}</span><span class="s1"> registries of </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">; look the port up '</span>
+<span class="s1">                                'under one transport protocol at a time')</span>
+<span class="s1">        if namespaces:</span>
+<span class="s1">            subclass = cls.__registries__.get(TransportProtocol(namespaces[0]))</span>
 <span class="s1">            if subclass is not None:</span>
 <span class="s1">                return subclass</span>
 <span class="s1">        raise ValueError('%r names no transport protocol registry of %s'</span>
@@ -790,7 +832,11 @@
 <span class="s1">            proto: Transport protocol carrying ``key``. Selects the registry to</span>
 <span class="s1">                search when called on :class:`</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">` itself, which holds no</span>
 <span class="s1">                members; ignored when called on one of those registries, each of</span>
-<span class="s1">                which already knows its own transport.</span>
+<span class="s1">                which already knows its own transport. **One** transport protocol</span>
+<span class="s1">                when it does select, since one registry is what a port lookup can</span>
+<span class="s1">                answer from -- a member's own ``proto`` is often a composite such</span>
+<span class="s1">                as ``tcp | udp`` and passing that back in is refused rather than</span>
+<span class="s1">                resolved to a guess.</span>
 
 <span class="s1">        Returns:</span>
 <span class="s1">            The **canonical** service for ``key``. IANA assigns several services</span>
@@ -807,6 +853,9 @@
 <span class="s1">                one outside ``0..65535``, whose rejection by :meth:`_missing_` this</span>
 <span class="s1">                method propagates rather than minting over, so that ``get`` is</span>
 <span class="s1">                never more permissive than ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(...)``.</span>
+<span class="s1">            ProtocolError: If ``proto`` names more than one transport protocol --</span>
+<span class="s1">                see :meth:`_dispatch`, which refuses it rather than answering from</span>
+<span class="s1">                whichever registry the lowest set bit happens to name.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
@@ -860,6 +909,7 @@
 
 <span class="s1">        Raises:</span>
 <span class="s1">            ValueError: As :meth:`get`.</span>
+<span class="s1">            ProtocolError: As :meth:`get`.</span>
 
 <span class="s1">        """</span>
 <span class="s1">        owner = cls._dispatch(key, proto)</span>
