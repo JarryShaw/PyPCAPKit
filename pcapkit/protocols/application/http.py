@@ -216,33 +216,40 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # NOTE: The two arms suppress different sets, and the asymmetry is
         # deliberate. Only the *last* arm additionally suppresses
         # :exc:`struct.error`, because a payload too short to hold HTTP/2's
-        # nine-octet frame header usually fails inside the schema machinery with
-        # that stdlib exception rather than with a protocol error --
-        # ``FieldBase.length`` calls :func:`struct.calcsize` on a template built
-        # from a negative length -- and it is neither a ``ProtocolError`` nor a
-        # :exc:`ValueError`, so it used to leave this method uncatchable by any
-        # caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised a bare
-        # :exc:`struct.error` where the closing ``raise`` below is the documented
-        # answer. ("Usually" because ``httpv2.HTTP``'s own guard tests the
-        # *declared* length, not the buffer's, so a four-octet payload declaring
-        # fifteen parses instead of failing.) Suppressing it on the last arm is
-        # safe in the sense that matters here -- no arm follows, so nothing can
-        # answer in place of the error.
+        # nine-octet frame header, or one whose frame-specific fields exceed
+        # what a slightly-longer buffer holds, fails inside the schema
+        # machinery with that stdlib exception rather than with a protocol
+        # error -- ``FieldBase.length`` calls :func:`struct.calcsize` on a
+        # template built from a negative length -- and it is neither a
+        # ``ProtocolError`` nor a :exc:`ValueError`, so it left this method
+        # uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised
+        # a bare :exc:`struct.error` where the closing ``raise`` below is the
+        # documented answer. Suppressing it on the last arm is safe in the
+        # sense that matters here -- no arm follows, so nothing can answer in
+        # place of the error.
         #
-        # The residual, which is real and is not zero: a genuine ``httpv2``
-        # schema defect that raised :exc:`struct.error` on well-formed HTTP/2
-        # bytes would now be reported as ``unknown HTTP version`` rather than
-        # crashing loudly, so a bug in that schema is quieter than it was. That is
-        # accepted because the alternative is a dispatcher no caller can catch,
-        # and it is bounded: ``httpv2.HTTP`` stays reachable directly, where
-        # nothing is suppressed, and that is the documented route for a caller who
-        # wants the unwrapped failure.
-        #
-        # This is keyed on being *last*, not on being the HTTP/2 arm. Inserting an
-        # arm after this one would silently make the reasoning false, and the
-        # regression test guards arm 1 specifically, so it would not catch that:
-        # the new arm must take the :exc:`struct.error` suppression and this one
-        # must give it up.
+        # #799 closed the *outer*-header slice of this: ``httpv2.HTTP.unpack``
+        # now rejects a buffer under nine octets before the schema layer runs
+        # at all, and ``read`` requires the declared length, the available
+        # buffer, and their consistency (``schema.length <= length``) all to
+        # hold. That did *not* retire this suppression, only shrink what it
+        # has to catch: a buffer that clears nine octets can still carry a
+        # frame type whose own fixed-width fields exceed what is left after
+        # the header -- a ``GOAWAY`` at 9-16 octets (``stream`` and ``error``
+        # alone are eight), a ``PUSH_PROMISE`` at 9-12, or any ``PADDED``
+        # ``DATA``/``HEADERS``/``PUSH_PROMISE`` whose ``pad_len`` exceeds the
+        # remainder -- and those still drive ``pkt['__length__']`` negative one
+        # field further in, past this guard's reach. Measured: a 16-octet
+        # ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)
+        # still raises a bare :exc:`struct.error` through ``httpv2.HTTP``
+        # directly. Closing that class needs the fix at its actual root --
+        # a negative field length raising :exc:`~pcapkit.utilities.\
+        # exceptions.ProtocolError` in :meth:`Schema.unpack
+        # <pcapkit.protocols.schema.schema.Schema.unpack>` /
+        # :attr:`FieldBase.length <pcapkit.corekit.fields.field.FieldBase.length>`
+        # instead of the bare warning those currently emit -- which is generic
+        # across every schema in the tree and is out of this change's scope;
+        # tracked as #805 rather than attempted here.
         #
         # Widening the *first* arm the same way was measured and reverted, as it
         # buys nothing and costs a great deal. Nothing reaches a

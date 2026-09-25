@@ -420,19 +420,23 @@ class HTTPUnitTests(unittest.TestCase):
         particular bytes still raised at all.
 
         What is asserted is that the second arm was *entered*, not the answer it
-        gave. An earlier revision of this test pinned ``version == '2'``, which
-        makes "garbage must report HTTP/2" a contract and would block a later
-        tightening of ``httpv2.HTTP`` -- the arm being reachable is the property
-        #787 is about, and the arm answering HTTP/2 for fifteen octets of prose
-        is a consequence of ``httpv2.HTTP`` accepting any payload of at least
-        nine octets, which is a fact about that class and this class's business
-        to dispatch to it rather than to guarantee. Real HTTP/2 wire bytes are
-        pinned to ``version == '2'`` by
+        gave -- and, as of #799, the answer for *these* bytes is itself
+        ``ProtocolError`` rather than ``version='2'``. An earlier revision of
+        this test pinned ``version == '2'`` here and #799's review caught that
+        as exactly the trap this docstring already warned against: "not"'s
+        three octets read as a 24-bit declared length of 7,237,492, wildly past
+        the fifteen actually available, and #799 now requires the declared
+        length to be consistent with the buffer -- so arm 2 is entered
+        (dead-code-ness stays fixed) but correctly declines this payload too,
+        and both arms failing is what drives ``_guess_version`` to its own
+        ``ProtocolError``. Real HTTP/2 wire bytes -- self-consistently declared
+        -- are pinned to ``version == '2'`` by
         ``test_guess_version_reaches_http2_on_the_connection_preface``, which is
         where that assertion belongs.
 
         """
         from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
 
         http = object.__new__(HTTP)
         http._data = b'not http at all'
@@ -451,61 +455,76 @@ class HTTPUnitTests(unittest.TestCase):
                         record('httpv1', real_v1)), \
              mock.patch('pcapkit.protocols.application.httpv2.HTTP',
                         record('httpv2', real_v2)):
-            guessed = HTTP._guess_version(http, len(http._data))
+            with self.assertRaises(ProtocolError):
+                HTTP._guess_version(http, len(http._data))
 
         # Both arms ran, in order: the first was tried and failed, and the
-        # second was reached -- which is exactly what it never used to be.
+        # second was reached -- which is exactly what it never used to be --
+        # even though it goes on to decline these particular bytes too.
         self.assertEqual(entered, ['httpv1', 'httpv2'])
-        self.assertIsInstance(guessed, real_v2)
 
     def test_guess_version_reaches_http2_on_the_connection_preface(self) -> None:
         """The literal #787 reproduction: the HTTP/2 connection preface.
 
         ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` plus a SETTINGS frame is
-        what an HTTP/2 connection opens with, and ``httpv2.HTTP`` parses it and
-        reports ``version='2'``. Through the proxy it raised ``ValueError: not
-        enough values to unpack (expected 2, got 1)`` instead, from
-        ``httpv1.HTTP`` -- so the guess could not reach the answer its own
-        second arm already had.
+        what an HTTP/2 connection opens with, and ``httpv2.HTTP`` parses the
+        *frame* (on its own) and reports ``version='2'``. Through the proxy it
+        raised ``ValueError: not enough values to unpack (expected 2, got 1)``
+        instead, from ``httpv1.HTTP`` -- so the guess could not reach the answer
+        its own second arm already had.
 
         Asserted against the explicit ``version=2`` path rather than on its own,
         because "``read()`` and ``read(version=2)`` agree" is the property #787
         is about: the explicit path worked throughout, and only the guess did
         not.
 
+        The preface itself is asserted separately, and *not* prepended to the
+        frame in one buffer as the original #787 reproduction did. That
+        construction only ever "worked" by exploiting the exact defect #799
+        fixes: ``httpv2.HTTP`` has no notion of the preface at all, so it read
+        the preface's own ASCII octets as a frame header -- ``b'PRI'`` as a
+        23-bit-plus declared length of 5,265,993 -- and pre-#799 the guard
+        never checked that against the real buffer, so it "succeeded" reporting
+        a length backed by nothing. #799's ``schema.length > length`` check
+        rejects that inconsistency on both the guess and the explicit path
+        alike, which is correct: recognising the preface and skipping past it
+        is a real gap (tracked as #800), but reading it as if it were binary
+        framing was never a fix for that gap, only an accident #799 closes.
+
         """
         import io
         import warnings
 
         from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
         from pcapkit.utilities.warnings import ProtocolWarning
 
-        raw = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n' + http2_frame_bytes(0x04, 0x00, 0, b'')
+        preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+        settings = http2_frame_bytes(0x04, 0x00, 0, b'')
 
-        guessed = HTTP(io.BytesIO(raw), len(raw))
-        explicit = HTTP(io.BytesIO(raw), len(raw), version=2)
+        guessed = HTTP(io.BytesIO(settings), len(settings))
+        explicit = HTTP(io.BytesIO(settings), len(settings), version=2)
 
         self.assertEqual(guessed.version, '2')
         self.assertEqual(guessed.alias, 'HTTP/2')
         self.assertEqual(guessed.length, explicit.length)
         self.assertEqual(guessed.info, explicit.info)
 
-        # The preface's own octets read as an unassigned frame type (``' '``,
-        # 0x20, is the third of ``PRI``), which ``httpv2.HTTP`` tolerates with a
-        # warning -- so the guess is noisy here, on both paths equally.
-        for label, kwargs in (('guessed', {}), ('explicit', {'version': 2})):
-            with self.subTest(path=label):
-                with self.assertWarns(ProtocolWarning):
-                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
-
-        # Wire bytes with no unassigned frame type in them parse clean, which
-        # pins the warning above to the preface rather than to the HTTP/2 arm.
-        settings = http2_frame_bytes(0x04, 0x00, 0, b'')
+        # The frame alone, with no unassigned frame type in it, parses clean.
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             clean = HTTP(io.BytesIO(settings), len(settings))
         self.assertEqual(clean.version, '2')
         self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
+
+        # The preface prepended to the frame, read as one buffer, must now be
+        # refused on *both* paths -- see the docstring above for why that is
+        # the fix rather than a regression.
+        raw = preface + settings
+        for label, kwargs in (('guessed', {}), ('explicit', {'version': 2})):
+            with self.subTest(path=label):
+                with self.assertRaises(ProtocolError):
+                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
 
     def test_guess_version_still_prefers_http1_for_http1_bytes(self) -> None:
         """HTTP/1 is tried first and must still win, request and response alike.
@@ -920,15 +939,27 @@ class HTTPUnitTests(unittest.TestCase):
     def test_guess_version_does_not_suppress_struct_error_on_the_http1_arm(self) -> None:
         """Only the *last* arm may suppress :exc:`struct.error`. Arm 1 must not.
 
-        The sub-nine-octet leak is fixed by suppressing :exc:`struct.error`
-        alongside ``ProtocolError``, and it is tempting to apply that to both arms
-        for symmetry. It must not be: an arm that is not the last one hands the
-        payload *onward* when it swallows an error, and the HTTP/2 arm accepts any
-        payload of at least nine octets -- so a swallowed error on arm 1 becomes a
-        confident ``version='2'`` for a message that is plainly HTTP/1, which is
-        the mislabel #787 exists to stop rather than a tidier failure.
-        ``unknown HTTP version`` is only the best case, needing arm 2 to decline
-        as well.
+        The sub-nine-octet leak is worked around by suppressing
+        :exc:`struct.error` alongside ``ProtocolError``, and it is tempting to
+        apply that to both arms for symmetry. It must not be: an arm that is
+        not the last one hands the payload *onward* when it swallows an error,
+        and the HTTP/2 arm accepts any payload of at least nine octets -- so a
+        swallowed error on arm 1 becomes a confident ``version='2'`` for a
+        message that is plainly HTTP/1, which is the mislabel #787 exists to
+        stop rather than a tidier failure. ``unknown HTTP version`` is only the
+        best case, needing arm 2 to decline as well.
+
+        #799 closed the *outer*-header slice of the class this suppression
+        exists for (``httpv2.HTTP.unpack`` now rejects a buffer under nine
+        octets before the schema layer runs), but did not retire the
+        suppression: a buffer that clears nine octets can still carry a frame
+        type -- ``GOAWAY``, ``PUSH_PROMISE``, a padded ``DATA``/``HEADERS`` --
+        whose own fixed-width fields exceed what is left, and that still raises
+        a bare :exc:`struct.error` one field further in. See
+        ``test_guess_version_reports_unknown_version_for_a_short_payload`` for
+        the outer-header case #799 did close, and
+        ``test_guess_version_still_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
+        below for the class it did not.
 
         It is also unnecessary: nothing reaches a :exc:`struct.error` through
         ``httpv1.HTTP``. Nine byte patterns over lengths 0-24, on both the direct
@@ -967,6 +998,57 @@ class HTTPUnitTests(unittest.TestCase):
                     # It must propagate, not be swallowed into an HTTP/2 answer.
                     with self.assertRaises(struct.error):
                         HTTP(io.BytesIO(raw), len(raw))
+
+    def test_guess_version_still_leaks_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
+        """A buffer that clears nine octets can still crash one field further in.
+
+        #799's ``httpv2.HTTP.unpack`` guard only protects the fixed nine-octet
+        *outer* header. A ``GOAWAY`` frame's own fixed ``stream`` (4 octets) and
+        ``error`` (4 octets) fields consume eight more octets before ``debug``
+        is even reached, so a sixteen-octet buffer -- nine for the header, seven
+        for the rest -- drives ``pkt['__length__']`` to ``-1`` at ``debug`` and
+        still raises a bare :exc:`struct.error` straight through ``httpv2.HTTP``.
+        Filed as its own issue (#805) rather than fixed here: the actual root is
+        generic ``Schema.unpack``/``FieldBase.length`` machinery shared by at
+        least ten schema modules, not something httpv2-specific.
+
+        This is exactly why ``_guess_version``'s last arm keeps suppressing
+        :exc:`struct.error` alongside ``ProtocolError`` -- narrowing it, as an
+        earlier revision of this fix did, regressed the direct ``HTTP()`` guess
+        path: the same bytes came back a bare :exc:`struct.error` instead of
+        ``ProtocolError``, which a caller catching protocol errors cannot catch.
+        This test drives real wire bytes through the actual guess path -- no
+        ``mock.patch`` -- specifically because a mocked fault cannot see a
+        regression in the *un-mocked* route the fault is meant to stand in for.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        # GOAWAY (type 0x07), sid 0, declared length 0x15 (21, this library's
+        # whole-frame convention) -- but only sixteen octets actually follow.
+        raw = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
+        self.assertEqual(len(raw), 16)
+
+        # Direct construction is documented to leak the unwrapped struct.error
+        # (see the module docstring above and #805) -- pinned so a fix to #805
+        # is noticed here rather than silently changing this contract too.
+        import struct
+        with self.assertRaises(struct.error):
+            HTTPv2(io.BytesIO(raw), len(raw))
+
+        # The guess path must not repeat that leak: _guess_version's arm 2
+        # suppresses struct.error precisely so this comes back catchable.
+        for label, kwargs in (('guessed', {}), ('explicit version=2', {'version': 2})):
+            with self.subTest(path=label):
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
+                self.assertIsInstance(ctx.exception, BaseError)
+                self.assertIsInstance(ctx.exception, ValueError)
+                self.assertNotIsInstance(ctx.exception, struct.error)
 
     def test_guess_version_keeps_http1_for_a_folded_http1_request(self) -> None:
         """The #787 claim, for the input class finding the colon-less line exposed.
@@ -1415,6 +1497,232 @@ class HTTPUnitTests(unittest.TestCase):
         proto._data = b'\x00' * 9
         proto.__cached__ = {}
         self.assertEqual(proto.read().to_dict()['type'], Frame.DATA)
+
+        # #799: a well-formed *declared* length (9, i.e. clears the header-only
+        # guard on its own) must still be refused if the *available* buffer
+        # does not also clear nine -- ``read``'s guard now checks both.
+        proto.__header__ = http2_header(9, Frame.DATA, sid=1)
+        proto.__header__.frame = http2_schema(pad_len=0, data=b'', __flags__=0)
+        with self.assertRaises(ProtocolError):
+            proto.read(length=8)
+
+        # #799 blocker 2: a declared length that clears nine on its own must
+        # still be refused if it exceeds what the buffer actually holds --
+        # otherwise a frame can declare far more than the capture contains and
+        # have that declared, attacker-controlled value reported as fact.
+        proto.__header__ = http2_header(16777215, Frame.DATA, sid=1)
+        proto.__header__.frame = http2_schema(pad_len=0, data=b'', __flags__=0)
+        with self.assertRaises(ProtocolError):
+            proto.read(length=9)
+
+    def test_httpv2_truncated_frame_is_rejected_uniformly_regardless_of_declared_length(self) -> None:
+        """#799: a buffer of four real octets must refuse *every* declared length.
+
+        ``httpv2.py:223`` used to read ``if schema.length < 9:`` -- the declared
+        24-bit length off the wire, never the buffer's -- so a frame whose real
+        buffer held only four octets still parsed whenever the declared value
+        happened to clear nine and (for ``SETTINGS``) land on a multiple of six
+        past it. Measured pre-fix, sweeping the declared length against exactly
+        this four-octet ``SETTINGS`` buffer::
+
+            declared=0    -> ProtocolError   declared=9        -> PARSED length=9
+            declared=5    -> ProtocolError   declared=15       -> PARSED length=15
+            declared=8    -> ProtocolError   declared=65535    -> PARSED length=65535
+            declared=10   -> ProtocolError   declared=16777215 -> PARSED length=16777215
+            declared=100  -> ProtocolError
+
+        Non-monotone in the declared value alone: 9 parsed, 10 did not, 15 did.
+        The parses are exactly the declared lengths congruent to 3 (mod 6) --
+        i.e. ``(declared - 9) % 6 == 0`` -- which is ``_read_http_settings``'s own
+        *unrelated* structural check on the declared value, not evidence the
+        buffer held what was declared. Every one of the nine cases below must
+        now come back ``ProtocolError`` uniformly.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        def truncated_settings_frame(declared: int) -> bytes:
+            # The *whole* wire buffer is four octets: the three-octet declared
+            # length plus a one-octet SETTINGS type. Nothing else -- not even
+            # the flags octet or the stream identifier -- is actually present,
+            # so the frame's real buffer never backs what it declares.
+            return declared.to_bytes(3, 'big') + bytes([0x04])
+
+        for declared in (0, 5, 8, 9, 10, 15, 100, 65535, 16777215):
+            with self.subTest(declared=declared):
+                raw = truncated_settings_frame(declared)
+                with self.assertRaises(ProtocolError):
+                    HTTP(io.BytesIO(raw), len(raw))
+
+    def test_httpv2_truncated_frame_is_rejected_across_frame_types_and_buffer_lengths(self) -> None:
+        """The uniformity holds for other frame types and other buffer sizes too.
+
+        The ``SETTINGS``-specific sweep above shows the exact reported shape,
+        but the guard fix (``schema.length < 9 or length < 9 or schema.length
+        > length``) is general: it must reject a too-short buffer for *any*
+        frame type, and at every buffer length under nine, not only four.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        def truncated_frame(declared: int, type_: int, buflen: int) -> bytes:
+            header = declared.to_bytes(3, 'big') + bytes([type_])
+            if len(header) < buflen:
+                return header + b'\x00' * (buflen - len(header))
+            return header[:buflen]
+
+        declares = (0, 9, 10, 15, 100, 65535, 16777215)
+        buflens = (0, 1, 4, 8)
+        types = (0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08)  # every registered frame type
+
+        for type_ in types:
+            for declared in declares:
+                for buflen in buflens:
+                    with self.subTest(type=type_, declared=declared, buflen=buflen):
+                        raw = truncated_frame(declared, type_, buflen)
+                        with self.assertRaises(ProtocolError):
+                            HTTP(io.BytesIO(raw), len(raw))
+
+    def test_httpv2_declared_length_exceeding_the_buffer_is_rejected(self) -> None:
+        """#799 blocker 2: a declared length beyond the buffer must not parse.
+
+        Before this check, a frame whose declared length cleared nine on its
+        own -- regardless of how far past the real buffer it reached -- still
+        passed the guard and reported the declared, attacker-controlled value
+        as if the capture actually contained it. Measured pre-fix, identical on
+        base and the first revision of this PR: a nine-octet buffer declaring
+        16777215 parsed and reported ``length=16777215``, overstated by
+        16,777,206 octets, at every one of these buffer sizes.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        def frame(declared: int, buflen: int, type_: int = 0x00) -> bytes:
+            header = (declared.to_bytes(3, 'big') + bytes([type_, 0x00])
+                     + (0).to_bytes(4, 'big'))
+            if len(header) < buflen:
+                return header + b'\x00' * (buflen - len(header))
+            return header[:buflen]
+
+        for buflen in (9, 10, 12, 16, 24):
+            with self.subTest(buflen=buflen):
+                raw = frame(16777215, buflen)
+                with self.assertRaises(ProtocolError):
+                    HTTPv2(io.BytesIO(raw), len(raw))
+
+        # The boundary itself: declared exactly equal to the buffer is fine
+        # (covered by other tests too), one octet past it is not.
+        exact = frame(9, 9)
+        HTTPv2(io.BytesIO(exact), len(exact))  # must not raise
+
+        one_over = frame(10, 9)
+        with self.assertRaises(ProtocolError):
+            HTTPv2(io.BytesIO(one_over), len(one_over))
+
+    def test_httpv2_boundary_buffer_exactly_nine_octets(self) -> None:
+        """The boundary itself: a buffer of exactly nine octets must parse.
+
+        Nine is the header's own size, so a ``DATA`` frame declaring nine (an
+        empty payload) backed by exactly nine real octets is the smallest
+        legitimate HTTP/2 frame there is. One octet short of that must still be
+        refused -- pinning that the fix's ``>= 9`` is not an off-by-one ``> 9``.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        exactly_nine = http2_frame_bytes(0x00, 0x00, 1, b'')
+        self.assertEqual(len(exactly_nine), 9)
+        info = HTTPv2(io.BytesIO(exactly_nine), len(exactly_nine)).info
+        self.assertEqual(info.length, 9)
+        self.assertEqual(info.data, b'')
+
+        one_short = exactly_nine[:8]
+        with self.assertRaises(ProtocolError):
+            HTTPv2(io.BytesIO(one_short), len(one_short))
+
+    def test_httpv2_well_formed_frame_still_parses(self) -> None:
+        """The fix must not refuse a frame whose buffer backs its declared length.
+
+        A ``DATA`` frame declaring 21 (nine octets of header plus twelve of
+        payload) backed by all 21 real octets is exactly the well-formed case
+        the guard must keep accepting.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+
+        payload = b'{"ok":true}\n'
+        raw = http2_frame_bytes(0x00, 0x00, 1, payload)
+
+        info = HTTPv2(io.BytesIO(raw), len(raw)).info
+        self.assertEqual(info.length, len(raw))
+        self.assertEqual(info.data, payload)
+
+    def test_httpv2_unpack_rejects_a_short_buffer_before_the_schema_layer_crashes(self) -> None:
+        """A buffer under nine octets must not reach :func:`struct.calcsize`.
+
+        Before this guard existed at ``unpack``, a buffer too short to hold the
+        fixed nine-octet header sent ``Schema.unpack`` into arithmetic that
+        builds a *negative*-length struct template for a frame's payload field
+        (``pkt['__length__']`` is decremented by each field's nominal width
+        regardless of how many octets the buffer actually had), and
+        :func:`struct.calcsize` raised a bare :exc:`struct.error` for it --
+        neither a ``ProtocolError`` nor caught by anything downstream. Pinned
+        directly on ``HTTP.unpack`` rather than only on ``read``, since ``read``
+        never runs for these buffers: the crash happened one call earlier.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        for size in range(0, 9):
+            with self.subTest(size=size):
+                short = b'\x00' * size
+                with self.assertRaises(ProtocolError):
+                    HTTPv2(io.BytesIO(short), len(short))
+
+    def test_httpv2_unpack_rejects_an_implicit_short_buffer_but_not_an_empty_one(self) -> None:
+        """The ``length=None`` path: non-empty short is rejected, empty is not.
+
+        ``unpack`` resolves ``length`` from ``len(self)`` only when the caller
+        leaves it ``None`` -- exercised nowhere else in this module, since
+        every other case above passes an explicit ``length``. A *non-empty*
+        buffer under nine octets is malformed regardless of how ``length``
+        arrived, so it is still rejected here. A *genuinely empty* one is not:
+        that is :meth:`Schema.unpack`'s own "no more packets" signal
+        (:exc:`StreamEOFError`), and forwarding a resolved ``0`` in its place --
+        rather than the original ``None`` -- would misreport that signal as a
+        malformed packet instead of preserving it.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+        from pcapkit.utilities.exceptions import ProtocolError, StreamEOFError
+
+        for size in range(1, 9):
+            with self.subTest(size=size):
+                short = b'\x00' * size
+                with self.assertRaises(ProtocolError):
+                    HTTPv2(io.BytesIO(short))  # no explicit length
+
+        with self.assertRaises(StreamEOFError):
+            HTTPv2(io.BytesIO(b''))  # no explicit length, genuinely exhausted
 
     def test_httpv2_frame_constructors_cover_all_frame_types_and_branches(self) -> None:
         from pcapkit.const.http.error_code import ErrorCode
