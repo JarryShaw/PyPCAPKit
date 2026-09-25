@@ -8,7 +8,7 @@ import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.utilities.compat import final
-from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
+from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
 __all__ = ['Field']
 
@@ -269,8 +269,25 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
     @property
     def length(self) -> 'int':
-        """Field size."""
-        return struct.calcsize(self.template)
+        """Field size.
+
+        Raises:
+            ProtocolError: If :attr:`template` resolves to a negative count
+                (e.g. ``'-5s'``, from a ``length`` callback such as
+                ``lambda pkt: pkt['__length__']`` resolving below zero once
+                the buffer ran short of what the schema declared).
+                :func:`struct.calcsize` cannot size such a template and would
+                otherwise raise a bare :exc:`struct.error`, uncatchable as a
+                pcapkit-specific error. See #805.
+
+        """
+        try:
+            return struct.calcsize(self.template)
+        except struct.error as error:
+            raise ProtocolError(
+                f'Field {self.name} resolved to a negative length; '
+                f'template={self.template!r}'
+            ) from error
 
     @property
     def optional(self) -> 'bool':
