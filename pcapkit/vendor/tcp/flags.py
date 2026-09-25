@@ -36,7 +36,7 @@ DATA = {
 #: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
@@ -91,7 +91,7 @@ class {NAME}(IntFlag):
 
         """
         if not ({FLAG}):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
         return super()._missing_(value)
 '''.strip()  # type: Callable[[str, str, str, str, str], str]
 

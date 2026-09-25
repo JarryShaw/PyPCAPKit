@@ -835,6 +835,66 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertIn('proto = code.proto', source)
         self.assertIn('if test not in proto:', source)
 
+    def test_the_new_dunders_are_byte_identical_to_the_percent_form(self) -> None:
+        """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` moved
+        from ``%`` formatting to f-strings, and ``__new__``'s format sets every
+        real member's underlying :class:`~aenum.StrEnum` value -- a far larger
+        blast radius than an error path, so this is checked member by member
+        rather than spot-checked.
+
+        Swept over all 12,391 real members (TCP 6147, UDP 6143, SCTP 91,
+        DCCP 10, matching the population GitHub issue #783 measured), each
+        compared against what the pre-#798 ``%``-style formula would have
+        produced for that same member's own ``svc``/``port``/``proto``. This
+        is an invariance check -- it is true either side of #798's fix by
+        construction, since both formulas render the same text for the same
+        inputs -- rather than a regression test that fails on stock ``main``.
+
+        Runs against a freshly imported, purged-and-restored ``pcapkit`` tree
+        (as :class:`~tests.const.test_const_enum_builtin_parity.ConstEnumBuiltinParityTests`
+        does) rather than whatever module instance an earlier test in this
+        file left behind: several sibling tests here mint throwaway members
+        via :func:`~aenum.extend_enum` and clean up with
+        :meth:`~unittest.TestCase.addCleanup`, but the population counts below
+        are only meaningful against a registry no other test has touched.
+        """
+        from tests._support import (ISOLATED_PREFIXES, purge_modules, restore_modules,
+                                    snapshot_modules)
+
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP
+
+        registries = {'TCP': TCP, 'UDP': UDP, 'SCTP': SCTP, 'DCCP': DCCP}
+        expected_counts = {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10}
+        total = 0
+
+        for name, cls in registries.items():
+            count = 0
+            for member in cls:
+                count += 1
+                total += 1
+                svc, port, proto = member.svc, member.port, member.proto
+
+                with self.subTest(registry=name, member=member.name, check='value'):
+                    old_value = '%s [%d - %s]' % (svc, port, proto.name)  # pylint: disable=consider-using-f-string
+                    self.assertEqual(str(member._value_), old_value)  # type: ignore[attr-defined]
+
+                with self.subTest(registry=name, member=member.name, check='repr'):
+                    old_repr = "<%s.%s: %d [%s]>" % (  # pylint: disable=consider-using-f-string
+                        member.__class__.__name__, svc, port, proto.name)
+                    self.assertEqual(repr(member), old_repr)
+
+                with self.subTest(registry=name, member=member.name, check='str'):
+                    old_str = '%s [%d - %s]' % (svc, port, proto.name)  # pylint: disable=consider-using-f-string
+                    self.assertEqual(str(member), old_str)
+
+            self.assertEqual(count, expected_counts[name], f'{name} population changed')
+
+        self.assertEqual(total, 12391)
+
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
         """Undo an :func:`~aenum.extend_enum` so the registry is left as found.

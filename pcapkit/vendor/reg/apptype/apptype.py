@@ -92,7 +92,7 @@ CANONICAL = {
 #: lookup, and no members at all.
 BASE = lambda NAME, DOCS, FLAG, TABLE, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
@@ -248,7 +248,7 @@ class {NAME}(StrEnum):
 
     def __new__(cls, value: 'int', name: 'str' = '<null>',
                 proto: 'TransportProtocol' = TransportProtocol.undefined) -> 'Type[{NAME}]':
-        temp = '%s [%d - %s]' % (name, value, proto.name)
+        temp = f'{{name}} [{{value}} - {{proto.name}}]'
 
         obj = str.__new__(cls, temp)
         obj._value_ = temp
@@ -268,10 +268,10 @@ class {NAME}(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s: %d [%s]>" % (self.__class__.__name__, self.svc, self.port, self.proto.name)
+        return f'<{{self.__class__.__name__}}.{{self.svc}}: {{self.port}} [{{self.proto.name}}]>'
 
     def __str__(self) -> 'str':
-        return '%s [%d - %s]' % (self.svc, self.port, self.proto.name)
+        return f'{{self.svc}} [{{self.port}} - {{self.proto.name}}]'
 
     def __int__(self) -> 'int':
         return self.port
@@ -325,7 +325,7 @@ class {NAME}(StrEnum):
         # protocol, so a name never matched and the miss path minted a brand-new
         # member with port -1 -- GitHub issue #734's silent junk. Rejecting a
         # non-port outright is the honest answer, and it has to happen before the
-        # miss path, which formats ``key`` with ``%d``.
+        # miss path, which formats ``key`` into an f-string.
         if not isinstance(key, int):
             raise ValueError(f'{{key!r}} is not a valid port number for {{cls.__name__}}')
         if cls.__registry__ is not None:
@@ -436,7 +436,7 @@ class {NAME}(StrEnum):
         # propagates, so both entry points answer an out-of-range port identically.
         ret = owner._missing_(key)
         if ret is None:
-            ret = extend_enum(owner, 'PORT_%d_%s' % (key, owner.__transport__.name),
+            ret = extend_enum(owner, f'PORT_{{key}}_{{owner.__transport__.name}}',
                               key, 'unknown', owner.__transport__)
         return ret
 
@@ -776,7 +776,7 @@ class AppType(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}{claim}:')
                 miss.append(f'    #: {cmmt}')
-                miss.append(f"    return extend_enum(cls, '{self.safe_name(svc)}_%d' % value, "
+                miss.append(f"    return extend_enum(cls, f'{self.safe_name(svc)}_{{value}}', "
                             f"value, {svc!r}, {flag})")
 
         return line, miss
