@@ -22,29 +22,83 @@ name: "Lint"
 #   bandit    8 findings (7 medium, 1 low, 0 high)   exit 1               [932cb48d1]
 #   mypy    112 errors in 38 files (506 checked)     exit 1               [932cb48d1]
 #   vermin  106 files flagged; needs 3.11, targets 3.6 in vermin.ini      exit 1   [932cb48d1]
-#   pylint  90 E, 4765 W, 542 C -- stable; R and the total are not, see below   exit 30  [932cb48d1]
+#   pylint  90 E, 4765 W, 542 C -- stable; R and the total are not, see below   exit 30  [1a852698b]
 #
-# pylint's R and total are deliberately not pinned to a single number: repeated
-# runs on the identical tree at 932cb48d1 gave R of 645-680 and totals of
-# 6044-6079 (two runs measured here: 659/6058 and 680/6079; a cross-review
-# measured four more: 662/647/647/645, totals 6061/6046/6046/6044), entirely
-# from `R0401` cyclic-import, whose count depends on module-processing order
-# rather than on the code -- `duplicate-code` (400) and every other R check
-# held steady across all of them. Separately, the job's own grep-based count
-# (the `pylint` step below) and this header can legitimately disagree on the
-# *same* run: four of `PYLINT_FLAGS`' `--disable=` entries name checks pylint
-# has since removed or renamed (`old-division`, `no-absolute-import`,
-# `input-builtin` -> `R0022 useless-option-value`; `eq-without-hash` ->
-# `W0012 unknown-option-value`), plus one plugin in `--load-plugins=` that no
-# longer exists in the installed pylint (`pylint.extensions.emptystring` ->
-# `E0013 bad-plugin-value`, see #767) -- five stale flags in all, and pylint
-# attributes every one of them to `Command line` rather than to a file.
-# Whether a count includes them is a choice, not a fact about the tree -- C
-# above is untouched either way (none of the five is class C); E and W above
-# both exclude their one Command-line message each (91 and 4766 with them, 90
-# and 4765 without -- pylint's own `messageTypeCount` agrees: 90/4765/542);
-# R's swing above already includes its three either way, dwarfed by
-# `R0401`'s own.
+# pylint's R and total are deliberately not pinned to a single number. Before
+# #767 below, repeated runs on the identical tree gave R of 645-680 and totals
+# of 6044-6079 at 932cb48d1 (two runs measured here: 659/6058 and 680/6079; a
+# cross-review measured four more: 662/647/647/645, totals 6061/6046/6046/6044),
+# entirely from `R0401` cyclic-import, whose count depends on module-processing
+# order rather than on the code -- `duplicate-code` (400) and every other R
+# check held steady across all of them. That range's own basis is not this
+# line's, though: every one of those runs predates #767, so each *R* already
+# carries the three `R0022` the old flags spent on `Command line` (not just
+# the total -- `R0022` is class R), and each *total* carries one `E0013` and
+# one `W0012` on top of that: five stale messages in all, `91 + 4766 + 542 +
+# R_old` where `R_old` is itself `R_real + 3`. On the corrected basis
+# (`90 + 4765 + 542 + R`) that range is really R 642-677, total 6039-6074 --
+# not R 645-680, total 6044-6079 as printed above the line predating #767.
+#
+# After #767, re-measured on that corrected basis at 1a852698b: two runs here
+# gave R 662 and 648 (coincidentally sharing a digit with one of the four
+# pre-#767 cross-review runs above, which is a different measurement on a
+# different basis, not a repeat of it), totals 6059 and 6045, and a
+# cross-review measured five more -- 642/643/646/649/659, totals
+# 6039/6040/6043/6046/6056. Combined: R 642-662, total 6039-6059
+# [1a852698b]. The floor matches the pre-#767 range's own corrected floor
+# exactly (642 both ways) because it is the same tree state either side of
+# that diff -- the range only looks lower now because three of its messages
+# have been deleted, not because the code changed. Already superseded the
+# same day it was measured, too: a cross-review measured `R0801
+# duplicate-code` alone moving 400 -> 573 on `merge(f31e5114f, 83b58ebda)` --
+# this branch merged onto the `main` it was rebased against before #769
+# landed there -- taking R to 823 and the total to 6220 on that merge. Still
+# true of `main` itself today, since this PR touches no `pcapkit/` file, but
+# named for the tree it was actually measured on rather than asserted of
+# `main` directly. This range is a moving target to re-measure, never a
+# constant to defend.
+#
+# The pin above moved from 932cb48d1 to 1a852698b because `pcapkit/` is not
+# actually unchanged between them, despite what an earlier revision of this
+# comment claimed: four files moved (`pcapkit/const/reg/apptype/apptype.py`,
+# `pcapkit/foundation/extraction.py`, `pcapkit/protocols/schema/schema.py`,
+# `pcapkit/vendor/reg/apptype/apptype.py`; tree 7270ad50 -> 2b9ac808), #764's
+# port-validation logic among them. E, W and C read identically either side of
+# that diff -- 90/4765/542 both times -- but 1a852698b is the tree actually
+# re-measured for this line, so that is what it is pinned to now, rather than
+# repeating a byte-identity claim that does not hold.
+#
+# Four of `PYLINT_FLAGS`' `--disable=` entries named checks pylint has
+# genuinely removed -- `old-division`, `no-absolute-import` and
+# `input-builtin` (-> `R0022 useless-option-value`, and pylint's own message
+# says so: "was removed from pylint") -- plus `eq-without-hash`, which is not
+# gone, only unloaded: `pylint.extensions.eq_without_hash` still ships `W1641`,
+# but nothing in `--load-plugins=` ever named it, so `--disable=eq-without-hash`
+# was as unrecognised as if the check had been removed (-> `W0012
+# unknown-option-value`). Same shape of breakage as `emptystring` below, a
+# different cause. All four are dropped either way -- loading the fifth plugin
+# to enable `eq-without-hash` properly would find nothing today (`W1641` is 0
+# over `pcapkit/`), so there is nothing lost in dropping it instead.
+#
+# `--load-plugins=` also named `pylint.extensions.emptystring`, which no
+# longer exists in the installed pylint (-> `E0013 bad-plugin-value` every
+# run). Unlike the four above, though, the check it used to provide did not
+# stop running when the plugin did: `compare-to-empty-string` was folded into
+# the core `refactoring` checker at pylint 3.0 as
+# `use-implicit-booleaness-not-comparison-to-string` (C1804), reachable under
+# either name with no plugin load at all. #767's own premise -- that the
+# broken plugin reference made the check "inert" and it "has never run" -- is
+# wrong: `--list-msgs-enabled` run under the old flags (broken plugin
+# reference included) and the new ones side by side gives the same 399-line
+# enabled-message list either way, and C1804 fires under the old flags on a
+# minimal repro despite the `E0013`. So this half of `PYLINT_FLAGS`' change is
+# flag hygiene, not enablement: it drops a dead plugin reference and keeps the
+# check it used to gate under that check's current name, and the only thing
+# that actually changes is that `E0013` (and the other four's Command-line
+# noise) stops firing. With the five gone, the job's own grep-based count (the
+# `pylint` step below) and this header have nothing left to disagree about on
+# the same run -- the figures above are both the raw and the file-scoped
+# count, for E, W and C alike.
 #
 # None of the four is clean, so none can block today: a job that is red the day
 # it lands teaches everyone to scroll past red, which costs more than the checks

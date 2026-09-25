@@ -5,9 +5,17 @@ export PIPENV_CACHE_DIR ?= $(CURDIR)/.pipenv-cache
 export PIP_CACHE_DIR ?= $(CURDIR)/.pip-cache
 export all_proxy=
 
-# Recipes below use bash features (brace expansion), so bash is required; take it
-# from PATH rather than a fixed prefix, as Homebrew, Linuxbrew and system installs
-# all put it somewhere different.
+# No recipe below currently needs a bash-only feature -- the last one, brace
+# expansion in the `isort:` target, went with #765's `find`-based fix (see
+# that target and tests/project/test_isort_clean.py for why: a later revision
+# of that same fix leaned on brace expansion plus a bash new enough for
+# `shopt -s globstar`, which is a second, version-specific way bash-only
+# reliance can go wrong beyond just needing bash at all). The pin stays
+# anyway: one known shell to write recipes against, rather than whatever
+# `/bin/sh` happens to be on a given machine, is worth keeping even with
+# nothing bash-specific relying on it today, and it costs nothing to take
+# from PATH rather than a fixed prefix, as Homebrew, Linuxbrew and system
+# installs all put it somewhere different.
 SHELL  := $(shell command -v bash 2>/dev/null || echo /bin/bash)
 VERSION = $(shell cat pcapkit/__init__.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/")
 
@@ -123,7 +131,8 @@ docs-autobuild:
 
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit $(wildcard temp/sort.py)
-	pipenv run isort -l100 -ppcapkit pcapkit/{const,vendor}/*/*.py
+	pipenv run isort -l100 -ppcapkit $$(find pcapkit/const -mindepth 2 -name '*.py')
+	pipenv run isort -l100 -ppcapkit $$(find pcapkit/vendor -mindepth 2 -name '*.py')
 	pipenv run isort -l100 -ppcapkit util/*.py examples/generators/*.py
 
 # The command prefix that puts the lint tools on PATH. Locally that is pipenv, as
@@ -140,7 +149,21 @@ RUN ?= pipenv run
 # recipe has always read, and vermin de-duplicates the paths (it reports 496
 # files analyzed either way), so it is preserved verbatim rather than tidied.
 VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv
-PYLINT_FLAGS = --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.emptystring,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,compare-to-empty-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,eq-without-hash,old-division,no-absolute-import,input-builtin,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes
+# `pylint.extensions.emptystring` no longer exists (#767): the check it provided,
+# `compare-to-empty-string`, was folded into the core `refactoring` checker at
+# pylint 3.0 as `use-implicit-booleaness-not-comparison-to-string` (C1804), with
+# `compare-to-empty-string` kept only as a message alias -- no plugin load needed
+# any more (confirmed: it fires the same with or without the dead plugin
+# reference, so it was never actually gated by it), so the entry is dropped
+# rather than the check. `old-division`, `no-absolute-import` and
+# `input-builtin` are dropped because pylint has genuinely removed them.
+# `eq-without-hash` is dropped for a different reason: the extension module
+# that still ships that check (`pylint.extensions.eq_without_hash`, `W1641`)
+# was simply never named in `--load-plugins=`, so `--disable=eq-without-hash`
+# was as unrecognised as if it had been removed -- same spurious Command-line
+# message, not the same cause. See .github/workflows/lint.yml's header for
+# the full account.
+PYLINT_FLAGS = --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,use-implicit-booleaness-not-comparison-to-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes
 MYPY_FLAGS = --follow-imports=silent --ignore-missing-imports --show-column-numbers --show-error-codes
 BANDIT_FLAGS = -r
 
