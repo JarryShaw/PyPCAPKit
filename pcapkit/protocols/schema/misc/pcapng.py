@@ -1833,6 +1833,45 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
             own NUL padding or plain end of data, still starts the next entry --
             even an empty one -- matching what splitting on it always did.
 
+            The guard above ends the entry on a line of *nothing but* NUL
+            padding, but only catches it when the real content ahead of the
+            padding ended with its own newline -- which put the padding on a
+            line by itself for :meth:`~io.BytesIO.readline` to return alone.
+            An entry whose last field is missing that trailing newline, as
+            the format requires, has no such separation: :meth:`readline`
+            runs straight through the field's own bytes and into the
+            padding behind them, returning both as one line, and
+            :meth:`bytes.strip` still will not take the NUL octets off since
+            they are not ASCII whitespace. The padding then went out as part
+            of the field's value with nothing to flag it, silently, however
+            small -- see `#794
+            <https://github.com/JarryShaw/PyPCAPKit/issues/794>`__.
+            :meth:`~io.BytesIO.readline` returns a line without its own
+            trailing newline only at end of stream, so a terminator-less
+            line is necessarily the buffer's last one; a binary field's
+            *name* landing on such a line fails its own 8-octet
+            length-prefix read for the same reason, nothing being left
+            behind it to hold one, so the guard below firing on that shape
+            of line too is harmless. A binary field's *value*, once its
+            name and length prefix are known, is read by that length prefix
+            directly, never by scanning for a line ending, so real block
+            padding immediately behind one cannot land inside it this way:
+            the one-octet terminator check already in place is always
+            reached in that case, and either reads the real separator
+            newline and passes silently, or reads padding's first octet
+            instead, fails, and reports it. Block padding is always 0-3
+            octets, whatever the last field turns out to be, so at most the
+            trailing three octets of a terminator-less line are stripped as
+            padding and warned about, and only when the line's own raw,
+            unstripped tail is itself NUL -- anything past three such
+            octets, or a line whose actual last octet is not NUL at all,
+            cannot be padding and is left as data. This cannot tell a
+            padding octet from a text value that itself legitimately ends
+            in one -- NUL is valid UTF-8 -- but that entry is already
+            malformed for lacking the newline the format mandates, and
+            returning the block's own padding as field data is the one
+            outcome that must not survive it.
+
         """
         self = cast('Self', super().post_process(packet))
 
@@ -1856,6 +1895,47 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
                     break
                 if not line.strip(b'\x00'):
                     break
+
+                if not raw_line.endswith(b'\n') and raw_line.endswith(b'\x00'):
+                    # the format requires this line's own trailing newline,
+                    # and it is missing -- so nothing separates its data from
+                    # the block's 32-bit alignment padding that immediately
+                    # follows it, unlike the padding-only line above, which
+                    # only exists as its own line *because* a real newline
+                    # put it there. Padding is at most three octets (0-3, to
+                    # round the entry up to the next multiple of four), so at
+                    # most the last three octets of `line` can be it; strip
+                    # only that many. Anything past that cannot be padding
+                    # and is left as the data the sender actually sent.
+                    #
+                    # gated on the *raw*, unstripped line ending in NUL: pad
+                    # octets are the only NULs to strip, and it is `raw_line`,
+                    # not `line`, that names the entry's actual last octet.
+                    # `line` is `raw_line.strip()`, which has already dropped
+                    # ASCII whitespace from both ends -- so if the entry's
+                    # real last octet were itself whitespace, `line`'s tail
+                    # would no longer match `raw_line`'s, and NUL octets
+                    # further in would be mistaken for the tail. Padding is
+                    # always NUL, never whitespace, so a `raw_line` ending in
+                    # anything else -- ordinary trailing whitespace included
+                    # -- proves the true padding is zero, and nothing here
+                    # may be stripped. See #794.
+                    # the outer gate above already requires `raw_line` --
+                    # and therefore `line`, since `bytes.strip()` cannot
+                    # remove a trailing NUL -- to end in one, so this loop
+                    # always runs at least once and `pad_octets` is never 0
+                    # here; there is no zero-padding case left to guard
+                    # against once the gate has passed.
+                    stripped = line
+                    pad_octets = 0
+                    while pad_octets < 3 and stripped.endswith(b'\x00'):
+                        stripped = stripped[:-1]
+                        pad_octets += 1
+                    warn(f'PCAP-NG: [systemd Journal Export] entry field {line!r} '
+                         f'has no terminating newline; treating its last '
+                         f'{pad_octets} NUL octet(s) as the block\'s own alignment '
+                         'padding, not data', SchemaWarning, stacklevel=stacklevel())
+                    line = stripped
 
                 line_split = line.split(b'=', maxsplit=1)
                 if len(line_split) == 2:
