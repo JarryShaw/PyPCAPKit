@@ -4509,6 +4509,120 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                 self.assertIn('is not UTF-8', str(schema_warnings[0].message))
                 self.assertEqual(entries[0][key], value)
 
+    def test_a_journal_entry_missing_its_final_newline_does_not_return_padding(self) -> None:
+        """#794: no trailing newline lets the block's own padding read as data.
+
+        The block pads its content to a 32-bit boundary with NULs, and the
+        existing padding-only-line guard only fires when the real content
+        ahead of it ended with its own newline, putting the padding on a
+        line of its own. Without that newline, ``readline()`` runs straight
+        through the field's value and into the padding behind it, returning
+        both together -- and ``bytes.strip()`` still will not touch the NUL
+        octets, since they are not ASCII whitespace. Swept over every
+        padding count the alignment rule can produce (0-3 octets), keyed by
+        how many octets ``MESSAGE=...`` needs trimmed from ``entry`` to land
+        on each remainder mod four.
+
+        """
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        cases = {
+            0: b'MESSAGE=abcd',    # 12 octets, already a multiple of four
+            1: b'MESSAGE=abc',     # 11 octets, one NUL pads it to 12
+            2: b'MESSAGE=hi',      # 10 octets, two NULs pad it to 12
+            3: b'MESSAGE=hello',   # 13 octets, three NULs pad it to 16
+        }
+
+        for pad_octets, entry in cases.items():
+            with self.subTest(pad_octets=pad_octets):
+                entries, caught = self._extract_journal(entry)
+
+                self.assertEqual(len(entries), 1)
+                self.assertEqual(entries[0]['MESSAGE'], entry.split(b'=', 1)[1].decode())
+
+                schema_warnings = [item for item in caught
+                                   if item.category is SchemaWarning]
+                if pad_octets == 0:
+                    # nothing was stripped, so there is nothing to warn about
+                    self.assertEqual(schema_warnings, [])
+                else:
+                    self.assertEqual(len(schema_warnings), 1)
+                    self.assertIn('has no terminating newline', str(schema_warnings[0].message))
+                    self.assertIn(f'last {pad_octets} NUL octet(s)', str(schema_warnings[0].message))
+
+    def test_a_terminated_journal_value_ending_in_a_nul_octet_is_kept_whole(self) -> None:
+        """A legitimate value ending in NUL is not the same shape as padding.
+
+        NUL is valid UTF-8, so a text field's value may end in one. Given its
+        own trailing newline, this line is one ``readline()`` call away from
+        the block's own padding -- exactly as it always was -- so #794's fix,
+        which only triggers when that newline is missing, must leave it
+        untouched.
+
+        """
+        entries, caught = self._extract_journal(b'MESSAGE=hi\x00\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['MESSAGE'], 'hi\x00')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
+    def test_a_terminator_less_line_whose_raw_tail_is_whitespace_has_zero_padding(self) -> None:
+        """Cross-review on #795: gating on ``raw_line``, not ``line``, matters.
+
+        ``line`` is ``raw_line.strip()`` -- ASCII whitespace already gone from
+        both ends. The first cut of #794's fix checked ``raw_line`` for the
+        missing newline but then counted padding off ``line``, so whenever
+        the entry's real last octet was itself ASCII whitespace (not the
+        newline the format wants, but whitespace all the same), ``strip()``
+        had already eaten it, exposing whatever NUL octets came *before* it
+        as if they were now the tail -- and those get read as block padding
+        that never existed. Padding is NUL, never whitespace, and
+        ``bytes.strip()`` does not touch NUL, so a ``raw_line`` ending in
+        whitespace is proof on its own that the true padding is zero: the
+        block's own last octet, unpadded, IS that whitespace. Swept over
+        every octet :meth:`bytes.strip` treats as ASCII whitespace -- space,
+        CR, tab, vtab and formfeed -- against a value that ends in NUL for a
+        genuine reason of its own -- a NUL is valid UTF-8 -- rather than by
+        accident.
+
+        """
+        from pcapkit.utilities.warnings import SchemaWarning
+
+        cases = {
+            'space': (b'MESSAGE=hi\x00 ', 'hi\x00'),
+            'CR': (b'MESSAGE=hi\x00\r', 'hi\x00'),
+            'tab': (b'MESSAGE=\x00\x00\x00\t', '\x00\x00\x00'),
+            'vtab': (b'MESSAGE=hi\x00\x0b', 'hi\x00'),
+            'formfeed': (b'MESSAGE=\x00\x00\x00\x0c', '\x00\x00\x00'),
+        }
+
+        for tail, (entry, expected) in cases.items():
+            with self.subTest(tail=tail):
+                entries, caught = self._extract_journal(entry)
+
+                self.assertEqual(len(entries), 1)
+                self.assertEqual(entries[0]['MESSAGE'], expected)
+                self.assertEqual([item for item in caught
+                                  if item.category is SchemaWarning], [])
+
+    def test_a_journal_binary_value_ending_in_nul_octets_is_unreachable_by_794(self) -> None:
+        """A binary field's value is read by its own length, never by line.
+
+        Nothing here needs a trailing newline to bound it, so there is no
+        terminator-less line for #794's fix to act on -- confirmed by giving
+        the value itself the shape of alignment padding, then padding the
+        block on top of that, and getting both back distinctly.
+
+        """
+        entries, caught = self._extract_journal(
+            b'BIN\n' + struct.pack('<Q', 2) + b'\x00\x00' + b'\n')
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['BIN'], b'\x00\x00')
+        self.assertEqual([item for item in caught
+                          if item.category.__name__ == 'SchemaWarning'], [])
+
     def test_the_captured_len_vector_parses_under_a_memory_cap(self) -> None:
         """#594's amplification band, on the ``captured_len`` vector.
 
