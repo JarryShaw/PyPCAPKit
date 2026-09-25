@@ -3895,7 +3895,11 @@ registry is one enumeration per transport protocol sharing a memberless base.</p
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined">
 <span class="sig-name descname"><span class="pre">undefined</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>No transport protocol. <code class="docutils literal notranslate"><span class="pre">TransportProtocol(0)</span> <span class="pre">is</span> <span class="pre">undefined</span></code> and
+<code class="docutils literal notranslate"><span class="pre">bool(undefined)</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>; it is the <code class="docutils literal notranslate"><span class="pre">proto</span></code> sentinel default
+for <code class="docutils literal notranslate"><span class="pre">__transport__</span></code>, <code class="docutils literal notranslate"><span class="pre">__new__</span></code>, <code class="docutils literal notranslate"><span class="pre">get</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, and what
+the base registry’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> extends unassigned/reserved rows from.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.tcp">

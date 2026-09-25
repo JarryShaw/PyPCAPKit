@@ -456,7 +456,7 @@
 <span class="sd">which is automatically generated from :class:`pcapkit.vendor.reg.apptype.apptype.AppType`.</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntFlag</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span><span class="p">,</span> <span class="n">extend_enum</span>
 
@@ -475,7 +475,19 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TransportProtocol</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Transport layer protocol."""</span>
 
-    <span class="n">undefined</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># mypy has no aenum plugin, so this class is a plain class to it: a bare</span>
+    <span class="c1"># ``0`` here infers as int while the auto()-valued members below infer as</span>
+    <span class="c1"># Any, and only this member then disagrees with the TransportProtocol</span>
+    <span class="c1"># annotations that use it. cast is the identity function at run time, so</span>
+    <span class="c1"># this changes nothing that runs -- see GitHub issue #770. mypy.ini sets</span>
+    <span class="c1"># warn_redundant_casts, so if aenum ever ships type stubs letting it infer</span>
+    <span class="c1"># TransportProtocol on its own, this cast starts erroring instead of</span>
+    <span class="c1"># lingering as dead scaffolding.</span>
+    <span class="c1">#: No transport protocol. ``TransportProtocol(0) is undefined`` and</span>
+    <span class="c1">#: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default</span>
+    <span class="c1">#: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what</span>
+    <span class="c1">#: the base registry's ``_missing_`` extends unassigned/reserved rows from.</span>
+    <span class="n">undefined</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1">#: Transmission Control Protocol.</span>
     <span class="n">tcp</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>

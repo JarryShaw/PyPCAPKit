@@ -462,10 +462,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xml.sax.saxutils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.dumper</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dictdumper.plist</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
@@ -690,6 +692,22 @@
 <span class="sd">        Customised :class:`~dictdumper.dumper.Dumper` object.</span>
 
 <span class="sd">    """</span>
+    <span class="c1"># NOTE: :class:`~dictdumper.plist.PLIST` -- which is also what</span>
+    <span class="c1"># :attr:`Extractor.__output__ &lt;pcapkit.foundation.extraction.Extractor.__output__&gt;`</span>
+    <span class="c1"># maps the ``'xml'`` format to, so the two are the same writer under two</span>
+    <span class="c1"># names here -- interpolates every ``&lt;string&gt;``/``&lt;key&gt;`` value into its</span>
+    <span class="c1"># XML-shaped markup with no entity escaping at all: neither ``&amp;``, ``&lt;``</span>
+    <span class="c1"># nor ``&gt;`` is escaped anywhere in :mod:`dictdumper`. Filed upstream as</span>
+    <span class="c1"># JarryShaw/DictDumper#125 and tracked here as GitHub issue #772. ``json``,</span>
+    <span class="c1"># ``tree`` and ``text`` have no such defect and all three characters are</span>
+    <span class="c1"># legal in their output, so escaping is conditioned on the output class</span>
+    <span class="c1"># rather than done unconditionally in :func:`render_enum`, which would</span>
+    <span class="c1"># double-escape those three. :class:`~dictdumper.xml.XML` itself defines</span>
+    <span class="c1"># no ``_append_string`` of its own -- its own module docstring says not to</span>
+    <span class="c1"># use it directly -- so :class:`~dictdumper.plist.PLIST` is the only</span>
+    <span class="c1"># concrete writer this applies to today.</span>
+    <span class="n">escape_strings</span> <span class="o">=</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dictdumper</span><span class="o">.</span><span class="n">plist</span><span class="o">.</span><span class="n">PLIST</span><span class="p">)</span>
+
     <span class="k">class</span><span class="w"> </span><span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Customised :class:`~dictdumper.dumper.Dumper` object."""</span>
 
@@ -701,35 +719,55 @@
 <span class="sd">                o: object to convert</span>
 
 <span class="sd">            Returns:</span>
-<span class="sd">                Converted object.</span>
+<span class="sd">                Converted object, escaped for XML-shaped output where needed.</span>
+
+<span class="sd">            Notes:</span>
+<span class="sd">                :meth:`~dictdumper.dumper.Dumper._encode_value` -- and so this</span>
+<span class="sd">                method -- is called once per node the dumper writes, however</span>
+<span class="sd">                deeply nested, so escaping the :class:`str` result here on the</span>
+<span class="sd">                way out reaches every string the writer will ever interpolate</span>
+<span class="sd">                raw, not merely the ones built directly in this method. The</span>
+<span class="sd">                one exception is a :class:`~pcapkit.corekit.multidict.MultiDict`</span>
+<span class="sd">                key: :meth:`~dictdumper.dumper.Dumper._append_dict` writes a</span>
+<span class="sd">                dict's keys straight from the mapping without ever calling</span>
+<span class="sd">                this method on them, so a key built from :func:`render_enum`</span>
+<span class="sd">                is escaped inline, right where it is built, instead.</span>
 
 <span class="sd">            """</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
-                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">)):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: Any</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">)):</span>
                 <span class="n">temp</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># type: DefaultDict[str, list[Any]]</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
                         <span class="n">key</span> <span class="o">=</span> <span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">escape_strings</span><span class="p">:</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                     <span class="n">temp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">temp</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">o</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">temp</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">o</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)):</span>
                 <span class="n">addon</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)}</span>
                 <span class="k">if</span> <span class="n">addon</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="p">{</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s1">'enum'</span><span class="p">:</span> <span class="n">render_enum</span><span class="p">(</span><span class="n">o</span><span class="p">),</span>
                         <span class="o">**</span><span class="n">addon</span><span class="p">,</span>
                     <span class="p">}</span>
-                <span class="k">return</span> <span class="n">render_enum</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">render_enum</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">escape_strings</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["fallback"]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">            </span><span class="sd">"""Check content type for function call.</span>

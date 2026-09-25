@@ -549,7 +549,7 @@
 <span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
 
 <span class="s1">"""</span>
-<span class="s1">from typing import TYPE_CHECKING</span>
+<span class="s1">from typing import TYPE_CHECKING, cast</span>
 
 <span class="s1">from aenum import IntFlag, StrEnum, auto, extend_enum</span>
 
@@ -566,7 +566,19 @@
 <span class="s1">class TransportProtocol(IntFlag):</span>
 <span class="s1">    """Transport layer protocol."""</span>
 
-<span class="s1">    undefined = 0</span>
+<span class="s1">    # mypy has no aenum plugin, so this class is a plain class to it: a bare</span>
+<span class="s1">    # ``0`` here infers as int while the auto()-valued members below infer as</span>
+<span class="s1">    # Any, and only this member then disagrees with the TransportProtocol</span>
+<span class="s1">    # annotations that use it. cast is the identity function at run time, so</span>
+<span class="s1">    # this changes nothing that runs -- see GitHub issue #770. mypy.ini sets</span>
+<span class="s1">    # warn_redundant_casts, so if aenum ever ships type stubs letting it infer</span>
+<span class="s1">    # TransportProtocol on its own, this cast starts erroring instead of</span>
+<span class="s1">    # lingering as dead scaffolding.</span>
+<span class="s1">    #: No transport protocol. ``TransportProtocol(0) is undefined`` and</span>
+<span class="s1">    #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default</span>
+<span class="s1">    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what</span>
+<span class="s1">    #: the base registry's ``_missing_`` extends unassigned/reserved rows from.</span>
+<span class="s1">    undefined = cast('TransportProtocol', 0)</span>
 
 <span class="s1">    #: Transmission Control Protocol.</span>
 <span class="s1">    tcp = auto()</span>

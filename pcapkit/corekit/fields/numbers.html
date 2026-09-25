@@ -776,6 +776,149 @@ obligation to stay quiet.</p>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.EnumField._pseudo_member">
+<span class="sig-name descname"><span class="pre">_pseudo_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#EnumField._pseudo_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.EnumField._pseudo_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build the bounded nameless pseudo-member this method falls back to
+when <code class="docutils literal notranslate"><span class="pre">value</span></code> is a foreign miss rather than an in-library rejection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single-member, throwaway <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></a> instance, built
+fresh per call rather than <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>-ed onto
+<code class="docutils literal notranslate"><span class="pre">self._namespace</span></code>, per this method’s own docstring above.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.numbers.EnumField._unregistered_member">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;unassigned&gt;'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/numbers.html#EnumField._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.numbers.EnumField._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member of <code class="docutils literal notranslate"><span class="pre">namespace</span></code>, absent from every one of its own
+lookup tables, for a value a <em>parse</em> – rather than a direct call to
+the registry’s own <code class="docutils literal notranslate"><span class="pre">get()</span></code> – resolved without anyone asking for a
+name.</p>
+<p>GitHub issue #575: the owner’s ruling is that an unassigned wire value
+should resolve to a real member of the registry the field names –
+<code class="docutils literal notranslate"><span class="pre">isinstance</span></code> against it and every ancestor holds, and it renders and
+dispatches exactly like a declared one – provided building it never
+grows the registry, which is the whole reason the field stopped
+calling <code class="docutils literal notranslate"><span class="pre">get()</span></code> unconditionally in the first place. This is what
+gets there: it calls <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s own storage base’s <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
+directly – <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, whichever <code class="docutils literal notranslate"><span class="pre">namespace</span></code>
+derives from – which skips <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s <em>own</em> <code class="docutils literal notranslate"><span class="pre">__new__</span></code>
+entirely, and with it the <code class="docutils literal notranslate"><span class="pre">cls.__registry__.add(...)</span></code> /
+<code class="docutils literal notranslate"><span class="pre">cls.__members_ns__[...]</span> <span class="pre">=</span> <span class="pre">...</span></code> line every registry in this package
+uses to record a member it mints. No entry is added to
+<code class="docutils literal notranslate"><span class="pre">_member_map_</span></code> or <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> either, since those are
+only ever touched by the metaclass machinery <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>
+drives, which this bypasses completely.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Building a member this way, rather than as some other type
+altogether, is why <code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code>
+and its siblings need this rather than <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField._pseudo_member" title="pcapkit.corekit.fields.numbers.EnumField._pseudo_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_pseudo_member()</span></code></a>:
+the result answers <code class="docutils literal notranslate"><span class="pre">isinstance(result,</span> <span class="pre">AppType)</span></code> truthfully,
+which matters to at least seven <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> sites elsewhere in
+<a class="reference internal" href="../../protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> (see <code class="docutils literal notranslate"><span class="pre">test_a_member_is_still_an_apptype</span></code>
+in <code class="docutils literal notranslate"><span class="pre">tests/const/test_const_apptype_split_unit.py</span></code>), and a value
+that fails all of them would be a second defect standing in for
+the one this fix removes.</p>
+<p>The member this returns is absent from <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, so
+a <em>value</em>-keyed lookup on it – <code class="docutils literal notranslate"><span class="pre">self._namespace(value)</span></code> –
+still raises exactly as it did before this existed. Nothing on the
+parse or reconstruction path does that to a value it just resolved
+this way, which is what keeps this safe to return from
+<code class="docutils literal notranslate"><span class="pre">post_process</span></code>. A direct call to
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> for the same port
+is a different matter and deliberately unchanged: asking the
+registry for a name is an explicit request for a named member, so
+it still mints one – measured on this tree,
+<code class="docutils literal notranslate"><span class="pre">AppType.get(54321,</span> <span class="pre">proto=tcp)</span></code> returns <code class="docutils literal notranslate"><span class="pre">PORT_54321_tcp</span></code> and
+takes <code class="docutils literal notranslate"><span class="pre">TCP.__members__</span></code> from 6147 to 6148, and a second call
+with the same port returns that member rather than raising. Two
+unregistered members for the same value also compare equal
+without being identical, since
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code> and
+<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> both define
+<code class="docutils literal notranslate"><span class="pre">__eq__</span></code>/<code class="docutils literal notranslate"><span class="pre">__hash__</span></code> off an attribute (<code class="docutils literal notranslate"><span class="pre">.port</span></code> /
+<code class="docutils literal notranslate"><span class="pre">.opt_value</span></code>) rather than object identity – harmless for every
+reader in this package, since none compares one with <code class="docutils literal notranslate"><span class="pre">is</span></code> or
+keys a mapping on it expecting identity, but worth knowing before
+reusing this elsewhere.</p>
+<p><a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> all
+reduce an <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> member through
+<code class="docutils literal notranslate"><span class="pre">Enum.__reduce_ex__</span></code>, which returns <code class="docutils literal notranslate"><span class="pre">(cls,</span> <span class="pre">(value,))</span></code> – the
+one lookup this member is deliberately absent from. Left alone
+that is a genuine regression rather than a pre-existing
+limitation, because the call sites used to <em>mint</em>, so the member
+was registered and a round-trip worked. Measured on CPython
+3.14.7, resolving port 53406 through
+<code class="xref py py-class docutils literal notranslate"><span class="pre">PortEnumField</span></code>:
+on <code class="docutils literal notranslate"><span class="pre">83b58ebda</span></code> <code class="docutils literal notranslate"><span class="pre">pickle.loads(pickle.dumps(member))</span></code> returned
+the member, and with the mint removed and nothing in its place it
+raised <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">'unknown</span> <span class="pre">[53406</span> <span class="pre">-</span> <span class="pre">tcp]'</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">TCP</span></code>
+– while <code class="docutils literal notranslate"><span class="pre">pickle.dumps</span></code> still succeeded, so the failure
+surfaced only on read-back rather than where it was caused.</p>
+<p>So <code class="docutils literal notranslate"><span class="pre">__reduce_ex__</span></code> is set on the member itself, reducing it to
+<code class="docutils literal notranslate"><span class="pre">_rebuild_unregistered_member</span></code> instead of to a value lookup.
+Both <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a> fetch that attribute with
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a> on the object rather than on its type, so a
+per-instance override is honoured: verified against the C
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> accelerator on every protocol from 0 to 5, against
+the pure-Python <code class="docutils literal notranslate"><span class="pre">pickle._Pickler</span></code>, and against
+<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> both as they are on 3.11+
+and with CPython’s <code class="docutils literal notranslate"><span class="pre">Enum.__copy__</span></code>/<code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> deleted to
+emulate 3.10, where those two do not exist. Rebuilding re-enters
+this method rather than <code class="docutils literal notranslate"><span class="pre">namespace.__new__</span></code>, so an unpickled
+member is unregistered exactly as the original was and the
+registry does not grow – <code class="docutils literal notranslate"><span class="pre">TCP.__members__</span></code> measured at 6147
+before and after. On 3.11+ <code class="docutils literal notranslate"><span class="pre">copy</span></code>/<code class="docutils literal notranslate"><span class="pre">deepcopy</span></code> still return the
+member itself, since <code class="docutils literal notranslate"><span class="pre">Enum.__copy__</span></code> short-circuits ahead of
+any reduction; on 3.10 they return an equal rebuilt one, which is
+the same answer for an immutable value.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code>]</span>) – The concrete registry class to build the member as an
+instance of. <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> holds against it and every
+ancestor; it never gains an entry in any of its own tables.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The value <code class="docutils literal notranslate"><span class="pre">namespace</span></code>’s own constructor would have
+wrapped – e.g. the crafted string
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> builds from
+a name, a port and a transport, or
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>’s
+equivalent – kept the same shape here so a rendered or
+re-keyed member reads the same either way.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s own <code class="docutils literal notranslate"><span class="pre">.name</span></code>; <code class="docutils literal notranslate"><span class="pre">'&lt;unassigned&gt;'</span></code> matches every
+other nameless value this package produces.</p></li>
+<li><p><strong>**attrs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Extra attributes to set on the returned member, matching
+the shape the caller’s registry gives its real members –
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code>’s <code class="docutils literal notranslate"><span class="pre">.port</span></code>,
+<code class="docutils literal notranslate"><span class="pre">.svc</span></code> and <code class="docutils literal notranslate"><span class="pre">.proto</span></code>, or
+<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>’s
+<code class="docutils literal notranslate"><span class="pre">.opt_name</span></code> and <code class="docutils literal notranslate"><span class="pre">.opt_value</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">namespace</span></code> derives from neither <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> nor
+    <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> – every registry this package builds does one or
+    the other, and guessing wrong for some future one would ship
+    a member silently missing whatever its storage base provides,
+    rather than saying plainly that this needs extending first.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

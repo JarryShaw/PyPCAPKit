@@ -457,6 +457,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BytesField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'UDP'</span><span class="p">]</span>
 
@@ -510,11 +511,33 @@
 <span class="sd">            packet: Packet data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Processed field value.</span>
+<span class="sd">            Processed field value -- the registry member declared for the</span>
+<span class="sd">            port, or an unregistered member of the same registry, carrying</span>
+<span class="sd">            the port itself, when the registry declares none. See GitHub</span>
+<span class="sd">            issue #575.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            See :meth:`pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`,</span>
+<span class="sd">            whose notes this mirrors verbatim aside from the transport.</span>
 
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">)</span>
+        <span class="n">proto</span> <span class="o">=</span> <span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">))):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">owner</span><span class="o">.</span><span class="n">__registry__</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>  <span class="c1"># type: ignore[union-attr]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">declared</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="n">declared</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">declared</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span>
+                    <span class="n">owner</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'unknown [</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span><span class="p">,</span>
+                    <span class="n">svc</span><span class="o">=</span><span class="s1">'unknown'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="UDP">
