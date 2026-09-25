@@ -1142,6 +1142,12 @@ class DependencyGateScanTests(unittest.TestCase):
         flat :func:`ast.walk` would report the flag as *needing* ``pcap._pcap``
         -- the one module whose presence makes it false.
 
+        :func:`~tests._dependency_gates.module_flag_exclusions` is the mirror
+        image, pinned on the same module: it is what recovers ``pcap._pcap``
+        as the thing this flag needs *absent*, which is exactly what
+        :func:`~tests._dependency_gates.module_flag_requirements` correctly
+        drops.
+
         """
         module = write_module(self.tmp_path, 'test_negated_unit.py', """
             import importlib
@@ -1160,6 +1166,8 @@ class DependencyGateScanTests(unittest.TestCase):
             """)
         self.assertEqual(_dependency_gates.module_flag_requirements(module),
                          {'HAS_PYPCAP': frozenset({'pcap'})})
+        self.assertEqual(_dependency_gates.module_flag_exclusions(module),
+                         {'HAS_PYPCAP': frozenset({'pcap._pcap'})})
 
     def test_a_flag_that_asks_about_something_pip_cannot_install_requires_nothing(self) -> None:
         """``HAS_PROC_FD``'s shape: no probe, so no requirement, so no gap.
@@ -1279,7 +1287,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
 
         selections = {job.name: job.selection for job in _dependency_gates.pytest_jobs()}
         self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
-                                      'gate': 'whole-suite'})
+                                      'gate': 'whole-suite', 'engine-tests': 'ignore',
+                                      'pypcap-parity': 'fixture-tier'})
 
     def test_the_selection_is_read_off_the_step_that_runs_pytest(self) -> None:
         """Not off the job, whose comments contradict it.
@@ -1307,7 +1316,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
         selections = {job.name: job.selection
                       for job in _dependency_gates.pytest_jobs(doctored)}
         self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
-                                      'gate': 'whole-suite'})
+                                      'gate': 'whole-suite', 'engine-tests': 'ignore',
+                                      'pypcap-parity': 'fixture-tier'})
 
     def test_two_install_lines_in_one_pytest_job_is_refused(self) -> None:
         """Ambiguity fails loudly instead of the first line winning."""
@@ -1525,8 +1535,20 @@ class DependencyGateCoverageTests(unittest.TestCase):
         is a failure, because an unresolved flag requires nothing and so can
         never be reported as a gap.
 
+        A *required* module missing from :data:`~tests._dependency_gates.MODULE_PROVIDERS`
+        fails right here, with this message naming it. An *excluded* one --
+        the modules :func:`~tests._dependency_gates.flag_exclusions` reads off
+        a negated probe -- had neither: nothing looped over them at all, so
+        the same gap surfaced only as a bare :exc:`KeyError` out of
+        :func:`~tests._dependency_gates.module_providers`, wherever
+        :func:`~tests._dependency_gates.ambiguous_satisfactions` happened to
+        call it. Looping over both here is what gives an excluded module the
+        same deliberate contract a required one already has, instead of an
+        accident of whichever caller reaches it first.
+
         """
         requirements = _dependency_gates.flag_requirements()
+        exclusions = _dependency_gates.flag_exclusions()
         gates = _dependency_gates.gated_scopes()
         # Without this the whole loop passes on an empty scan, which is the one
         # way a classification check can be wrong and silent at the same time.
@@ -1550,13 +1572,51 @@ class DependencyGateCoverageTests(unittest.TestCase):
                                   f'{module} has no MODULE_PROVIDERS entry, so nothing '
                                   f'knows which extra installs it')
 
+                for module in sorted(exclusions.get((gate.module, gate.flag), ())):
+                    self.assertIn(module.partition('.')[0],
+                                  _dependency_gates.MODULE_PROVIDERS,
+                                  f'{module} is excluded by {gate.flag}\'s own negated probe '
+                                  f'but has no MODULE_PROVIDERS entry, so '
+                                  f'ambiguous_satisfactions() would raise a bare KeyError '
+                                  f'resolving it rather than fail with this message')
+
     def test_no_provider_mapping_or_exclusion_is_vestigial(self) -> None:
-        """Both tables are exactly as wide as the suite needs them to be."""
+        """Both tables are exactly as wide as the suite needs them to be --
+        for every drift this comparison can actually see.
+
+        A required module resolves through the *exact* key when
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` has one (``pcap._pcap``,
+        which does not want plain ``pcap``'s two-wide entry) and through its
+        top-level truncation otherwise -- the same rule
+        :func:`~tests._dependency_gates.module_providers` and
+        :func:`~tests._dependency_gates.extras_providing` both apply, so
+        ``needed`` is built the same way rather than by truncating every
+        required module unconditionally.
+
+        One blind spot, not fixed here because nothing else needs it fixed:
+        ``needed`` decides *whether* to truncate a required module by asking
+        the very dictionary being checked, so deleting a *dotted* key
+        (``pcap._pcap``) removes it from both sides of the comparison in the
+        same step -- ``needed`` truncates to ``'pcap'`` the moment the exact
+        key is gone, and the assertion below stays green. That deletion is
+        not vestigial -- :func:`~tests._dependency_gates.module_providers`'s
+        callers still need the entry -- it is just invisible to this
+        particular test;
+        :meth:`~tests.test_tier_guard.DependencyGateScanTests.test_a_negated_probe_is_not_a_requirement`,
+        the two ``#762`` swap tests below, and
+        :meth:`~tests.test_tier_guard.DependencyGateFalsifiabilityTests\
+.test_removing_the_negation_or_the_exact_path_reopens_762`'s own mutation all
+        pin ``pcap._pcap`` directly and would catch it.
+
+        """
         requirements = _dependency_gates.flag_requirements()
         gated = {gate.flag for gate in _dependency_gates.gated_scopes()}
-        needed = {module.partition('.')[0]
-                  for (_, flag), modules in requirements.items() if flag in gated
-                  for module in modules}
+        required = {module
+                    for (_, flag), modules in requirements.items() if flag in gated
+                    for module in modules}
+        needed = {module if module in _dependency_gates.MODULE_PROVIDERS
+                 else module.partition('.')[0]
+                 for module in required}
 
         self.assertEqual(set(_dependency_gates.MODULE_PROVIDERS), needed)
         self.assertLessEqual(set(_dependency_gates.NON_DISTRIBUTION_FLAGS),
@@ -1565,6 +1625,47 @@ class DependencyGateCoverageTests(unittest.TestCase):
             set(_dependency_gates.NON_DISTRIBUTION_FLAGS)
             & set(_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS), set(),
             'a flag no extra could satisfy does not also need an exclusion')
+
+    def test_mutually_exclusive_imports_matches_its_derivation(self) -> None:
+        """The liveness half :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS` needs.
+
+        A hand-written set can misname which distribution is right for an
+        entry it already has, but it cannot notice a *third* name going
+        contested that nobody added -- the exact shape #745's own docstring
+        warns a skip list rots into. Comparing it against
+        :func:`~tests._dependency_gates.contested_imports`, which counts how
+        many of a :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry's
+        alternatives some declared extra actually resolves, is what would
+        catch that: an entry gaining a second *live* alternative without a
+        matching addition here fails this assertion rather than silently
+        reopening #762 under a name nobody scoped
+        :func:`~tests._dependency_gates.ambiguous_satisfactions` to.
+
+        """
+        self.assertEqual(_dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS,
+                         _dependency_gates.contested_imports())
+
+    def test_no_gate_is_satisfied_through_the_wrong_half_of_an_ambiguous_import(self) -> None:
+        """#762: a satisfied gate has to resolve to the *right* distribution.
+
+        :meth:`test_every_gate_a_job_reaches_has_its_dependency_installed` only
+        asks whether at least one distribution the job installs ships the
+        module a gate needs -- which cannot tell PyPCAP's ``pcap`` from
+        pcap-ct's, since both are registered under the one
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry. This is that
+        check's complement: every ``(job, gate)`` pair the gaps pass calls
+        satisfied has to resolve to exactly the distribution that is legitimate
+        for it -- derived from :func:`~tests._dependency_gates.module_providers`
+        and :func:`~tests._dependency_gates.module_flag_exclusions`, not a
+        hand-maintained table -- wherever more than one distribution could have
+        supplied the import.
+
+        """
+        findings = _dependency_gates.ambiguous_satisfactions()
+        self.assertEqual(
+            findings, (),
+            '\n\n'.join(_dependency_gates.describe_ambiguous_satisfaction(finding)
+                       for finding in findings))
 
 
 class DependencyGateFalsifiabilityTests(unittest.TestCase):
@@ -1610,13 +1711,23 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         )
 
     def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
-        """#729's defect, restaged. Three jobs install ``DPKT``; all three go dark."""
+        """#729's defect, restaged. Five jobs install ``DPKT``; all five go dark.
+
+        #751 added ``engine-tests`` and ``pypcap-parity`` to the three this test
+        used to name, each carrying its own ``DPKT`` for the same reason as the
+        original three -- ``engine-tests`` for
+        :file:`tests/foundation/engines/test_runtime_engines.py`'s reused
+        ``HAS_RUNTIME``, ``pypcap-parity`` for
+        :file:`examples/generators/make_samples.py`.
+
+        """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
         doctored = doctored_workflow(self, text, text.replace('DPKT,', '').replace(',DPKT', ''))
 
         gaps = {gap.job: gap for gap in _dependency_gates.dependency_gate_gaps(doctored)
                 if gap.flag == 'HAS_DPKT'}
-        self.assertEqual(sorted(gaps), ['gate', 'integration', 'test'])
+        self.assertEqual(sorted(gaps),
+                         ['engine-tests', 'gate', 'integration', 'pypcap-parity', 'test'])
         for job, gap in sorted(gaps.items()):
             with self.subTest(job=job):
                 self.assertEqual(gap.missing, ('dpkt',))
@@ -1625,10 +1736,13 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """Precision, not just detection.
 
         Every ``HAS_EMOJI`` gate is in :file:`tests/integration/test_cli_subprocess.py`,
-        which the ``test`` job ignores wholesale. So dropping ``cli`` must be
-        reported against ``integration`` and ``gate`` and *not* against
-        ``test``: a guard that flagged all three would be noise, and noise is
-        what gets a guard allowlisted into uselessness.
+        which the ``test`` and ``engine-tests`` jobs both ignore wholesale. So
+        dropping ``cli`` must be reported against ``integration``, ``gate`` and
+        ``pypcap-parity`` -- #751's job that mirrors ``integration``'s
+        fixture-tier selection and so reaches the same gate -- and *not*
+        against ``test`` or ``engine-tests``: a guard that flagged those two as
+        well would be noise, and noise is what gets a guard allowlisted into
+        uselessness.
 
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
@@ -1636,13 +1750,235 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
         jobs = sorted(gap.job for gap in _dependency_gates.dependency_gate_gaps(doctored)
                       if gap.flag == 'HAS_EMOJI')
-        self.assertEqual(jobs, ['gate', 'integration'])
+        self.assertEqual(jobs, ['gate', 'integration', 'pypcap-parity'])
+
+    def test_swapping_pypcap_parity_to_pcap_ct_is_an_ambiguous_satisfaction(self) -> None:
+        """#762, direction one: the wrong half of the ``pcap`` ambiguity, installed.
+
+        ``pypcap-parity`` swapped from the ``PyPCAP`` extra to ``PCAP_CT`` still
+        reaches all 4 ``HAS_PYPCAP`` gates, and
+        :func:`~tests._dependency_gates.dependency_gate_gaps` still calls them
+        satisfied -- pcap-ct ships the same top-level ``pcap`` module, so this is
+        exactly the blind spot :func:`~tests._dependency_gates.dependency_gate_gaps`
+        cannot see on its own. :func:`~tests._dependency_gates.ambiguous_satisfactions`
+        is what catches it.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+        )
+
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
+        self.assertNotIn(
+            ('HAS_PYPCAP', 'pypcap-parity'), gaps,
+            'the premise of this test: dependency_gate_gaps must still see no gap on this '
+            'job, which is exactly what makes the blind spot invisible to it')
+
+        findings = {(finding.job, finding.flag): finding
+                   for finding in _dependency_gates.ambiguous_satisfactions(doctored)}
+        self.assertIn(('pypcap-parity', 'HAS_PYPCAP'), findings)
+        finding = findings[('pypcap-parity', 'HAS_PYPCAP')]
+        self.assertEqual(finding.module, 'pcap')
+        self.assertEqual(finding.providers, frozenset({'pypcap', 'pcap-ct'}))
+        self.assertEqual(finding.satisfied, frozenset({'pcap-ct'}))
+
+        self.assertEqual(finding.valid, frozenset({'pypcap'}))
+
+        message = _dependency_gates.describe_ambiguous_satisfaction(finding)
+        self.assertIn("'pypcap-parity'", message)
+        self.assertIn('HAS_PYPCAP', message)
+        self.assertIn("it resolves to ['pcap-ct']", message)
+        self.assertIn("not to ['pypcap']", message)
+
+    def test_swapping_engine_tests_to_pypcap_is_an_ambiguous_satisfaction(self) -> None:
+        """#762, direction two: the wrong half of the ``pcap._pcap`` ambiguity.
+
+        ``engine-tests`` swapped from ``PCAP_CT`` to ``PyPCAP`` still reaches the
+        1 ``HAS_PCAP_CT`` gate and still reads as satisfied to
+        :func:`~tests._dependency_gates.dependency_gate_gaps`, for the mirrored
+        reason: ``extras_providing`` truncates ``pcap._pcap`` to ``pcap`` before
+        its lookup, per this module's own docstring.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PyPCAP]'",
+        )
+
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
+        self.assertNotIn(('HAS_PCAP_CT', 'engine-tests'), gaps)
+
+        findings = {(finding.job, finding.flag): finding
+                   for finding in _dependency_gates.ambiguous_satisfactions(doctored)}
+        self.assertIn(('engine-tests', 'HAS_PCAP_CT'), findings)
+        finding = findings[('engine-tests', 'HAS_PCAP_CT')]
+        self.assertEqual(finding.module, 'pcap._pcap')
+        self.assertEqual(finding.providers, frozenset({'pypcap', 'pcap-ct'}))
+        self.assertEqual(finding.satisfied, frozenset({'pypcap'}))
+        self.assertEqual(finding.valid, frozenset({'pcap-ct'}))
+
+    def test_gaining_the_vendor_extra_is_not_an_ambiguous_satisfaction(self) -> None:
+        """The html5lib near-miss: two requirement strings, one distribution.
+
+        ``html5lib`` has two entries in
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS`
+        (``beautifulsoup4[html5lib]`` and plain ``html5lib``), the same shape
+        as ``pcap``'s two. The difference is that both name the *same*
+        distribution -- pyproject.toml never declares bare ``html5lib`` -- so
+        gaining the ``vendor`` extra (closing #738's ``HAS_VENDOR_DEPS`` gap)
+        must not read as ambiguous the way installing the wrong ``pcap``
+        distribution does. Scoping
+        :func:`~tests._dependency_gates.ambiguous_satisfactions` to
+        :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS` rather than
+        to every :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry with
+        more than one requirement string is what keeps it that way.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,vendor]'",
+        )
+
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
+        self.assertNotIn(
+            ('HAS_VENDOR_DEPS', 'test'), gaps,
+            'the premise of this test: gaining vendor must actually close the gap on '
+            'this job, or there is no ambiguity question to ask about it')
+
+        findings = _dependency_gates.ambiguous_satisfactions(doctored)
+        self.assertEqual(
+            findings, (),
+            '\n\n'.join(_dependency_gates.describe_ambiguous_satisfaction(finding)
+                       for finding in findings))
+
+    def test_removing_the_negation_or_the_exact_path_reopens_762(self) -> None:
+        """Anti-rot: both halves of the fix are load-bearing, checked by removing each.
+
+        Neither doctored scenario above is caught by :func:`~tests._dependency_gates
+        .dependency_gate_gaps` on its own (that is their whole premise). If
+        either of :func:`~tests._dependency_gates.ambiguous_satisfactions`'s
+        two extra sources of information stopped being consulted, the
+        corresponding scenario would go back to being invisible -- which is
+        exactly what removing each one in turn demonstrates.
+
+        """
+        doctored_pypcap_parity = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+        )
+        doctored_engine_tests = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PyPCAP]'",
+        )
+
+        with self.subTest(mutation='flag_exclusions stubbed to report nothing'):
+            with unittest.mock.patch.object(_dependency_gates, 'flag_exclusions', lambda: {}):
+                findings = {(finding.job, finding.flag)
+                           for finding in
+                           _dependency_gates.ambiguous_satisfactions(doctored_pypcap_parity)}
+            self.assertNotIn(
+                ('pypcap-parity', 'HAS_PYPCAP'), findings,
+                'without HAS_PYPCAP\'s own negated probe, nothing disqualifies pcap-ct from '
+                'plain pcap\'s two-wide entry, and the #762 shape goes uncaught again')
+
+        with self.subTest(mutation="MODULE_PROVIDERS['pcap._pcap'] widened back to both"):
+            with unittest.mock.patch.dict(_dependency_gates.MODULE_PROVIDERS,
+                                          {'pcap._pcap': ('pypcap', 'pcap-ct')}):
+                findings = {(finding.job, finding.flag)
+                           for finding in
+                           _dependency_gates.ambiguous_satisfactions(doctored_engine_tests)}
+            self.assertNotIn(
+                ('engine-tests', 'HAS_PCAP_CT'), findings,
+                'without the exact-path entry, pcap._pcap falls back to the same two-wide '
+                'set as plain pcap, and the #762 shape goes uncaught again')
+
+    def test_a_third_contested_name_going_undeclared_is_caught(self) -> None:
+        """Falsifiability for the liveness comparison itself.
+
+        A hand-written set passing a comparison against itself proves
+        nothing; this shows the comparison actually distinguishes a set that
+        has drifted from one that has not. Doctoring in a module with two
+        *live* alternatives -- ``requests`` and ``cryptography`` are both
+        already installed everywhere, so both resolve for real, unlike
+        ``html5lib``'s second -- and never adding it to
+        :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS` is exactly
+        the omission the real table must not make.
+
+        """
+        with unittest.mock.patch.dict(_dependency_gates.MODULE_PROVIDERS,
+                                      {'fakemod': ('requests', 'cryptography')}):
+            derived = _dependency_gates.contested_imports()
+            self.assertIn(
+                'fakemod', derived,
+                'the premise of this test: two live alternatives must make it contested')
+            self.assertNotEqual(
+                _dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS, derived,
+                'the real table was never told about fakemod, so it must disagree here')
+
+    def test_a_non_distribution_flag_is_not_reported_even_when_doctored_ambiguous(self) -> None:
+        """:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, exercised for real.
+
+        ``HAS_PYSHARK`` (used to stand in for this mechanism elsewhere) never
+        reaches :func:`~tests._dependency_gates.ambiguous_satisfactions`'s
+        ``MUTUALLY_EXCLUSIVE_IMPORTS`` branch at all -- ``pyshark`` has one
+        provider -- so naming it in ``NON_DISTRIBUTION_FLAGS`` would still
+        report nothing whether or not this function's own skip line ran,
+        which proves nothing about that line specifically. ``HAS_PYPCAP`` on
+        the doctored ``pypcap-parity`` workflow does reach it -- there is a
+        real finding to suppress -- so naming *that* flag here is what
+        actually exercises the skip.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+        )
+
+        findings = {(f.job, f.flag) for f in _dependency_gates.ambiguous_satisfactions(doctored)}
+        self.assertIn(
+            ('pypcap-parity', 'HAS_PYPCAP'), findings,
+            'the premise of this test: there must be a real finding here to suppress')
+
+        with unittest.mock.patch.dict(_dependency_gates.NON_DISTRIBUTION_FLAGS,
+                                      {'HAS_PYPCAP': 'stood in for this test'}):
+            findings = {(f.job, f.flag)
+                       for f in _dependency_gates.ambiguous_satisfactions(doctored)}
+        self.assertNotIn(('pypcap-parity', 'HAS_PYPCAP'), findings)
 
     def test_the_undoctored_workflow_produces_no_unexplained_gap(self) -> None:
-        """The control: the three tests above fail for the doctoring, not by default."""
+        """The control: the tests above fail for the doctoring, not by default."""
         unexplained = [gap for gap in _dependency_gates.dependency_gate_gaps()
                        if gap.flag not in _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS]
         self.assertEqual(unexplained, [])
+        self.assertEqual(_dependency_gates.ambiguous_satisfactions(), ())
+
+    def test_describe_ambiguous_satisfaction_names_residual_ambiguity_too(self) -> None:
+        """The other branch of :func:`~tests._dependency_gates.describe_ambiguous_satisfaction`.
+
+        Both real findings above are the "resolved to something illegitimate"
+        shape. The other shape -- resolved to more than one distribution even
+        after narrowing to the legitimate set -- has no real workflow state
+        that produces it today (the legitimate set for both watched flags is
+        always a singleton), so it needs its own construction to reach.
+
+        """
+        finding = _dependency_gates.AmbiguousProvider(
+            flag='HAS_MADE_UP', job='made-up-job', module='pcap',
+            providers=frozenset({'pypcap', 'pcap-ct'}),
+            satisfied=frozenset({'pypcap', 'pcap-ct'}),
+            valid=frozenset({'pypcap', 'pcap-ct'}))
+
+        message = _dependency_gates.describe_ambiguous_satisfaction(finding)
+        self.assertIn('more than one legitimate distribution at once', message)
+        self.assertIn('HAS_MADE_UP', message)
+        self.assertIn('made-up-job', message)
 
 
 class DependencyGateDegradationTests(unittest.TestCase):
@@ -1670,11 +2006,13 @@ class DependencyGateDegradationTests(unittest.TestCase):
             """)
         self.assertEqual(_dependency_gates.module_gates(module, 'test_broken_unit.py'), ())
         self.assertEqual(_dependency_gates.module_flag_requirements(module), {})
+        self.assertEqual(_dependency_gates.module_flag_exclusions(module), {})
 
     def test_a_missing_module_is_skipped_too(self) -> None:
         absent = self.tmp_path / 'test_absent_unit.py'
         self.assertEqual(_dependency_gates.module_gates(absent, 'test_absent_unit.py'), ())
         self.assertEqual(_dependency_gates.module_flag_requirements(absent), {})
+        self.assertEqual(_dependency_gates.module_flag_exclusions(absent), {})
 
     def test_an_unrecognised_flag_shape_resolves_to_nothing(self) -> None:
         """And :class:`DependencyGateCoverageTests` is what makes that a failure.
@@ -1753,3 +2091,67 @@ class DependencyGateDegradationTests(unittest.TestCase):
                                       {'HAS_PYSHARK': 'stood in for this test'}):
             self.assertNotIn('HAS_PYSHARK',
                              {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
+
+    def test_an_excluded_module_outside_any_contested_scope_is_ignored(self) -> None:
+        """:func:`~tests._dependency_gates._disqualified_providers`, the safe default.
+
+        A negated probe naming a module this scan has never heard of, whose
+        top-level package is not in
+        :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS` either,
+        contributes nothing to disqualification rather than raising --
+        there is no ambiguity to protect here, so there is nothing this
+        function needs to know about the module at all.
+
+        """
+        self.assertEqual(
+            _dependency_gates._disqualified_providers(frozenset({'totally.unmapped.thing'})),
+            frozenset())
+
+    def test_an_excluded_module_under_a_contested_top_level_needs_its_own_entry(self) -> None:
+        """The over-disqualification case: fails loud, with the right diagnosis.
+
+        ``pcap._pcap``'s real entry is what stops ``pcap``'s two-wide one from
+        being borrowed wholesale. Removing that entry (simulating an excluded
+        dotted path nobody has mapped yet, under a top-level that *is*
+        contested) must not silently fall back to the broader entry -- that
+        would disqualify ``pypcap`` too, collapsing every legitimate candidate
+        to none and reporting a real satisfaction as ambiguous for the wrong
+        reason. It has to fail instead, and name what is missing.
+
+        """
+        with unittest.mock.patch.dict(_dependency_gates.MODULE_PROVIDERS):
+            del _dependency_gates.MODULE_PROVIDERS['pcap._pcap']
+            with self.assertRaises(AssertionError) as caught:
+                _dependency_gates._disqualified_providers(frozenset({'pcap._pcap'}))
+        self.assertIn("'pcap._pcap'", str(caught.exception))
+        self.assertIn('MUTUALLY_EXCLUSIVE_IMPORTS', str(caught.exception))
+
+    def test_an_unrelated_flags_unmapped_exclusion_never_reaches_disqualification(self) -> None:
+        """The ordering fix: the contested-scope check has to run *first*.
+
+        :func:`~tests._dependency_gates.ambiguous_satisfactions` used to
+        compute disqualified providers for every gate a job reaches, before
+        checking whether the gate's own required module was even in
+        :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS`. A flag
+        with a negated probe on some module with no
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry, and nothing
+        to do with a contested name, would crash the entire function via
+        :func:`~tests._dependency_gates._disqualified_providers` rather than
+        being scoped out of it. This pins a synthetic flag shaped exactly
+        that way and shows it no longer crashes.
+
+        """
+        with unittest.mock.patch.object(
+                _dependency_gates, 'flag_exclusions',
+                lambda: {('fake/module.py', 'HAS_FAKE'): frozenset({'totally.unmapped.nonsense'})}):
+            with unittest.mock.patch.object(
+                    _dependency_gates, 'flag_requirements',
+                    lambda: {('fake/module.py', 'HAS_FAKE'): frozenset({'dpkt'})}):
+                with unittest.mock.patch.object(
+                        _dependency_gates, 'gated_scopes',
+                        lambda: (_dependency_gates.Gate('HAS_FAKE', 'fake/module.py', 1, None,
+                                                        'test_fake'),)):
+                    with unittest.mock.patch.object(
+                            _dependency_gates, 'job_reaches', lambda job, gate: True):
+                        result = _dependency_gates.ambiguous_satisfactions()
+        self.assertEqual(result, ())
