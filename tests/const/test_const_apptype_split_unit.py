@@ -363,18 +363,29 @@ class AppTypeSplitTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import AppType
 
         source = inspect.getsource(AppType._missing_.__func__)  # type: ignore[attr-defined]
+        # NOTE: GitHub issue #768 changed the emitted form from
+        # ``TransportProtocol.get('tcp')`` to the attribute access
+        # ``TransportProtocol.tcp``, so the capture is a bare identifier now
+        # rather than a quoted literal.
         branches = re.findall(r'\n        if (.+?):\n            #:.*?\n            '
-                              r'return extend_enum\(.+?TransportProtocol\.get\((.+?)\)\)',
+                              r'return extend_enum\(.+?TransportProtocol\.(\w+)\)',
                               source)
         self.assertEqual(len(branches), 766)
 
         for condition, proto in branches:
             with self.subTest(condition=condition):
-                claim = 'cls.__transport__ is TransportProtocol.get(%s)' % proto
-                if proto == "'undefined'":
+                claim = 'cls.__transport__ is TransportProtocol.%s' % proto
+                if proto == 'undefined':
                     self.assertNotIn('cls.__transport__', condition)
                 else:
-                    self.assertIn(claim, condition)
+                    # NOTE: anchored at the end rather than a bare `assertIn`,
+                    # which would pass on a prefix collision -- e.g. `claim`
+                    # ending in ``TransportProtocol.tc`` would falsely match a
+                    # condition actually naming ``TransportProtocol.tcp``. Not
+                    # reachable today, since none of the five declared names
+                    # is a prefix of another, but the check should not depend
+                    # on that being true to stay correct.
+                    self.assertTrue(condition.endswith(claim), condition)
 
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
