@@ -428,10 +428,11 @@ class Extractor(Generic[_P]):
         if isinstance(engine, ModuleDescriptor):
             engine = engine.klass
         # NOTE: checked against ``EngineBase`` rather than ``Engine``: every built-in
-        # engine subclasses the base directly (``engines/pcap.py`` imports it as
-        # ``EngineBase as Engine``) precisely so that it is *not* auto-registered by
-        # ``Engine.__init_subclass__``, which made this check reject pcapkit's own
-        # classes. ``Engine`` is itself an ``EngineBase``, so this only widens. See #513.
+        # engine subclasses the base directly (``engines/pcap.py`` declares
+        # ``class PCAP(EngineBase[Frame])``) precisely so that it is *not*
+        # auto-registered by ``Engine.__init_subclass__``, which made this check
+        # reject pcapkit's own classes. ``Engine`` is itself an ``EngineBase``, so
+        # this only widens. See #513.
         if not issubclass(engine, EngineBase):
             raise RegistryError(f'engine must be an Engine subclass, not {engine!r}')
         incumbent = cls.__engine__.get(name)
