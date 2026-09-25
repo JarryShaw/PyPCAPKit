@@ -136,7 +136,7 @@ class Flags(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', flags=re.MULTILINE))
 
             code = item[0]
             name = DATA.get(int(code), dscp.split(' (')[0]).replace('Reserved for future use', 'Reserved')

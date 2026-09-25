@@ -86,7 +86,7 @@ class Option(Vendor):
             if re.fullmatch(r'[0-9a-zA-Z]+', name) is None or name.upper() == 'DEPRECATED':
                 name = re.sub(r'(.*) \(.*\)', r'\1', splt)
 
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{splt}{tmp1}', re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{splt}{tmp1}', flags=re.MULTILINE))
             renm = self.rename(name or 'Unassigned', code, original=dscp)
 
             pres = f"{renm} = {code}"
