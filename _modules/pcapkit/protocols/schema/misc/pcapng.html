@@ -2503,6 +2503,45 @@
 <span class="sd">            own NUL padding or plain end of data, still starts the next entry --</span>
 <span class="sd">            even an empty one -- matching what splitting on it always did.</span>
 
+<span class="sd">            The guard above ends the entry on a line of *nothing but* NUL</span>
+<span class="sd">            padding, but only catches it when the real content ahead of the</span>
+<span class="sd">            padding ended with its own newline -- which put the padding on a</span>
+<span class="sd">            line by itself for :meth:`~io.BytesIO.readline` to return alone.</span>
+<span class="sd">            An entry whose last field is missing that trailing newline, as</span>
+<span class="sd">            the format requires, has no such separation: :meth:`readline`</span>
+<span class="sd">            runs straight through the field's own bytes and into the</span>
+<span class="sd">            padding behind them, returning both as one line, and</span>
+<span class="sd">            :meth:`bytes.strip` still will not take the NUL octets off since</span>
+<span class="sd">            they are not ASCII whitespace. The padding then went out as part</span>
+<span class="sd">            of the field's value with nothing to flag it, silently, however</span>
+<span class="sd">            small -- see `#794</span>
+<span class="sd">            &lt;https://github.com/JarryShaw/PyPCAPKit/issues/794&gt;`__.</span>
+<span class="sd">            :meth:`~io.BytesIO.readline` returns a line without its own</span>
+<span class="sd">            trailing newline only at end of stream, so a terminator-less</span>
+<span class="sd">            line is necessarily the buffer's last one; a binary field's</span>
+<span class="sd">            *name* landing on such a line fails its own 8-octet</span>
+<span class="sd">            length-prefix read for the same reason, nothing being left</span>
+<span class="sd">            behind it to hold one, so the guard below firing on that shape</span>
+<span class="sd">            of line too is harmless. A binary field's *value*, once its</span>
+<span class="sd">            name and length prefix are known, is read by that length prefix</span>
+<span class="sd">            directly, never by scanning for a line ending, so real block</span>
+<span class="sd">            padding immediately behind one cannot land inside it this way:</span>
+<span class="sd">            the one-octet terminator check already in place is always</span>
+<span class="sd">            reached in that case, and either reads the real separator</span>
+<span class="sd">            newline and passes silently, or reads padding's first octet</span>
+<span class="sd">            instead, fails, and reports it. Block padding is always 0-3</span>
+<span class="sd">            octets, whatever the last field turns out to be, so at most the</span>
+<span class="sd">            trailing three octets of a terminator-less line are stripped as</span>
+<span class="sd">            padding and warned about, and only when the line's own raw,</span>
+<span class="sd">            unstripped tail is itself NUL -- anything past three such</span>
+<span class="sd">            octets, or a line whose actual last octet is not NUL at all,</span>
+<span class="sd">            cannot be padding and is left as data. This cannot tell a</span>
+<span class="sd">            padding octet from a text value that itself legitimately ends</span>
+<span class="sd">            in one -- NUL is valid UTF-8 -- but that entry is already</span>
+<span class="sd">            malformed for lacking the newline the format mandates, and</span>
+<span class="sd">            returning the block's own padding as field data is the one</span>
+<span class="sd">            outcome that must not survive it.</span>
+
 <span class="sd">        """</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
@@ -2526,6 +2565,47 @@
                     <span class="k">break</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
                     <span class="k">break</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+                    <span class="c1"># the format requires this line's own trailing newline,</span>
+                    <span class="c1"># and it is missing -- so nothing separates its data from</span>
+                    <span class="c1"># the block's 32-bit alignment padding that immediately</span>
+                    <span class="c1"># follows it, unlike the padding-only line above, which</span>
+                    <span class="c1"># only exists as its own line *because* a real newline</span>
+                    <span class="c1"># put it there. Padding is at most three octets (0-3, to</span>
+                    <span class="c1"># round the entry up to the next multiple of four), so at</span>
+                    <span class="c1"># most the last three octets of `line` can be it; strip</span>
+                    <span class="c1"># only that many. Anything past that cannot be padding</span>
+                    <span class="c1"># and is left as the data the sender actually sent.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># gated on the *raw*, unstripped line ending in NUL: pad</span>
+                    <span class="c1"># octets are the only NULs to strip, and it is `raw_line`,</span>
+                    <span class="c1"># not `line`, that names the entry's actual last octet.</span>
+                    <span class="c1"># `line` is `raw_line.strip()`, which has already dropped</span>
+                    <span class="c1"># ASCII whitespace from both ends -- so if the entry's</span>
+                    <span class="c1"># real last octet were itself whitespace, `line`'s tail</span>
+                    <span class="c1"># would no longer match `raw_line`'s, and NUL octets</span>
+                    <span class="c1"># further in would be mistaken for the tail. Padding is</span>
+                    <span class="c1"># always NUL, never whitespace, so a `raw_line` ending in</span>
+                    <span class="c1"># anything else -- ordinary trailing whitespace included</span>
+                    <span class="c1"># -- proves the true padding is zero, and nothing here</span>
+                    <span class="c1"># may be stripped. See #794.</span>
+                    <span class="c1"># the outer gate above already requires `raw_line` --</span>
+                    <span class="c1"># and therefore `line`, since `bytes.strip()` cannot</span>
+                    <span class="c1"># remove a trailing NUL -- to end in one, so this loop</span>
+                    <span class="c1"># always runs at least once and `pad_octets` is never 0</span>
+                    <span class="c1"># here; there is no zero-padding case left to guard</span>
+                    <span class="c1"># against once the gate has passed.</span>
+                    <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span>
+                    <span class="n">pad_octets</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="n">pad_octets</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">stripped</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">):</span>
+                        <span class="n">stripped</span> <span class="o">=</span> <span class="n">stripped</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">pad_octets</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [systemd Journal Export] entry field </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1"> '</span>
+                         <span class="sa">f</span><span class="s1">'has no terminating newline; treating its last '</span>
+                         <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">pad_octets</span><span class="si">}</span><span class="s1"> NUL octet(s) as the block</span><span class="se">\'</span><span class="s1">s own alignment '</span>
+                         <span class="s1">'padding, not data'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">stripped</span>
 
                 <span class="n">line_split</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'='</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>

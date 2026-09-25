@@ -453,6 +453,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">NoValue</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldError</span><span class="p">,</span> <span class="n">NoDefaultValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'ConditionalField'</span><span class="p">,</span> <span class="s1">'PayloadField'</span><span class="p">,</span>
@@ -704,7 +705,9 @@
 <span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
 <span class="sd">            an integer value and accept the current packet as its only argument.</span>
 <span class="sd">        default: Field default value.</span>
-<span class="sd">        protocol: Payload protocol.</span>
+<span class="sd">        protocol: Payload protocol, as a class or as a registered protocol name;</span>
+<span class="sd">            see :meth:`the property setter &lt;PayloadField.protocol&gt;`, through</span>
+<span class="sd">            which this argument is resolved.</span>
 <span class="sd">        callback: Callback function to be called upon</span>
 <span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field.FieldBase.__call__&gt;`.</span>
 
@@ -738,21 +741,67 @@
 <span class="w">        </span><span class="sd">"""Set payload protocol.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            protocol: Payload protocol.</span>
+<span class="sd">            protocol: Payload protocol. A :obj:`str` is resolved against the</span>
+<span class="sd">                :data:`pcapkit.protocols.__proto__` registry, case-insensitively,</span>
+<span class="sd">                and an unresolved name leaves the payload as</span>
+<span class="sd">                :class:`~pcapkit.protocols.misc.raw.Raw`.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            pcapkit.utilities.warnings.RegistryWarning: If ``protocol`` names a</span>
+<span class="sd">                protocol the registry does not hold.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_TP]'</span><span class="p">,</span> <span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="p">))</span>
+
+            <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, both</span>
+            <span class="c1"># when it is seeded (``pcapkit/protocols/__init__.py:75``) and when</span>
+            <span class="c1"># ``pcapkit.foundation.registry.protocols.register_protocol`` adds to</span>
+            <span class="c1"># it, so a name given in any other case missed every time -- and a</span>
+            <span class="c1"># miss leaves ``_protocol`` as :obj:`None`, which the property above</span>
+            <span class="c1"># resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So</span>
+            <span class="c1"># ``PayloadField(protocol='http')`` yielded a raw payload instead of</span>
+            <span class="c1"># HTTP, with nothing to say so (#787).</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">__proto__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+            <span class="c1"># NOTE: Warned rather than left silent, and warned rather than</span>
+            <span class="c1"># raised. Unlike the registry lookups that dispatch on a code read</span>
+            <span class="c1"># off the wire -- where a miss is ordinary traffic and</span>
+            <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` is the right answer --</span>
+            <span class="c1"># this branch is reached only from a caller that named a protocol in</span>
+            <span class="c1"># source, so a miss is a mistake in that name rather than a property</span>
+            <span class="c1"># of the captured packet, and it is otherwise indistinguishable from</span>
+            <span class="c1"># an unparsed payload. It stays a warning because the :obj:`None`</span>
+            <span class="c1"># fallback is itself legitimate (a ``PayloadField`` with no protocol</span>
+            <span class="c1"># at all is the common case), so refusing the assignment outright</span>
+            <span class="c1"># would reject a lenient spelling the field has always accepted.</span>
+            <span class="k">if</span> <span class="n">resolved</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unregistered payload protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
+
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[_TP]'</span><span class="p">,</span> <span class="n">resolved</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="o">=</span> <span class="n">protocol</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">'_TP | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
-                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Type[_TP]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Type[_TP] | str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1">#self._name = '&lt;payload&gt;'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>  <span class="c1"># type: ignore[assignment]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="c1"># NOTE: Through the property rather than straight to ``_protocol``, so a</span>
+        <span class="c1"># name given here is resolved exactly as one assigned later is. Writing</span>
+        <span class="c1"># the attribute directly stored the :obj:`str` verbatim and the getter</span>
+        <span class="c1"># handed that same string back, so ``PayloadField(protocol='http')``</span>
+        <span class="c1"># yielded neither the protocol nor</span>
+        <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` but ``'http'`` itself -- and</span>
+        <span class="c1"># ``protocol='HTTP'`` was no better, since the case was never what this</span>
+        <span class="c1"># path went wrong on (#787). The lookup the setter performs stays inside</span>
+        <span class="c1"># its ``isinstance(protocol, str)`` branch, so a field declared in a</span>
+        <span class="c1"># schema class body -- every in-library use, none of which names a</span>
+        <span class="c1"># protocol -- still does not import :mod:`pcapkit.protocols` while that</span>
+        <span class="c1"># package may itself be mid-import.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="o">=</span> <span class="kc">None</span>

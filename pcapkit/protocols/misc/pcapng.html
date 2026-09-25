@@ -4874,6 +4874,43 @@ been seen at all, so a rebuild lost that one octet and wrote a
 explicitly, so a blank line actually read, rather than the block’s
 own NUL padding or plain end of data, still starts the next entry –
 even an empty one – matching what splitting on it always did.</p>
+<p>The guard above ends the entry on a line of <em>nothing but</em> NUL
+padding, but only catches it when the real content ahead of the
+padding ended with its own newline – which put the padding on a
+line by itself for <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> to return alone.
+An entry whose last field is missing that trailing newline, as
+the format requires, has no such separation: <code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code>
+runs straight through the field’s own bytes and into the
+padding behind them, returning both as one line, and
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes.strip" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytes.strip()</span></code></a> still will not take the NUL octets off since
+they are not ASCII whitespace. The padding then went out as part
+of the field’s value with nothing to flag it, silently, however
+small – see <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/794">#794</a>.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">readline()</span></code> returns a line without its own
+trailing newline only at end of stream, so a terminator-less
+line is necessarily the buffer’s last one; a binary field’s
+<em>name</em> landing on such a line fails its own 8-octet
+length-prefix read for the same reason, nothing being left
+behind it to hold one, so the guard below firing on that shape
+of line too is harmless. A binary field’s <em>value</em>, once its
+name and length prefix are known, is read by that length prefix
+directly, never by scanning for a line ending, so real block
+padding immediately behind one cannot land inside it this way:
+the one-octet terminator check already in place is always
+reached in that case, and either reads the real separator
+newline and passes silently, or reads padding’s first octet
+instead, fails, and reports it. Block padding is always 0-3
+octets, whatever the last field turns out to be, so at most the
+trailing three octets of a terminator-less line are stripped as
+padding and warned about, and only when the line’s own raw,
+unstripped tail is itself NUL – anything past three such
+octets, or a line whose actual last octet is not NUL at all,
+cannot be padding and is left as data. This cannot tell a
+padding octet from a text value that itself legitimately ends
+in one – NUL is valid UTF-8 – but that entry is already
+malformed for lacking the newline the format mandates, and
+returning the block’s own padding as field data is the one
+outcome that must not survive it.</p>
 </div>
 </dd></dl>
 

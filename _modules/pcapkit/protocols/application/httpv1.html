@@ -593,7 +593,20 @@
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
         <span class="n">packet</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">header</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: A payload carrying no header/body separator at all unpacks short</span>
+        <span class="c1"># here, and the bare ``ValueError`` that used to escape is what made</span>
+        <span class="c1"># ``HTTP._guess_version``'s HTTP/2 arm unreachable: that dispatcher falls</span>
+        <span class="c1"># through on ``ProtocolError`` alone, so an HTTP/1 attempt on HTTP/2 wire</span>
+        <span class="c1"># bytes aborted the guess rather than failing it, and the HTTP/2 attempt</span>
+        <span class="c1"># never ran (#787). ``ProtocolError`` is what the ``Raises:`` section</span>
+        <span class="c1"># above already promises for a malformed packet, and the same conversion</span>
+        <span class="c1"># the explicit ``version=`` path performs at ``http.py:119``; chained, so</span>
+        <span class="c1"># the underlying unpacking error stays reachable as ``__cause__``.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="n">header_line</span><span class="p">,</span> <span class="n">header_unpacked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_http_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">body_unpacked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_http_body</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">header_unpacked</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
@@ -751,10 +764,63 @@
 <span class="sd">            ProtocolError: If the packet is malformed.</span>
 
 <span class="sd">        """</span>
-        <span class="n">startline</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">)</span>
-        <span class="n">lists</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">)</span>
+        <span class="c1"># NOTE: Both unpackings are short for input that is not an HTTP/1</span>
+        <span class="c1"># message: a header of one line with no CRLF -- the HTTP/2 connection</span>
+        <span class="c1"># preface, ``PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n``, splits to exactly that</span>
+        <span class="c1"># -- and a start line of fewer than three whitespace-separated tokens.</span>
+        <span class="c1"># Raised as ``ProtocolError`` for the reason ``read`` gives above, and</span>
+        <span class="c1"># to the same message this method already uses below for a start line it</span>
+        <span class="c1"># cannot recognise (#787).</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">startline</span><span class="p">,</span> <span class="n">headerfield</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+
+        <span class="c1"># NOTE: A field line beginning with SP or HTAB is an ``obs-fold``</span>
+        <span class="c1"># continuation of the line before it (:rfc:`9112#section-5.2`), and is</span>
+        <span class="c1"># unfolded here -- the RFC's own remedy -- rather than treated as a field</span>
+        <span class="c1"># line of its own. Deprecated, but present in real captures, and the two</span>
+        <span class="c1"># ways it used to come out were both wrong: a continuation carrying no</span>
+        <span class="c1"># colon left the split below one element long and ``item[1]`` raised</span>
+        <span class="c1"># :exc:`IndexError`, which is neither a :exc:`ValueError` nor a</span>
+        <span class="c1"># ``ProtocolError`` and so escaped ``HTTP._guess_version``'s suppression</span>
+        <span class="c1"># exactly as the bare :exc:`ValueError` of #787 did; a continuation that</span>
+        <span class="c1"># happened to contain one was worse, parsing silently into a spurious</span>
+        <span class="c1"># extra field (``X-Long: a`` plus ``b: c``, for a folded ``X-Long: a b``)</span>
+        <span class="c1"># with nothing raised at all. Unfolded, a folded message parses to the</span>
+        <span class="c1"># field it actually carries, so this input class stops reaching the</span>
+        <span class="c1"># HTTP/2 arm by accident instead of merely failing more politely.</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">headerfield</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="sa">b</span><span class="s1">' '</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)):</span>
+                <span class="c1"># A continuation with nothing to continue -- the first field line</span>
+                <span class="c1"># folded -- is malformed rather than unfoldable.</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
+                <span class="c1"># NOTE: The accumulator is right-stripped as well as the</span>
+                <span class="c1"># continuation, because the production is ``obs-fold = OWS CRLF</span>
+                <span class="c1"># RWS`` and it is the *whole* obs-fold that is replaced by a</span>
+                <span class="c1"># single space -- the OWS before the CRLF belongs to the fold,</span>
+                <span class="c1"># not to the value. Stripping only the continuation left that OWS</span>
+                <span class="c1"># in place, so ``X: a \t\r\n\tb`` unfolded to ``'a \t  b'``</span>
+                <span class="c1"># rather than ``'a b'``: four of five folded/literal pairs</span>
+                <span class="c1"># disagreed, and a HTAB survived where the RFC prescribes SP.</span>
+                <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">' '</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">continue</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Checked rather than left to ``item[1]``, and refused rather than</span>
+        <span class="c1"># skipped: a field line with no colon is not a header field, and dropping</span>
+        <span class="c1"># it would hand back a message whose fields are quietly not the ones on</span>
+        <span class="c1"># the wire. ``ProtocolError`` for the reason the start-line split above</span>
+        <span class="c1"># gives, and to the same message.</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[list[bytes]]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s*:\s*'</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP: invalid format'</span><span class="p">)</span>
+            <span class="n">lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="n">header_line</span><span class="p">:</span> <span class="s1">'Data_Header'</span>

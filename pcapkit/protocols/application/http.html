@@ -588,6 +588,12 @@ and <a class="reference internal" href="httpv2.html#pcapkit.protocols.applicatio
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed packet data.</p>
 </dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If no version in the family accepts the payload. This
+    is the <em>only</em> exception this method raises for an unparseable
+    payload – a candidate failing in any other way is a fall-through
+    and not an answer.</p>
+</dd>
 </dl>
 </dd></dl>
 

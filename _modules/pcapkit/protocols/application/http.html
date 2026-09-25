@@ -462,6 +462,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
@@ -570,7 +571,15 @@
                 <span class="n">http</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
                 <span class="k">raise</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="c1"># NOTE: :exc:`struct.error` alongside :exc:`ValueError` because the</span>
+            <span class="c1"># two are disjoint -- it derives straight from :exc:`Exception` --</span>
+            <span class="c1"># and a payload too short for a versioned parser's fixed header</span>
+            <span class="c1"># raises the former from deep inside the schema machinery</span>
+            <span class="c1"># (``FieldBase.length`` calls :func:`struct.calcsize` on a template</span>
+            <span class="c1"># built from a negative length). A caller of this method cannot</span>
+            <span class="c1"># catch that as a protocol error, which is the whole point of the</span>
+            <span class="c1"># conversion the next line performs, so it is converted too.</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">version</span>
@@ -660,13 +669,66 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If no version in the family accepts the payload. This</span>
+<span class="sd">                is the *only* exception this method raises for an unparseable</span>
+<span class="sd">                payload -- a candidate failing in any other way is a fall-through</span>
+<span class="sd">                and not an answer.</span>
+
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: The two arms suppress different sets, and the asymmetry is</span>
+        <span class="c1"># deliberate. Only the *last* arm additionally suppresses</span>
+        <span class="c1"># :exc:`struct.error`, because a payload too short to hold HTTP/2's</span>
+        <span class="c1"># nine-octet frame header usually fails inside the schema machinery with</span>
+        <span class="c1"># that stdlib exception rather than with a protocol error --</span>
+        <span class="c1"># ``FieldBase.length`` calls :func:`struct.calcsize` on a template built</span>
+        <span class="c1"># from a negative length -- and it is neither a ``ProtocolError`` nor a</span>
+        <span class="c1"># :exc:`ValueError`, so it used to leave this method uncatchable by any</span>
+        <span class="c1"># caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised a bare</span>
+        <span class="c1"># :exc:`struct.error` where the closing ``raise`` below is the documented</span>
+        <span class="c1"># answer. ("Usually" because ``httpv2.HTTP``'s own guard tests the</span>
+        <span class="c1"># *declared* length, not the buffer's, so a four-octet payload declaring</span>
+        <span class="c1"># fifteen parses instead of failing.) Suppressing it on the last arm is</span>
+        <span class="c1"># safe in the sense that matters here -- no arm follows, so nothing can</span>
+        <span class="c1"># answer in place of the error.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The residual, which is real and is not zero: a genuine ``httpv2``</span>
+        <span class="c1"># schema defect that raised :exc:`struct.error` on well-formed HTTP/2</span>
+        <span class="c1"># bytes would now be reported as ``unknown HTTP version`` rather than</span>
+        <span class="c1"># crashing loudly, so a bug in that schema is quieter than it was. That is</span>
+        <span class="c1"># accepted because the alternative is a dispatcher no caller can catch,</span>
+        <span class="c1"># and it is bounded: ``httpv2.HTTP`` stays reachable directly, where</span>
+        <span class="c1"># nothing is suppressed, and that is the documented route for a caller who</span>
+        <span class="c1"># wants the unwrapped failure.</span>
+        <span class="c1">#</span>
+        <span class="c1"># This is keyed on being *last*, not on being the HTTP/2 arm. Inserting an</span>
+        <span class="c1"># arm after this one would silently make the reasoning false, and the</span>
+        <span class="c1"># regression test guards arm 1 specifically, so it would not catch that:</span>
+        <span class="c1"># the new arm must take the :exc:`struct.error` suppression and this one</span>
+        <span class="c1"># must give it up.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Widening the *first* arm the same way was measured and reverted, as it</span>
+        <span class="c1"># buys nothing and costs a great deal. Nothing reaches a</span>
+        <span class="c1"># :exc:`struct.error` through ``httpv1.HTTP``: nine byte patterns over</span>
+        <span class="c1"># lengths 0-24, on this route and on ``read(version=1)``, answered</span>
+        <span class="c1"># ``ProtocolError`` 450 times out of 450. And</span>
+        <span class="c1"># :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*</span>
+        <span class="c1"># :exc:`struct.error`, so suppressing it on a non-final arm swallows</span>
+        <span class="c1"># pcapkit's own signal and hands the payload to the arm below -- which</span>
+        <span class="c1"># accepts anything of at least nine octets. With a fault injected at arm</span>
+        <span class="c1"># 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP</span>
+        <span class="c1"># port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2</span>
+        <span class="c1"># mislabel of HTTP/1 traffic is the exact failure #787 exists to stop, and</span>
+        <span class="c1"># it is worse than letting the error escape to ``beholder``, which turns</span>
+        <span class="c1"># it into ``Raw``; it would also erase ``StructError.eof``, which</span>
+        <span class="c1"># ``NoPayload`` handling reads. ``unknown HTTP version`` is only the best</span>
+        <span class="c1"># case, needing arm 2 to decline as well.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv1</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>  <span class="c1"># isort: skip # pylint: disable=line-too-long,import-outside-toplevel</span>
-        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">suppress</span><span class="p">(</span><span class="n">ProtocolError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">HTTPv2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s2">"unknown HTTP version"</span><span class="p">)</span></div>
