@@ -2848,7 +2848,10 @@
 <span class="sd">            ValueError: If called on a class that holds no members, i.e. on</span>
 <span class="sd">                :class:`AppType` itself, with a ``proto`` naming no registry to</span>
 <span class="sd">                delegate to. Also for a ``key`` that is not a port number, since</span>
-<span class="sd">                this registry resolves ports and not service names.</span>
+<span class="sd">                this registry resolves ports and not service names -- including</span>
+<span class="sd">                one outside ``0..65535``, whose rejection by :meth:`_missing_` this</span>
+<span class="sd">                method propagates rather than minting over, so that ``get`` is</span>
+<span class="sd">                never more permissive than ``AppType(...)``.</span>
 
 <span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
@@ -2867,11 +2870,15 @@
             <span class="c1"># answered with.</span>
             <span class="k">return</span> <span class="n">matched</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row</span>
+        <span class="c1"># for, which is what minting is for, and *raises* for a value that is not a</span>
+        <span class="c1"># port at all. Catching that rejection was GitHub issue #758's defect: it</span>
+        <span class="c1"># minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no</span>
+        <span class="c1"># attribute access can reach, and left ``get`` more permissive than</span>
+        <span class="c1"># ``AppType(...)``, which has always raised here. The rejection now</span>
+        <span class="c1"># propagates, so both entry points answer an out-of-range port identically.</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="s1">'PORT_</span><span class="si">%d</span><span class="s1">_</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">owner</span><span class="o">.</span><span class="n">__transport__</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
                               <span class="n">key</span><span class="p">,</span> <span class="s1">'unknown'</span><span class="p">,</span> <span class="n">owner</span><span class="o">.</span><span class="n">__transport__</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
@@ -2923,10 +2930,16 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="c1"># NOTE: extending this class would give it a member, and aenum then</span>
         <span class="c1"># refuses to subclass it -- permanently, for every registry not yet</span>
-        <span class="c1"># imported. The spans below are IANA's unassigned ranges, which belong to</span>
-        <span class="c1"># whichever registry was asked, never to this one.</span>
+        <span class="c1"># imported. The spans below belong to whichever registry was asked, never</span>
+        <span class="c1"># to this one.</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__registry__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="c1"># NOTE: most spans are IANA's unassigned and reserved markers, which name</span>
+        <span class="c1"># no transport protocol and so answer every registry. A span that does name</span>
+        <span class="c1"># one tests ``cls.__transport__`` and answers that registry alone --</span>
+        <span class="c1"># GitHub issue #760, where source order decided instead and a UDP lookup in</span>
+        <span class="c1"># 6000-6063 came back carrying ``tcp``. A registry a named span excludes</span>
+        <span class="c1"># falls through to a mint, which is what IANA assigning it nothing means.</span>
         <span class="k">if</span> <span class="mi">225</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">241</span><span class="p">:</span>
             <span class="c1">#: [N/A] Reserved [:rfc:`1060`]</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'reserved_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">))</span>
@@ -3350,10 +3363,10 @@
         <span class="k">if</span> <span class="mi">5995</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">5998</span><span class="p">:</span>
             <span class="c1">#: [N/A] Unassigned</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'unassigned'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">6000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6063</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">6000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6063</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__transport__</span> <span class="ow">is</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">):</span>
             <span class="c1">#: [TCP] X Window System</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'x11_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'x11'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">6000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6063</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">6000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6063</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__transport__</span> <span class="ow">is</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">):</span>
             <span class="c1">#: [UDP] X Window System</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'x11_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'x11'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">))</span>
         <span class="k">if</span> <span class="mi">6078</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6079</span><span class="p">:</span>
@@ -3500,10 +3513,10 @@
         <span class="k">if</span> <span class="mi">6658</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6664</span><span class="p">:</span>
             <span class="c1">#: [N/A] Unassigned</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'unassigned'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'undefined'</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">6665</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6669</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">6665</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6669</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__transport__</span> <span class="ow">is</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">):</span>
             <span class="c1">#: [TCP] IRCU</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'ircu_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'ircu'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tcp'</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">6665</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6669</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">6665</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6669</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__transport__</span> <span class="ow">is</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">):</span>
             <span class="c1">#: [UDP] Reserved</span>
             <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'reserved_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'udp'</span><span class="p">))</span>
         <span class="k">if</span> <span class="mi">6674</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">6677</span><span class="p">:</span>

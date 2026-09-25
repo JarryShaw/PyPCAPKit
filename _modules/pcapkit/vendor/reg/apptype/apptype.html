@@ -792,7 +792,10 @@
 <span class="s1">            ValueError: If called on a class that holds no members, i.e. on</span>
 <span class="s1">                :class:`</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">` itself, with a ``proto`` naming no registry to</span>
 <span class="s1">                delegate to. Also for a ``key`` that is not a port number, since</span>
-<span class="s1">                this registry resolves ports and not service names.</span>
+<span class="s1">                this registry resolves ports and not service names -- including</span>
+<span class="s1">                one outside ``0..65535``, whose rejection by :meth:`_missing_` this</span>
+<span class="s1">                method propagates rather than minting over, so that ``get`` is</span>
+<span class="s1">                never more permissive than ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(...)``.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
@@ -811,11 +814,15 @@
 <span class="s1">            # answered with.</span>
 <span class="s1">            return matched[0]</span>
 
-<span class="s1">        try:</span>
-<span class="s1">            ret = owner._missing_(key)</span>
-<span class="s1">            if ret is None:</span>
-<span class="s1">                raise ValueError</span>
-<span class="s1">        except ValueError:</span>
+<span class="s1">        # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row</span>
+<span class="s1">        # for, which is what minting is for, and *raises* for a value that is not a</span>
+<span class="s1">        # port at all. Catching that rejection was GitHub issue #758's defect: it</span>
+<span class="s1">        # minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no</span>
+<span class="s1">        # attribute access can reach, and left ``get`` more permissive than</span>
+<span class="s1">        # ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(...)``, which has always raised here. The rejection now</span>
+<span class="s1">        # propagates, so both entry points answer an out-of-range port identically.</span>
+<span class="s1">        ret = owner._missing_(key)</span>
+<span class="s1">        if ret is None:</span>
 <span class="s1">            ret = extend_enum(owner, 'PORT_%d_%s' % (key, owner.__transport__.name),</span>
 <span class="s1">                              key, 'unknown', owner.__transport__)</span>
 <span class="s1">        return ret</span>
@@ -862,10 +869,16 @@
 <span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
 <span class="s1">        # NOTE: extending this class would give it a member, and aenum then</span>
 <span class="s1">        # refuses to subclass it -- permanently, for every registry not yet</span>
-<span class="s1">        # imported. The spans below are IANA's unassigned ranges, which belong to</span>
-<span class="s1">        # whichever registry was asked, never to this one.</span>
+<span class="s1">        # imported. The spans below belong to whichever registry was asked, never</span>
+<span class="s1">        # to this one.</span>
 <span class="s1">        if cls.__registry__ is None:</span>
 <span class="s1">            raise ValueError('%r is not a valid %s' % (value, cls.__name__))</span>
+<span class="s1">        # NOTE: most spans are IANA's unassigned and reserved markers, which name</span>
+<span class="s1">        # no transport protocol and so answer every registry. A span that does name</span>
+<span class="s1">        # one tests ``cls.__transport__`` and answers that registry alone --</span>
+<span class="s1">        # GitHub issue #760, where source order decided instead and a UDP lookup in</span>
+<span class="s1">        # 6000-6063 came back carrying ``tcp``. A registry a named span excludes</span>
+<span class="s1">        # falls through to a mint, which is what IANA assigning it nothing means.</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
 <span class="s1">        </span><span class="si">{</span><span class="s1">''</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'return'</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'return super()._missing_(value)'</span><span class="si">}</span>
 <span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
@@ -1133,10 +1146,27 @@
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">)</span>
 
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
+                <span class="c1"># NOTE: a span IANA assigns to a transport protocol is claimed by</span>
+                <span class="c1"># that registry alone, through a test on ``cls.__transport__``.</span>
+                <span class="c1"># Source order decided instead until GitHub issue #760: the only</span>
+                <span class="c1"># two spans registered on more than one transport -- 6000-6063 and</span>
+                <span class="c1"># 6665-6669 -- rendered the same condition twice, leaving the</span>
+                <span class="c1"># second copy unreachable, so *every* registry answered with the</span>
+                <span class="c1"># first row's. That is not merely a duplicate to collapse: the</span>
+                <span class="c1"># 6665-6669 rows are two different services, ``ircu`` on TCP and</span>
+                <span class="c1"># IANA's ``reserved`` marker on UDP, so one merged branch carrying</span>
+                <span class="c1"># ``tcp | udp`` would have to discard one of them.</span>
+                <span class="c1">#</span>
+                <span class="c1"># A span naming no transport protocol is an unassigned or reserved</span>
+                <span class="c1"># marker belonging to whichever registry was asked, so it carries</span>
+                <span class="c1"># no test and keeps answering all four.</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">([</span><span class="n">proto</span><span class="p">])</span>
+                <span class="n">claim</span> <span class="o">=</span> <span class="s1">''</span> <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">' and cls.__transport__ is </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s1">'</span>
+
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}{</span><span class="n">claim</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">svc</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d' % value, "</span>
-                            <span class="sa">f</span><span class="s2">"value, </span><span class="si">{</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">([</span><span class="n">proto</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">"value, </span><span class="si">{</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">line</span><span class="p">,</span> <span class="n">miss</span>
 
