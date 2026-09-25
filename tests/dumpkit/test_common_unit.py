@@ -173,6 +173,120 @@ class DumpkitCommonTests(unittest.TestCase):
         dumper._append_fallback(123, file)
         self.assertEqual(file.getvalue(), "'123'")
 
+    def test_make_dumper_escapes_strings_only_for_plist_like_output(self) -> None:
+        """GitHub issue #772: no entity escaping anywhere in :mod:`dictdumper`.
+
+        ``dictdumper.plist.PLIST`` (which is also what ``'xml'`` maps to --
+        see ``Extractor.__output__``) interpolates every ``<string>``/``<key>``
+        value straight into its markup, so a value containing ``&``, ``<`` or
+        ``>`` breaks the document it is embedded in. Filed upstream as
+        JarryShaw/DictDumper#125. ``json``/``tree``/``text`` have no such
+        defect and all three characters are legal there, so the escaping in
+        :func:`~pcapkit.dumpkit.common.make_dumper` must fire for a
+        PLIST-rooted ``output`` and stay off for anything else -- a plain
+        :class:`str`, an enum rendered by :func:`~pcapkit.dumpkit.common.render_enum`,
+        and a :class:`~pcapkit.corekit.multidict.MultiDict` key built from one,
+        since that key is written by the PLIST writer directly and never
+        passed back through this hook the way a value is.
+
+        """
+        import dictdumper.plist
+
+        from pcapkit.corekit.multidict import MultiDict
+        from pcapkit.dumpkit.common import make_dumper
+
+        class PlistLikeDumper(dictdumper.plist.PLIST):
+            """Shares PLIST's class identity without its file I/O."""
+
+            def __init__(self, *args: 'object', **kwargs: 'object') -> None:  # pylint: disable=super-init-not-called
+                pass
+
+        plist_dumper = make_dumper(PlistLikeDumper)('unused')
+        self.assertEqual(plist_dumper.object_hook('a & b <c>'), 'a &amp; b &lt;c&gt;')
+
+        unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
+        member = getattr(unknown, '<unassigned>')
+        self.assertEqual(plist_dumper.object_hook(member),
+                          '&lt;unknown&gt;::&lt;unassigned&gt; [1]')
+
+        multidict = MultiDict()
+        multidict.add(member, 'value')
+        converted = plist_dumper.object_hook(multidict)
+        self.assertEqual(converted['&lt;unknown&gt;::&lt;unassigned&gt; [1]'], ['value'])
+
+        # NOTE: unlike BaseDumper above (used elsewhere in this class to prove
+        # the *fallback* is reached at all), this stub's object_hook is the
+        # identity for anything it does not itself convert -- exactly what
+        # dictdumper.dumper.Dumper.object_hook does -- so it is what a
+        # non-PLIST format such as json/tree/text actually sees.
+        class IdentityDumper:
+            def object_hook(self, value: 'object') -> 'object':
+                return value
+
+            def _encode_func(self, value: 'object') -> 'object':
+                raise NotImplementedError
+
+        plain_dumper = make_dumper(IdentityDumper)()
+        self.assertEqual(plain_dumper.object_hook('a & b <c>'), 'a & b <c>')
+        self.assertEqual(plain_dumper.object_hook(member), '<unknown>::<unassigned> [1]')
+
+    def test_an_unassigned_port_dumps_its_addon_keys_in_the_declared_order(self) -> None:
+        """GitHub issue #575's fallback must not reorder what it renders.
+
+        :meth:`object_hook` builds a member's addon mapping straight out of its
+        :attr:`~object.__dict__`, which preserves insertion order, so the order
+        the attributes were *set* in is the order they are dumped in.
+        ``AppType.__new__`` sets ``svc``, then ``port``, then ``proto``, while
+        :meth:`~pcapkit.corekit.fields.numbers.EnumField._unregistered_member`
+        sets them in whatever order its caller passes them -- so a mismatch
+        there flips every unassigned port's keys relative to every declared
+        one's, in all four output formats, while leaving every value correct
+        and every test that reads by key still passing. Measured on
+        ``examples/captures/http.pcap``: 1117 rendered port blocks of each
+        kind, and with the two keyword arguments the other way round the
+        unassigned ones read ``port, svc, proto`` against the declared
+        ``svc, port, proto``.
+
+        """
+        from pcapkit.const.reg.apptype import AppType, TransportProtocol
+        from pcapkit.dumpkit.common import make_dumper
+        from pcapkit.protocols.schema.transport import tcp as tcp_schema
+
+        dumper = make_dumper(BaseDumper)()
+        field = tcp_schema.PortEnumField(length=2, namespace=AppType)
+
+        declared = dumper.object_hook(AppType.get(80, proto=TransportProtocol.tcp))
+        unassigned = dumper.object_hook(field.unpack(b'\xd4\x31', {}))  # 54321
+
+        self.assertEqual(list(declared), ['enum', 'svc', 'port', 'proto'])
+        self.assertEqual(list(unassigned), list(declared))
+        self.assertEqual(unassigned['svc'], 'unknown')
+        self.assertEqual(unassigned['port'], 54321)
+
+    def test_an_undeclared_option_code_dumps_its_addon_keys_in_order_too(self) -> None:
+        """The same invariant for PCAP-NG's option types.
+
+        ``OptionType.__new__`` sets ``opt_name`` then ``opt_value``, and
+        :class:`~pcapkit.protocols.schema.misc.pcapng.OptionEnumField` already
+        passes them that way -- this pins it, since nothing else would notice
+        if the two keyword arguments were ever swapped.
+
+        """
+        from pcapkit.const.pcapng.option_type import OptionType
+        from pcapkit.dumpkit.common import make_dumper
+        from pcapkit.protocols.schema.misc import pcapng as pcapng_schema
+
+        dumper = make_dumper(BaseDumper)()
+        field = pcapng_schema.OptionEnumField(length=2, namespace='if')
+
+        declared = dumper.object_hook(OptionType.if_tsresol)
+        undeclared = dumper.object_hook(field.unpack(b'\x27\x0f', {}))  # 9999
+
+        self.assertEqual(list(declared), ['enum', 'opt_name', 'opt_value'])
+        self.assertEqual(list(undeclared), list(declared))
+        self.assertEqual(undeclared['opt_name'], 'if_unknown')
+        self.assertEqual(undeclared['opt_value'], 9999)
+
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DumpkitIOTests(unittest.TestCase):

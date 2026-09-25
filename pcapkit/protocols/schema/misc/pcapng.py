@@ -566,11 +566,49 @@ class OptionEnumField(EnumField):
             packet: Packet data.
 
         Returns:
-            Processed field value.
+            Processed field value -- the registry member declared for the
+            option code in this namespace (or in the shared ``opt``
+            namespace), or an unregistered member of the same registry,
+            carrying the code itself, when neither declares one. See GitHub
+            issue #575.
+
+        Notes:
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` mints a
+            fresh member -- via :func:`aenum.extend_enum` -- for any code
+            neither namespace's row covers, and does so unconditionally on a
+            miss: unlike :class:`~pcapkit.const.reg.apptype.AppType`, its
+            ``_missing_`` never declines, so it cannot be consulted the way
+            :meth:`pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`
+            consults :class:`~pcapkit.const.reg.apptype.AppType`'s. This
+            instead replicates the read-only membership test
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` itself
+            runs first, and only calls it once that test finds the code
+            already declared, so an undeclared option type gets
+            :meth:`EnumField._unregistered_member` instead of a fresh
+            registry row.
 
         """
         value = super(EnumField, self).post_process(value, packet)
-        return self._namespace.get(value, namespace=self._opt_ns)
+        namespace = self._opt_ns
+        members_ns = self._namespace.__members_ns__
+        if value not in members_ns.get('opt', {}) and value not in members_ns.get(namespace, {}):
+            # NOTE: an unregistered member of self._namespace itself, per
+            # GitHub issue #575's owner ruling. ``.opt_name`` and
+            # ``.opt_value`` are what a real OptionType member carries --
+            # read unconditionally by e.g. pcapng's own ``_option_key`` --
+            # and the ``<namespace>_unknown`` name matches what the mint this
+            # replaces used to call it, so a rendered or re-keyed member
+            # reads the same either way. They are passed in the order
+            # OptionType.__new__ sets them, because DictDumper.object_hook
+            # renders a member's addon keys straight out of its ``__dict__``
+            # in insertion order, so any other order here would dump an
+            # undeclared option code's keys the other way round from every
+            # declared one's.
+            opt_name = f'{namespace}_unknown'
+            return self._unregistered_member(
+                self._namespace, f'{opt_name} [{value:d}]',
+                opt_name=opt_name, opt_value=value)
+        return self._namespace.get(value, namespace=namespace)
 
 
 @schema_final

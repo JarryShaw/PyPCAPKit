@@ -10,6 +10,7 @@ from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt16Field
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.utilities.exceptions import BaseError
 
 __all__ = ['UDP']
 
@@ -63,11 +64,33 @@ class PortEnumField(EnumField):
             packet: Packet data.
 
         Returns:
-            Processed field value.
+            Processed field value -- the registry member declared for the
+            port, or an unregistered member of the same registry, carrying
+            the port itself, when the registry declares none. See GitHub
+            issue #575.
+
+        Notes:
+            See :meth:`pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`,
+            whose notes this mirrors verbatim aside from the transport.
 
         """
         value = super(EnumField, self).post_process(value, packet)
-        return self._namespace.get(value, proto=Enum_TransportProtocol.udp)
+        proto = Enum_TransportProtocol.udp
+        if not (isinstance(value, int) and 0 <= value < (1 << (8 * self.length))):
+            return self._namespace.get(value, proto=proto)
+        owner = self._namespace._dispatch(value, proto)  # pylint: disable=protected-access
+        if not owner.__registry__.getlist(value):  # type: ignore[union-attr]
+            try:
+                declared = owner._missing_(value)  # pylint: disable=protected-access
+            except ValueError as error:
+                if isinstance(error, BaseError):
+                    raise
+                declared = None
+            if declared is None:
+                return self._unregistered_member(
+                    owner, f'unknown [{value:d} - {proto.name}]',
+                    svc='unknown', port=value, proto=proto)
+        return self._namespace.get(value, proto=proto)
 
 
 @schema_final
