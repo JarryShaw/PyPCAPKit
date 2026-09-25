@@ -882,10 +882,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>
             <span class="n">engine</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">klass</span>
         <span class="c1"># NOTE: checked against ``EngineBase`` rather than ``Engine``: every built-in</span>
-        <span class="c1"># engine subclasses the base directly (``engines/pcap.py`` imports it as</span>
-        <span class="c1"># ``EngineBase as Engine``) precisely so that it is *not* auto-registered by</span>
-        <span class="c1"># ``Engine.__init_subclass__``, which made this check reject pcapkit's own</span>
-        <span class="c1"># classes. ``Engine`` is itself an ``EngineBase``, so this only widens. See #513.</span>
+        <span class="c1"># engine subclasses the base directly (``engines/pcap.py`` declares</span>
+        <span class="c1"># ``class PCAP(EngineBase[Frame])``) precisely so that it is *not*</span>
+        <span class="c1"># auto-registered by ``Engine.__init_subclass__``, which made this check</span>
+        <span class="c1"># reject pcapkit's own classes. ``Engine`` is itself an ``EngineBase``, so</span>
+        <span class="c1"># this only widens. See #513.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine must be an Engine subclass, not </span><span class="si">{</span><span class="n">engine</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
