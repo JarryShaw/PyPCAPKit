@@ -247,6 +247,47 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
     # concrete writer this applies to today.
     escape_strings = issubclass(output, dictdumper.plist.PLIST)
 
+    def escape_key(key: 'Any') -> 'Any':
+        """Escape a mapping key on its way to the writer.
+
+        Args:
+            key: Mapping key, as the writer would interpolate it.
+
+        Returns:
+            The key unchanged where ``output`` needs no escaping, otherwise the
+            escaped text of the writer's own rendering of it.
+
+        Note:
+            :meth:`~dictdumper.plist.PLIST._append_dict` writes a key straight
+            into ``'<key>{item}</key>'`` and calls
+            :meth:`~dictdumper.dumper.Dumper._encode_value` on the *value* two
+            lines later, never on the key -- so :meth:`DictDumper.object_hook`
+            is handed every value the writer will interpolate but no key at all,
+            and cannot escape one on the way out the way it does a value. Each
+            branch below that builds a mapping therefore escapes its own keys
+            through here.
+
+            A non-:class:`str` key is rendered with :func:`format`, which is the
+            very conversion ``'{item}'.format(item=key)`` already applies to it,
+            so the ``<key>`` text is what it always was apart from the escaping.
+            Rendering such a key rather than passing it over is deliberate:
+            :file:`examples/captures/test.pcapng` keys the TLS key log entries
+            of its decryption secrets block by a raw :class:`bytes` client
+            random (:meth:`TLSKeyLog.post_process
+            <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`), and
+            the ``bytes`` repr of that one carries ``&``, ``<`` *and* ``>``. That
+            is what made the fixture's ``plist`` report unparseable:
+            :func:`xml.etree.ElementTree.parse` stopped at the key's ``&`` on
+            line 1517 of 1958. The same key also breaks the fixture's ``json``
+            report, but on the quotes in that repr rather than on these three
+            characters, so that half is :mod:`dictdumper`'s to fix and is left
+            exactly as it is.
+
+        """
+        if not escape_strings:
+            return key
+        return xml.sax.saxutils.escape(format(key, ''))
+
     class DictDumper(output):
         """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
@@ -266,11 +307,13 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 deeply nested, so escaping the :class:`str` result here on the
                 way out reaches every string the writer will ever interpolate
                 raw, not merely the ones built directly in this method. The
-                one exception is a :class:`~pcapkit.corekit.multidict.MultiDict`
-                key: :meth:`~dictdumper.dumper.Dumper._append_dict` writes a
-                dict's keys straight from the mapping without ever calling
-                this method on them, so a key built from :func:`render_enum`
-                is escaped inline, right where it is built, instead.
+                one exception is a mapping *key*:
+                :meth:`~dictdumper.dumper.Dumper._append_dict` writes those
+                straight from the mapping without ever calling this method on
+                them, so both branches that hand the writer a mapping -- a
+                :class:`~pcapkit.corekit.multidict.MultiDict` and a plain
+                :class:`dict` -- escape their own keys through
+                :func:`escape_key` instead.
 
             """
             if isinstance(o, decimal.Decimal):
@@ -286,12 +329,16 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 for key, val in o.items(multi=True):
                     if isinstance(key, (enum.Enum, aenum.Enum)):
                         key = render_enum(key)
-                        if escape_strings:
-                            key = xml.sax.saxutils.escape(key)
-                    temp[key].append(val)
+                    temp[escape_key(key)].append(val)
                 result = temp
             elif isinstance(o, dict):
-                result = o
+                # NOTE: rebuilt only where the keys need escaping, so every other
+                # output is still handed the caller's own mapping rather than a
+                # copy of it.
+                if escape_strings:
+                    result = {escape_key(key): val for key, val in o.items()}
+                else:
+                    result = o
             elif isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                 if addon:

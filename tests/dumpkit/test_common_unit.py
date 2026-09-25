@@ -42,11 +42,58 @@ class BaseDumper:
         return encode
 
 
+class IdentityDumper:
+    """A stub whose ``object_hook`` is the identity for anything it is handed.
+
+    Unlike :class:`BaseDumper` -- used to prove the *fallback* is reached at all
+    -- this is what :meth:`dictdumper.dumper.Dumper.object_hook` itself does, so
+    it is what a non-PLIST format such as ``json``, ``tree`` or ``text``
+    actually sees.
+
+    """
+
+    def object_hook(self, value: 'object') -> 'object':
+        return value
+
+    def _encode_func(self, value: 'object') -> 'object':
+        raise NotImplementedError
+
+
 class SlotObject:
     __slots__ = ('name',)
 
     def __init__(self) -> None:
         self.name = 'slot'
+
+
+#: The raw :class:`bytes` client random :file:`examples/captures/test.pcapng`
+#: keys a TLS key log entry by, and the text the PLIST writer interpolates for
+#: it. Every character from ``0x20`` to ``0x3F``, so the ``bytes`` repr carries
+#: ``&``, ``<`` and ``>`` -- and a quote of each kind, which nothing escapes
+#: because neither is special inside an XML text node.
+BYTES_KEY = bytes(range(0x20, 0x40))
+RAW_BYTES_KEY = """b' !"#$%&\\'()*+,-./0123456789:;<=>?'"""
+ESCAPED_BYTES_KEY = """b' !"#$%&amp;\\'()*+,-./0123456789:;&lt;=&gt;?'"""
+
+
+def plist_like_dumper() -> 'object':
+    """A dumper whose ``output`` shares PLIST's class identity, not its file I/O.
+
+    :func:`~pcapkit.dumpkit.common.make_dumper` decides whether to escape from
+    ``issubclass(output, dictdumper.plist.PLIST)``, so the stub has to inherit
+    the real writer -- but nothing here writes a report, and PLIST's
+    ``__init__`` opens a file.
+
+    """
+    import dictdumper.plist
+
+    from pcapkit.dumpkit.common import make_dumper
+
+    class PlistLikeDumper(dictdumper.plist.PLIST):
+        def __init__(self, *args: 'object', **kwargs: 'object') -> None:  # pylint: disable=super-init-not-called
+            pass
+
+    return make_dumper(PlistLikeDumper)('unused')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -190,18 +237,10 @@ class DumpkitCommonTests(unittest.TestCase):
         passed back through this hook the way a value is.
 
         """
-        import dictdumper.plist
-
         from pcapkit.corekit.multidict import MultiDict
         from pcapkit.dumpkit.common import make_dumper
 
-        class PlistLikeDumper(dictdumper.plist.PLIST):
-            """Shares PLIST's class identity without its file I/O."""
-
-            def __init__(self, *args: 'object', **kwargs: 'object') -> None:  # pylint: disable=super-init-not-called
-                pass
-
-        plist_dumper = make_dumper(PlistLikeDumper)('unused')
+        plist_dumper = plist_like_dumper()
         self.assertEqual(plist_dumper.object_hook('a & b <c>'), 'a &amp; b &lt;c&gt;')
 
         unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
@@ -214,21 +253,90 @@ class DumpkitCommonTests(unittest.TestCase):
         converted = plist_dumper.object_hook(multidict)
         self.assertEqual(converted['&lt;unknown&gt;::&lt;unassigned&gt; [1]'], ['value'])
 
-        # NOTE: unlike BaseDumper above (used elsewhere in this class to prove
-        # the *fallback* is reached at all), this stub's object_hook is the
-        # identity for anything it does not itself convert -- exactly what
-        # dictdumper.dumper.Dumper.object_hook does -- so it is what a
-        # non-PLIST format such as json/tree/text actually sees.
-        class IdentityDumper:
-            def object_hook(self, value: 'object') -> 'object':
-                return value
-
-            def _encode_func(self, value: 'object') -> 'object':
-                raise NotImplementedError
-
         plain_dumper = make_dumper(IdentityDumper)()
         self.assertEqual(plain_dumper.object_hook('a & b <c>'), 'a & b <c>')
         self.assertEqual(plain_dumper.object_hook(member), '<unknown>::<unassigned> [1]')
+
+    def test_make_dumper_escapes_mapping_keys_for_plist_like_output(self) -> None:
+        """GitHub issue #772, the half the hook above cannot reach.
+
+        ``dictdumper/plist.py:202`` writes a key as
+        ``'<key>{item}</key>'.format(item=item)`` and calls ``_encode_value`` on
+        the *value* two lines down, never on the key -- so
+        :meth:`object_hook` is handed every value the writer interpolates and no
+        key at all, and the escaping proven above cannot reach one. Both
+        branches that build a mapping therefore escape their own keys:
+        :class:`~pcapkit.corekit.multidict.MultiDict`, where only an
+        enum-derived key was escaped before, and a plain :class:`dict`, where
+        nothing was.
+
+        The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own,
+        and it is the reason that fixture's ``plist`` report did not parse:
+        ``&``, ``<`` and ``>`` all inside one key. It is rendered with
+        :func:`format`, i.e. the conversion the writer's interpolation already
+        applies to it, so the ``<key>`` text is unchanged apart from the
+        escaping -- which is what the :data:`RAW_BYTES_KEY` assertion pins,
+        since an expected escaping is only as good as the rendering it is
+        derived from.
+
+        """
+        from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+
+        plist_dumper = plist_like_dumper()
+
+        # A plain dict: str keys, and the bytes key of the fixture.
+        self.assertEqual(format(BYTES_KEY, ''), RAW_BYTES_KEY)
+        converted = plist_dumper.object_hook({'a & b <c>': 'value', BYTES_KEY: 'secret'})
+        self.assertEqual(list(converted), ['a &amp; b &lt;c&gt;', ESCAPED_BYTES_KEY])
+        self.assertEqual(converted['a &amp; b &lt;c&gt;'], 'value')
+        self.assertEqual(converted[ESCAPED_BYTES_KEY], 'secret')
+
+        # A MultiDict: a plain-str key was interpolated raw until now, and the
+        # bytes key of the fixture arrives through here rather than through the
+        # dict branch -- its TLS key log entries are an OrderedMultiDict.
+        multidict = OrderedMultiDict()
+        multidict.add('a & b <c>', 'value')
+        multidict.add(BYTES_KEY, 'secret')
+        converted = plist_dumper.object_hook(multidict)
+        self.assertEqual(list(converted), ['a &amp; b &lt;c&gt;', ESCAPED_BYTES_KEY])
+        self.assertEqual(converted[ESCAPED_BYTES_KEY], ['secret'])
+
+        # An enum-derived key is still escaped exactly once: the escaping moved
+        # out of this branch and into one shared helper, so escaping it twice is
+        # the shape of mistake that move could have made.
+        unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
+        member = getattr(unknown, '<unassigned>')
+        multidict = MultiDict()
+        multidict.add(member, 'value')
+        converted = plist_dumper.object_hook(multidict)
+        self.assertEqual(list(converted), ['&lt;unknown&gt;::&lt;unassigned&gt; [1]'])
+        self.assertNotIn('&amp;', ''.join(converted))
+
+    def test_make_dumper_hands_other_output_the_mapping_it_was_given(self) -> None:
+        """``json``, ``tree`` and ``text`` take all three characters literally.
+
+        So no key is escaped for them, and -- the stronger statement, and the
+        one that keeps this branch free of any risk of double-escaping -- a
+        plain :class:`dict` is not even rebuilt: the writer is handed the
+        caller's own mapping, with the caller's own key objects in it, exactly
+        as it was before #772. A :class:`bytes` key stays :class:`bytes` there,
+        which is what ``dictdumper``'s ``json`` writer then breaks on, for
+        reasons of its own.
+
+        """
+        from pcapkit.corekit.multidict import OrderedMultiDict
+        from pcapkit.dumpkit.common import make_dumper
+
+        plain_dumper = make_dumper(IdentityDumper)()
+
+        mapping = {'a & b <c>': 'value', BYTES_KEY: 'secret'}
+        self.assertIs(plain_dumper.object_hook(mapping), mapping)
+
+        multidict = OrderedMultiDict()
+        multidict.add('a & b <c>', 'value')
+        multidict.add(BYTES_KEY, 'secret')
+        converted = plain_dumper.object_hook(multidict)
+        self.assertEqual(list(converted), ['a & b <c>', BYTES_KEY])
 
     def test_an_unassigned_port_dumps_its_addon_keys_in_the_declared_order(self) -> None:
         """GitHub issue #575's fallback must not reorder what it renders.
