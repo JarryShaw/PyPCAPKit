@@ -92,7 +92,6 @@ CANONICAL = {
 #: lookup, and no members at all.
 BASE = lambda NAME, DOCS, FLAG, TABLE, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
-# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
@@ -440,7 +439,6 @@ class {NAME}(StrEnum):
 #: members of one transport protocol and nothing else.
 TRANSPORT = lambda NAME, DOCS, PROTO, CANON, TABLE, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
@@ -583,7 +581,7 @@ class AppType(Vendor):
 
         """
         order = TRANSPORTS + ('undefined',)
-        return ' | '.join(f'TransportProtocol.get({proto!r})'
+        return ' | '.join(f'TransportProtocol.{proto}'
                           for proto in sorted(protos, key=order.index))
 
     @staticmethod
@@ -744,7 +742,7 @@ class AppType(Vendor):
             if keyword.iskeyword(key):
                 key = '%s_' % key
 
-            pres = f"{key}: {self.NAME!r} = {record.port}, {record.svc!r}, {self.flag(record.protos)}"
+            pres = f"{key} = {record.port}, {record.svc!r}, {self.flag(record.protos)}"
             if len(record.parts) > 1:
                 # NOTE: a merged entry describes each registry row it came from,
                 # as one bullet per row. The single-row form re-indents its own

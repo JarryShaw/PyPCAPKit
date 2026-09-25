@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """Application Layer Protocol Numbers (SCTP)
 ===============================================
@@ -66,367 +65,367 @@ class SCTP(AppType):
     #: - [UDP] Discard
     #: - [SCTP] Discard [:rfc:`9260`]
     #: - [DCCP] Discard [:rfc:`4340`]
-    discard: 'SCTP' = 9, 'discard', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
+    discard = 9, 'discard', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp | TransportProtocol.dccp
 
     #: - [TCP] File Transfer [Default Data]
     #: - [UDP] File Transfer [Default Data]
     #: - [SCTP] FTP [:rfc:`9260`]
-    ftp_data: 'SCTP' = 20, 'ftp-data', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ftp_data = 20, 'ftp-data', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]
     #: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]
     #: - [SCTP] FTP [:rfc:`9260`]
-    ftp: 'SCTP' = 21, 'ftp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ftp = 21, 'ftp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
     #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
     #: - [SCTP] HTTP [:rfc:`9260`]
-    http: 'SCTP' = 80, 'http', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    http = 80, 'http', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Border Gateway Protocol
     #: - [UDP] Border Gateway Protocol
     #: - [SCTP] BGP [:rfc:`9260`]
-    bgp: 'SCTP' = 179, 'bgp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    bgp = 179, 'bgp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    exp1: 'SCTP' = 1021, 'exp1', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
+    exp1 = 1021, 'exp1', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp | TransportProtocol.dccp
 
     #: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
     #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    exp2: 'SCTP' = 1022, 'exp2', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
+    exp2 = 1022, 'exp2', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp | TransportProtocol.dccp
 
     #: - [TCP] Cisco IP SLAs Control Protocol
     #: - [UDP] Cisco IP SLAs Control Protocol
     #: - [SCTP] Cisco IP SLAs Control Protocol
-    cisco_ipsla: 'SCTP' = 1167, 'cisco-ipsla', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    cisco_ipsla = 1167, 'cisco-ipsla', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Not Only a Routeing Protocol
     #: - [UDP] Not Only a Routeing Protocol
     #: - [SCTP] Not Only a Routeing Protocol
-    norp: 'SCTP' = 1528, 'norp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    norp = 1528, 'norp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] H.323 Call Control Signalling
     #: - [UDP] H.323 Call Control Signalling
     #: - [SCTP] H.323 Call Control
-    h323hostcall: 'SCTP' = 1720, 'h323hostcall', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    h323hostcall = 1720, 'h323hostcall', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Network File System - Sun Microsystems
     #: - [UDP] Network File System - Sun Microsystems
     #: - [SCTP] Network File System [:rfc:`5665`]
-    nfs: 'SCTP' = 2049, 'nfs', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    nfs = 2049, 'nfs', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Resource Connection Initiation Protocol
     #: - [SCTP] Resource Connection Initiation Protocol
-    rcip_itu: 'SCTP' = 2225, 'rcip-itu', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    rcip_itu = 2225, 'rcip-itu', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] M2UA
     #: - [UDP] M2UA
     #: - [SCTP] M2UA
-    m2ua: 'SCTP' = 2904, 'm2ua', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    m2ua = 2904, 'm2ua', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] M3UA [:rfc:`4666`]
     #: - [SCTP] M3UA [:rfc:`4666`]
-    m3ua: 'SCTP' = 2905, 'm3ua', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    m3ua = 2905, 'm3ua', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] Megaco H-248
     #: - [UDP] Megaco H-248
     #: - [SCTP] Megaco-H.248 text
-    megaco_h248: 'SCTP' = 2944, 'megaco-h248', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    megaco_h248 = 2944, 'megaco-h248', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] H248 Binary
     #: - [UDP] H248 Binary
     #: - [SCTP] Megaco/H.248 binary
-    h248_binary: 'SCTP' = 2945, 'h248-binary', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    h248_binary = 2945, 'h248-binary', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] ITU-T Q.1902.1/Q.2150.3
-    itu_bicc_stc: 'SCTP' = 3097, 'itu-bicc-stc', TransportProtocol.get('sctp')
+    itu_bicc_stc = 3097, 'itu-bicc-stc', TransportProtocol.sctp
 
     #: - [TCP] M2PA [:rfc:`4165`]
     #: - [SCTP] M2PA [:rfc:`4165`]
-    m2pa: 'SCTP' = 3565, 'm2pa', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    m2pa = 3565, 'm2pa', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: [SCTP] asap sctp [:rfc:`5352`]
-    asap_sctp: 'SCTP' = 3863, 'asap-sctp', TransportProtocol.get('sctp')
+    asap_sctp = 3863, 'asap-sctp', TransportProtocol.sctp
 
     #: [SCTP] asap-sctp/tls [:rfc:`5352`]
-    asap_sctp_tls: 'SCTP' = 3864, 'asap-sctp-tls', TransportProtocol.get('sctp')
+    asap_sctp_tls = 3864, 'asap-sctp-tls', TransportProtocol.sctp
 
     #: - [TCP] DIAMETER
     #: - [SCTP] DIAMETER [:rfc:`3588`]
-    diameter: 'SCTP' = 3868, 'diameter', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    diameter = 3868, 'diameter', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] AWS protocol for cloud remoting solution
     #: - [UDP] AWS protocol for cloud remoting solution
     #: - [SCTP] AWS protocol for cloud remoting solution
     #: - [DCCP] AWS protocol for cloud remoting solution
-    aws_wsp: 'SCTP' = 4195, 'aws-wsp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
+    aws_wsp = 4195, 'aws-wsp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp | TransportProtocol.dccp
 
     #: - [TCP] ArrowHead Service Protocol (AHSP)
     #: - [UDP] ArrowHead Service Protocol (AHSP)
     #: - [SCTP] ArrowHead Service Protocol (AHSP)
-    ahsp: 'SCTP' = 4333, 'ahsp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ahsp = 4333, 'ahsp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] A25 (FAP-FGW)
-    a25_fap_fgw: 'SCTP' = 4502, 'a25-fap-fgw', TransportProtocol.get('sctp')
+    a25_fap_fgw = 4502, 'a25-fap-fgw', TransportProtocol.sctp
 
     #: - [TCP] Trinity Trust Network Node Communication
     #: - [UDP] Trinity Trust Network Node Communication
     #: - [SCTP] Trinity Trust Network Node Communication
-    trinity_dist: 'SCTP' = 4711, 'trinity-dist', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    trinity_dist = 4711, 'trinity-dist', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] IP Flow Info Export
     #: - [UDP] IP Flow Info Export
     #: - [SCTP] IP Flow Info Export
-    ipfix: 'SCTP' = 4739, 'ipfix', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ipfix = 4739, 'ipfix', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] ipfix protocol over TLS
     #: - [SCTP] ipfix protocol over DTLS
     #: - [UDP] ipfix protocol over DTLS
-    ipfixs: 'SCTP' = 4740, 'ipfixs', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ipfixs = 4740, 'ipfixs', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] SIP [:rfc:`3263`]
     #: - [UDP] SIP [:rfc:`3263`]
     #: - [SCTP] SIP [:rfc:`4168`]
-    sip: 'SCTP' = 5060, 'sip', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    sip = 5060, 'sip', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] SIP-TLS [:rfc:`3263`]
     #: - [UDP] SIP-TLS [:rfc:`3263`]
     #: - [SCTP] SIP-TLS [:rfc:`4168`]
-    sips: 'SCTP' = 5061, 'sips', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    sips = 5061, 'sips', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] Candidate AR
-    car: 'SCTP' = 5090, 'car', TransportProtocol.get('sctp')
+    car = 5090, 'car', TransportProtocol.sctp
 
     #: [SCTP] Context Transfer Protocol [:rfc:`4065`]
-    cxtp: 'SCTP' = 5091, 'cxtp', TransportProtocol.get('sctp')
+    cxtp = 5091, 'cxtp', TransportProtocol.sctp
 
     #: - [TCP] NOTEZA Data Safety Service
     #: - [SCTP] NOTEZA Data Safety Service
-    noteza: 'SCTP' = 5215, 'noteza', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    noteza = 5215, 'noteza', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] Server Message Block over Remote Direct Memory Access
     #: - [SCTP] Server Message Block over Remote Direct Memory Access
-    smbdirect: 'SCTP' = 5445, 'smbdirect', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    smbdirect = 5445, 'smbdirect', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] AMQP
     #: - [UDP] AMQP
     #: - [SCTP] AMQP
-    amqp: 'SCTP' = 5672, 'amqp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    amqp = 5672, 'amqp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] V5UA application port [:rfc:`3807`]
     #: - [UDP] V5UA application port [:rfc:`3807`]
     #: - [SCTP] V5UA application port [:rfc:`3807`]
-    v5ua: 'SCTP' = 5675, 'v5ua', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    v5ua = 5675, 'v5ua', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Diameter over TLS/TCP [:rfc:`6733`]
     #: - [SCTP] Diameter over DTLS/SCTP [:rfc:`6733`]
-    diameters: 'SCTP' = 5868, 'diameters', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    diameters = 5868, 'diameters', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: - [TCP] Flight & Flow Info for Collaborative Env
     #: - [UDP] Flight & Flow Info for Collaborative Env
     #: - [SCTP] Flight & Flow Info for Collaborative Env
-    ff_ice: 'SCTP' = 5903, 'ff-ice', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ff_ice = 5903, 'ff-ice', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Air-Ground SWIM
     #: - [UDP] Air-Ground SWIM
     #: - [SCTP] Air-Ground SWIM
-    ag_swim: 'SCTP' = 5904, 'ag-swim', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ag_swim = 5904, 'ag-swim', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Adv Surface Mvmnt and Guidance Cont Sys
     #: - [UDP] Adv Surface Mvmnt and Guidance Cont Sys
     #: - [SCTP] Adv Surface Mvmnt and Guidance Cont Sys
-    asmgcs: 'SCTP' = 5905, 'asmgcs', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    asmgcs = 5905, 'asmgcs', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Remotely Piloted Vehicle C&C
     #: - [UDP] Remotely Piloted Vehicle C&C
     #: - [SCTP] Remotely Piloted Vehicle C&C
-    rpas_c2: 'SCTP' = 5906, 'rpas-c2', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    rpas_c2 = 5906, 'rpas-c2', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Distress and Safety Data App
     #: - [UDP] Distress and Safety Data App
     #: - [SCTP] Distress and Safety Data App
-    dsd: 'SCTP' = 5907, 'dsd', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    dsd = 5907, 'dsd', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] IPS Management Application
     #: - [UDP] IPS Management Application
     #: - [SCTP] IPS Management Application
-    ipsma: 'SCTP' = 5908, 'ipsma', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ipsma = 5908, 'ipsma', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Air-ground media advisory
     #: - [UDP] Air-ground media advisory
     #: - [SCTP] Air-ground media advisory
-    agma: 'SCTP' = 5909, 'agma', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    agma = 5909, 'agma', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] Context Management
-    cm: 'SCTP' = 5910, 'cm', TransportProtocol.get('sctp')
+    cm = 5910, 'cm', TransportProtocol.sctp
 
     #: [SCTP] Controller Pilot Data Link Communication
-    cpdlc: 'SCTP' = 5911, 'cpdlc', TransportProtocol.get('sctp')
+    cpdlc = 5911, 'cpdlc', TransportProtocol.sctp
 
     #: [SCTP] Flight Information Services
-    fis: 'SCTP' = 5912, 'fis', TransportProtocol.get('sctp')
+    fis = 5912, 'fis', TransportProtocol.sctp
 
     #: [SCTP] Automatic Dependent Surveillance
-    ads_c: 'SCTP' = 5913, 'ads-c', TransportProtocol.get('sctp')
+    ads_c = 5913, 'ads-c', TransportProtocol.sctp
 
     #: - [TCP] Security for Internet Protocol Suite
     #: - [UDP] Security for Internet Protocol Suite
     #: - [SCTP] Security for Internet Protocol Suite
-    ipsdtls: 'SCTP' = 5914, 'ipsdtls', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ipsdtls = 5914, 'ipsdtls', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] Unassigned
-    unassigned_6701: 'SCTP' = 6701, 'unassigned', TransportProtocol.get('sctp')
+    unassigned_6701 = 6701, 'unassigned', TransportProtocol.sctp
 
     #: [SCTP] Unassigned
-    unassigned_6702: 'SCTP' = 6702, 'unassigned', TransportProtocol.get('sctp')
+    unassigned_6702 = 6702, 'unassigned', TransportProtocol.sctp
 
     #: [SCTP] ForCES HP (High Priority) channel [:rfc:`5811`]
-    frc_hp: 'SCTP' = 6704, 'frc-hp', TransportProtocol.get('sctp')
+    frc_hp = 6704, 'frc-hp', TransportProtocol.sctp
 
     #: [SCTP] ForCES MP (Medium Priority) channel [:rfc:`5811`]
-    frc_mp: 'SCTP' = 6705, 'frc-mp', TransportProtocol.get('sctp')
+    frc_mp = 6705, 'frc-mp', TransportProtocol.sctp
 
     #: [SCTP] ForCES LP (Low priority) channel [:rfc:`5811`]
-    frc_lp: 'SCTP' = 6706, 'frc-lp', TransportProtocol.get('sctp')
+    frc_lp = 6706, 'frc-lp', TransportProtocol.sctp
 
     #: [SCTP] conductor for multiplex
-    conductor_mpx: 'SCTP' = 6970, 'conductor-mpx', TransportProtocol.get('sctp')
+    conductor_mpx = 6970, 'conductor-mpx', TransportProtocol.sctp
 
     #: - [TCP] SImple Middlebox COnfiguration (SIMCO) Server [:rfc:`4540`]
     #: - [SCTP] SImple Middlebox COnfiguration (SIMCO)
-    simco: 'SCTP' = 7626, 'simco', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    simco = 7626, 'simco', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: [SCTP] SCF nFAPI defining MAC/PHY split
-    nfapi: 'SCTP' = 7701, 'nfapi', TransportProtocol.get('sctp')
+    nfapi = 7701, 'nfapi', TransportProtocol.sctp
 
     #: - [TCP] Open-Source Virtual Reality
     #: - [UDP] Open-Source Virtual Reality
     #: - [SCTP] Open-Source Virtual Reality
-    osvr: 'SCTP' = 7728, 'osvr', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    osvr = 7728, 'osvr', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [SCTP] Reserved
     #: - [DCCP] Reserved
-    reserved_8282: 'SCTP' = 8282, 'reserved', TransportProtocol.get('sctp') | TransportProtocol.get('dccp')
+    reserved_8282 = 8282, 'reserved', TransportProtocol.sctp | TransportProtocol.dccp
 
     #: - [TCP] PIM over Reliable Transport [:rfc:`6559`]
     #: - [SCTP] PIM over Reliable Transport [:rfc:`6559`]
-    pim_port: 'SCTP' = 8471, 'pim-port', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    pim_port = 8471, 'pim-port', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: [SCTP] LCS Application Protocol
-    lcs_ap: 'SCTP' = 9082, 'lcs-ap', TransportProtocol.get('sctp')
+    lcs_ap = 9082, 'lcs-ap', TransportProtocol.sctp
 
     #: - [TCP] IBM AURORA Performance Visualizer
     #: - [UDP] IBM AURORA Performance Visualizer
     #: - [SCTP] IBM AURORA Performance Visualizer
-    aurora: 'SCTP' = 9084, 'aurora', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    aurora = 9084, 'aurora', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] IUA
     #: - [UDP] IUA
     #: - [SCTP] IUA
-    iua: 'SCTP' = 9900, 'iua', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    iua = 9900, 'iua', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] enrp server channel [:rfc:`5353`]
-    enrp_sctp: 'SCTP' = 9901, 'enrp-sctp', TransportProtocol.get('sctp')
+    enrp_sctp = 9901, 'enrp-sctp', TransportProtocol.sctp
 
     #: [SCTP] enrp/tls server channel [:rfc:`5353`]
-    enrp_sctp_tls: 'SCTP' = 9902, 'enrp-sctp-tls', TransportProtocol.get('sctp')
+    enrp_sctp_tls = 9902, 'enrp-sctp-tls', TransportProtocol.sctp
 
     #: - [TCP] numerical systems messaging
     #: - [SCTP] numerical systems messaging
-    xcompute: 'SCTP' = 11235, 'xcompute', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    xcompute = 11235, 'xcompute', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: [SCTP] WorldMailExpress
-    wmereceiving: 'SCTP' = 11997, 'wmereceiving', TransportProtocol.get('sctp')
+    wmereceiving = 11997, 'wmereceiving', TransportProtocol.sctp
 
     #: [SCTP] WorldMailExpress
-    wmedistribution: 'SCTP' = 11998, 'wmedistribution', TransportProtocol.get('sctp')
+    wmedistribution = 11998, 'wmedistribution', TransportProtocol.sctp
 
     #: [SCTP] WorldMailExpress
-    wmereporting: 'SCTP' = 11999, 'wmereporting', TransportProtocol.get('sctp')
+    wmereporting = 11999, 'wmereporting', TransportProtocol.sctp
 
     #: - [TCP] SUA
     #: - [UDP] De-Registered
     #: - [SCTP] SUA
-    sua: 'SCTP' = 14001, 'sua', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    sua = 14001, 'sua', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Distributed Network Protocol - Secure
     #: - [UDP] Distributed Network Protocol - Secure
     #: - [SCTP] Distributed Network Protocol - secured
-    dnp_sec: 'SCTP' = 19999, 'dnp-sec', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    dnp_sec = 19999, 'dnp-sec', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] DNP
     #: - [UDP] DNP
     #: - [SCTP] Distributed Network Protocol
-    dnp: 'SCTP' = 20000, 'dnp', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    dnp = 20000, 'dnp', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]
     #: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]
     #: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    nfsrdma: 'SCTP' = 20049, 'nfsrdma', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    nfsrdma = 20049, 'nfsrdma', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: [SCTP] RNSAP User Adaptation for Iurh
-    rna: 'SCTP' = 25471, 'rna', TransportProtocol.get('sctp')
+    rna = 25471, 'rna', TransportProtocol.sctp
 
     #: [SCTP] SGsAP in 3GPP
-    sgsap: 'SCTP' = 29118, 'sgsap', TransportProtocol.get('sctp')
+    sgsap = 29118, 'sgsap', TransportProtocol.sctp
 
     #: [SCTP] SBcAP in 3GPP
-    sbcap: 'SCTP' = 29168, 'sbcap', TransportProtocol.get('sctp')
+    sbcap = 29168, 'sbcap', TransportProtocol.sctp
 
     #: [SCTP] HNBAP and RUA Common Association
-    iuhsctpassoc: 'SCTP' = 29169, 'iuhsctpassoc', TransportProtocol.get('sctp')
+    iuhsctpassoc = 29169, 'iuhsctpassoc', TransportProtocol.sctp
 
     #: - [TCP] Remote Window Protocol
     #: - [SCTP] Remote Window Protocol
-    rwp: 'SCTP' = 30100, 'rwp', TransportProtocol.get('tcp') | TransportProtocol.get('sctp')
+    rwp = 30100, 'rwp', TransportProtocol.tcp | TransportProtocol.sctp
 
     #: [SCTP] S1-Control Plane (3GPP)
-    s1_control: 'SCTP' = 36412, 's1-control', TransportProtocol.get('sctp')
+    s1_control = 36412, 's1-control', TransportProtocol.sctp
 
     #: [SCTP] X2-Control Plane (3GPP)
-    x2_control: 'SCTP' = 36422, 'x2-control', TransportProtocol.get('sctp')
+    x2_control = 36422, 'x2-control', TransportProtocol.sctp
 
     #: [SCTP] SLm Interface Application Protocol
-    slmap: 'SCTP' = 36423, 'slmap', TransportProtocol.get('sctp')
+    slmap = 36423, 'slmap', TransportProtocol.sctp
 
     #: [SCTP] Nq and Nq' Application Protocol
-    nq_ap: 'SCTP' = 36424, 'nq-ap', TransportProtocol.get('sctp')
+    nq_ap = 36424, 'nq-ap', TransportProtocol.sctp
 
     #: [SCTP] M2 Application Part
-    m2ap: 'SCTP' = 36443, 'm2ap', TransportProtocol.get('sctp')
+    m2ap = 36443, 'm2ap', TransportProtocol.sctp
 
     #: [SCTP] M3 Application Part
-    m3ap: 'SCTP' = 36444, 'm3ap', TransportProtocol.get('sctp')
+    m3ap = 36444, 'm3ap', TransportProtocol.sctp
 
     #: [SCTP] Xw-Control Plane (3GPP)
-    xw_control: 'SCTP' = 36462, 'xw-control', TransportProtocol.get('sctp')
+    xw_control = 36462, 'xw-control', TransportProtocol.sctp
 
     #: [SCTP] W1 signalling transport
-    SCTP_3gpp_w1ap: 'SCTP' = 37472, '3gpp-w1ap', TransportProtocol.get('sctp')
+    SCTP_3gpp_w1ap = 37472, '3gpp-w1ap', TransportProtocol.sctp
 
     #: [SCTP] NG Control Plane (3GPP)
-    ng_control: 'SCTP' = 38412, 'ng-control', TransportProtocol.get('sctp')
+    ng_control = 38412, 'ng-control', TransportProtocol.sctp
 
     #: [SCTP] Xn Control Plane (3GPP)
-    xn_control: 'SCTP' = 38422, 'xn-control', TransportProtocol.get('sctp')
+    xn_control = 38422, 'xn-control', TransportProtocol.sctp
 
     #: [SCTP] E1 signalling transport (3GPP)
-    e1_interface: 'SCTP' = 38462, 'e1-interface', TransportProtocol.get('sctp')
+    e1_interface = 38462, 'e1-interface', TransportProtocol.sctp
 
     #: [SCTP] F1 Control Plane (3GPP)
-    f1_control: 'SCTP' = 38472, 'f1-control', TransportProtocol.get('sctp')
+    f1_control = 38472, 'f1-control', TransportProtocol.sctp
 
     #: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]
     #: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]
     #: - [SCTP] HTTPS [:rfc:`9260`]
-    https_443: 'SCTP' = 443, 'https', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    https_443 = 443, 'https', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
 
     #: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
     #: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
     #: - [SCTP] SSH [:rfc:`9260`]
-    ssh_22: 'SCTP' = 22, 'ssh', TransportProtocol.get('tcp') | TransportProtocol.get('udp') | TransportProtocol.get('sctp')
+    ssh_22 = 22, 'ssh', TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp
