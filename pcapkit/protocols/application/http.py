@@ -15,6 +15,7 @@ and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 
 """
 import contextlib
+import struct
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.application.application import Application
@@ -116,7 +117,15 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 http = protocol(self._data, length, **kwargs)
             except ProtocolError:
                 raise
-            except ValueError as error:
+            # NOTE: :exc:`struct.error` alongside :exc:`ValueError` because the
+            # two are disjoint -- it derives straight from :exc:`Exception` --
+            # and a payload too short for a versioned parser's fixed header
+            # raises the former from deep inside the schema machinery
+            # (``FieldBase.length`` calls :func:`struct.calcsize` on a template
+            # built from a negative length). A caller of this method cannot
+            # catch that as a protocol error, which is the whole point of the
+            # conversion the next line performs, so it is converted too.
+            except (ValueError, struct.error) as error:
                 raise ProtocolError(f'HTTP/{version}: invalid format') from error
 
         self._version = http.version
@@ -197,13 +206,66 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If no version in the family accepts the payload. This
+                is the *only* exception this method raises for an unparseable
+                payload -- a candidate failing in any other way is a fall-through
+                and not an answer.
+
         """
+        # NOTE: The two arms suppress different sets, and the asymmetry is
+        # deliberate. Only the *last* arm additionally suppresses
+        # :exc:`struct.error`, because a payload too short to hold HTTP/2's
+        # nine-octet frame header usually fails inside the schema machinery with
+        # that stdlib exception rather than with a protocol error --
+        # ``FieldBase.length`` calls :func:`struct.calcsize` on a template built
+        # from a negative length -- and it is neither a ``ProtocolError`` nor a
+        # :exc:`ValueError`, so it used to leave this method uncatchable by any
+        # caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised a bare
+        # :exc:`struct.error` where the closing ``raise`` below is the documented
+        # answer. ("Usually" because ``httpv2.HTTP``'s own guard tests the
+        # *declared* length, not the buffer's, so a four-octet payload declaring
+        # fifteen parses instead of failing.) Suppressing it on the last arm is
+        # safe in the sense that matters here -- no arm follows, so nothing can
+        # answer in place of the error.
+        #
+        # The residual, which is real and is not zero: a genuine ``httpv2``
+        # schema defect that raised :exc:`struct.error` on well-formed HTTP/2
+        # bytes would now be reported as ``unknown HTTP version`` rather than
+        # crashing loudly, so a bug in that schema is quieter than it was. That is
+        # accepted because the alternative is a dispatcher no caller can catch,
+        # and it is bounded: ``httpv2.HTTP`` stays reachable directly, where
+        # nothing is suppressed, and that is the documented route for a caller who
+        # wants the unwrapped failure.
+        #
+        # This is keyed on being *last*, not on being the HTTP/2 arm. Inserting an
+        # arm after this one would silently make the reasoning false, and the
+        # regression test guards arm 1 specifically, so it would not catch that:
+        # the new arm must take the :exc:`struct.error` suppression and this one
+        # must give it up.
+        #
+        # Widening the *first* arm the same way was measured and reverted, as it
+        # buys nothing and costs a great deal. Nothing reaches a
+        # :exc:`struct.error` through ``httpv1.HTTP``: nine byte patterns over
+        # lengths 0-24, on this route and on ``read(version=1)``, answered
+        # ``ProtocolError`` 450 times out of 450. And
+        # :class:`~pcapkit.utilities.exceptions.StructError` *subclasses*
+        # :exc:`struct.error`, so suppressing it on a non-final arm swallows
+        # pcapkit's own signal and hands the payload to the arm below -- which
+        # accepts anything of at least nine octets. With a fault injected at arm
+        # 1, a *valid* HTTP/1.1 request came back ``version='2'``, and over UDP
+        # port 80 its ``protochain`` read ``UDP:HTTP/2``. A confident HTTP/2
+        # mislabel of HTTP/1 traffic is the exact failure #787 exists to stop, and
+        # it is worse than letting the error escape to ``beholder``, which turns
+        # it into ``Raw``; it would also erase ``StructError.eof``, which
+        # ``NoPayload`` handling reads. ``unknown HTTP version`` is only the best
+        # case, needing arm 2 to decline as well.
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._data, length, **kwargs)
 
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
-        with contextlib.suppress(ProtocolError):
+        with contextlib.suppress(ProtocolError, struct.error):
             return HTTPv2(self._data, length, **kwargs)
 
         raise ProtocolError("unknown HTTP version")

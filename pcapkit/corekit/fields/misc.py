@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import FieldBase, NoValue
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 __all__ = [
     'ConditionalField', 'PayloadField',
@@ -225,7 +226,9 @@ class PayloadField(FieldBase[_TP]):
         length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: Field default value.
-        protocol: Payload protocol.
+        protocol: Payload protocol, as a class or as a registered protocol name;
+            see :meth:`the property setter <PayloadField.protocol>`, through
+            which this argument is resolved.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field.FieldBase.__call__>`.
 
@@ -259,21 +262,67 @@ class PayloadField(FieldBase[_TP]):
         """Set payload protocol.
 
         Arguments:
-            protocol: Payload protocol.
+            protocol: Payload protocol. A :obj:`str` is resolved against the
+                :data:`pcapkit.protocols.__proto__` registry, case-insensitively,
+                and an unresolved name leaves the payload as
+                :class:`~pcapkit.protocols.misc.raw.Raw`.
+
+        Warns:
+            pcapkit.utilities.warnings.RegistryWarning: If ``protocol`` names a
+                protocol the registry does not hold.
 
         """
         if isinstance(protocol, str):
             from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
-            protocol = cast('Type[_TP]', __proto__.get(protocol))
+
+            # NOTE: The registry is keyed on the upper-cased class name, both
+            # when it is seeded (``pcapkit/protocols/__init__.py:75``) and when
+            # ``pcapkit.foundation.registry.protocols.register_protocol`` adds to
+            # it, so a name given in any other case missed every time -- and a
+            # miss leaves ``_protocol`` as :obj:`None`, which the property above
+            # resolves to :class:`~pcapkit.protocols.misc.raw.Raw`. So
+            # ``PayloadField(protocol='http')`` yielded a raw payload instead of
+            # HTTP, with nothing to say so (#787).
+            resolved = __proto__.get(protocol.upper())
+
+            # NOTE: Warned rather than left silent, and warned rather than
+            # raised. Unlike the registry lookups that dispatch on a code read
+            # off the wire -- where a miss is ordinary traffic and
+            # :class:`~pcapkit.protocols.misc.raw.Raw` is the right answer --
+            # this branch is reached only from a caller that named a protocol in
+            # source, so a miss is a mistake in that name rather than a property
+            # of the captured packet, and it is otherwise indistinguishable from
+            # an unparsed payload. It stays a warning because the :obj:`None`
+            # fallback is itself legitimate (a ``PayloadField`` with no protocol
+            # at all is the common case), so refusing the assignment outright
+            # would reject a lenient spelling the field has always accepted.
+            if resolved is None:
+                warn(f'unregistered payload protocol: {protocol!r}', RegistryWarning)
+
+            protocol = cast('Type[_TP]', resolved)
         self._protocol = protocol
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  default: '_TP | NoValueType | bytes' = NoValue,
-                 protocol: 'Optional[Type[_TP]]' = None,
+                 protocol: 'Optional[Type[_TP] | str]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<payload>'
         self._default = default  # type: ignore[assignment]
-        self._protocol = protocol  # type: ignore[assignment]
+
+        # NOTE: Through the property rather than straight to ``_protocol``, so a
+        # name given here is resolved exactly as one assigned later is. Writing
+        # the attribute directly stored the :obj:`str` verbatim and the getter
+        # handed that same string back, so ``PayloadField(protocol='http')``
+        # yielded neither the protocol nor
+        # :class:`~pcapkit.protocols.misc.raw.Raw` but ``'http'`` itself -- and
+        # ``protocol='HTTP'`` was no better, since the case was never what this
+        # path went wrong on (#787). The lookup the setter performs stays inside
+        # its ``isinstance(protocol, str)`` branch, so a field declared in a
+        # schema class body -- every in-library use, none of which names a
+        # protocol -- still does not import :mod:`pcapkit.protocols` while that
+        # package may itself be mid-import.
+        self.protocol = protocol  # type: ignore[assignment]
+
         self._callback = callback
 
         self._length_callback = None

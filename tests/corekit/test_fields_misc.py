@@ -396,5 +396,116 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
                                  bound.pack(0, dict(packet)))
 
 
+class PayloadFieldProtocolNameTests(unittest.TestCase):
+    """Resolving :class:`~pcapkit.corekit.fields.misc.PayloadField`'s ``protocol``
+    from a name, per `#787 <https://github.com/JarryShaw/PyPCAPKit/issues/787>`__.
+
+    :data:`pcapkit.protocols.__proto__` is keyed on ``__name__.upper()``, both
+    where it is seeded and in
+    :func:`~pcapkit.foundation.registry.protocols.register_protocol`. The setter
+    looked the name up as given, so anything not already upper-cased missed --
+    and a miss is indistinguishable from an unparsed payload, because
+    :obj:`None` is what the getter turns into
+    :class:`~pcapkit.protocols.misc.raw.Raw`.
+
+    The constructor was worse, and is the path the issue's own reproduction
+    takes: it assigned ``_protocol`` directly, bypassing the setter, so the
+    :obj:`str` was stored verbatim and handed straight back.
+    ``PayloadField(protocol='http').protocol`` was therefore ``'http'`` -- not
+    HTTP, and not even ``Raw`` -- and ``protocol='HTTP'`` was no better, so case
+    was never what that path went wrong on.
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_a_protocol_name_resolves_whatever_its_case(self) -> None:
+        from pcapkit.corekit.fields.misc import PayloadField
+        from pcapkit.protocols.application.http import HTTP
+
+        for name in ('HTTP', 'http', 'Http', 'hTTp'):
+            with self.subTest(name=name, path='constructor'):
+                self.assertIs(PayloadField(protocol=name).protocol, HTTP)
+
+            with self.subTest(name=name, path='setter'):
+                field = PayloadField()
+                field.protocol = name
+                self.assertIs(field.protocol, HTTP)
+
+    def test_an_unregistered_name_warns_and_still_falls_back_to_raw(self) -> None:
+        """A name the registry does not hold is a caller's mistake, so it warns.
+
+        The fallback itself is kept: refusing the assignment would reject a
+        lenient spelling the field has always accepted, and :obj:`None` -- hence
+        :class:`~pcapkit.protocols.misc.raw.Raw` -- remains a legitimate state
+        for a payload whose protocol is genuinely not known. What was wrong was
+        only that nothing said so.
+
+        """
+        from pcapkit.corekit.fields.misc import PayloadField
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.warnings import RegistryWarning
+
+        for path, build in (('constructor', lambda: PayloadField(protocol='NoSuchProtocol')),
+                            ('setter', None)):
+            with self.subTest(path=path):
+                if build is None:
+                    field = PayloadField()
+                    with self.assertWarns(RegistryWarning):
+                        field.protocol = 'NoSuchProtocol'
+                else:
+                    with self.assertWarns(RegistryWarning):
+                        field = build()
+
+                self.assertIs(field.protocol, Raw)
+
+    def test_a_class_or_an_absent_protocol_is_left_alone_and_silent(self) -> None:
+        """Neither of the two shapes the library itself uses may warn.
+
+        Every in-library ``PayloadField`` either names no protocol at all or is
+        assigned one by a callback -- ``schema/link/ethernet.py``'s, which hands
+        over whatever ``_lookup_next_layer`` returned, a class or a
+        :class:`~pcapkit.corekit.module.ModuleDescriptor`, never a :obj:`str`.
+        So routing the constructor through the setter must leave both untouched,
+        and in particular must not make importing a schema module warn.
+
+        """
+        import warnings
+
+        from pcapkit.corekit.fields.misc import PayloadField
+        from pcapkit.corekit.module import ModuleDescriptor
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.misc.raw import Raw
+
+        descriptor = ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw')
+        cases = (
+            ('class, constructor', lambda: PayloadField(protocol=HTTP), HTTP),
+            ('absent', PayloadField, Raw),
+            ('none, explicit', lambda: PayloadField(protocol=None), Raw),
+        )
+
+        for label, build, expected in cases:
+            with self.subTest(case=label):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    field = build()
+                self.assertIs(field.protocol, expected)
+                self.assertEqual(caught, [])
+
+        with self.subTest(case='class, setter'):
+            field = PayloadField()
+            field.protocol = HTTP
+            self.assertIs(field.protocol, HTTP)
+
+        with self.subTest(case='module descriptor, setter'):
+            field = PayloadField()
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                field.protocol = descriptor
+            self.assertIs(field.protocol, descriptor)
+            self.assertEqual(caught, [])
+
+
 if __name__ == '__main__':
     unittest.main()

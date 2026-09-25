@@ -218,18 +218,36 @@ class HTTPUnitTests(unittest.TestCase):
         - on the unfixed code, this raises ``TypeError: HTTP.make() missing
           1 required positional argument: 'self'`` -- the *same* exception
           text as the wrong reproduction, but reached legitimately this time.
-        - on the fixed code, deliberately minimal keyword arguments (no
-          ``method``/``status``) reach ``HTTPv1.make`` and are rejected
-          *there*, as ``ProtocolError: HTTP/1: invalid format`` -- proving
-          the callee was actually reached, which "no ``TypeError``" alone
-          would not.
+        - on the fixed code, the constructed packet is read back and rejected,
+          as ``ProtocolError: HTTP: invalid format`` -- proving the callee was
+          actually reached, which "no ``TypeError``" alone would not.
+
+        The asserted message was ``'HTTP/1: invalid format'`` until #787.
+        Nothing about *this* regression test changed: the exception type, and
+        the fact that reaching it at all proves the versioned ``make`` ran, are
+        as they were. What moved is which line raises. ``httpv1.HTTP`` now
+        reports a malformed message as ``ProtocolError`` itself, so
+        ``HTTP.read``'s ``except ProtocolError: raise`` re-raises it unchanged
+        instead of ``except ValueError`` re-labelling it with the version it had
+        dispatched on. The bare message is also what this path *already* gave
+        whenever ``_read_http_header`` rejected a start line it could not
+        recognise, so #787 makes one message of two rather than introducing a
+        new one.
+
+        Worth recording, since the docstring above used to claim otherwise: the
+        rejection is not ``HTTPv1.make`` refusing these keywords. ``make``
+        accepts them and builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``; it is the
+        read-back of that packet which fails, because ``_read_http_header``
+        requires a header field section and a field-less request has none. That
+        a valid minimal HTTP/1 request cannot be re-read is a defect in its own
+        right, and not one #787 set out to fix.
         """
         from pcapkit.protocols.application.http import HTTP
         from pcapkit.utilities.exceptions import ProtocolError
 
         with self.assertRaises(ProtocolError) as ctx:
             HTTP(version=1, http_version='1.1', method='GET', uri='/')
-        self.assertEqual(str(ctx.exception), 'HTTP/1: invalid format')
+        self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
 
     def test_http_read_explicit_version_uses_same_buffer_as_guess(self) -> None:
         """Regression test for GH-447.
@@ -299,6 +317,50 @@ class HTTPUnitTests(unittest.TestCase):
             HTTP(io.BytesIO(bad), len(bad), version=1)
         self.assertIsInstance(ctx.exception.__cause__, ValueError)
 
+    def test_http_read_explicit_version_still_wraps_a_bare_value_error(self) -> None:
+        """``HTTP.read``'s ``except ValueError`` net stays, and is pinned here.
+
+        #787 stops ``httpv1.HTTP`` from raising a bare :class:`ValueError` at
+        all, and that wrapper is what used to catch it -- so after the fix no
+        real payload reaches it, and the test above that used to cover it
+        (``..._wraps_malformed_payload``) now gets its chained ``__cause__`` from
+        ``httpv1.HTTP`` instead. Left in place rather than deleted, because the
+        guarantee is the explicit path's and not one delegate's: a
+        :class:`ValueError` out of *either* versioned class, from any site #787
+        did not touch, must still reach the caller as a
+        :class:`~pcapkit.utilities.exceptions.ProtocolError`. Pinned with a
+        stand-in that raises one, since nothing in the library does any more --
+        an untested branch is how a net like this comes to look redundant and
+        gets removed.
+
+        """
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        http = object.__new__(HTTP)
+        http._data = b'irrelevant'
+        http.__cached__ = {}
+
+        for version, module in ((1, 'httpv1'), (2, 'httpv2')):
+            with self.subTest(version=version):
+                with mock.patch(f'pcapkit.protocols.application.{module}.HTTP',
+                                mock.Mock(side_effect=ValueError('boom'))):
+                    with self.assertRaises(ProtocolError) as ctx:
+                        http.read(version=version)
+
+                self.assertEqual(str(ctx.exception), f'HTTP/{version}: invalid format')
+                self.assertIsInstance(ctx.exception.__cause__, ValueError)
+
+        # A ``ProtocolError`` from the delegate is re-raised as it is, not
+        # re-labelled -- which is why #787's normalisation changes the message
+        # the two tests named in its commit assert.
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+                        mock.Mock(side_effect=ProtocolError('HTTP: invalid format'))):
+            with self.assertRaises(ProtocolError) as ctx:
+                http.read(version=1)
+        self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+        self.assertIsNone(ctx.exception.__cause__)
+
     def test_http_make_data_delegates_to_httpv1(self) -> None:
         from pcapkit.const.http.method import Method
         from pcapkit.corekit.multidict import OrderedMultiDict
@@ -339,14 +401,596 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(values['sid'], 1)
         self.assertIs(values['frame'], data)
 
-    def test_http_guess_version_propagates_malformed_payload_value_error(self) -> None:
+    def test_http_guess_version_falls_through_to_the_http2_arm(self) -> None:
+        """``_guess_version`` must reach its second arm, which it never did (#787).
+
+        This test used to be ``..._propagates_malformed_payload_value_error``
+        and asserted the opposite -- that these bytes raise :class:`ValueError`
+        -- because that is what the unfixed code did: ``httpv1.HTTP`` failed
+        with a bare :class:`ValueError`, which ``contextlib.suppress(
+        ProtocolError)`` does not catch, so the exception left ``_guess_version``
+        from the *first* arm and the HTTP/2 arm below it was dead code.
+
+        The expectation is inverted rather than deleted because the old one
+        pinned the defect as though it were the contract. Note the assertion
+        would still have *passed* untouched --
+        :class:`~pcapkit.utilities.exceptions.ProtocolError` is a
+        :class:`ValueError` subclass, so ``assertRaises(ValueError)`` cannot tell
+        a normalised protocol error from a stray stdlib one -- had these
+        particular bytes still raised at all.
+
+        What is asserted is that the second arm was *entered*, not the answer it
+        gave. An earlier revision of this test pinned ``version == '2'``, which
+        makes "garbage must report HTTP/2" a contract and would block a later
+        tightening of ``httpv2.HTTP`` -- the arm being reachable is the property
+        #787 is about, and the arm answering HTTP/2 for fifteen octets of prose
+        is a consequence of ``httpv2.HTTP`` accepting any payload of at least
+        nine octets, which is a fact about that class and this class's business
+        to dispatch to it rather than to guarantee. Real HTTP/2 wire bytes are
+        pinned to ``version == '2'`` by
+        ``test_guess_version_reaches_http2_on_the_connection_preface``, which is
+        where that assertion belongs.
+
+        """
         from pcapkit.protocols.application.http import HTTP
 
         http = object.__new__(HTTP)
         http._data = b'not http at all'
 
-        with self.assertRaises(ValueError):
-            HTTP._guess_version(http, len(http._data))
+        entered = []  # type: list[str]
+        real_v1 = importlib.import_module('pcapkit.protocols.application.httpv1').HTTP
+        real_v2 = importlib.import_module('pcapkit.protocols.application.httpv2').HTTP
+
+        def record(name: str, real: object) -> object:
+            def spy(*args: object, **kwargs: object) -> object:
+                entered.append(name)
+                return real(*args, **kwargs)  # type: ignore[operator]
+            return spy
+
+        with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+                        record('httpv1', real_v1)), \
+             mock.patch('pcapkit.protocols.application.httpv2.HTTP',
+                        record('httpv2', real_v2)):
+            guessed = HTTP._guess_version(http, len(http._data))
+
+        # Both arms ran, in order: the first was tried and failed, and the
+        # second was reached -- which is exactly what it never used to be.
+        self.assertEqual(entered, ['httpv1', 'httpv2'])
+        self.assertIsInstance(guessed, real_v2)
+
+    def test_guess_version_reaches_http2_on_the_connection_preface(self) -> None:
+        """The literal #787 reproduction: the HTTP/2 connection preface.
+
+        ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` plus a SETTINGS frame is
+        what an HTTP/2 connection opens with, and ``httpv2.HTTP`` parses it and
+        reports ``version='2'``. Through the proxy it raised ``ValueError: not
+        enough values to unpack (expected 2, got 1)`` instead, from
+        ``httpv1.HTTP`` -- so the guess could not reach the answer its own
+        second arm already had.
+
+        Asserted against the explicit ``version=2`` path rather than on its own,
+        because "``read()`` and ``read(version=2)`` agree" is the property #787
+        is about: the explicit path worked throughout, and only the guess did
+        not.
+
+        """
+        import io
+        import warnings
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        raw = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n' + http2_frame_bytes(0x04, 0x00, 0, b'')
+
+        guessed = HTTP(io.BytesIO(raw), len(raw))
+        explicit = HTTP(io.BytesIO(raw), len(raw), version=2)
+
+        self.assertEqual(guessed.version, '2')
+        self.assertEqual(guessed.alias, 'HTTP/2')
+        self.assertEqual(guessed.length, explicit.length)
+        self.assertEqual(guessed.info, explicit.info)
+
+        # The preface's own octets read as an unassigned frame type (``' '``,
+        # 0x20, is the third of ``PRI``), which ``httpv2.HTTP`` tolerates with a
+        # warning -- so the guess is noisy here, on both paths equally.
+        for label, kwargs in (('guessed', {}), ('explicit', {'version': 2})):
+            with self.subTest(path=label):
+                with self.assertWarns(ProtocolWarning):
+                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
+
+        # Wire bytes with no unassigned frame type in them parse clean, which
+        # pins the warning above to the preface rather than to the HTTP/2 arm.
+        settings = http2_frame_bytes(0x04, 0x00, 0, b'')
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            clean = HTTP(io.BytesIO(settings), len(settings))
+        self.assertEqual(clean.version, '2')
+        self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
+
+    def test_guess_version_still_prefers_http1_for_http1_bytes(self) -> None:
+        """HTTP/1 is tried first and must still win, request and response alike.
+
+        The arms are ordered, so making the second reachable is only safe if the
+        first still claims everything it used to -- which is what stops #787's
+        fix from relabelling ordinary HTTP/1 traffic as HTTP/2.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+
+        cases = (
+            ('request', b'GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n', '1.1'),
+            ('response', b'HTTP/1.1 200 OK\r\nServer: example\r\n\r\nbody', '1.1'),
+            ('response 1.0', b'HTTP/1.0 404 Not Found\r\nServer: example\r\n\r\n', '1.0'),
+        )
+
+        for label, raw, version in cases:
+            with self.subTest(case=label):
+                guessed = HTTP(io.BytesIO(raw), len(raw))
+                explicit = HTTP(io.BytesIO(raw), len(raw), version=1)
+
+                self.assertEqual(guessed.version, version)
+                self.assertEqual(guessed.alias, f'HTTP/{version}')
+                self.assertEqual(guessed.info, explicit.info)
+
+    def test_guess_version_still_reports_an_unknown_http_version(self) -> None:
+        """Bytes neither arm accepts must still raise ``unknown HTTP version``.
+
+        ``_guess_version``'s closing ``raise`` is only reachable when *both*
+        arms fail with :class:`~pcapkit.utilities.exceptions.ProtocolError`, so
+        it needs a payload that ``httpv2.HTTP`` rejects too -- a frame whose
+        declared length contradicts its type. A PING frame carries eight octets
+        of opaque data and so must declare 17 by this library's whole-frame
+        convention; 9 is refused by ``_read_http_ping``.
+
+        A frame is used as the probe rather than short garbage because it
+        exercises the intended route: both arms declining with
+        ``ProtocolError``. Short garbage now arrives here too, by way of the
+        :exc:`struct.error` that ``_guess_version`` suppresses alongside
+        ``ProtocolError``, and
+        ``test_guess_version_reports_unknown_version_for_a_short_payload``
+        covers that separately -- it used to escape uncaught, which is the second
+        leak of #787's shape.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        raw = http2_frame_bytes(0x06, 0x00, 0, b'')  # PING, declared length 9
+
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(raw), len(raw))
+        self.assertEqual(str(ctx.exception), 'unknown HTTP version')
+
+    def test_guess_version_reports_unknown_version_for_a_short_payload(self) -> None:
+        """A payload too short for an HTTP/2 frame header must not leak :exc:`struct.error`.
+
+        Making the HTTP/2 arm reachable routed a class of payload that used to
+        stop at the HTTP/1 arm into ``httpv2.HTTP`` for the first time, and under
+        nine octets that class fails *inside* the schema machinery rather than in
+        ``read``: ``FieldBase.length`` hands :func:`struct.calcsize` a template
+        built from a negative length, and the resulting :exc:`struct.error`
+        derives straight from :exc:`Exception`. It is therefore not a
+        ``ProtocolError``, not a :exc:`ValueError`, and not
+        :exc:`~pcapkit.utilities.exceptions.StructError`, so none of
+        ``_guess_version``'s suppression, ``read``'s ``except ValueError`` net,
+        nor a caller's ``except BaseError`` saw it -- it left the proxy bare.
+
+        Asserted on all three of those nets, because "it raises something" is not
+        the property that was missing; "a caller who catches protocol errors
+        catches this" is.
+
+        The underlying defect is ``httpv2.HTTP``'s, and predates #787: the same
+        :exc:`struct.error` comes out of ``HTTPv2`` constructed directly and out
+        of ``HTTP(..., version=2)``, on the base revision as much as on this one.
+        What #787 changed is that the *guess* path reaches it, so the fix belongs
+        at this dispatcher's boundary, where both routes into a versioned parser
+        already normalise their failures. Both routes are pinned here for that
+        reason.
+
+        """
+        import io
+        import struct
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        # Eight octets: one short of the nine an HTTP/2 frame header needs, and
+        # with no CRLF pair, so the HTTP/1 arm declines it as well.
+        raw = b'\x00' * 8
+
+        for label, kwargs in (('guessed', {}), ('explicit version=2', {'version': 2})):
+            with self.subTest(path=label):
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
+
+                # The nets that used to miss it.
+                self.assertIsInstance(ctx.exception, ValueError)
+                self.assertIsInstance(ctx.exception, BaseError)
+                self.assertNotIsInstance(ctx.exception, struct.error)
+
+        # Every length below the frame header size behaves the same way, so the
+        # fix is not pinned to one convenient payload.
+        for size in range(0, 9):
+            with self.subTest(size=size):
+                short = b'\x00' * size
+                with self.assertRaises(ProtocolError):
+                    HTTP(io.BytesIO(short), len(short))
+
+    def test_httpv1_read_raises_protocol_error_for_a_malformed_message(self) -> None:
+        """The chosen #787 fix, at its source: ``httpv1.HTTP`` raises ``ProtocolError``.
+
+        Both of the unpackings that a non-HTTP/1 payload lands short on are
+        covered -- the header/body separator in ``read``, and the start line in
+        ``_read_http_header`` -- since either alone leaves the other leaking a
+        bare :class:`ValueError`, and the reproduction only reaches the second.
+
+        Asserted on ``httpv1.HTTP`` directly rather than through the proxy
+        because that is the difference between the two candidate fixes: the
+        contract now holds for every caller, including
+        ``Transport._decode_next_layer``, which dispatches TCP ports 80 and 8080
+        straight to this class and never passes through ``_guess_version`` at
+        all.
+
+        ``__cause__`` is asserted because the chain is what keeps the underlying
+        unpacking error reportable, and what keeps
+        ``test_http_read_explicit_version_wraps_malformed_payload`` true of the
+        explicit path.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        cases = (
+            # No header/body separator at all -- ``read``'s own unpacking.
+            ('no separator', b'not http at all'),
+            # A header with no CRLF in it -- the HTTP/2 preface is exactly this
+            # once the separator has been split off.
+            ('preface start line', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
+            # A start line of fewer than three whitespace-separated tokens.
+            ('two-token start line', b'GET /\r\nHost: example.com\r\n\r\n'),
+            ('one-token start line', b'PRI\r\nHost: example.com\r\n\r\n'),
+        )
+
+        for label, raw in cases:
+            with self.subTest(case=label):
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTPv1(io.BytesIO(raw), len(raw))
+                self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+                self.assertIsInstance(ctx.exception.__cause__, ValueError)
+                self.assertNotIsInstance(ctx.exception.__cause__, ProtocolError)
+
+    def test_httpv1_refuses_a_field_line_with_no_colon(self) -> None:
+        """A colon-less field line must raise ``ProtocolError``, not :exc:`IndexError`.
+
+        ``re.split(rb'\\s*:\\s*', field, maxsplit=1)`` returns a *one*-element
+        list for a field line with no colon in it, so ``item[1]`` raised
+        :exc:`IndexError`. That is the same defect #787 is about, one loop
+        further on and wearing a different exception type: an :exc:`IndexError`
+        is neither a :exc:`ValueError` nor a ``ProtocolError``, so it escaped
+        ``HTTP._guess_version``'s suppression exactly as the bare
+        :exc:`ValueError` did and left the HTTP/2 arm dead for this whole class
+        of input as well.
+
+        Refused rather than skipped: dropping the line would hand back a message
+        whose header fields are quietly not the ones on the wire, which is worse
+        than declining to parse it.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        cases = (
+            ('no colon at all', b'GET / HTTP/1.1\r\nNoColonHere\r\nHost: e\r\n\r\n'),
+            ('no colon, last field', b'GET / HTTP/1.1\r\nHost: e\r\nNoColonHere\r\n\r\n'),
+            # A continuation line with nothing before it to continue: an
+            # ``obs-fold`` is only meaningful after a field line.
+            ('orphan continuation', b'GET / HTTP/1.1\r\n   orphan\r\nHost: e\r\n\r\n'),
+        )
+
+        for label, raw in cases:
+            with self.subTest(case=label):
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTPv1(io.BytesIO(raw), len(raw))
+                self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+
+    def test_httpv1_unfolds_an_obs_fold_continuation_line(self) -> None:
+        """A folded field line is legal HTTP/1 and must parse to the field it carries.
+
+        :rfc:`9112#section-5.2` allows a field value to continue on the next line
+        when that line begins with SP or HTAB, and prescribes replacing each such
+        ``obs-fold`` with a space before interpreting the value. Deprecated, but
+        present in real captures, and both of the ways it used to come out were
+        wrong:
+
+        * a continuation carrying no colon reached ``item[1]`` and raised
+          :exc:`IndexError` -- so an ordinary, legal HTTP/1.1 request aborted the
+          guess and, once refused, would have been relabelled HTTP/2;
+        * a continuation that happened to contain a colon was *worse*: it parsed
+          silently into a spurious extra field, so ``X-Long: a`` folded over
+          ``b: c`` yielded two fields rather than one value of ``a b: c``, with
+          nothing raised to say so.
+
+        The second is the reason this is unfolded rather than merely refused.
+        Detecting the continuation is what both answers need, and having detected
+        it, parsing the message correctly costs one line more than declining it
+        -- while declining it would leave a legal request falling through to the
+        HTTP/2 arm, which is the mislabelling #787 exists to stop.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        cases = (
+            ('space continuation', b'GET / HTTP/1.1\r\nX-Long: a\r\n   b\r\nHost: e\r\n\r\n'),
+            ('tab continuation', b'GET / HTTP/1.1\r\nX-Long: a\r\n\tb\r\nHost: e\r\n\r\n'),
+            ('two continuations', b'GET / HTTP/1.1\r\nX-Long: a\r\n b\r\n\tc\r\nHost: e\r\n\r\n'),
+        )
+        expected = (
+            ('space continuation', [('X-Long', 'a b'), ('Host', 'e')]),
+            ('tab continuation', [('X-Long', 'a b'), ('Host', 'e')]),
+            ('two continuations', [('X-Long', 'a b c'), ('Host', 'e')]),
+        )
+
+        for (label, raw), (_, fields) in zip(cases, expected):
+            with self.subTest(case=label):
+                proto = HTTPv1(io.BytesIO(raw), len(raw))
+                self.assertEqual(list(proto.info.header.items()), fields)
+
+        # The colon-bearing continuation, which used to mis-parse in silence.
+        raw = b'GET / HTTP/1.1\r\nX-Long: a\r\n   b: c\r\nHost: e\r\n\r\n'
+        proto = HTTPv1(io.BytesIO(raw), len(raw))
+        self.assertEqual(list(proto.info.header.items()),
+                         [('X-Long', 'a b: c'), ('Host', 'e')])
+
+    def test_httpv1_unfold_replaces_the_whole_obs_fold_including_the_ows(self) -> None:
+        """A folded message must agree with its literal equivalent, OWS and all.
+
+        The production is ``obs-fold = OWS CRLF RWS`` (:rfc:`9112#section-5.2`)
+        and a recipient replaces *the whole* obs-fold with one or more SP -- so
+        the optional whitespace before the CRLF belongs to the fold, not to the
+        field value. Right-stripping only the continuation left that OWS behind:
+        ``X: a \\t`` folded over ``\\tb`` unfolded to ``'a \\t  b'`` where the
+        literal ``X: a b`` gives ``'a b'``, four of the five pairs below
+        disagreed, and a HTAB survived inside the value where the RFC prescribes
+        SP.
+
+        Asserted as agreement between each folded message and the literal message
+        it is *defined to mean*, rather than against a hand-written expected
+        value, because that equivalence is the whole content of the RFC's remedy
+        -- and pinning it on one input, as this test first did, is what let the
+        trailing-OWS forms through.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        def fields(raw: bytes) -> object:
+            return list(HTTPv1(io.BytesIO(raw), len(raw)).info.header.items())
+
+        pairs = (
+            ('no trailing OWS',
+             b'GET / HTTP/1.1\r\nX: a\r\n b\r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a b\r\nHost: e\r\n\r\n'),
+            ('trailing SP',
+             b'GET / HTTP/1.1\r\nX: a   \r\n b\r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a b\r\nHost: e\r\n\r\n'),
+            ('trailing HTAB',
+             b'GET / HTTP/1.1\r\nX: a\t\r\n b\r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a b\r\nHost: e\r\n\r\n'),
+            ('mixed trailing OWS',
+             b'GET / HTTP/1.1\r\nX: a \t \r\n\tb\r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a b\r\nHost: e\r\n\r\n'),
+            ('two folds, both with trailing OWS',
+             b'GET / HTTP/1.1\r\nX: a \r\n b \r\n c\r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a b c\r\nHost: e\r\n\r\n'),
+            # A continuation that is *only* whitespace: ``line.strip()`` is empty,
+            # so the branch appends a bare separator and must still land on the
+            # same value as the literal form.
+            ('OWS-only continuation',
+             b'GET / HTTP/1.1\r\nX: a\r\n \t \r\nHost: e\r\n\r\n',
+             b'GET / HTTP/1.1\r\nX: a\r\nHost: e\r\n\r\n'),
+            # A *response* start line takes the other classification branch, so
+            # the unfold is exercised independently of request parsing.
+            ('response fold',
+             b'HTTP/1.1 200 OK\r\nX: a \r\n b\r\nServer: s\r\n\r\n',
+             b'HTTP/1.1 200 OK\r\nX: a b\r\nServer: s\r\n\r\n'),
+        )
+
+        for label, folded, literal in pairs:
+            with self.subTest(case=label):
+                self.assertEqual(fields(folded), fields(literal))
+
+        # No unfolded value may carry a HTAB: the fold is replaced by SP, and a
+        # surviving HTAB is the signature of the OWS that was not stripped.
+        for label, folded, _ in pairs:
+            with self.subTest(case=label, check='no HTAB survives'):
+                values = [value for _, value in fields(folded)]  # type: ignore[misc]
+                self.assertEqual([v for v in values if '\t' in v], [])
+
+    def test_httpv1_never_lets_a_bare_exception_escape(self) -> None:
+        """The invariant behind #787: ``httpv1.HTTP`` fails only as ``ProtocolError``.
+
+        This is what makes the set of payloads whose proxy answer changed
+        *derivable* rather than something to enumerate by example. That set is
+        exactly
+
+            {payloads ``httpv1`` refused with a bare exception on base}
+            INTERSECT {payloads ``httpv2`` accepts}
+            INTERSECT {payloads ``httpv1`` still refuses}
+
+        and the bare-exception sites were precisely four: the missing
+        ``\\r\\n\\r\\n`` in ``read``, a header with no CRLF, a start line of fewer
+        than three whitespace-separated tokens, and ``item[1]`` on a colon-less
+        field line. A fifth such site would add a fifth class nobody predicted,
+        which is how that count grew by one on each review round while it was
+        being found by search.
+
+        So rather than pin the classes, this pins the property that bounds them:
+        over a battery spanning every branch of ``read`` and
+        ``_read_http_header`` -- including the four converted sites and the four
+        classes that already raised ``ProtocolError`` before the fix -- nothing
+        escapes that is not a ``ProtocolError``. A new bare-raising site fails
+        here, and no consequence table has to be re-derived by hand.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        payloads = (
+            # The four converted sites.
+            ('read: no CRLFCRLF', b'not http at all'),
+            ('read: no CRLFCRLF, long', b'abcdefghijklmnopqrstuvwxyz0123456789'),
+            ('header: no CRLF (preface)', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
+            ('header: no CRLF (field-less request)', b'GET / HTTP/1.0\r\n\r\n'),
+            ('header: no CRLF (field-less response)', b'HTTP/1.1 200 OK\r\n\r\n'),
+            ('start line: two tokens', b'GET /\r\nHost: e\r\n\r\n'),
+            ('start line: one token', b'PRI\r\nHost: e\r\n\r\n'),
+            ('field line: no colon', b'GET / HTTP/1.1\r\nNoColonHere\r\n\r\n'),
+            ('field line: orphan continuation', b'GET / HTTP/1.1\r\n orphan\r\n\r\n'),
+            # Already ``ProtocolError`` before the fix -- these must stay so.
+            ('start line: unrecognised 3 tokens', b'FOO BAR BAZ\r\nHost: e\r\n\r\n'),
+            ('start line: non-numeric status', b'HTTP/1.1 XXX OK\r\nHost: e\r\n\r\n'),
+            ('start line: four-digit status', b'HTTP/1.1 2000 OK\r\nHost: e\r\n\r\n'),
+            ('start line: lowercase method', b'get / HTTP/1.1\r\nHost: e\r\n\r\n'),
+            ('start line: bad version token', b'GET / HTTP/x.y\r\nHost: e\r\n\r\n'),
+            # Empty and near-empty buffers.
+            ('empty', b''),
+            ('bare CRLFCRLF', b'\r\n\r\n'),
+            ('CRLFCRLF then body', b'\r\n\r\nbody'),
+            # Valid, to keep the battery honest about what it is asserting.
+            ('valid request', b'GET / HTTP/1.1\r\nHost: e\r\n\r\n'),
+            ('valid response', b'HTTP/1.1 200 OK\r\nServer: s\r\n\r\n'),
+            ('valid folded request', b'GET / HTTP/1.1\r\nX: a\r\n b\r\nHost: e\r\n\r\n'),
+        )
+
+        for label, raw in payloads:
+            with self.subTest(case=label):
+                try:
+                    HTTPv1(io.BytesIO(raw), len(raw))
+                except ProtocolError:
+                    pass  # the only permitted failure
+                except BaseException as exc:  # noqa: B036 # pragma: no cover
+                    self.fail(f'{label}: bare {type(exc).__module__}.'
+                              f'{type(exc).__qualname__} escaped httpv1.HTTP: {exc}')
+
+    def test_httpv1_passes_maxsplit_to_re_split_by_keyword(self) -> None:
+        """``re.split``'s ``maxsplit`` must be a keyword, or #787 recurs verbatim.
+
+        Passing it positionally is a :exc:`DeprecationWarning` from Python 3.13
+        and is documented to become a :exc:`TypeError`. A :exc:`TypeError` is
+        neither a :exc:`ValueError` nor a ``ProtocolError``, so on the release
+        that makes the change it would escape ``HTTP._guess_version``'s
+        suppression and kill the HTTP/2 arm again -- the same defect as #787, from
+        a different exception type, which is why it is pinned rather than left to
+        a linter.
+
+        Asserted on a real parse rather than by reading the source, so that a new
+        positional ``re.split`` anywhere on this path is caught too.
+
+        """
+        import io
+        import warnings
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+
+        raw = b'GET /index.html HTTP/1.1\r\nHost: example.com\r\nX-A: b\r\n\r\nbody'
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            HTTPv1(io.BytesIO(raw), len(raw))
+
+        offenders = [
+            f'{w.filename}:{w.lineno}: {w.message}' for w in caught
+            if issubclass(w.category, DeprecationWarning) and 'maxsplit' in str(w.message)
+        ]
+        self.assertEqual(offenders, [])
+
+    def test_guess_version_does_not_suppress_struct_error_on_the_http1_arm(self) -> None:
+        """Only the *last* arm may suppress :exc:`struct.error`. Arm 1 must not.
+
+        The sub-nine-octet leak is fixed by suppressing :exc:`struct.error`
+        alongside ``ProtocolError``, and it is tempting to apply that to both arms
+        for symmetry. It must not be: an arm that is not the last one hands the
+        payload *onward* when it swallows an error, and the HTTP/2 arm accepts any
+        payload of at least nine octets -- so a swallowed error on arm 1 becomes a
+        confident ``version='2'`` for a message that is plainly HTTP/1, which is
+        the mislabel #787 exists to stop rather than a tidier failure.
+        ``unknown HTTP version`` is only the best case, needing arm 2 to decline
+        as well.
+
+        It is also unnecessary: nothing reaches a :exc:`struct.error` through
+        ``httpv1.HTTP``. Nine byte patterns over lengths 0-24, on both the direct
+        route and ``read(version=1)``, answered ``ProtocolError`` 450 times out of
+        450.
+
+        :class:`~pcapkit.utilities.exceptions.StructError` is included because it
+        *subclasses* :exc:`struct.error`, so a widened arm 1 would swallow
+        pcapkit's own signal too -- along with ``StructError.eof``, which
+        ``NoPayload`` handling reads -- where letting it escape reaches
+        ``beholder`` and becomes ``Raw``.
+
+        """
+        import io
+        import struct
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import StructError
+
+        # Unambiguously HTTP/1.1, and long enough that arm 2 would accept it.
+        raw = b'GET /index.html HTTP/1.1\r\nHost: example.com\r\nAccept: */*\r\n\r\n'
+
+        # Control: unpatched, this is HTTP/1.1 on the guess path.
+        self.assertEqual(HTTP(io.BytesIO(raw), len(raw)).version, '1.1')
+
+        faults = (
+            ('stdlib struct.error', struct.error('injected')),
+            ('pcapkit StructError', StructError('injected')),
+            ('pcapkit StructError, eof', StructError('injected', eof=True)),
+        )
+
+        for label, error in faults:
+            with self.subTest(fault=label):
+                with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
+                                mock.Mock(side_effect=error)):
+                    # It must propagate, not be swallowed into an HTTP/2 answer.
+                    with self.assertRaises(struct.error):
+                        HTTP(io.BytesIO(raw), len(raw))
+
+    def test_guess_version_keeps_http1_for_a_folded_http1_request(self) -> None:
+        """The #787 claim, for the input class finding the colon-less line exposed.
+
+        A folded request is legal HTTP/1, so the *right* outcome is that the
+        HTTP/1 arm still claims it -- not that the HTTP/2 arm becomes reachable
+        for it. Pinned through the proxy because that is where the mislabel would
+        appear: ``UDP`` dispatches ports 80 and 8080 to this dispatcher, so a
+        refused HTTP/1 request reads as ``UDP:HTTP/2`` in ``pcapkit.extract``
+        output rather than merely failing.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+
+        raw = b'GET / HTTP/1.1\r\nX-Long: a\r\n   b\r\nHost: e\r\n\r\n'
+
+        guessed = HTTP(io.BytesIO(raw), len(raw))
+        explicit = HTTP(io.BytesIO(raw), len(raw), version=1)
+
+        self.assertEqual(guessed.version, '1.1')
+        self.assertEqual(guessed.alias, 'HTTP/1.1')
+        self.assertEqual(guessed.info, explicit.info)
 
     def test_httpv1_id_make_data_and_request_construction(self) -> None:
         from pcapkit.const.http.method import Method

@@ -552,10 +552,19 @@ class ScopeTests(unittest.TestCase):
         Asserted through the real class rather than a dummy, because the point is
         that this one protocol declines and the rest do not. The construction still
         fails, with :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
-        ``HTTPv1.make`` itself -- which is the outcome
+        :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` -- which is the
+        outcome
         :meth:`HTTPUnitTests.test_http_construction_reaches_the_versioned_make_callee`
         already pins, and is the proof that the keywords reached the delegate
         rather than being refused on the way.
+
+        The asserted message was ``'HTTP/1: invalid format'`` until #787, and the
+        attribution above said ``HTTPv1.make``. Neither the exception type nor what
+        this test is *for* moved: ``HTTPv1.make`` accepts these keywords and builds
+        the packet, and it is reading that packet back that fails -- now as a
+        ``ProtocolError`` raised by ``httpv1.HTTP`` itself, which ``HTTP.read``
+        re-raises unchanged rather than re-labelling with the dispatched version.
+        See that method's docstring for the whole of it.
 
         """
         from pcapkit.protocols.application.http import HTTP
@@ -581,7 +590,7 @@ class ScopeTests(unittest.TestCase):
 
         with self.assertRaises(ProtocolError) as context:
             HTTP(version=1, http_version='1.1', method='GET', uri='/')
-        self.assertEqual(str(context.exception), 'HTTP/1: invalid format')
+        self.assertEqual(str(context.exception), 'HTTP: invalid format')
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
