@@ -491,6 +491,13 @@ class HTTPUnitTests(unittest.TestCase):
         is a real gap (tracked as #800), but reading it as if it were binary
         framing was never a fix for that gap, only an accident #799 closes.
 
+        #800 has since closed that gap, so the one-buffer construction is
+        asserted here on the *explicit* path only: ``read(version=2)`` still has
+        no notion of the preface and must still refuse to read it as framing,
+        while the guess path now identifies the preface by prefix compare and
+        parses the frame after it. That half moved to
+        ``test_guess_version_identifies_the_http2_connection_preface`` below.
+
         """
         import io
         import warnings
@@ -517,14 +524,349 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(clean.version, '2')
         self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
 
-        # The preface prepended to the frame, read as one buffer, must now be
-        # refused on *both* paths -- see the docstring above for why that is
-        # the fix rather than a regression.
+        # The preface prepended to the frame, read as one buffer, is still
+        # refused on the *explicit* path: ``read(version=2)`` hands the whole
+        # buffer to ``httpv2.HTTP``, which has no notion of the preface and must
+        # not read its ASCII as framing. The guess path identifies it instead --
+        # see ``test_guess_version_identifies_the_http2_connection_preface``.
         raw = preface + settings
-        for label, kwargs in (('guessed', {}), ('explicit', {'version': 2})):
-            with self.subTest(path=label):
+        with self.assertRaises(ProtocolError):
+            HTTP(io.BytesIO(raw), len(raw), version=2)
+
+    def test_guess_version_identifies_the_http2_connection_preface(self) -> None:
+        """The preface is identified by prefix compare, not by a parse (#800).
+
+        ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` followed by a SETTINGS
+        frame is what every HTTP/2 connection opens with
+        (:rfc:`9113#section-3.4`), and before this change the dispatcher had no
+        notion of it: the HTTP/1 arm declined it and the HTTP/2 arm read the
+        preface's own ASCII as a frame header, ``b'PRI'`` becoming a declared
+        length of 5,265,993. #799/#802 then made that inconsistency a refusal,
+        which was right in itself but left a real HTTP/2 connection opening
+        reported as not-HTTP at all -- measured on ``f046b38f8``/``4530424df``,
+        both the bare preface and preface-plus-SETTINGS raised ``unknown HTTP
+        version``.
+
+        Three things are asserted, because "it answers 2" alone would also be
+        true of the accident this replaces:
+
+        * the answer is ``version='2'``;
+        * the parsed frame is *the SETTINGS frame*, byte-identical to reading
+          that frame on its own -- which is what proves the preface was skipped
+          rather than consumed as framing;
+        * the reported declared length is the frame's real 9, not a number the
+          preface's ASCII happens to spell.
+
+        """
+        import io
+        import warnings
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.warnings import ProtocolWarning
+
+        preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+        settings = http2_frame_bytes(0x04, 0x00, 0, b'')
+        raw = preface + settings
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            guessed = HTTP(io.BytesIO(raw), len(raw))
+        frame_only = HTTP(io.BytesIO(settings), len(settings), version=2)
+
+        self.assertEqual(guessed.version, '2')
+        self.assertEqual(guessed.alias, 'HTTP/2')
+        # The preface is header rather than payload, so it counts towards
+        # ``length`` -- without that, ``__init__``'s ``packet=self.packet.payload``
+        # injection slices from octet 9 of a buffer whose frame starts at 24 and
+        # reports the tail of the preface as this packet's payload, which is what
+        # ``info`` equality below would otherwise catch.
+        self.assertEqual(guessed.length, len(preface) + frame_only.length)
+        self.assertEqual(guessed.info, frame_only.info)
+        self.assertEqual(guessed.info.packet, b'')
+        self.assertEqual(guessed.info.length, 9)
+        self.assertNotEqual(guessed.info.length, 5265993)
+        self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
+
+        # The frame after the preface is parsed for real, not assumed: a padded
+        # SETTINGS payload comes back as its own settings, and a frame the
+        # parser refuses is refused rather than answered by the identification.
+        settings_2 = http2_frame_bytes(0x04, 0x00, 0, b'\x00\x03\x00\x00\x00d')
+        guessed_2 = HTTP(io.BytesIO(preface + settings_2), len(preface) + len(settings_2))
+        self.assertEqual(guessed_2.version, '2')
+        self.assertEqual(guessed_2.info, HTTP(io.BytesIO(settings_2), len(settings_2),
+                                              version=2).info)
+
+    def test_guess_version_reports_a_preface_with_no_frame_as_such(self) -> None:
+        """A preface with nothing after it is HTTP/2, but carries no frame.
+
+        :rfc:`9113#section-3.4` requires the preface to be followed immediately
+        by a SETTINGS frame, so a payload that is *exactly* the 24 preface octets
+        is either truncated or cut at a segment boundary. It is still positively
+        identified as HTTP/2 -- but this library's HTTP/2 data model is one frame
+        per packet and has no representation for a frameless segment, so there is
+        nothing to return and the payload is refused.
+
+        What the fix buys here is the *diagnosis*, which is why the message is
+        asserted rather than merely the exception type: on ``4530424df`` this
+        answered ``unknown HTTP version``, indistinguishable from genuine
+        garbage, and it now says which of the two it was. Reporting a version
+        with no data would be the dishonest alternative.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+        self.assertEqual(len(preface), 24)
+
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(preface), len(preface))
+        self.assertEqual(str(ctx.exception), 'HTTP/2: connection preface with no frame')
+
+        # A preface followed by something too short to be a frame is refused by
+        # the HTTP/2 parser itself -- identification commits to the version, it
+        # does not excuse the frame.
+        raw = preface + b'\x00\x00\x09\x04'
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(raw), len(raw))
+        self.assertIn('9-octet frame header', str(ctx.exception))
+
+        # And a preface followed by a frame that trips the #805 residual -- a
+        # sixteen-octet GOAWAY, whose fixed ``stream`` and ``error`` fields alone
+        # want eight octets after the header -- must come back catchable. The
+        # identified HTTP/2 route normalises that, because the trial-parse arm it
+        # replaces for this input used to suppress :exc:`struct.error` and answer
+        # ``unknown HTTP version``; without the conversion the bare stdlib error
+        # would now escape a dispatcher documented to raise ``ProtocolError``.
+        import struct
+
+        from pcapkit.utilities.exceptions import BaseError
+
+        goaway = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
+        self.assertEqual(len(goaway), 16)
+        raw = preface + goaway
+        with self.assertRaises(ProtocolError) as ctx:
+            HTTP(io.BytesIO(raw), len(raw))
+        self.assertEqual(str(ctx.exception), 'HTTP/2: invalid format')
+        self.assertIsInstance(ctx.exception, BaseError)
+        self.assertNotIsInstance(ctx.exception, struct.error)
+        self.assertIsInstance(ctx.exception.__cause__, struct.error)
+
+    def test_guess_version_does_not_classify_text_as_http2(self) -> None:
+        """Garbage text must never come back HTTP/2.
+
+        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` answered ``version='2'`` on
+        ``main`` before #802 -- the headline wrong answer of #800 -- because the
+        HTTP/2 arm accepted any buffer of nine octets or more and ``b'foo'`` read
+        as a declared length of 6,712,175 that nothing checked.
+
+        Honest about what closed it: #802's ``schema.length > length`` check
+        already refuses this, so this case passes on ``4530424df`` too and is a
+        *regression guard* rather than a fix demonstration. It is worth pinning
+        here all the same, because after #800 the answer no longer depends on
+        that guard at all: text does not match the preface and does not match an
+        HTTP/1 start line, so it is never positively identified as anything, and
+        the fall-through is the only route left to it. Both defences are asserted
+        so that loosening either one is noticed.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+        cases = (
+            ('lowercase start line', b'foo bar baz\r\nX: y\r\n\r\n'),
+            ('no start line at all', b'not http at all'),
+            ('prose', b'the quick brown fox jumps over the lazy dog\r\n\r\n'),
+            ('almost a method', b'Get /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n'),
+        )
+
+        for label, raw in cases:
+            with self.subTest(case=label):
+                # Neither identification claims it ...
+                self.assertFalse(raw.startswith(preface))
+                self.assertFalse(_test_start_line(raw))
+                # ... and the fall-through refuses it rather than guessing.
                 with self.assertRaises(ProtocolError):
-                    HTTP(io.BytesIO(raw), len(raw), **kwargs)
+                    HTTP(io.BytesIO(raw), len(raw))
+
+    def test_guess_version_commits_to_http1_once_the_start_line_says_so(self) -> None:
+        """An identified HTTP/1 message is not re-tried as HTTP/2 (#800).
+
+        This is the direction that matters for #682, which is about to route 231
+        real HTTP/1 frames through this dispatcher. Before the fix, an HTTP/1
+        message the HTTP/1 parser refused was handed to the HTTP/2 arm, which
+        accepts any self-consistent buffer of nine octets or more -- so the
+        answer for a malformed HTTP/1 message depended on what its first three
+        ASCII octets happened to spell as a 24-bit length. Now the start line
+        decides the version and the HTTP/1 parser's own verdict is the answer.
+
+        Asserted on the message, because the exception *type* is
+        ``ProtocolError`` either way: on ``4530424df`` these payloads came back
+        ``unknown HTTP version`` (both arms having declined), and they now come
+        back ``HTTP: invalid format`` from the version that was actually
+        identified.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        cases = (
+            ('field line with no colon', b'GET / HTTP/1.1\r\nbadfield\r\n\r\n'),
+            ('first field line folded', b'GET / HTTP/1.1\r\n Host: example.com\r\n\r\n'),
+            ('status line, no colon', b'HTTP/1.1 200 OK\r\nbadfield\r\n\r\n'),
+        )
+
+        for label, raw in cases:
+            with self.subTest(case=label):
+                self.assertTrue(_test_start_line(raw))
+                with self.assertRaises(ProtocolError) as ctx:
+                    HTTP(io.BytesIO(raw), len(raw))
+                self.assertEqual(str(ctx.exception), 'HTTP: invalid format')
+
+    def test_start_line_predicate_agrees_with_the_httpv1_parser(self) -> None:
+        """``_test_start_line`` must accept exactly what ``httpv1.HTTP`` accepts.
+
+        The predicate classifies and the parser parses, and they are two
+        statements of the same rule -- which is why the predicate lives beside
+        ``_RE_METHOD``/``_RE_VERSION``/``_RE_STATUS`` in ``httpv1.py`` rather
+        than in the dispatcher. Drift either way is a defect: a predicate looser
+        than the parser classifies payloads the parser then refuses, and a
+        tighter one hands real HTTP/1 to a later arm, which is the mislabel #787
+        and #800 are both about.
+
+        Pinned by construction rather than by inspection -- each payload is run
+        through ``httpv1.HTTP`` as well as through the predicate, so the two
+        cannot be edited apart without this failing.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
+        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        accepted = (
+            ('request', b'GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n'),
+            ('request, extra spaces', b'GET  /  HTTP/1.0\r\nHost: example.com\r\n\r\n'),
+            ('response', b'HTTP/1.1 200 OK\r\nServer: example\r\n\r\nbody'),
+            ('response, no message', b'HTTP/1.0 404 -\r\nServer: example\r\n\r\n'),
+            ('hyphenated method', b'M-SEARCH * HTTP/1.1\r\nHost: example.com\r\n\r\n'),
+        )
+        refused = (
+            # Rejected by the anchored patterns themselves.
+            ('lowercase method', b'Get / HTTP/1.1\r\nHost: example.com\r\n\r\n'),
+            ('four-digit status', b'HTTP/1.1 2000 OK\r\nServer: example\r\n\r\n'),
+            ('no version token', b'GET / FTP/1.1\r\nHost: example.com\r\n\r\n'),
+            # Rejected by the unpackings ``_read_http_header`` performs first.
+            ('two-token start line', b'GET /\r\nHost: example.com\r\n\r\n'),
+            ('no CRLF at all', b'GET / HTTP/1.1'),
+            ('the HTTP/2 preface', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
+            ('not http at all', b'not http at all'),
+        )
+
+        for label, raw in accepted:
+            with self.subTest(accepted=label):
+                self.assertTrue(_test_start_line(raw))
+                # The parser agrees: it reads this without raising.
+                self.assertIn(HTTPv1(io.BytesIO(raw), len(raw)).version, ('1.0', '1.1'))
+
+        for label, raw in refused:
+            with self.subTest(refused=label):
+                self.assertFalse(_test_start_line(raw))
+                # The parser agrees: it refuses this at the start line.
+                with self.assertRaises(ProtocolError):
+                    HTTPv1(io.BytesIO(raw), len(raw))
+
+    def test_guess_version_leaves_a_mid_stream_frame_to_the_fall_through(self) -> None:
+        """A bare frame carries no preface and no start line, and is undecidable.
+
+        Identification cannot answer for a mid-stream segment, and #800
+        deliberately adds no heuristic for one -- no "frame type at most 9,
+        reserved bit clear" test, because that is what misfires on binary HTTP/1
+        bodies. So a bare frame falls through to the trial parse, where the
+        HTTP/2 parser's own length and type consistency rules decide: a
+        self-consistent frame is read as HTTP/2 (unchanged behaviour, pinned so
+        the new identification step is not mistaken for a replacement of the
+        fall-through), and one whose declared length its buffer does not back is
+        refused rather than answered.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+        from pcapkit.protocols.application.httpv1 import _test_start_line
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        preface = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+        settings = http2_frame_bytes(0x04, 0x00, 0, b'')
+
+        # Neither identification fires, so this reaches the fall-through.
+        self.assertFalse(settings.startswith(preface))
+        self.assertFalse(_test_start_line(settings))
+
+        guessed = HTTP(io.BytesIO(settings), len(settings))
+        self.assertEqual(guessed.version, '2')
+        self.assertEqual(guessed.info,
+                         HTTP(io.BytesIO(settings), len(settings), version=2).info)
+
+        # A nine-octet header declaring 16777215 is not backed by its buffer.
+        inconsistent = b'\xff\xff\xff\x04\x00\x00\x00\x00\x00'
+        with self.assertRaises(ProtocolError):
+            HTTP(io.BytesIO(inconsistent), len(inconsistent))
+
+    def test_guess_version_keeps_an_upgrade_h2c_exchange_on_http1(self) -> None:
+        """An ``Upgrade: h2c`` exchange stays HTTP/1.1, and that is correct.
+
+        :rfc:`7540#section-3.2`'s upgrade -- deprecated by
+        :rfc:`9113#section-3.1` but not removed -- is explicitly out of #800's
+        scope, and not because it was awkward: on the wire the upgrade request
+        and its ``101 Switching Protocols`` response *are* HTTP/1.1 messages, and
+        HTTP/1.1 is the right answer for both. The switch takes effect only after
+        the ``101``, so classifying later segments of the same connection as
+        HTTP/2 needs per-connection state keyed on the 4-tuple, and
+        ``_guess_version`` is handed one payload with no flow context.
+        Recognising the field is possible; acting on it is not, so it is left
+        alone rather than half-implemented.
+
+        Pinned so that a later attempt to "support h2c" by sniffing the header
+        has to change a test that says why it must not.
+
+        """
+        import io
+
+        from pcapkit.protocols.application.http import HTTP
+
+        request = (b'GET / HTTP/1.1\r\n'
+                   b'Host: example.com\r\n'
+                   b'Connection: Upgrade, HTTP2-Settings\r\n'
+                   b'Upgrade: h2c\r\n'
+                   b'HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA\r\n\r\n')
+        response = (b'HTTP/1.1 101 Switching Protocols\r\n'
+                    b'Connection: Upgrade\r\n'
+                    b'Upgrade: h2c\r\n\r\n')
+
+        for label, raw in (('upgrade request', request), ('101 response', response)):
+            with self.subTest(case=label):
+                guessed = HTTP(io.BytesIO(raw), len(raw))
+                explicit = HTTP(io.BytesIO(raw), len(raw), version=1)
+
+                self.assertEqual(guessed.version, '1.1')
+                self.assertEqual(guessed.alias, 'HTTP/1.1')
+                self.assertEqual(guessed.info, explicit.info)
+
+        # The field is visible in the parsed message -- it is simply not acted
+        # on, which is the distinction this test exists to record.
+        upgraded = HTTP(io.BytesIO(request), len(request))
+        self.assertEqual(upgraded.info.header['Upgrade'], 'h2c')
 
     def test_guess_version_still_prefers_http1_for_http1_bytes(self) -> None:
         """HTTP/1 is tried first and must still win, request and response alike.

@@ -72,6 +72,71 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 _RE_STATUS = re.compile(rb'\d{3}\Z')
 
 
+def _test_start_line(data: 'bytes') -> 'bool':
+    """Whether ``data`` opens with an HTTP/1.* start line.
+
+    This is a *classification* predicate and parses nothing: it answers "is this
+    HTTP/1?" for :meth:`HTTP._guess_version
+    <pcapkit.protocols.application.http.HTTP._guess_version>`, which until #800
+    answered that question by trial-parsing every version in the family and
+    keeping whichever one did not object -- so a payload that is not HTTP at all
+    was classified by which parser happened to fail less loudly.
+
+    Args:
+        data: Payload to classify.
+
+    Returns:
+        Whether the payload's first line is a ``request-line`` or a
+        ``status-line`` (:rfc:`9112#section-2.1`).
+
+    Note:
+        The acceptance rule is deliberately the *same* one
+        :meth:`HTTP._read_http_header
+        <pcapkit.protocols.application.httpv1.HTTP._read_http_header>` applies
+        further down this module -- ``_RE_METHOD`` with ``_RE_VERSION`` for a
+        request, ``_RE_VERSION`` with ``_RE_STATUS`` for a response -- which is
+        why this lives beside those three patterns rather than in the dispatcher
+        that calls it. The two must accept the same start lines: a predicate
+        looser than the parser classifies payloads the parser then refuses, and
+        one tighter than the parser hands real HTTP/1 to a later arm.
+        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that
+        agreement.
+
+        Both of the unpackings the parser performs *before* those patterns are
+        mirrored too, and this is not pedantry -- the second of them is the whole
+        reason the HTTP/2 connection preface is not claimed here. ``PRI *
+        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed
+        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that
+        tested only the first line would answer :data:`True` for it. Split at the
+        header/body separator first, as :meth:`HTTP.read
+        <pcapkit.protocols.application.httpv1.HTTP.read>` does, and the preface's
+        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is exactly
+        why the parser refuses it, and now why this does. Measured: without the
+        separator split this returned :data:`True` for the preface.
+
+        An HTTP/0.9 request line carries only two tokens and so is not recognised
+        here either, matching the parser, which raises on fewer than three.
+
+    """
+    header = data.split(b'\r\n\r\n', maxsplit=1)[0]
+    if header == data:  # no header/body separator -- ``read`` raises
+        return False
+
+    startline = header.split(b'\r\n', maxsplit=1)[0]
+    if startline == header:  # header holds no CRLF -- ``_read_http_header`` raises
+        return False
+
+    try:
+        para1, para2, para3 = re.split(rb'\s+', startline, maxsplit=2)
+    except ValueError:
+        return False
+
+    return bool(
+        (re.match(_RE_METHOD, para1) and re.match(_RE_VERSION, para3))     # request-line
+        or (re.match(_RE_VERSION, para1) and re.match(_RE_STATUS, para2))  # status-line
+    )
+
+
 class Type(StrEnum):
     """HTTP packet type."""
 

@@ -29,6 +29,17 @@ if TYPE_CHECKING:
 
 __all__ = ['HTTP']
 
+#: The HTTP/2 connection preface (:rfc:`9113#section-3.4`). A client opens every
+#: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --
+#: by sending exactly these 24 octets, and the sequence is *designed* to be
+#: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose
+#: method ``PRI`` is reserved and permanently unregistered, so no valid HTTP/1
+#: message can begin with it and a prefix compare cannot false-positive on one.
+#: That is what makes it a positive identification rather than a heuristic, and
+#: it is why :meth:`HTTP._guess_version` tests it before attempting any parse
+#: (#800).
+_HTTP2_PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
+
 
 class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     """This class implements all protocols in HTTP family.
@@ -41,6 +52,16 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     if TYPE_CHECKING:
         #: Saved subclass protocol data (only for HTTP base class).
         _http: 'HTTP[_PT, _ST]'
+
+    #: Octets consumed ahead of the identified version's own header -- in practice
+    #: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`
+    #: identified one and parsed the frame that follows it. They belong to this
+    #: packet's header rather than to its payload, so :meth:`read` adds them to
+    #: :attr:`length`; without that, ``ProtocolBase.__init__``'s
+    #: ``self._info.__update__(packet=self.packet.payload)`` slices the payload
+    #: from octet 9 of a buffer whose frame starts at octet 24 and reports the
+    #: tail of the preface as packet payload. See #800.
+    _preface_length = 0
 
     #: This class is a version dispatcher rather than a protocol with a header of
     #: its own, so its construction keywords cannot be enumerated: :meth:`make`
@@ -129,7 +150,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
                 raise ProtocolError(f'HTTP/{version}: invalid format') from error
 
         self._version = http.version
-        self._length = http.length
+        self._length = http.length + self._preface_length
         self._http = http
         return http.info
 
@@ -195,7 +216,20 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         return protocol._make_data(data)  # type: ignore[arg-type]
 
     def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'HTTP':
-        """Guess HTTP version.
+        """Identify the HTTP version of the payload, and parse it with that version.
+
+        The payload is *identified* first and trial-parsed only as a last resort.
+        Until #800 there was no identification step at all: both versions were
+        tried in turn and whichever parser did not object was taken as the
+        answer, which answers "did a parser accept this?" where the question is
+        "what is this?" -- and got both directions wrong. The HTTP/2 connection
+        preface came back ``version='2'`` only because ``httpv2.HTTP`` read its
+        leading ``b'PRI'`` as a 24-bit declared frame length of 5,265,993, and
+        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` -- not HTTP at all -- came back
+        ``version='2'`` the same way. #799/#802 closed the second of those by
+        requiring a frame's declared length to be backed by its buffer, but that
+        left the preface *unidentifiable*: a real HTTP/2 connection opening is
+        refused by both arms and reported as not-HTTP.
 
         Args:
             length: Length of packet data.
@@ -207,13 +241,121 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             Parsed packet data.
 
         Raises:
-            ProtocolError: If no version in the family accepts the payload. This
-                is the *only* exception this method raises for an unparseable
-                payload -- a candidate failing in any other way is a fall-through
-                and not an answer.
+            ProtocolError: If no version in the family accepts the payload, or if
+                an identified version's own parser refuses it. This is the
+                *only* exception this method raises for an unparseable payload --
+                a candidate failing in any other way, on a version that was not
+                positively identified, is a fall-through and not an answer.
+
+        Note:
+            Two things this deliberately does **not** decide, because one payload
+            with no flow context cannot:
+
+            * **An ``Upgrade: h2c`` exchange** (:rfc:`7540#section-3.2`,
+              deprecated but not removed by :rfc:`9113#section-3.1`) stays
+              HTTP/1.1 here, and is *correctly* HTTP/1.1: on the wire the upgrade
+              request and its ``101 Switching Protocols`` response are HTTP/1.1
+              messages and parse as such. The switch takes effect only *after*
+              the ``101``, so deciding that later segments of the same connection
+              are HTTP/2 needs per-connection state keyed on the 4-tuple, and
+              this method is handed a single payload with no such context.
+              Recognising the ``Upgrade: h2c`` field is possible; acting on it is
+              not, so it is left alone rather than half-implemented.
+            * **A mid-stream segment** -- a bare HTTP/2 frame header with no
+              preface ahead of it, or an opaque HTTP/1 message body -- is
+              genuinely undecidable from one payload, and the honest answer is
+              the ``Raw`` that an escaping ``ProtocolError`` becomes under
+              :func:`~pcapkit.protocols.misc.raw.beholder`. In particular there
+              is deliberately *no* heuristic on the nine-octet frame header
+              ("type at most 9, reserved bit clear"): that misfires on binary
+              HTTP/1 bodies, which is precisely how garbage text was classified
+              HTTP/2 to begin with. A self-consistent bare frame is still parsed
+              as HTTP/2, but by the fall-through below -- on the parser's own
+              length/type consistency rules -- rather than by a guess dressed up
+              as identification.
 
         """
-        # NOTE: The two arms suppress different sets, and the asymmetry is
+        # NOTE: Positive identification, before any parse attempt. The preface is
+        # a fixed 24-octet sequence that only an HTTP/2 client sends and that no
+        # valid HTTP/1 message can begin with (see ``_HTTP2_PREFACE``), so a
+        # prefix compare is an *answer* rather than evidence: it cannot
+        # false-positive on HTTP/1, and it needs no parse to reach.
+        #
+        # ``length`` bounds the compare as well as ``self._data``, because a
+        # caller may hand this method fewer octets than the buffer holds, and
+        # claiming a preface out of octets that were not part of this payload
+        # would be the same kind of accident this change removes.
+        preface_len = len(_HTTP2_PREFACE)
+        if length >= preface_len and self._data[:preface_len] == _HTTP2_PREFACE:
+            from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+
+            # The preface is not a frame -- the frames begin after it
+            # (:rfc:`9113#section-3.4` requires a ``SETTINGS`` frame immediately
+            # following), so it is skipped rather than fed to ``httpv2.HTTP``,
+            # which is how it used to be misread as framing.
+            if length == preface_len:
+                # A preface with nothing after it *is* HTTP/2, but this library's
+                # HTTP/2 data model is one frame per packet and has no
+                # representation for a frameless segment, so there is nothing to
+                # return. Refused with a message that says which of the two it
+                # was -- an HTTP/2 connection opening truncated at the preface,
+                # not an unrecognised payload -- because that distinction is the
+                # whole point of identifying before parsing.
+                raise ProtocolError('HTTP/2: connection preface with no frame')
+
+            try:
+                http = HTTPv2(self._data[preface_len:length], length - preface_len, **kwargs)
+            except ProtocolError:
+                raise
+            # NOTE: Converted, unlike the HTTP/1 commit below, because this route
+            # is new and has no escaping-error contract to keep: the old arm 2
+            # suppressed :exc:`struct.error` and fell through to ``unknown HTTP
+            # version``, so a preface followed by a frame that trips the #805
+            # residual (an inner field shortfall, e.g. a 16-octet ``GOAWAY``)
+            # must still reach the caller as something it can catch, not as a
+            # bare stdlib error. Same normalisation, and the same reasoning, as
+            # ``read``'s explicit ``version=`` path above.
+            except (ValueError, struct.error) as error:
+                raise ProtocolError('HTTP/2: invalid format') from error
+
+            # The preface is header, not payload -- see ``_preface_length``.
+            self._preface_length = preface_len
+            return http
+
+        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv1 import \
+            _test_start_line  # isort: skip # pylint: disable=import-outside-toplevel
+
+        # NOTE: The second identification: an HTTP/1 ``request-line`` or
+        # ``status-line``, tested with the very patterns ``httpv1.HTTP`` parses
+        # with (``httpv1.py``'s ``_RE_METHOD``, ``_RE_VERSION`` and
+        # ``_RE_STATUS``, all anchored), so the predicate and the parser cannot
+        # disagree about what HTTP/1 looks like.
+        #
+        # Identified means *committed*: a malformed HTTP/1 message is reported as
+        # the malformed HTTP/1 message it is, instead of being handed to the
+        # HTTP/2 arm, which accepts any self-consistent nine-octet-or-longer
+        # buffer. Re-trying an identified HTTP/1 payload as HTTP/2 is exactly how
+        # HTTP/1 traffic acquires a confident HTTP/2 mislabel -- the failure #787
+        # exists to stop -- and #682 is about to route 231 real HTTP/1 frames
+        # through here.
+        #
+        # Nothing is suppressed on this arm, deliberately: it is not a candidate
+        # to be declined, so there is nothing to decline *to*, and
+        # ``test_guess_version_does_not_suppress_struct_error_on_the_http1_arm``
+        # pins that a :exc:`struct.error` -- or pcapkit's own ``StructError``,
+        # whose ``eof`` flag ``NoPayload`` handling reads -- reaches the caller
+        # from this route rather than being converted or swallowed.
+        if _test_start_line(self._data[:length]):
+            return HTTPv1(self._data, length, **kwargs)
+
+        # NOTE: Neither identification matched, so this is the fall-through: a
+        # trial parse, kept because a *mid-stream* payload carries no start line
+        # and no preface, and a self-consistent HTTP/2 frame is still the best
+        # answer available for one. It is the last resort rather than the whole
+        # method, which is the #800 change.
+        #
+        # The two arms suppress different sets, and the asymmetry is
         # deliberate. Only the *last* arm additionally suppresses
         # :exc:`struct.error`, because a payload too short to hold HTTP/2's
         # nine-octet frame header, or one whose frame-specific fields exceed
@@ -267,7 +409,6 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # it into ``Raw``; it would also erase ``StructError.eof``, which
         # ``NoPayload`` handling reads. ``unknown HTTP version`` is only the best
         # case, needing arm 2 to decline as well.
-        from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._data, length, **kwargs)
 
