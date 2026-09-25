@@ -16,8 +16,7 @@ from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
-from pcapkit.utilities.warnings import (RegistryWarning, SchemaWarning, UnknownFieldWarning,
-                                        warn)
+from pcapkit.utilities.warnings import RegistryWarning, SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict

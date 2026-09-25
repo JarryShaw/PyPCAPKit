@@ -283,6 +283,7 @@ def _link_payload(code: 'int') -> 'bytes':
         return bytes(ARP(oper=1))
     if code == EtherType.Reverse_Address_Resolution_Protocol:
         from pcapkit.protocols.link.rarp import RARP
+
         # ARP/RARP/InARP/DRARP all report their alias from the wire ``oper``
         # field rather than from the dispatching EtherType (link/arp.py:176-190
         # per #496), so ``oper`` has to land in the RARP range (3, 4) or this
@@ -378,6 +379,7 @@ def _internet_payload(code: 'int') -> 'bytes':
     if code == TransType.HIP:
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
+
         # Two copies of one parameter, not one -- HIP.make's header length
         # arithmetic loses four octets for a lone parameter and the packet is
         # then rejected on the way back in; see HIP_COPIES in
