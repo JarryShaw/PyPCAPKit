@@ -100,20 +100,19 @@ EXPECTED_TO_REGISTER = frozenset({
 #: Each was rendering a registry that GitHub issue #647 found unguarded.
 #:
 #: Keyed to each template's own guard text rather than one literal shared by
-#: all four: GitHub issue #792 moved ``pcapkit.vendor.reg.apptype.apptype``'s
-#: copy to an f-string, following the library-wide convention GitHub issue
-#: #783 settled, while the other three still raise with ``%`` -- #792
-#: deliberately left them alone so the ``const`` diff stayed reviewable, and
-#: #798 tracks sweeping them, along with the ``%``-formatted dunders and
-#: dropping the f-string disable. One shared literal can no longer pin all four;
-#: what #647 actually needs pinned is that each template still carries *a*
-#: guard rejecting an invalid value, in whatever form that template's own
-#: raise takes, not that the four agree on a formatting style the library is
-#: moving away from.
+#: all four, kept as a dict rather than collapsed back to one shared literal:
+#: GitHub issue #792 moved ``pcapkit.vendor.reg.apptype.apptype``'s copy to an
+#: f-string first, deliberately leaving the other three on ``%`` so its own
+#: diff over a 12,391-member file stayed reviewable, and GitHub issue #798
+#: swept the remaining three onto the same f-string form. All four now agree,
+#: but the dict stays: a future bespoke guard is not guaranteed to match this
+#: one's shape, and what #647 actually needs pinned is that each template
+#: still carries *a* guard rejecting an invalid value, not that every template
+#: shares one literal.
 BESPOKE_TEMPLATES = {
-    'pcapkit.vendor.tcp.flags': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
-    'pcapkit.vendor.ftp.command': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
-    'pcapkit.vendor.http.method': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
+    'pcapkit.vendor.tcp.flags': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
+    'pcapkit.vendor.ftp.command': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
+    'pcapkit.vendor.http.method': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
     'pcapkit.vendor.reg.apptype.apptype': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
 }
 
@@ -589,9 +588,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     agree with it -- the next crawl would simply revert them. The four templates
     below each carry their own copy of the guard rather than inheriting the one
     in :mod:`pcapkit.vendor.default`, which is why all four had to be edited and
-    why all four are checked -- each against its own guard text now that
-    GitHub issue #792 moved one of them off ``%`` formatting, per
-    :data:`BESPOKE_TEMPLATES`.
+    why all four are checked -- each against its own guard text in
+    :data:`BESPOKE_TEMPLATES`, now that GitHub issue #798 finished moving all
+    four off ``%`` formatting (GitHub issue #792 did the first).
     """
 
     def setUp(self) -> None:
@@ -606,6 +605,61 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                 self.assertIn(
                     guard, source, f'{module_name} no longer emits its guard; '
                                    f'see GitHub issue #647')
+
+    def test_no_bespoke_const_module_still_uses_percent_formatting_for_its_guard(self) -> None:
+        """The committed side of :data:`BESPOKE_TEMPLATES`, needing no ``requests``.
+
+        GitHub issue #798: the three vendor templates the previous test's
+        ``skipUnless`` can silently skip -- exactly how #792's regression
+        reached seven CI legs -- so this checks the same guards through the
+        committed :mod:`pcapkit.const` modules instead, which need no network
+        dependency to import. Asserts the *old* ``%``-style literal is gone
+        rather than merely that a guard exists, so a half-converted template
+        (old and new form both present) would still fail this.
+        """
+        old_guard = "raise ValueError('%r is not a valid %s' % (value, cls.__name__))"
+        const_modules = (
+            'pcapkit.const.tcp.flags',
+            'pcapkit.const.ftp.command',
+            'pcapkit.const.http.method',
+            'pcapkit.const.reg.apptype.apptype',
+        )
+        for module_name in const_modules:
+            with self.subTest(const=module_name):
+                source = inspect.getsource(importlib.import_module(module_name))
+                self.assertNotIn(
+                    old_guard, source, f'{module_name} still raises its guard with '
+                                        f'%% formatting; see GitHub issue #798')
+
+    def test_the_disable_drops_only_where_nothing_else_needs_percent_formatting(self) -> None:
+        """GitHub issue #798's third part: the disable is earned, not blanket-dropped.
+
+        ``pcapkit.const.tcp.flags`` and ``pcapkit.const.reg.apptype.apptype``
+        carry no other %-formatted code once their guards (and, for the
+        latter, its three dunders and its span-handling tail) are converted,
+        so their module-level ``consider-using-f-string`` disable comes off.
+        ``pcapkit.const.ftp.command`` and ``pcapkit.const.http.method`` each
+        still render a ``__repr__`` using ``%`` -- out of #798's stated scope,
+        which named only the ``AppType`` template's dunders -- so their
+        disable has to stay; this pins *why* rather than letting a future
+        sweep assume the omission was an oversight.
+        """
+        dropped = ('pcapkit.const.tcp.flags', 'pcapkit.const.reg.apptype.apptype')
+        for module_name in dropped:
+            with self.subTest(const=module_name):
+                source = inspect.getsource(importlib.import_module(module_name))
+                self.assertNotIn('consider-using-f-string', source)
+                self.assertNotIn('%', source)
+
+        retained = ('pcapkit.const.ftp.command', 'pcapkit.const.http.method')
+        for module_name in retained:
+            with self.subTest(const=module_name):
+                source = inspect.getsource(importlib.import_module(module_name))
+                self.assertIn('consider-using-f-string', source)
+                # The __repr__ still using %-formatting is the reason the
+                # disable is retained; the guard itself no longer needs it.
+                self.assertIn('def __repr__', source)
+                self.assertIn('%', source)
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')

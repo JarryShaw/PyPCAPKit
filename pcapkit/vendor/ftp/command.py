@@ -88,7 +88,7 @@ class FEATCode(StrEnum):
 
         """
         if not isinstance(value, str):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
         return extend_enum(cls, value.upper(), value)
 
 
@@ -113,7 +113,7 @@ class CommandType(IntFlag):
 
         """
         if not (isinstance(value, int) and 0 <= value <= 0x07):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
         return super()._missing_(value)
 
 
@@ -186,7 +186,7 @@ class {NAME}(StrEnum):
 
         """
         if not isinstance(value, str):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
         name = value.upper()
         if name in cls._member_map_:
             return cls._member_map_[name]  # type: ignore[return-value]
