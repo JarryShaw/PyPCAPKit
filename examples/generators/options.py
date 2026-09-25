@@ -821,11 +821,12 @@ def _mh_option_registry() -> 'Any':
 
 
 def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
+    import ipaddress
+
     from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
     from pcapkit.const.mh.lma_mag_suboption import \
         LMAControlledMAGSuboption as Enum_LMAControlledMAGSuboption
     from pcapkit.const.mh.option import Option as Enum_Option
-    import ipaddress
     return {
         # ``{}`` makes ``_make_opt_pad`` warn and silently emit a Pad1, so the
         # PadN case would otherwise be a duplicate of the Pad1 one.
@@ -1797,7 +1798,7 @@ def _frame(family: 'Family', octets: 'bytes', index: 'int') -> 'Any':
         ValueError: If ``family`` names an envelope this function does not know.
 
     """
-    from scapy.all import IP, IPv6, Ether, Raw, TCP  # pylint: disable=no-name-in-module
+    from scapy.all import IP, TCP, Ether, IPv6, Raw  # pylint: disable=no-name-in-module
 
     link = Ether(src=SRC_MAC, dst=DST_MAC)
     if family.envelope == 'ethernet-ipv4':
