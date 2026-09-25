@@ -345,7 +345,10 @@ class {NAME}(StrEnum):
             ValueError: If called on a class that holds no members, i.e. on
                 :class:`{NAME}` itself, with a ``proto`` naming no registry to
                 delegate to. Also for a ``key`` that is not a port number, since
-                this registry resolves ports and not service names.
+                this registry resolves ports and not service names -- including
+                one outside ``0..65535``, whose rejection by :meth:`_missing_` this
+                method propagates rather than minting over, so that ``get`` is
+                never more permissive than ``{NAME}(...)``.
 
         :meta private:
         """
@@ -364,11 +367,15 @@ class {NAME}(StrEnum):
             # answered with.
             return matched[0]
 
-        try:
-            ret = owner._missing_(key)
-            if ret is None:
-                raise ValueError
-        except ValueError:
+        # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
+        # for, which is what minting is for, and *raises* for a value that is not a
+        # port at all. Catching that rejection was GitHub issue #758's defect: it
+        # minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
+        # attribute access can reach, and left ``get`` more permissive than
+        # ``{NAME}(...)``, which has always raised here. The rejection now
+        # propagates, so both entry points answer an out-of-range port identically.
+        ret = owner._missing_(key)
+        if ret is None:
             ret = extend_enum(owner, 'PORT_%d_%s' % (key, owner.__transport__.name),
                               key, 'unknown', owner.__transport__)
         return ret
@@ -415,10 +422,16 @@ class {NAME}(StrEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         # NOTE: extending this class would give it a member, and aenum then
         # refuses to subclass it -- permanently, for every registry not yet
-        # imported. The spans below are IANA's unassigned ranges, which belong to
-        # whichever registry was asked, never to this one.
+        # imported. The spans below belong to whichever registry was asked, never
+        # to this one.
         if cls.__registry__ is None:
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        # NOTE: most spans are IANA's unassigned and reserved markers, which name
+        # no transport protocol and so answer every registry. A span that does name
+        # one tests ``cls.__transport__`` and answers that registry alone --
+        # GitHub issue #760, where source order decided instead and a UDP lookup in
+        # 6000-6063 came back carrying ``tcp``. A registry a named span excludes
+        # falls through to a mint, which is what IANA assigning it nothing means.
         {MISS}
         {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
@@ -684,10 +697,27 @@ class AppType(Vendor):
             except ValueError:
                 start, stop = port.split('-')
 
-                miss.append(f'if {start} <= value <= {stop}:')
+                # NOTE: a span IANA assigns to a transport protocol is claimed by
+                # that registry alone, through a test on ``cls.__transport__``.
+                # Source order decided instead until GitHub issue #760: the only
+                # two spans registered on more than one transport -- 6000-6063 and
+                # 6665-6669 -- rendered the same condition twice, leaving the
+                # second copy unreachable, so *every* registry answered with the
+                # first row's. That is not merely a duplicate to collapse: the
+                # 6665-6669 rows are two different services, ``ircu`` on TCP and
+                # IANA's ``reserved`` marker on UDP, so one merged branch carrying
+                # ``tcp | udp`` would have to discard one of them.
+                #
+                # A span naming no transport protocol is an unassigned or reserved
+                # marker belonging to whichever registry was asked, so it carries
+                # no test and keeps answering all four.
+                flag = self.flag([proto])
+                claim = '' if proto == 'undefined' else f' and cls.__transport__ is {flag}'
+
+                miss.append(f'if {start} <= value <= {stop}{claim}:')
                 miss.append(f'    #: {cmmt}')
                 miss.append(f"    return extend_enum(cls, '{self.safe_name(svc)}_%d' % value, "
-                            f"value, {svc!r}, {self.flag([proto])})")
+                            f"value, {svc!r}, {flag})")
 
         return line, miss
 
