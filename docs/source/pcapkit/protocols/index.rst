@@ -177,6 +177,7 @@ Header Schema
    .. autoattribute:: __excluded__
       :no-value:
 
+   .. automethod:: __init_subclass__
    .. automethod:: __new__
 
    .. automethod:: pack

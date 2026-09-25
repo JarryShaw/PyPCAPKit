@@ -144,7 +144,20 @@ if sys.version_info < (3, 11):
 else:
     from enum import StrEnum  # novermin
 
-if sys.version_info < (3, 8):
+# The guard is 3.11 rather than 3.8, which is when the *name* arrived, because
+# what this library needs from ``final`` is not the name but the side effect:
+# from 3.11 on (gh-90500) ``typing.final`` records ``__final__ = True`` on the
+# decorated object, and before that it is a pure annotation for the type checker
+# leaving no runtime trace at all. That dunder is now *read* --
+# :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__` and
+# :meth:`pcapkit.protocols.schema.schema.Schema.__init_subclass__` refuse to
+# derive from a class carrying it in its own ``__dict__`` -- so on 3.10, which is
+# in the CI matrix, keying the guard on 3.8 would leave the runtime check reading
+# an attribute nothing had set: a silent no-op on one supported interpreter and
+# an enforced rule on the rest. ``typing_extensions`` is a declared dependency
+# for exactly ``python_version < '3.11'`` and its ``final`` sets the attribute on
+# every version, so asking for it below 3.11 costs nothing and closes the gap.
+if sys.version_info < (3, 11):
     from typing_extensions import final
 else:
     from typing import final
