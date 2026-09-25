@@ -121,7 +121,15 @@ jobs:
           export PCAPKIT_CI_MODE=1
 
           pcapkit-vendor
-          isort -l100 -ppcapkit pcapkit/const/*/*.py
+          # `find -mindepth 2`, not a `pcapkit/const/*/*.py` shell glob (#765):
+          # this job runs on `macos-latest`, whose default `bash` on PATH is
+          # the system's, unlike the Makefile's own `SHELL := $(shell command
+          # -v bash ...)`, which is confirmed (elsewhere) to pick up a modern
+          # one -- `shopt -s globstar` is not a safe assumption here, and
+          # `find` needs neither globstar nor a modern bash to reach any
+          # depth. `-mindepth 2` keeps the same floor the old glob had: it
+          # still skips `pcapkit/const/__init__.py` itself.
+          isort -l100 -ppcapkit $(find pcapkit/const -mindepth 2 -name '*.py')
 
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v17
@@ -134,8 +142,8 @@ jobs:
 
           python util/bump_version.py
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
-          isort -l100 -ppcapkit pcapkit/const/*/*.py
-          isort -l100 -ppcapkit pcapkit/vendor/*/*.py
+          isort -l100 -ppcapkit $(find pcapkit/const -mindepth 2 -name '*.py')
+          isort -l100 -ppcapkit $(find pcapkit/vendor -mindepth 2 -name '*.py')
 
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
