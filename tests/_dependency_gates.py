@@ -173,6 +173,27 @@ MODULE_PROVIDERS = {
     # anyway, so the day some extra does carry mypy the gap closes itself
     # rather than needing this table rewritten.
     'mypy': ('mypy',),
+    # The other lint-tier tool with a gate, and the counter-example to the entry
+    # above rather than a copy of it. ``isort`` is a ``test`` extra requirement
+    # (#766), so :func:`extras_providing` resolves it to ``{'test'}``, every
+    # pytest job installs it, and ``HAS_ISORT`` is a satisfied gate with no
+    # :data:`DEPENDENCY_GATE_EXCLUSIONS` entry at all -- which is the whole point
+    # of listing it here: the guard now *counts* a gate it could not see before,
+    # and finds nothing to report.
+    #
+    # Why the opposite ruling from ``mypy``, whose gap is declined above: that
+    # entry's reason turns on lint.yml already running mypy over the whole
+    # package, so a pytest leg would pay for a second copy of an existing check.
+    # No such check exists for isort. lint.yml installs "vermin pylint mypy
+    # bandit" and its own header says isort is deliberately not among them --
+    # it appears only in cron-vendor.yml, as a formatter that rewrites the
+    # generated constants on a schedule rather than as a check -- so excluding
+    # this flag would have left `make isort`'s verdict unverified everywhere,
+    # which is the #766 complaint. Cost does not argue the other way either:
+    # isort is a pure-Python wheel and all four Makefile lines together measure
+    # about 1.5s, against the ~238 MB and licence questions that keep ``NGAP``
+    # out of ``all``.
+    'isort': ('isort',),
     # ``beautifulsoup4`` ships ``bs4``; ``html5lib`` is an *extra of* that
     # distribution, so ``beautifulsoup4`` alone does not provide it. That
     # distinction is the whole reason ``HAS_CRAWLER_DEPS`` is satisfied in CI
@@ -492,8 +513,19 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'not. Visibly is the whole point of #779: the gate was an inline '
             'try/except ImportError skipTest until then, which works but is invisible to '
             'this module by construction, since _gates_of() walks a decorator list and '
-            'never a function body. That is the dark-test hazard #745 exists to stop, and '
-            '#766 carries the same shape for the sibling isort check.\n\n'
+            'never a function body. That is the dark-test hazard #745 exists to stop.\n\n'
+            'The sibling isort check (#766) had the identical invisible shape and was '
+            'fixed the other way -- a HAS_ISORT gate plus isort in the test extra, so it '
+            'is a satisfied gate with no entry here. The two rulings disagree for a '
+            'reason that is specific to this paragraph rather than to lint tools in '
+            'general: the "second copy of a check lint.yml already runs" argument above '
+            'is what declines mypy, and lint.yml installs no isort at all (its header '
+            'records that deliberately -- isort appears only in cron-vendor.yml, as a '
+            'formatter rather than as a check), so for isort there was no first copy to '
+            'defer to and excluding it would have left `make isort` verified nowhere. '
+            'This entry is therefore narrow: it is not a precedent that a gate on a lint '
+            'tool gets excluded, only that a gate duplicating an existing lint.yml check '
+            'does.\n\n'
             'test, engine-tests and gate are exactly the three jobs whose selection '
             'reaches tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the two '
             'ignore-shape legs and the whole-suite one. integration and pypcap-parity '

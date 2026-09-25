@@ -89,6 +89,35 @@ def doctored_workflow(case: 'unittest.TestCase', old: 'str', new: 'str') -> 'pat
     return path
 
 
+def doctored_pyproject(case: 'unittest.TestCase', old: 'str', new: 'str') -> 'pathlib.Path':
+    """A throwaway copy of :file:`pyproject.toml`, with ``old`` replaced by ``new``.
+
+    :func:`doctored_workflow` for the *other* input, and it needs one thing that
+    one does not. :func:`~tests._dependency_gates.dependency_gate_gaps` takes a
+    workflow path as an argument, so doctoring a workflow needs no patching at
+    all; :file:`pyproject.toml` is reached through the
+    :data:`~tests._dependency_gates.PYPROJECT` module constant by two
+    :func:`functools.lru_cache`\\ d readers, so a caller has to patch the
+    constant *and* clear both caches -- on the way in, or the real reading is
+    still cached, and on the way out, or the doctored one leaks into every test
+    that runs afterwards. Registering those cleanups here is the point of having
+    a helper rather than open-coding it.
+
+    """
+    text = _dependency_gates.PYPROJECT.read_text(encoding='utf-8')
+    case.assertIn(old, text, f'{old!r} is no longer in pyproject.toml')
+    tmpdir = tempfile.TemporaryDirectory(prefix='pcapkit-doctored-pyproject-')
+    case.addCleanup(tmpdir.cleanup)
+    path = pathlib.Path(tmpdir.name) / 'pyproject.toml'
+    path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+    case.addCleanup(_dependency_gates.extras_providing.cache_clear)
+    case.addCleanup(_dependency_gates.declared_requirements.cache_clear)
+    _dependency_gates.declared_requirements.cache_clear()
+    _dependency_gates.extras_providing.cache_clear()
+    return path
+
+
 def job_section(text: 'str', name: 'str') -> 'str':
     """The YAML text of job ``name``, from its header to the next top-level job.
 
@@ -1565,6 +1594,68 @@ class DependencyGateCoverageTests(unittest.TestCase):
         exclusion = _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS['HAS_MYPY']
         self.assertEqual(set(exclusion.dark), {'test', 'engine-tests', 'gate'})
 
+    def test_the_isort_gate_is_visible_and_closed_by_the_test_extra(self) -> None:
+        """#766: the same invisible shape as ``mypy``, resolved the opposite way.
+
+        :file:`tests/project/test_isort_clean.py` gated on isort with a
+        ``try: import isort`` inside ``setUpClass``, which
+        :func:`~tests._dependency_gates._gates_of` cannot see -- it walks a
+        definition's ``decorator_list`` and never a function body -- and isort
+        was in no :file:`pyproject.toml` extra, so the module reported
+        ``OK (skipped=1)`` on every leg and the only guard on ``make isort``'s
+        four recipe lines ran nowhere.
+
+        Where #779 gave ``mypy`` a visible gate and then declined the install
+        line, this closes the gap instead, so there is deliberately no
+        :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` entry to
+        assert against. The reason the two rulings differ is specific rather
+        than stylistic: that exclusion's own argument is that lint.yml already
+        runs mypy over the whole package, so a pytest leg would be a second
+        copy -- and lint.yml installs no isort at all, by its own header's
+        account, so for isort there was no first copy to defer to.
+
+        The reachability assertion below is load-bearing and is what this test
+        has that its ``mypy`` sibling does not need. That one asserts gaps are
+        *present*, which cannot pass vacuously; this one asserts they are
+        *absent*, which would pass just as well if no job collected the module
+        at all -- so which jobs reach the gate is checked directly rather than
+        inferred from the absence of a gap.
+
+        """
+        gates = [gate for gate in _dependency_gates.gated_scopes()
+                 if gate.flag == 'HAS_ISORT']
+        self.assertEqual(
+            [(gate.module, gate.class_name, gate.func_name) for gate in gates],
+            [('tests/project/test_isort_clean.py', 'TestIsortIsCleanOnThePackage', None)],
+            'the isort gate is invisible to the scan again -- a try/except ImportError '
+            'in setUpClass is exactly the shape _gates_of() cannot see (#766). A '
+            'func_name of None is the class-level decorator, which is what gates the '
+            'whole module rather than one method of it')
+
+        # Mapped *and* carried, which is the difference from mypy: no extra
+        # declares mypy, so extras_providing() answers with the empty set there.
+        self.assertEqual(_dependency_gates.extras_providing('isort'),
+                         frozenset({'test'}))
+
+        reaching = {job.name for job in _dependency_gates.pytest_jobs()
+                    if _dependency_gates.job_reaches(job, gates[0])}
+        self.assertEqual(
+            reaching, {'test', 'engine-tests', 'gate'},
+            'the two ignore-shape legs and the whole-suite one collect '
+            'tests/project/; integration and pypcap-parity select by fixture tier and '
+            'never reach it, the same reason they are absent from HAS_MYPY above')
+
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
+        for job in sorted(reaching):
+            with self.subTest(reaches=job):
+                self.assertNotIn(('HAS_ISORT', job), gaps)
+
+        self.assertNotIn(
+            'HAS_ISORT', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,
+            'the isort gap is closed by an install line, so an exclusion here would be '
+            'the vestigial kind test_each_exclusion_still_describes_a_gap_that_is_'
+            'really_there refuses')
+
     def test_each_exclusion_still_describes_a_gap_that_is_really_there(self) -> None:
         """The anti-rot half, and the reason this is an allowlist and not a skip list.
 
@@ -1799,6 +1890,52 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             'HAS_CRYPTO', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,
             'the exclusion list would swallow the gap this test relies on'
         )
+
+    def test_dropping_isort_from_the_test_extra_is_caught(self) -> None:
+        """#766's own prediction, measured: the gap the install line closes is real.
+
+        Every assertion in
+        :meth:`DependencyGateCoverageTests.test_the_isort_gate_is_visible_and_closed_by_the_test_extra`
+        says a gap is *absent*, and an analysis that had quietly stopped
+        resolving ``HAS_ISORT`` at all would satisfy every one of them. So this
+        takes the requirement back out on a copy and requires the three gaps to
+        reappear -- which is also the state #766 predicted a visible gate would
+        produce before the extra carried isort ("would correctly turn the
+        dependency-gate guard red until isort is on a pytest install line"), and
+        the reason the gate and the install line had to land in one change.
+
+        This mutates :file:`pyproject.toml` rather than the workflow because
+        there is no isort to remove from an install line: every pytest job
+        already installs ``test``, so the extra's own contents are where the
+        dependency enters. That is why :file:`unit-tests.yml` needed no edit for
+        #766 at all.
+
+        """
+        doctored = doctored_pyproject(self, '\n    "isort",\n', '\n')
+        with unittest.mock.patch.object(_dependency_gates, 'PYPROJECT', doctored):
+            self.assertEqual(
+                _dependency_gates.extras_providing('isort'), frozenset(),
+                'the mutation did not take -- some other extra still carries isort')
+            gaps = {(gap.flag, gap.job): gap
+                    for gap in _dependency_gates.dependency_gate_gaps()}
+
+            self.assertEqual(
+                sorted(job for (flag, job) in gaps if flag == 'HAS_ISORT'),
+                ['engine-tests', 'gate', 'test'])
+
+            gap = gaps[('HAS_ISORT', 'test')]
+            self.assertEqual(gap.missing, ('isort',))
+            self.assertEqual({gate.module for gate in gap.gates},
+                             {'tests/project/test_isort_clean.py'})
+
+            message = _dependency_gates.describe_gap(gap)
+            self.assertIn("the 'test' job", message)
+            self.assertIn('isort', message)
+            self.assertIn('test_isort_clean.py', message)
+
+        self.assertNotIn(
+            'HAS_ISORT', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS,
+            'the exclusion list would swallow the gap this test relies on')
 
     def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
         """#729's defect, restaged. Five jobs install ``DPKT``; all five go dark.

@@ -115,17 +115,46 @@ exercises ``make isort``, and :file:`cron-vendor.yml`'s ``vendor-update`` job
 never runs this test suite at all -- it commits and pushes on its own, with
 no pytest step in between.
 
-``isort`` is deliberately absent from both ``Pipfile`` and ``pyproject.toml``:
-:file:`.github/workflows/lint.yml` notes it stays local-only, unlike the other
-three linters. So this test skips outright when isort is not installed, the
-same way :class:`tests.project.test_release_gates.TestYAMLAgreesWithTheScanner`
-skips its PyYAML-dependent half. #766 covers why that skip is itself invisible
-to :file:`tests/_dependency_gates.py`'s guard -- deferred there, not fixed here.
+Until #766 this module gated on isort with a ``try: import isort`` inside
+:meth:`~TestIsortIsCleanOnThePackage.setUpClass`, raising
+:exc:`~unittest.SkipTest` from the body -- and isort was in no
+:file:`pyproject.toml` extra, so every CI leg skipped it. Both halves of that
+are fixed here, and they had to move together.
+
+The gate is now a module-level :data:`HAS_ISORT` read by an
+``@unittest.skipUnless`` decorator, because
+:func:`tests._dependency_gates._gates_of` walks a definition's
+``decorator_list`` and never a function body: an inline ``skipTest`` is
+invisible to that scan *by construction*, which is the dark-test hazard #745
+exists to stop and which #779 fixed the same way for the sibling ``mypy``
+check.
+
+The install line is the other half. ``isort`` is now a ``test`` extra
+requirement, so the three jobs whose selection collects this module --
+``test``, ``engine-tests`` and ``gate`` -- run it for real rather than
+reporting a skip. That is the opposite resolution from ``mypy``'s, whose
+:data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` entry declines the
+install line, and the difference is not taste: :file:`lint.yml` already runs
+``make mypy`` over the whole package, so a pytest copy would be a *second*
+copy, while that same workflow's header records that ``isort`` is deliberately
+not one of the four linters it installs -- it appears only in
+:file:`cron-vendor.yml`, as a formatter that rewrites the generated constants
+on a schedule rather than as a check. So declining the install line here would
+have left ``make isort``'s verdict checked nowhere at all, which is what #766
+objected to. It is cheap enough to be uncontroversial, too: all four lines
+below take about 1.5s together, the "costs nothing per leg" category the test
+job's own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
+
+``isort`` remains absent from ``Pipfile``, which is what ``make isort``'s own
+``pipenv run`` prefix resolves against -- so the target still depends on a
+contributor having isort on ``PATH``. Out of scope here: this module is reached
+by pytest, not by ``make``.
 
 """
 
 from __future__ import annotations
 
+import importlib.util
 import pathlib
 import subprocess
 import sys
@@ -134,6 +163,15 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / 'pcapkit'
 MAKEFILE = ROOT / 'Makefile'
+
+#: Whether :mod:`isort` is importable, for the one test that runs it. A visible
+#: ``skipUnless`` flag rather than the inline ``skipTest`` this module used
+#: until #766, so :func:`~tests._dependency_gates.gated_scopes` counts the gate
+#: and :mod:`tests.test_tier_guard` can audit which CI jobs it darkens -- none
+#: of them, now that the ``test`` extra carries isort; see this module's own
+#: docstring for why that install line was the right answer here and the wrong
+#: one for ``mypy``.
+HAS_ISORT = importlib.util.find_spec('isort') is not None
 
 
 def _pcapkit_tree_targets() -> 'list[str]':
@@ -276,23 +314,12 @@ MAKEFILE_LINES = [
 ]
 
 
+@unittest.skipUnless(HAS_ISORT, 'isort is not installed')
 class TestIsortIsCleanOnThePackage(unittest.TestCase):
     """``make isort`` must not be red on a clean checkout, on any of its four
     lines (#757).
 
     """
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        try:
-            import isort  # noqa: F401  pylint: disable=unused-import,import-outside-toplevel
-        except ImportError:
-            raise unittest.SkipTest(
-                "isort is not installed -- it is deliberately absent from both "
-                "Pipfile and pyproject.toml (lint.yml: 'still local-only'), so "
-                "this test only runs when a contributor has it installed, the "
-                "same precondition `make isort` itself has"
-            )
 
     def test_check_only_is_clean_on_every_makefile_line(self) -> None:
         """Each line of the Makefile's ``isort:`` target, run the way it runs."""

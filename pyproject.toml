@@ -263,6 +263,31 @@ test = [
     # pytest captures and shows only on failure; they change no result. See #507.
     "requests",
     "beautifulsoup4",
+    # Same reason as the two above, for a different test: without it
+    # ``tests/project/test_isort_clean.py`` skipped on every CI leg, so the only
+    # guard on ``make isort``'s four recipe lines -- and on the target-resolving
+    # globs behind them, wrong three times over (#757, #765, #767) -- ran
+    # nowhere. #766.
+    #
+    # A lint tool in the ``test`` extra rather than in a ``lint`` extra of its
+    # own, deliberately. ``isort`` is what *this suite* needs in order not to
+    # skip, which is exactly what this extra is for; a ``lint`` extra would also
+    # have to carry ``mypy``, ``pylint``, ``bandit`` and ``vermin`` to mean
+    # anything, and carrying mypy would silently close the ``HAS_MYPY`` gap that
+    # #779 decided to leave open -- reversing a ruling from an unrelated change.
+    #
+    # Unlike the other four linters, isort has no CI check of its own to defer
+    # to: ``.github/workflows/lint.yml`` installs "vermin pylint mypy bandit"
+    # and says in its own header that isort appears only in
+    # ``cron-vendor.yml``, as a formatter rather than as a check. Cheap, too --
+    # a pure-Python wheel, and all four lines together measure about 1.5s.
+    #
+    # Unpinned, matching ``requests`` and ``beautifulsoup4`` above rather than
+    # inventing an unmeasured floor (verified against 9.0.1). A future isort
+    # whose verdict moves therefore turns that test red, which is the intended
+    # failure: it names the file and prints the diff, where the skip it replaced
+    # said nothing at all.
+    "isort",
 ]
 
 # setuptools specific
