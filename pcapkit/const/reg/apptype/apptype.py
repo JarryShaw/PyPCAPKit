@@ -90,7 +90,7 @@ class TransportProtocol(IntFlag):
 
         """
         if not (isinstance(value, int) and 0 <= value <= max(cls.__members__.values()) * 2 - 1):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         return super()._missing_(value)
 
 
@@ -2306,8 +2306,8 @@ class AppType(StrEnum):
         # two services on one port stay two canonical members instead of one
         # member and an alias -- an alias would answer to the other's name.
         if cls.__registry__ is None:
-            raise ValueError('%s holds no members; they belong to its per-transport '
-                             'subclasses' % cls.__name__)
+            raise ValueError(f'{cls.__name__} holds no members; they belong to its per-transport '
+                             'subclasses')
         cls.__registry__.add(value, obj)
 
         return obj
@@ -2372,7 +2372,7 @@ class AppType(StrEnum):
         # non-port outright is the honest answer, and it has to happen before the
         # miss path, which formats ``key`` with ``%d``.
         if not isinstance(key, int):
-            raise ValueError('%r is not a valid port number for %s' % (key, cls.__name__))
+            raise ValueError(f'{key!r} is not a valid port number for {cls.__name__}')
         if cls.__registry__ is not None:
             return cls
 
@@ -2417,8 +2417,8 @@ class AppType(StrEnum):
             subclass = cls.__registries__.get(TransportProtocol(namespaces[0]))
             if subclass is not None:
                 return subclass
-        raise ValueError('%r names no transport protocol registry of %s'
-                         % (proto, cls.__name__))
+        raise ValueError(f'{proto!r} names no transport protocol registry of '
+                         f'{cls.__name__}')
 
     @classmethod
     def get(cls, key: 'int', *,
@@ -2525,13 +2525,13 @@ class AppType(StrEnum):
 
         """
         if not (isinstance(value, int) and 0 <= value <= 65535):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         # NOTE: extending this class would give it a member, and aenum then
         # refuses to subclass it -- permanently, for every registry not yet
         # imported. The spans below belong to whichever registry was asked, never
         # to this one.
         if cls.__registry__ is None:
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         # NOTE: most spans are IANA's unassigned and reserved markers, which name
         # no transport protocol and so answer every registry. A span that does name
         # one tests ``cls.__transport__`` and answers that registry alone --
