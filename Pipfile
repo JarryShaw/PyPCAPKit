@@ -45,6 +45,7 @@ beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 autopep8 = "*"
 bandit = "*"
+isort = "*"
 mypy = "*"
 pylint = "*"
 ipython = "*"
