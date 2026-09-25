@@ -2390,7 +2390,10 @@ class AppType(StrEnum):
             ValueError: If called on a class that holds no members, i.e. on
                 :class:`AppType` itself, with a ``proto`` naming no registry to
                 delegate to. Also for a ``key`` that is not a port number, since
-                this registry resolves ports and not service names.
+                this registry resolves ports and not service names -- including
+                one outside ``0..65535``, whose rejection by :meth:`_missing_` this
+                method propagates rather than minting over, so that ``get`` is
+                never more permissive than ``AppType(...)``.
 
         :meta private:
         """
@@ -2409,11 +2412,15 @@ class AppType(StrEnum):
             # answered with.
             return matched[0]
 
-        try:
-            ret = owner._missing_(key)
-            if ret is None:
-                raise ValueError
-        except ValueError:
+        # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
+        # for, which is what minting is for, and *raises* for a value that is not a
+        # port at all. Catching that rejection was GitHub issue #758's defect: it
+        # minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
+        # attribute access can reach, and left ``get`` more permissive than
+        # ``AppType(...)``, which has always raised here. The rejection now
+        # propagates, so both entry points answer an out-of-range port identically.
+        ret = owner._missing_(key)
+        if ret is None:
             ret = extend_enum(owner, 'PORT_%d_%s' % (key, owner.__transport__.name),
                               key, 'unknown', owner.__transport__)
         return ret
@@ -2460,10 +2467,16 @@ class AppType(StrEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         # NOTE: extending this class would give it a member, and aenum then
         # refuses to subclass it -- permanently, for every registry not yet
-        # imported. The spans below are IANA's unassigned ranges, which belong to
-        # whichever registry was asked, never to this one.
+        # imported. The spans below belong to whichever registry was asked, never
+        # to this one.
         if cls.__registry__ is None:
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        # NOTE: most spans are IANA's unassigned and reserved markers, which name
+        # no transport protocol and so answer every registry. A span that does name
+        # one tests ``cls.__transport__`` and answers that registry alone --
+        # GitHub issue #760, where source order decided instead and a UDP lookup in
+        # 6000-6063 came back carrying ``tcp``. A registry a named span excludes
+        # falls through to a mint, which is what IANA assigning it nothing means.
         if 225 <= value <= 241:
             #: [N/A] Reserved [:rfc:`1060`]
             return extend_enum(cls, 'reserved_%d' % value, value, 'reserved', TransportProtocol.get('undefined'))
@@ -2887,10 +2900,10 @@ class AppType(StrEnum):
         if 5995 <= value <= 5998:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 6000 <= value <= 6063:
+        if 6000 <= value <= 6063 and cls.__transport__ is TransportProtocol.get('tcp'):
             #: [TCP] X Window System
             return extend_enum(cls, 'x11_%d' % value, value, 'x11', TransportProtocol.get('tcp'))
-        if 6000 <= value <= 6063:
+        if 6000 <= value <= 6063 and cls.__transport__ is TransportProtocol.get('udp'):
             #: [UDP] X Window System
             return extend_enum(cls, 'x11_%d' % value, value, 'x11', TransportProtocol.get('udp'))
         if 6078 <= value <= 6079:
@@ -3037,10 +3050,10 @@ class AppType(StrEnum):
         if 6658 <= value <= 6664:
             #: [N/A] Unassigned
             return extend_enum(cls, 'unassigned_%d' % value, value, 'unassigned', TransportProtocol.get('undefined'))
-        if 6665 <= value <= 6669:
+        if 6665 <= value <= 6669 and cls.__transport__ is TransportProtocol.get('tcp'):
             #: [TCP] IRCU
             return extend_enum(cls, 'ircu_%d' % value, value, 'ircu', TransportProtocol.get('tcp'))
-        if 6665 <= value <= 6669:
+        if 6665 <= value <= 6669 and cls.__transport__ is TransportProtocol.get('udp'):
             #: [UDP] Reserved
             return extend_enum(cls, 'reserved_%d' % value, value, 'reserved', TransportProtocol.get('udp'))
         if 6674 <= value <= 6677:

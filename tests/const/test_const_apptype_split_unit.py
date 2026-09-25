@@ -274,6 +274,108 @@ class AppTypeSplitTests(unittest.TestCase):
         # It is still documented, just not resolvable.
         self.assertIn('``reserved``', AppType.__doc__ or '')
 
+    def test_get_rejects_an_out_of_range_port_as_the_constructor_does(self) -> None:
+        """GitHub issue #758: ``get`` swallowed ``_missing_``'s own rejection.
+
+        ``test_every_registry_rejects_a_negative_value`` above asserts ``cls(-1)``
+        and ``cls(65536)`` and **never** ``.get``, which is how CI stayed green
+        while ``AppType.get(-1, proto='tcp')`` minted ``PORT_-1_tcp`` -- a key no
+        attribute access can reach, since it is not an identifier. ``_missing_``
+        did raise; ``get``'s ``except ValueError`` caught that very rejection and
+        minted regardless, leaving ``get`` more permissive than ``cls(...)``. So
+        the assertion has to be on ``.get``, and on the registry not having grown:
+        the defect was visible as ``len(TCP)`` going 6147 to 6148.
+        """
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType, TransportProtocol
+
+        for cls in (TCP, UDP, SCTP, DCCP):
+            for port in (-1, 65536, 999999):
+                with self.subTest(registry=cls.__name__, port=port):
+                    before = len(cls)
+                    with self.assertRaises(ValueError):
+                        cls.get(port)
+                    with self.assertRaises(ValueError):
+                        cls.get_all(port)
+                    with self.assertRaises(ValueError):
+                        AppType.get(port, proto=cls.__transport__)
+                    self.assertEqual(len(cls), before)
+                    self.assertNotIn('PORT_%d_%s' % (port, cls.__transport__.name),
+                                     cls.__members__)
+
+        # Paid for by narrowing nothing: a valid but unassigned port is what the
+        # mint is *for*, and it still answers with one.
+        minted = AppType.get(59000, proto=TransportProtocol.tcp)
+        self.addCleanup(self._purge_member, TCP, 'PORT_59000_tcp', 59000)
+        self.assertEqual(minted.svc, 'unknown')
+        self.assertEqual(minted.port, 59000)
+
+    def test_a_span_on_two_transports_answers_each_with_its_own_row(self) -> None:
+        """GitHub issue #760: source order decided, so the TCP row answered all four.
+
+        IANA registers exactly two port *spans* on more than one transport
+        protocol, and the crawler rendered one ``_missing_`` branch per registry
+        row -- two branches with an identical condition, the second unreachable.
+        Every registry therefore answered with the first: ``AppType.get(6010,
+        proto='udp')`` returned a **UDP** member whose ``proto`` read ``tcp``.
+
+        6665-6669 is why the duplicate is not simply collapsed into one branch
+        carrying ``tcp | udp``: its two rows are different services -- ``ircu`` on
+        TCP, IANA's ``reserved`` marker on UDP -- so a merged branch would have to
+        discard one of them, and #732's ``TransportProtocol`` retype would then
+        want a *named* combination for it. Each branch tests ``cls.__transport__``
+        instead, which also stays right for a span naming one transport only.
+        """
+        from pcapkit.const.reg.apptype import SCTP, TCP, UDP, AppType
+
+        for cls, port, svc in ((TCP, 6010, 'x11'), (UDP, 6010, 'x11'),
+                               (TCP, 6666, 'ircu'), (UDP, 6666, 'reserved')):
+            with self.subTest(registry=cls.__name__, port=port):
+                resolved = AppType.get(port, proto=cls.__transport__)
+                self.addCleanup(self._purge_member, cls, '%s_%d' % (svc, port), port)
+                self.assertIs(type(resolved), cls)
+                self.assertEqual(resolved.svc, svc)
+                self.assertIs(resolved.proto, cls.__transport__)
+
+        # A span IANA assigns to TCP and UDP assigns nothing to SCTP, so the third
+        # registry mints rather than inheriting the TCP row -- which it did, as
+        # ``<SCTP.x11: 6010 [tcp]>``.
+        resolved = AppType.get(6010, proto='sctp')
+        self.addCleanup(self._purge_member, SCTP, 'PORT_6010_sctp', 6010)
+        self.assertEqual(resolved.svc, 'unknown')
+        self.assertIs(resolved.proto, SCTP.__transport__)
+
+    def test_every_transport_named_span_is_claimed_by_one_registry(self) -> None:
+        """The structural half of #760, which is what survives the next crawl.
+
+        :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_` is generated,
+        so the defect returns the moment
+        :mod:`pcapkit.vendor.reg.apptype.apptype` stops emitting the test -- and
+        it returns silently, because a shadowed branch is unreachable rather than
+        wrong. This asserts the invariant over every branch instead of over the two
+        spans that happen to collide today: a branch minting a member for a named
+        transport protocol is claimed by that registry, and one minting for
+        ``undefined`` claims nothing, since IANA's unassigned and reserved markers
+        belong to whichever registry was asked.
+        """
+        import inspect
+        import re
+
+        from pcapkit.const.reg.apptype import AppType
+
+        source = inspect.getsource(AppType._missing_.__func__)  # type: ignore[attr-defined]
+        branches = re.findall(r'\n        if (.+?):\n            #:.*?\n            '
+                              r'return extend_enum\(.+?TransportProtocol\.get\((.+?)\)\)',
+                              source)
+        self.assertEqual(len(branches), 766)
+
+        for condition, proto in branches:
+            with self.subTest(condition=condition):
+                claim = 'cls.__transport__ is TransportProtocol.get(%s)' % proto
+                if proto == "'undefined'":
+                    self.assertNotIn('cls.__transport__', condition)
+                else:
+                    self.assertIn(claim, condition)
+
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
         """Undo an :func:`~aenum.extend_enum` so the registry is left as found.
