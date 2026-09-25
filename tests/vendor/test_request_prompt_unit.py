@@ -99,10 +99,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all. They ship in the ``vendor`` extra
-#: (:file:`pyproject.toml`), not ``test``, and CI installs ``.[test]``, so these
-#: cases skip in CI as things stand. Guarded the way
-#: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional
-#: dependencies rather than making the whole unit tier depend on the crawlers'.
+#: (:file:`pyproject.toml`), not ``test`` -- so these cases skip on the ``test``
+#: and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`, but run for
+#: real on ``engine-tests``, which installs ``vendor`` too (#738).
+#: Guarded the way :file:`tests/protocols/test_dispatch_registry_unit.py` guards
+#: its own optional dependencies rather than making the whole unit tier depend on
+#: the crawlers'.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 #: How many prompts :func:`_fake_input` will answer before it decides the loop is

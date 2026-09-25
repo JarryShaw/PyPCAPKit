@@ -274,6 +274,59 @@ jobs:
   # pcapkit/foundation/engines/_pcap_backend.py's own module docstring. That is
   # why PyPCAP is not in this job's install line at all; it gets the
   # `pypcap-parity` job below, entirely to itself.
+  #
+  # `vendor` joins the install line for #738's remaining gap, HAS_VENDOR_DEPS
+  # (41 methods across tests/vendor/test_request_prompt_unit.py,
+  # test_user_agent_unit.py, test_ipx_packet_unit.py and
+  # test_ftp_return_code_unit.py) -- one requirement extra short of the `test`
+  # extra's own requests+bs4 (#507): html5lib, which only
+  # beautifulsoup4[html5lib] provides. #738's ruling was to land this on a
+  # non-blocking leg rather than add it to `test`, following the precedent of
+  # 3.15 in python-compatibility.yml (b7f51401b) -- a job that exists and
+  # reports without being one of ruleset 23497679's 15 required checks. This
+  # job already is exactly that leg: "Engines Python X" is not among the 15
+  # (Python/Integration Python/Compat Python 3.10-3.14), so adding the extra
+  # here, rather than opening a new job, closes the gap without a sixth matrix
+  # to maintain. Its selection mirrors `test`'s ignore-shape, which is what
+  # already reaches these gates dark -- see this job's own comment above and
+  # tests/_dependency_gates.py's HAS_VENDOR_DEPS exclusion. It is also the
+  # only *per-pull-request* job with that property: `gate` reaches these
+  # gates too but never runs on a pull request at all (only via a release's
+  # `gate-only: true` call), and `integration`'s fixture-tier selection never
+  # reaches tests/vendor/ in the first place -- so this was the forced
+  # choice, not merely a convenient one.
+  #
+  # Worth recording since it bears on the ruling: none of the 41 methods this
+  # closes make a live network call, though not for one reason across the
+  # four files.
+  #
+  # test_user_agent_unit.py (11 methods) and test_request_prompt_unit.py (16)
+  # gate on HAS_VENDOR_DEPS only because pcapkit.vendor's package import
+  # chain needs requests/bs4/html5lib importable -- html5lib itself is never
+  # used by either file's test bodies, both of which replace requests.get
+  # with a recorder for the whole of every case (each file's own module
+  # docstring says so in its own words, not a shared one).
+  #
+  # test_ipx_packet_unit.py (9 methods) is a regression suite for a
+  # *retired* scrape: pcapkit.vendor.ipx.packet.Packet.LINK is None, so
+  # _request() short-circuits before ever calling requests.get, and
+  # test_request_makes_no_network_call asserts exactly that by making
+  # requests.get and requests.Session.request raise if reached at all.
+  # html5lib is an import precondition here too, not something the test
+  # bodies use.
+  #
+  # test_ftp_return_code_unit.py (5 methods) is not retired --
+  # pcapkit.vendor.ftp.return_code.ReturnCode.LINK is a live Wikipedia URL --
+  # and is the one file where html5lib is a *functional* dependency rather
+  # than an import precondition: its tests build the HTML fixture inline and
+  # hand it straight to ReturnCode.request(), which is
+  # bs4.BeautifulSoup(text, 'html5lib'). What keeps it off the network is the
+  # fixture being inline, not an absence of html5lib use.
+  #
+  # The #518 Wikipedia-403 flakiness the ruling was guarding against belongs
+  # to the crawlers HAS_CRAWLER_DEPS gates (live, unconditionally, since
+  # #507), not to any of the above -- but the leg placement follows the
+  # ruling as recorded rather than re-opening it here.
   engine-tests:
     name: Engines Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true }}
@@ -332,7 +385,7 @@ jobs:
       - name: Install package and per-engine test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'
+          python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT,vendor]'
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism

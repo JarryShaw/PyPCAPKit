@@ -244,8 +244,8 @@ test = [
     # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports "9 skipped"
     # rather than failing, so the byte-for-byte regeneration check that is the
     # only guard on the hand-maintained IPX socket registry never runs on any CI
-    # path: the ``unit-tests.yml`` jobs install ``.[test]``, and
-    # ``cron-vendor.yml`` installs ``.[all]`` but never invokes pytest.
+    # path: every ``unit-tests.yml`` job's install line builds on ``.[test]``,
+    # and ``cron-vendor.yml`` installs ``.[all]`` but never invokes pytest.
     #
     # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
     # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports
@@ -254,9 +254,11 @@ test = [
     # ``ModuleNotFoundError`` that the crawler imports below it raise anyway.
     #
     # Plain, without the ``vendor`` extra's ``[socks]`` and ``[html5lib]``:
-    # nothing in the test suite goes through a proxy, and no unit-tier test
-    # parses HTML (none of them may -- the tier makes no network call), so
-    # neither parser nor proxy support is reachable from here. Their absence
+    # nothing in the test suite goes through a proxy, and the one unit-tier
+    # test that parses HTML (``tests/vendor/test_ftp_return_code_unit.py``)
+    # does so from an inline fixture with the ``vendor`` extra's own
+    # ``html5lib``, not through anything this extra provides, so neither
+    # parser nor proxy support is reachable from here. Their absence
     # makes :mod:`pcapkit.vendor` log two ``VendorWarning``s at import, which
     # pytest captures and shows only on failure; they change no result. See #507.
     "requests",

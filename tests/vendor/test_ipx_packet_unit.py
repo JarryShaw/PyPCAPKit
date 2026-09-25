@@ -53,8 +53,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all. They ship in the ``vendor`` extra
-#: (:file:`pyproject.toml`), not ``test``, and CI installs ``.[test]`` -- so these
-#: tests skip in CI as things stand. Guarded the same way
+#: (:file:`pyproject.toml`), not ``test`` -- so these tests skip on the ``test``
+#: and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`, which never
+#: install ``vendor``, but run for real on ``engine-tests``, which does (#738).
+#: Guarded the same way
 #: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional
 #: runtime dependencies, rather than making the whole unit tier depend on the
 #: crawlers' requirements. See #518.
