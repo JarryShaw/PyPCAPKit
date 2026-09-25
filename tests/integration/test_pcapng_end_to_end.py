@@ -151,9 +151,10 @@ class PcapngByteOrderTests(EndToEndTestCase):
 class PcapngUnescapedKeyTests(EndToEndTestCase):
     """The report of :file:`test.pcapng`, which carries a decryption secrets block.
 
-    Its tree report is fine -- :class:`PcapngTreeReportTests` covers it -- but
-    the ``json`` and ``plist`` reports come out unparseable, so the round trip
-    lives here behind a skip rather than being asserted either way.
+    Its tree report is fine -- :class:`PcapngTreeReportTests` covers it -- and
+    since #784 its ``plist`` report parses too. Its ``json`` report still comes
+    out unparseable, so that round trip lives here behind a skip rather than
+    being asserted either way.
 
     """
 
@@ -165,7 +166,7 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
 
         For this fixture it is not, and two things stack up to make it so:
 
-        1. ``pcapkit/protocols/schema/misc/pcapng.py:1450`` keys the TLS key log
+        1. ``pcapkit/protocols/schema/misc/pcapng.py:1982`` keys the TLS key log
            entries by ``bytes.fromhex(random)``, i.e. by a raw :class:`bytes`
            client random rather than by its hex text, so the report's key is a
            Python ``bytes`` repr: ``b' !"#$%&\\'()*+,-./0123456789:;<=>?'``.
@@ -180,9 +181,15 @@ class PcapngUnescapedKeyTests(EndToEndTestCase):
                >>> json.load(open('probe.json'))
                json.decoder.JSONDecodeError: Expecting ':' delimiter ...
 
-        Measured on this fixture: ``json.load`` fails with ``Expecting ':'
-        delimiter: line 915 column 12``. The same key makes the ``plist`` report
-        invalid XML at line 1376, where its ``&`` is unescaped.
+        Measured on this fixture at ``ef859f776``: ``json.load`` fails with
+        ``Expecting ':' delimiter: line 1019 column 12`` -- quoted as what that
+        commit measured, not as a promise the fixture will keep producing it,
+        since a stale instance of exactly this number is what #785 was filed
+        over. The same key used to make the ``plist`` report invalid XML too;
+        #784 fixed that half by adding an ``escape_key`` helper in
+        ``pcapkit/dumpkit/common.py:250`` that XML-escapes mapping keys, leaving
+        only this ``json`` quoting defect, still open upstream as
+        JarryShaw/DictDumper#121.
 
         """
         extractor = self.extract(fin=sample_path('test.pcapng'), fout=self.out('report'),
