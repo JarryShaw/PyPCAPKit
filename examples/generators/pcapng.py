@@ -342,8 +342,9 @@ class _Blocks:
     def journal(self, entry: 'bytes') -> 'bytes':
         """:manpage:`systemd(1)` Journal Export Block.
 
-        ``entry`` is padded out to a 4-octet boundary by the caller rather than
-        here -- see :func:`_journal_entry` for why that distinction matters.
+        ``entry`` is padded out to a 4-octet boundary by :meth:`_Blocks.block`,
+        not here -- see :func:`_journal_entry` for why that distinction used to
+        matter.
 
         """
         return self.block(BLOCK_JOURNAL, entry)
@@ -402,15 +403,16 @@ def _read_epb_packets(path: 'pathlib.Path') -> 'list[bytes]':
 def _journal_entry(message: 'str', realtime_us: 'int') -> 'bytes':
     """Build a :manpage:`systemd(1)` journal export entry of 4-octet length.
 
-    The block body is padded to a 4-octet boundary like every other PCAP-NG
-    block, but pcapkit hands the padding to its journal-entry parser along with
-    the entry itself, and the parser then reads the NULs as the start of a
-    binary field and raises ``struct.error: unpack requires a buffer of 8
-    bytes``. Choosing a message whose entry is already aligned means no padding
-    is added, which the specification allows and which keeps the fixture
-    parseable. The underlying defect is
-    ``pcapkit/protocols/schema/misc/pcapng.py:1376`` splitting ``self.entry``
-    without first stripping the block padding.
+    The block body is padded to a 4-octet boundary by :meth:`_Blocks.block`,
+    so a message whose entry is already aligned gets no padding at all. That
+    used to be load-bearing: an unaligned entry's own NUL padding was read as
+    a binary field name and raised a bare ``struct.error`` (fixed in `#699
+    <https://github.com/JarryShaw/PyPCAPKit/pull/699>`__, which made a
+    NUL-only line end the entry). Measured on ``ef859f776``: a misaligned
+    entry now parses with no ``SchemaWarning``. The loop stays only because
+    removing it regenerates ``test.pcapng`` -- an untracked fixture change,
+    not a prose one; see `#791
+    <https://github.com/JarryShaw/PyPCAPKit/issues/791>`__.
 
     """
     while True:
