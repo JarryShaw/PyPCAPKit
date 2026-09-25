@@ -147,7 +147,7 @@ class StatusCode(Vendor):
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (  # pylint: disable=consider-using-f-string
                 name, ''.join(temp) if rfcs else '',
-            ), re.MULTILINE))
+            ), flags=re.MULTILINE))
 
             try:
                 code, _ = item[0], int(item[0])

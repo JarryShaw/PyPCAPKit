@@ -92,7 +92,7 @@ class EtherType(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = re.sub(r'( )( )*', ' ', f"{''.join(temp)}".replace('\n', ' ')) if rfcs else ''
-            tmp2 = re.sub(r'\r*\n', ' ', tmp1, re.MULTILINE)
+            tmp2 = re.sub(r'\r*\n', ' ', tmp1, flags=re.MULTILINE)
             tmp3 = name.replace('\n', ' ')
             desc = self.wrap_comment(f"{tmp3} {tmp2}")
 
