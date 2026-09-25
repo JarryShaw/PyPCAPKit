@@ -313,25 +313,69 @@ DEPENDENCY_GATE_EXCLUSIONS = {
         ),
     ),
     'HAS_VENDOR_DEPS': Exclusion(
-        dark={'test': ('html5lib',), 'gate': ('html5lib',), 'engine-tests': ('html5lib',)},
+        dark={'test': ('html5lib',), 'gate': ('html5lib',)},
         reason=(
-            "Ruled onto a non-blocking leg by #738's option (b), because the crawlers "
-            'fetch from IANA and Wikipedia and #518 records four Wikipedia 403s and a '
-            'dead IETF URL -- so a blocking leg would go red on upstream availability '
-            'rather than on this code. That leg is #738\'s own remaining scope and does '
-            'not exist yet. Note what is actually missing, which #738 gets wrong: '
-            'requests and bs4 have shipped in the test extra since #507 and are '
-            'installed on every job, so these five classes are one *requirement extra* '
-            'short -- html5lib, which only beautifulsoup4[html5lib] provides, i.e. the '
-            'vendor and all extras.\n\n'
-            "engine-tests (#751) joins test and gate here rather than closing the gap: "
-            "its selection mirrors test's ignore-shape exactly (same --ignore flags), so "
-            'it reaches the same unit-tier HAS_VENDOR_DEPS gates and is dark on html5lib '
-            'for the identical reason test is. pypcap-parity does not appear here even '
-            'though it also declines html5lib, because its fixture-tier selection never '
-            "reaches tests/vendor/test_ipx_socket_unit.py in the first place -- same "
-            'shape as integration above it, which is why integration is not listed '
-            'either.'
+            "Ruled onto a non-blocking leg by #738's option (b), on the premise that the "
+            'crawlers fetch from IANA and Wikipedia and #518 records four Wikipedia 403s '
+            'and a dead IETF URL -- so a blocking leg would go red on upstream '
+            'availability rather than on this code. Note what is actually missing, which '
+            "#738's own inventory gets wrong: requests and bs4 have shipped in the test "
+            'extra since #507 and are installed on every job, so these classes are one '
+            '*requirement extra* short -- html5lib, which only beautifulsoup4[html5lib] '
+            'provides, i.e. the vendor and all extras.\n\n'
+            'engine-tests (#751) is that leg. It already mirrors test\'s ignore-shape '
+            'exactly (same --ignore flags), so it already reached these unit-tier '
+            'HAS_VENDOR_DEPS gates; adding vendor to its install line is what closes '
+            'them, and #738\'s own precedent for a job that "exists and reports" without '
+            "gating a merge -- 3.15 in python-compatibility.yml (b7f51401b) -- already "
+            'describes this job: "Engines Python X" has never been one of ruleset '
+            "23497679's 15 required checks, so it was already the non-blocking leg the "
+            'ruling asked for, and no new job was needed to get one. It is also the only '
+            '*per-pull-request* job with that property: gate reaches these gates too but '
+            "never runs on a pull request at all (only via a release's "
+            "gate-only: true call), and integration's fixture-tier selection never "
+            'reaches tests/vendor/ in the first place -- so engine-tests was the forced '
+            'choice, not merely a convenient one.\n\n'
+            'test and gate stay dark for different reasons, not the same one. test '
+            'declines html5lib per the non-blocking-leg ruling itself -- that is the '
+            'whole reason it is dark. gate is not part of the blocking matrix at all -- '
+            "it only runs on the release path (workflow_call's gate-only: true), never "
+            'on a pull request -- so the ruling does not require it dark; nothing about '
+            '"non-blocking" would stop vendor being added there too. It stays dark on a '
+            'separate, substantive ground instead: by the time a commit reaches the '
+            'release path it has already run test, integration and engine-tests, and '
+            'engine-tests already carries vendor, so gate would be re-verifying coverage '
+            'that already ran rather than adding any. Gaining a network-and-parser '
+            'extra on the one job that gates an actual release, for coverage the release '
+            'path already has by the time it runs, is not worth the footprint.\n\n'
+            'Worth recording since it bears on the ruling itself, though this exclusion '
+            'is not the place to relitigate it: none of the 41 methods this closes make '
+            'a live network call, though not for one reason across all four files. '
+            'test_user_agent_unit.py (11 methods) and test_request_prompt_unit.py (16) '
+            'gate on HAS_VENDOR_DEPS only because the pcapkit.vendor package import '
+            'chain needs requests/bs4/html5lib importable -- html5lib itself is never '
+            "used by either file's test bodies, both of which replace requests.get with "
+            "a recorder for the whole of every case (each file's own module docstring "
+            'says so in its own words, not a shared one). test_ipx_packet_unit.py (9 '
+            'methods) is a regression suite for a *retired* scrape -- Packet.LINK is '
+            'None, so _request() short-circuits before ever calling requests.get, and '
+            'test_request_makes_no_network_call asserts exactly that by making '
+            'requests.get and requests.Session.request raise if reached at all; '
+            'html5lib is an import precondition there too, nothing in the file uses it. '
+            'test_ftp_return_code_unit.py (5 methods) is not retired -- '
+            'pcapkit.vendor.ftp.return_code.ReturnCode.LINK is a live Wikipedia URL -- '
+            'and is the one file where html5lib is a *functional* dependency rather '
+            'than an import precondition: its tests build the HTML fixture inline and '
+            "hand it straight to ReturnCode.request(), which is "
+            "bs4.BeautifulSoup(text, 'html5lib'); what keeps it off the network is the "
+            'fixture being inline, not an absence of html5lib use. '
+            "#518's flakiness is real for HAS_CRAWLER_DEPS's live crawlers, which run "
+            'unconditionally since #507; it does not describe any of the above. '
+            'pypcap-parity does not appear here even though it also declines html5lib, '
+            'because its fixture-tier selection never reaches '
+            'tests/vendor/test_ipx_packet_unit.py or its three siblings in the first '
+            'place -- same shape as integration above it, which is why integration is '
+            'not listed either.'
         ),
     ),
     'HAS_SCAPY': Exclusion(

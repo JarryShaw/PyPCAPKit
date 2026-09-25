@@ -1483,6 +1483,36 @@ class DependencyGateCoverageTests(unittest.TestCase):
         self.assertNotIn('HAS_CRAWLER_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
         self.assertIn('HAS_VENDOR_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
 
+    def test_the_vendor_extra_closes_engine_tests_but_not_test_or_gate(self) -> None:
+        """#738's remaining scope: an existing non-blocking leg absorbs it.
+
+        ``engine-tests`` (#751) already reaches these gates through the same
+        ignore-shape selection as ``test`` -- see this guard's own
+        ``HAS_VENDOR_DEPS`` exclusion -- and it has never been one of ruleset
+        23497679's 15 required checks, so it already was the "job that exists
+        and reports without gating a merge" #738's ruling asked for. Installing
+        ``vendor`` there, rather than opening a sixth job, is what closes the
+        41-method gap on it. It is also the only *per-pull-request* job with
+        that property: ``gate`` reaches these gates too but never runs on a
+        pull request at all (only via a release's ``gate-only: true`` call),
+        and ``integration``'s fixture-tier selection never reaches
+        :file:`tests/vendor/` in the first place -- so ``engine-tests`` was
+        the forced choice, not merely a convenient one.
+
+        ``test`` and ``gate`` stay dark for different reasons, not the same
+        one -- see the exclusion's own reason for why ``gate`` is not merely
+        "also non-blocking".
+
+        """
+        gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
+        self.assertNotIn(('HAS_VENDOR_DEPS', 'engine-tests'), gaps)
+        self.assertIn(('HAS_VENDOR_DEPS', 'test'), gaps)
+        self.assertIn(('HAS_VENDOR_DEPS', 'gate'), gaps)
+
+        exclusion = _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS['HAS_VENDOR_DEPS']
+        self.assertNotIn('engine-tests', exclusion.dark)
+        self.assertEqual(set(exclusion.dark), {'test', 'gate'})
+
     def test_each_exclusion_still_describes_a_gap_that_is_really_there(self) -> None:
         """The anti-rot half, and the reason this is an allowlist and not a skip list.
 
@@ -1804,8 +1834,10 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'",
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PyPCAP]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
+            "PCAP_CT,vendor]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
+            "PyPCAP,vendor]'",
         )
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
@@ -1873,8 +1905,10 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         )
         doctored_engine_tests = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PCAP_CT]'",
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,PyPCAP]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
+            "PCAP_CT,vendor]'",
+            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
+            "PyPCAP,vendor]'",
         )
 
         with self.subTest(mutation='flag_exclusions stubbed to report nothing'):
