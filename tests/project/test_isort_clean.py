@@ -145,10 +145,12 @@ objected to. It is cheap enough to be uncontroversial, too: all four lines
 below take about 1.5s together, the "costs nothing per leg" category the test
 job's own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
 
-``isort`` remains absent from ``Pipfile``, which is what ``make isort``'s own
-``pipenv run`` prefix resolves against -- so the target still depends on a
-contributor having isort on ``PATH``. Out of scope here: this module is reached
-by pytest, not by ``make``.
+``isort`` is in ``Pipfile``'s ``[dev-packages]`` too, as of #810 -- that being
+what ``make isort``'s own ``pipenv run`` prefix resolves against, so the target
+no longer depends on a contributor happening to have isort on ``PATH``. The two
+declarations are additive rather than duplicate: the ``pyproject.toml`` extra
+serves consumers installing the package, ``Pipfile`` serves this repository's
+own dev environment, and ``make isort`` reads only the latter.
 
 """
 
