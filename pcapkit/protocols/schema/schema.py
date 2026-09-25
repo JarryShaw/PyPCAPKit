@@ -6,14 +6,14 @@ import collections
 import collections.abc
 import io
 import itertools
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import FieldBase, NoValue
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
-from pcapkit.utilities.compat import Mapping
+from pcapkit.utilities.compat import Mapping, final
 from pcapkit.utilities.decorators import prepare
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, SchemaError, stacklevel
 from pcapkit.utilities.warnings import RegistryWarning, SchemaWarning, UnknownFieldWarning, warn
@@ -41,9 +41,23 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     time as well as caching already generated attributes.
 
     Notes:
-        The decorator should only be used on the *final*
-        class, otherwise, any subclasses derived from a
-        finalised schema class will not be re-finalised.
+        The decorator should only be used on the *final* class. Applying it
+        with ``_finalised=True`` seals the class against *subclassing*, which
+        :meth:`Schema.__init_subclass__` enforces, and marks it with
+        :func:`~pcapkit.utilities.compat.final` -- so ``@schema_final`` implies
+        ``@final`` and there is never a reason to write both. Writing both is
+        harmless in either order, though; what is not is ``@final`` *without*
+        this decorator, which :meth:`Schema.__new__` refuses -- provided
+        ``@final`` is :func:`~pcapkit.utilities.compat.final` (or, on Python
+        3.11 and up, :func:`typing.final` directly). Below 3.11, plain
+        :func:`typing.final` does not set ``__final__`` at all (gh-90500), so a
+        class marked with a user's own ``from typing import final`` on 3.10 is
+        not refused: there is nothing on the class for :meth:`Schema.__new__` to
+        read.
+
+        Applying this decorator to the same class a second time only warns: the
+        first application already did the work, so the duplicate is redundant
+        rather than wrong, and the class comes back finalised and usable.
 
     Args:
         cls: Schema class.
@@ -52,11 +66,34 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     Returns:
         Finalised schema class.
 
+    Warns:
+        pcapkit.utilities.warnings.SchemaWarning: If ``cls`` has already been
+            finalised *by this function*, i.e. it carries
+            :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL` in its own
+            ``__dict__``. The class is returned untouched.
+
     :meta decorator:
     """
-    if cls.__finalised__ == FinalisedState.FINAL:
+    # NOTE: keyed on ``__finalised__`` rather than on ``final``'s ``__final__``,
+    # and read out of ``cls.__dict__`` rather than through ``getattr``. See
+    # :func:`pcapkit.corekit.infoclass.info_final`, which makes both choices for
+    # the same two reasons: only ``__finalised__`` records *this function* having
+    # run, so a ``__final__`` test would make ``@schema_final`` over ``@final``
+    # skip the generation while the opposite order did the work; and
+    # ``__finalised__`` is inherited, so ``getattr`` would skip a subclass
+    # declared before its parent was finalised.
+    if cls.__dict__.get('__finalised__') == FinalisedState.FINAL:
         warn(f'{cls.__name__}: schema has been finalised; now skipping',
              SchemaWarning, stacklevel=stacklevel())
+        return cls
+
+    # NOTE: short-circuit for ``Schema`` itself -- see the identical NOTE in
+    # :func:`pcapkit.corekit.infoclass.info_final`, which makes the same fix for
+    # the same reason: ``Schema`` never reaches ``FinalisedState.BASE`` now, so a
+    # bare ``Schema()`` would otherwise re-enter this function, and redo the
+    # ``dir()``-over-the-MRO scan below, on *every* call. ``__base_ready__`` is
+    # its own marker, own-``__dict__`` only, so it never touches ``__finalised__``.
+    if cls is Schema and cls.__dict__.get('__base_ready__'):
         return cls
 
     temp = ['__map__', '__map_reverse__', '__builtin__',
@@ -125,7 +162,22 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
     if not _finalised:
-        cls.__finalised__ = FinalisedState.BASE
+        # NOTE: ``Schema`` itself must never receive this promotion, for the same
+        # reason ``Info`` must not -- see :func:`pcapkit.corekit.infoclass.info_final`,
+        # which makes the identical fix. This branch binds ``cls`` to ``Schema``
+        # only when something bare-constructs ``Schema()`` directly, and writing
+        # ``BASE`` onto ``Schema.__dict__`` there would make every subclass declared
+        # afterwards inherit ``BASE`` and skip :meth:`Schema.__new__`'s own
+        # ``FinalisedState.NONE`` branch -- silently defeating the bare-``@final``
+        # guard nested inside it for the rest of the process.
+        #
+        # ``__base_ready__`` is set instead, for the short-circuit at the top of
+        # this function -- own-``__dict__`` only, so it neither inherits nor
+        # touches ``__finalised__``.
+        if cls is not Schema:
+            cls.__finalised__ = FinalisedState.BASE
+        else:
+            cls.__base_ready__ = True
         return cls
 
     cls.__finalised__ = FinalisedState.FINAL
@@ -340,6 +392,45 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
     #: List of names to be excluded from :obj:`dict` conversion.
     __excluded__: 'list[str]' = []
 
+    def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':
+        """Refuse to derive from a finalised schema.
+
+        :func:`~pcapkit.utilities.compat.final` is a promise to the type
+        checker and nothing more: it records ``__final__`` on the class and
+        leaves the interpreter free to subclass it anyway. Every schema
+        :func:`schema_final` finalises carries a generated ``__init__`` built
+        from the :attr:`__fields__` that were declared at that moment, so a
+        subclass adding a field afterwards inherits a constructor that cannot
+        set it -- which is #422's failure shape, reached by a different route.
+        This turns that promise into a rule the interpreter keeps.
+
+        Args:
+            *args: Arbitrary positional arguments.
+            **kwargs: Arbitrary keyword arguments in class definition.
+
+        Raises:
+            SchemaError: If any class in ``cls``'s ancestry carries the
+                ``__final__`` marker in its own ``__dict__``.
+
+        """
+        # NOTE: the whole ancestry rather than ``cls.__bases__``, and
+        # ``base.__dict__`` rather than ``getattr`` -- see
+        # :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__`, which makes
+        # the same two choices for the same two reasons.
+        for base in cls.__mro__[1:]:
+            if base.__dict__.get('__final__'):
+                raise SchemaError(f'{cls.__name__}: cannot subclass {base.__name__}, '
+                                  'which is final')
+
+        # NOTE: forwarded rather than swallowed, so that a class keyword nobody
+        # accepts still reaches ``object`` and still fails there, as it did before
+        # this hook existed. :meth:`EnumSchema.__init_subclass__` is the one caller
+        # that reaches here with nothing: it consumes its own ``code`` keyword and
+        # discards the rest, which is why a stray class keyword is tolerated on an
+        # :class:`EnumSchema` subclass and rejected on a plain one. That asymmetry
+        # predates this method and is left alone.
+        super().__init_subclass__(*args, **kwargs)
+
     def __new__(cls, *args: '_VT', **kwargs: '_VT') -> 'Self':  # pylint: disable=unused-argument
         """Create a new instance.
 
@@ -351,8 +442,36 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             *args: Arbitrary positional arguments.
             **kwargs: Arbitrary keyword arguments.
 
+        Raises:
+            SchemaError: If ``cls`` was marked with
+                :func:`~pcapkit.utilities.compat.final` but never finalised by
+                :func:`schema_final`, i.e. it carries ``__final__`` in its own
+                ``__dict__`` without
+                :attr:`~pcapkit.corekit.infoclass.FinalisedState.FINAL`.
+
+        Warning:
+            Out of scope, deliberately -- see
+            :meth:`pcapkit.corekit.infoclass.Info.__new__`, which documents the
+            identical gap: a ``@final`` class descending from a
+            :attr:`~pcapkit.corekit.infoclass.FinalisedState.BASE` ancestor
+            inherits ``BASE`` rather than ``NONE`` and so never reaches the
+            branch below at all, regardless of its own marker. No ``BASE``-state
+            schema in the tree is marked ``@final`` by hand today, so the escape
+            is theoretical rather than live.
+
         """
+        # NOTE: first instantiation is the earliest point a bare ``@final`` can
+        # be caught -- ``final`` runs after the class object exists, so
+        # :meth:`__init_subclass__` has already returned. Nested inside the NONE
+        # branch, which is already one-shot per class, so a finalised schema pays
+        # nothing for it. See :meth:`pcapkit.corekit.infoclass.Info.__new__`,
+        # which carries the full reasoning and the measurement; on this side the
+        # missing generated ``__init__`` is the one built from
+        # :attr:`__fields__`, so the damage is #422's shape.
         if cls.__finalised__ == FinalisedState.NONE:
+            if cls.__dict__.get('__final__'):
+                raise SchemaError(f'{cls.__name__}: marked final but never finalised, so it has no generated '
+                                  '__init__; apply schema_final, which applies final itself, not final alone')
             cls = schema_final(cls, _finalised=False)
         self = super().__new__(cls)
 
@@ -1099,6 +1218,16 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             anything else can hold a reference to the original object.
 
         """
+        # NOTE: the base hook goes first, before any of the registry work below.
+        # :meth:`Schema.__init_subclass__` is what refuses to derive from a
+        # finalised schema, and a refusal has to land before this method writes
+        # ``cls`` into ``__enum__``: raising afterwards would discard the class
+        # object while leaving the registry pointing at it, so a rejected
+        # declaration would still have displaced a built-in schema. It took no
+        # arguments when it was the last statement here and still takes none --
+        # ``code`` is this method's own and the rest are deliberately dropped.
+        super().__init_subclass__()
+
         if not hasattr(cls, '__enum__'):
             cls.__enum__ = _EnumRegistry(cls.__default__)
         elif '__enum__' in cls.__dict__ and not isinstance(cls.__dict__['__enum__'], _EnumRegistry):
@@ -1134,7 +1263,6 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
                     warn(f'schema {_code} already registered, overwriting '
                          f'{incumbent!r} with {cls!r}', RegistryWarning)
                 cls.__enum__[_code] = (cls)  # type: ignore[index]
-        super().__init_subclass__()
 
     @classmethod
     def register(cls, code: '_ET', schema: 'Type[Self]') -> 'None':

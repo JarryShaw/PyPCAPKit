@@ -728,6 +728,16 @@ class Option(EnumSchema[Enum_OptionType]):
             - :class:`pcapkit.const.pcapng.option_type.OptionType`
 
         """
+        # NOTE: the base hook goes first, before any of the registration work
+        # below -- see :meth:`EnumSchema.__init_subclass__`, which makes the same
+        # move for the same reason. :meth:`Schema.__init_subclass__` is what
+        # refuses to derive from a finalised schema, and a refusal has to land
+        # before :meth:`Option.register` writes ``cls`` into ``__enum__``: calling
+        # this last, as this method used to, let a raise discard the class object
+        # while leaving the registry pointing at it, so a rejected declaration
+        # still displaced a built-in option schema for the rest of the process.
+        super().__init_subclass__()
+
         if ns is not None:
             cls.__namespace__ = ns
 
@@ -740,7 +750,6 @@ class Option(EnumSchema[Enum_OptionType]):
                     Option.register(_code, cls, ns)
             else:
                 Option.register(code, cls, ns)
-        super().__init_subclass__()
 
     @staticmethod
     def register(code: 'Enum_OptionType', cls: 'Type[Option]', ns: 'Optional[str]' = None) -> 'None':
