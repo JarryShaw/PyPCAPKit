@@ -677,7 +677,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             surfaced only on read-back rather than where it was caused.
 
             So ``__reduce_ex__`` is set on the member itself, reducing it to
-            ``_rebuild_unregistered_member`` instead of to a value lookup.
+            :func:`_rebuild_unregistered_member` instead of to a value lookup.
             Both :mod:`pickle` and :mod:`copy` fetch that attribute with
             :func:`getattr` on the object rather than on its type, so a
             per-instance override is honoured: verified against the C
@@ -801,7 +801,7 @@ def _reduce_unregistered_member(  # pylint: disable=unused-argument
             is the same for all of them, and :mod:`copy` passes 4 here.
 
     Returns:
-        A two-tuple of ``_rebuild_unregistered_member`` and its arguments.
+        A two-tuple of :func:`_rebuild_unregistered_member` and its arguments.
 
     """
     return (_rebuild_unregistered_member, (namespace, value, name, attrs))

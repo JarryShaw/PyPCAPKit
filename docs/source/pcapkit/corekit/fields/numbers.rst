@@ -52,6 +52,10 @@ Internal Definitions
    :members:
    :show-inheritance:
 
+.. autofunction:: pcapkit.corekit.fields.numbers._rebuild_unregistered_member
+
+.. autofunction:: pcapkit.corekit.fields.numbers._reduce_unregistered_member
+
 Type Variables
 --------------
 
