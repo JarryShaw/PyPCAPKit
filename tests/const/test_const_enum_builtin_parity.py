@@ -98,12 +98,24 @@ EXPECTED_TO_REGISTER = frozenset({
 #: The bespoke templates under :mod:`pcapkit.vendor` that carry their own copy of
 #: the guard, rather than inheriting the one in :mod:`pcapkit.vendor.default`.
 #: Each was rendering a registry that GitHub issue #647 found unguarded.
-BESPOKE_TEMPLATES = (
-    'pcapkit.vendor.tcp.flags',
-    'pcapkit.vendor.ftp.command',
-    'pcapkit.vendor.http.method',
-    'pcapkit.vendor.reg.apptype.apptype',
-)
+#:
+#: Keyed to each template's own guard text rather than one literal shared by
+#: all four: GitHub issue #792 moved ``pcapkit.vendor.reg.apptype.apptype``'s
+#: copy to an f-string, following the library-wide convention GitHub issue
+#: #783 settled, while the other three still raise with ``%`` -- #792
+#: deliberately left them alone so the ``const`` diff stayed reviewable, and
+#: #798 tracks sweeping them, along with the ``%``-formatted dunders and
+#: dropping the f-string disable. One shared literal can no longer pin all four;
+#: what #647 actually needs pinned is that each template still carries *a*
+#: guard rejecting an invalid value, in whatever form that template's own
+#: raise takes, not that the four agree on a formatting style the library is
+#: moving away from.
+BESPOKE_TEMPLATES = {
+    'pcapkit.vendor.tcp.flags': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
+    'pcapkit.vendor.ftp.command': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
+    'pcapkit.vendor.http.method': "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
+    'pcapkit.vendor.reg.apptype.apptype': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
+}
 
 
 class _StdIntEnum(enum.IntEnum):
@@ -577,7 +589,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     agree with it -- the next crawl would simply revert them. The four templates
     below each carry their own copy of the guard rather than inheriting the one
     in :mod:`pcapkit.vendor.default`, which is why all four had to be edited and
-    why all four are checked.
+    why all four are checked -- each against its own guard text now that
+    GitHub issue #792 moved one of them off ``%`` formatting, per
+    :data:`BESPOKE_TEMPLATES`.
     """
 
     def setUp(self) -> None:
@@ -586,13 +600,12 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')
     def test_every_bespoke_template_carries_the_guard(self) -> None:
-        for module_name in BESPOKE_TEMPLATES:
+        for module_name, guard in BESPOKE_TEMPLATES.items():
             with self.subTest(vendor=module_name):
                 source = inspect.getsource(importlib.import_module(module_name))
                 self.assertIn(
-                    "raise ValueError('%r is not a valid %s' % (value, cls.__name__))",
-                    source, f'{module_name} no longer emits the guard; '
-                            f'see GitHub issue #647')
+                    guard, source, f'{module_name} no longer emits its guard; '
+                                   f'see GitHub issue #647')
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')
