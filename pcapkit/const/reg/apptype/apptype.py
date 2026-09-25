@@ -9,7 +9,7 @@ This module contains the constant enumeration for **Application Layer Protocol N
 which is automatically generated from :class:`pcapkit.vendor.reg.apptype.apptype.AppType`.
 
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from aenum import IntFlag, StrEnum, auto, extend_enum
 
@@ -26,7 +26,19 @@ if TYPE_CHECKING:
 class TransportProtocol(IntFlag):
     """Transport layer protocol."""
 
-    undefined = 0
+    # mypy has no aenum plugin, so this class is a plain class to it: a bare
+    # ``0`` here infers as int while the auto()-valued members below infer as
+    # Any, and only this member then disagrees with the TransportProtocol
+    # annotations that use it. cast is the identity function at run time, so
+    # this changes nothing that runs -- see GitHub issue #770. mypy.ini sets
+    # warn_redundant_casts, so if aenum ever ships type stubs letting it infer
+    # TransportProtocol on its own, this cast starts erroring instead of
+    # lingering as dead scaffolding.
+    #: No transport protocol. ``TransportProtocol(0) is undefined`` and
+    #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
+    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what
+    #: the base registry's ``_missing_`` extends unassigned/reserved rows from.
+    undefined = cast('TransportProtocol', 0)
 
     #: Transmission Control Protocol.
     tcp = auto()
