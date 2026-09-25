@@ -625,8 +625,10 @@ PINNED_TARGETS = {
     # -- TCP.__proto__ (port) --------------------------------------------------
     'tcp/20': ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
-    'tcp/80': ('pcapkit.protocols.application.httpv1', 'HTTP'),
-    'tcp/8080': ('pcapkit.protocols.application.httpv1', 'HTTP'),
+    # Repointed from ``httpv1`` to the version-identifying proxy by #682, which
+    # is what makes these two agree with ``udp/80`` and ``udp/8080`` below.
+    'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
+    'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
     # -- UDP.__proto__ (port) --------------------------------------------------
     'udp/80': ('pcapkit.protocols.application.http', 'HTTP'),

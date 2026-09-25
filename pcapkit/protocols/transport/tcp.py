@@ -185,9 +185,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
        * - 21
          - :class:`pcapkit.protocols.application.ftp.FTP`
        * - 80
-         - :class:`pcapkit.protocols.application.httpv1.HTTP`
+         - :class:`pcapkit.protocols.application.http.HTTP`
        * - 8080
-         - :class:`pcapkit.protocols.application.httpv1.HTTP`
+         - :class:`pcapkit.protocols.application.http.HTTP`
 
     This class currently supports parsing of the following TCP options,
     which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`
@@ -325,10 +325,21 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # 8443 is deliberately absent: IANA registers it as ``pcsync-https``
             # rather than as an HTTP alternate, and traffic there is TLS-wrapped,
             # which pcapkit does not parse.
+            #
+            # Both HTTP ports bind the version-dispatching
+            # :class:`pcapkit.protocols.application.http.HTTP` rather than
+            # ``httpv1.HTTP``, because HTTP/1 and HTTP/2 share these ports on the
+            # wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on
+            # 80 -- so the port cannot decide the version and the payload has to.
+            # That dispatch is a positive identification (the RFC 9113 §3.4
+            # connection preface, then an HTTP/1 start line) rather than a trial
+            # parse; see #682 for the repoint and #800 for the identification it
+            # waited on. UDP's table already bound the proxy for the same ports,
+            # so this is also what removes the asymmetry between the two.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),
-            80: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),
-            8080: ModuleDescriptor('pcapkit.protocols.application.httpv1', 'HTTP'),
+            80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
+            8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
         },
     )
 
