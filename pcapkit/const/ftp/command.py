@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """FTP Command
 =================
 
@@ -37,7 +37,7 @@ class FEATCode(StrEnum):
     nat6 = '<nat6>'
 
     def __repr__(self) -> 'str':
-        return "<%s [%s]>" % (self.__class__.__name__, self._name_)
+        return f'<{self.__class__.__name__} [{self._name_}]>'
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'FEATCode':
@@ -116,7 +116,7 @@ class Command(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s: %s>" % (self.__class__.__name__, self._name_, self.desc)
+        return f'<{self.__class__.__name__}.{self._name_}: {self.desc}>'
 
     #: Abort [:rfc:`959`]
     ABOR: 'Command' = 'ABOR', FEATCode.base, 'Abort', CommandType.S, ConformanceRequirement.M

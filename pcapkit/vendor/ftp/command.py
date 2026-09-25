@@ -40,7 +40,7 @@ CONF = {
 LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
@@ -77,7 +77,7 @@ class FEATCode(StrEnum):
     nat6 = '<nat6>'
 
     def __repr__(self) -> 'str':
-        return "<%s [%s]>" % (self.__class__.__name__, self._name_)
+        return f'<{{self.__class__.__name__}} [{{self._name_}}]>'
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'FEATCode':
@@ -156,7 +156,7 @@ class {NAME}(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s: %s>" % (self.__class__.__name__, self._name_, self.desc)
+        return f'<{{self.__class__.__name__}}.{{self._name_}}: {{self.desc}}>'
 
     {ENUM}
 
@@ -229,7 +229,7 @@ class Command(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            cmmt = self.wrap_comment('%s %s' % (desc, ''.join(temp)))  # pylint: disable=consider-using-f-string
+            cmmt = self.wrap_comment(f'{desc} {"".join(temp)}')
 
             if cmmd == '-N/A-':
                 cmmd = cast('str', feat)

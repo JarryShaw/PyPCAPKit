@@ -23,7 +23,7 @@ __all__ = ['Method']
 #: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
@@ -63,7 +63,7 @@ class {NAME}(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s>" % (self.__class__.__name__, self._value_)
+        return f'<{{self.__class__.__name__}}.{{self._value_}}>'
 
     {ENUM}
 
@@ -141,9 +141,9 @@ class Method(Vendor):
                         temp.append(f'[:rfc:`{temp_split[0]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (  # pylint: disable=consider-using-f-string
-                meth, ''.join(temp) if rfcs else '',
-            ), flags=re.MULTILINE))
+            desc = self.wrap_comment(re.sub(
+                r'\r*\n', ' ', f'{meth} {"".join(temp) if rfcs else ""}',
+                flags=re.MULTILINE))
 
             name = self.safe_name(meth).upper()
             safe_flag = 'True' if safe == 'yes' else 'False'
