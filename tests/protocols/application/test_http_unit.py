@@ -951,15 +951,16 @@ class HTTPUnitTests(unittest.TestCase):
 
         #799 closed the *outer*-header slice of the class this suppression
         exists for (``httpv2.HTTP.unpack`` now rejects a buffer under nine
-        octets before the schema layer runs), but did not retire the
-        suppression: a buffer that clears nine octets can still carry a frame
-        type -- ``GOAWAY``, ``PUSH_PROMISE``, a padded ``DATA``/``HEADERS`` --
-        whose own fixed-width fields exceed what is left, and that still raises
-        a bare :exc:`struct.error` one field further in. See
+        octets before the schema layer runs), and #805 closed the *inner*
+        slice (a resolved field length going negative now raises
+        ``ProtocolError`` rather than a bare :exc:`struct.error`), but neither
+        retired the suppression: it stays as defence in depth for any
+        ``__length__``-keyed field #805 did not individually verify, across
+        the ten schema modules that share the pattern. See
         ``test_guess_version_reports_unknown_version_for_a_short_payload`` for
-        the outer-header case #799 did close, and
-        ``test_guess_version_still_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
-        below for the class it did not.
+        the outer-header case #799 closed, and
+        ``test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
+        below for the inner one #805 closed.
 
         It is also unnecessary: nothing reaches a :exc:`struct.error` through
         ``httpv1.HTTP``. Nine byte patterns over lengths 0-24, on both the direct
@@ -999,24 +1000,26 @@ class HTTPUnitTests(unittest.TestCase):
                     with self.assertRaises(struct.error):
                         HTTP(io.BytesIO(raw), len(raw))
 
-    def test_guess_version_still_leaks_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
-        """A buffer that clears nine octets can still crash one field further in.
+    def test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
+        """A buffer that clears nine octets used to still crash one field further in.
 
         #799's ``httpv2.HTTP.unpack`` guard only protects the fixed nine-octet
         *outer* header. A ``GOAWAY`` frame's own fixed ``stream`` (4 octets) and
         ``error`` (4 octets) fields consume eight more octets before ``debug``
         is even reached, so a sixteen-octet buffer -- nine for the header, seven
-        for the rest -- drives ``pkt['__length__']`` to ``-1`` at ``debug`` and
-        still raises a bare :exc:`struct.error` straight through ``httpv2.HTTP``.
-        Filed as its own issue (#805) rather than fixed here: the actual root is
-        generic ``Schema.unpack``/``FieldBase.length`` machinery shared by at
-        least ten schema modules, not something httpv2-specific.
+        for the rest -- drives ``pkt['__length__']`` to ``-1`` at ``debug``.
+        Pre-#805, that raised a bare :exc:`struct.error` straight through
+        ``httpv2.HTTP``; #805 closed the actual root, generic
+        ``FieldBase.length`` (``struct.calcsize`` on a negative-count template),
+        shared by at least ten schema modules, not something httpv2-specific --
+        so direct construction now raises :exc:`ProtocolError` too.
 
-        This is exactly why ``_guess_version``'s last arm keeps suppressing
-        :exc:`struct.error` alongside ``ProtocolError`` -- narrowing it, as an
-        earlier revision of this fix did, regressed the direct ``HTTP()`` guess
-        path: the same bytes came back a bare :exc:`struct.error` instead of
-        ``ProtocolError``, which a caller catching protocol errors cannot catch.
+        ``_guess_version``'s last arm keeps suppressing :exc:`struct.error`
+        alongside ``ProtocolError`` regardless: narrowing it, as an earlier
+        revision of this fix did, regressed the direct ``HTTP()`` guess path
+        for a *different* input class (the sub-nine-octet outer-header one),
+        and #805 does not touch every ``__length__``-keyed field in every one
+        of those ten modules, so the suppression stays as defence in depth.
         This test drives real wire bytes through the actual guess path -- no
         ``mock.patch`` -- specifically because a mocked fault cannot see a
         regression in the *un-mocked* route the fault is meant to stand in for.
@@ -1033,15 +1036,16 @@ class HTTPUnitTests(unittest.TestCase):
         raw = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
         self.assertEqual(len(raw), 16)
 
-        # Direct construction is documented to leak the unwrapped struct.error
-        # (see the module docstring above and #805) -- pinned so a fix to #805
-        # is noticed here rather than silently changing this contract too.
+        # Direct construction now raises ProtocolError, not a bare
+        # struct.error -- #805's fix, pinned here so a regression is noticed.
         import struct
-        with self.assertRaises(struct.error):
+        with self.assertRaises(ProtocolError) as direct_ctx:
             HTTPv2(io.BytesIO(raw), len(raw))
+        self.assertNotIsInstance(direct_ctx.exception, struct.error)
 
-        # The guess path must not repeat that leak: _guess_version's arm 2
-        # suppresses struct.error precisely so this comes back catchable.
+        # The guess path must answer the same way: _guess_version's arm 2
+        # suppresses struct.error/ProtocolError precisely so this comes back
+        # catchable either way.
         for label, kwargs in (('guessed', {}), ('explicit version=2', {'version': 2})):
             with self.subTest(path=label):
                 with self.assertRaises(ProtocolError) as ctx:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import struct
 import threading
 import unittest
 
@@ -855,3 +856,69 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
                     with self.subTest(width=width, byteorder=byteorder, kept=kept):
                         self.assertEqual(field.pack(read, {}),
                                          buffer.ljust(width, b'\x00'))
+
+
+class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
+    """:attr:`FieldBase.length <pcapkit.corekit.fields.field.FieldBase.length>`
+    on a negative resolved length.
+
+    A ``length=lambda pkt: pkt['__length__']``-style callback is
+    attacker/corruption-controlled the same way :attr:`FieldBase.unpack`'s
+    ``length`` argument is (see the class above): :meth:`Schema.unpack
+    <pcapkit.protocols.schema.schema.Schema.unpack>` decrements
+    ``packet['__length__']`` by each field's nominal width regardless of how
+    many octets the buffer actually held, and a subsequent field's callback
+    can resolve to that negative remainder. :class:`~pcapkit.corekit.fields.
+    strings._TextField.__call__` then builds a template such as ``'-5s'``
+    from it with no lower bound, and :func:`struct.calcsize` cannot size
+    that -- pre-fix this surfaced as a bare, uncatchable :exc:`struct.error`
+    (GitHub issue #805).
+
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+        from pcapkit.corekit.fields.strings import BytesField
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        self.BytesField = BytesField
+        self.ProtocolError = ProtocolError
+
+    def test_a_negative_resolved_length_raises_protocolerror_not_structerror(self) -> None:
+        """The crash reproduction from #805, isolated to the field property.
+
+        Pre-fix, ``struct.error: bad char in struct format`` -- a bare
+        stdlib exception, not even a :exc:`ValueError`, uncatchable by
+        ordinary caller code -- escaped here. This is the exact shape
+        HTTP/2's ``GoawayFrame.debug``/``PushPromiseFrame.fragment`` fields
+        hit once their fixed-width siblings have already driven
+        ``pkt['__length__']`` negative.
+        """
+        field = self.BytesField(length=lambda pkt: pkt['__length__'])({'__length__': -5})
+
+        self.assertEqual(field.template, '-5s')
+        with self.assertRaises(self.ProtocolError) as ctx:
+            field.length  # noqa: B018 -- property access is the point
+
+        # must not be a bare struct.error: ProtocolError is a ValueError
+        # subclass in this library's hierarchy, never struct.error itself.
+        self.assertIsInstance(ctx.exception, ValueError)
+        self.assertNotIsInstance(ctx.exception, struct.error)
+
+    def test_a_zero_or_positive_resolved_length_is_unaffected(self) -> None:
+        """The fix must not change the answer for any non-negative length.
+
+        The property is a thin ``try/except`` around the same
+        :func:`struct.calcsize` call as before; a resolved length that never
+        raises must return exactly what it always returned.
+        """
+        for resolved in (0, 1, 5, 1024):
+            with self.subTest(resolved=resolved):
+                field = self.BytesField(length=lambda pkt: pkt['__length__'])(
+                    {'__length__': resolved})
+                self.assertEqual(field.length, resolved)
+
+
+if __name__ == '__main__':
+    unittest.main()
