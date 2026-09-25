@@ -73,11 +73,14 @@ class AppTypeSplitTests(unittest.TestCase):
                 self.assertIs(type(member), cls)
 
         # One service on two transports is two members, not one shared object --
-        # they carry the same name and the same full ``proto``, and differ only in
-        # which registry they belong to.
+        # they carry the same name and differ in which registry they belong to,
+        # which since GitHub issue #806 is what ``proto`` says. It named the whole
+        # IANA set on both of them before, so the two compared equal.
         self.assertIsNot(TCP.http, UDP.http)
         self.assertEqual(TCP.http.svc, UDP.http.svc)
-        self.assertEqual(TCP.http.proto, UDP.http.proto)
+        self.assertNotEqual(TCP.http.proto, UDP.http.proto)
+        self.assertIs(TCP.http.proto, TCP.__transport__)
+        self.assertIs(UDP.http.proto, UDP.__transport__)
         self.assertEqual(int(TCP.http), 80)
 
     def test_each_registry_has_its_own_port_key_space(self) -> None:
@@ -390,12 +393,13 @@ class AppTypeSplitTests(unittest.TestCase):
     def test_a_proto_naming_two_transports_is_refused_rather_than_resolved(self) -> None:
         """GitHub issue #759: the lowest set bit decided, silently.
 
-        ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member carries the
-        *whole* set IANA assigned the service, so ``tcp | udp`` is an ordinary value
-        to read off one and therefore an ordinary thing to pass back in. It names
-        two registries holding two different services for the same port, though,
-        and a lookup answers with one member -- so there is no answer to which of
-        them the composite meant. ``_dispatch`` resolved it through
+        ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp | udp`` stays
+        constructible by hand even though no member carries one since GitHub issue
+        #806 -- which is why this guard is still needed and is tested with
+        composites built here rather than read off a member. It names two
+        registries holding two different services for the same port, and a lookup
+        answers with one member -- so there is no answer to which of them the
+        composite meant. ``_dispatch`` resolved it through
         :func:`~pcapkit.utilities.compat.show_flag_values`, which iterates
         **LSB-first**, so every composite containing ``tcp`` -- the lowest declared
         bit -- dispatched into the TCP registry whatever else it named.
@@ -442,11 +446,16 @@ class AppTypeSplitTests(unittest.TestCase):
         # #759's own reproduction. 888 carries ``cddbp`` on TCP and
         # ``accessbuilder`` on UDP, so the composite answered ``cddbp`` for a UDP
         # member -- and ``==`` read ``True``, since it compares on ``port`` alone.
+        # The member's own ``proto`` was that composite until #806; it is ``udp``
+        # now, so the composite is built here instead and the member's own value is
+        # asserted to be the single bit that no longer reaches this guard.
         both = TransportProtocol.tcp | TransportProtocol.udp
         member = next(each for each in UDP.__registry__.getlist(888)
                       if each.svc == 'accessbuilder')
+        self.assertIs(member.proto, TransportProtocol.udp)
+        self.assertIs(AppType.get(888, proto=member.proto), member)
         with self.assertRaises(ProtocolError) as caught:
-            AppType.get(888, proto=member.proto)
+            AppType.get(888, proto=both)
         self.assertIsInstance(caught.exception, ValueError)
         self.assertIsInstance(caught.exception, BaseError)
         self.assertIn('tcp|udp', str(caught.exception))
@@ -494,95 +503,72 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertIs(UDP.get(888, proto=both), member)
         self.assertEqual(TCP.get(888, proto=both).svc, 'cddbp')
 
-    def test_every_multi_transport_member_refuses_its_own_proto(self) -> None:
-        """All 10,625 of them, which is how the 46 differing answers were found.
+    def test_no_member_carries_a_multi_transport_proto(self) -> None:
+        """GitHub issue #806: the composite that caused #759 is gone at the source.
 
-        The measurement in #759, re-derived on ``fe80b8525``: sweeping every
-        multi-transport member through ``AppType.get(m.port, proto=m.proto)`` gave
-        0 exceptions, 0 mints and **46 answers naming a service other than the
-        member's own**, at 20 distinct ports and 23 ``(port, service)`` pairs --
-        each pair declared once in the TCP registry and once in UDP. Identical at
-        ``932cb48d1``, so long-standing rather than a regression.
+        This test used to sweep the 10,625 multi-transport members through
+        ``AppType.get(m.port, proto=m.proto)`` and require every one of them to be
+        *refused*, because a member's own ``proto`` was the whole set IANA assigned
+        the service and so named up to four registries. Retyping ``proto`` to the
+        single transport protocol of the registry the member lives in removes that
+        population outright: the sweep count goes from **10,625 to 0**, and a
+        member's own ``proto`` is now the one thing a lookup can always be given.
 
-        Those 46 are three different things, and only the last is a wrong *answer*:
+        So the assertion inverts. Instead of "every multi-bit member refuses its own
+        ``proto``" it is "no member has a multi-bit ``proto``, and every member
+        resolves under its own" -- which is the same property the old test protected
+        the callers from, established at generation time rather than defended at
+        every entry point.
 
-        #. all 46 name a service other than the member's own, which for 44 of them
-           is :meth:`get`'s documented behaviour rather than a defect -- the member
-           is simply not its port's canonical, and a single-bit lookup answers the
-           canonical too;
-        #. **23** -- the UDP-declared half -- came back as a member of the *TCP*
-           registry, so ``type(result)`` and ``result.proto`` were wrong whatever
-           the service string said;
-        #. **2** named a service UDP's own lookup does not answer at all, and they
-           are the whole of this bug's blast radius: port **888**, where
-           ``accessbuilder`` resolved to TCP's ``cddbp``, and port **999**, where
-           ``puprouter`` resolved to TCP's ``garcon`` against UDP's ``applix``.
-           They are the two ports where :data:`__canonical__` genuinely disagrees
-           between the two registries *and* the port carries a multi-transport
-           member; #759's body found the first of them and generalised from it.
+        The 23 ``(port, service)`` pairs #759 measured are kept and re-checked
+        against the *new* behaviour, because they are the pairs where the defect was
+        observable: each is declared in both the TCP and the UDP registry, and each
+        used to come back as its port's TCP canonical. Every one of them now
+        resolves inside its own registry. The two whose ``__canonical__`` genuinely
+        disagrees between the registries -- port **888**, ``accessbuilder`` against
+        TCP's ``cddbp``, and port **999**, ``puprouter`` against TCP's ``garcon``
+        where UDP answers ``applix`` -- were the whole blast radius, and are the
+        sharpest check that the answer now comes from the right registry.
 
         Asserted over the whole population rather than over a sample, because the
         population is what the crawler regenerates: a future crawl that adds a
-        service to a second transport adds members here, and they have to refuse
-        too. The failures are collected rather than run through
-        :meth:`~unittest.TestCase.subTest` -- 10,625 subtests would dominate the
-        suite's own output, and each refusal logs at CRITICAL.
+        service to a second transport adds members here, and they have to be
+        single-bit too. The failures are collected rather than run through
+        :meth:`~unittest.TestCase.subTest`, since 12,391 subtests would dominate
+        the suite's own output.
 
         Counted over members the crawler *declared*, so the figure does not depend
         on what else has run in this process: a mint carries ``svc == 'unknown'``
         and no generated member does, which makes that the filter.
         """
-        import logging
-        import sys
-
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType
         from pcapkit.utilities.compat import show_flag_values
-        from pcapkit.utilities.exceptions import ProtocolError
-
-        saved_limit = getattr(sys, 'tracebacklimit', None)
-        saved_level = logging.getLogger('pcapkit').level
-
-        def restore() -> None:
-            logging.getLogger('pcapkit').setLevel(saved_level)
-            if saved_limit is None:
-                if hasattr(sys, 'tracebacklimit'):
-                    del sys.tracebacklimit
-            else:
-                sys.tracebacklimit = saved_limit
-
-        self.addCleanup(restore)
-        logging.getLogger('pcapkit').setLevel(logging.CRITICAL + 1)
 
         registries = [TCP, UDP, SCTP, DCCP]
         before = {cls.__name__: len(cls) for cls in registries}
 
-        swept = 0
-        answered = []  # type: list[tuple[str, int, str, str]]
-        other = []  # type: list[tuple[str, int, str]]
+        declared = 0
+        multi = []  # type: list[tuple[str, int, str, str]]
+        foreign = []  # type: list[tuple[str, int, str, str]]
         for cls in registries:
             for member in list(cls):
-                if member.svc == 'unknown' or len(show_flag_values(member.proto)) <= 1:
+                if member.svc == 'unknown':
                     continue
-                swept += 1
-                try:
-                    result = AppType.get(member.port, proto=member.proto)
-                except ProtocolError:
-                    continue
-                except Exception as exc:  # pylint: disable=broad-except
-                    other.append((cls.__name__, member.port, type(exc).__name__))
-                else:
-                    answered.append((cls.__name__, member.port, member.svc, result.svc))
+                declared += 1
+                if len(show_flag_values(member.proto)) > 1:
+                    multi.append((cls.__name__, member.port, member.svc, member.proto.name))
+                if member.proto is not cls.__transport__:
+                    foreign.append((cls.__name__, member.port, member.svc, member.proto.name))
 
-        self.assertEqual(answered, [])
-        self.assertEqual(other, [])
-        self.assertEqual(swept, 10625)
+        self.assertEqual(multi, [])
+        self.assertEqual(foreign, [])
+        self.assertEqual(declared, 12391)
         self.assertEqual({cls.__name__: len(cls) for cls in registries}, before)
 
-        # The 23 ``(port, service)`` pairs the sweep used to answer wrongly, named
-        # so the count above is not the only thing pinning them. Each is a member
-        # of both the TCP and the UDP registry -- 23 * 2 = 46 -- and each used to
-        # come back as its port's TCP canonical instead, which is asserted here as
-        # the state of ``__canonical__`` rather than by rerunning the old code.
+        # The 23 ``(port, service)`` pairs #759 measured, kept so the counts above
+        # are not the only thing pinning the fix. Each is a member of both the TCP
+        # and the UDP registry -- 23 * 2 = 46 lookups -- and each used to answer
+        # from TCP whichever registry it was declared in.
         mismatched = (
             (42, 'name'), (63, 'whoispp'), (80, 'www'), (80, 'www-http'), (105, 'cso'),
             (351, 'bhoetty'), (352, 'bhoedap4'), (666, 'doom'), (888, 'accessbuilder'),
@@ -601,23 +587,25 @@ class AppTypeSplitTests(unittest.TestCase):
                 with self.subTest(registry=cls.__name__, port=port, svc=svc):
                     member = next(each for each in cls.__registry__.getlist(port)
                                   if each.svc == svc)
-                    self.assertGreater(len(show_flag_values(member.proto)), 1)
-                    with self.assertRaises(ProtocolError):
-                        AppType.get(port, proto=member.proto)
-                    # What it answered instead: the TCP registry's canonical, since
-                    # ``tcp`` is the lowest bit of every one of these.
-                    self.assertNotEqual(TCP.get(port).svc, svc)
+                    # Single-bit and its own registry's, where it used to be the
+                    # ``tcp | udp`` these pairs all carried.
+                    self.assertEqual(len(show_flag_values(member.proto)), 1)
+                    self.assertIs(member.proto, cls.__transport__)
+                    # And passing it back in resolves inside that registry rather
+                    # than being refused -- ``get`` answers the port's canonical,
+                    # which is the member itself where the member is canonical.
+                    resolved = AppType.get(port, proto=member.proto)
+                    self.assertIs(type(resolved), cls)
+                    self.assertIs(resolved, cls.get(port))
                     # And the member is still reachable, under its own transport.
                     self.assertIn(member, cls.get_all(port))
 
-                    # NOTE: the blast radius, derived from the LSB rule and this
-                    # tree's ``__canonical__`` rather than by rerunning the old
-                    # code. ``tcp`` is the lowest bit of all 46, so the TCP
-                    # registry's answer is what the composite used to resolve to;
-                    # where that differs from the member's own registry's answer,
-                    # the lookup returned a service that registry does not answer
-                    # at all. Everywhere else the two coincide, and the difference
-                    # from ``svc`` is only that the member is not the canonical.
+                    # NOTE: the blast radius, still named. ``tcp`` was the lowest
+                    # bit of all 46, so the TCP registry's answer is what the
+                    # composite used to resolve to; where that differs from the
+                    # member's own registry's answer, the lookup returned a service
+                    # that registry does not answer at all. Those are the two rows
+                    # below, and they are now answered from UDP as they should be.
                     if TCP.get(port).svc != cls.get(port).svc:
                         divergent.append((cls.__name__, port, svc,
                                           TCP.get(port).svc, cls.get(port).svc))
@@ -626,6 +614,8 @@ class AppTypeSplitTests(unittest.TestCase):
             ('UDP', 888, 'accessbuilder', 'cddbp', 'accessbuilder'),
             ('UDP', 999, 'puprouter', 'garcon', 'applix'),
         ])
+        self.assertEqual(AppType.get(888, proto=UDP.__transport__).svc, 'accessbuilder')
+        self.assertEqual(AppType.get(999, proto=UDP.__transport__).svc, 'applix')
 
     def test_one_transport_protocol_still_resolves_every_port_it_resolved_before(self) -> None:
         """The refusal narrows the composite case and nothing else.
@@ -640,23 +630,25 @@ class AppTypeSplitTests(unittest.TestCase):
         four numbers here are easy to confuse:
 
         * **12,391** declared members -- 6,147 TCP, 6,143 UDP, 91 SCTP, 10 DCCP;
-        * of those, **10,625** carry a multi-bit ``.proto`` and **1,766** a
-          single-bit one. That is a property of the *members*, and it is not what
-          this test partitions on;
+        * of those, **all 12,391** now carry a single-bit ``.proto`` and **0** a
+          multi-bit one. It was 10,625 multi-bit against 1,766 single-bit until
+          GitHub issue #806 retyped ``proto`` to the registry's own transport
+          protocol. That is a property of the *members*, and it is not what this
+          test partitions on;
         * they sit on **12,341** distinct ``(registry, port)`` pairs -- 6,121 TCP,
           6,119 UDP, 91 SCTP, 10 DCCP -- the other **50** sharing a port with
           another service, as IANA's three on TCP/80 do;
         * so the sweep below makes 12,341 distinct lookups, each passing **one**
-          transport protocol whatever the member's own ``.proto`` holds.
+          transport protocol, which is now also what every member's own ``.proto``
+          holds.
 
-        The digest is over those 12,341 rows, one per ``(registry, port)``, as
-        ``registry|port|resolved service|int(resolved proto)``:
-        ``3a457683c7b00609b06526aa02e3c361a910fa4a0e22d25ca16b4ab01acc053a``,
-        identical either side of the fix and identical again when ``proto`` is
-        passed as a name rather than as a flag. Restricted to the 1,766 single-bit
-        ``.proto`` members it is 1,763 rows -- three of them share a port --
-        digest ``308715ae6642a91be547d73e1c07f84bed7f27b7158951e831201c936807814b``,
-        also identical either side.
+        The sweep resolves each ``(registry, port)`` to the same member either side
+        of #806, since the lookup key is the port and the registry and neither
+        moved. What #806 does change is the *resolved member's* ``.proto``, so a
+        digest over ``registry|port|resolved service|int(resolved proto)`` is not
+        invariant across it and is deliberately not asserted here; the member-by-
+        member rendering is pinned by
+        ``test_every_member_renders_its_own_registrys_transport_protocol`` instead.
 
         Declared members only, for the reason
         ``test_every_multi_transport_member_refuses_its_own_proto`` gives: a mint
@@ -677,8 +669,8 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(sum(len(rows) for rows in members.values()), 12391)
         widths = [len(show_flag_values(each.proto))
                   for rows in members.values() for each in rows]
-        self.assertEqual(sum(1 for width in widths if width > 1), 10625)
-        self.assertEqual(sum(1 for width in widths if width == 1), 1766)
+        self.assertEqual(sum(1 for width in widths if width > 1), 0)
+        self.assertEqual(sum(1 for width in widths if width == 1), 12391)
 
         per_registry = {}  # type: dict[str, int]
         divergent = []  # type: list[tuple[str, int, str, str]]
@@ -723,12 +715,16 @@ class AppTypeSplitTests(unittest.TestCase):
         no import of :mod:`pcapkit.protocols` -- whose runtime dependencies this
         tier does not gate on.
 
-        :func:`~pcapkit.foundation.registry.register_apptype` is the one place that
-        *does* handle a member's composite ``proto``, reading it off ``code.proto``
-        when called with a member. It tests it with ``in`` and fans out to the TCP
-        and UDP protocol registries rather than looking a port up, so it never
-        reaches ``_dispatch`` and is unaffected -- asserted here so that a future
-        rewrite routing it through the lookup does not do so silently.
+        :func:`~pcapkit.foundation.registry.register_apptype` used to be the one
+        place that handled a member's *composite* ``proto``, reading it off
+        ``code.proto`` and testing it with ``in`` to fan out across the TCP and UDP
+        protocol registries. GitHub issue #806 removed both halves of that: the
+        member's ``proto`` is a single transport protocol, and the function takes
+        ``*transport`` varargs, so it iterates the transports it was given and looks
+        each one up in a mapping. The two source strings the fan-out was pinned by
+        -- ``proto = code.proto`` and ``if test not in proto:`` -- are therefore
+        asserted **absent**, and the new shape asserted present, so that a
+        reintroduced fan-out cannot pass this test.
         """
         import ast
         import pathlib
@@ -829,11 +825,68 @@ class AppTypeSplitTests(unittest.TestCase):
             'pcapkit/protocols/transport/udp.py _make_port(proto=Enum_TransportProtocol.udp)',
         ])
 
-        # ``register_apptype`` reads a member's composite ``proto`` and must keep
-        # testing it with ``in`` rather than looking a port up with it.
+        # ``register_apptype`` takes the transports one at a time and resolves each
+        # against a mapping, so neither half of the old fan-out may reappear. The
+        # *shape* is pinned below on the live signature instead of here: a literal
+        # ``*transport: 'TransportProtocol', class_: ...`` snippet would re-break on
+        # every future change to the annotation (it already broke once, when the
+        # #815 ruling added ``| str``) despite the shape it exists to protect never
+        # having changed at the source-text level it was reading.
         source = (root / 'pcapkit' / 'foundation' / 'registry' / 'protocols.py').read_text(encoding='utf-8')
-        self.assertIn('proto = code.proto', source)
-        self.assertIn('if test not in proto:', source)
+        self.assertNotIn('proto = code.proto', source)
+        self.assertNotIn('if test not in proto:', source)
+        self.assertIn('transport = (code.proto,)', source)
+        self.assertIn('for proto in transport:', source)
+
+        # Its signature, checked on the live object rather than on the text, since
+        # the text above cannot show what the parameters bind to. ``class_`` is
+        # positional again, at the sibling position ahead of ``*transport`` --
+        # further maintainer ruling on #815, reversing the keyword-only shape this
+        # test used to pin -- restoring consistency with ``register_tcp`` and its
+        # siblings.
+        import inspect
+
+        from pcapkit.foundation.registry.protocols import register_apptype
+
+        parameters = inspect.signature(register_apptype).parameters
+        self.assertEqual([(name, parameter.kind.name) for name, parameter in parameters.items()],
+                         [('code', 'POSITIONAL_OR_KEYWORD'), ('module', 'POSITIONAL_OR_KEYWORD'),
+                          ('class_', 'POSITIONAL_OR_KEYWORD'), ('transport', 'VAR_POSITIONAL')])
+
+        # Pure ``bind()`` is purely positional: it cannot see what ``module`` *is*,
+        # so a third positional argument lands in ``class_`` regardless -- the very
+        # swallow the keyword-only shape used to prevent. That the swallow does not
+        # actually happen any more is not a fact ``bind()`` can show, because the
+        # disambiguation runs in the function body, keyed on ``type(module)``, and
+        # only takes place once ``register_apptype`` actually executes.
+        from pcapkit.const.reg.apptype import TransportProtocol
+
+        bound = inspect.signature(register_apptype).bind(80, object(), TransportProtocol.udp)
+        self.assertEqual(bound.arguments['class_'], TransportProtocol.udp)
+        self.assertNotIn('transport', bound.arguments)
+
+        # So the branch itself is checked by actually calling the live function,
+        # not by binding its signature: a class ``module`` sends the same third
+        # argument to the real ``TCP``/``UDP`` registry as ``transport``, and a
+        # ``str`` module leaves it in ``class_`` and registers the class it names.
+        # ``tests/foundation/registry/test_protocols.py`` covers this branch and
+        # its edge cases in full; this is the narrow claim that anchors it here.
+        from unittest import mock
+
+        from pcapkit.foundation.registry import protocols as apptype_registry
+        from pcapkit.protocols.misc.raw import Raw
+
+        missing = object()
+        previous = apptype_registry.UDP.__proto__.get(65210, missing)
+        try:
+            with mock.patch.object(apptype_registry, 'register_protocol'):
+                register_apptype(65210, Raw, TransportProtocol.udp)
+            self.assertIs(apptype_registry.UDP.__proto__[65210], Raw)
+        finally:
+            if previous is missing:
+                apptype_registry.UDP.__proto__.pop(65210, None)
+            else:
+                apptype_registry.UDP.__proto__[65210] = previous
 
     def test_the_new_dunders_are_byte_identical_to_the_percent_form(self) -> None:
         """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` moved
@@ -893,6 +946,65 @@ class AppTypeSplitTests(unittest.TestCase):
 
             self.assertEqual(count, expected_counts[name], f'{name} population changed')
 
+        self.assertEqual(total, 12391)
+
+    def test_every_member_renders_its_own_registrys_transport_protocol(self) -> None:
+        """GitHub issue #806, member by member over all 12,391.
+
+        ``proto.name`` is folded into the member's underlying
+        :class:`~aenum.StrEnum` *value* by ``__new__``, not merely into its display,
+        so retyping ``proto`` rewrites ``TCP.http.value`` from
+        ``'http [80 - tcp|udp|sctp]'`` to ``'http [80 - tcp]'``. ``_value_`` is the
+        live key in ``_value2member_map_``, which is why the retype has to happen in
+        the generated source rather than at runtime -- a member whose ``_value_``
+        were edited afterwards would no longer be reachable by its own value.
+
+        Checked against the formula rather than against the member's own ``proto``:
+        the expected text is built from ``cls.__transport__``, which is declared once
+        per registry and is independent of what any member carries. That is what
+        makes this fail on stock ``4530424df``, where 10,625 of the 12,391 render a
+        composite -- ``test_the_new_dunders_are_byte_identical_to_the_percent_form``
+        derives its expectation from ``member.proto`` instead and so is invariant
+        across this change by construction.
+
+        Swept over every declared member of all four registries rather than
+        spot-checked, since the blast radius is 85.7% of the enumeration.
+        """
+        from tests._support import (ISOLATED_PREFIXES, purge_modules, restore_modules,
+                                    snapshot_modules)
+
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP
+
+        expected_counts = {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10}
+        total = 0
+        wrong = []  # type: list[tuple[str, str, str, str]]
+
+        for cls in (TCP, UDP, SCTP, DCCP):
+            count = 0
+            transport = cls.__transport__.name
+            for member in cls:
+                count += 1
+                total += 1
+                value = f'{member.svc} [{member.port} - {transport}]'
+                if str(member._value_) != value:  # type: ignore[attr-defined]
+                    wrong.append((cls.__name__, member.name, 'value', str(member._value_)))  # type: ignore[attr-defined]
+                if str(member) != value:
+                    wrong.append((cls.__name__, member.name, 'str', str(member)))
+                shown = f'<{cls.__name__}.{member.svc}: {member.port} [{transport}]>'
+                if repr(member) != shown:
+                    wrong.append((cls.__name__, member.name, 'repr', repr(member)))
+                # The value is the live lookup key, so it has to round-trip.
+                if cls(value) is not member:
+                    wrong.append((cls.__name__, member.name, 'lookup', value))
+            self.assertEqual(count, expected_counts[cls.__name__],
+                             f'{cls.__name__} population changed')
+
+        self.assertEqual(wrong[:20], [])
+        self.assertEqual(len(wrong), 0)
         self.assertEqual(total, 12391)
 
     @staticmethod

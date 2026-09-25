@@ -784,17 +784,17 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
 
 
 @overload
-def register_apptype(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *, proto: 'TransportProtocol | str') -> 'None': ...
+def register_apptype(code: 'int', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *transport: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+def register_apptype(code: 'Enum_AppType', module: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]', *transport: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_apptype(code: 'int', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str') -> 'None': ...
+def register_apptype(code: 'int', module: 'str', class_: 'str', *transport: 'TransportProtocol | str') -> 'None': ...
 @overload
-def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *, proto: 'TransportProtocol | str' = ...) -> 'None': ...
+def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *transport: 'TransportProtocol | str') -> 'None': ...
 
 
 def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                     class_: 'str' = NULL, *, proto: 'TransportProtocol | str' = NULL) -> 'None':
+                     class_: 'str | TransportProtocol' = NULL, *transport: 'TransportProtocol | str') -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -809,13 +809,46 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         code: port number
         module: module name or module descriptor or a
             :class:`~pcapkit.protocols.protocol.Protocol` subclass
-        class\_: class name
-        proto: protocol name (must be a valid transport protocol)
+        class\_: class name, meaningful only when ``module`` is a :class:`str`.
+            Positional, at the same position as the sibling ``register_*``
+            functions -- but unlike them, a third positional argument here is
+            not always ``class_``: which parameter it binds to is decided by
+            ``type(module)`` alone, never by what the value looks like.
+            When ``module`` is **not** a :class:`str`, whatever is given here
+            is treated as the first ``*transport`` element instead --
+            prepended, so argument order is preserved -- and ``class_`` itself
+            stays unset; ``register_apptype(80, Unit, TransportProtocol.udp)``
+            therefore reaches ``transport`` rather than being silently
+            swallowed. This is not a heuristic on the value: with a
+            :class:`str` ``module``, a :class:`str` third argument is
+            **always** a class name -- ``register_apptype(80, 'a.b', 'tcp')``
+            registers a class literally named ``'tcp'`` -- and naming a
+            transport alongside a :class:`str` module takes the fourth
+            position onward instead.
+        *transport: transport protocols to register ``code`` under, named **one
+            at a time**, each as a :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
+            member or as that member's ``name`` (case-insensitively, e.g. ``'tcp'``,
+            ``'TCP'`` or ``'Tcp'`` alike); the two forms are coerced to the same
+            member and behave identically,
+            including which error they raise. Where none is given and ``code`` is
+            an :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, the
+            member's own :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto`
+            is used, which names exactly the registry the member lives in. A bare
+            :class:`int` carries no such default and so requires at least one.
+
+    Raises:
+        pcapkit.utilities.exceptions.RegistryError: If no transport protocol is
+            given for a bare :class:`int`; if one of those given (member or name)
+            names no port-keyed registry; or if a ``str`` matches no
+            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member's
+            ``name``. A composite such as ``tcp | udp``, or its string form
+            ``'tcp|udp'``, names two and is refused for the same reason: one call
+            registers under one transport protocol.
 
     Important:
         :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**
-        part of this fan-out, even for application types that name ``sctp`` in
-        their :class:`~pcapkit.const.reg.apptype.TransportProtocol`. Its
+        one of the registries this writes to, so naming ``sctp`` here is an error
+        rather than a no-op. Its
         :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is
         keyed by the DATA chunk's payload protocol identifier rather than by
         port number, so writing a port number into it would dispatch on a
@@ -828,30 +861,85 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
         * :func:`pcapkit.foundation.registry.register_sctp`
 
     """
+    # NOTE: ``class_`` is back at the sibling position -- positional, ahead of
+    # ``*transport`` -- per maintainer ruling, and the swallow that made it
+    # keyword-only in the first place is disambiguated here by ``type(module)``
+    # alone, never by what ``class_`` itself looks like. A ``str`` module means
+    # ``class_`` really is a class name, so it is left untouched -- including
+    # when it happens to be a string like ``'tcp'``, which is not sniffed for
+    # looking like a transport. Any other module type means the third
+    # positional was never a class name to begin with, so it is moved to the
+    # front of ``transport`` -- prepended, so argument order survives -- and
+    # ``class_`` is reset to ``NULL`` so the ``ModuleDescriptor`` branch below
+    # never sees it.
+    if not isinstance(module, str) and class_ is not NULL:
+        transport = (cast('TransportProtocol | str', class_),) + transport
+        class_ = NULL
+
+    # NOTE: a ``str`` transport is coerced to its ``TransportProtocol`` member
+    # up front, before any registry work, so every downstream use -- the
+    # ``code.proto`` default and the registries lookup below -- sees members
+    # only. Resolution is by the member's own ``name``, case-insensitively --
+    # maintainer ruling on #815 -- via ``__members__`` directly rather than
+    # ``TransportProtocol[name]``: aenum's ``Flag.__getitem__`` parses a
+    # ``'|'``-joined name into a composite value on its own
+    # (``TransportProtocol['tcp|udp']`` silently returns the value ``3``),
+    # which is exactly the composite this function has to refuse, and
+    # lowercasing does not change that: ``'tcp|udp'`` is not a member name
+    # either. Anything that is neither a ``str`` nor a ``TransportProtocol``
+    # member is rejected here too, rather than falling through to the
+    # registries lookup below: ``TransportProtocol`` is an ``IntFlag``, so
+    # ``registries.get(1)`` resolves to ``TCP`` just as
+    # ``registries.get(TransportProtocol.tcp)`` does, and would otherwise
+    # register the port before the ``proto.name`` access two lines below it
+    # raised -- leaving the port written into ``TCP.__proto__`` with
+    # ``register_protocol`` never called.
+    coerced: 'list[TransportProtocol]' = []
+    for proto in transport:
+        if isinstance(proto, str):
+            # NOTE: ``proto`` itself -- not the lowercased lookup key -- is
+            # what the error message formats with ``!r``, so a mismatched
+            # name such as ``'TCP '`` still shows its own casing and its
+            # trailing space rather than the lowercased form.
+            member = TransportProtocol.__members__.get(proto.lower())
+            if member is None:
+                raise RegistryError(f'unknown transport protocol: {proto!r}')
+            proto = cast('TransportProtocol', member)
+        elif not isinstance(proto, TransportProtocol):
+            raise RegistryError(f'unknown transport protocol: {proto!r}')
+        coerced.append(proto)
+    transport = tuple(coerced)
+
+    # NOTE: the member's own ``proto`` is the single transport protocol of the
+    # registry it lives in -- GitHub issue #806 -- so it names one destination
+    # rather than fanning out across every transport IANA gave the service. The
+    # fan-out this replaced made ``register_apptype(TCP.http, Dummy)`` displace
+    # the UDP handler for port 80 as well, which no caller naming the TCP member
+    # asked for.
+    if not transport:
+        if not isinstance(code, Enum_AppType):
+            raise RegistryError(f'no transport protocol given for port {code}; name each '
+                                'transport protocol to register under')
+        transport = (code.proto,)
     if isinstance(code, Enum_AppType):
-        if proto is NULL:
-            proto = code.proto
         code = code.port
     if isinstance(module, str):
         module = cast('ModuleDescriptor[ProtocolBase]', ModuleDescriptor(module, class_))
 
-    _reg = False
-    if isinstance(proto, str):
-        proto = TransportProtocol.get(proto.lower())
-
-    for test, cls in cast('dict[TransportProtocol, Type[ProtocolBase]]', {
+    registries = cast('dict[TransportProtocol, Type[ProtocolBase]]', {
         TransportProtocol.tcp: TCP,
         TransportProtocol.udp: UDP,
-    }).items():
-        if test not in proto:
-            continue
+    })
+    for proto in transport:
+        # NOTE: a composite is not a key here, so ``tcp | udp`` is rejected
+        # rather than quietly registering under both. Naming them one at a time
+        # is what the varargs are for.
+        cls = registries.get(proto)
+        if cls is None:
+            raise RegistryError(f'unknown transport protocol: {proto.name}')
 
         cls.register(code, module)
-        logger.debug('registered %s port: %s', test.name, code)
-        _reg = True
-
-    if not _reg:
-        raise RegistryError(f'unknown transport protocol: {proto.name}')
+        logger.debug('registered %s port: %s', proto.name, code)
 
     # register protocol to protocol registry
     if isinstance(module, ModuleDescriptor):
