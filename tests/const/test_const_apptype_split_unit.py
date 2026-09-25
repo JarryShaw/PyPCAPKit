@@ -387,6 +387,454 @@ class AppTypeSplitTests(unittest.TestCase):
                     # on that being true to stay correct.
                     self.assertTrue(condition.endswith(claim), condition)
 
+    def test_a_proto_naming_two_transports_is_refused_rather_than_resolved(self) -> None:
+        """GitHub issue #759: the lowest set bit decided, silently.
+
+        ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member carries the
+        *whole* set IANA assigned the service, so ``tcp | udp`` is an ordinary value
+        to read off one and therefore an ordinary thing to pass back in. It names
+        two registries holding two different services for the same port, though,
+        and a lookup answers with one member -- so there is no answer to which of
+        them the composite meant. ``_dispatch`` resolved it through
+        :func:`~pcapkit.utilities.compat.show_flag_values`, which iterates
+        **LSB-first**, so every composite containing ``tcp`` -- the lowest declared
+        bit -- dispatched into the TCP registry whatever else it named.
+
+        The refusal is :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
+        than a bare :exc:`ValueError` because in-library errors come from
+        :mod:`pcapkit.utilities.exceptions`, and it is safe here in a way it is
+        **not** in ``_missing_``:
+        ``ConstEnumBuiltinParityTests.test_the_exception_is_not_an_in_library_one``,
+        in :mod:`tests.const.test_const_enum_builtin_parity`, requires the
+        constructor's guard to stay a non-:class:`BaseError` precisely because
+        ``get``'s ``except ValueError`` fallback catches and discards it, and a
+        ``BaseError`` would log at CRITICAL once per discarded default. Nothing
+        catches this one -- it propagates out of ``get``/``get_all`` to the caller
+        -- so a loud error is what it should be. It subclasses :exc:`ValueError` all
+        the same, so the documented contract of both entry points still holds.
+        """
+        import sys
+
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType, TransportProtocol
+        from pcapkit.utilities.compat import show_flag_values
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        # NOTE: a loud BaseError sets ``sys.tracebacklimit`` to 0 process-wide
+        # outside development mode, which would truncate the traceback of every
+        # later failure in this process. Restored the way
+        # ``QuietExceptionTests.setUp`` does it.
+        saved = getattr(sys, 'tracebacklimit', None)
+
+        def restore() -> None:
+            if saved is None:
+                if hasattr(sys, 'tracebacklimit'):
+                    del sys.tracebacklimit
+            else:
+                sys.tracebacklimit = saved
+
+        self.addCleanup(restore)
+
+        # The mechanism, pinned rather than described: ``tcp`` is the lowest bit
+        # and LSB-first iteration is why it used to win.
+        self.assertEqual(show_flag_values(TransportProtocol.tcp | TransportProtocol.udp),
+                         [TransportProtocol.tcp, TransportProtocol.udp])
+
+        # #759's own reproduction. 888 carries ``cddbp`` on TCP and
+        # ``accessbuilder`` on UDP, so the composite answered ``cddbp`` for a UDP
+        # member -- and ``==`` read ``True``, since it compares on ``port`` alone.
+        both = TransportProtocol.tcp | TransportProtocol.udp
+        member = next(each for each in UDP.__registry__.getlist(888)
+                      if each.svc == 'accessbuilder')
+        with self.assertRaises(ProtocolError) as caught:
+            AppType.get(888, proto=member.proto)
+        self.assertIsInstance(caught.exception, ValueError)
+        self.assertIsInstance(caught.exception, BaseError)
+        self.assertIn('tcp|udp', str(caught.exception))
+        self.assertIn('2 transport protocols', str(caught.exception))
+
+        # Every composite over the four declared bits, through all three entry
+        # points -- ``get_all`` and ``_dispatch`` dispatch exactly as ``get`` does,
+        # so a guard on one of them only would leave the other two resolving.
+        singles = (TransportProtocol.tcp, TransportProtocol.udp,
+                   TransportProtocol.sctp, TransportProtocol.dccp)
+        composites = []
+        for first in range(len(singles)):
+            for second in range(first + 1, len(singles)):
+                composites.append(singles[first] | singles[second])
+        composites.append(TransportProtocol.tcp | TransportProtocol.udp | TransportProtocol.sctp)
+        composites.append(singles[0] | singles[1] | singles[2] | singles[3])
+        self.assertEqual(len(composites), 8)
+
+        before = {cls: len(cls) for cls in (TCP, UDP, SCTP, DCCP)}
+        for proto in composites:
+            with self.subTest(proto=proto.name):
+                with self.assertRaises(ProtocolError):
+                    AppType.get(80, proto=proto)
+                with self.assertRaises(ProtocolError):
+                    AppType.get_all(80, proto=proto)
+                with self.assertRaises(ProtocolError):
+                    AppType._dispatch(80, proto)
+
+        # And nothing was minted on the way out: #758's shape of defect was a
+        # rejection that grew the registry anyway.
+        self.assertEqual({cls: len(cls) for cls in (TCP, UDP, SCTP, DCCP)}, before)
+
+        # A single bit is untouched, and so is ``undefined``: zero bits names no
+        # registry rather than too many, which is a different refusal and stays the
+        # plain ``ValueError`` ``test_a_port_lookup_on_the_base_dispatches_by_transport``
+        # asserts.
+        self.assertIs(AppType.get(80, proto=TransportProtocol.tcp), TCP.get(80))
+        with self.assertRaises(ValueError) as plain:
+            AppType.get(80, proto=TransportProtocol.undefined)
+        self.assertNotIsInstance(plain.exception, ProtocolError)
+
+        # On a registry subclass ``proto`` is documented as ignored -- it already
+        # knows its own transport, so there is nothing ambiguous to refuse and the
+        # composite must not start erroring there.
+        self.assertIs(UDP.get(888, proto=both), member)
+        self.assertEqual(TCP.get(888, proto=both).svc, 'cddbp')
+
+    def test_every_multi_transport_member_refuses_its_own_proto(self) -> None:
+        """All 10,625 of them, which is how the 46 differing answers were found.
+
+        The measurement in #759, re-derived on ``fe80b8525``: sweeping every
+        multi-transport member through ``AppType.get(m.port, proto=m.proto)`` gave
+        0 exceptions, 0 mints and **46 answers naming a service other than the
+        member's own**, at 20 distinct ports and 23 ``(port, service)`` pairs --
+        each pair declared once in the TCP registry and once in UDP. Identical at
+        ``932cb48d1``, so long-standing rather than a regression.
+
+        Those 46 are three different things, and only the last is a wrong *answer*:
+
+        #. all 46 name a service other than the member's own, which for 44 of them
+           is :meth:`get`'s documented behaviour rather than a defect -- the member
+           is simply not its port's canonical, and a single-bit lookup answers the
+           canonical too;
+        #. **23** -- the UDP-declared half -- came back as a member of the *TCP*
+           registry, so ``type(result)`` and ``result.proto`` were wrong whatever
+           the service string said;
+        #. **2** named a service UDP's own lookup does not answer at all, and they
+           are the whole of this bug's blast radius: port **888**, where
+           ``accessbuilder`` resolved to TCP's ``cddbp``, and port **999**, where
+           ``puprouter`` resolved to TCP's ``garcon`` against UDP's ``applix``.
+           They are the two ports where :data:`__canonical__` genuinely disagrees
+           between the two registries *and* the port carries a multi-transport
+           member; #759's body found the first of them and generalised from it.
+
+        Asserted over the whole population rather than over a sample, because the
+        population is what the crawler regenerates: a future crawl that adds a
+        service to a second transport adds members here, and they have to refuse
+        too. The failures are collected rather than run through
+        :meth:`~unittest.TestCase.subTest` -- 10,625 subtests would dominate the
+        suite's own output, and each refusal logs at CRITICAL.
+
+        Counted over members the crawler *declared*, so the figure does not depend
+        on what else has run in this process: a mint carries ``svc == 'unknown'``
+        and no generated member does, which makes that the filter.
+        """
+        import logging
+        import sys
+
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType
+        from pcapkit.utilities.compat import show_flag_values
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        saved_limit = getattr(sys, 'tracebacklimit', None)
+        saved_level = logging.getLogger('pcapkit').level
+
+        def restore() -> None:
+            logging.getLogger('pcapkit').setLevel(saved_level)
+            if saved_limit is None:
+                if hasattr(sys, 'tracebacklimit'):
+                    del sys.tracebacklimit
+            else:
+                sys.tracebacklimit = saved_limit
+
+        self.addCleanup(restore)
+        logging.getLogger('pcapkit').setLevel(logging.CRITICAL + 1)
+
+        registries = [TCP, UDP, SCTP, DCCP]
+        before = {cls.__name__: len(cls) for cls in registries}
+
+        swept = 0
+        answered = []  # type: list[tuple[str, int, str, str]]
+        other = []  # type: list[tuple[str, int, str]]
+        for cls in registries:
+            for member in list(cls):
+                if member.svc == 'unknown' or len(show_flag_values(member.proto)) <= 1:
+                    continue
+                swept += 1
+                try:
+                    result = AppType.get(member.port, proto=member.proto)
+                except ProtocolError:
+                    continue
+                except Exception as exc:  # pylint: disable=broad-except
+                    other.append((cls.__name__, member.port, type(exc).__name__))
+                else:
+                    answered.append((cls.__name__, member.port, member.svc, result.svc))
+
+        self.assertEqual(answered, [])
+        self.assertEqual(other, [])
+        self.assertEqual(swept, 10625)
+        self.assertEqual({cls.__name__: len(cls) for cls in registries}, before)
+
+        # The 23 ``(port, service)`` pairs the sweep used to answer wrongly, named
+        # so the count above is not the only thing pinning them. Each is a member
+        # of both the TCP and the UDP registry -- 23 * 2 = 46 -- and each used to
+        # come back as its port's TCP canonical instead, which is asserted here as
+        # the state of ``__canonical__`` rather than by rerunning the old code.
+        mismatched = (
+            (42, 'name'), (63, 'whoispp'), (80, 'www'), (80, 'www-http'), (105, 'cso'),
+            (351, 'bhoetty'), (352, 'bhoedap4'), (666, 'doom'), (888, 'accessbuilder'),
+            (999, 'puprouter'), (1525, 'orasrv'), (1701, 'l2f'), (1989, 'mshnet'),
+            (1992, 'ipsendmsg'), (2049, 'shilp'), (3000, 'remoteware-cl'),
+            (3002, 'remoteware-srv'), (3478, 'turn'), (3478, 'stun-behavior'),
+            (4444, 'nv-video'), (5349, 'turns'), (5349, 'stun-behaviors'),
+            (9100, 'pdl-datastream'),
+        )
+        self.assertEqual(len(mismatched), 23)
+        self.assertEqual(len({port for port, _ in mismatched}), 20)
+
+        divergent = []  # type: list[tuple[str, int, str, str, str]]
+        for port, svc in mismatched:
+            for cls in (TCP, UDP):
+                with self.subTest(registry=cls.__name__, port=port, svc=svc):
+                    member = next(each for each in cls.__registry__.getlist(port)
+                                  if each.svc == svc)
+                    self.assertGreater(len(show_flag_values(member.proto)), 1)
+                    with self.assertRaises(ProtocolError):
+                        AppType.get(port, proto=member.proto)
+                    # What it answered instead: the TCP registry's canonical, since
+                    # ``tcp`` is the lowest bit of every one of these.
+                    self.assertNotEqual(TCP.get(port).svc, svc)
+                    # And the member is still reachable, under its own transport.
+                    self.assertIn(member, cls.get_all(port))
+
+                    # NOTE: the blast radius, derived from the LSB rule and this
+                    # tree's ``__canonical__`` rather than by rerunning the old
+                    # code. ``tcp`` is the lowest bit of all 46, so the TCP
+                    # registry's answer is what the composite used to resolve to;
+                    # where that differs from the member's own registry's answer,
+                    # the lookup returned a service that registry does not answer
+                    # at all. Everywhere else the two coincide, and the difference
+                    # from ``svc`` is only that the member is not the canonical.
+                    if TCP.get(port).svc != cls.get(port).svc:
+                        divergent.append((cls.__name__, port, svc,
+                                          TCP.get(port).svc, cls.get(port).svc))
+
+        self.assertEqual(divergent, [
+            ('UDP', 888, 'accessbuilder', 'cddbp', 'accessbuilder'),
+            ('UDP', 999, 'puprouter', 'garcon', 'applix'),
+        ])
+
+    def test_one_transport_protocol_still_resolves_every_port_it_resolved_before(self) -> None:
+        """The refusal narrows the composite case and nothing else.
+
+        Every declared member of every registry, dispatched from the base under its
+        own registry's **single** transport bit, has to land on the member that
+        registry's own ``get`` answers with -- ``cls.get`` reaches ``_dispatch``'s
+        early return for a class that holds members, so it never runs the guard and
+        is an independent oracle for what the guard must not have changed.
+
+        The population, measured on ``fe80b8525`` and unchanged by the fix, because
+        four numbers here are easy to confuse:
+
+        * **12,391** declared members -- 6,147 TCP, 6,143 UDP, 91 SCTP, 10 DCCP;
+        * of those, **10,625** carry a multi-bit ``.proto`` and **1,766** a
+          single-bit one. That is a property of the *members*, and it is not what
+          this test partitions on;
+        * they sit on **12,341** distinct ``(registry, port)`` pairs -- 6,121 TCP,
+          6,119 UDP, 91 SCTP, 10 DCCP -- the other **50** sharing a port with
+          another service, as IANA's three on TCP/80 do;
+        * so the sweep below makes 12,341 distinct lookups, each passing **one**
+          transport protocol whatever the member's own ``.proto`` holds.
+
+        The digest is over those 12,341 rows, one per ``(registry, port)``, as
+        ``registry|port|resolved service|int(resolved proto)``:
+        ``3a457683c7b00609b06526aa02e3c361a910fa4a0e22d25ca16b4ab01acc053a``,
+        identical either side of the fix and identical again when ``proto`` is
+        passed as a name rather than as a flag. Restricted to the 1,766 single-bit
+        ``.proto`` members it is 1,763 rows -- three of them share a port --
+        digest ``308715ae6642a91be547d73e1c07f84bed7f27b7158951e831201c936807814b``,
+        also identical either side.
+
+        Declared members only, for the reason
+        ``test_every_multi_transport_member_refuses_its_own_proto`` gives: a mint
+        carries ``svc == 'unknown'``, and ``AppType.get(9899, proto=sctp)`` in
+        ``test_a_port_lookup_on_the_base_dispatches_by_transport`` leaves one
+        behind, so a count over every registry key would depend on test order.
+        """
+        from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType
+        from pcapkit.utilities.compat import show_flag_values
+
+        registries = [TCP, UDP, SCTP, DCCP]
+        before = {cls.__name__: len(cls) for cls in registries}
+
+        members = {cls.__name__: [each for each in cls if each.svc != 'unknown']
+                   for cls in registries}
+        self.assertEqual({name: len(rows) for name, rows in members.items()},
+                         {'TCP': 6147, 'UDP': 6143, 'SCTP': 91, 'DCCP': 10})
+        self.assertEqual(sum(len(rows) for rows in members.values()), 12391)
+        widths = [len(show_flag_values(each.proto))
+                  for rows in members.values() for each in rows]
+        self.assertEqual(sum(1 for width in widths if width > 1), 10625)
+        self.assertEqual(sum(1 for width in widths if width == 1), 1766)
+
+        per_registry = {}  # type: dict[str, int]
+        divergent = []  # type: list[tuple[str, int, str, str]]
+        for cls in registries:
+            ports = sorted({member.port for member in members[cls.__name__]})
+            per_registry[cls.__name__] = len(ports)
+            for port in ports:
+                own = cls.get(port)
+                for proto in (cls.__transport__, cls.__transport__.name):
+                    resolved = AppType.get(port, proto=proto)  # type: ignore[arg-type]
+                    if resolved is not own:
+                        divergent.append((cls.__name__, port, resolved.svc, own.svc))
+
+        self.assertEqual(divergent, [])
+        self.assertEqual(per_registry, {'TCP': 6121, 'UDP': 6119, 'SCTP': 91, 'DCCP': 10})
+        self.assertEqual(sum(per_registry.values()), 12341)
+        self.assertEqual(sum(len(rows) for rows in members.values())
+                         - sum(per_registry.values()), 50)
+        self.assertEqual({cls.__name__: len(cls) for cls in registries}, before)
+
+        # Spot-checked against the answers ``/etc/services`` gives, so the sweep
+        # above cannot pass by agreeing with itself on a wrong value.
+        for cls, port, svc in ((TCP, 80, 'http'), (UDP, 512, 'biff'), (TCP, 888, 'cddbp'),
+                               (UDP, 888, 'accessbuilder'), (TCP, 22, 'ssh')):
+            with self.subTest(registry=cls.__name__, port=port):
+                self.assertEqual(AppType.get(port, proto=cls.__transport__).svc, svc)
+
+    def test_no_lookup_call_site_in_the_library_builds_a_composite_proto(self) -> None:
+        """Why refusing one breaks nothing, asserted rather than taken on trust.
+
+        The refusal is only safe while every library caller passes a single
+        transport protocol. There are ten call sites into the base registry's lookup
+        outside :mod:`pcapkit.const`: one in ``Transport._make_port``, which passes
+        the ``proto`` its six call sites hand it -- a literal member every time, two
+        per transport in the TCP, UDP and SCTP protocol modules -- and three in each
+        of the TCP, UDP and SCTP schemas' ``PortEnumField.post_process``, which
+        binds ``proto`` to one literal member and then uses it for ``_dispatch`` and
+        both ``get`` calls. None of them can pass a composite, because none of those
+        modules builds one.
+
+        Read off disk rather than through :func:`inspect.getsource`, so this needs
+        no import of :mod:`pcapkit.protocols` -- whose runtime dependencies this
+        tier does not gate on.
+
+        :func:`~pcapkit.foundation.registry.register_apptype` is the one place that
+        *does* handle a member's composite ``proto``, reading it off ``code.proto``
+        when called with a member. It tests it with ``in`` and fans out to the TCP
+        and UDP protocol registries rather than looking a port up, so it never
+        reaches ``_dispatch`` and is unaffected -- asserted here so that a future
+        rewrite routing it through the lookup does not do so silently.
+        """
+        import ast
+        import pathlib
+
+        root = pathlib.Path(__file__).resolve().parents[2]
+        if not (root / 'pcapkit' / 'protocols').is_dir():
+            self.skipTest('no pcapkit sources next to the test tree')
+
+        callers = [
+            'pcapkit/protocols/transport/transport.py',
+            'pcapkit/protocols/transport/tcp.py',
+            'pcapkit/protocols/transport/udp.py',
+            'pcapkit/protocols/transport/sctp.py',
+            'pcapkit/protocols/schema/transport/tcp.py',
+            'pcapkit/protocols/schema/transport/udp.py',
+            'pcapkit/protocols/schema/transport/sctp.py',
+            'pcapkit/foundation/registry/protocols.py',
+            'pcapkit/corekit/fields/numbers.py',
+        ]
+        members = {'tcp', 'udp', 'sctp', 'dccp'}
+
+        composites = []  # type: list[tuple[str, int]]
+        lookups = []  # type: list[str]
+        bindings = []  # type: list[tuple[str, str]]
+        for relative in callers:
+            path = root / relative
+            with self.subTest(module=relative):
+                self.assertTrue(path.is_file(), path)
+                tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+                for node in ast.walk(tree):
+                    # A ``TransportProtocol`` composite, however it is spelled.
+                    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+                        if 'TransportProtocol' in ast.unparse(node):
+                            composites.append((relative, node.lineno))
+                    # What ``proto`` is bound to, for the schema fields that use a
+                    # local rather than passing the member straight in. Only those
+                    # three modules: ``Transport._decode_next_layer`` has a local of
+                    # the same name holding a *port number* for the next-layer
+                    # registry, which never reaches this lookup.
+                    if isinstance(node, ast.Assign) and 'schema' in relative:
+                        for target in node.targets:
+                            if isinstance(target, ast.Name) and target.id == 'proto':
+                                bindings.append((relative, ast.unparse(node.value)))
+                    if not isinstance(node, ast.Call):
+                        continue
+                    name = (node.func.attr if isinstance(node.func, ast.Attribute) else
+                            node.func.id if isinstance(node.func, ast.Name) else '')
+                    if name not in ('get', 'get_all', '_dispatch', '_make_port'):
+                        continue
+                    arguments = [keyword.value for keyword in node.keywords
+                                 if keyword.arg == 'proto']
+                    if name in ('_dispatch', '_make_port') and len(node.args) > 1:
+                        arguments.append(node.args[1])
+                    for argument in arguments:
+                        lookups.append('%s %s(proto=%s)' % (relative, name, ast.unparse(argument)))
+
+        self.assertEqual(composites, [])
+
+        # Every argument is one member, its name, or the single-member local that
+        # ``_make_port`` and ``post_process`` bind -- never an expression that could
+        # widen. Both the ``Enum_`` alias and the bare name, since the schema modules
+        # import it under one and the transport modules under the other.
+        permitted = {'proto'}
+        for name in members:
+            permitted.update({repr(name), 'TransportProtocol.%s' % name,
+                              'Enum_TransportProtocol.%s' % name})
+        for rendered in lookups:
+            with self.subTest(call=rendered):
+                self.assertIn(rendered.split('proto=', 1)[1].rstrip(')'), permitted)
+
+        # Every local named ``proto`` in these modules is bound to exactly one
+        # member, which is what makes the bare ``proto`` arguments above single-bit.
+        self.assertEqual(sorted(bindings), [
+            ('pcapkit/protocols/schema/transport/sctp.py', 'Enum_TransportProtocol.sctp'),
+            ('pcapkit/protocols/schema/transport/tcp.py', 'Enum_TransportProtocol.tcp'),
+            ('pcapkit/protocols/schema/transport/udp.py', 'Enum_TransportProtocol.udp'),
+        ])
+
+        # The sixteen the sweep found, so a new one cannot appear without this test
+        # saying so. ``transport.py`` holds the single lookup and the six literal
+        # ``_make_port`` arguments that feed it; each schema module holds three.
+        self.assertEqual(sorted(lookups), [
+            'pcapkit/protocols/schema/transport/sctp.py _dispatch(proto=proto)',
+            'pcapkit/protocols/schema/transport/sctp.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/sctp.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/tcp.py _dispatch(proto=proto)',
+            'pcapkit/protocols/schema/transport/tcp.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/tcp.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/udp.py _dispatch(proto=proto)',
+            'pcapkit/protocols/schema/transport/udp.py get(proto=proto)',
+            'pcapkit/protocols/schema/transport/udp.py get(proto=proto)',
+            'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/sctp.py _make_port(proto=Enum_TransportProtocol.sctp)',
+            'pcapkit/protocols/transport/tcp.py _make_port(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/tcp.py _make_port(proto=Enum_TransportProtocol.tcp)',
+            'pcapkit/protocols/transport/transport.py get(proto=proto)',
+            'pcapkit/protocols/transport/udp.py _make_port(proto=Enum_TransportProtocol.udp)',
+            'pcapkit/protocols/transport/udp.py _make_port(proto=Enum_TransportProtocol.udp)',
+        ])
+
+        # ``register_apptype`` reads a member's composite ``proto`` and must keep
+        # testing it with ``in`` rather than looking a port up with it.
+        source = (root / 'pcapkit' / 'foundation' / 'registry' / 'protocols.py').read_text(encoding='utf-8')
+        self.assertIn('proto = code.proto', source)
+        self.assertIn('if test not in proto:', source)
+
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
         """Undo an :func:`~aenum.extend_enum` so the registry is left as found.
