@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, cast
 from aenum import IntFlag, StrEnum, auto, extend_enum
 
 from pcapkit.utilities.compat import show_flag_values
+from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['TransportProtocol', 'AppType']
 
@@ -2348,7 +2349,9 @@ class AppType(StrEnum):
         Args:
             key: Port number the caller is looking up, validated here so that
                 every entry point rejects a non-port identically.
-            proto: Transport protocol, as a flag or its name.
+            proto: Transport protocol, as a flag or its name. Exactly one, on
+                the delegating path -- see :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+                below.
 
         Returns:
             The registry class to search.
@@ -2356,6 +2359,10 @@ class AppType(StrEnum):
         Raises:
             ValueError: If ``key`` is not a port number, or if ``cls`` holds no
                 members and ``proto`` names no registry to delegate to.
+            ProtocolError: If ``cls`` holds no members and ``proto`` names more
+                than one transport protocol, which names more than one registry
+                and so no single answer. Itself a :exc:`ValueError`, so a caller
+                catching that keeps catching this.
 
         """
         # NOTE: this registry resolves ports, not service names. The old string
@@ -2371,8 +2378,43 @@ class AppType(StrEnum):
 
         if isinstance(proto, str):
             proto = TransportProtocol.get(proto.lower())
-        for namespace in show_flag_values(proto):
-            subclass = cls.__registries__.get(TransportProtocol(namespace))
+        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member
+        # carries the *whole* transport protocol set IANA assigned the service, so
+        # ``tcp | udp`` is an ordinary value to read off one and therefore an
+        # ordinary thing to pass back in. It names two registries, though, holding
+        # two different services for the same port -- and a lookup answers with one
+        # member, so there is no answer to which of them the composite meant.
+        # Resolving it picked the lowest set bit: :func:`~enum.show_flag_values`
+        # iterates LSB-first and ``tcp`` is the lowest, so every composite
+        # containing it dispatched into the TCP registry whatever else it named.
+        # Measured on fe80b8525, that answered 46 of the 10,625 multi-transport
+        # members' own ``get(m.port, proto=m.proto)`` with a service other than the
+        # member's own, of which 23 -- the UDP-declared half -- came back as a
+        # member of the *TCP* registry, carrying the wrong type and a narrower
+        # ``proto``. Two of those named a service UDP does not answer for the port
+        # at all, and they are the whole blast radius: ``AppType.get(888, proto=tcp
+        # | udp)`` gave ``cddbp`` for ``<UDP.accessbuilder: 888 [tcp|udp]>``, and
+        # 999 gave ``garcon`` against UDP's ``applix``. The other 44 differ from
+        # ``m.svc`` only in that the member is not its port's canonical, which a
+        # single-bit lookup does too and which ``get`` documents. All of it silent,
+        # and undetectable to a caller checking equality, since ``__eq__`` compares
+        # on ``port`` alone. GitHub issue #759, whose body found 888 and
+        # generalised from it.
+        #
+        # Refusing the composite is the honest answer and costs
+        # nothing: a caller resolving a parsed port knows which transport carried
+        # it and passes that one bit, which is what every call site in
+        # :mod:`pcapkit` does, and one that wants every service on a port asks each
+        # registry in turn. This is the delegating path only -- a registry subclass
+        # returned above already knows its own transport and documents ``proto`` as
+        # ignored, so nothing there is ambiguous to begin with.
+        namespaces = show_flag_values(proto)
+        if len(namespaces) > 1:
+            raise ProtocolError(f'{proto!r} names {len(namespaces)} transport protocols, and so '
+                                f'{len(namespaces)} registries of {cls.__name__}; look the port up '
+                                'under one transport protocol at a time')
+        if namespaces:
+            subclass = cls.__registries__.get(TransportProtocol(namespaces[0]))
             if subclass is not None:
                 return subclass
         raise ValueError('%r names no transport protocol registry of %s'
@@ -2388,7 +2430,11 @@ class AppType(StrEnum):
             proto: Transport protocol carrying ``key``. Selects the registry to
                 search when called on :class:`AppType` itself, which holds no
                 members; ignored when called on one of those registries, each of
-                which already knows its own transport.
+                which already knows its own transport. **One** transport protocol
+                when it does select, since one registry is what a port lookup can
+                answer from -- a member's own ``proto`` is often a composite such
+                as ``tcp | udp`` and passing that back in is refused rather than
+                resolved to a guess.
 
         Returns:
             The **canonical** service for ``key``. IANA assigns several services
@@ -2405,6 +2451,9 @@ class AppType(StrEnum):
                 one outside ``0..65535``, whose rejection by :meth:`_missing_` this
                 method propagates rather than minting over, so that ``get`` is
                 never more permissive than ``AppType(...)``.
+            ProtocolError: If ``proto`` names more than one transport protocol --
+                see :meth:`_dispatch`, which refuses it rather than answering from
+                whichever registry the lowest set bit happens to name.
 
         :meta private:
         """
@@ -2458,6 +2507,7 @@ class AppType(StrEnum):
 
         Raises:
             ValueError: As :meth:`get`.
+            ProtocolError: As :meth:`get`.
 
         """
         owner = cls._dispatch(key, proto)
