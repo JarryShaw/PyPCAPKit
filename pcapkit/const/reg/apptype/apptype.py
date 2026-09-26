@@ -11,10 +11,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.apptype.apptype
 """
 from typing import TYPE_CHECKING, cast
 
-from aenum import IntFlag, StrEnum, auto, extend_enum
-
-from pcapkit.utilities.compat import show_flag_values
-from pcapkit.utilities.exceptions import ProtocolError
+from aenum import IntEnum, StrEnum, extend_enum
 
 __all__ = ['TransportProtocol', 'AppType']
 
@@ -24,31 +21,42 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import MultiDict
 
 
-class TransportProtocol(IntFlag):
+class TransportProtocol(IntEnum):
     """Transport layer protocol."""
 
-    # mypy has no aenum plugin, so this class is a plain class to it: a bare
-    # ``0`` here infers as int while the auto()-valued members below infer as
-    # Any, and only this member then disagrees with the TransportProtocol
-    # annotations that use it. cast is the identity function at run time, so
-    # this changes nothing that runs -- see GitHub issue #770. mypy.ini sets
-    # warn_redundant_casts, so if aenum ever ships type stubs letting it infer
-    # TransportProtocol on its own, this cast starts erroring instead of
-    # lingering as dead scaffolding.
+    # mypy has no aenum plugin, so this class is a plain class to it: every
+    # member below is a literal int rather than an auto()-valued one -- GitHub
+    # issue #808 dropped the IntFlag base, so auto() would number sequentially
+    # instead of by the power-of-two spacing the values must keep -- and a
+    # literal infers as int while the TransportProtocol annotations that use
+    # each member (__transport__, and the proto default on __new__, get and
+    # get_all) expect TransportProtocol. cast is the identity function at run
+    # time, so this changes nothing that runs -- see GitHub issue #770, which
+    # cast only this member while the rest still inferred Any from auto().
+    # mypy.ini sets warn_redundant_casts, so if aenum ever ships type stubs
+    # letting it infer TransportProtocol on its own, these casts start
+    # erroring instead of lingering as dead scaffolding.
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
     #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what
     #: the base registry's ``_missing_`` extends unassigned/reserved rows from.
     undefined = cast('TransportProtocol', 0)
 
-    #: Transmission Control Protocol.
-    tcp = auto()
-    #: User Datagram Protocol.
-    udp = auto()
-    #: Stream Control Transmission Protocol.
-    sctp = auto()
-    #: Datagram Congestion Control Protocol.
-    dccp = auto()
+    #: Transmission Control Protocol. Value fixed at ``1`` rather than
+    #: renumbered sequentially -- GitHub issue #808 dropped the ``IntFlag``
+    #: base once nothing built a composite, but did not revisit the four
+    #: values themselves, which predate this class and are not its call to
+    #: renumber.
+    tcp = cast('TransportProtocol', 1)
+    #: User Datagram Protocol. See ``tcp`` above for why the value stays ``2``
+    #: rather than becoming sequential.
+    udp = cast('TransportProtocol', 2)
+    #: Stream Control Transmission Protocol. See ``tcp`` above for why the
+    #: value stays ``4`` rather than becoming sequential.
+    sctp = cast('TransportProtocol', 4)
+    #: Datagram Congestion Control Protocol. See ``tcp`` above for why the
+    #: value stays ``8`` rather than becoming sequential.
+    dccp = cast('TransportProtocol', 8)
 
     @staticmethod
     def get(key: 'int | str') -> 'TransportProtocol':
@@ -63,35 +71,35 @@ class TransportProtocol(IntFlag):
             return TransportProtocol(key)
         if key.lower() in TransportProtocol.__members__:
             return TransportProtocol[key.lower()]  # type: ignore[misc]
-        max_val = max(TransportProtocol.__members__.values())
-        return extend_enum(TransportProtocol, key.lower(), max_val * 2)
+        # NOTE: maintainer ruling on this PR (#836): "Do not allow extension
+        # of TransportProtocol at all." A name that is not a declared member
+        # used to mint a brand-new one here, at ``max_val + 1`` (before that,
+        # ``max_val * 2``) -- an unbounded, ever-growing set of transport
+        # protocols nothing ever asked for. There is nothing left to walk
+        # now: it is simply refused, exactly like any other unrecognised
+        # name -- including one spelling a composite, e.g. ``'tcp|udp'``.
+        # ``'|'`` used to be intercepted here on its own, so a composite in
+        # disguise never got minted into a member whose own name lied about
+        # being a single transport; the owner's further ruling on this PR
+        # retired that special case along with the rest of the composite
+        # handling once TransportProtocol stopped being a Flag at all:
+        # "since it's no longer a Flag, `|` joined values are no longer
+        # parsed and accepted, we will treat it as a whole, instead of
+        # splitting." A ``'|'``-joined name is therefore not special any
+        # more -- it is simply not the name of a declared member, and gets
+        # the same message as any other one that is not.
+        raise ValueError(f'{key!r} is not a valid {TransportProtocol.__name__}')
 
-    @classmethod
-    def _missing_(cls, value: 'int') -> 'TransportProtocol':
-        """Lookup function used when value is not found.
-
-        Args:
-            value: Value to get enum item.
-
-        Raises:
-            ValueError: If ``value`` sets a bit no member declares.
-
-        Note:
-            This is what makes an unrecognised transport protocol *rejected*
-            rather than accepted -- GitHub issue #647's fix for this registry.
-            :mod:`aenum` on its own is permissive here and composes whatever bits
-            it is handed: measured on aenum 3.1.17 with this method removed,
-            ``TransportProtocol(-1)`` returns ``tcp|udp|sctp|dccp``, which is
-            #647's recorded defect for this class verbatim, and
-            ``TransportProtocol(16)`` returns a member whose ``name`` is
-            :obj:`None`. Declared bits still compose, since a service assigned to
-            several transport protocols is the ordinary case rather than the
-            exception.
-
-        """
-        if not (isinstance(value, int) and 0 <= value <= max(cls.__members__.values()) * 2 - 1):
-            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
-        return super()._missing_(value)
+    # NOTE: ``_missing_`` used to range-check ``value`` and then defer to
+    # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an
+    # unrecognised bit combination into a pseudo-member -- ``TransportProtocol(3)``
+    # returning ``tcp|udp`` -- GitHub issue #647's guard against that composing
+    # *anything*, including values no member declares. GitHub issue #808 removed
+    # the ``IntFlag`` base once nothing built a composite, and with it the only
+    # reason this method existed: a plain :class:`~aenum.IntEnum` already raises
+    # ``ValueError`` for a value no member declares, with no ``_missing_`` of
+    # its own needed to get there, so declaring one here would only be
+    # reproducing what the base class already does.
 
 
 class AppType(StrEnum):
@@ -2344,26 +2352,30 @@ class AppType(StrEnum):
         return hash(self.port)
 
     @classmethod
-    def _dispatch(cls, key: 'int', proto: 'TransportProtocol | str') -> 'Type[AppType]':
+    def _dispatch(cls, key: 'int', proto: 'TransportProtocol | str | int') -> 'Type[AppType]':
         """The registry that owns ``proto``, or ``cls`` where it is one already.
 
         Args:
             key: Port number the caller is looking up, validated here so that
                 every entry point rejects a non-port identically.
-            proto: Transport protocol, as a flag or its name. Exactly one, on
-                the delegating path -- see :exc:`~pcapkit.utilities.exceptions.ProtocolError`
-                below.
+            proto: Transport protocol, as a member, its name, or a bare
+                :class:`int`. That last shape is not merely defensive: GitHub
+                issue #808 dropped ``TransportProtocol``'s ``IntFlag`` base, so
+                ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,
+                the same as any caller passing a literal port-transport bitmask
+                -- falls through to ``int.__or__`` and returns a bare
+                :class:`int` rather than a member. Never split back into the
+                transports its bits would each name -- owner ruling on this PR
+                (#836) -- so it is refused as a whole exactly like any other
+                value naming no registry.
 
         Returns:
             The registry class to search.
 
         Raises:
-            ValueError: If ``key`` is not a port number, or if ``cls`` holds no
-                members and ``proto`` names no registry to delegate to.
-            ProtocolError: If ``cls`` holds no members and ``proto`` names more
-                than one transport protocol, which names more than one registry
-                and so no single answer. Itself a :exc:`ValueError`, so a caller
-                catching that keeps catching this.
+            ValueError: If ``key`` is not a port number, or if ``proto`` --
+                member or bare int, composite or not -- names no registry to
+                delegate to.
 
         """
         # NOTE: this registry resolves ports, not service names. The old string
@@ -2379,52 +2391,52 @@ class AppType(StrEnum):
 
         if isinstance(proto, str):
             proto = TransportProtocol.get(proto.lower())
-        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp |
-        # udp`` stays constructible by hand even though no member carries one any
-        # more -- every member's ``proto`` is the single transport of the registry
-        # it lives in, GitHub issue #806. A composite names two registries,
-        # though, holding two different services for the same port -- and a lookup
-        # answers with one member, so there is no answer to which of them the
-        # composite meant. Resolving it picked the lowest set bit:
-        # :func:`~enum.show_flag_values` iterates LSB-first and ``tcp`` is the
-        # lowest, so every composite containing it dispatched into the TCP
-        # registry whatever else it named. Measured on fe80b8525, when members
-        # still carried the whole set, that answered 46 of the 10,625 multi-transport
-        # members' own ``get(m.port, proto=m.proto)`` with a service other than the
-        # member's own, of which 23 -- the UDP-declared half -- came back as a
-        # member of the *TCP* registry, carrying the wrong type and a narrower
-        # ``proto``. Two of those named a service UDP does not answer for the port
-        # at all, and they are the whole blast radius: ``AppType.get(888, proto=tcp
-        # | udp)`` gave ``cddbp`` for ``<UDP.accessbuilder: 888 [tcp|udp]>``, and
-        # 999 gave ``garcon`` against UDP's ``applix``. The other 44 differ from
-        # ``m.svc`` only in that the member is not its port's canonical, which a
-        # single-bit lookup does too and which ``get`` documents. All of it silent,
-        # and undetectable to a caller checking equality, since ``__eq__`` compares
-        # on ``port`` alone. GitHub issue #759, whose body found 888 and
-        # generalised from it.
-        #
-        # Refusing the composite is the honest answer and costs
-        # nothing: a caller resolving a parsed port knows which transport carried
-        # it and passes that one bit, which is what every call site in
-        # :mod:`pcapkit` does, and one that wants every service on a port asks each
-        # registry in turn. This is the delegating path only -- a registry subclass
-        # returned above already knows its own transport and documents ``proto`` as
-        # ignored, so nothing there is ambiguous to begin with.
-        namespaces = show_flag_values(proto)
-        if len(namespaces) > 1:
-            raise ProtocolError(f'{proto!r} names {len(namespaces)} transport protocols, and so '
-                                f'{len(namespaces)} registries of {cls.__name__}; look the port up '
-                                'under one transport protocol at a time')
-        if namespaces:
-            subclass = cls.__registries__.get(TransportProtocol(namespaces[0]))
-            if subclass is not None:
-                return subclass
+
+        # NOTE: a direct dict lookup covers every genuine single transport --
+        # one of the four real members, or a bare int equal to one of their
+        # values -- since ``__registries__`` keys compare by the same
+        # int-valued hash/eq every member and bare int alike already use. The
+        # cast is for mypy alone: ``dict.get`` accepts any hashable key at run
+        # time regardless of its declared key type, but mypy holds ``.get`` to
+        # the dict's own ``TransportProtocol`` keys, and does not know ``proto``
+        # can genuinely be a bare :class:`int` here now that GitHub issue #808
+        # dropped the ``IntFlag`` base -- see the annotation on ``proto`` above.
+        subclass = cls.__registries__.get(cast('TransportProtocol', proto))
+        if subclass is not None:
+            return subclass
+
+        # NOTE: everything that reaches here names no registry, and nothing
+        # below decodes ``proto``'s bits looking for a partial answer. A
+        # genuine member reaching this point is ``undefined`` -- the four
+        # real transports would already have resolved above, and
+        # :meth:`TransportProtocol.get` cannot mint anything else, per this
+        # PR's own maintainer ruling against extending TransportProtocol at
+        # all -- and a bare :class:`int` is refused exactly the same way
+        # whether it is a single stray bit, e.g. ``17``, or a composite of
+        # several real transports, e.g. ``3`` (``tcp | udp``). That composite
+        # case used to get its own
+        # :exc:`~pcapkit.utilities.exceptions.ProtocolError`, decoded through
+        # :func:`~pcapkit.utilities.compat.show_flag_values` and naming every
+        # transport whose bit was set -- the fix for GitHub issue #759, where
+        # resolving a composite by picking its lowest set bit dispatched
+        # every one containing ``tcp`` into the TCP registry regardless of
+        # what else it named. The owner's further ruling on this PR (#836)
+        # retired that decoding along with the rest of the composite
+        # handling: "since it's no longer a Flag, `|` joined values are no
+        # longer parsed and accepted, we will treat it as a whole, instead of
+        # splitting." So ``AppType.get(80, proto=3)`` now says "3 names no
+        # transport protocol registry" rather than naming ``tcp`` and ``udp``
+        # individually -- the same answer a caller resolving a parsed port
+        # already gets right, since it knows which single transport carried
+        # it and passes that one bit, and the same answer a caller wanting
+        # every service on a port already has to ask each registry for in
+        # turn regardless.
         raise ValueError(f'{proto!r} names no transport protocol registry of '
                          f'{cls.__name__}')
 
     @classmethod
     def get(cls, key: 'int', *,
-            proto: 'TransportProtocol | str' = TransportProtocol.undefined) -> 'AppType':
+            proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> 'AppType':
         """Backport support for original codes.
 
         Args:
@@ -2452,10 +2464,11 @@ class AppType(StrEnum):
                 this registry resolves ports and not service names -- including
                 one outside ``0..65535``, whose rejection by :meth:`_missing_` this
                 method propagates rather than minting over, so that ``get`` is
-                never more permissive than ``AppType(...)``.
-            ProtocolError: If ``proto`` names more than one transport protocol --
-                see :meth:`_dispatch`, which refuses it rather than answering from
-                whichever registry the lowest set bit happens to name.
+                never more permissive than ``AppType(...)``. Also covers a
+                ``proto`` naming more than one transport protocol -- a
+                composite built by hand is refused as a whole rather than
+                answered from any one of the registries it names -- see
+                :meth:`_dispatch`.
 
         :meta private:
         """
@@ -2489,7 +2502,7 @@ class AppType(StrEnum):
 
     @classmethod
     def get_all(cls, key: 'int', *,
-                proto: 'TransportProtocol | str' = TransportProtocol.undefined) -> 'tuple[AppType, ...]':
+                proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> 'tuple[AppType, ...]':
         """Every service IANA assigns to a port, canonical first.
 
         :meth:`get` answers with one member because that is what a port lookup
@@ -2509,7 +2522,6 @@ class AppType(StrEnum):
 
         Raises:
             ValueError: As :meth:`get`.
-            ProtocolError: As :meth:`get`.
 
         """
         owner = cls._dispatch(key, proto)

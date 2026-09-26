@@ -104,9 +104,12 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     sixteen-bit field :class:`~pcapkit.const.tcp.flags.Flags` bounds its
     :meth:`~enum.Enum._missing_` to. That guard is correct, so the probe was
     what had to move: a value the registry is right to refuse cannot also be a
-    value the dumper renders. Every one of the library's seven flag registries
-    carries such a guard, at four distinct widths, so exempting the guarded ones
-    instead would have left this half of the sweep with nothing in it at all.
+    value the dumper renders. Every one of the library's six flag registries
+    carries such a guard, at three distinct widths, so exempting the guarded
+    ones instead would have left this half of the sweep with nothing in it at
+    all. (GitHub issue #808 retyped the seventh, ``TransportProtocol``, out of
+    this sweep entirely -- see ``test_no_flag_registry_renders_the_literal_none``'s
+    docstring below.)
 
     """
 
@@ -241,10 +244,20 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         """Every flag enumeration in the library, swept rather than sampled.
 
         The sweep is the point: #648 was first reported against
-        :class:`pcapkit.const.tcp.flags.Flags` alone, and five of the seven flag
+        :class:`pcapkit.const.tcp.flags.Flags` alone, and five of the six flag
         registries turn out to be nameless at zero -- ``Flags`` plus the four
         Mobility Header flag registries. Naming them here would rot the moment
-        an eighth is added, so they are discovered.
+        a seventh is added, so they are discovered.
+
+        GitHub issue #808 dropped this sweep from seven registries to six:
+        :class:`~pcapkit.const.reg.apptype.TransportProtocol` was a bounded
+        :class:`~aenum.IntFlag` before that issue and is a plain
+        :class:`~aenum.IntEnum` after, so it no longer matches the
+        ``issubclass(attribute, (enum.Flag, aenum.Flag))`` test
+        :func:`_flag_registries` sweeps on. It contributed nothing to
+        ``nameless`` either before or after -- it declared ``0`` as
+        ``undefined`` and had no undeclared bits left in its field, the same
+        shape as ``CommandType`` -- so only the registry *count* below moved.
 
         Since #702 the sweep is over every nameless value each registry admits
         rather than over ``registry(0)`` alone. Before that, the four Mobility
@@ -260,7 +273,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         # A guard on the sweep itself: an empty mapping would make every
         # assertion below vacuous, and that is how this test would rot silently.
-        self.assertGreaterEqual(len(registries), 7, registries)
+        self.assertGreaterEqual(len(registries), 6, registries)
 
         nameless = []
         for label, registry in sorted(registries.items()):
@@ -268,11 +281,11 @@ class NamelessEnumRenderingTests(unittest.TestCase):
             if values:
                 nameless.append(label)
 
-            # ``0`` is rendered whether or not it is nameless. For the two
-            # registries that declare it -- ``CommandType`` and
-            # ``TransportProtocol``, the two with no undeclared bits left in
-            # their field -- it is the only thing there is to render, and it is
-            # the control showing the fix keys on the name and not on the value.
+            # ``0`` is rendered whether or not it is nameless. For the one
+            # registry that declares it -- ``CommandType``, the one with no
+            # undeclared bits left in its field -- it is the only thing there
+            # is to render, and it is the control showing the fix keys on the
+            # name and not on the value.
             for value in dict.fromkeys((0, *values)):
                 with self.subTest(registry=label, value=value):
                     member = registry(value)
@@ -290,16 +303,18 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         # Not an incidental detail: if this ever drops to zero the test above
         # stops exercising the fix at all and would pass on unfixed code.
+        # Unchanged at 5 by GitHub issue #808 dropping the sweep from seven
+        # registries to six -- see the class docstring above: the registry it
+        # removed, TransportProtocol, was never one of the nameless five.
         self.assertGreaterEqual(len(nameless), 5, nameless)
 
     def test_a_value_past_the_field_is_refused_rather_than_rendered(self) -> None:
         """#702 -- the probe that was wrong, asserted the right way round.
 
-        All seven flag registries bound their :meth:`~enum.Enum._missing_` to
+        All six flag registries bound their :meth:`~enum.Enum._missing_` to
         the width of their own field, and the widths differ: three bits for
-        :class:`~pcapkit.const.ftp.command.CommandType`, four for
-        :class:`~pcapkit.const.reg.apptype.TransportProtocol`, eight for three
-        of the Mobility Header flags, sixteen for ``BindingUpdateFlag`` and
+        :class:`~pcapkit.const.ftp.command.CommandType`, eight for three of the
+        Mobility Header flags, sixteen for ``BindingUpdateFlag`` and
         :class:`~pcapkit.const.tcp.flags.Flags`. One literal therefore cannot
         mean "past the field" for all of them, which is the whole reason
         :func:`_field_mask` derives it per registry.
@@ -309,15 +324,24 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         holds only if the mask :func:`_field_mask` computes is exactly the bound
         each registry wrote down for itself.
 
+        Until GitHub issue #808 there were seven registries and four distinct
+        widths here, the fourth being
+        :class:`~pcapkit.const.reg.apptype.TransportProtocol`'s four bits --
+        derived as ``max(cls.__members__.values()) * 2 - 1`` since it extended
+        itself at runtime and could not hard-code a bound. #808 retyped it to a
+        plain :class:`~aenum.IntEnum`, dropping it out of :func:`_flag_registries`'
+        sweep entirely (see the class docstring above), which is why three
+        widths remain rather than four.
+
         ``65536`` survives here, as the bound of the two sixteen-bit registries
         -- asserted as the rejection it always was, rather than as a value the
         dumper was expected to render. Which also keeps the ``raise`` in those
-        guards covered: six of the seven were never reached by any test, and the
-        seventh was reached only by this file failing on it.
+        guards covered: five of the six were never reached by any test, and the
+        sixth was reached only by this file failing on it.
 
         """
         registries = _flag_registries()
-        self.assertGreaterEqual(len(registries), 7, registries)
+        self.assertGreaterEqual(len(registries), 6, registries)
 
         widths = set()
         for label, registry in sorted(registries.items()):
@@ -340,8 +364,9 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         # The literal could not have been right for all of them, and this is the
         # measurement that says so: several distinct widths, and ``65536`` is
-        # outside every single one of them.
-        self.assertGreaterEqual(len(widths), 4, widths)
+        # outside every single one of them. 3 rather than 4 since GitHub issue
+        # #808 -- see the docstring above.
+        self.assertGreaterEqual(len(widths), 3, widths)
 
 
 def _const_path() -> 'list[str]':
@@ -416,14 +441,21 @@ def _field_mask(registry: 'FlagRegistry') -> int:
     """The width of *registry*'s field, as an all-ones mask.
 
     Every flag registry in the library bounds its :meth:`~enum.Enum._missing_`
-    to the field its declared bits live in, and for all seven of them that bound
+    to the field its declared bits live in, and for all six of them that bound
     is exactly the smallest all-ones mask covering every declared bit --
     ``0xFFFF`` for ``Flags``' ``1 << 4 .. 1 << 15``, ``0xFF`` for the eight-bit
     Mobility Header flags, ``0x07`` for the three-bit
     :class:`~pcapkit.const.ftp.command.CommandType`.
-    :class:`~pcapkit.const.reg.apptype.TransportProtocol` already spells it that
-    way in its own source, as ``max(cls.__members__.values()) * 2 - 1``, because
-    it extends itself at runtime and cannot hard-code a bound.
+
+    A seventh registry used to belong here on the same terms:
+    :class:`~pcapkit.const.reg.apptype.TransportProtocol` spelled its own bound
+    as ``max(cls.__members__.values()) * 2 - 1`` because it extends itself at
+    runtime and could not hard-code one. GitHub issue #808 retyped it from
+    :class:`~aenum.IntFlag` to a plain :class:`~aenum.IntEnum` once nothing
+    built a composite, dropping it out of :func:`_flag_registries`'s sweep
+    entirely rather than merely changing its bound -- it no longer matches
+    ``issubclass(attribute, (enum.Flag, aenum.Flag))``, so this function never
+    sees it at all.
 
     Derived rather than read off the source, so it cannot drift from the guard
     and needs no table to maintain. That it does not drift is itself asserted, by
@@ -461,9 +493,12 @@ def _nameless_values(registry: 'FlagRegistry') -> 'tuple[int, ...]':
 
     A registry whose declared bits fill its field has no nameless value at all
     and yields an empty tuple. :class:`~pcapkit.const.ftp.command.CommandType`
-    and :class:`~pcapkit.const.reg.apptype.TransportProtocol` are both of that
-    shape, each declaring ``0`` as ``undefined``, which is why five of the seven
-    registries are nameless at zero rather than all seven.
+    is of that shape, declaring ``0`` as ``undefined``, which is why five of
+    the six registries :func:`_flag_registries` discovers are nameless at zero
+    rather than all six.
+    :class:`~pcapkit.const.reg.apptype.TransportProtocol` used to be a second
+    example of the same shape before GitHub issue #808 retyped it out of the
+    sweep entirely -- see :func:`_field_mask`'s docstring.
 
     Args:
         registry: The flag enumeration to inspect.

@@ -193,9 +193,11 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         # Pins the size of the sweep itself: if this drifts, a const enum was
         # added, removed, or renamed, and EXPECTED_TO_REJECT_ZERO (and the
         # analysis in GitHub issue #492) needs a fresh look rather than a
-        # silent pass.
+        # silent pass. 112 rather than 111 since GitHub issue #808: dropping
+        # ``TransportProtocol``'s ``IntFlag`` base moved it from
+        # ``_iter_const_int_flags`` into this sweep.
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
-        self.assertEqual(len(self.enums), 111)
+        self.assertEqual(len(self.enums), 112)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
                         f'expected reject-list entries missing from the sweep: '
                         f'{EXPECTED_TO_REJECT_ZERO - names}')
@@ -304,9 +306,14 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
     def test_the_sweep_size_is_pinned(self) -> None:
-        """A flag enum added or removed needs a fresh look, not a silent pass."""
+        """A flag enum added or removed needs a fresh look, not a silent pass.
+
+        6 rather than 7 since GitHub issue #808: dropping
+        ``TransportProtocol``'s ``IntFlag`` base moved it out of this sweep and
+        into ``_iter_const_int_enums`` instead.
+        """
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.flags}
-        self.assertEqual(len(self.flags), 7)
+        self.assertEqual(len(self.flags), 6)
 
         expected = {f'pcapkit.const.mh.{stem}.{name}'
                     for stem, name, _, _ in MH_FLAG_ENUMS}

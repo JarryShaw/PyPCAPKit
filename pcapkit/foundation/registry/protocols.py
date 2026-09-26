@@ -888,14 +888,21 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
     # ``code.proto`` default and the registries lookup below -- sees members
     # only. Resolution is by the member's own ``name``, case-insensitively --
     # maintainer ruling on #815 -- via ``__members__`` directly rather than
-    # ``TransportProtocol[name]``: aenum's ``Flag.__getitem__`` parses a
-    # ``'|'``-joined name into a composite value on its own
-    # (``TransportProtocol['tcp|udp']`` silently returns the value ``3``),
-    # which is exactly the composite this function has to refuse, and
-    # lowercasing does not change that: ``'tcp|udp'`` is not a member name
-    # either. Anything that is neither a ``str`` nor a ``TransportProtocol``
-    # member is rejected here too, rather than falling through to the
-    # registries lookup below: ``TransportProtocol`` is an ``IntFlag``, so
+    # ``TransportProtocol[name]``: this function's contract is
+    # :exc:`~pcapkit.utilities.exceptions.RegistryError` for anything
+    # unrecognised, composite-spelled or not, and ``__getitem__`` raises a
+    # bare :exc:`KeyError` on a miss instead of that -- both
+    # ``TransportProtocol['tcp|udp']`` and ``TransportProtocol['bogus']`` do,
+    # now that GitHub issue #808 dropped the ``IntFlag`` base that used to
+    # make the first of those two silently compose into the value ``3``
+    # rather than miss at all. ``__members__.get(...)`` lets this function
+    # raise its own exception on a miss instead of letting ``__getitem__``'s
+    # propagate, and lowercasing does not turn ``'tcp|udp'`` into a member
+    # name either way. Anything that is neither a ``str`` nor a
+    # ``TransportProtocol`` member is rejected here too, rather than falling
+    # through to the registries lookup below: a bare ``int`` still hashes
+    # and compares equal to its matching member -- ``TransportProtocol``
+    # being an ``IntEnum`` rather than an ``IntFlag`` changes neither -- so
     # ``registries.get(1)`` resolves to ``TCP`` just as
     # ``registries.get(TransportProtocol.tcp)`` does, and would otherwise
     # register the port before the ``proto.name`` access two lines below it
