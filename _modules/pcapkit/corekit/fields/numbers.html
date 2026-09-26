@@ -456,7 +456,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">aenum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">NoValue</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">IntError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">IntError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'NumberField'</span><span class="p">,</span>
@@ -583,6 +583,23 @@
 <span class="sd">        This method will return a new instance of :class:`NumberField` instead of</span>
 <span class="sd">        updating the current instance.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the resolved ``length`` is negative and</span>
+<span class="sd">                ``bit_length`` was not supplied -- e.g. a ``length`` callback</span>
+<span class="sd">                such as ``lambda pkt: pkt['len'] - 4`` resolving below zero</span>
+<span class="sd">                once the wire value it reads is smaller than the subtrahend.</span>
+<span class="sd">                Left alone, ``1 &lt;&lt; (length * 8)`` raises a bare, uncatchable</span>
+<span class="sd">                :exc:`ValueError` (``negative shift count``) here, before</span>
+<span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see</span>
+<span class="sd">                its own :exc:`ProtocolError` guard, #805/#811/#827) or</span>
+<span class="sd">                :meth:`build_template` ever sees the value: this method sets</span>
+<span class="sd">                ``self._bit_length`` from the resolved length eagerly, as a</span>
+<span class="sd">                cache, and shifts by it immediately, so the crash happens on</span>
+<span class="sd">                *this* line rather than on the later, already-guarded ones.</span>
+<span class="sd">                See GitHub issue #828. A resolved length of exactly ``0`` is a</span>
+<span class="sd">                legitimate empty field (e.g. ``len=4`` above resolving to</span>
+<span class="sd">                ``0``) and is left alone.</span>
+
 <span class="sd">        Notes:</span>
 <span class="sd">            Rebuilding the template here is what applies a callable ``length``,</span>
 <span class="sd">            and :meth:`build_template` recomputes ``self._need_process`` as it</span>
@@ -593,6 +610,11 @@
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                    <span class="sa">f</span><span class="s1">'length=</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">!r}</span><span class="s1">'</span>
+                <span class="p">)</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">*</span> <span class="mi">8</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 

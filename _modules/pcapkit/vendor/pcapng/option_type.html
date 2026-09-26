@@ -523,7 +523,7 @@
 <span class="s1">        return obj</span>
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
-<span class="s1">        return "&lt;%s.%s: %d&gt;" % (self.__class__.__name__, self.opt_name, self.opt_value)</span>
+<span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1">.</span><span class="se">{{</span><span class="s1">self.opt_name</span><span class="se">}}</span><span class="s1">: </span><span class="se">{{</span><span class="s1">self.opt_value</span><span class="se">}}</span><span class="s1">&gt;'</span>
 
 <span class="s1">    def __str__(self) -&gt; 'str':</span>
 <span class="s1">        return '%s [%d]' % (self.opt_name, self.opt_value)</span>

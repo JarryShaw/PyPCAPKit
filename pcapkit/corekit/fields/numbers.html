@@ -985,6 +985,25 @@ sign the class already fixes, stays legal.</p>
 </dl>
 <p>This method will return a new instance of <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField" title="pcapkit.corekit.fields.numbers.NumberField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberField</span></code></a> instead of
 updating the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the resolved <code class="docutils literal notranslate"><span class="pre">length</span></code> is negative and
+    <code class="docutils literal notranslate"><span class="pre">bit_length</span></code> was not supplied – e.g. a <code class="docutils literal notranslate"><span class="pre">length</span></code> callback
+    such as <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">pkt:</span> <span class="pre">pkt['len']</span> <span class="pre">-</span> <span class="pre">4</span></code> resolving below zero
+    once the wire value it reads is smaller than the subtrahend.
+    Left alone, <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;&lt;</span> <span class="pre">(length</span> <span class="pre">*</span> <span class="pre">8)</span></code> raises a bare, uncatchable
+    <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">shift</span> <span class="pre">count</span></code>) here, before
+    <a class="reference internal" href="field.html#pcapkit.corekit.fields.field.FieldBase.length" title="pcapkit.corekit.fields.field.FieldBase.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> (see
+    its own <code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code> guard, #805/#811/#827) or
+    <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template" title="pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_template()</span></code></a> ever sees the value: this method sets
+    <code class="docutils literal notranslate"><span class="pre">self._bit_length</span></code> from the resolved length eagerly, as a
+    cache, and shifts by it immediately, so the crash happens on
+    <em>this</em> line rather than on the later, already-guarded ones.
+    See GitHub issue #828. A resolved length of exactly <code class="docutils literal notranslate"><span class="pre">0</span></code> is a
+    legitimate empty field (e.g. <code class="docutils literal notranslate"><span class="pre">len=4</span></code> above resolving to
+    <code class="docutils literal notranslate"><span class="pre">0</span></code>) and is left alone.</p>
+</dd>
+</dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>Rebuilding the template here is what applies a callable <code class="docutils literal notranslate"><span class="pre">length</span></code>,
