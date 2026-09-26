@@ -40,6 +40,8 @@ as below:
    .. automethod:: _read_http_header
    .. automethod:: _read_http_body
 
+.. autofunction:: pcapkit.protocols.application.httpv1._test_start_line
+
 Auxiliary Data
 --------------
 

@@ -637,6 +637,54 @@ header-field    :==:    field-name ":" OWS field-value OWS
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1._test_start_line">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">_test_start_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv1.html#_test_start_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1._test_start_line" title="Link to this definition">¶</a></dt>
+<dd><p>Whether <code class="docutils literal notranslate"><span class="pre">data</span></code> opens with an HTTP/1.* start line.</p>
+<p>This is a <em>classification</em> predicate and parses nothing: it answers “is this
+HTTP/1?” for <a class="reference internal" href="http.html#pcapkit.protocols.application.http.HTTP._guess_version" title="pcapkit.protocols.application.http.HTTP._guess_version"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._guess_version</span></code></a>, which until #800
+answered that question by trial-parsing every version in the family and
+keeping whichever one did not object – so a payload that is not HTTP at all
+was classified by which parser happened to fail less loudly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Payload to classify.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the payload’s first line is a <code class="docutils literal notranslate"><span class="pre">request-line</span></code> or a
+<code class="docutils literal notranslate"><span class="pre">status-line</span></code> (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-2.1"><strong>RFC 9112 Section 2.1</strong></a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The acceptance rule is deliberately the <em>same</em> one
+<a class="reference internal" href="#pcapkit.protocols.application.httpv1.HTTP._read_http_header" title="pcapkit.protocols.application.httpv1.HTTP._read_http_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP._read_http_header</span></code></a> applies
+further down this module – <code class="docutils literal notranslate"><span class="pre">_RE_METHOD</span></code> with <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code> for a
+request, <code class="docutils literal notranslate"><span class="pre">_RE_VERSION</span></code> with <code class="docutils literal notranslate"><span class="pre">_RE_STATUS</span></code> for a response – which is
+why this lives beside those three patterns rather than in the dispatcher
+that calls it. The two must accept the same start lines: a predicate
+looser than the parser classifies payloads the parser then refuses, and
+one tighter than the parser hands real HTTP/1 to a later arm.
+<code class="docutils literal notranslate"><span class="pre">test_start_line_predicate_agrees_with_the_httpv1_parser</span></code> pins that
+agreement.</p>
+<p>Both of the unpackings the parser performs <em>before</em> those patterns are
+mirrored too, and this is not pedantry – the second of them is the whole
+reason the HTTP/2 connection preface is not claimed here. <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span>
+<span class="pre">HTTP/2.0\r\n\r\nSM\r\n\r\n</span></code> is deliberately a well-formed
+HTTP/1.1 <em>request line</em> (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-3.4"><strong>RFC 9113 Section 3.4</strong></a>), so a predicate that
+tested only the first line would answer <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for it. Split at the
+header/body separator first, as <a class="reference internal" href="#pcapkit.protocols.application.httpv1.HTTP.read" title="pcapkit.protocols.application.httpv1.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">HTTP.read</span></code></a> does, and the preface’s
+header is <code class="docutils literal notranslate"><span class="pre">PRI</span> <span class="pre">*</span> <span class="pre">HTTP/2.0</span></code> with no CRLF left in it – which is exactly
+why the parser refuses it, and now why this does. Measured: without the
+separator split this returned <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> for the preface.</p>
+<p>An HTTP/0.9 request line carries only two tokens and so is not recognised
+here either, matching the parser, which raises on fewer than three.</p>
+</div>
+</dd></dl>
+
 <section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Link to this heading">¶</a></h2>
 <dl class="py class">

@@ -28,6 +28,10 @@ and :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>`.
 
    .. automethod:: _guess_version
 
+   .. autoattribute:: _preface_length
+
+.. autodata:: pcapkit.protocols.application.http._HTTP2_PREFACE
+
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol

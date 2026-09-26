@@ -519,6 +519,74 @@
 <span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\d</span><span class="si">{3}</span><span class="s1">\Z'</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="_test_start_line">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._test_start_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_test_start_line</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``data`` opens with an HTTP/1.* start line.</span>
+
+<span class="sd">    This is a *classification* predicate and parses nothing: it answers "is this</span>
+<span class="sd">    HTTP/1?" for :meth:`HTTP._guess_version</span>
+<span class="sd">    &lt;pcapkit.protocols.application.http.HTTP._guess_version&gt;`, which until #800</span>
+<span class="sd">    answered that question by trial-parsing every version in the family and</span>
+<span class="sd">    keeping whichever one did not object -- so a payload that is not HTTP at all</span>
+<span class="sd">    was classified by which parser happened to fail less loudly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Payload to classify.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether the payload's first line is a ``request-line`` or a</span>
+<span class="sd">        ``status-line`` (:rfc:`9112#section-2.1`).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The acceptance rule is deliberately the *same* one</span>
+<span class="sd">        :meth:`HTTP._read_http_header</span>
+<span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP._read_http_header&gt;` applies</span>
+<span class="sd">        further down this module -- ``_RE_METHOD`` with ``_RE_VERSION`` for a</span>
+<span class="sd">        request, ``_RE_VERSION`` with ``_RE_STATUS`` for a response -- which is</span>
+<span class="sd">        why this lives beside those three patterns rather than in the dispatcher</span>
+<span class="sd">        that calls it. The two must accept the same start lines: a predicate</span>
+<span class="sd">        looser than the parser classifies payloads the parser then refuses, and</span>
+<span class="sd">        one tighter than the parser hands real HTTP/1 to a later arm.</span>
+<span class="sd">        ``test_start_line_predicate_agrees_with_the_httpv1_parser`` pins that</span>
+<span class="sd">        agreement.</span>
+
+<span class="sd">        Both of the unpackings the parser performs *before* those patterns are</span>
+<span class="sd">        mirrored too, and this is not pedantry -- the second of them is the whole</span>
+<span class="sd">        reason the HTTP/2 connection preface is not claimed here. ``PRI *</span>
+<span class="sd">        HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n`` is deliberately a well-formed</span>
+<span class="sd">        HTTP/1.1 *request line* (:rfc:`9113#section-3.4`), so a predicate that</span>
+<span class="sd">        tested only the first line would answer :data:`True` for it. Split at the</span>
+<span class="sd">        header/body separator first, as :meth:`HTTP.read</span>
+<span class="sd">        &lt;pcapkit.protocols.application.httpv1.HTTP.read&gt;` does, and the preface's</span>
+<span class="sd">        header is ``PRI * HTTP/2.0`` with no CRLF left in it -- which is exactly</span>
+<span class="sd">        why the parser refuses it, and now why this does. Measured: without the</span>
+<span class="sd">        separator split this returned :data:`True` for the preface.</span>
+
+<span class="sd">        An HTTP/0.9 request line carries only two tokens and so is not recognised</span>
+<span class="sd">        here either, matching the parser, which raises on fewer than three.</span>
+
+<span class="sd">    """</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="n">data</span><span class="p">:</span>  <span class="c1"># no header/body separator -- ``read`` raises</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">startline</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\r\n</span><span class="s1">'</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">startline</span> <span class="o">==</span> <span class="n">header</span><span class="p">:</span>  <span class="c1"># header holds no CRLF -- ``_read_http_header`` raises</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">para1</span><span class="p">,</span> <span class="n">para2</span><span class="p">,</span> <span class="n">para3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'\s+'</span><span class="p">,</span> <span class="n">startline</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para3</span><span class="p">))</span>     <span class="c1"># request-line</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_STATUS</span><span class="p">,</span> <span class="n">para2</span><span class="p">))</span>  <span class="c1"># status-line</span>
+    <span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="Type">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.Type">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
