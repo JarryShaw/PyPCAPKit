@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 import aenum
 
 from pcapkit.corekit.fields.field import Field, NoValue
-from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError
+from pcapkit.utilities.exceptions import BaseError, FieldValueError, IntError, ProtocolError
 
 __all__ = [
     'NumberField',
@@ -132,6 +132,23 @@ class NumberField(Field[int], Generic[_T]):
         This method will return a new instance of :class:`NumberField` instead of
         updating the current instance.
 
+        Raises:
+            ProtocolError: If the resolved ``length`` is negative and
+                ``bit_length`` was not supplied -- e.g. a ``length`` callback
+                such as ``lambda pkt: pkt['len'] - 4`` resolving below zero
+                once the wire value it reads is smaller than the subtrahend.
+                Left alone, ``1 << (length * 8)`` raises a bare, uncatchable
+                :exc:`ValueError` (``negative shift count``) here, before
+                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see
+                its own :exc:`ProtocolError` guard, #805/#811/#827) or
+                :meth:`build_template` ever sees the value: this method sets
+                ``self._bit_length`` from the resolved length eagerly, as a
+                cache, and shifts by it immediately, so the crash happens on
+                *this* line rather than on the later, already-guarded ones.
+                See GitHub issue #828. A resolved length of exactly ``0`` is a
+                legitimate empty field (e.g. ``len=4`` above resolving to
+                ``0``) and is left alone.
+
         Notes:
             Rebuilding the template here is what applies a callable ``length``,
             and :meth:`build_template` recomputes ``self._need_process`` as it
@@ -142,6 +159,11 @@ class NumberField(Field[int], Generic[_T]):
         new_self = super().__call__(packet)
 
         if new_self._bit_length < 0:
+            if new_self._length < 0:
+                raise ProtocolError(
+                    f'Field {new_self.name} resolved to a negative length; '
+                    f'length={new_self._length!r}'
+                )
             new_self._bit_length = new_self._length * 8
             new_self._bit_mask = (1 << new_self._bit_length) - 1
 
