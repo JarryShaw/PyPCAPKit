@@ -773,11 +773,17 @@
             <span class="c1"># NOTE: Converted, unlike the HTTP/1 commit below, because this route</span>
             <span class="c1"># is new and has no escaping-error contract to keep: the old arm 2</span>
             <span class="c1"># suppressed :exc:`struct.error` and fell through to ``unknown HTTP</span>
-            <span class="c1"># version``, so a preface followed by a frame that trips the #805</span>
-            <span class="c1"># residual (an inner field shortfall, e.g. a 16-octet ``GOAWAY``)</span>
-            <span class="c1"># must still reach the caller as something it can catch, not as a</span>
-            <span class="c1"># bare stdlib error. Same normalisation, and the same reasoning, as</span>
-            <span class="c1"># ``read``'s explicit ``version=`` path above.</span>
+            <span class="c1"># version``, so a preface followed by a frame that used to trip the</span>
+            <span class="c1"># #805 residual (an inner field shortfall, e.g. a 16-octet</span>
+            <span class="c1"># ``GOAWAY``) had to reach the caller as something it could catch,</span>
+            <span class="c1"># not as a bare stdlib error. #811 has since closed that residual at</span>
+            <span class="c1"># ``FieldBase.length``, so the same ``GOAWAY`` now raises</span>
+            <span class="c1"># ``ProtocolError`` on its own and is caught by the ``except</span>
+            <span class="c1"># ProtocolError: raise`` above, never reaching this clause -- but</span>
+            <span class="c1"># the conversion stays for whichever :exc:`ValueError` or</span>
+            <span class="c1"># :exc:`struct.error` the schema machinery has not been shown never</span>
+            <span class="c1"># to raise here again. Same normalisation, and the same reasoning,</span>
+            <span class="c1"># as ``read``'s explicit ``version=`` path above.</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">'HTTP/2: invalid format'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -823,16 +829,21 @@
         <span class="c1"># deliberate. Only the *last* arm additionally suppresses</span>
         <span class="c1"># :exc:`struct.error`, because a payload too short to hold HTTP/2's</span>
         <span class="c1"># nine-octet frame header, or one whose frame-specific fields exceed</span>
-        <span class="c1"># what a slightly-longer buffer holds, fails inside the schema</span>
+        <span class="c1"># what a slightly-longer buffer holds, used to fail inside the schema</span>
         <span class="c1"># machinery with that stdlib exception rather than with a protocol</span>
-        <span class="c1"># error -- ``FieldBase.length`` calls :func:`struct.calcsize` on a</span>
-        <span class="c1"># template built from a negative length -- and it is neither a</span>
-        <span class="c1"># ``ProtocolError`` nor a :exc:`ValueError`, so it left this method</span>
-        <span class="c1"># uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised</span>
-        <span class="c1"># a bare :exc:`struct.error` where the closing ``raise`` below is the</span>
-        <span class="c1"># documented answer. Suppressing it on the last arm is safe in the</span>
-        <span class="c1"># sense that matters here -- no arm follows, so nothing can answer in</span>
-        <span class="c1"># place of the error.</span>
+        <span class="c1"># error -- ``FieldBase.length`` called :func:`struct.calcsize` on a</span>
+        <span class="c1"># template built from a negative length -- and it was neither a</span>
+        <span class="c1"># ``ProtocolError`` nor a :exc:`ValueError`, so it used to leave this</span>
+        <span class="c1"># method uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8),</span>
+        <span class="c1"># 8)`` used to raise a bare :exc:`struct.error` instead of reaching</span>
+        <span class="c1"># the closing ``raise`` below. #799's nine-octet guard has since</span>
+        <span class="c1"># closed that particular route -- the same call now raises</span>
+        <span class="c1"># ``ProtocolError: unknown HTTP version``, the documented answer.</span>
+        <span class="c1"># Suppressing :exc:`struct.error` on the last arm stays regardless --</span>
+        <span class="c1"># #811 kept it deliberately, as defence in depth, rather than retiring</span>
+        <span class="c1"># it now that the case it was added for is closed. Whether anything</span>
+        <span class="c1"># can still reach it, and whether it should therefore go, is #825's</span>
+        <span class="c1"># open question, not settled here.</span>
         <span class="c1">#</span>
         <span class="c1"># #799 closed the *outer*-header slice of this: ``httpv2.HTTP.unpack``</span>
         <span class="c1"># now rejects a buffer under nine octets before the schema layer runs</span>
@@ -847,15 +858,21 @@
         <span class="c1"># remainder -- and those still drive ``pkt['__length__']`` negative one</span>
         <span class="c1"># field further in, past this guard's reach. Measured: a 16-octet</span>
         <span class="c1"># ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)</span>
-        <span class="c1"># still raises a bare :exc:`struct.error` through ``httpv2.HTTP``</span>
-        <span class="c1"># directly. Closing that class needs the fix at its actual root --</span>
-        <span class="c1"># a negative field length raising :exc:`~pcapkit.utilities.\</span>
-        <span class="c1"># exceptions.ProtocolError` in :meth:`Schema.unpack</span>
-        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` /</span>
-        <span class="c1"># :attr:`FieldBase.length &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;`</span>
-        <span class="c1"># instead of the bare warning those currently emit -- which is generic</span>
-        <span class="c1"># across every schema in the tree and is out of this change's scope;</span>
-        <span class="c1"># tracked as #805 rather than attempted here.</span>
+        <span class="c1"># used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``</span>
+        <span class="c1"># directly. #811 closed that class at its actual root --</span>
+        <span class="c1"># :attr:`FieldBase.length</span>
+        <span class="c1"># &lt;pcapkit.corekit.fields.field.FieldBase.length&gt;` now catches</span>
+        <span class="c1"># :func:`struct.calcsize`'s failure on a negative-length template and</span>
+        <span class="c1"># re-raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,</span>
+        <span class="c1"># generic across every schema in the tree rather than special-cased</span>
+        <span class="c1"># here. :meth:`Schema.unpack</span>
+        <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`'s own</span>
+        <span class="c1"># running-counter warning was left alone on purpose: converting it too</span>
+        <span class="c1"># would reject a ``SETTINGS`` frame with a short trailing entry that</span>
+        <span class="c1"># parses successfully today while only warning, so that</span>
+        <span class="c1"># :class:`~pcapkit.utilities.warnings.SchemaWarning` still fires. The</span>
+        <span class="c1"># same ``GOAWAY`` now raises ``ProtocolError: Field debug resolved to</span>
+        <span class="c1"># a negative length; template='-1s'``.</span>
         <span class="c1">#</span>
         <span class="c1"># Widening the *first* arm the same way was measured and reverted, as it</span>
         <span class="c1"># buys nothing and costs a great deal. Nothing reaches a</span>

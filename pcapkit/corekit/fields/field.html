@@ -580,13 +580,28 @@ and the actual value provided for packing.</p>
 <dd><p>Field size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> resolves to a negative count
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> resolves to a negative count
     (e.g. <code class="docutils literal notranslate"><span class="pre">'-5s'</span></code>, from a <code class="docutils literal notranslate"><span class="pre">length</span></code> callback such as
     <code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">pkt:</span> <span class="pre">pkt['__length__']</span></code> resolving below zero once
     the buffer ran short of what the schema declared).
-    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size such a template and would
-    otherwise raise a bare <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, uncatchable as a
-    pcapkit-specific error. See #805.</p>
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size such a template and raises
+    a bare <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a>, uncatchable as a pcapkit-specific
+    error; this re-raises it as the negative-length message below.
+    See #805.</p></li>
+<li><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> is otherwise malformed –
+    anything else <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> cannot size, such as a
+    typo’d format character – rather than the negative-length
+    message above, which would misreport the actual cause.
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a> raises the identical bare
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.error" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">struct.error</span></code></a> for both cases (measured:
+    <code class="docutils literal notranslate"><span class="pre">calcsize('-1s')</span></code> and <code class="docutils literal notranslate"><span class="pre">calcsize('Xs')</span></code> both raise <code class="docutils literal notranslate"><span class="pre">bad</span>
+&#160;&#160;&#160; <span class="pre">char</span> <span class="pre">in</span> <span class="pre">struct</span> <span class="pre">format</span></code>), so the two are told apart by
+    <code class="xref py py-data docutils literal notranslate"><span class="pre">_RE_NEGATIVE_LENGTH_TEMPLATE</span></code> against <a class="reference internal" href="#pcapkit.corekit.fields.field.FieldBase.template" title="pcapkit.corekit.fields.field.FieldBase.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a>
+    itself – which is known already, without needing anything
+    <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.calcsize" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.calcsize()</span></code></a>’s own error says – rather than by the
+    error message. See #825.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

@@ -451,6 +451,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -648,6 +649,31 @@
         <span class="n">_zero_pad_ledger</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
 
+<span class="c1">#: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative</span>
+<span class="c1">#: count in a :attr:`FieldBase.template`, e.g. the ``-1`` in ``'-1s'`` or in</span>
+<span class="c1">#: ``'&gt;-1s'``.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Every template this package builds from a resolved field length is</span>
+<span class="c1">#: ``f'{length}s'`` (see :mod:`pcapkit.corekit.fields.strings`,</span>
+<span class="c1">#: :mod:`~pcapkit.corekit.fields.misc`, :mod:`~pcapkit.corekit.fields.collections`</span>
+<span class="c1">#: and, before it gets byte-order-prefixed, :mod:`~pcapkit.corekit.fields.numbers`</span>
+<span class="c1">#: -- :meth:`NumberField.build_template &lt;pcapkit.corekit.fields.numbers.</span>
+<span class="c1">#: NumberField.build_template&gt;`'s ``else`` arm), so a negative resolved length</span>
+<span class="c1">#: always leaves that literal ``-`` immediately before the digits. What</span>
+<span class="c1">#: :class:`~pcapkit.corekit.fields.numbers.NumberField` adds is a byte-order</span>
+<span class="c1">#: prefix -- one of ``'@=&lt;&gt;!'`` -- *in front of* that whole template</span>
+<span class="c1">#: (``f'{endian}{struct_fmt}'``), which is what a plain ``^-\d+`` misses: the</span>
+<span class="c1">#: prefix, not the minus sign, is what starts the string. The optional</span>
+<span class="c1">#: character class here accounts for exactly that one prefix position, so a</span>
+<span class="c1">#: negative count is recognised whether or not it was byte-order-prefixed, while</span>
+<span class="c1">#: still refusing anything else -- a bare byte-order character with no minus</span>
+<span class="c1">#: sign after it (``'&gt;Xs'``), or any other malformed template -- which is what</span>
+<span class="c1">#: makes checking for it a reliable way to tell those cases apart from each</span>
+<span class="c1">#: other *before* :func:`struct.calcsize` is asked to size either one. See</span>
+<span class="c1">#: #825, #827.</span>
+<span class="n">_RE_NEGATIVE_LENGTH_TEMPLATE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">'^[@=&lt;&gt;!]?-\d+'</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="FieldMeta">
 <a class="viewcode-back" href="../../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.FieldMeta">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FieldMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
@@ -731,16 +757,34 @@
 <span class="sd">                (e.g. ``'-5s'``, from a ``length`` callback such as</span>
 <span class="sd">                ``lambda pkt: pkt['__length__']`` resolving below zero once</span>
 <span class="sd">                the buffer ran short of what the schema declared).</span>
-<span class="sd">                :func:`struct.calcsize` cannot size such a template and would</span>
-<span class="sd">                otherwise raise a bare :exc:`struct.error`, uncatchable as a</span>
-<span class="sd">                pcapkit-specific error. See #805.</span>
+<span class="sd">                :func:`struct.calcsize` cannot size such a template and raises</span>
+<span class="sd">                a bare :exc:`struct.error`, uncatchable as a pcapkit-specific</span>
+<span class="sd">                error; this re-raises it as the negative-length message below.</span>
+<span class="sd">                See #805.</span>
+<span class="sd">            ProtocolError: If :attr:`template` is otherwise malformed --</span>
+<span class="sd">                anything else :func:`struct.calcsize` cannot size, such as a</span>
+<span class="sd">                typo'd format character -- rather than the negative-length</span>
+<span class="sd">                message above, which would misreport the actual cause.</span>
+<span class="sd">                :func:`struct.calcsize` raises the identical bare</span>
+<span class="sd">                :exc:`struct.error` for both cases (measured:</span>
+<span class="sd">                ``calcsize('-1s')`` and ``calcsize('Xs')`` both raise ``bad</span>
+<span class="sd">                char in struct format``), so the two are told apart by</span>
+<span class="sd">                :data:`_RE_NEGATIVE_LENGTH_TEMPLATE` against :attr:`template`</span>
+<span class="sd">                itself -- which is known already, without needing anything</span>
+<span class="sd">                :func:`struct.calcsize`'s own error says -- rather than by the</span>
+<span class="sd">                error message. See #825.</span>
 
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_RE_NEGATIVE_LENGTH_TEMPLATE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                    <span class="sa">f</span><span class="s1">'template=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="si">!r}</span><span class="s1">'</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has a malformed template; '</span>
                 <span class="sa">f</span><span class="s1">'template=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="si">!r}</span><span class="s1">'</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
