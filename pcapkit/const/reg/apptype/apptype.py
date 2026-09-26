@@ -2263,7 +2263,8 @@ class AppType(StrEnum):
         svc: 'str'
         #: Port number.
         port: 'int'
-        #: Transport protocol.
+        #: Transport protocol carrying the service, i.e. the single transport
+        #: protocol of the registry this member lives in.
         proto: 'TransportProtocol'
 
     #: Transport protocol whose assignments this registry holds. The base
@@ -2378,16 +2379,17 @@ class AppType(StrEnum):
 
         if isinstance(proto, str):
             proto = TransportProtocol.get(proto.lower())
-        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member
-        # carries the *whole* transport protocol set IANA assigned the service, so
-        # ``tcp | udp`` is an ordinary value to read off one and therefore an
-        # ordinary thing to pass back in. It names two registries, though, holding
-        # two different services for the same port -- and a lookup answers with one
-        # member, so there is no answer to which of them the composite meant.
-        # Resolving it picked the lowest set bit: :func:`~enum.show_flag_values`
-        # iterates LSB-first and ``tcp`` is the lowest, so every composite
-        # containing it dispatched into the TCP registry whatever else it named.
-        # Measured on fe80b8525, that answered 46 of the 10,625 multi-transport
+        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp |
+        # udp`` stays constructible by hand even though no member carries one any
+        # more -- every member's ``proto`` is the single transport of the registry
+        # it lives in, GitHub issue #806. A composite names two registries,
+        # though, holding two different services for the same port -- and a lookup
+        # answers with one member, so there is no answer to which of them the
+        # composite meant. Resolving it picked the lowest set bit:
+        # :func:`~enum.show_flag_values` iterates LSB-first and ``tcp`` is the
+        # lowest, so every composite containing it dispatched into the TCP
+        # registry whatever else it named. Measured on fe80b8525, when members
+        # still carried the whole set, that answered 46 of the 10,625 multi-transport
         # members' own ``get(m.port, proto=m.proto)`` with a service other than the
         # member's own, of which 23 -- the UDP-declared half -- came back as a
         # member of the *TCP* registry, carrying the wrong type and a narrower
@@ -2432,9 +2434,9 @@ class AppType(StrEnum):
                 members; ignored when called on one of those registries, each of
                 which already knows its own transport. **One** transport protocol
                 when it does select, since one registry is what a port lookup can
-                answer from -- a member's own ``proto`` is often a composite such
-                as ``tcp | udp`` and passing that back in is refused rather than
-                resolved to a guess.
+                answer from -- a member's own ``proto`` names exactly one, so
+                passing it straight back in always resolves, while a composite
+                built by hand is refused rather than resolved to a guess.
 
         Returns:
             The **canonical** service for ``key``. IANA assigns several services

@@ -218,7 +218,8 @@ class {NAME}(StrEnum):
         svc: 'str'
         #: Port number.
         port: 'int'
-        #: Transport protocol.
+        #: Transport protocol carrying the service, i.e. the single transport
+        #: protocol of the registry this member lives in.
         proto: 'TransportProtocol'
 
     #: Transport protocol whose assignments this registry holds. The base
@@ -333,16 +334,17 @@ class {NAME}(StrEnum):
 
         if isinstance(proto, str):
             proto = TransportProtocol.get(proto.lower())
-        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member
-        # carries the *whole* transport protocol set IANA assigned the service, so
-        # ``tcp | udp`` is an ordinary value to read off one and therefore an
-        # ordinary thing to pass back in. It names two registries, though, holding
-        # two different services for the same port -- and a lookup answers with one
-        # member, so there is no answer to which of them the composite meant.
-        # Resolving it picked the lowest set bit: :func:`~enum.show_flag_values`
-        # iterates LSB-first and ``tcp`` is the lowest, so every composite
-        # containing it dispatched into the TCP registry whatever else it named.
-        # Measured on fe80b8525, that answered 46 of the 10,625 multi-transport
+        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp |
+        # udp`` stays constructible by hand even though no member carries one any
+        # more -- every member's ``proto`` is the single transport of the registry
+        # it lives in, GitHub issue #806. A composite names two registries,
+        # though, holding two different services for the same port -- and a lookup
+        # answers with one member, so there is no answer to which of them the
+        # composite meant. Resolving it picked the lowest set bit:
+        # :func:`~enum.show_flag_values` iterates LSB-first and ``tcp`` is the
+        # lowest, so every composite containing it dispatched into the TCP
+        # registry whatever else it named. Measured on fe80b8525, when members
+        # still carried the whole set, that answered 46 of the 10,625 multi-transport
         # members' own ``get(m.port, proto=m.proto)`` with a service other than the
         # member's own, of which 23 -- the UDP-declared half -- came back as a
         # member of the *TCP* registry, carrying the wrong type and a narrower
@@ -387,9 +389,9 @@ class {NAME}(StrEnum):
                 members; ignored when called on one of those registries, each of
                 which already knows its own transport. **One** transport protocol
                 when it does select, since one registry is what a port lookup can
-                answer from -- a member's own ``proto`` is often a composite such
-                as ``tcp | udp`` and passing that back in is refused rather than
-                resolved to a guess.
+                answer from -- a member's own ``proto`` names exactly one, so
+                passing it straight back in always resolves, while a composite
+                built by hand is refused rather than resolved to a guess.
 
         Returns:
             The **canonical** service for ``key``. IANA assigns several services
@@ -501,7 +503,7 @@ class {NAME}(StrEnum):
 #: members of one transport protocol and nothing else.
 TRANSPORT = lambda NAME, DOCS, PROTO, CANON, TABLE, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
@@ -520,10 +522,11 @@ __all__ = ['{NAME}']
 class {NAME}(AppType):
     """[{NAME}] {DOCS}
 
-    Members carry the **whole** transport protocol set IANA assigned the service,
-    not just ``{PROTO}``, so a service registered on several transports appears in
-    each of their registries with its
-    :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` intact.
+    Every member's :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` is
+    ``{PROTO}`` and nothing else, so it labels the registry the member lives in
+    rather than restating the whole set IANA assigned the service. A service
+    registered on several transports is a separate member of each of their
+    registries, which is where that set is read off.
 
     Note:
         The rows below are this transport's registry entries with **no port
@@ -804,7 +807,15 @@ class AppType(Vendor):
             if keyword.iskeyword(key):
                 key = '%s_' % key
 
-            pres = f"{key} = {record.port}, {record.svc!r}, {self.flag(record.protos)}"
+            # NOTE: the member's ``proto`` is this registry's own transport
+            # protocol and nothing else, so it is a single bit -- GitHub issue
+            # #806. Rendering ``record.protos`` here instead put the whole
+            # ``(service, port)`` IANA set on every member, which made
+            # ``TCP.http.proto`` name UDP and SCTP as well. That was a second
+            # copy of what the four registries already encode, it is the copy
+            # that could drift, and being multi-bit it was refused by every
+            # entry point that consumed it.
+            pres = f"{key} = {record.port}, {record.svc!r}, {self.flag([self.TRANSPORT])}"
             if len(record.parts) > 1:
                 # NOTE: a merged entry describes each registry row it came from,
                 # as one bullet per row. The single-row form re-indents its own
