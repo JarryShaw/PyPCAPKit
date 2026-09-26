@@ -44,6 +44,8 @@ its own constructor recurses without bound.
 """
 from __future__ import annotations
 
+import ast
+import collections
 import enum
 import importlib
 import importlib.util
@@ -115,6 +117,61 @@ BESPOKE_TEMPLATES = {
     'pcapkit.vendor.http.method': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
     'pcapkit.vendor.reg.apptype.apptype': "raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')",
 }
+
+#: The pair GitHub issue #804 finished, as ``(vendor module, class name, const
+#: module)``. Their templates are the two of :data:`BESPOKE_TEMPLATES`' four
+#: that #798 left on ``%``-formatted ``__repr__`` methods.
+ISSUE_804_PAIR = (
+    ('pcapkit.vendor.ftp.command', 'Command', 'pcapkit.const.ftp.command'),
+    ('pcapkit.vendor.http.method', 'Method', 'pcapkit.const.http.method'),
+)
+
+
+def percent_format_lines(source: 'str') -> 'list[int]':
+    """Every line holding a ``<str literal> % <anything>`` expression.
+
+    An :mod:`ast` walk over ``BinOp(Constant(str) % x)`` rather than a grep,
+    because a grep has to commit to a quote style and every line GitHub issue
+    #804 was about is **double**-quoted: the issue's own
+    ``'[^']*%[sdr]`` pattern reported ``0`` for these very files. Self-tested
+    against known-positive and known-negative fixtures by
+    :meth:`ConstEnumGuardTemplateTests.test_self_check_of_the_percent_format_walk`
+    before it is pointed at the tree.
+
+    Note this deliberately does *not* see ``%`` inside a string literal, which
+    is what the ``__repr__`` methods look like from inside a ``vendor``
+    template -- there they are template text, not expressions. The issue's
+    per-file table counted them textually and so reported ``3`` and ``2`` for
+    the two vendor modules where this reports ``1`` each, those being the
+    generators' own ``wrap_comment`` calls.
+
+    Args:
+        source: Python source text.
+
+    Returns:
+        The 1-based line numbers, sorted and deduplicated.
+
+    """
+    return sorted({
+        node.lineno for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod)
+        and isinstance(node.left, ast.Constant) and isinstance(node.left.value, str)
+    })
+
+
+#: Known-positive and known-negative fixtures for :func:`percent_format_lines`,
+#: as ``(label, source, expected hit count)``. Both quote styles appear on the
+#: positive side, since quote-blindness is the property being asserted.
+PERCENT_WALK_FIXTURES = (
+    ("single-quoted %s", "x = '%s bar' % y\n", 1),
+    ("double-quoted %s, as all of #804's were", 'x = "<%s [%s]>" % (a, b)\n', 1),
+    ('double-quoted, inside a method body',
+     "def f(self):\n    return \"<%s.%s>\" % (a, b)\n", 1),
+    ('f-string, the converted form', "x = f'{y} bar'\n", 0),
+    ('integer modulo, not formatting', 'x = 5 % 3\n', 0),
+    ('a percent sign in a comment only', '# %s in a comment\nx = 1\n', 0),
+    ('a percent sign in a plain literal', "x = '100%'\n", 0),
+)
 
 
 class _StdIntEnum(enum.IntEnum):
@@ -632,34 +689,227 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                                         f'%% formatting; see GitHub issue #798')
 
     def test_the_disable_drops_only_where_nothing_else_needs_percent_formatting(self) -> None:
-        """GitHub issue #798's third part: the disable is earned, not blanket-dropped.
+        """GitHub issue #798's third part, finished by #804: the disable is earned.
 
+        All four bespoke const modules now carry no ``%``-formatted code, so
+        all four drop their module-level ``consider-using-f-string``.
         ``pcapkit.const.tcp.flags`` and ``pcapkit.const.reg.apptype.apptype``
-        carry no other %-formatted code once their guards (and, for the
-        latter, its three dunders and its span-handling tail) are converted,
-        so their module-level ``consider-using-f-string`` disable comes off.
-        ``pcapkit.const.ftp.command`` and ``pcapkit.const.http.method`` each
-        still render a ``__repr__`` using ``%`` -- out of #798's stated scope,
-        which named only the ``AppType`` template's dunders -- so their
-        disable has to stay; this pins *why* rather than letting a future
-        sweep assume the omission was an oversight.
+        got there under GitHub issue #803, once their guards -- and, for the
+        latter, its three dunders and its span-handling tail -- were
+        converted. ``pcapkit.const.ftp.command`` and
+        ``pcapkit.const.http.method`` were *not* an oversight of #798, whose
+        stated scope named only the ``AppType`` template's dunders; they were
+        tracked as GitHub issue #804 and finished there, two ``__repr__``
+        methods in the former and one in the latter being the last ``%`` in
+        either file.
+
+        This previously asserted the opposite for that pair -- that their
+        disable was retained, and why -- so it fails against any tree where
+        #804's conversion is missing or half-applied, which is the point.
+        Asserts the absence of ``%`` anywhere in the source rather than only
+        of the disable, since a file that dropped the disable while keeping a
+        ``%`` would otherwise be caught by ``make pylint`` in CI instead of
+        here.
         """
-        dropped = ('pcapkit.const.tcp.flags', 'pcapkit.const.reg.apptype.apptype')
+        dropped = (
+            'pcapkit.const.tcp.flags',
+            'pcapkit.const.reg.apptype.apptype',
+            'pcapkit.const.ftp.command',
+            'pcapkit.const.http.method',
+        )
         for module_name in dropped:
             with self.subTest(const=module_name):
                 source = inspect.getsource(importlib.import_module(module_name))
                 self.assertNotIn('consider-using-f-string', source)
                 self.assertNotIn('%', source)
 
-        retained = ('pcapkit.const.ftp.command', 'pcapkit.const.http.method')
-        for module_name in retained:
-            with self.subTest(const=module_name):
-                source = inspect.getsource(importlib.import_module(module_name))
-                self.assertIn('consider-using-f-string', source)
-                # The __repr__ still using %-formatting is the reason the
-                # disable is retained; the guard itself no longer needs it.
-                self.assertIn('def __repr__', source)
-                self.assertIn('%', source)
+    def test_self_check_of_the_percent_format_walk(self) -> None:
+        """:func:`percent_format_lines` against known-positive and known-negative fixtures.
+
+        GitHub issue #804's third trap: the grep that surveyed these files
+        used ``'[^']*%[sdr]`` and reported ``0`` for both of them, because
+        every surviving ``%`` line was double-quoted. A detector is worth
+        nothing until it has been shown to fire on a positive it was given on
+        purpose, so this runs first.
+        """
+        for label, source, expected in PERCENT_WALK_FIXTURES:
+            with self.subTest(fixture=label):
+                self.assertEqual(len(percent_format_lines(source)), expected)
+
+        # And the naive grep, on the same double-quoted known-positive, to pin
+        # *why* it read zero rather than merely asserting that it did.
+        self.assertIsNone(re.search(r"'[^']*%[sdr]", 'x = "<%s [%s]>" % (a, b)\n'))
+
+    def test_no_percent_formatting_survives_in_the_issue_804_pair(self) -> None:
+        """Neither const module nor either generator still formats with ``%``.
+
+        The maintainer's convention from GitHub issue #783: *"id like to keep
+        f-string convention across the library. only use % substitution when
+        inevitable."* A ``__repr__`` is not an inevitable case, and neither is
+        a ``wrap_comment`` argument.
+
+        Covers the vendor modules as well as the const ones because the tree
+        is generated: a conversion that is not in the template is reverted by
+        the next crawl. Fails against stock ``55e1b756e`` reporting four
+        sites -- two in :file:`pcapkit/const/ftp/command.py`, one in
+        :file:`pcapkit/const/http/method.py`, and one apiece in the two
+        generators' ``process`` methods.
+        """
+        for vendor_name, _, const_name in ISSUE_804_PAIR:
+            for module_name in (const_name, vendor_name):
+                with self.subTest(module=module_name):
+                    source = inspect.getsource(importlib.import_module(module_name))
+                    self.assertEqual(
+                        percent_format_lines(source), [],
+                        f'{module_name} still formats with %; see GitHub issue #804')
+
+    def test_the_converted_reprs_render_exactly_what_percent_formatting_did(self) -> None:
+        """Member by member, the ``__repr__`` output is byte-identical.
+
+        The conversion is only safe if ``%s`` and an f-string's default
+        conversion agree on every operand these three dunders interpolate.
+        They do -- ``format(x, '')`` falls through to ``str(x)`` for both
+        :class:`str` and :data:`None`, and ``Command.desc`` is the one
+        ``Optional[str]`` among them -- but GitHub issue #796's text claimed
+        an equivalence in generated output that did not hold, so this derives
+        the old form's output for every member rather than assuming the two
+        forms agree.
+        """
+        from pcapkit.const.ftp.command import Command, FEATCode
+        from pcapkit.const.http.method import Method
+
+        for member in FEATCode:
+            with self.subTest(enum='FEATCode', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s [%s]>" % (member.__class__.__name__, member._name_))  # pylint: disable=consider-using-f-string,protected-access
+
+        for member in Command:
+            with self.subTest(enum='Command', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s.%s: %s>" % (member.__class__.__name__,  # pylint: disable=consider-using-f-string
+                                     member._name_, member.desc))  # pylint: disable=protected-access
+
+        for member in Method:
+            with self.subTest(enum='Method', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s.%s>" % (member.__class__.__name__, member._value_))  # pylint: disable=consider-using-f-string,protected-access
+
+        # A member whose ``desc`` is None reaches the one operand that is not
+        # a str, since the sweep above cannot guarantee the committed registry
+        # still contains one.
+        grown = Command.get('XYZZY')
+        self.assertIsNone(grown.desc)
+        self.assertEqual(repr(grown), '<Command.XYZZY: None>')
+
+    def test_the_converted_generators_emit_the_same_comment_text(self) -> None:
+        """The two ``wrap_comment`` arguments, run rather than inspected.
+
+        :meth:`test_no_percent_formatting_survives_in_the_issue_804_pair`
+        proves these two lines no longer use ``%`` in the *source*; this
+        proves the replacement produces the same text, which the
+        render-and-diff below cannot reach because it supplies the
+        enumeration block ready-made instead of crawling for it.
+
+        Built with ``cls.__new__(cls)`` and a hand-set ``record``, the bypass
+        :file:`tests/vendor/test_re_sub_positional_flag_unit.py` uses, since
+        :meth:`~pcapkit.vendor.default.Vendor.__init__` fetches from IANA and
+        writes :file:`pcapkit/const/` as a side effect of construction. The
+        rows are synthetic -- never live IANA data.
+        """
+        vendor_ftp = importlib.import_module('pcapkit.vendor.ftp.command')
+        command = vendor_ftp.Command.__new__(vendor_ftp.Command)
+        command.record = collections.Counter()
+        emitted = command.process([
+            'h0,h1,h2,h3,h4,h5',
+            'ABOR,base,Abort a transfer,s,m,[RFC959]',
+        ])
+        # The old form, derived here rather than hardcoded, so this compares
+        # the two expressions rather than the new one against a guess.
+        expected_ftp = command.wrap_comment('%s %s' % (  # pylint: disable=consider-using-f-string
+            'Abort a transfer', '[:rfc:`959`]'))
+        self.assertEqual(expected_ftp, "Abort a transfer [:rfc:`959`]")
+        self.assertIn(f'#: {expected_ftp}', emitted[0])
+
+        # ``desc`` is Optional[str], and ``%s`` renders None as 'None'; the
+        # f-string has to agree, so the empty-description row is exercised too.
+        emitted_none = command.process([
+            'h0,h1,h2,h3,h4,h5',
+            'ABOR,base,,s,m,[RFC959]',
+        ])
+        expected_none = command.wrap_comment('%s %s' % (None, '[:rfc:`959`]'))  # pylint: disable=consider-using-f-string
+        self.assertEqual(expected_none, "None [:rfc:`959`]")
+        self.assertIn(f'#: {expected_none}', emitted_none[0])
+
+        vendor_http = importlib.import_module('pcapkit.vendor.http.method')
+        method = vendor_http.Method.__new__(vendor_http.Method)
+        method.record = collections.Counter()
+        emitted = method.process([
+            'h0,h1,h2,h3',
+            'GET,yes,yes,"[RFC9110, Section 9.3.1]"',
+        ])
+        expected_http = method.wrap_comment(re.sub(
+            r'\r*\n', ' ', '%s %s' % ('GET', '[:rfc:`9110#section-9.3.1`]'),  # pylint: disable=consider-using-f-string
+            flags=re.MULTILINE))
+        self.assertEqual(expected_http, 'GET [:rfc:`9110#section-9.3.1`]')
+        self.assertIn(f'#: {expected_http}', emitted[0])
+
+        # And the falsy-``rfcs`` branch, whose f-string form has to keep the
+        # conditional inside the replacement field. ``wrap_comment`` drops the
+        # trailing space ``'%s %s'`` leaves behind, so the expectation is
+        # derived from the old form rather than written as ``'GET '``.
+        emitted_norfc = method.process(['h0,h1,h2,h3', 'GET,yes,yes,'])
+        expected_norfc = method.wrap_comment(re.sub(
+            r'\r*\n', ' ', '%s %s' % ('GET', ''), flags=re.MULTILINE))  # pylint: disable=consider-using-f-string
+        self.assertEqual(expected_norfc, 'GET')
+        self.assertIn(f'#: {expected_norfc}\n', emitted_norfc[0])
+
+    @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
+                         'pcapkit.vendor needs requests')
+    def test_the_issue_804_templates_render_the_committed_modules(self) -> None:
+        """The whole file, character for character, for both of #804's pair.
+
+        The same proof shape as
+        :meth:`test_the_tcp_flags_template_renders_the_committed_module`,
+        which GitHub issue #803 added for the other half of
+        :data:`BESPOKE_TEMPLATES`. This is what makes a half-applied
+        conversion -- template edited but generated file not, or the reverse
+        -- fail here rather than at the next crawl, which is the failure mode
+        GitHub issue #804's first trap names. Needs no network: the crawl
+        supplies only the enumeration block, which is read back out of the
+        committed module.
+        """
+        import pathlib
+
+        from tests.const.test_const_enum_lookup import _normalize
+
+        for vendor_name, cls_name, const_name in ISSUE_804_PAIR:
+            with self.subTest(const=const_name):
+                vendor_module = importlib.import_module(vendor_name)
+                vendor_class = getattr(vendor_module, cls_name)
+
+                const_module = importlib.import_module(const_name)
+                committed = pathlib.Path(
+                    const_module.__file__  # type: ignore[arg-type]
+                ).read_text(encoding='utf-8')
+
+                block = re.compile(
+                    rf'class {cls_name}\(StrEnum\):\n    """.*?\n\n    (#:.*?)'
+                    r'\n\n    @staticmethod', re.S)
+                enum_block = block.search(committed)
+                self.assertIsNotNone(enum_block, f'no enumeration block in {const_name}')
+
+                rendered = _normalize(vendor_module.LINE(
+                    vendor_class.__name__, vendor_class.__doc__,
+                    enum_block.group(1),  # type: ignore[union-attr]
+                    vendor_name,
+                ))
+
+                self.assertIn("def __repr__(self) -> 'str':", rendered)
+                self.assertNotIn('consider-using-f-string', rendered)
+                self.assertEqual(rendered, committed)
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')

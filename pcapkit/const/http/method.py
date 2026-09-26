@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long,consider-using-f-string
+# pylint: disable=line-too-long
 """HTTP Method
 =================
 
@@ -39,7 +39,7 @@ class Method(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s>" % (self.__class__.__name__, self._value_)
+        return f'<{self.__class__.__name__}.{self._value_}>'
 
     #: ACL [:rfc:`3744#section-8.1`]
     ACL = 'ACL', False, True
