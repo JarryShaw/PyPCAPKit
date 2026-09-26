@@ -430,7 +430,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry import protocols as registry
-        from pcapkit.utilities.exceptions import RegistryError
+        from pcapkit.utilities.exceptions import ProtocolError, RegistryError
 
         UnitProtocol = self._unit_protocol()
         raw_module = ('pcapkit.protocols.misc.raw', 'Raw')
@@ -701,11 +701,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         # a ``str`` third argument is *always* a class name, even one that
         # happens to spell a transport's own name. ``'tcp'`` is looked up as
         # a class in ``raw_module[0]``, which has none, so it fails the same
-        # way any other wrong class name would: an ``AttributeError`` naming
+        # way any other wrong class name would: a ``ProtocolError`` naming
         # ``'tcp'`` itself, not a ``RegistryError`` about an unknown
-        # transport -- proof it was never coerced as one.
+        # transport -- proof it was never coerced as one. GitHub issue #832
+        # retyped this from a bare stdlib ``AttributeError`` to
+        # ``ProtocolError`` -- the property that a ``str`` third positional is
+        # resolved as a class name, never sniffed as a transport, is what has
+        # to survive; only the exception type changed.
         with mock.patch.object(registry, 'register_protocol'):
-            with self.assertRaises(AttributeError) as caught:
+            with self.assertRaises(ProtocolError) as caught:
                 registry.register_apptype(65204, raw_module[0], 'tcp', TransportProtocol.udp)
         self.assertIn("'tcp'", str(caught.exception))
         self.assertNotIn(65204, registry.TCP.__proto__)
@@ -734,6 +738,107 @@ class ProtocolRegistryTests(unittest.TestCase):
                 registry.register_udp(65003, *raw_module)
         self.assertIsInstance(udp_register.call_args.args[1], registry.ModuleDescriptor)
         self.assertEqual(register_protocol.call_args.args[0].__name__, 'Raw')
+
+    def test_register_apptype_omitted_class_name_reports_missing_argument(self) -> None:
+        """GitHub issues #832 and #833: an omitted ``class_`` must say so.
+
+        ``register_apptype(AppType_TCP.TCP_3exmp, raw_module_name)`` never
+        supplies ``class_`` at all -- it defaults to :data:`NULL` -- so this
+        is the omission the two issues describe together: with a :class:`str`
+        ``module`` and no ``class_``, the failure must name the *argument* as
+        missing rather than letting the sentinel reach :func:`getattr` and
+        come back as an attribute named ``'(null)'``.
+
+        """
+        from pcapkit.const.reg.apptype import TCP as AppType_TCP
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        raw_module_name = 'pcapkit.protocols.misc.raw'
+        port = AppType_TCP.TCP_3exmp.port
+
+        self._guard_registry(registry.TCP.__proto__, port)
+        with mock.patch.object(registry, 'register_protocol'):
+            with self.assertRaises(ProtocolError) as caught:
+                registry.register_apptype(AppType_TCP.TCP_3exmp, raw_module_name)
+        message = str(caught.exception)
+        self.assertIn(raw_module_name, message)
+        self.assertNotIn('(null)', message)
+
+    def test_register_apptype_explicit_null_string_is_a_class_name_not_the_sentinel(self) -> None:
+        """GitHub issue #833: ``class_='(null)'`` is data, not the sentinel.
+
+        Before the sentinel stopped being a plain :class:`str`, an
+        equal-but-distinct ``'(null)'`` passed by a caller was indistinguishable
+        from the default -- both compared equal, and which branch ran depended
+        on identity/interning rather than intent. Passed explicitly here, it
+        must be resolved as an ordinary (missing) class name, the same way any
+        other wrong class name is, and the failure must name the module and
+        the literal ``'(null)'`` that was looked up.
+
+        """
+        from pcapkit.const.reg.apptype import TransportProtocol
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        raw_module_name = 'pcapkit.protocols.misc.raw'
+        port = 65213
+
+        self._guard_registry(registry.TCP.__proto__, port)
+        with mock.patch.object(registry, 'register_protocol'):
+            with self.assertRaises(ProtocolError) as caught:
+                registry.register_apptype(port, raw_module_name, '(null)', TransportProtocol.tcp)
+        self.assertIn(raw_module_name, str(caught.exception))
+        self.assertIn("'(null)'", str(caught.exception))
+
+    def test_register_apptype_null_sentinel_still_means_absent_with_a_class_module(self) -> None:
+        """GitHub issue #833's own repro, re-run against the new sentinel.
+
+        With a non-``str`` ``module``, the third positional is never
+        ``class_`` -- it is the first ``*transport`` element instead, per the
+        maintainer ruling in #815. :data:`NULL` passed there must still mean
+        "nothing was named" (falling through to "no transport protocol
+        given"), while the *string* ``'(null)'`` must be treated as an
+        ordinary, unrecognised transport name -- proving the two no longer
+        collide now that :data:`NULL` is not a :class:`str`.
+
+        """
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import RegistryError
+
+        UnitProtocol = self._unit_protocol()
+
+        with self.assertRaises(RegistryError) as caught_absent:
+            registry.register_apptype(65210, UnitProtocol, class_=registry.NULL)
+        self.assertIn('no transport protocol given', str(caught_absent.exception))
+
+        with self.assertRaises(RegistryError) as caught_present:
+            registry.register_apptype(65211, UnitProtocol, class_='(null)')
+        self.assertIn("unknown transport protocol: '(null)'", str(caught_present.exception))
+
+    def test_register_tcp_bad_class_name_raises_protocolerror(self) -> None:
+        """GitHub issue #832: the fix is family-wide, not one function.
+
+        :func:`register_apptype` is not the only one of the nine ``register_*``
+        wrappers that builds a :class:`~pcapkit.corekit.module.ModuleDescriptor`
+        from a :class:`str` ``module`` -- :func:`register_tcp` is a sibling
+        that shares the same :attr:`ModuleDescriptor.klass` resolution, so it
+        must fail a bad class name the same way.
+
+        """
+        from pcapkit.foundation.registry import protocols as registry
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        raw_module_name = 'pcapkit.protocols.misc.raw'
+        port = 65212
+
+        self._guard_registry(registry.TCP.__proto__, port)
+        with mock.patch.object(registry, 'register_protocol'):
+            with self.assertRaises(ProtocolError) as caught:
+                registry.register_tcp(port, raw_module_name, 'NotAClass')
+        message = str(caught.exception)
+        self.assertIn(raw_module_name, message)
+        self.assertIn("'NotAClass'", message)
 
     def test_option_like_registry_wrappers_validate_methods_and_register_schema(self) -> None:
         from pcapkit.const.hip.parameter import Parameter

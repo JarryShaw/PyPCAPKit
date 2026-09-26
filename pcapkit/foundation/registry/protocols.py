@@ -20,7 +20,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.const.sctp.payload_protocol_identifier import \
     PayloadProtocolIdentifier as Enum_PayloadProtocolIdentifier
-from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.module import NULL, ModuleDescriptor
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.internet.hip import HIP
@@ -80,6 +80,7 @@ if TYPE_CHECKING:
         PayloadProtocolIdentifier as SCTP_PayloadProtocolIdentifier
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
+    from pcapkit.corekit.module import NullType
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
     from pcapkit.protocols.internet.hip import ParameterConstructor as HIP_ParameterConstructor
@@ -139,8 +140,6 @@ __all__ = [
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
-
-NULL = '(null)'
 
 
 # NOTE: pcapkit.protocols.__proto__
@@ -383,7 +382,7 @@ def register_linktype(code: 'LinkType', module: 'str', class_: 'str') -> 'None':
 
 
 def register_linktype(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                      class_: 'str' = NULL) -> 'None':
+                      class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -428,7 +427,7 @@ def register_pcap(code: 'LinkType', module: 'str', class_: 'str') -> 'None': ...
 
 # NOTE: pcapkit.protocols.misc.pcap.frame.Frame.__proto__
 def register_pcap(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str' = NULL) -> 'None':
+                  class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -465,7 +464,7 @@ def register_pcapng(code: 'LinkType', module: 'str', class_: 'str') -> 'None': .
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__proto__
 def register_pcapng(code: 'LinkType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                    class_: 'str' = NULL) -> 'None':
+                    class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -507,7 +506,7 @@ def register_ethertype(code: 'EtherType', module: 'str', class_: 'str') -> 'None
 
 # NOTE: pcapkit.protocols.link.link.Link.__proto__
 def register_ethertype(code: 'EtherType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                       class_: 'str' = NULL) -> 'None':
+                       class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -549,7 +548,7 @@ def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None
 
 # NOTE: pcapkit.protocols.internet.internet.Internet.__proto__
 def register_transtype(code: 'TransType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                       class_: 'str' = NULL) -> 'None':
+                       class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -794,7 +793,8 @@ def register_apptype(code: 'Enum_AppType', module: 'str', class_: 'str', *transp
 
 
 def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                     class_: 'str | TransportProtocol' = NULL, *transport: 'TransportProtocol | str') -> 'None':
+                     class_: 'str | TransportProtocol | NullType' = NULL,
+                     *transport: 'TransportProtocol | str') -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -844,6 +844,13 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             ``name``. A composite such as ``tcp | udp``, or its string form
             ``'tcp|udp'``, names two and is refused for the same reason: one call
             registers under one transport protocol.
+        pcapkit.utilities.exceptions.ProtocolError: Raised lazily, from
+            :attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>`,
+            when ``module`` is a :class:`str` and either ``class_`` names no
+            attribute of it, or ``class_`` was never given at all -- the
+            latter distinguished from the former rather than reported as a
+            missing attribute named ``'(null)'``. See GitHub issues #832 and
+            #833.
 
     Important:
         :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**
@@ -955,7 +962,7 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'N
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__proto__
 def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str' = NULL) -> 'None':
+                 class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -1044,7 +1051,7 @@ def register_udp(code: 'int | Enum_AppType', module: 'str', class_: 'str') -> 'N
 
 # NOTE: pcapkit.protocols.transport.udp.UDP.__proto__
 def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                 class_: 'str' = NULL) -> 'None':
+                 class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
@@ -1083,7 +1090,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str', c
 
 # NOTE: pcapkit.protocols.transport.sctp.SCTP.__proto__
 def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]',
-                  class_: 'str' = NULL) -> 'None':
+                  class_: 'str | NullType' = NULL) -> 'None':
     r"""Register a new protocol class.
 
     Notes:
