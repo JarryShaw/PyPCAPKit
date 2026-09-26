@@ -126,6 +126,73 @@ ISSUE_804_PAIR = (
     ('pcapkit.vendor.http.method', 'Method', 'pcapkit.const.http.method'),
 )
 
+#: The three GitHub issue #818 finishes, as ``(vendor module, class name,
+#: const module)`` -- the same shape as :data:`ISSUE_804_PAIR`, for the
+#: ``__repr__`` methods #804 deliberately left out of its own scope.
+#:
+#: Derived by an :mod:`ast` walk over every ``__repr__`` under
+#: :mod:`pcapkit.const`, not by trusting GitHub issue #818's own headline
+#: count of eight: that count includes
+#: ``pcapkit.const.http.{error_code,frame,setting}``, whose ``%`` lives in
+#: their ``_missing_`` guard (inherited from the *shared*
+#: :mod:`pcapkit.vendor.default` template) and which the issue's own last
+#: comment split back out, plus ``pcapkit.const.reg.apptype.apptype`` (already
+#: an f-string since #792, and off the table anyway while GitHub issue #815
+#: owns that tree). What is left with an actual ``%``-formatted ``__repr__``
+#: is exactly these three -- each its own bespoke vendor template, like
+#: :data:`ISSUE_804_PAIR`'s pair, so each gets a const half and a vendor half.
+ISSUE_818_TRIPLE = (
+    ('pcapkit.vendor.ftp.return_code', 'ReturnCode', 'pcapkit.const.ftp.return_code'),
+    ('pcapkit.vendor.http.status_code', 'StatusCode', 'pcapkit.const.http.status_code'),
+    ('pcapkit.vendor.pcapng.option_type', 'OptionType', 'pcapkit.const.pcapng.option_type'),
+)
+
+
+def percent_format_lines_in_repr(source: 'str') -> 'list[int]':
+    """Every ``%``-formatting line inside a ``def __repr__`` body, and nowhere else.
+
+    Narrower than :func:`percent_format_lines`, which the four
+    :data:`BESPOKE_TEMPLATES` const modules cannot use for this: all three of
+    :data:`ISSUE_818_TRIPLE` still format their ``__str__`` and ``_missing_``
+    with ``%``, deliberately -- GitHub issue #818 is about ``__repr__``
+    specifically, not the module-wide sweep #804 already finished for its own
+    pair. Walking only the ``__repr__`` :class:`ast.FunctionDef` is what makes
+    that distinction possible; a whole-module :func:`percent_format_lines`
+    would report the same nonzero count before and after this fix, because
+    the ``__str__`` and ``_missing_`` sites it also matches are untouched by
+    it either way.
+
+    Args:
+        source: Python source text.
+
+    Returns:
+        The 1-based line numbers, sorted and deduplicated.
+
+    """
+    lines = set()  # type: set[int]
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.FunctionDef) and node.name == '__repr__':
+            for inner in ast.walk(node):
+                if (isinstance(inner, ast.BinOp) and isinstance(inner.op, ast.Mod)
+                        and isinstance(inner.left, ast.Constant) and isinstance(inner.left.value, str)):
+                    lines.add(inner.lineno)
+    return sorted(lines)
+
+
+#: Known-positive and known-negative fixtures for
+#: :func:`percent_format_lines_in_repr`. The positive fixture also formats
+#: with ``%`` in a sibling method, the property :func:`percent_format_lines`
+#: cannot distinguish from the ``__repr__`` site and this function must.
+REPR_PERCENT_WALK_FIXTURES = (
+    ('a %-formatted __repr__, the pre-#818 shape',
+     "class C:\n    def __repr__(self):\n        return '<%s>' % self.x\n"
+     "    def __str__(self):\n        return '%s' % self.x\n", 1),
+    ('an f-string __repr__, the post-#818 shape',
+     "class C:\n    def __repr__(self):\n        return f'<{self.x}>'\n"
+     "    def __str__(self):\n        return '%s' % self.x\n", 0),
+    ('no __repr__ at all', "class C:\n    def __str__(self):\n        return '%s' % self.x\n", 0),
+)
+
 
 def percent_format_lines(source: 'str') -> 'list[int]':
     """Every line holding a ``<str literal> % <anything>`` expression.
@@ -973,6 +1040,101 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                 self.assertFalse(eval('isinstance(value, int) and 4 <= value <= 15',
                                       {'value': value}),  # pylint: disable=eval-used
                                  f'the old checker accepted {member.name}={value}')
+
+    def test_self_check_of_the_repr_percent_format_walk(self) -> None:
+        """:func:`percent_format_lines_in_repr` against its own fixtures.
+
+        Run before the walk is pointed at real modules, same discipline as
+        :meth:`test_self_check_of_the_percent_format_walk`: a detector that
+        has not been shown to fire on a positive on purpose, and to stay
+        quiet on a sibling method's own ``%``, is not trustworthy on the real
+        tree either.
+        """
+        for label, source, expected in REPR_PERCENT_WALK_FIXTURES:
+            with self.subTest(fixture=label):
+                self.assertEqual(len(percent_format_lines_in_repr(source)), expected)
+
+    def test_no_percent_formatting_survives_in_the_issue_818_triples_repr(self) -> None:
+        """None of :data:`ISSUE_818_TRIPLE`'s three ``__repr__`` methods still format with ``%``.
+
+        Scoped to ``__repr__`` alone via :func:`percent_format_lines_in_repr`,
+        because unlike :data:`ISSUE_804_PAIR`'s pair, all three of these
+        modules keep formatting their ``__str__`` and ``_missing_`` guard with
+        ``%`` -- that is unrelated to GitHub issue #818, which is about
+        ``__repr__`` specifically, and a whole-module check would never turn
+        green. Fails against stock ``75c340413`` reporting one line apiece in
+        the three const modules.
+
+        The vendor half is checked separately, by
+        :meth:`test_no_percent_formatting_survives_in_the_issue_818_triples_vendor_repr_template`,
+        because there the ``__repr__`` source is template *text* inside an
+        f-string, invisible to an outer :mod:`ast` walk -- exactly the trap
+        GitHub issue #804's own fixtures were built to catch.
+        """
+        for _, _, const_name in ISSUE_818_TRIPLE:
+            with self.subTest(const=const_name):
+                source = inspect.getsource(importlib.import_module(const_name))
+                self.assertEqual(
+                    percent_format_lines_in_repr(source), [],
+                    f'{const_name}.__repr__ still formats with %; see GitHub issue #818')
+
+    def test_no_percent_formatting_survives_in_the_issue_818_triples_vendor_repr_template(self) -> None:
+        """The vendor half: the ``__repr__`` line the ``LINE`` template emits.
+
+        The generator's own module is not itself executing a ``%``-formatted
+        ``__repr__`` -- it holds the *text* of one, inside a ``LINE = lambda
+        ...: f'''...'''`` template, so an :mod:`ast` walk over the vendor
+        module sees an ordinary f-string and nothing to flag. This checks the
+        template's source text directly instead, the same distinction GitHub
+        issue #804's own docstring draws between "template text" and
+        "expression". Fails against stock ``75c340413``, whose three
+        templates still hold ``return "<%s...>" % (...)`` verbatim.
+        """
+        for vendor_name, _, _ in ISSUE_818_TRIPLE:
+            with self.subTest(vendor=vendor_name):
+                source = inspect.getsource(importlib.import_module(vendor_name))
+                repr_def = source[source.index("def __repr__(self) -> 'str':"):]
+                repr_line = repr_def.splitlines()[1]
+                self.assertNotIn('%', repr_line,
+                                  f'{vendor_name} template still emits a %-formatted __repr__; '
+                                  f'see GitHub issue #818')
+                self.assertIn('f\'<', repr_line)
+
+    def test_the_issue_818_triples_reprs_render_exactly_what_percent_formatting_did(self) -> None:
+        """Member by member, the ``__repr__`` output is byte-identical.
+
+        Same proof shape as
+        :meth:`test_the_converted_reprs_render_exactly_what_percent_formatting_did`,
+        derived per member rather than assumed: ``%s`` and an f-string's
+        default conversion agree for :class:`str` and :class:`int` operands,
+        which is all three of these interpolate (``__class__.__name__``,
+        ``_value_``/``opt_name``, and -- for :class:`~pcapkit.const.pcapng
+        .option_type.OptionType` -- ``opt_value``, an :class:`int` that
+        ``%d`` and ``str()`` render identically for every non-negative value
+        these registries carry).
+        """
+        from pcapkit.const.ftp.return_code import ReturnCode
+        from pcapkit.const.http.status_code import StatusCode
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        for member in ReturnCode:
+            with self.subTest(enum='ReturnCode', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s [%s]>" % (member.__class__.__name__, member._value_))  # pylint: disable=consider-using-f-string,protected-access
+
+        for member in StatusCode:
+            with self.subTest(enum='StatusCode', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s [%s]>" % (member.__class__.__name__, member._value_))  # pylint: disable=consider-using-f-string,protected-access
+
+        for member in OptionType:
+            with self.subTest(enum='OptionType', member=member.name):
+                self.assertEqual(
+                    repr(member),
+                    "<%s.%s: %d>" % (  # pylint: disable=consider-using-f-string
+                        member.__class__.__name__, member.opt_name, member.opt_value))
 
 
 if __name__ == '__main__':

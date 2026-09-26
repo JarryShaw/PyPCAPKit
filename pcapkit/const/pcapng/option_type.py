@@ -48,7 +48,7 @@ class OptionType(StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s.%s: %d>" % (self.__class__.__name__, self.opt_name, self.opt_value)
+        return f'<{self.__class__.__name__}.{self.opt_name}: {self.opt_value}>'
 
     def __str__(self) -> 'str':
         return '%s [%d]' % (self.opt_name, self.opt_value)
