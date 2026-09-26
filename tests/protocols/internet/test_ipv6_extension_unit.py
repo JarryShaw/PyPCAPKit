@@ -1307,6 +1307,17 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         bad_smf = schema.SMFHashBasedDPDOption(type=Option.SMF_DPD, len=3, hav=b'\x81\x02\x03')
         object.__setattr__(bad_smf, 'mode', 2)
         assert_bad(proto._read_opt_smf_dpd, bad_smf)
+        # #775 tier 1: an unresolvable TaggerID name now raises KeyError out
+        # of Enum_TaggerID.get() instead of minting a member -- this reader
+        # must turn that into its own ProtocolError, not let the KeyError
+        # escape. Mirrors the SeedID 'Bogus_Seed_For_Test' case below.
+        bad_tagger_id = schema.SMFIdentificationBasedDPDOption(
+            type=Option.SMF_DPD, len=3,
+            info={'mode': 0, 'type': 'Bogus_Tagger_For_Test', 'len': 0},
+            tid=None, id=b'',
+        )
+        object.__setattr__(bad_tagger_id, 'mode', SMFDPDMode.I_DPD)
+        assert_bad(proto._read_opt_smf_dpd, bad_tagger_id)
         assert_bad(proto._read_opt_pdm, schema.PDMOption(
             type=Option.PDM, len=9, scaledtlr=1, scaledtls=2,
             psntp=3, psnlr=4, deltatlr=5, deltatls=6,

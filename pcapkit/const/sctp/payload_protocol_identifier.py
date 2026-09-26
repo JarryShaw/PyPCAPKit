@@ -283,9 +283,52 @@ class PayloadProtocolIdentifier(IntEnum):
                 if default == -1:
                     raise
                 return PayloadProtocolIdentifier(default)
-        if key not in PayloadProtocolIdentifier._member_map_:  # pylint: disable=no-member
-            return extend_enum(PayloadProtocolIdentifier, key, default)
-        return PayloadProtocolIdentifier[key]  # type: ignore[misc]
+        try:
+            return PayloadProtocolIdentifier[key]  # type: ignore[misc]
+        except KeyError:
+            if default == -1:
+                raise
+            return PayloadProtocolIdentifier(default)
+
+    @classmethod
+    def register(cls, value: 'int', name: 'str') -> 'PayloadProtocolIdentifier':
+        """Explicitly register a new member.
+
+        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
+        value without minting anything new, this is the caller-named entry
+        point that still grows the registry, via :func:`aenum.extend_enum`.
+
+        Args:
+            value: Value of the new member.
+            name: Name of the new member.
+
+        Returns:
+            The newly registered member.
+
+        """
+        return extend_enum(cls, name, value)
+
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> 'PayloadProtocolIdentifier':
+        """Build a member absent from this registry's own lookup tables.
+
+        Used by :meth:`_missing_` for a bounded-but-unassigned value it
+        resolves without anyone asking for a name, so that such a lookup no
+        longer grows the registry -- contrast :meth:`register`, the explicit
+        path that still does.
+
+        Args:
+            value: The member's value.
+            name: The member's name.
+
+        Returns:
+            The unregistered member.
+
+        """
+        obj = int.__new__(cls, value)
+        obj._name_ = name  # pylint: disable=protected-access
+        obj._value_ = value  # pylint: disable=protected-access
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'PayloadProtocolIdentifier':
@@ -299,8 +342,8 @@ class PayloadProtocolIdentifier(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 74 <= value <= 4241:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 4243 <= value <= 4294967295:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

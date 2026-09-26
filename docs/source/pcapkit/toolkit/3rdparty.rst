@@ -82,6 +82,8 @@ usable for its caller.
 
 .. autofunction:: pcapkit.toolkit.pyshark.tcp_traceflow
 
+.. autodata:: pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE
+
 Auxiliary Functions
 -------------------
 

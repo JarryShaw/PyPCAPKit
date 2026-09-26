@@ -798,7 +798,17 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             if TYPE_CHECKING:
                 schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
-            tid_type = Enum_TaggerID.get(schema.info['type'])
+            # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
+            # instead of minting a member; only a hand-constructed schema hits
+            # this guard. An unassigned *wire* value still mints via _missing_
+            # (tier 2, deferred), so it never reaches here.
+            tid_key = None
+            try:
+                tid_key = schema.info['type']
+                tid_type = Enum_TaggerID.get(tid_key)
+            except KeyError:
+                raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] '
+                                    f'unknown tagger-id type: {tid_key!r}') from None
             tid_len = schema.info['len']
 
             opt = Data_SMFIdentificationBasedDPDOption(
@@ -1022,7 +1032,17 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        kind = Enum_SeedID.get(schema.flags['type'])
+        # NOTE: #775 tier 1 made an unresolvable *string* key raise KeyError
+        # instead of minting a member; only a hand-constructed schema hits
+        # this guard. An unassigned *wire* value still mints via _missing_
+        # (tier 2, deferred), so it never reaches here.
+        seed_key = None
+        try:
+            seed_key = schema.flags['type']
+            kind = Enum_SeedID.get(seed_key)
+        except KeyError:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] '
+                                f'unknown seed-id type: {seed_key!r}') from None
         clen = schema.len
 
         if schema.len < 2:

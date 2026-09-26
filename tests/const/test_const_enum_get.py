@@ -180,7 +180,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         # A resolvable key is untouched.
         self.assertIs(Hardware.get(1), Hardware.Ethernet)
-        self.assertIs(Hardware.get(40), Hardware(40))
+        # 40 falls in Hardware's unassigned 39-255 range: since #775 tier 1,
+        # that no longer mints a permanent member, so each lookup returns its
+        # own unregistered pseudo-member -- equal, but no longer the same
+        # object, which is why this is assertEqual rather than assertIs.
+        self.assertEqual(Hardware.get(40), Hardware(40))
         self.assertIs(Hardware.get('Ethernet'), Hardware.Ethernet)
 
     def test_the_placeholder_still_raises(self) -> None:
