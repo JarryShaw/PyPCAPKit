@@ -168,6 +168,229 @@ class AppTypeSplitTests(unittest.TestCase):
         # And it dispatches from the base exactly as ``get`` does.
         self.assertEqual(AppType.get_all(80, proto=TransportProtocol.tcp), TCP.get_all(80))
 
+    def test_aliases_is_the_rest_of_get_alls_bucket(self) -> None:
+        """GitHub issue #807's first ask: a public ``.aliases`` per member.
+
+        No new storage -- ``get_all``'s own ``(canonical, *rest)`` shape is
+        already this same bucket, so ``.aliases`` is checked directly against
+        it rather than against a hand-written list, which would just be a
+        second, driftable copy of what ``get_all`` already answers.
+        """
+        from pcapkit.const.reg.apptype import SCTP, TCP, UDP
+
+        self.assertEqual([member.svc for member in TCP.http.aliases], ['www', 'www-http'])
+        self.assertEqual([member.svc for member in TCP.www.aliases], ['http', 'www-http'])
+        self.assertEqual(TCP.http.aliases, TCP.get_all(80)[1:])
+
+        # A member IANA assigned nobody else on this transport's port has no
+        # aliases -- an empty tuple, never ``None``, so a caller needs no guard.
+        self.assertEqual(TCP.finger.aliases, ())
+        self.assertIsInstance(TCP.finger.aliases, tuple)
+
+        # Per-transport, exactly as the maintainer ruled: ``www`` is an alias
+        # of ``http`` on TCP and UDP, both of which IANA assigns it to, and
+        # SCTP's ``http`` has no aliases because IANA never registered ``www``
+        # there at all.
+        self.assertEqual([member.svc for member in UDP.http.aliases], ['www', 'www-http'])
+        self.assertEqual(SCTP.get(80).svc, 'http')
+        self.assertEqual(SCTP.get(80).aliases, ())
+
+    def test_repr_and_str_grow_an_alias_suffix_only_when_there_is_one(self) -> None:
+        """GitHub issue #807's second ask, and the hard constraint alongside it.
+
+        The suffix is display-only: it never reaches ``_value_``, which is the
+        live lookup key in ``_value2member_map_`` and is built once when the
+        class is created -- see ``test_the_new_dunders_are_byte_identical_to_the_percent_form``
+        and ``test_every_member_renders_its_own_registrys_transport_protocol``
+        for the sweep over all 12,391 members that pins this for every one of
+        them, aliased or not.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        # No aliases: byte-identical to the pre-#807 form.
+        self.assertEqual(repr(TCP.finger), '<TCP.finger: 79 [tcp]>')
+        self.assertEqual(str(TCP.finger), 'finger [79 - tcp]')
+
+        # Aliases: the suffix names every *other* member on the port, in
+        # get_all's row order, never itself.
+        self.assertEqual(repr(TCP.http), '<TCP.http: 80 [tcp] (aliases: www, www-http)>')
+        self.assertEqual(str(TCP.http), 'http [80 - tcp] (aliases: www, www-http)')
+        self.assertEqual(repr(TCP.www), '<TCP.www: 80 [tcp] (aliases: http, www-http)>')
+
+        # ``_value_`` -- and so the lookup key -- carries neither: the
+        # constraint #807 states explicitly, since aliases are registerable at
+        # runtime and ``_value_`` cannot be re-derived after class creation.
+        self.assertEqual(TCP.http._value_, 'http [80 - tcp]')  # type: ignore[attr-defined]
+        self.assertIs(TCP('http [80 - tcp]'), TCP.http)
+
+    def test_register_alias_is_scoped_to_one_per_transport_registry(self) -> None:
+        """GitHub issue #807's third ask: register an alias, per transport.
+
+        Calling it on :class:`TCP` alone must never touch :class:`UDP`'s or
+        :class:`SCTP`'s members -- the whole point of "alias should ... be
+        per-transport" is that a service registered as an alias on one
+        transport stays absent from a transport IANA never assigned it.
+        """
+        from pcapkit.const.reg.apptype import SCTP, TCP, UDP
+
+        before = [member.svc for member in TCP.__registry__.getlist(80)]
+        self.assertEqual(before, ['http', 'www', 'www-http'])
+
+        minted = TCP.register_alias(80, 'unit-test-807-alias')
+        self.addCleanup(self._purge_member, TCP, minted.name, 80)
+
+        self.assertEqual(minted.svc, 'unit-test-807-alias')
+        self.assertEqual(minted.port, 80)
+        self.assertIs(minted.proto, TCP.__transport__)
+        self.assertIsInstance(minted, TCP)
+
+        # Reachable by subscription, on the sanitised identifier -- the same
+        # ``www-http`` -> ``www_http`` transform the generator applies to a
+        # statically declared member -- and ``.svc`` still reads the name
+        # exactly as given, unsanitised.
+        self.assertEqual(minted.name, 'unit_test_807_alias')
+        self.assertIs(TCP['unit_test_807_alias'], minted)
+        self.assertEqual(TCP['unit_test_807_alias'].svc, 'unit-test-807-alias')
+
+        # The new member is reachable both ways: it lists the three it joined
+        # as its own aliases, and each of them now lists it back.
+        self.assertEqual({member.svc for member in minted.aliases}, {'http', 'www', 'www-http'})
+        self.assertIn('unit-test-807-alias', [member.svc for member in TCP.http.aliases])
+        self.assertIn('unit-test-807-alias', [member.svc for member in TCP.get_all(80)])
+
+        # Scoped to TCP alone: neither sibling registry saw anything.
+        self.assertNotIn('unit-test-807-alias', [member.svc for member in UDP.get_all(80)])
+        self.assertEqual(SCTP.get(80).aliases, ())
+
+    def test_register_alias_is_reachable_by_its_sanitised_identifier(self) -> None:
+        """The finding this issue's second round fixed, pinned directly.
+
+        An alias whose own name does not resolve through subscription is not
+        much of an alias -- ``TCP['http-alt-test']`` is a ``KeyError`` because
+        ``-`` cannot appear in an attribute name, exactly like every
+        statically declared member: ``TCP['www-http']`` is a ``KeyError`` too,
+        and ``TCP['www_http']`` is what resolves. ``register_alias`` mirrors
+        that same sanitisation rather than minting an identifier that has
+        nothing to do with ``name``.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        minted = TCP.register_alias(80, 'http-alt-test')
+        self.addCleanup(self._purge_member, TCP, minted.name, 80)
+
+        self.assertEqual(minted.name, 'http_alt_test')
+        with self.assertRaises(KeyError):
+            TCP['http-alt-test']  # pylint: disable=pointless-statement
+        self.assertIs(TCP['http_alt_test'], minted)
+        self.assertEqual(TCP['http_alt_test'].svc, 'http-alt-test')
+
+    def test_register_alias_refuses_a_sanitised_identifier_collision(self) -> None:
+        """A name that sanitises into an *unrelated* existing member's identifier.
+
+        Distinct from ``test_register_alias_refuses_a_name_already_on_the_port``:
+        ``'finger'`` is not already registered on port 80 -- the svc-name check
+        above would not catch it -- but it sanitises to the identifier
+        ``'finger'``, which already names :attr:`TCP.finger` at port 79. Refused
+        rather than silently overwritten or given a synthetic fallback name.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        self.assertEqual(TCP.finger.port, 79)
+        self.assertNotIn('finger', [member.svc for member in TCP.__registry__.getlist(80)])
+
+        with self.assertRaises(ValueError) as caught:
+            TCP.register_alias(80, 'finger')
+        self.assertIn("'finger'", str(caught.exception))
+        self.assertIn('already names a member', str(caught.exception))
+
+        # Neither the existing member nor the target port was touched.
+        self.assertEqual(TCP.finger.port, 79)
+        self.assertEqual(TCP.finger.svc, 'finger')
+        self.assertEqual([member.svc for member in TCP.__registry__.getlist(80)],
+                         ['http', 'www', 'www-http'])
+
+    def test_register_alias_refuses_an_unsanitisable_name(self) -> None:
+        """A name with nothing left after sanitising, or a Python cannot start with.
+
+        Refused explicitly rather than falling back to a synthetic identifier
+        such as the port-and-counter scheme this method used before this
+        round -- a fallback here would just recreate the original defect of
+        an alias unreachable by anything resembling its own name.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        before = [member.svc for member in TCP.__registry__.getlist(80)]
+
+        with self.assertRaises(ValueError) as caught:
+            TCP.register_alias(80, '...')
+        self.assertIn('no valid Python identifier', str(caught.exception))
+
+        with self.assertRaises(ValueError) as caught:
+            TCP.register_alias(80, '80s-club')
+        self.assertIn('no valid Python identifier', str(caught.exception))
+        self.assertIn("'80s_club'", str(caught.exception))
+
+        self.assertEqual([member.svc for member in TCP.__registry__.getlist(80)], before)
+        self.assertNotIn('80s_club', TCP.__members__)
+
+    def test_register_alias_sanitises_a_keyword_name_like_the_generator_does(self) -> None:
+        """A name that sanitises to a reserved word gets the same ``_`` suffix.
+
+        Mirrors ``process()``'s own guard for a statically declared member
+        whose service name happens to be a Python keyword.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        minted = TCP.register_alias(80, 'class')
+        self.addCleanup(self._purge_member, TCP, minted.name, 80)
+
+        self.assertEqual(minted.name, 'class_')
+        self.assertEqual(minted.svc, 'class')
+        self.assertIs(TCP['class_'], minted)
+
+    def test_register_alias_refuses_the_base_registry(self) -> None:
+        """The base holds no members for the same reason ``__new__`` refuses it.
+
+        ``register_alias`` cannot pick a transport for the caller the way
+        ``get``/``get_all`` do through their ``proto=`` keyword: per-transport
+        registration is the point, so it has to be called on one of the four
+        subclasses directly.
+        """
+        from pcapkit.const.reg.apptype import AppType
+
+        with self.assertRaises(ValueError) as caught:
+            AppType.register_alias(80, 'unit-test-807-base')
+        self.assertIn('holds no members', str(caught.exception))
+        self.assertNotIn('unit-test-807-base', AppType.__members__)
+
+    def test_register_alias_refuses_a_port_with_no_canonical_member_yet(self) -> None:
+        """Aliasing names a second service on a port that already has one.
+
+        A port with nothing there yet is what the generator and ``get``'s own
+        mint-on-miss are for, not this -- so this refuses rather than quietly
+        becoming the port's first and only member.
+        """
+        from pcapkit.const.reg.apptype import TCP
+
+        self.assertNotIn(59002, TCP.__registry__)
+        with self.assertRaises(ValueError) as caught:
+            TCP.register_alias(59002, 'unit-test-807-orphan')
+        self.assertIn('59002', str(caught.exception))
+        self.assertIn('is not yet a member', str(caught.exception))
+        self.assertNotIn(59002, TCP.__registry__)
+        self.assertNotIn('unit-test-807-orphan', TCP.__members__)
+
+    def test_register_alias_refuses_a_name_already_on_the_port(self) -> None:
+        """The same name registered twice on one port is not a second alias."""
+        from pcapkit.const.reg.apptype import TCP
+
+        before = len(TCP.__registry__.getlist(80))
+        with self.assertRaises(ValueError) as caught:
+            TCP.register_alias(80, 'http')
+        self.assertIn("'http'", str(caught.exception))
+        self.assertIn('already registered', str(caught.exception))
+        self.assertEqual(len(TCP.__registry__.getlist(80)), before)
+
     def test_extend_enum_appends_to_an_occupied_port(self) -> None:
         """The old ``__members_proto__[proto][port] = obj`` displaced it silently."""
         import aenum
@@ -890,6 +1113,14 @@ class AppTypeSplitTests(unittest.TestCase):
         via :func:`~aenum.extend_enum` and clean up with
         :meth:`~unittest.TestCase.addCleanup`, but the population counts below
         are only meaningful against a registry no other test has touched.
+
+        GitHub issue #807 grew ``repr``/``str`` an ``(aliases: ...)`` suffix
+        for a member that shares its port with another service in the same
+        registry, so ``old_repr``/``old_str`` below append the identical
+        suffix through ``member.aliases`` before comparing. ``old_value``
+        needs no such change: ``_value_`` is deliberately exempt from #807's
+        suffix, which is the whole reason that issue exists rather than
+        folding the alias list into the same formula this test already pins.
         """
         from tests._support import (ISOLATED_PREFIXES, purge_modules, restore_modules,
                                     snapshot_modules)
@@ -915,13 +1146,17 @@ class AppTypeSplitTests(unittest.TestCase):
                     old_value = '%s [%d - %s]' % (svc, port, proto.name)  # pylint: disable=consider-using-f-string
                     self.assertEqual(str(member._value_), old_value)  # type: ignore[attr-defined]
 
+                aliases = member.aliases
+                suffix = '' if not aliases else ' (aliases: %s)' % ', '.join(  # pylint: disable=consider-using-f-string
+                    alias.svc for alias in aliases)
+
                 with self.subTest(registry=name, member=member.name, check='repr'):
-                    old_repr = "<%s.%s: %d [%s]>" % (  # pylint: disable=consider-using-f-string
-                        member.__class__.__name__, svc, port, proto.name)
+                    old_repr = "<%s.%s: %d [%s]%s>" % (  # pylint: disable=consider-using-f-string
+                        member.__class__.__name__, svc, port, proto.name, suffix)
                     self.assertEqual(repr(member), old_repr)
 
                 with self.subTest(registry=name, member=member.name, check='str'):
-                    old_str = '%s [%d - %s]' % (svc, port, proto.name)  # pylint: disable=consider-using-f-string
+                    old_str = '%s [%d - %s]%s' % (svc, port, proto.name, suffix)  # pylint: disable=consider-using-f-string
                     self.assertEqual(str(member), old_str)
 
             self.assertEqual(count, expected_counts[name], f'{name} population changed')
@@ -949,6 +1184,15 @@ class AppTypeSplitTests(unittest.TestCase):
 
         Swept over every declared member of all four registries rather than
         spot-checked, since the blast radius is 85.7% of the enumeration.
+
+        GitHub issue #807 grew ``str``/``repr`` an ``(aliases: ...)`` suffix
+        for a member sharing its port with another service in this registry,
+        so ``value``/``shown`` below grow the identical suffix through
+        ``member.aliases`` before comparing. The lookup round-trip at the
+        bottom deliberately keeps using the **un**-suffixed ``value``: the
+        suffix never reaches ``_value_``, which is #807's hard constraint --
+        ``_value_`` is the live key in ``_value2member_map_``, built once at
+        class creation, and aliases are registerable at runtime.
         """
         from tests._support import (ISOLATED_PREFIXES, purge_modules, restore_modules,
                                     snapshot_modules)
@@ -972,12 +1216,18 @@ class AppTypeSplitTests(unittest.TestCase):
                 value = f'{member.svc} [{member.port} - {transport}]'
                 if str(member._value_) != value:  # type: ignore[attr-defined]
                     wrong.append((cls.__name__, member.name, 'value', str(member._value_)))  # type: ignore[attr-defined]
-                if str(member) != value:
+
+                aliases = member.aliases
+                suffix = '' if not aliases else ' (aliases: {})'.format(
+                    ', '.join(alias.svc for alias in aliases))
+
+                if str(member) != value + suffix:
                     wrong.append((cls.__name__, member.name, 'str', str(member)))
-                shown = f'<{cls.__name__}.{member.svc}: {member.port} [{transport}]>'
+                shown = f'<{cls.__name__}.{member.svc}: {member.port} [{transport}]{suffix}>'
                 if repr(member) != shown:
                     wrong.append((cls.__name__, member.name, 'repr', repr(member)))
-                # The value is the live lookup key, so it has to round-trip.
+                # The value is the live lookup key, so it has to round-trip --
+                # unaffected by the display-only suffix checked just above.
                 if cls(value) is not member:
                     wrong.append((cls.__name__, member.name, 'lookup', value))
             self.assertEqual(count, expected_counts[cls.__name__],
