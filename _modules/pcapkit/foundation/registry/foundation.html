@@ -456,7 +456,7 @@
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ipv4</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">IPv4_Reassembly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.ipv6</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">IPv6_Reassembly</span>
@@ -470,6 +470,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallbackFn</span> <span class="k">as</span> <span class="n">Reasm_CallbackFn</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reassembly</span>
@@ -492,8 +493,6 @@
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="n">NULL</span> <span class="o">=</span> <span class="s1">'(null)'</span>
-
 <span class="c1">###############################################################################</span>
 <span class="c1"># Engine Registries</span>
 <span class="c1">###############################################################################</span>
@@ -509,7 +508,7 @@
 <div class="viewcode-block" id="register_extractor_engine">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_engine">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_engine</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Engine] | Type[Engine] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new engine class.</span>
 
 <span class="sd">    Notes:</span>
@@ -548,7 +547,7 @@
 <div class="viewcode-block" id="register_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
@@ -590,7 +589,7 @@
 <div class="viewcode-block" id="register_extractor_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
@@ -626,7 +625,7 @@
 <div class="viewcode-block" id="register_traceflow_dumper">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_traceflow_dumper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_traceflow_dumper</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[Dumper] | Type[Dumper] | str'</span><span class="p">,</span>
-                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                              <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
@@ -748,7 +747,7 @@
 <div class="viewcode-block" id="register_extractor_reassembly">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_reassembly">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_reassembly</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[Reassembly] | Type[Reassembly]'</span><span class="p">,</span>
-                                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new reassembly class.</span>
 
 <span class="sd">    Notes:</span>
@@ -783,7 +782,7 @@
 <div class="viewcode-block" id="register_extractor_traceflow">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.foundation.register_extractor_traceflow">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_extractor_traceflow</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]'</span><span class="p">,</span>
-                                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Registered a new flow tracing class.</span>
 
 <span class="sd">    Notes:</span>

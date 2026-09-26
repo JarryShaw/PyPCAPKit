@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/module.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.module contains tuple like class ModuleDescriptor, which is originally designed as tuple[str, str]. Type Variables:" />
-<meta name="description" content="pcapkit.corekit.module contains tuple like class ModuleDescriptor, which is originally designed as tuple[str, str]. Type Variables:" />
+<meta property="og:description" content="pcapkit.corekit.module contains tuple like class ModuleDescriptor, which is originally designed as tuple[str, str]. Auxiliaries: Type Variables:" />
+<meta name="description" content="pcapkit.corekit.module contains tuple like class ModuleDescriptor, which is originally designed as tuple[str, str]. Auxiliaries: Type Variables:" />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Multi-Mapping Dictionary" href="multidict.html"><link rel="prev" title="Seekable I/O Object" href="io.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -476,6 +476,14 @@ class can be imported by <code class="docutils literal notranslate"><span class=
 <dt class="sig sig-object py" id="pcapkit.corekit.module.ModuleDescriptor.klass">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">klass</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.14)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.corekit.module.pcapkit.corekit.module._T" title="pcapkit.corekit.module.pcapkit.corekit.module._T"><span class="pre">_T</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.module.ModuleDescriptor.klass" title="Link to this definition">¶</a></dt>
 <dd><p>Import class from module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>pcapkit.utilities.exceptions.ProtocolError</strong></a> – If <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.name" title="pcapkit.corekit.module.ModuleDescriptor.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> is
+    <a class="reference internal" href="#pcapkit.corekit.module.NULL" title="pcapkit.corekit.module.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> – the caller building this descriptor omitted
+    the class name rather than naming one that turned out wrong –
+    or if <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.module" title="pcapkit.corekit.module.ModuleDescriptor.module"><code class="xref py py-attr docutils literal notranslate"><span class="pre">module</span></code></a> has no attribute named <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.name" title="pcapkit.corekit.module.ModuleDescriptor.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>.</p>
+</dd>
+</dl>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The module is read from <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> first, and
@@ -512,12 +520,96 @@ pre-reload class forever, and an instance of it fails
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.module.ModuleDescriptor.name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.corekit.module.ModuleDescriptor.name" title="Link to this definition">¶</a></dt>
-<dd><p>Class name.</p>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType"><span class="pre">pcapkit.corekit.module.NullType</span></a></span><a class="headerlink" href="#pcapkit.corekit.module.ModuleDescriptor.name" title="Link to this definition">¶</a></dt>
+<dd><p>Class name, or <a class="reference internal" href="#pcapkit.corekit.module.NULL" title="pcapkit.corekit.module.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> when whatever built this descriptor never
+got one – see <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-attr docutils literal notranslate"><span class="pre">klass</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
 
+<section id="auxiliaries">
+<h2>Auxiliaries<a class="headerlink" href="#auxiliaries" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.module.NullType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.module.</span></span><span class="sig-name descname"><span class="pre">NullType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/module.html#NullType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.module.NullType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Type of <a class="reference internal" href="#pcapkit.corekit.module.NULL" title="pcapkit.corekit.module.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a>, the omitted-<code class="docutils literal notranslate"><span class="pre">class_</span></code>/<code class="docutils literal notranslate"><span class="pre">module</span></code> sentinel.</p>
+<p>A distinct class rather than a plain <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> – which is what the
+registry helpers in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> and
+<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a> used to define,
+independently of each other – so that <code class="docutils literal notranslate"><span class="pre">is</span></code> comparisons against it mean
+what they say: no <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> a caller passes, including one that
+happens to spell <code class="docutils literal notranslate"><span class="pre">'(null)'</span></code> itself, can compare equal to this sentinel
+by identity. See GitHub issue #833.</p>
+<p>Genuinely a singleton, not merely a class this module happens to
+instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance
+that already exists, rather than building a new one, so no caller –
+direct, or <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">copy</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> reconstructing an instance behind
+the scenes – can end up holding a second object that fails an <code class="docutils literal notranslate"><span class="pre">is</span>
+<span class="pre">NULL</span></code> check downstream. <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ModuleDescriptor.klass()</span></code></a> makes exactly
+that check, and a stricter guard that raises on a second call would be
+truer to “singleton” in the abstract, but it would also mean the
+module’s own <code class="docutils literal notranslate"><span class="pre">NULL</span> <span class="pre">=</span> <span class="pre">NullType()</span></code> below is the only call that is ever
+allowed to succeed – fragile for no real benefit, since nothing here
+needs <em>rejecting</em> a second construction, only preventing it from
+producing a distinct object.</p>
+<p>That still leaves <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> and
+<a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> unhandled: none of them constructs a new instance by
+calling <code class="docutils literal notranslate"><span class="pre">NullType()</span></code> themselves, so the guard above never runs for
+them. Each is therefore given its own override below, rather than left
+to fall back to the default behaviour for a plain object:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> check for
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__copy__()</span></code>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">__deepcopy__()</span></code> before ever falling back to
+reduction, so <code class="xref py py-meth docutils literal notranslate"><span class="pre">__deepcopy__()</span></code> in particular has to be defined –
+its absence is the actual defect this class used to have: deepcopying
+a <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> recursed into this sentinel, reduced it,
+and rebuilt a second, non-identical <a class="reference internal" href="#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> that then read as
+an ordinary attribute name to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, downgrading a clean
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a> into a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> (<code class="docutils literal notranslate"><span class="pre">attribute</span> <span class="pre">name</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">string,</span> <span class="pre">not</span> <span class="pre">'NullType'</span></code>).</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> protocols 2 and up reconstruct through
+<code class="docutils literal notranslate"><span class="pre">cls.__new__(cls)</span></code>, which the guarded <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> already keeps
+to one instance – but protocols 0 and 1 reconstruct through
+<code class="xref py py-func docutils literal notranslate"><span class="pre">copyreg._reconstructor()</span></code>, which calls <code class="xref py py-func docutils literal notranslate"><span class="pre">object.__new__()</span></code>
+<em>directly</em>, bypassing <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely. <code class="xref py py-meth docutils literal notranslate"><span class="pre">__reduce__()</span></code> is
+defined so that every protocol, not only the ones that happen to go
+through this class’s own <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>, is routed through the same
+module-level getter instead of through reconstruction at all.</p></li>
+</ul>
+<p>A caveat rather than a defect: <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importlib.reload" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.reload()</span></code></a> on this module
+re-executes <code class="docutils literal notranslate"><span class="pre">NULL</span> <span class="pre">=</span> <span class="pre">NullType()</span></code> below, producing a <em>second</em> singleton
+that the reloaded code compares against correctly but that every module
+which already imported the pre-reload <a class="reference internal" href="#pcapkit.corekit.module.NULL" title="pcapkit.corekit.module.NULL"><code class="xref py py-data docutils literal notranslate"><span class="pre">NULL</span></code></a> still holds – so a
+comparison spanning the reload sees two “singletons” that are not each
+other. <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor.klass" title="pcapkit.corekit.module.ModuleDescriptor.klass"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ModuleDescriptor.klass()</span></code></a> faces exactly this class of
+problem for the <em>class</em> it resolves, which is why it re-reads
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> on every call rather than memoising; nothing
+equivalent is possible here, because unlike a resolved class there is no
+live registry this sentinel could be re-read from. The pre-#833 <code class="docutils literal notranslate"><span class="pre">str</span></code>
+sentinel had the same fragility for the same reason – it is a property
+of sharing one module-level binding across a reload, not something this
+class’s singleton guarantees claim to solve – and nothing in this
+package reloads <a class="reference internal" href="#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a> after import.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.module.NULL">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.module.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NULL&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.module.NULL" title="Link to this definition">¶</a></dt>
+<dd><p>Sentinel for an omitted <code class="docutils literal notranslate"><span class="pre">class_</span></code> argument to the <code class="docutils literal notranslate"><span class="pre">register_*</span></code>
+helpers in <a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.protocols" title="pcapkit.foundation.registry.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.protocols</span></code></a> and
+<a class="reference internal" href="../foundation/registry.html#module-pcapkit.foundation.registry.foundation" title="pcapkit.foundation.registry.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.foundation</span></code></a>. Defined once, here, rather
+than once per module: both already import <a class="reference internal" href="#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> from
+this module, so it is the shared home that needs no new module and creates
+no import cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType">NullType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="type-variables">
 <h2>Type Variables<a class="headerlink" href="#type-variables" title="Link to this heading">¶</a></h2>
 <dl class="py data">
@@ -584,6 +676,7 @@ pre-reload class forever, and an instance of it fails
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Module Descriptor</a><ul>
+<li><a class="reference internal" href="#auxiliaries">Auxiliaries</a></li>
 <li><a class="reference internal" href="#type-variables">Type Variables</a></li>
 </ul>
 </li>

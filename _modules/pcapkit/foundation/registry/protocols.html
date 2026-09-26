@@ -467,7 +467,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.sctp.payload_protocol_identifier</span><span class="w"> </span><span class="kn">import</span> \
     <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">Enum_PayloadProtocolIdentifier</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">HIP</span>
@@ -527,6 +527,7 @@
         <span class="n">PayloadProtocolIdentifier</span> <span class="k">as</span> <span class="n">SCTP_PayloadProtocolIdentifier</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.mp_tcp_option</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.tcp.option</span><span class="w"> </span><span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameConstructor</span> <span class="k">as</span> <span class="n">HTTP_FrameConstructor</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.httpv2</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterConstructor</span> <span class="k">as</span> <span class="n">HIP_ParameterConstructor</span>
@@ -586,8 +587,6 @@
 <span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
 <span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-<span class="n">NULL</span> <span class="o">=</span> <span class="s1">'(null)'</span>
 
 
 <span class="c1"># NOTE: pcapkit.protocols.__proto__</span>
@@ -835,7 +834,7 @@
 <div class="viewcode-block" id="register_linktype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_linktype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                      <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -883,7 +882,7 @@
 <div class="viewcode-block" id="register_pcap">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcap">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -923,7 +922,7 @@
 <div class="viewcode-block" id="register_pcapng">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_pcapng">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_pcapng</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'LinkType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                    <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -968,7 +967,7 @@
 <div class="viewcode-block" id="register_ethertype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_ethertype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'EtherType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1013,7 +1012,7 @@
 <div class="viewcode-block" id="register_transtype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_transtype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'TransType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                       <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1285,7 +1284,8 @@
 <div class="viewcode-block" id="register_apptype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | TransportProtocol'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | TransportProtocol | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span>
+                     <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1335,6 +1335,13 @@
 <span class="sd">            ``name``. A composite such as ``tcp | udp``, or its string form</span>
 <span class="sd">            ``'tcp|udp'``, names two and is refused for the same reason: one call</span>
 <span class="sd">            registers under one transport protocol.</span>
+<span class="sd">        pcapkit.utilities.exceptions.ProtocolError: Raised lazily, from</span>
+<span class="sd">            :attr:`ModuleDescriptor.klass &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;`,</span>
+<span class="sd">            when ``module`` is a :class:`str` and either ``class_`` names no</span>
+<span class="sd">            attribute of it, or ``class_`` was never given at all -- the</span>
+<span class="sd">            latter distinguished from the former rather than reported as a</span>
+<span class="sd">            missing attribute named ``'(null)'``. See GitHub issues #832 and</span>
+<span class="sd">            #833.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**</span>
@@ -1449,7 +1456,7 @@
 <div class="viewcode-block" id="register_tcp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_tcp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1547,7 +1554,7 @@
 <div class="viewcode-block" id="register_udp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_udp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_udp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                 <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1589,7 +1596,7 @@
 <div class="viewcode-block" id="register_sctp">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_sctp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_sctp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | SCTP_PayloadProtocolIdentifier'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                  <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | NullType'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>

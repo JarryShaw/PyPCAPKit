@@ -500,6 +500,14 @@
 <span class="sd">        IntError: If no ``length`` is given and ``__length__`` fixes none either.</span>
 <span class="sd">        FieldValueError: If ``signed`` contradicts a sign already fixed by</span>
 <span class="sd">            ``__signed__`` -- never from this class, which fixes none.</span>
+<span class="sd">        ProtocolError: If ``bit_length`` is given negative. Left alone,</span>
+<span class="sd">            ``(1 &lt;&lt; bit_length) - 1`` raises a bare, uncatchable</span>
+<span class="sd">            :exc:`ValueError` (``negative shift count``) here, before</span>
+<span class="sd">            :meth:`__call__`'s own negative-``length`` guard (#828/#829) or</span>
+<span class="sd">            :attr:`~pcapkit.corekit.fields.field.FieldBase.length`'s (#805)</span>
+<span class="sd">            ever see anything -- this one fires at construction time, on the</span>
+<span class="sd">            argument itself rather than on a resolved wire length. See</span>
+<span class="sd">            GitHub issue #831.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        A subclass such as :class:`UInt32Field` fixes the sign through</span>
@@ -533,6 +541,11 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">bit_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                    <span class="sa">f</span><span class="s1">'bit_length=</span><span class="si">{</span><span class="n">bit_length</span><span class="si">!r}</span><span class="s1">'</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">bit_length</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
@@ -584,19 +597,26 @@
 <span class="sd">        updating the current instance.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If the resolved ``length`` is negative and</span>
-<span class="sd">                ``bit_length`` was not supplied -- e.g. a ``length`` callback</span>
-<span class="sd">                such as ``lambda pkt: pkt['len'] - 4`` resolving below zero</span>
-<span class="sd">                once the wire value it reads is smaller than the subtrahend.</span>
-<span class="sd">                Left alone, ``1 &lt;&lt; (length * 8)`` raises a bare, uncatchable</span>
-<span class="sd">                :exc:`ValueError` (``negative shift count``) here, before</span>
+<span class="sd">            ProtocolError: If the resolved ``length`` is negative -- e.g. a</span>
+<span class="sd">                ``length`` callback such as ``lambda pkt: pkt['len'] - 4``</span>
+<span class="sd">                resolving below zero once the wire value it reads is smaller</span>
+<span class="sd">                than the subtrahend. Left alone, ``1 &lt;&lt; (length * 8)`` raises</span>
+<span class="sd">                a bare, uncatchable :exc:`ValueError` (``negative shift</span>
+<span class="sd">                count``) when ``bit_length`` was not supplied, before</span>
 <span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` (see</span>
 <span class="sd">                its own :exc:`ProtocolError` guard, #805/#811/#827) or</span>
 <span class="sd">                :meth:`build_template` ever sees the value: this method sets</span>
 <span class="sd">                ``self._bit_length`` from the resolved length eagerly, as a</span>
 <span class="sd">                cache, and shifts by it immediately, so the crash happens on</span>
 <span class="sd">                *this* line rather than on the later, already-guarded ones.</span>
-<span class="sd">                See GitHub issue #828. A resolved length of exactly ``0`` is a</span>
+<span class="sd">                See GitHub issue #828. This guard runs regardless of whether</span>
+<span class="sd">                ``bit_length`` was supplied, so a field constructed with a</span>
+<span class="sd">                fixed ``bit_length`` *and* a callable ``length`` that resolves</span>
+<span class="sd">                negative raises the identical message as one with no</span>
+<span class="sd">                ``bit_length`` at all, rather than falling through to a</span>
+<span class="sd">                ``template='...-1s'`` :exc:`ProtocolError` from</span>
+<span class="sd">                :attr:`~pcapkit.corekit.fields.field.FieldBase.length` later --</span>
+<span class="sd">                see GitHub issue #831. A resolved length of exactly ``0`` is a</span>
 <span class="sd">                legitimate empty field (e.g. ``len=4`` above resolving to</span>
 <span class="sd">                ``0``) and is left alone.</span>
 
@@ -609,12 +629,13 @@
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
+                <span class="sa">f</span><span class="s1">'length=</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">!r}</span><span class="s1">'</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> resolved to a negative length; '</span>
-                    <span class="sa">f</span><span class="s1">'length=</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">!r}</span><span class="s1">'</span>
-                <span class="p">)</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">*</span> <span class="mi">8</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
