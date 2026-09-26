@@ -100,7 +100,7 @@ class ReturnCode(IntEnum):
         return obj
 
     def __repr__(self) -> 'str':
-        return "<%s [%s]>" % (self.__class__.__name__, self._value_)
+        return f'<{self.__class__.__name__} [{self._value_}]>'
 
     def __str__(self) -> 'str':
         return "[%s] %s" % (self._value_, self.description)
