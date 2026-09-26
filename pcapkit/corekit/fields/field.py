@@ -4,6 +4,7 @@
 import abc
 import contextlib
 import contextvars
+import re
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -198,6 +199,31 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
         _zero_pad_ledger.reset(token)
 
 
+#: Pattern[str]: Matches a leading, optionally byte-order-prefixed negative
+#: count in a :attr:`FieldBase.template`, e.g. the ``-1`` in ``'-1s'`` or in
+#: ``'>-1s'``.
+#:
+#: Every template this package builds from a resolved field length is
+#: ``f'{length}s'`` (see :mod:`pcapkit.corekit.fields.strings`,
+#: :mod:`~pcapkit.corekit.fields.misc`, :mod:`~pcapkit.corekit.fields.collections`
+#: and, before it gets byte-order-prefixed, :mod:`~pcapkit.corekit.fields.numbers`
+#: -- :meth:`NumberField.build_template <pcapkit.corekit.fields.numbers.
+#: NumberField.build_template>`'s ``else`` arm), so a negative resolved length
+#: always leaves that literal ``-`` immediately before the digits. What
+#: :class:`~pcapkit.corekit.fields.numbers.NumberField` adds is a byte-order
+#: prefix -- one of ``'@=<>!'`` -- *in front of* that whole template
+#: (``f'{endian}{struct_fmt}'``), which is what a plain ``^-\d+`` misses: the
+#: prefix, not the minus sign, is what starts the string. The optional
+#: character class here accounts for exactly that one prefix position, so a
+#: negative count is recognised whether or not it was byte-order-prefixed, while
+#: still refusing anything else -- a bare byte-order character with no minus
+#: sign after it (``'>Xs'``), or any other malformed template -- which is what
+#: makes checking for it a reliable way to tell those cases apart from each
+#: other *before* :func:`struct.calcsize` is asked to size either one. See
+#: #825, #827.
+_RE_NEGATIVE_LENGTH_TEMPLATE = re.compile(r'^[@=<>!]?-\d+')
+
+
 class FieldMeta(abc.ABCMeta, Generic[_T]):
     """Meta class to add dynamic support to :class:`FieldBase`.
 
@@ -276,16 +302,34 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
                 (e.g. ``'-5s'``, from a ``length`` callback such as
                 ``lambda pkt: pkt['__length__']`` resolving below zero once
                 the buffer ran short of what the schema declared).
-                :func:`struct.calcsize` cannot size such a template and would
-                otherwise raise a bare :exc:`struct.error`, uncatchable as a
-                pcapkit-specific error. See #805.
+                :func:`struct.calcsize` cannot size such a template and raises
+                a bare :exc:`struct.error`, uncatchable as a pcapkit-specific
+                error; this re-raises it as the negative-length message below.
+                See #805.
+            ProtocolError: If :attr:`template` is otherwise malformed --
+                anything else :func:`struct.calcsize` cannot size, such as a
+                typo'd format character -- rather than the negative-length
+                message above, which would misreport the actual cause.
+                :func:`struct.calcsize` raises the identical bare
+                :exc:`struct.error` for both cases (measured:
+                ``calcsize('-1s')`` and ``calcsize('Xs')`` both raise ``bad
+                char in struct format``), so the two are told apart by
+                :data:`_RE_NEGATIVE_LENGTH_TEMPLATE` against :attr:`template`
+                itself -- which is known already, without needing anything
+                :func:`struct.calcsize`'s own error says -- rather than by the
+                error message. See #825.
 
         """
         try:
             return struct.calcsize(self.template)
         except struct.error as error:
+            if _RE_NEGATIVE_LENGTH_TEMPLATE.match(self.template) is not None:
+                raise ProtocolError(
+                    f'Field {self.name} resolved to a negative length; '
+                    f'template={self.template!r}'
+                ) from error
             raise ProtocolError(
-                f'Field {self.name} resolved to a negative length; '
+                f'Field {self.name} has a malformed template; '
                 f'template={self.template!r}'
             ) from error
 

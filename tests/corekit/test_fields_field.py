@@ -879,10 +879,12 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
+        from pcapkit.corekit.fields.numbers import NumberField
         from pcapkit.corekit.fields.strings import BytesField
         from pcapkit.utilities.exceptions import ProtocolError
 
         self.BytesField = BytesField
+        self.NumberField = NumberField
         self.ProtocolError = ProtocolError
 
     def test_a_negative_resolved_length_raises_protocolerror_not_structerror(self) -> None:
@@ -918,6 +920,91 @@ class FieldBaseLengthNegativeResolvedLengthTests(unittest.TestCase):
                 field = self.BytesField(length=lambda pkt: pkt['__length__'])(
                     {'__length__': resolved})
                 self.assertEqual(field.length, resolved)
+
+    def test_a_malformed_template_raises_protocolerror_naming_the_template(self) -> None:
+        """A typo'd template is a category error, not a negative length (#825).
+
+        :func:`struct.calcsize` raises the identical bare :exc:`struct.error`
+        -- ``bad char in struct format`` -- for a malformed template as it
+        does for a negative one (measured on 3.14.7: ``calcsize('-1s')`` and
+        ``calcsize('Xs')`` both raise it). Pre-fix, :attr:`FieldBase.length
+        <pcapkit.corekit.fields.field.FieldBase.length>` caught that blanket
+        and always reported "resolved to a negative length", which would have
+        misdiagnosed this case. The template here (``'Xs'``) never matches
+        the leading-minus-sign shape a resolved negative count takes, so it
+        must fall to the distinct, template-naming message instead.
+        """
+        field = self.BytesField(length=4)
+        field.name = 'weird'
+        field._template = 'Xs'  # a typo, not a resolved negative count
+
+        with self.assertRaises(self.ProtocolError) as ctx:
+            field.length  # noqa: B018 -- property access is the point
+
+        message = str(ctx.exception)
+        self.assertIn('Xs', message)
+        self.assertNotIn('negative length', message)
+
+        # must not be a bare struct.error, and must still chain to the real
+        # one struct.calcsize actually raised.
+        self.assertNotIsInstance(ctx.exception, struct.error)
+        self.assertIsInstance(ctx.exception.__cause__, struct.error)
+
+    def test_a_byte_order_prefixed_negative_length_is_still_reported_as_negative(self) -> None:
+        """A prefixed negative template must not be misdiagnosed as malformed (#827).
+
+        :class:`~pcapkit.corekit.fields.numbers.NumberField` builds its
+        template as ``f'{endian}{struct_fmt}'``
+        (:meth:`NumberField.__init__ <pcapkit.corekit.fields.numbers.
+        NumberField.__init__>`) over the same ``f'{length}s'`` fall-through
+        every other field uses (:meth:`NumberField.build_template
+        <pcapkit.corekit.fields.numbers.NumberField.build_template>`'s
+        ``else`` arm) -- so a negative resolved length comes out prefixed,
+        e.g. ``'>-1s'``, not bare ``'-1s'``. Uses the real ``NumberField``
+        construction path rather than hand-setting ``_template``, so this
+        would catch a future change to how templates are assembled, not
+        just to the regex.
+        """
+        field = self.NumberField(length=-1)
+        field.name = 'number'
+
+        self.assertEqual(field.template, '>-1s')
+        with self.assertRaises(self.ProtocolError) as ctx:
+            field.length  # noqa: B018 -- property access is the point
+
+        message = str(ctx.exception)
+        self.assertIn('negative length', message)
+        self.assertNotIn('malformed', message)
+        self.assertNotIsInstance(ctx.exception, struct.error)
+        self.assertIsInstance(ctx.exception.__cause__, struct.error)
+
+    def test_negative_and_malformed_templates_are_reported_distinctly(self) -> None:
+        """The two categories never trade messages, and neither leaks a bare
+        :exc:`struct.error` -- across both, not just one.
+        """
+        cases = {
+            'negative': (self.BytesField(length=lambda pkt: pkt['__length__'])(
+                {'__length__': -1}), None),
+            'malformed': (self.BytesField(length=4), 'Xs'),
+        }
+        for label, (field, forced_template) in cases.items():
+            with self.subTest(case=label):
+                field.name = 'field'
+                if forced_template is not None:
+                    field._template = forced_template
+
+                with self.assertRaises(self.ProtocolError) as ctx:
+                    field.length  # noqa: B018 -- property access is the point
+
+                message = str(ctx.exception)
+                if label == 'negative':
+                    self.assertIn('negative length', message)
+                else:
+                    self.assertNotIn('negative length', message)
+                    self.assertIn(field.template, message)
+
+                self.assertNotIsInstance(ctx.exception, struct.error)
+                self.assertIsInstance(ctx.exception.__cause__, struct.error)
 
 
 if __name__ == '__main__':
