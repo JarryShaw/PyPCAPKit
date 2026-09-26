@@ -515,14 +515,13 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Both HTTP ports here resolve to</span>
-<span class="sd">        :class:`pcapkit.protocols.application.http.HTTP`, which sniffs HTTP/1</span>
-<span class="sd">        against HTTP/2 and delegates, whereas</span>
+<span class="sd">        :class:`pcapkit.protocols.application.http.HTTP`, which identifies the</span>
+<span class="sd">        version from the payload and delegates.</span>
 <span class="sd">        :attr:`TCP.__proto__ &lt;pcapkit.protocols.transport.tcp.TCP.__proto__&gt;`</span>
-<span class="sd">        binds :class:`pcapkit.protocols.application.httpv1.HTTP` directly for</span>
-<span class="sd">        the same ports. The asymmetry predates the 8080 entries -- port 80 was</span>
-<span class="sd">        already split this way -- and each table is left internally consistent</span>
-<span class="sd">        rather than repointing port 80 and changing what existing captures</span>
-<span class="sd">        parse to. Reconciling the two is left as its own change.</span>
+<span class="sd">        bound :class:`pcapkit.protocols.application.httpv1.HTTP` directly for the</span>
+<span class="sd">        same ports until #682, which repointed it here and so removed an</span>
+<span class="sd">        asymmetry that had predated the 8080 entries -- port 80 was already split</span>
+<span class="sd">        that way. Both tables now agree.</span>
 
 <span class="sd">    """</span>
 
@@ -544,10 +543,11 @@
             <span class="c1">#   1701  l2tp       l2tp</span>
             <span class="c1">#   8080  http-alt   HTTP Alternate (see port 80)</span>
             <span class="c1">#</span>
-            <span class="c1"># Both HTTP entries keep pointing at the version-guessing</span>
+            <span class="c1"># Both HTTP entries keep pointing at the version-dispatching</span>
             <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP`, which is what</span>
-            <span class="c1"># port 80 already used here -- unlike TCP, which binds HTTP/1</span>
-            <span class="c1"># directly. c.f. the note in the class docstring.</span>
+            <span class="c1"># port 80 already used here. TCP bound HTTP/1 directly for the same</span>
+            <span class="c1"># ports until #682 repointed it at the proxy too, so the two tables</span>
+            <span class="c1"># no longer disagree. c.f. the note in the class docstring.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
 

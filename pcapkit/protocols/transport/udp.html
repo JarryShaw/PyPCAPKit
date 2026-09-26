@@ -531,14 +531,13 @@ attribute:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Both HTTP ports here resolve to
-<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a>, which sniffs HTTP/1
-against HTTP/2 and delegates, whereas
+<a class="reference internal" href="../application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a>, which identifies the
+version from the payload and delegates.
 <a class="reference internal" href="tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a>
-binds <a class="reference internal" href="../application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a> directly for
-the same ports. The asymmetry predates the 8080 entries – port 80 was
-already split this way – and each table is left internally consistent
-rather than repointing port 80 and changing what existing captures
-parse to. Reconciling the two is left as its own change.</p>
+bound <a class="reference internal" href="../application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a> directly for the
+same ports until #682, which repointed it here and so removed an
+asymmetry that had predated the 8080 entries – port 80 was already split
+that way. Both tables now agree.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.udp.UDP.name">

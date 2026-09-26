@@ -634,9 +634,9 @@
 <span class="sd">       * - 21</span>
 <span class="sd">         - :class:`pcapkit.protocols.application.ftp.FTP`</span>
 <span class="sd">       * - 80</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.httpv1.HTTP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
 <span class="sd">       * - 8080</span>
-<span class="sd">         - :class:`pcapkit.protocols.application.httpv1.HTTP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
 
 <span class="sd">    This class currently supports parsing of the following TCP options,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`</span>
@@ -774,10 +774,21 @@
             <span class="c1"># 8443 is deliberately absent: IANA registers it as ``pcsync-https``</span>
             <span class="c1"># rather than as an HTTP alternate, and traffic there is TLS-wrapped,</span>
             <span class="c1"># which pcapkit does not parse.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Both HTTP ports bind the version-dispatching</span>
+            <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP` rather than</span>
+            <span class="c1"># ``httpv1.HTTP``, because HTTP/1 and HTTP/2 share these ports on the</span>
+            <span class="c1"># wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on</span>
+            <span class="c1"># 80 -- so the port cannot decide the version and the payload has to.</span>
+            <span class="c1"># That dispatch is a positive identification (the RFC 9113 §3.4</span>
+            <span class="c1"># connection preface, then an HTTP/1 start line) rather than a trial</span>
+            <span class="c1"># parse; see #682 for the repoint and #800 for the identification it</span>
+            <span class="c1"># waited on. UDP's table already bound the proxy for the same ports,</span>
+            <span class="c1"># so this is also what removes the asymmetry between the two.</span>
             <span class="mi">20</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP_DATA'</span><span class="p">),</span>
             <span class="mi">21</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ftp'</span><span class="p">,</span> <span class="s1">'FTP'</span><span class="p">),</span>
-            <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv1'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
-            <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.httpv1'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
+            <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
+            <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 

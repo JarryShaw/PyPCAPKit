@@ -800,8 +800,9 @@
         <span class="c1"># HTTP/2 arm, which accepts any self-consistent nine-octet-or-longer</span>
         <span class="c1"># buffer. Re-trying an identified HTTP/1 payload as HTTP/2 is exactly how</span>
         <span class="c1"># HTTP/1 traffic acquires a confident HTTP/2 mislabel -- the failure #787</span>
-        <span class="c1"># exists to stop -- and #682 is about to route 231 real HTTP/1 frames</span>
-        <span class="c1"># through here.</span>
+        <span class="c1"># exists to stop -- and #682 now routes 231 real HTTP/1 frames from the</span>
+        <span class="c1"># fixture corpus through here, TCP:80/8080 having been repointed at this</span>
+        <span class="c1"># class.</span>
         <span class="c1">#</span>
         <span class="c1"># Nothing is suppressed on this arm, deliberately: it is not a candidate</span>
         <span class="c1"># to be declined, so there is nothing to decline *to*, and</span>

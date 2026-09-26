@@ -357,17 +357,21 @@ Three follow-ups the above deliberately left alone:
   public import paths, so the misclassification is documented rather than
   fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
   an ``internet`` extraction before either is reached.
-* :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>` points
-  its HTTP ports at the version-guessing
-  :class:`pcapkit.protocols.application.http.HTTP`, while
-  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` points
-  the same ports at :class:`pcapkit.protocols.application.httpv1.HTTP`. The
-  asymmetry predates the 8080 entries. Reconciling it changes what existing
-  captures parse to, so it wants its own change and its own decision, which is
-  why it is asked for here. The separate defect that ``http.HTTP``'s explicit
-  ``version=`` path was unusable --
-  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__ -- has since been
-  fixed, and is no longer part of this request.
+* **Done.** :attr:`UDP.__proto__
+  <pcapkit.protocols.transport.udp.UDP.__proto__>` pointed its HTTP ports at the
+  version-identifying :class:`pcapkit.protocols.application.http.HTTP` while
+  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` pointed
+  the same ports at :class:`pcapkit.protocols.application.httpv1.HTTP`, an
+  asymmetry that predated the 8080 entries. Both now bind the proxy, so a TCP
+  segment's HTTP version is decided by its payload rather than asserted by its
+  port number. It waited on
+  `#800 <https://github.com/JarryShaw/PyPCAPKit/issues/800>`__, which replaced
+  the proxy's trial-and-error guess with a positive identification: repointing
+  ahead of that would have routed 231 real HTTP/1.1 fixture frames through a
+  guess path that was known-wrong on non-HTTP input. The separate defect that
+  ``http.HTTP``'s explicit ``version=`` path was unusable --
+  `#447 <https://github.com/JarryShaw/PyPCAPKit/issues/447>`__ -- had already
+  been fixed and was never part of this.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;

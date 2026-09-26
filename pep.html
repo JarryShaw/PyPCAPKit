@@ -790,17 +790,20 @@ is carried inside IP and the other inside UDP. Moving them would change their
 public import paths, so the misclassification is documented rather than
 fixed. It is inert for layer-limited extraction, since IPv4 and IPv6 terminate
 an <code class="docutils literal notranslate"><span class="pre">internet</span></code> extraction before either is reached.</p></li>
-<li><p><a class="reference internal" href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a> points
-its HTTP ports at the version-guessing
-<a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a>, while
-<a class="reference internal" href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a> points
-the same ports at <a class="reference internal" href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a>. The
-asymmetry predates the 8080 entries. Reconciling it changes what existing
-captures parse to, so it wants its own change and its own decision, which is
-why it is asked for here. The separate defect that <code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit
-<code class="docutils literal notranslate"><span class="pre">version=</span></code> path was unusable –
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/447">#447</a> – has since been
-fixed, and is no longer part of this request.</p></li>
+<li><p><strong>Done.</strong> <a class="reference internal" href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__proto__" title="pcapkit.protocols.transport.udp.UDP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UDP.__proto__</span></code></a> pointed its HTTP ports at the
+version-identifying <a class="reference internal" href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a> while
+<a class="reference internal" href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__proto__" title="pcapkit.protocols.transport.tcp.TCP.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TCP.__proto__</span></code></a> pointed
+the same ports at <a class="reference internal" href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1.HTTP</span></code></a>, an
+asymmetry that predated the 8080 entries. Both now bind the proxy, so a TCP
+segment’s HTTP version is decided by its payload rather than asserted by its
+port number. It waited on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/800">#800</a>, which replaced
+the proxy’s trial-and-error guess with a positive identification: repointing
+ahead of that would have routed 231 real HTTP/1.1 fixture frames through a
+guess path that was known-wrong on non-HTTP input. The separate defect that
+<code class="docutils literal notranslate"><span class="pre">http.HTTP</span></code>’s explicit <code class="docutils literal notranslate"><span class="pre">version=</span></code> path was unusable –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/447">#447</a> – had already
+been fixed and was never part of this.</p></li>
 </ul>
 <p>Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
 ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
