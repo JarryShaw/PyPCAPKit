@@ -2804,6 +2804,51 @@ since -- reaching #805 by the entries below.
   ``type <= 9`` guess misfires on binary HTTP/1 bodies. Protochain over all 23
   sample captures (1,604 frames, 231 HTTP-bearing) is byte-identical to the
   unfixed tree (#800).
+* **Changed** -- the three ``__repr__`` methods #798 left on ``%`` formatting
+  -- ``pcapkit/const/ftp/command.py:40,119`` and
+  ``pcapkit/const/http/method.py:42`` -- are f-strings now, so the
+  ``consider-using-f-string`` disable drops from both files and from both
+  ``pcapkit/vendor/`` templates; each generator's own ``%``-formatted
+  ``wrap_comment`` argument went with them, dropping their two inline
+  disables. The other bespoke templates in these directories --
+  ``{const,vendor}/ftp/return_code.py``,
+  ``{const,vendor}/http/status_code.py`` and ``vendor/http/frame.py`` -- and
+  the shared ``vendor/default.py`` one still carry the disable, so #804's
+  claim that nothing in ``pcapkit/{const,vendor}/{ftp,http}/`` needs it holds
+  for this pair only. Generated, so both sides changed: rendering each
+  ``LINE`` template with the real arguments reproduces the committed const
+  module byte-for-byte, and the render-against-committed diff is 6 changed
+  lines for ``ftp/command`` and 4 for ``http/method``, the intended pairs and
+  nothing else. ``test_the_disable_drops_only_where_nothing_else_needs_percent_formatting``
+  asserted the opposite for this pair -- that the disable was retained -- so
+  it is flipped rather than added to; ``tests/const/test_const_enum_builtin_parity.py``
+  goes 22 to 27 tests / 701 subtests, with 8 subtests across the 3 converted
+  methods failing against the unfixed pair. ``repr()`` is asserted member by
+  member against the old ``%`` expression's own output for all of
+  ``Command``, ``FEATCode`` and ``Method``, including a ``desc`` of ``None``
+  (#804).
+* **Fixed** -- ``TCP.__proto__`` bound ``httpv1.HTTP`` directly for ports 80
+  and 8080, so a segment on either port was HTTP/1 by assertion of the port
+  number alone; both versions share those ports on the wire, so the port
+  cannot decide the version and the payload has to. Repointed to the generic
+  ``pcapkit.protocols.application.http.HTTP`` proxy, whose identification
+  became positive only once #800 and #814 landed, which is why this waited.
+  ``udp.py`` already bound the proxy for both ports; this removes the
+  asymmetry its docstring and ``docs/source/pep.rst`` documented as an open
+  request, prose-only on that side since its port rows already pointed at
+  the proxy. Protochain over all 23 sample captures (1,604 frames) is *not*
+  byte-identical, and that is the fix: all 231 HTTP/1.1 frames keep their
+  chain, and nine frames in ``options-transport.pcap`` change
+  ``Ethernet:IPv4:TCP:Raw`` to ``Ethernet:IPv4:TCP:HTTP/2`` -- genuine HTTP/2
+  frames this library's own ``httpv2.HTTP.make`` built, previously refused by
+  the HTTP/1 parser. ``_guess_version``'s entry count over the corpus goes 0
+  to 252: 231 HTTP/1.1, 9 HTTP/2 and 12 fall-throughs that stay ``Raw``. Not
+  labelled breaking, but not free: TCP:80/8080 traffic that is neither valid
+  HTTP/1 nor preface-carrying is now exposed to ``_guess_version``'s
+  fall-through arm, where the direct ``httpv1`` binding used to leave it
+  ``Raw`` outright regardless of shape -- the 12 fall-throughs above are that
+  arm firing on this corpus, and a caller depending on the old direct bind
+  for traffic that is neither is the one who would notice (#682).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
