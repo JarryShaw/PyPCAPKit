@@ -3890,7 +3890,7 @@ registry is one enumeration per transport protocol sharing a memberless base.</p
 <dl class="py class" id="module-pcapkit.const.reg.apptype.apptype">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">TransportProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#TransportProtocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>Transport layer protocol.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined">
@@ -3904,55 +3904,32 @@ the base registry’s <code class="docutils literal notranslate"><span class="pr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.tcp">
 <span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.tcp" title="Link to this definition">¶</a></dt>
-<dd><p>Transmission Control Protocol.</p>
+<dd><p>Transmission Control Protocol. Value fixed at <code class="docutils literal notranslate"><span class="pre">1</span></code> rather than
+renumbered sequentially – GitHub issue #808 dropped the <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code>
+base once nothing built a composite, but did not revisit the four
+values themselves, which predate this class and are not its call to
+renumber.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.udp">
 <span class="sig-name descname"><span class="pre">udp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.udp" title="Link to this definition">¶</a></dt>
-<dd><p>User Datagram Protocol.</p>
+<dd><p>User Datagram Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the value stays <code class="docutils literal notranslate"><span class="pre">2</span></code>
+rather than becoming sequential.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.sctp">
 <span class="sig-name descname"><span class="pre">sctp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.sctp" title="Link to this definition">¶</a></dt>
-<dd><p>Stream Control Transmission Protocol.</p>
+<dd><p>Stream Control Transmission Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the
+value stays <code class="docutils literal notranslate"><span class="pre">4</span></code> rather than becoming sequential.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.dccp">
 <span class="sig-name descname"><span class="pre">dccp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.dccp" title="Link to this definition">¶</a></dt>
-<dd><p>Datagram Congestion Control Protocol.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol._missing_">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#TransportProtocol._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol._missing_" title="Link to this definition">¶</a></dt>
-<dd><p>Lookup function used when value is not found.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> sets a bit no member declares.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a></span></p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is what makes an unrecognised transport protocol <em>rejected</em>
-rather than accepted – GitHub issue #647’s fix for this registry.
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> on its own is permissive here and composes whatever bits
-it is handed: measured on aenum 3.1.17 with this method removed,
-<code class="docutils literal notranslate"><span class="pre">TransportProtocol(-1)</span></code> returns <code class="docutils literal notranslate"><span class="pre">tcp|udp|sctp|dccp</span></code>, which is
-#647’s recorded defect for this class verbatim, and
-<code class="docutils literal notranslate"><span class="pre">TransportProtocol(16)</span></code> returns a member whose <code class="docutils literal notranslate"><span class="pre">name</span></code> is
-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>. Declared bits still compose, since a service assigned to
-several transport protocols is the ordinary case rather than the
-exception.</p>
-</div>
+<dd><p>Datagram Congestion Control Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the
+value stays <code class="docutils literal notranslate"><span class="pre">8</span></code> rather than becoming sequential.</p>
 </dd></dl>
 
 </dd></dl>
@@ -6863,9 +6840,16 @@ protocol of the registry this member lives in.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number the caller is looking up, validated here so that
 every entry point rejects a non-port identically.</p></li>
-<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Transport protocol, as a flag or its name. Exactly one, on
-the delegating path – see <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>
-below.</p></li>
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Transport protocol, as a member, its name, or a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>. That last shape is not merely defensive: GitHub
+issue #808 dropped <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code> base, so
+<code class="docutils literal notranslate"><span class="pre">TransportProtocol.a</span> <span class="pre">|</span> <span class="pre">TransportProtocol.b</span></code> – built by hand,
+the same as any caller passing a literal port-transport bitmask
+– falls through to <code class="docutils literal notranslate"><span class="pre">int.__or__</span></code> and returns a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> rather than a member. Never split back into the
+transports its bits would each name – owner ruling on this PR
+(#836) – so it is refused as a whole exactly like any other
+value naming no registry.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -6875,14 +6859,9 @@ below.</p></li>
 <dd class="field-odd"><p>The registry class to search.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> is not a port number, or if <code class="docutils literal notranslate"><span class="pre">cls</span></code> holds no
-    members and <code class="docutils literal notranslate"><span class="pre">proto</span></code> names no registry to delegate to.</p></li>
-<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> holds no members and <code class="docutils literal notranslate"><span class="pre">proto</span></code> names more
-    than one transport protocol, which names more than one registry
-    and so no single answer. Itself a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a caller
-    catching that keeps catching this.</p></li>
-</ul>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> is not a port number, or if <code class="docutils literal notranslate"><span class="pre">proto</span></code> –
+    member or bare int, composite or not – names no registry to
+    delegate to.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -6900,7 +6879,7 @@ This is how the rest are reached.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number to look up.</p></li>
-<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Transport protocol carrying <code class="docutils literal notranslate"><span class="pre">key</span></code>, as for <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Transport protocol carrying <code class="docutils literal notranslate"><span class="pre">key</span></code>, as for <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -6912,10 +6891,7 @@ Never empty: a port with no assignment goes through <code class="xref py py-meth
 is minted rather than answered with an empty result.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
-<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p></li>
-</ul>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – As <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
