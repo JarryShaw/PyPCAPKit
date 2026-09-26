@@ -64,9 +64,11 @@ symptom directly by re-creating the exact ``r'\\r*\\n'`` call shape used at
 every one of these sites and asserting no :exc:`DeprecationWarning` fires
 under ``error`` filtering -- run against the pre-fix positional form, the
 same assertion raises :exc:`DeprecationWarning` (captured explicitly in
-:meth:`RuntimeDeprecationWarningTests.test_positional_flag_shape_would_warn`,
-which pins the *old* shape's own defect so a future refactor cannot silently
-drop the regression coverage for it).
+:meth:`RuntimeDeprecationWarningTests.test_positional_flag_shape_warns_only_from_the_version_that_added_it`,
+which pins the *old* shape's own defect -- gated on the CPython version that
+introduced it (3.13+; below that, the same shape must NOT warn) so a future
+refactor cannot silently drop the regression coverage for it, and no
+matrix leg below 3.13 goes dark).
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no fixture capture
 and makes no network call, only :mod:`ast`-parsing source files already on
@@ -80,6 +82,7 @@ import collections
 import importlib
 import pathlib
 import re
+import sys
 import unittest
 import warnings
 
@@ -214,14 +217,79 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
     #: independent of which file happens to still contain it.
     PATTERN = r'\r*\n'
 
-    def test_positional_flag_shape_would_warn(self) -> None:
-        # Pin the OLD shape's own defect, so a future refactor of this test
-        # cannot silently drop the regression coverage for it: the
-        # positional form must still be the thing that warns.
-        with self.assertWarns(DeprecationWarning):
-            with warnings.catch_warnings():
+    #: The CPython version that began emitting a ``DeprecationWarning`` when
+    #: ``count``/``maxsplit`` is passed positionally. The module docstring at
+    #: line 25 already states "a live DeprecationWarning on Python 3.13+";
+    #: this constant is what turns that prose into a fact both branches of
+    #: :meth:`test_positional_flag_shape_warns_only_from_the_version_that_added_it`
+    #: are checked against (GitHub issue #819).
+    POSITIONAL_COUNT_DEPRECATED_SINCE = (3, 13)
+
+    def _assert_positional_flag_shape(self, boundary: 'tuple[int, int]') -> None:
+        # Shared by the real test below and its own self-test, so both
+        # exercise identical branching logic against a boundary that is a
+        # parameter here rather than a hard-coded module global -- which is
+        # what lets the self-test flip it without touching class state.
+        if sys.version_info >= boundary:
+            with self.assertWarns(DeprecationWarning):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('always')
+                    re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional pre-fix shape
+        else:
+            with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter('always')
                 re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional pre-fix shape
+            self.assertFalse(
+                any(issubclass(w.category, DeprecationWarning) for w in caught),
+                f'expected no DeprecationWarning on Python {tuple(sys.version_info[:2])} for the '
+                f'positional-count shape -- the deprecation is a {boundary}+ addition, so this '
+                f'interpreter sits below the boundary and must not warn',
+            )
+
+    def test_positional_flag_shape_warns_only_from_the_version_that_added_it(self) -> None:
+        # GitHub issue #819: the OLD version of this test asserted only the
+        # 3.13+ branch, with no version guard at all, so it went red on
+        # every leg below 3.13 (measured: Python 3.11, 3.12 -- "warns" and
+        # "asserted" are not the same interpreter). Asserting the ABSENCE
+        # below the boundary, instead of skipping it, keeps coverage on
+        # every leg and makes the boundary itself a tested fact rather than
+        # a comment only two of five legs ever exercised.
+        self._assert_positional_flag_shape(self.POSITIONAL_COUNT_DEPRECATED_SINCE)
+
+    def test_the_boundary_constant_is_load_bearing(self) -> None:
+        # Self-test: a wrong boundary must fail on THIS interpreter, so the
+        # guard above is demonstrably load-bearing rather than decorative --
+        # run without assuming which side of 3.13 the interpreter is on, so
+        # this holds the same way on 3.11/3.12 as on 3.13+.
+        #
+        # `actually_warns` is the ground truth for THIS interpreter, read
+        # from the real (correct) constant. The wrong boundary is built to
+        # disagree with it either way:
+        #   - already warns (3.13+): push the boundary one minor version
+        #     higher, so the branch flips to "no warning expected" while the
+        #     real behaviour still warns -- the mirror image of the wild
+        #     failure, where the boundary was wrongly read as 3.12 instead
+        #     of 3.13 and a real 3.12 interpreter landed on the wrong side.
+        #   - does not warn yet (below 3.13): pull the boundary down to this
+        #     interpreter's own version, so the branch flips to "warning
+        #     expected" while the real behaviour still does not warn.
+        # Either way, _assert_positional_flag_shape must raise -- exactly
+        # the shape of the original #819 failure, reproduced on demand
+        # rather than waiting for a matrix leg on the other side of 3.13.
+        actually_warns = sys.version_info >= self.POSITIONAL_COUNT_DEPRECATED_SINCE
+        if actually_warns:
+            wrong_boundary = (sys.version_info[0], sys.version_info[1] + 1)
+        else:
+            wrong_boundary = (sys.version_info[0], sys.version_info[1])
+
+        with self.assertRaises(AssertionError):
+            self._assert_positional_flag_shape(wrong_boundary)
+
+        # Mirror check: the CORRECT boundary must hold on this interpreter
+        # regardless, so the failure above is actually about the boundary
+        # being wrong, not about _assert_positional_flag_shape always
+        # failing no matter what it is given.
+        self._assert_positional_flag_shape(self.POSITIONAL_COUNT_DEPRECATED_SINCE)
 
     def test_flags_keyword_shape_does_not_warn(self) -> None:
         # The fix, exercised the same way: no DeprecationWarning under
