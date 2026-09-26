@@ -19,9 +19,16 @@ which is originally designed as :obj:`tuple[str, str] <tuple>`.
       Module name.
 
    .. property:: name
-      :type: str
+      :type: str | pcapkit.corekit.module.NullType
 
-      Class name.
+      Class name, or :data:`NULL` when whatever built this descriptor never
+      got one -- see :attr:`klass`.
+
+Auxiliaries
+-----------
+
+.. autoclass:: pcapkit.corekit.module.NullType
+.. autodata:: pcapkit.corekit.module.NULL
 
 Type Variables
 --------------

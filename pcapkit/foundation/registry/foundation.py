@@ -9,7 +9,7 @@ This module provides the foundation registries for :mod:`pcapkit`.
 """
 from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.corekit.module import ModuleDescriptor
+from pcapkit.corekit.module import NULL, ModuleDescriptor
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
 from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
     from dictdumper import Dumper
 
+    from pcapkit.corekit.module import NullType
     from pcapkit.foundation.engines import Engine
     from pcapkit.foundation.reassembly.reassembly import CallbackFn as Reasm_CallbackFn
     from pcapkit.foundation.reassembly.reassembly import Reassembly
@@ -45,8 +46,6 @@ __all__ = [
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
 
-NULL = '(null)'
-
 ###############################################################################
 # Engine Registries
 ###############################################################################
@@ -60,7 +59,7 @@ def register_extractor_engine(name: 'str', module: 'str', class_: 'str') -> 'Non
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__engine__
 def register_extractor_engine(name: 'str', module: 'ModuleDescriptor[Engine] | Type[Engine] | str',
-                              class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+                              class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new engine class.
 
     Notes:
@@ -96,7 +95,7 @@ def register_dumper(format: 'str', module: 'str', class_: 'str', *, ext: 'str') 
 
 
 def register_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                    class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+                    class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -135,7 +134,7 @@ def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', *, ex
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__output__
 def register_extractor_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                              class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+                              class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -168,7 +167,7 @@ def register_traceflow_dumper(format: 'str', module: 'str', class_: 'str', *, ex
 
 # NOTE: pcapkit.foundation.traceflow.traceflow.TraceFlow.__output__
 def register_traceflow_dumper(format: 'str', module: 'ModuleDescriptor[Dumper] | Type[Dumper] | str',
-                              class_: 'str' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+                              class_: 'str | NullType' = NULL, *, ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -275,7 +274,7 @@ def register_extractor_reassembly(protocol: 'str', module: 'str', class_: 'str')
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__reassembly__
 def register_extractor_reassembly(protocol: 'str', module: 'str | ModuleDescriptor[Reassembly] | Type[Reassembly]',
-                                  class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+                                  class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new reassembly class.
 
     Notes:
@@ -307,7 +306,7 @@ def register_extractor_traceflow(protocol: 'str', module: 'str', class_: 'str') 
 
 # NOTE: pcapkit.foundation.extraction.Extractor.__traceflow__
 def register_extractor_traceflow(protocol: 'str', module: 'str | ModuleDescriptor[TraceFlow] | Type[TraceFlow]',
-                                 class_: 'str' = NULL) -> 'None':  # pylint: disable=redefined-builtin
+                                 class_: 'str | NullType' = NULL) -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new flow tracing class.
 
     Notes:
