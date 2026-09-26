@@ -310,11 +310,17 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             # NOTE: Converted, unlike the HTTP/1 commit below, because this route
             # is new and has no escaping-error contract to keep: the old arm 2
             # suppressed :exc:`struct.error` and fell through to ``unknown HTTP
-            # version``, so a preface followed by a frame that trips the #805
-            # residual (an inner field shortfall, e.g. a 16-octet ``GOAWAY``)
-            # must still reach the caller as something it can catch, not as a
-            # bare stdlib error. Same normalisation, and the same reasoning, as
-            # ``read``'s explicit ``version=`` path above.
+            # version``, so a preface followed by a frame that used to trip the
+            # #805 residual (an inner field shortfall, e.g. a 16-octet
+            # ``GOAWAY``) had to reach the caller as something it could catch,
+            # not as a bare stdlib error. #811 has since closed that residual at
+            # ``FieldBase.length``, so the same ``GOAWAY`` now raises
+            # ``ProtocolError`` on its own and is caught by the ``except
+            # ProtocolError: raise`` above, never reaching this clause -- but
+            # the conversion stays for whichever :exc:`ValueError` or
+            # :exc:`struct.error` the schema machinery has not been shown never
+            # to raise here again. Same normalisation, and the same reasoning,
+            # as ``read``'s explicit ``version=`` path above.
             except (ValueError, struct.error) as error:
                 raise ProtocolError('HTTP/2: invalid format') from error
 
@@ -360,16 +366,21 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # deliberate. Only the *last* arm additionally suppresses
         # :exc:`struct.error`, because a payload too short to hold HTTP/2's
         # nine-octet frame header, or one whose frame-specific fields exceed
-        # what a slightly-longer buffer holds, fails inside the schema
+        # what a slightly-longer buffer holds, used to fail inside the schema
         # machinery with that stdlib exception rather than with a protocol
-        # error -- ``FieldBase.length`` calls :func:`struct.calcsize` on a
-        # template built from a negative length -- and it is neither a
-        # ``ProtocolError`` nor a :exc:`ValueError`, so it left this method
-        # uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8), 8)`` raised
-        # a bare :exc:`struct.error` where the closing ``raise`` below is the
-        # documented answer. Suppressing it on the last arm is safe in the
-        # sense that matters here -- no arm follows, so nothing can answer in
-        # place of the error.
+        # error -- ``FieldBase.length`` called :func:`struct.calcsize` on a
+        # template built from a negative length -- and it was neither a
+        # ``ProtocolError`` nor a :exc:`ValueError`, so it used to leave this
+        # method uncatchable by any caller: ``HTTP(io.BytesIO(b'\x00' * 8),
+        # 8)`` used to raise a bare :exc:`struct.error` instead of reaching
+        # the closing ``raise`` below. #799's nine-octet guard has since
+        # closed that particular route -- the same call now raises
+        # ``ProtocolError: unknown HTTP version``, the documented answer.
+        # Suppressing :exc:`struct.error` on the last arm stays regardless --
+        # #811 kept it deliberately, as defence in depth, rather than retiring
+        # it now that the case it was added for is closed. Whether anything
+        # can still reach it, and whether it should therefore go, is #825's
+        # open question, not settled here.
         #
         # #799 closed the *outer*-header slice of this: ``httpv2.HTTP.unpack``
         # now rejects a buffer under nine octets before the schema layer runs
@@ -384,15 +395,21 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # remainder -- and those still drive ``pkt['__length__']`` negative one
         # field further in, past this guard's reach. Measured: a 16-octet
         # ``GOAWAY`` (``b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7``)
-        # still raises a bare :exc:`struct.error` through ``httpv2.HTTP``
-        # directly. Closing that class needs the fix at its actual root --
-        # a negative field length raising :exc:`~pcapkit.utilities.\
-        # exceptions.ProtocolError` in :meth:`Schema.unpack
-        # <pcapkit.protocols.schema.schema.Schema.unpack>` /
-        # :attr:`FieldBase.length <pcapkit.corekit.fields.field.FieldBase.length>`
-        # instead of the bare warning those currently emit -- which is generic
-        # across every schema in the tree and is out of this change's scope;
-        # tracked as #805 rather than attempted here.
+        # used to raise a bare :exc:`struct.error` through ``httpv2.HTTP``
+        # directly. #811 closed that class at its actual root --
+        # :attr:`FieldBase.length
+        # <pcapkit.corekit.fields.field.FieldBase.length>` now catches
+        # :func:`struct.calcsize`'s failure on a negative-length template and
+        # re-raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+        # generic across every schema in the tree rather than special-cased
+        # here. :meth:`Schema.unpack
+        # <pcapkit.protocols.schema.schema.Schema.unpack>`'s own
+        # running-counter warning was left alone on purpose: converting it too
+        # would reject a ``SETTINGS`` frame with a short trailing entry that
+        # parses successfully today while only warning, so that
+        # :class:`~pcapkit.utilities.warnings.SchemaWarning` still fires. The
+        # same ``GOAWAY`` now raises ``ProtocolError: Field debug resolved to
+        # a negative length; template='-1s'``.
         #
         # Widening the *first* arm the same way was measured and reverted, as it
         # buys nothing and costs a great deal. Nothing reaches a
