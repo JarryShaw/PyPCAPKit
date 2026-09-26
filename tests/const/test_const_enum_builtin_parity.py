@@ -348,17 +348,20 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
                 if issubclass(obj, int) and not issubclass(obj, aenum.Flag)]
 
         # The decomposition is asserted, not just the total, so this sweep stays
-        # in step with the three narrower ones it overlaps: 111 non-flag IntEnum
-        # and 7 IntFlag in tests.const.test_const_enum_lookup, and 118 -- their
-        # sum -- in tests.const.test_const_enum_get.
+        # in step with the three narrower ones it overlaps: 112 non-flag IntEnum
+        # and 6 IntFlag in tests.const.test_const_enum_lookup, and 118 -- their
+        # sum, unchanged -- in tests.const.test_const_enum_get. GitHub issue #808
+        # moved ``TransportProtocol`` from the flag count to the int count by
+        # dropping its ``IntFlag`` base, one for one, so the sum each of those
+        # counts on stays the same even though the two addends moved.
         #
         # Five of the nine string registries are the application layer one, which
         # GitHub issue #732 split into a package: the memberless
         # pcapkit.const.reg.apptype.apptype.AppType base plus one registry per
         # transport protocol. It is discovered exactly like a member-bearing
         # registry, since this sweep is structural and never looks at members.
-        self.assertEqual(len(ints), 111)
-        self.assertEqual(len(flags), 7)
+        self.assertEqual(len(ints), 112)
+        self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 9)
         self.assertEqual(len(self.enums), 127)
         self.assertEqual(len({obj.__module__ for obj in self.enums}), 121)
@@ -474,7 +477,18 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
 
         # The six of issue #647 specifically, since the sweep above would still
         # pass if they had no ``_missing_`` at all -- which was the defect.
+        #
+        # ``TransportProtocol`` is the one deliberate exception: GitHub issue
+        # #808 dropped its ``IntFlag`` base once nothing built a composite, and
+        # with it the custom ``_missing_`` this guard checks for -- a plain
+        # ``IntEnum``'s own default ``_missing_`` already rejects everything
+        # undeclared, so declaring one here would only reproduce the base
+        # class. Its ``-1`` rejection is still checked, just not through this
+        # guard shape; see ``test_the_registries_named_in_issue_647`` above,
+        # which does not skip it.
         for module_name, class_name, _ in ISSUE_647_OUTLIERS:
+            if (module_name, class_name) == ('pcapkit.const.reg.apptype.apptype', 'TransportProtocol'):
+                continue
             obj = getattr(importlib.import_module(module_name), class_name)
             with self.subTest(enum=f'{module_name}.{class_name}'):
                 self.assertIn('_missing_', vars(obj),
@@ -541,19 +555,41 @@ class ConstFlagCompositeTests(unittest.TestCase):
         # being rejected: bits 0-3 of that field are the data offset.
         self.assertEqual(int(Flags(1)), 1)
 
-    def test_the_other_two_flag_registries_compose(self) -> None:
+    def test_the_other_flag_registry_composes(self) -> None:
+        """GitHub issue #808 dropped ``TransportProtocol`` out of this group.
+
+        This used to test ``TransportProtocol`` here too, as the third
+        registry in the codebase sharing Flag semantics alongside ``Flags``
+        (:class:`ConstFlagCompositeTests` above) and ``CommandType``. #808
+        dropped ``TransportProtocol``'s ``IntFlag`` base once nothing built a
+        composite, so it no longer belongs to this group; its own -- now
+        negative -- assertions live in
+        :meth:`test_transport_protocol_no_longer_composes` below instead.
+        """
         from pcapkit.const.ftp.command import CommandType
-        from pcapkit.const.reg.apptype import TransportProtocol
 
         self.assertEqual(int(CommandType(0)), 0)
         self.assertEqual(CommandType(0x07), CommandType.A | CommandType.P | CommandType.S)
         with self.assertRaises(ValueError):
             CommandType(0x08)
 
+    def test_transport_protocol_no_longer_composes(self) -> None:
+        """GitHub issue #808: dropping the ``IntFlag`` base removed composing.
+
+        ``TransportProtocol(0x0F)`` used to equal the union of all four
+        declared bits, and ``TransportProtocol(0x10)`` -- one past the widest
+        legitimate combination -- was rejected by the range check
+        ``_missing_`` used to carry. Both mechanisms are gone now rather than
+        dormant: a plain :class:`~aenum.IntEnum` recognises only the five
+        declared values, so any other integer -- in range for the old bound
+        or not -- is rejected by the base class's own default ``_missing_``,
+        with no custom one declared here to widen it.
+        """
+        from pcapkit.const.reg.apptype import TransportProtocol
+
         self.assertEqual(int(TransportProtocol(0)), 0)
-        self.assertEqual(TransportProtocol(0x0F),
-                         TransportProtocol.tcp | TransportProtocol.udp
-                         | TransportProtocol.sctp | TransportProtocol.dccp)
+        with self.assertRaises(ValueError):
+            TransportProtocol(0x0F)
         with self.assertRaises(ValueError):
             TransportProtocol(0x10)
 
@@ -674,32 +710,54 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         self.assertEqual(int(registered), 65000)
         self.assertIs(AppType.get(65000, proto=TransportProtocol.tcp), registered)
 
-    def test_transport_protocol_can_still_be_extended_at_runtime(self) -> None:
-        """Why this registry's bound is derived rather than written down.
+    def test_transport_protocol_can_no_longer_be_extended_at_runtime(self) -> None:
+        """Maintainer ruling on PR #836: extension refused, not renumbered.
 
-        ``TransportProtocol.get`` registers an unknown protocol name at
-        ``max * 2``, so a literal upper bound -- the shape the Mobility Header
-        flag guards use -- would reject the very member the registry had just
-        grown, and every composite containing it. The guard reads the bound off
-        the current members instead, and this test is what pins that: it fails
-        against a hard-coded ``0x0F``.
+        This used to pin the *shape* of ``TransportProtocol.get``'s
+        registration. GitHub issue #808 dropped the ``IntFlag`` base -- see
+        :meth:`ConstFlagCompositeTests.test_transport_protocol_no_longer_composes`
+        for why composing stopped mattering -- but left the doubling itself
+        alone: stock ``ad4805f5f`` still mints at ``max_val * 2``, so
+        ``.get('quic')`` there returns ``16``, right after ``dccp``'s ``8``.
+        This PR's own intermediate revision, not #808, is what switched an
+        unrecognised name to ``max_val + 1`` instead, minting ``9``. PR
+        #836's own inline comment on ``TransportProtocol.get`` removes the
+        registration entirely regardless of which scheme numbered it: "Do
+        not allow extension of TransportProtocol at all." Unlike
+        :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
+        and :class:`~pcapkit.const.mh.cga_type.CGAType` below,
+        ``TransportProtocol`` was never one of :data:`EXPECTED_TO_REGISTER`
+        -- it reached the "look up, miss, then register" shape through its
+        own hand-written ``get`` rather than through a generated
+        ``_missing_`` -- so pulling it back out of that shape is this
+        module's ruling changing which registries are mutable, not a
+        regression the sweep above would otherwise have to catch.
+
+        Regression check: this fails against this PR's own prior head,
+        ``3567359e2``, which still registers ``'quic'`` at value 9 rather
+        than raising -- see the session report for the quoted failure.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
 
         self.assertNotIn('quic', TransportProtocol.__members__)
         with self.assertRaises(ValueError):
-            TransportProtocol(0x10)
+            TransportProtocol(9)
 
-        grown = TransportProtocol.get('quic')
-        self.assertEqual(int(grown), 0x10)
-        self.assertIn('quic', TransportProtocol.__members__)
+        before = len(TransportProtocol.__members__)
+        with self.assertRaises(ValueError):
+            TransportProtocol.get('quic')
+        self.assertNotIn('quic', TransportProtocol.__members__)
+        self.assertEqual(len(TransportProtocol.__members__), before)
 
-        # The new member composes with the old ones, which is the assertion a
-        # literal bound fails.
-        self.assertEqual(int(TransportProtocol(0x11)), 0x11)
-        self.assertEqual(TransportProtocol(0x11), grown | TransportProtocol.tcp)
+        # A second unrecognised name is refused identically -- there is no
+        # ``max + 1`` left to walk to, since nothing registers in the first
+        # place.
+        with self.assertRaises(ValueError):
+            TransportProtocol.get('quic2')
+        self.assertEqual(len(TransportProtocol.__members__), before)
 
-        # And the bound moved with it rather than disappearing.
+        # An int naming no declared member is still rejected exactly as
+        # before -- this half of the guard is untouched by the ruling.
         with self.assertRaises(ValueError):
             TransportProtocol(0x20)
 

@@ -262,23 +262,30 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         self.assertEqual(status, 0, msg=stdout + stderr)
         self.assertNotIn('[assignment]', stdout)
 
-    def test_transport_protocol_undefined_still_zero_and_composes(self) -> None:
+    def test_transport_protocol_undefined_still_zero(self) -> None:
         """GitHub issue #770: the ``cast`` changes nothing at run time.
 
         :func:`~typing.cast` is the identity function at run time, so
         ``TransportProtocol.undefined`` has to stay the same genuine
         ``TransportProtocol`` member with value ``0`` -- ``TransportProtocol(0)
         is undefined`` and ``bool(undefined)`` is ``False`` -- rather than
-        merely being *typed* as one. There is no flag composition naming
-        ``undefined`` in this module or its siblings to preserve; what the
-        value has to keep is its role as the ``proto`` sentinel default and
-        its neutrality under ``|``, checked directly below.
+        merely being *typed* as one.
+
+        Before GitHub issue #808 dropped the ``IntFlag`` base, this also
+        asserted ``TransportProtocol.tcp | TransportProtocol.undefined is
+        TransportProtocol.tcp`` -- ``|``'s neutral element composing back to the
+        same singleton. That assertion is gone rather than adapted: ``|`` on a
+        plain :class:`~aenum.IntEnum` falls through to ``int.__or__`` and
+        returns a bare :class:`int`, never a ``TransportProtocol`` -- not even
+        one identical to an existing member -- so there is no longer a
+        singleton for ``is`` to find on *either* side of ``|``, and pinning
+        ``int(tcp | undefined) == int(tcp)`` would only be pinning integer
+        arithmetic.
         """
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
         self.assertIsInstance(TransportProtocol.undefined, TransportProtocol)
         self.assertEqual(int(TransportProtocol.undefined), 0)
-        self.assertIs(TransportProtocol.tcp | TransportProtocol.undefined, TransportProtocol.tcp)
 
 
 if __name__ == '__main__':

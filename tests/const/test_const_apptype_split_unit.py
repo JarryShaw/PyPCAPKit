@@ -390,76 +390,50 @@ class AppTypeSplitTests(unittest.TestCase):
                     # on that being true to stay correct.
                     self.assertTrue(condition.endswith(claim), condition)
 
-    def test_a_proto_naming_two_transports_is_refused_rather_than_resolved(self) -> None:
-        """GitHub issue #759: the lowest set bit decided, silently.
+    def test_a_bare_int_composite_is_refused_as_a_whole(self) -> None:
+        """GitHub issue #759's old fix, superseded by the owner's #836 ruling.
 
-        ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp | udp`` stays
-        constructible by hand even though no member carries one since GitHub issue
-        #806 -- which is why this guard is still needed and is tested with
-        composites built here rather than read off a member. It names two
-        registries holding two different services for the same port, and a lookup
-        answers with one member -- so there is no answer to which of them the
-        composite meant. ``_dispatch`` resolved it through
-        :func:`~pcapkit.utilities.compat.show_flag_values`, which iterates
-        **LSB-first**, so every composite containing ``tcp`` -- the lowest declared
-        bit -- dispatched into the TCP registry whatever else it named.
+        ``TransportProtocol`` dropped its :class:`~aenum.IntFlag` base in GitHub
+        issue #808, so ``tcp | udp`` no longer builds a member at all -- it falls
+        through to ``int.__or__`` and returns a bare :class:`int`. That bare int
+        stays constructible by hand even though no member carries one since
+        GitHub issue #806, which is why this guard is still needed and is tested
+        with composites built here rather than read off a member.
 
-        The refusal is :exc:`~pcapkit.utilities.exceptions.ProtocolError` rather
-        than a bare :exc:`ValueError` because in-library errors come from
-        :mod:`pcapkit.utilities.exceptions`, and it is safe here in a way it is
-        **not** in ``_missing_``:
-        ``ConstEnumBuiltinParityTests.test_the_exception_is_not_an_in_library_one``,
-        in :mod:`tests.const.test_const_enum_builtin_parity`, requires the
-        constructor's guard to stay a non-:class:`BaseError` precisely because
-        ``get``'s ``except ValueError`` fallback catches and discards it, and a
-        ``BaseError`` would log at CRITICAL once per discarded default. Nothing
-        catches this one -- it propagates out of ``get``/``get_all`` to the caller
-        -- so a loud error is what it should be. It subclasses :exc:`ValueError` all
-        the same, so the documented contract of both entry points still holds.
+        ``_dispatch`` used to resolve a composite through
+        :func:`~pcapkit.utilities.compat.show_flag_values`, decoding its bits and
+        answering :exc:`~pcapkit.utilities.exceptions.ProtocolError` naming every
+        transport whose bit was set -- the fix for #759, where resolving one by
+        picking the lowest set bit (``tcp``, iterating **LSB-first**) dispatched
+        every composite containing it into the TCP registry whatever else it
+        named. The owner's ruling on this PR (#836) retires that decoding
+        instead of refining it: "since it's no longer a Flag, `|` joined values
+        are no longer parsed and accepted, we will treat it as a whole, instead
+        of splitting." A bare-int composite is therefore refused exactly like
+        any other value that names no registry -- a stray bit, ``undefined``, or
+        a number with nothing to do with any transport -- through the one plain
+        :exc:`ValueError` :meth:`AppType._dispatch` already gives those. There is
+        no longer a "too many transports" refusal distinct from a "no
+        transport" one.
         """
-        import sys
-
         from pcapkit.const.reg.apptype import DCCP, SCTP, TCP, UDP, AppType, TransportProtocol
-        from pcapkit.utilities.compat import show_flag_values
-        from pcapkit.utilities.exceptions import BaseError, ProtocolError
-
-        # NOTE: a loud BaseError sets ``sys.tracebacklimit`` to 0 process-wide
-        # outside development mode, which would truncate the traceback of every
-        # later failure in this process. Restored the way
-        # ``QuietExceptionTests.setUp`` does it.
-        saved = getattr(sys, 'tracebacklimit', None)
-
-        def restore() -> None:
-            if saved is None:
-                if hasattr(sys, 'tracebacklimit'):
-                    del sys.tracebacklimit
-            else:
-                sys.tracebacklimit = saved
-
-        self.addCleanup(restore)
-
-        # The mechanism, pinned rather than described: ``tcp`` is the lowest bit
-        # and LSB-first iteration is why it used to win.
-        self.assertEqual(show_flag_values(TransportProtocol.tcp | TransportProtocol.udp),
-                         [TransportProtocol.tcp, TransportProtocol.udp])
+        from pcapkit.utilities.exceptions import ProtocolError
 
         # #759's own reproduction. 888 carries ``cddbp`` on TCP and
-        # ``accessbuilder`` on UDP, so the composite answered ``cddbp`` for a UDP
-        # member -- and ``==`` read ``True``, since it compares on ``port`` alone.
-        # The member's own ``proto`` was that composite until #806; it is ``udp``
-        # now, so the composite is built here instead and the member's own value is
-        # asserted to be the single bit that no longer reaches this guard.
+        # ``accessbuilder`` on UDP. The member's own ``proto`` was that
+        # composite until #806; it is ``udp`` now, so the composite is built
+        # here instead and the member's own value is asserted to be the
+        # single bit that resolves cleanly.
         both = TransportProtocol.tcp | TransportProtocol.udp
         member = next(each for each in UDP.__registry__.getlist(888)
                       if each.svc == 'accessbuilder')
         self.assertIs(member.proto, TransportProtocol.udp)
         self.assertIs(AppType.get(888, proto=member.proto), member)
-        with self.assertRaises(ProtocolError) as caught:
+        with self.assertRaises(ValueError) as caught:
             AppType.get(888, proto=both)
-        self.assertIsInstance(caught.exception, ValueError)
-        self.assertIsInstance(caught.exception, BaseError)
-        self.assertIn('tcp|udp', str(caught.exception))
-        self.assertIn('2 transport protocols', str(caught.exception))
+        self.assertNotIsInstance(caught.exception, ProtocolError)
+        self.assertIn(str(int(both)), str(caught.exception))
+        self.assertIn('names no transport protocol registry', str(caught.exception))
 
         # Every composite over the four declared bits, through all three entry
         # points -- ``get_all`` and ``_dispatch`` dispatch exactly as ``get`` does,
@@ -476,22 +450,28 @@ class AppTypeSplitTests(unittest.TestCase):
 
         before = {cls: len(cls) for cls in (TCP, UDP, SCTP, DCCP)}
         for proto in composites:
-            with self.subTest(proto=proto.name):
-                with self.assertRaises(ProtocolError):
+            # NOTE: not ``proto.name`` -- ``proto`` is a bare ``int`` since
+            # GitHub issue #808 dropped the ``IntFlag`` base composites used to
+            # be built from, and a bare int has no ``.name``. ``hex`` still
+            # tells the subTests apart on failure.
+            with self.subTest(proto=hex(proto)):
+                with self.assertRaises(ValueError) as via_get:
                     AppType.get(80, proto=proto)
-                with self.assertRaises(ProtocolError):
+                self.assertNotIsInstance(via_get.exception, ProtocolError)
+                with self.assertRaises(ValueError) as via_get_all:
                     AppType.get_all(80, proto=proto)
-                with self.assertRaises(ProtocolError):
+                self.assertNotIsInstance(via_get_all.exception, ProtocolError)
+                with self.assertRaises(ValueError) as via_dispatch:
                     AppType._dispatch(80, proto)
+                self.assertNotIsInstance(via_dispatch.exception, ProtocolError)
 
         # And nothing was minted on the way out: #758's shape of defect was a
         # rejection that grew the registry anyway.
         self.assertEqual({cls: len(cls) for cls in (TCP, UDP, SCTP, DCCP)}, before)
 
-        # A single bit is untouched, and so is ``undefined``: zero bits names no
-        # registry rather than too many, which is a different refusal and stays the
-        # plain ``ValueError`` ``test_a_port_lookup_on_the_base_dispatches_by_transport``
-        # asserts.
+        # A single bit resolves, and ``undefined`` is refused the identical way
+        # a composite now is -- there is no longer a distinct refusal for
+        # "too many transports" versus "no transport".
         self.assertIs(AppType.get(80, proto=TransportProtocol.tcp), TCP.get(80))
         with self.assertRaises(ValueError) as plain:
             AppType.get(80, proto=TransportProtocol.undefined)
@@ -1006,6 +986,187 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(wrong[:20], [])
         self.assertEqual(len(wrong), 0)
         self.assertEqual(total, 12391)
+
+    def test_transport_protocol_dropped_its_flag_base(self) -> None:
+        """GitHub issue #808: the base itself, once #806 removed every composite.
+
+        Pins three things directly, so a regression that reintroduces the
+        ``IntFlag`` base or renumbers the four transports fails here rather
+        than only in the ``_dispatch`` refusal tests above:
+
+        * ``TransportProtocol`` is a plain :class:`~aenum.IntEnum`, not a
+          :class:`~enum.Flag` of any kind -- ``&``, ``^`` and ``~`` are gone
+          along with ``|``'s member-composing behaviour.
+        * ``tcp | udp`` no longer builds a named member: it falls through to
+          ``int.__or__`` and returns a bare :class:`int`, so ``.name`` on the
+          result raises :class:`AttributeError` rather than answering
+          ``'tcp|udp'``.
+        * The five members keep the exact integer values they had as Flag
+          bits -- ``undefined`` 0, ``tcp`` 1, ``udp`` 2, ``sctp`` 4, ``dccp``
+          8 -- since GitHub issue #808 is about the base class, not about
+          renumbering members that predate it.
+
+        Fails on stock ``ad4805f5f``: ``TransportProtocol`` there is still an
+        ``IntFlag``, so ``issubclass(TransportProtocol, enum.Flag)`` is
+        ``True``, and ``TransportProtocol.tcp | TransportProtocol.udp`` is a
+        genuine composite member whose ``.name`` answers ``'tcp|udp'`` rather
+        than raising :class:`AttributeError`.
+
+        Also pins a change to plain iteration that is easy to miss because
+        every *member's* own ``repr``/``str``/``.name``/``.value`` stay
+        byte-identical: :class:`~enum.Flag` hides a zero-valued canonical
+        member from ``list(cls)``/``for m in cls``, so stock iterates
+        ``undefined`` out and yields the four real transports alone. A plain
+        :class:`~aenum.IntEnum` has no such convention and yields all five.
+        Nothing in :mod:`pcapkit` iterates ``TransportProtocol`` bare --
+        ``apptype.py``'s own ``__init__.py`` populates ``__registries__``
+        through ``__members__`` (5 either way, unaffected), never through
+        iteration -- so this is a correctness fact about the change worth
+        pinning, not a defect to fix.
+        """
+        import enum
+
+        from pcapkit.const.reg.apptype import TransportProtocol
+
+        self.assertTrue(issubclass(TransportProtocol, int))
+        self.assertFalse(issubclass(TransportProtocol, enum.Flag))
+
+        composite = TransportProtocol.tcp | TransportProtocol.udp
+        self.assertNotIsInstance(composite, TransportProtocol)
+        self.assertIsInstance(composite, int)
+        self.assertEqual(int(composite), 3)
+        with self.assertRaises(AttributeError):
+            composite.name  # type: ignore[union-attr]
+
+        self.assertEqual(
+            {member.name: int(member) for member in
+             (TransportProtocol.undefined, TransportProtocol.tcp, TransportProtocol.udp,
+              TransportProtocol.sctp, TransportProtocol.dccp)},
+            {'undefined': 0, 'tcp': 1, 'udp': 2, 'sctp': 4, 'dccp': 8})
+
+        # 5 rather than 4: undefined is no longer hidden from iteration. Stock
+        # ad4805f5f gives 4 here (tcp, udp, sctp, dccp only), so this half of
+        # the test would also fail there, on a different assertion than the
+        # ones above.
+        self.assertEqual(len(list(TransportProtocol)), 5)
+        self.assertEqual(len(TransportProtocol.__members__), 5)
+
+    def test_get_refuses_an_unrecognised_name_rather_than_minting_it(self) -> None:
+        """Maintainer ruling on this PR (#836), the ``TransportProtocol.get`` inline comment.
+
+        ``TransportProtocol.get`` used to mint a brand-new member for any
+        name it did not recognise. This PR's own prior revision minted at
+        ``max_val + 1`` -- right after ``dccp``'s 8, so ``.get('bogus')``
+        minted 9 -- rather than stock ``ad4805f5f``'s ``max_val * 2``
+        doubling, which mints 16 for that same call; the difference between
+        the two schemes is explained below. The maintainer's ruling refuses
+        minting outright either way: "Do not allow extension of
+        TransportProtocol at all." There is no bound left to walk and
+        nothing left to mint, so the refusal is the one plain
+        :class:`ValueError` every unrecognised name gets, whether or not it
+        happens to spell a composite like ``'tcp|udp'``. A later round of
+        this PR briefly gave the composite case its own, more specific
+        message; the owner's ruling retired that split too -- "since it's
+        no longer a Flag, `|` joined values are no longer parsed and
+        accepted, we will treat it as a whole, instead of splitting" -- so
+        ``'|'`` is not treated specially any more, here or in
+        :meth:`AppType._dispatch` (see
+        ``test_a_bare_int_composite_is_refused_as_a_whole``).
+
+        This also retires a sharper defect the old minting scheme created,
+        which is what this test used to be named for: 9 is exactly ``1 | 8``,
+        the bits ``tcp`` and ``dccp`` declare, so an intermediate round of
+        this same PR -- after minting had already moved to ``max_val + 1``
+        but before this ruling -- decoded every ``proto`` reaching
+        :meth:`AppType._dispatch` through
+        :func:`~pcapkit.utilities.compat.show_flag_values` regardless of
+        whether it was a genuine member, and answered "tcp|dccp names 2
+        transport protocols" for a name that named neither. That shape never
+        shipped in stock ``ad4805f5f``, whose ``max_val * 2`` doubling kept
+        every minted value a fresh single bit, and it cannot happen now
+        either, from the other direction: refusing the mint outright leaves
+        :meth:`AppType._dispatch` nothing minted to mis-decode in the first
+        place.
+
+        Regression check: this fails against this PR's own prior head,
+        ``3567359e2``, which still mints ``9`` and returns it rather than
+        raising -- see the session report for the quoted failure.
+        """
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        from pcapkit.const.reg.apptype import TransportProtocol
+
+        self.assertNotIn('unit_test_836_bogus', TransportProtocol.__members__)
+        before = len(TransportProtocol.__members__)
+
+        with self.assertRaises(ValueError) as caught:
+            TransportProtocol.get('unit_test_836_bogus')
+        # Plain ValueError -- not the ProtocolError the old
+        # show_flag_values-based decoding briefly answered with for a
+        # minted 9, back before this ruling retired minting entirely.
+        self.assertNotIsInstance(caught.exception, ProtocolError)
+        self.assertIn('unit_test_836_bogus', str(caught.exception))
+        self.assertIn('is not a valid', str(caught.exception))
+
+        # Refused, not minted: the registry is exactly as it was, and a
+        # second distinct unrecognised name is refused the same way rather
+        # than taking the next integer after a member that was never created.
+        self.assertEqual(len(TransportProtocol.__members__), before)
+        self.assertNotIn('unit_test_836_bogus', TransportProtocol.__members__)
+        with self.assertRaises(ValueError):
+            TransportProtocol.get('unit_test_836_bogus_two')
+        self.assertEqual(len(TransportProtocol.__members__), before)
+
+    def test_get_refuses_a_composite_spelled_string(self) -> None:
+        """A ``'|'``-joined name is just another unrecognised name.
+
+        :meth:`TransportProtocol.get` used to mint whatever string it did not
+        recognise, including one spelling a composite -- ``'tcp|udp'`` -- as a
+        brand-new, single-bit member whose own name lies about being one
+        transport. That member's value would then satisfy the bare-int
+        composite branch :meth:`AppType._dispatch` used to have just as
+        readily as a genuinely OR-ed value, the mirror image of the
+        minted-member defect above -- and that branch is gone now too (see
+        ``test_a_bare_int_composite_is_refused_as_a_whole``).
+        :func:`~pcapkit.foundation.registry.protocols.register_apptype`
+        refuses the identical string the same generic way it refuses any
+        other unrecognised one, and the owner's ruling on this PR -- "since
+        it's no longer a Flag, `|` joined values are no longer parsed and
+        accepted, we will treat it as a whole, instead of splitting" --
+        settles :meth:`TransportProtocol.get` onto that same answer: ``'|'``
+        is not special, it is simply not the name of a declared member. A
+        review round of this PR briefly carved the composite case out with
+        its own diagnostic message; the owner's ruling retired that too.
+        """
+        from pcapkit.const.reg.apptype import TransportProtocol
+
+        self.assertNotIn('tcp|udp', TransportProtocol.__members__)
+        with self.assertRaises(ValueError) as caught:
+            TransportProtocol.get('tcp|udp')
+        self.assertIn('tcp|udp', str(caught.exception))
+        self.assertIn('is not a valid', str(caught.exception))
+        self.assertNotIn('tcp|udp', TransportProtocol.__members__)
+
+    def test_a_bare_int_with_a_stray_bit_names_no_registry_either(self) -> None:
+        """A stray bit gets the exact same refusal a clean composite does.
+
+        ``17`` is ``1 | 16`` -- ``tcp`` plus a bit no registry declares -- so
+        it never named a clean composite of real transports the way ``3``
+        (``tcp | udp``) once did either, back when ``_dispatch`` still
+        decoded a bare int's bits at all. The owner's ruling on this PR
+        (#836) retired that decoding entirely (see
+        ``test_a_bare_int_composite_is_refused_as_a_whole``), so ``17`` and
+        ``3`` are no longer two different cases -- both are simply an
+        ``int`` that names no registry, and both get the identical plain
+        ``ValueError`` any other unmatched value gets.
+        """
+        from pcapkit.const.reg.apptype import AppType
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ValueError) as caught:
+            AppType.get(80, proto=17)
+        self.assertNotIsInstance(caught.exception, ProtocolError)
+        self.assertIn('names no transport protocol registry', str(caught.exception))
 
     @staticmethod
     def _purge_member(cls: type, name: str, port: int) -> None:
