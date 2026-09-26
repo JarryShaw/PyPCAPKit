@@ -172,5 +172,159 @@ class NegativeResolvedLengthTests(unittest.TestCase):
                           static.pack(0xdeadbeef, dict()))
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class NegativeBitLengthTests(unittest.TestCase):
+    """GitHub issue #831: the sibling eager shift, in ``__init__`` rather than
+    ``__call__``.
+
+    ``NumberField.__init__`` caches ``self._bit_mask`` from ``bit_length``
+    whenever one is supplied, and shifts by it immediately:
+    ``(1 << bit_length) - 1``. #829 guarded the *resolved-length* shift in
+    :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__` but left this
+    one, at ``pcapkit/corekit/fields/numbers.py:88`` on ``5576708d4``, open --
+    a negative ``bit_length`` still raised a bare, uncatchable
+    :exc:`ValueError` (``negative shift count``) rather than a
+    :class:`~pcapkit.utilities.exceptions.ProtocolError`.
+
+    The last two cases below are the second half of #831: with ``bit_length``
+    supplied, #829's guard in :meth:`__call__` sits entirely inside the
+    ``bit_length``-not-supplied branch and so never runs, and a field combining
+    a fixed ``bit_length`` with a callable ``length`` that resolves negative
+    used to fall through to ``template='...-1s'`` and a *different*
+    :exc:`ProtocolError` message from
+    :attr:`~pcapkit.corekit.fields.field.FieldBase.length` -- the same wire
+    condition, two different messages, depending on an unrelated constructor
+    argument. The fix validates the resolved ``length`` unconditionally in
+    ``__call__``, so both shapes now raise the identical message.
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_a_negative_bit_length_raises_protocolerror(self) -> None:
+        """The narrowest reproduction: ``bit_length=-1`` supplied directly.
+
+        Unlike the resolved-``length`` case, this one does not even need a
+        call: :meth:`~pcapkit.corekit.fields.numbers.NumberField.__init__`
+        shifts by ``bit_length`` eagerly, so the raise happens at
+        construction.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError) as ctx:
+            NumberField(length=4, bit_length=-1)
+
+        self.assertIn('resolved to a negative length', str(ctx.exception))
+        self.assertIn('bit_length=-1', str(ctx.exception))
+
+    def test_negative_bit_length_protocolerror_is_a_baseerror(self) -> None:
+        """The defect in one assertion: catchable as a pcapkit error.
+
+        On stock ``5576708d4`` this raises a bare :class:`builtins.ValueError`
+        (``negative shift count``), which is *not* an instance of
+        :class:`~pcapkit.utilities.exceptions.BaseError` -- measured directly
+        below, mirroring
+        :meth:`NegativeResolvedLengthTests.
+        test_protocolerror_is_a_baseerror_unlike_the_stock_valueerror`
+        for the ``__init__`` shift rather than the ``__call__`` one.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+        from pcapkit.utilities.exceptions import BaseError
+
+        with self.assertRaises(BaseError) as ctx:
+            NumberField(length=4, bit_length=-3)
+
+        self.assertIsInstance(ctx.exception, BaseError)
+
+    def test_the_reported_value_is_the_bit_length_not_a_byte_length(self) -> None:
+        """The message must name what is actually wrong: ``bit_length``.
+
+        A resolved byte ``length`` of ``4`` is perfectly legitimate here --
+        it is the *bit* length that is negative -- so the message must not
+        report ``length=4``, which would send a reader looking at the wrong
+        argument.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError) as ctx:
+            NumberField(length=4, bit_length=-2)
+
+        self.assertIn('bit_length=-2', str(ctx.exception))
+        self.assertNotIn('length=4', str(ctx.exception))
+
+    def test_a_positive_bit_length_is_unaffected(self) -> None:
+        """The control: the ordinary, well-formed case is not touched.
+
+        The exact shape at ``pcapkit/protocols/schema/link/vlan.py``'s
+        ``TCI.pcp``/``dei``/``vid`` fields (lines 47, 49, 51 on
+        ``5576708d4``): a positive literal ``bit_length`` alongside a fixed
+        byte ``length``.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+
+        field = NumberField(length=1, bit_length=3)
+        self.assertEqual(field.bit_length, 3)
+        self.assertEqual(field._bit_mask, 0b111)
+
+        called = field(dict())
+        self.assertEqual(called.bit_length, 3)
+        self.assertEqual(called._bit_mask, 0b111)
+
+    def test_bit_length_zero_still_works_exactly_as_it_does_on_main(self) -> None:
+        """The boundary the fix must not break: ``bit_length=0`` is not negative.
+
+        Checked against stock behaviour rather than assumed: on ``5576708d4``,
+        prior to any change here, ``bit_length=0`` already constructs and
+        calls cleanly with a mask of ``0``, and that has to keep being true.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+
+        field = NumberField(length=4, bit_length=0)
+        self.assertEqual(field.bit_length, 0)
+        self.assertEqual(field._bit_mask, 0)
+
+        called = field(dict())
+        self.assertEqual(called.bit_length, 0)
+        self.assertEqual(called._bit_mask, 0)
+
+    def test_bit_length_supplied_plus_negative_callable_length_matches_the_unsupplied_message(self) -> None:
+        """The second half of #831: one wire condition, one message.
+
+        No in-tree call site combines a fixed ``bit_length`` with a callable
+        ``length`` -- ``vlan.py``'s three ``bit_length`` fields all take
+        positive literal ``length`` -- so this is a constructed reproduction,
+        not a real wire shape. Before the fix, #829's guard in ``__call__``
+        sits inside ``if new_self._bit_length < 0:`` and this combination
+        never enters that branch, so no ``ProtocolError`` fires there at all;
+        the field instead degrades to ``template='>-1s'`` and the error is
+        deferred to :attr:`~pcapkit.corekit.fields.field.FieldBase.length`,
+        which reports ``template='>-1s'`` rather than ``length=-1`` --
+        a different message for the same underlying defect.
+
+        """
+        from pcapkit.corekit.fields.numbers import NumberField
+        from pcapkit.utilities.exceptions import BaseError, ProtocolError
+
+        with_bit_length = NumberField(length=lambda pkt: pkt['len'] - 4, bit_length=8, signed=False)
+        without_bit_length = NumberField(length=lambda pkt: pkt['len'] - 4, signed=False)
+
+        with self.assertRaises(ProtocolError) as ctx_with:
+            with_bit_length({'len': 3})
+        with self.assertRaises(ProtocolError) as ctx_without:
+            without_bit_length({'len': 3})
+
+        self.assertIsInstance(ctx_with.exception, BaseError)
+        self.assertEqual(str(ctx_with.exception), str(ctx_without.exception))
+        self.assertIn('resolved to a negative length', str(ctx_with.exception))
+        self.assertIn('length=-1', str(ctx_with.exception))
+
+
 if __name__ == '__main__':
     unittest.main()
