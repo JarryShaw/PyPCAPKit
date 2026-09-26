@@ -549,6 +549,8 @@
 <span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
 
 <span class="s1">"""</span>
+<span class="s1">import keyword</span>
+<span class="s1">import re</span>
 <span class="s1">from typing import TYPE_CHECKING, cast</span>
 
 <span class="s1">from aenum import IntEnum, StrEnum, extend_enum</span>
@@ -723,11 +725,64 @@
 
 <span class="s1">        return obj</span>
 
+<span class="s1">    @property</span>
+<span class="s1">    def aliases(self) -&gt; 'tuple[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, ...]':</span>
+<span class="s1">        """Other services sharing :attr:`port` in this member's own registry.</span>
+
+<span class="s1">        GitHub issue #807. No storage of its own: IANA already keeps every</span>
+<span class="s1">        colliding service as its own member of :data:`__registry__`, keyed on</span>
+<span class="s1">        the shared port -- :meth:`get_all` already walks that same bucket to</span>
+<span class="s1">        answer with the aliases after the canonical member, so this is exactly</span>
+<span class="s1">        that bucket, minus ``self``. Derived fresh on every access rather than</span>
+<span class="s1">        cached once, since :meth:`register_alias` can add a new member to the</span>
+<span class="s1">        bucket at any time and a cached tuple would go stale the moment one is</span>
+<span class="s1">        -- the same reason the ``_value_`` :meth:`__new__` sets never grows an</span>
+<span class="s1">        alias list of its own; see :meth:`__repr__` and :meth:`__str__`, which</span>
+<span class="s1">        do.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            Every other member this registry holds at :attr:`port`, in</span>
+<span class="s1">            :data:`__registry__`'s row order, or an empty :class:`tuple` when</span>
+<span class="s1">            nothing else collides -- never :obj:`None`, so a caller never has</span>
+<span class="s1">            to guard the read.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        return tuple(member for member in self.__registry__.getlist(self.port)  # type: ignore[union-attr]</span>
+<span class="s1">                     if member is not self)</span>
+
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
-<span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1">.</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1">: </span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]&gt;'</span>
+<span class="s1">        # NOTE: GitHub issue #807. The suffix below is the only difference from</span>
+<span class="s1">        # the plain form GitHub issue #806 already fixed: it is appended only</span>
+<span class="s1">        # when :attr:`aliases` is non-empty, so every member that does not</span>
+<span class="s1">        # share its port with another service -- the vast majority -- renders</span>
+<span class="s1">        # exactly as it did before this issue. Registering a new alias through</span>
+<span class="s1">        # :meth:`register_alias` changes what *every* member already on that</span>
+<span class="s1">        # port renders, immediately, since :attr:`aliases` is derived fresh on</span>
+<span class="s1">        # each call rather than fixed at construction.</span>
+<span class="s1">        base = f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1">.</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1">: </span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]'</span>
+<span class="s1">        aliases = self.aliases</span>
+<span class="s1">        if not aliases:</span>
+<span class="s1">            return f'</span><span class="se">{{</span><span class="s1">base</span><span class="se">}}</span><span class="s1">&gt;'</span>
+<span class="s1">        return f'</span><span class="se">{{</span><span class="s1">base</span><span class="se">}}</span><span class="s1"> (aliases: </span><span class="se">{{</span><span class="s1">", ".join(alias.svc for alias in aliases)</span><span class="se">}}</span><span class="s1">)&gt;'</span>
 
 <span class="s1">    def __str__(self) -&gt; 'str':</span>
-<span class="s1">        return f'</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]'</span>
+<span class="s1">        # NOTE: same suffix as __repr__, for the same reason, and -- like that</span>
+<span class="s1">        # suffix, and unlike everything else this formats -- never folded into</span>
+<span class="s1">        # ``_value_``. GitHub issue #807's hard constraint: ``_value_`` is the</span>
+<span class="s1">        # live key in ``_value2member_map_``, built once when the class is</span>
+<span class="s1">        # created, while aliases are registerable at runtime through</span>
+<span class="s1">        # :meth:`register_alias`; baking the alias list into ``_value_`` would</span>
+<span class="s1">        # go stale the moment one is registered after the fact. One</span>
+<span class="s1">        # consequence worth stating plainly rather than leaving for a doctest</span>
+<span class="s1">        # to trip over: ``str(member) == member.value`` already breaks at</span>
+<span class="s1">        # class-creation time for every port that statically carries more</span>
+<span class="s1">        # than one service (94 such members as shipped);</span>
+<span class="s1">        # :meth:`register_alias` merely adds to that set at runtime.</span>
+<span class="s1">        base = f'</span><span class="se">{{</span><span class="s1">self.svc</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self.port</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">self.proto.name</span><span class="se">}}</span><span class="s1">]'</span>
+<span class="s1">        aliases = self.aliases</span>
+<span class="s1">        if not aliases:</span>
+<span class="s1">            return base</span>
+<span class="s1">        return f'</span><span class="se">{{</span><span class="s1">base</span><span class="se">}}</span><span class="s1"> (aliases: </span><span class="se">{{</span><span class="s1">", ".join(alias.svc for alias in aliases)</span><span class="se">}}</span><span class="s1">)'</span>
 
 <span class="s1">    def __int__(self) -&gt; 'int':</span>
 <span class="s1">        return self.port</span>
@@ -931,6 +986,109 @@
 <span class="s1">        canonical = owner.get(key)</span>
 <span class="s1">        matched = owner.__registry__.getlist(key)  # type: ignore[union-attr]</span>
 <span class="s1">        return (canonical, *(member for member in matched if member is not canonical))</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register_alias(cls, port: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Register ``name`` as a new alias on ``port``, in this registry alone.</span>
+
+<span class="s1">        GitHub issue #807's third ask, deliberately scoped to **this**</span>
+<span class="s1">        per-transport registry: ``TCP.register_alias(...)`` never touches</span>
+<span class="s1">        :class:`UDP`'s members, which is what keeps an alias registered on one</span>
+<span class="s1">        transport from leaking onto a transport IANA never assigned it -- e.g.</span>
+<span class="s1">        registering ``www`` as an alias of ``http`` on :class:`TCP` and</span>
+<span class="s1">        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as</span>
+<span class="s1">        IANA itself never registered it there.</span>
+
+<span class="s1">        No new storage: the new member simply joins :data:`__registry__` at</span>
+<span class="s1">        ``port``, through the same :func:`~aenum.extend_enum` call :meth:`get`</span>
+<span class="s1">        already uses to mint an unknown one below. It is then reachable</span>
+<span class="s1">        through :attr:`aliases` on every other member already on ``port``, and</span>
+<span class="s1">        vice versa, with nothing further to keep in sync.</span>
+
+<span class="s1">        The Python attribute name is derived from ``name`` through the same</span>
+<span class="s1">        sanitising steps the generator uses for every statically declared</span>
+<span class="s1">        member's -- ``www-http`` becomes ``www_http`` at</span>
+<span class="s1">        :meth:`~pcapkit.vendor.default.Vendor.safe_name`, reproduced below</span>
+<span class="s1">        (minus its fallback; see Raises below) rather than imported, since</span>
+<span class="s1">        this module is generated *from* :mod:`pcapkit.vendor` and importing</span>
+<span class="s1">        back would run a crawler built for one pass over IANA's CSV for what</span>
+<span class="s1">        is otherwise a plain attribute lookup. It has to be ``name``, not</span>
+<span class="s1">        ``port`` and a counter: an alias whose own name does not resolve</span>
+<span class="s1">        through subscription is most of the point of registering one, and</span>
+<span class="s1">        ``TCP['www_http']`` resolving is exactly what lets a caller reach an</span>
+<span class="s1">        alias the same way every statically declared member already is.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            port: Port number to register the alias under. Must already carry</span>
+<span class="s1">                at least one member of this registry -- aliasing names a</span>
+<span class="s1">                second service on a port that already has one, rather than</span>
+<span class="s1">                declaring a fresh port out of nothing, which stays the</span>
+<span class="s1">                generator's job (or, for an unassigned port, :meth:`get`'s own</span>
+<span class="s1">                mint-on-miss).</span>
+<span class="s1">            name: The alias's service name, i.e. what :attr:`svc` reads on the</span>
+<span class="s1">                new member -- kept exactly as given, unlike the identifier</span>
+<span class="s1">                sanitised from it below. Checked against every member already</span>
+<span class="s1">                on ``port`` so the same name is never registered twice.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The newly minted member.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If called on a class that holds no members, i.e. on</span>
+<span class="s1">                :class:`</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">` itself, which is not one of the four</span>
+<span class="s1">                per-transport registries; if ``port`` carries no member of</span>
+<span class="s1">                this registry yet; if ``name`` already names one of the</span>
+<span class="s1">                members already there; if ``name`` sanitises to text that is</span>
+<span class="s1">                not a valid Python identifier at all -- empty, or leading with</span>
+<span class="s1">                a digit; or if the identifier it does sanitise to already</span>
+<span class="s1">                names an unrelated member of this registry.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        if cls.__registry__ is None:</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> holds no members; register the alias on one '</span>
+<span class="s1">                             'of its per-transport subclasses instead')</span>
+
+<span class="s1">        existing = cls.__registry__.getlist(port)</span>
+<span class="s1">        if not existing:</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">port!r</span><span class="se">}}</span><span class="s1"> is not yet a member of </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">; register the '</span>
+<span class="s1">                             'canonical service before aliasing it')</span>
+<span class="s1">        if any(member.svc == name for member in existing):</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">name!r</span><span class="se">}}</span><span class="s1"> is already registered on port </span><span class="se">{{</span><span class="s1">port</span><span class="se">}}</span><span class="s1"> of </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">')</span>
+
+<span class="s1">        # NOTE: mirrors Vendor.safe_name (pcapkit/vendor/default.py)'s</span>
+<span class="s1">        # sanitising steps -- strip a parenthetical aside, collapse whitespace</span>
+<span class="s1">        # to single underscores, replace every remaining non-word character</span>
+<span class="s1">        # with ``_``, then collapse and trim the underscores that step leaves</span>
+<span class="s1">        # behind. ``rename``'s further dedup -- appending ``_</span><span class="se">{{</span><span class="s1">port</span><span class="se">}}</span><span class="s1">`` when a</span>
+<span class="s1">        # name already recurs elsewhere in the registry -- is deliberately</span>
+<span class="s1">        # not reproduced: that decision is curated from a full CSV pass at</span>
+<span class="s1">        # generation time, and synthesising a different fallback name here</span>
+<span class="s1">        # would be exactly the silent rename the collision check below</span>
+<span class="s1">        # refuses to do instead. ``safe_name``'s own fallback -- minting</span>
+<span class="s1">        # ``</span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">_</span><span class="se">{{</span><span class="s1">residue</span><span class="se">}}</span><span class="s1">`` when the sanitised residue is not a</span>
+<span class="s1">        # valid identifier -- is not reproduced either: this method raises</span>
+<span class="s1">        # instead (see Raises above), so the 58 members the generator mints</span>
+<span class="s1">        # that way in the shipped const (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) are</span>
+<span class="s1">        # names this runtime path refuses rather than accepts.</span>
+<span class="s1">        stripped = re.sub(r'</span><span class="se">\\</span><span class="s1">(.*</span><span class="se">\\</span><span class="s1">)', '', name)</span>
+<span class="s1">        collapsed = '_'.join(stripped.split())</span>
+<span class="s1">        replaced = re.sub(r'</span><span class="se">\\</span><span class="s1">W', '_', collapsed)</span>
+<span class="s1">        identifier = '_'.join(filter(None, replaced.split('_')))</span>
+<span class="s1">        # NOTE: matches process()'s own keyword guard below -- a name that</span>
+<span class="s1">        # sanitises to a reserved word is not usable as an attribute as is,</span>
+<span class="s1">        # and a trailing underscore is the same fix the generator already</span>
+<span class="s1">        # applies to a statically declared member with the same problem.</span>
+<span class="s1">        if keyword.iskeyword(identifier):</span>
+<span class="s1">            identifier = f'</span><span class="se">{{</span><span class="s1">identifier</span><span class="se">}}</span><span class="s1">_'</span>
+
+<span class="s1">        if not identifier.isidentifier():</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">name!r</span><span class="se">}}</span><span class="s1"> has no valid Python identifier to register '</span>
+<span class="s1">                             f'</span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> with (sanitises to </span><span class="se">{{</span><span class="s1">identifier!r</span><span class="se">}}</span><span class="s1">)')</span>
+<span class="s1">        if identifier in cls.__members__:</span>
+<span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">identifier!r</span><span class="se">}}</span><span class="s1"> already names a member of </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">; '</span>
+<span class="s1">                             'choose a name whose identifier does not collide')</span>
+
+<span class="s1">        return extend_enum(cls, identifier, port, name, cls.__transport__)</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; 'Optional[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
