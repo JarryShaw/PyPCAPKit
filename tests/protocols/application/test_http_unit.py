@@ -635,11 +635,21 @@ class HTTPUnitTests(unittest.TestCase):
 
         # And a preface followed by a frame that trips the #805 residual -- a
         # sixteen-octet GOAWAY, whose fixed ``stream`` and ``error`` fields alone
-        # want eight octets after the header -- must come back catchable. The
-        # identified HTTP/2 route normalises that, because the trial-parse arm it
-        # replaces for this input used to suppress :exc:`struct.error` and answer
-        # ``unknown HTTP version``; without the conversion the bare stdlib error
-        # would now escape a dispatcher documented to raise ``ProtocolError``.
+        # want eight octets after the header -- must come back catchable. #805
+        # is now fixed at its actual root by #811: ``FieldBase.length`` raises
+        # ``ProtocolError`` itself on a negative resolved length, instead of
+        # letting a bare :exc:`struct.error` escape from :func:`struct.calcsize`.
+        # So the ``debug`` field -- whose length is ``pkt['__length__']`` minus
+        # the fixed ``stream``/``error`` octets, negative once the declared frame
+        # length outruns this 16-octet buffer -- raises that ``ProtocolError``
+        # directly, and ``http.py``'s dispatcher (``except ProtocolError: raise``)
+        # passes it through unchanged rather than wrapping it as
+        # ``'HTTP/2: invalid format'``, exactly as it does for the
+        # '9-octet frame header' case above. What #814 needed preserved survives
+        # this: it is still a catchable ``BaseError``, still not a bare
+        # :exc:`struct.error`, and still chained to the original one via
+        # ``__cause__`` -- only the message is now the more specific one #811
+        # provides.
         import struct
 
         from pcapkit.utilities.exceptions import BaseError
@@ -649,7 +659,8 @@ class HTTPUnitTests(unittest.TestCase):
         raw = preface + goaway
         with self.assertRaises(ProtocolError) as ctx:
             HTTP(io.BytesIO(raw), len(raw))
-        self.assertEqual(str(ctx.exception), 'HTTP/2: invalid format')
+        self.assertEqual(str(ctx.exception),
+                          "Field debug resolved to a negative length; template='-1s'")
         self.assertIsInstance(ctx.exception, BaseError)
         self.assertNotIsInstance(ctx.exception, struct.error)
         self.assertIsInstance(ctx.exception.__cause__, struct.error)
