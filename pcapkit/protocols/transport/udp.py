@@ -66,14 +66,13 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
     Note:
         Both HTTP ports here resolve to
-        :class:`pcapkit.protocols.application.http.HTTP`, which sniffs HTTP/1
-        against HTTP/2 and delegates, whereas
+        :class:`pcapkit.protocols.application.http.HTTP`, which identifies the
+        version from the payload and delegates.
         :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
-        binds :class:`pcapkit.protocols.application.httpv1.HTTP` directly for
-        the same ports. The asymmetry predates the 8080 entries -- port 80 was
-        already split this way -- and each table is left internally consistent
-        rather than repointing port 80 and changing what existing captures
-        parse to. Reconciling the two is left as its own change.
+        bound :class:`pcapkit.protocols.application.httpv1.HTTP` directly for the
+        same ports until #682, which repointed it here and so removed an
+        asymmetry that had predated the 8080 entries -- port 80 was already split
+        that way. Both tables now agree.
 
     """
 
@@ -95,10 +94,11 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #   1701  l2tp       l2tp
             #   8080  http-alt   HTTP Alternate (see port 80)
             #
-            # Both HTTP entries keep pointing at the version-guessing
+            # Both HTTP entries keep pointing at the version-dispatching
             # :class:`pcapkit.protocols.application.http.HTTP`, which is what
-            # port 80 already used here -- unlike TCP, which binds HTTP/1
-            # directly. c.f. the note in the class docstring.
+            # port 80 already used here. TCP bound HTTP/1 directly for the same
+            # ports until #682 repointed it at the proxy too, so the two tables
+            # no longer disagree. c.f. the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
 

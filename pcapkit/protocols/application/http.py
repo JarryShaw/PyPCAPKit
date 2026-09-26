@@ -337,8 +337,9 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # HTTP/2 arm, which accepts any self-consistent nine-octet-or-longer
         # buffer. Re-trying an identified HTTP/1 payload as HTTP/2 is exactly how
         # HTTP/1 traffic acquires a confident HTTP/2 mislabel -- the failure #787
-        # exists to stop -- and #682 is about to route 231 real HTTP/1 frames
-        # through here.
+        # exists to stop -- and #682 now routes 231 real HTTP/1 frames from the
+        # fixture corpus through here, TCP:80/8080 having been repointed at this
+        # class.
         #
         # Nothing is suppressed on this arm, deliberately: it is not a candidate
         # to be declined, so there is nothing to decline *to*, and
