@@ -9,6 +9,8 @@ This module contains the constant enumeration for **Application Layer Protocol N
 which is automatically generated from :class:`pcapkit.vendor.reg.apptype.apptype.AppType`.
 
 """
+import keyword
+import re
 from typing import TYPE_CHECKING, cast
 
 from aenum import IntEnum, StrEnum, extend_enum
@@ -2321,11 +2323,64 @@ class AppType(StrEnum):
 
         return obj
 
+    @property
+    def aliases(self) -> 'tuple[AppType, ...]':
+        """Other services sharing :attr:`port` in this member's own registry.
+
+        GitHub issue #807. No storage of its own: IANA already keeps every
+        colliding service as its own member of :data:`__registry__`, keyed on
+        the shared port -- :meth:`get_all` already walks that same bucket to
+        answer with the aliases after the canonical member, so this is exactly
+        that bucket, minus ``self``. Derived fresh on every access rather than
+        cached once, since :meth:`register_alias` can add a new member to the
+        bucket at any time and a cached tuple would go stale the moment one is
+        -- the same reason the ``_value_`` :meth:`__new__` sets never grows an
+        alias list of its own; see :meth:`__repr__` and :meth:`__str__`, which
+        do.
+
+        Returns:
+            Every other member this registry holds at :attr:`port`, in
+            :data:`__registry__`'s row order, or an empty :class:`tuple` when
+            nothing else collides -- never :obj:`None`, so a caller never has
+            to guard the read.
+
+        """
+        return tuple(member for member in self.__registry__.getlist(self.port)  # type: ignore[union-attr]
+                     if member is not self)
+
     def __repr__(self) -> 'str':
-        return f'<{self.__class__.__name__}.{self.svc}: {self.port} [{self.proto.name}]>'
+        # NOTE: GitHub issue #807. The suffix below is the only difference from
+        # the plain form GitHub issue #806 already fixed: it is appended only
+        # when :attr:`aliases` is non-empty, so every member that does not
+        # share its port with another service -- the vast majority -- renders
+        # exactly as it did before this issue. Registering a new alias through
+        # :meth:`register_alias` changes what *every* member already on that
+        # port renders, immediately, since :attr:`aliases` is derived fresh on
+        # each call rather than fixed at construction.
+        base = f'<{self.__class__.__name__}.{self.svc}: {self.port} [{self.proto.name}]'
+        aliases = self.aliases
+        if not aliases:
+            return f'{base}>'
+        return f'{base} (aliases: {", ".join(alias.svc for alias in aliases)})>'
 
     def __str__(self) -> 'str':
-        return f'{self.svc} [{self.port} - {self.proto.name}]'
+        # NOTE: same suffix as __repr__, for the same reason, and -- like that
+        # suffix, and unlike everything else this formats -- never folded into
+        # ``_value_``. GitHub issue #807's hard constraint: ``_value_`` is the
+        # live key in ``_value2member_map_``, built once when the class is
+        # created, while aliases are registerable at runtime through
+        # :meth:`register_alias`; baking the alias list into ``_value_`` would
+        # go stale the moment one is registered after the fact. One
+        # consequence worth stating plainly rather than leaving for a doctest
+        # to trip over: ``str(member) == member.value`` already breaks at
+        # class-creation time for every port that statically carries more
+        # than one service (94 such members as shipped);
+        # :meth:`register_alias` merely adds to that set at runtime.
+        base = f'{self.svc} [{self.port} - {self.proto.name}]'
+        aliases = self.aliases
+        if not aliases:
+            return base
+        return f'{base} (aliases: {", ".join(alias.svc for alias in aliases)})'
 
     def __int__(self) -> 'int':
         return self.port
@@ -2529,6 +2584,109 @@ class AppType(StrEnum):
         canonical = owner.get(key)
         matched = owner.__registry__.getlist(key)  # type: ignore[union-attr]
         return (canonical, *(member for member in matched if member is not canonical))
+
+    @classmethod
+    def register_alias(cls, port: 'int', name: 'str') -> 'AppType':
+        """Register ``name`` as a new alias on ``port``, in this registry alone.
+
+        GitHub issue #807's third ask, deliberately scoped to **this**
+        per-transport registry: ``TCP.register_alias(...)`` never touches
+        :class:`UDP`'s members, which is what keeps an alias registered on one
+        transport from leaking onto a transport IANA never assigned it -- e.g.
+        registering ``www`` as an alias of ``http`` on :class:`TCP` and
+        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as
+        IANA itself never registered it there.
+
+        No new storage: the new member simply joins :data:`__registry__` at
+        ``port``, through the same :func:`~aenum.extend_enum` call :meth:`get`
+        already uses to mint an unknown one below. It is then reachable
+        through :attr:`aliases` on every other member already on ``port``, and
+        vice versa, with nothing further to keep in sync.
+
+        The Python attribute name is derived from ``name`` through the same
+        sanitising steps the generator uses for every statically declared
+        member's -- ``www-http`` becomes ``www_http`` at
+        :meth:`~pcapkit.vendor.default.Vendor.safe_name`, reproduced below
+        (minus its fallback; see Raises below) rather than imported, since
+        this module is generated *from* :mod:`pcapkit.vendor` and importing
+        back would run a crawler built for one pass over IANA's CSV for what
+        is otherwise a plain attribute lookup. It has to be ``name``, not
+        ``port`` and a counter: an alias whose own name does not resolve
+        through subscription is most of the point of registering one, and
+        ``TCP['www_http']`` resolving is exactly what lets a caller reach an
+        alias the same way every statically declared member already is.
+
+        Args:
+            port: Port number to register the alias under. Must already carry
+                at least one member of this registry -- aliasing names a
+                second service on a port that already has one, rather than
+                declaring a fresh port out of nothing, which stays the
+                generator's job (or, for an unassigned port, :meth:`get`'s own
+                mint-on-miss).
+            name: The alias's service name, i.e. what :attr:`svc` reads on the
+                new member -- kept exactly as given, unlike the identifier
+                sanitised from it below. Checked against every member already
+                on ``port`` so the same name is never registered twice.
+
+        Returns:
+            The newly minted member.
+
+        Raises:
+            ValueError: If called on a class that holds no members, i.e. on
+                :class:`AppType` itself, which is not one of the four
+                per-transport registries; if ``port`` carries no member of
+                this registry yet; if ``name`` already names one of the
+                members already there; if ``name`` sanitises to text that is
+                not a valid Python identifier at all -- empty, or leading with
+                a digit; or if the identifier it does sanitise to already
+                names an unrelated member of this registry.
+
+        """
+        if cls.__registry__ is None:
+            raise ValueError(f'{cls.__name__} holds no members; register the alias on one '
+                             'of its per-transport subclasses instead')
+
+        existing = cls.__registry__.getlist(port)
+        if not existing:
+            raise ValueError(f'{port!r} is not yet a member of {cls.__name__}; register the '
+                             'canonical service before aliasing it')
+        if any(member.svc == name for member in existing):
+            raise ValueError(f'{name!r} is already registered on port {port} of {cls.__name__}')
+
+        # NOTE: mirrors Vendor.safe_name (pcapkit/vendor/default.py)'s
+        # sanitising steps -- strip a parenthetical aside, collapse whitespace
+        # to single underscores, replace every remaining non-word character
+        # with ``_``, then collapse and trim the underscores that step leaves
+        # behind. ``rename``'s further dedup -- appending ``_{port}`` when a
+        # name already recurs elsewhere in the registry -- is deliberately
+        # not reproduced: that decision is curated from a full CSV pass at
+        # generation time, and synthesising a different fallback name here
+        # would be exactly the silent rename the collision check below
+        # refuses to do instead. ``safe_name``'s own fallback -- minting
+        # ``{cls.__name__}_{residue}`` when the sanitised residue is not a
+        # valid identifier -- is not reproduced either: this method raises
+        # instead (see Raises above), so the 58 members the generator mints
+        # that way in the shipped const (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) are
+        # names this runtime path refuses rather than accepts.
+        stripped = re.sub(r'\(.*\)', '', name)
+        collapsed = '_'.join(stripped.split())
+        replaced = re.sub(r'\W', '_', collapsed)
+        identifier = '_'.join(filter(None, replaced.split('_')))
+        # NOTE: matches process()'s own keyword guard below -- a name that
+        # sanitises to a reserved word is not usable as an attribute as is,
+        # and a trailing underscore is the same fix the generator already
+        # applies to a statically declared member with the same problem.
+        if keyword.iskeyword(identifier):
+            identifier = f'{identifier}_'
+
+        if not identifier.isidentifier():
+            raise ValueError(f'{name!r} has no valid Python identifier to register '
+                             f'{cls.__name__} with (sanitises to {identifier!r})')
+        if identifier in cls.__members__:
+            raise ValueError(f'{identifier!r} already names a member of {cls.__name__}; '
+                             'choose a name whose identifier does not collide')
+
+        return extend_enum(cls, identifier, port, name, cls.__transport__)
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Optional[AppType]':
