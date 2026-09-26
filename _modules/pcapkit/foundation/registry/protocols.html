@@ -1273,19 +1273,19 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="register_apptype">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_apptype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">'int | Enum_AppType'</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">'str | ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">,</span>
-                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+                     <span class="n">class_</span><span class="p">:</span> <span class="s1">'str | TransportProtocol'</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">transport</span><span class="p">:</span> <span class="s1">'TransportProtocol | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
@@ -1300,13 +1300,46 @@
 <span class="sd">        code: port number</span>
 <span class="sd">        module: module name or module descriptor or a</span>
 <span class="sd">            :class:`~pcapkit.protocols.protocol.Protocol` subclass</span>
-<span class="sd">        class\_: class name</span>
-<span class="sd">        proto: protocol name (must be a valid transport protocol)</span>
+<span class="sd">        class\_: class name, meaningful only when ``module`` is a :class:`str`.</span>
+<span class="sd">            Positional, at the same position as the sibling ``register_*``</span>
+<span class="sd">            functions -- but unlike them, a third positional argument here is</span>
+<span class="sd">            not always ``class_``: which parameter it binds to is decided by</span>
+<span class="sd">            ``type(module)`` alone, never by what the value looks like.</span>
+<span class="sd">            When ``module`` is **not** a :class:`str`, whatever is given here</span>
+<span class="sd">            is treated as the first ``*transport`` element instead --</span>
+<span class="sd">            prepended, so argument order is preserved -- and ``class_`` itself</span>
+<span class="sd">            stays unset; ``register_apptype(80, Unit, TransportProtocol.udp)``</span>
+<span class="sd">            therefore reaches ``transport`` rather than being silently</span>
+<span class="sd">            swallowed. This is not a heuristic on the value: with a</span>
+<span class="sd">            :class:`str` ``module``, a :class:`str` third argument is</span>
+<span class="sd">            **always** a class name -- ``register_apptype(80, 'a.b', 'tcp')``</span>
+<span class="sd">            registers a class literally named ``'tcp'`` -- and naming a</span>
+<span class="sd">            transport alongside a :class:`str` module takes the fourth</span>
+<span class="sd">            position onward instead.</span>
+<span class="sd">        *transport: transport protocols to register ``code`` under, named **one</span>
+<span class="sd">            at a time**, each as a :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`</span>
+<span class="sd">            member or as that member's ``name`` (case-insensitively, e.g. ``'tcp'``,</span>
+<span class="sd">            ``'TCP'`` or ``'Tcp'`` alike); the two forms are coerced to the same</span>
+<span class="sd">            member and behave identically,</span>
+<span class="sd">            including which error they raise. Where none is given and ``code`` is</span>
+<span class="sd">            an :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, the</span>
+<span class="sd">            member's own :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto`</span>
+<span class="sd">            is used, which names exactly the registry the member lives in. A bare</span>
+<span class="sd">            :class:`int` carries no such default and so requires at least one.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        pcapkit.utilities.exceptions.RegistryError: If no transport protocol is</span>
+<span class="sd">            given for a bare :class:`int`; if one of those given (member or name)</span>
+<span class="sd">            names no port-keyed registry; or if a ``str`` matches no</span>
+<span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` member's</span>
+<span class="sd">            ``name``. A composite such as ``tcp | udp``, or its string form</span>
+<span class="sd">            ``'tcp|udp'``, names two and is refused for the same reason: one call</span>
+<span class="sd">            registers under one transport protocol.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        :class:`~pcapkit.protocols.transport.sctp.SCTP` is deliberately **not**</span>
-<span class="sd">        part of this fan-out, even for application types that name ``sctp`` in</span>
-<span class="sd">        their :class:`~pcapkit.const.reg.apptype.TransportProtocol`. Its</span>
+<span class="sd">        one of the registries this writes to, so naming ``sctp`` here is an error</span>
+<span class="sd">        rather than a no-op. Its</span>
 <span class="sd">        :data:`~pcapkit.protocols.transport.sctp.SCTP.__proto__` registry is</span>
 <span class="sd">        keyed by the DATA chunk's payload protocol identifier rather than by</span>
 <span class="sd">        port number, so writing a port number into it would dispatch on a</span>
@@ -1319,30 +1352,85 @@
 <span class="sd">        * :func:`pcapkit.foundation.registry.register_sctp`</span>
 
 <span class="sd">    """</span>
+    <span class="c1"># NOTE: ``class_`` is back at the sibling position -- positional, ahead of</span>
+    <span class="c1"># ``*transport`` -- per maintainer ruling, and the swallow that made it</span>
+    <span class="c1"># keyword-only in the first place is disambiguated here by ``type(module)``</span>
+    <span class="c1"># alone, never by what ``class_`` itself looks like. A ``str`` module means</span>
+    <span class="c1"># ``class_`` really is a class name, so it is left untouched -- including</span>
+    <span class="c1"># when it happens to be a string like ``'tcp'``, which is not sniffed for</span>
+    <span class="c1"># looking like a transport. Any other module type means the third</span>
+    <span class="c1"># positional was never a class name to begin with, so it is moved to the</span>
+    <span class="c1"># front of ``transport`` -- prepended, so argument order survives -- and</span>
+    <span class="c1"># ``class_`` is reset to ``NULL`` so the ``ModuleDescriptor`` branch below</span>
+    <span class="c1"># never sees it.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">class_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NULL</span><span class="p">:</span>
+        <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol | str'</span><span class="p">,</span> <span class="n">class_</span><span class="p">),)</span> <span class="o">+</span> <span class="n">transport</span>
+        <span class="n">class_</span> <span class="o">=</span> <span class="n">NULL</span>
+
+    <span class="c1"># NOTE: a ``str`` transport is coerced to its ``TransportProtocol`` member</span>
+    <span class="c1"># up front, before any registry work, so every downstream use -- the</span>
+    <span class="c1"># ``code.proto`` default and the registries lookup below -- sees members</span>
+    <span class="c1"># only. Resolution is by the member's own ``name``, case-insensitively --</span>
+    <span class="c1"># maintainer ruling on #815 -- via ``__members__`` directly rather than</span>
+    <span class="c1"># ``TransportProtocol[name]``: aenum's ``Flag.__getitem__`` parses a</span>
+    <span class="c1"># ``'|'``-joined name into a composite value on its own</span>
+    <span class="c1"># (``TransportProtocol['tcp|udp']`` silently returns the value ``3``),</span>
+    <span class="c1"># which is exactly the composite this function has to refuse, and</span>
+    <span class="c1"># lowercasing does not change that: ``'tcp|udp'`` is not a member name</span>
+    <span class="c1"># either. Anything that is neither a ``str`` nor a ``TransportProtocol``</span>
+    <span class="c1"># member is rejected here too, rather than falling through to the</span>
+    <span class="c1"># registries lookup below: ``TransportProtocol`` is an ``IntFlag``, so</span>
+    <span class="c1"># ``registries.get(1)`` resolves to ``TCP`` just as</span>
+    <span class="c1"># ``registries.get(TransportProtocol.tcp)`` does, and would otherwise</span>
+    <span class="c1"># register the port before the ``proto.name`` access two lines below it</span>
+    <span class="c1"># raised -- leaving the port written into ``TCP.__proto__`` with</span>
+    <span class="c1"># ``register_protocol`` never called.</span>
+    <span class="n">coerced</span><span class="p">:</span> <span class="s1">'list[TransportProtocol]'</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># NOTE: ``proto`` itself -- not the lowercased lookup key -- is</span>
+            <span class="c1"># what the error message formats with ``!r``, so a mismatched</span>
+            <span class="c1"># name such as ``'TCP '`` still shows its own casing and its</span>
+            <span class="c1"># trailing space rather than the lowercased form.</span>
+            <span class="n">member</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">member</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol'</span><span class="p">,</span> <span class="n">member</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">coerced</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
+    <span class="n">transport</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coerced</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: the member's own ``proto`` is the single transport protocol of the</span>
+    <span class="c1"># registry it lives in -- GitHub issue #806 -- so it names one destination</span>
+    <span class="c1"># rather than fanning out across every transport IANA gave the service. The</span>
+    <span class="c1"># fan-out this replaced made ``register_apptype(TCP.http, Dummy)`` displace</span>
+    <span class="c1"># the UDP handler for port 80 as well, which no caller naming the TCP member</span>
+    <span class="c1"># asked for.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">transport</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'no transport protocol given for port </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">; name each '</span>
+                                <span class="s1">'transport protocol to register under'</span><span class="p">)</span>
+        <span class="n">transport</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">proto</span><span class="p">,)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">proto</span> <span class="ow">is</span> <span class="n">NULL</span><span class="p">:</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">proto</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">port</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ModuleDescriptor[ProtocolBase]'</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
 
-    <span class="n">_reg</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">proto</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-
-    <span class="k">for</span> <span class="n">test</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[TransportProtocol, Type[ProtocolBase]]'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">registries</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[TransportProtocol, Type[ProtocolBase]]'</span><span class="p">,</span> <span class="p">{</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span> <span class="n">TCP</span><span class="p">,</span>
         <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span><span class="p">:</span> <span class="n">UDP</span><span class="p">,</span>
-    <span class="p">})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">test</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proto</span><span class="p">:</span>
-            <span class="k">continue</span>
+    <span class="p">})</span>
+    <span class="k">for</span> <span class="n">proto</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
+        <span class="c1"># NOTE: a composite is not a key here, so ``tcp | udp`` is rejected</span>
+        <span class="c1"># rather than quietly registering under both. Naming them one at a time</span>
+        <span class="c1"># is what the varargs are for.</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">registries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
         <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
-        <span class="n">_reg</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_reg</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown transport protocol: </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="c1"># register protocol to protocol registry</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">ModuleDescriptor</span><span class="p">):</span>

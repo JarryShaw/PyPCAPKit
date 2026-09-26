@@ -665,7 +665,8 @@
 <span class="s1">        svc: 'str'</span>
 <span class="s1">        #: Port number.</span>
 <span class="s1">        port: 'int'</span>
-<span class="s1">        #: Transport protocol.</span>
+<span class="s1">        #: Transport protocol carrying the service, i.e. the single transport</span>
+<span class="s1">        #: protocol of the registry this member lives in.</span>
 <span class="s1">        proto: 'TransportProtocol'</span>
 
 <span class="s1">    #: Transport protocol whose assignments this registry holds. The base</span>
@@ -780,16 +781,17 @@
 
 <span class="s1">        if isinstance(proto, str):</span>
 <span class="s1">            proto = TransportProtocol.get(proto.lower())</span>
-<span class="s1">        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag` and a member</span>
-<span class="s1">        # carries the *whole* transport protocol set IANA assigned the service, so</span>
-<span class="s1">        # ``tcp | udp`` is an ordinary value to read off one and therefore an</span>
-<span class="s1">        # ordinary thing to pass back in. It names two registries, though, holding</span>
-<span class="s1">        # two different services for the same port -- and a lookup answers with one</span>
-<span class="s1">        # member, so there is no answer to which of them the composite meant.</span>
-<span class="s1">        # Resolving it picked the lowest set bit: :func:`~enum.show_flag_values`</span>
-<span class="s1">        # iterates LSB-first and ``tcp`` is the lowest, so every composite</span>
-<span class="s1">        # containing it dispatched into the TCP registry whatever else it named.</span>
-<span class="s1">        # Measured on fe80b8525, that answered 46 of the 10,625 multi-transport</span>
+<span class="s1">        # NOTE: ``TransportProtocol`` is an :class:`~aenum.IntFlag`, so ``tcp |</span>
+<span class="s1">        # udp`` stays constructible by hand even though no member carries one any</span>
+<span class="s1">        # more -- every member's ``proto`` is the single transport of the registry</span>
+<span class="s1">        # it lives in, GitHub issue #806. A composite names two registries,</span>
+<span class="s1">        # though, holding two different services for the same port -- and a lookup</span>
+<span class="s1">        # answers with one member, so there is no answer to which of them the</span>
+<span class="s1">        # composite meant. Resolving it picked the lowest set bit:</span>
+<span class="s1">        # :func:`~enum.show_flag_values` iterates LSB-first and ``tcp`` is the</span>
+<span class="s1">        # lowest, so every composite containing it dispatched into the TCP</span>
+<span class="s1">        # registry whatever else it named. Measured on fe80b8525, when members</span>
+<span class="s1">        # still carried the whole set, that answered 46 of the 10,625 multi-transport</span>
 <span class="s1">        # members' own ``get(m.port, proto=m.proto)`` with a service other than the</span>
 <span class="s1">        # member's own, of which 23 -- the UDP-declared half -- came back as a</span>
 <span class="s1">        # member of the *TCP* registry, carrying the wrong type and a narrower</span>
@@ -834,9 +836,9 @@
 <span class="s1">                members; ignored when called on one of those registries, each of</span>
 <span class="s1">                which already knows its own transport. **One** transport protocol</span>
 <span class="s1">                when it does select, since one registry is what a port lookup can</span>
-<span class="s1">                answer from -- a member's own ``proto`` is often a composite such</span>
-<span class="s1">                as ``tcp | udp`` and passing that back in is refused rather than</span>
-<span class="s1">                resolved to a guess.</span>
+<span class="s1">                answer from -- a member's own ``proto`` names exactly one, so</span>
+<span class="s1">                passing it straight back in always resolves, while a composite</span>
+<span class="s1">                built by hand is refused rather than resolved to a guess.</span>
 
 <span class="s1">        Returns:</span>
 <span class="s1">            The **canonical** service for ``key``. IANA assigns several services</span>
@@ -948,7 +950,7 @@
 <span class="c1">#: members of one transport protocol and nothing else.</span>
 <span class="n">TRANSPORT</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">PROTO</span><span class="p">,</span> <span class="n">CANON</span><span class="p">,</span> <span class="n">TABLE</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
-<span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="s1"># pylint: disable=line-too-long</span>
 <span class="s1">"""</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ['</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
 <span class="si">{</span><span class="s1">'='</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
 
@@ -967,10 +969,11 @@
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(AppType):</span>
 <span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span>
 
-<span class="s1">    Members carry the **whole** transport protocol set IANA assigned the service,</span>
-<span class="s1">    not just ``</span><span class="si">{</span><span class="n">PROTO</span><span class="si">}</span><span class="s1">``, so a service registered on several transports appears in</span>
-<span class="s1">    each of their registries with its</span>
-<span class="s1">    :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` intact.</span>
+<span class="s1">    Every member's :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` is</span>
+<span class="s1">    ``</span><span class="si">{</span><span class="n">PROTO</span><span class="si">}</span><span class="s1">`` and nothing else, so it labels the registry the member lives in</span>
+<span class="s1">    rather than restating the whole set IANA assigned the service. A service</span>
+<span class="s1">    registered on several transports is a separate member of each of their</span>
+<span class="s1">    registries, which is where that set is read off.</span>
 
 <span class="s1">    Note:</span>
 <span class="s1">        The rows below are this transport's registry entries with **no port</span>
@@ -1253,7 +1256,15 @@
             <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="s1">'</span><span class="si">%s</span><span class="s1">_'</span> <span class="o">%</span> <span class="n">key</span>
 
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">protos</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="c1"># NOTE: the member's ``proto`` is this registry's own transport</span>
+            <span class="c1"># protocol and nothing else, so it is a single bit -- GitHub issue</span>
+            <span class="c1"># #806. Rendering ``record.protos`` here instead put the whole</span>
+            <span class="c1"># ``(service, port)`` IANA set on every member, which made</span>
+            <span class="c1"># ``TCP.http.proto`` name UDP and SCTP as well. That was a second</span>
+            <span class="c1"># copy of what the four registries already encode, it is the copy</span>
+            <span class="c1"># that could drift, and being multi-bit it was refused by every</span>
+            <span class="c1"># entry point that consumed it.</span>
+            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">record</span><span class="o">.</span><span class="n">svc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">TRANSPORT</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># NOTE: a merged entry describes each registry row it came from,</span>
                 <span class="c1"># as one bullet per row. The single-row form re-indents its own</span>

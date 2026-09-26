@@ -446,7 +446,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.const.reg.apptype.sctp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="c1"># pylint: disable=line-too-long</span>
 <span class="sd">"""Application Layer Protocol Numbers (SCTP)</span>
 <span class="sd">===============================================</span>
 
@@ -467,10 +467,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SCTP</span><span class="p">(</span><span class="n">AppType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[SCTP] Application Layer Protocol Numbers (SCTP)</span>
 
-<span class="sd">    Members carry the **whole** transport protocol set IANA assigned the service,</span>
-<span class="sd">    not just ``sctp``, so a service registered on several transports appears in</span>
-<span class="sd">    each of their registries with its</span>
-<span class="sd">    :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` intact.</span>
+<span class="sd">    Every member's :attr:`~pcapkit.const.reg.apptype.apptype.AppType.proto` is</span>
+<span class="sd">    ``sctp`` and nothing else, so it labels the registry the member lives in</span>
+<span class="sd">    rather than restating the whole set IANA assigned the service. A service</span>
+<span class="sd">    registered on several transports is a separate member of each of their</span>
+<span class="sd">    registries, which is where that set is read off.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The rows below are this transport's registry entries with **no port</span>
@@ -514,89 +515,89 @@
     <span class="c1">#: - [UDP] Discard</span>
     <span class="c1">#: - [SCTP] Discard [:rfc:`9260`]</span>
     <span class="c1">#: - [DCCP] Discard [:rfc:`4340`]</span>
-    <span class="n">discard</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">'discard'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">discard</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">'discard'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] File Transfer [Default Data]</span>
     <span class="c1">#: - [UDP] File Transfer [Default Data]</span>
     <span class="c1">#: - [SCTP] FTP [:rfc:`9260`]</span>
-    <span class="n">ftp_data</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'ftp-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ftp_data</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'ftp-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]</span>
     <span class="c1">#: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]</span>
     <span class="c1">#: - [SCTP] FTP [:rfc:`9260`]</span>
-    <span class="n">ftp</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="s1">'ftp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ftp</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="s1">'ftp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] World Wide Web HTTP [:rfc:`9110`]</span>
     <span class="c1">#: - [UDP] World Wide Web HTTP [:rfc:`9110`]</span>
     <span class="c1">#: - [SCTP] HTTP [:rfc:`9260`]</span>
-    <span class="n">http</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">'http'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">http</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">'http'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Border Gateway Protocol</span>
     <span class="c1">#: - [UDP] Border Gateway Protocol</span>
     <span class="c1">#: - [SCTP] BGP [:rfc:`9260`]</span>
-    <span class="n">bgp</span> <span class="o">=</span> <span class="mi">179</span><span class="p">,</span> <span class="s1">'bgp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">bgp</span> <span class="o">=</span> <span class="mi">179</span><span class="p">,</span> <span class="s1">'bgp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="n">exp1</span> <span class="o">=</span> <span class="mi">1021</span><span class="p">,</span> <span class="s1">'exp1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">exp1</span> <span class="o">=</span> <span class="mi">1021</span><span class="p">,</span> <span class="s1">'exp1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
     <span class="c1">#: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="n">exp2</span> <span class="o">=</span> <span class="mi">1022</span><span class="p">,</span> <span class="s1">'exp2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">exp2</span> <span class="o">=</span> <span class="mi">1022</span><span class="p">,</span> <span class="s1">'exp2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Cisco IP SLAs Control Protocol</span>
     <span class="c1">#: - [UDP] Cisco IP SLAs Control Protocol</span>
     <span class="c1">#: - [SCTP] Cisco IP SLAs Control Protocol</span>
-    <span class="n">cisco_ipsla</span> <span class="o">=</span> <span class="mi">1167</span><span class="p">,</span> <span class="s1">'cisco-ipsla'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">cisco_ipsla</span> <span class="o">=</span> <span class="mi">1167</span><span class="p">,</span> <span class="s1">'cisco-ipsla'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Not Only a Routeing Protocol</span>
     <span class="c1">#: - [UDP] Not Only a Routeing Protocol</span>
     <span class="c1">#: - [SCTP] Not Only a Routeing Protocol</span>
-    <span class="n">norp</span> <span class="o">=</span> <span class="mi">1528</span><span class="p">,</span> <span class="s1">'norp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">norp</span> <span class="o">=</span> <span class="mi">1528</span><span class="p">,</span> <span class="s1">'norp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] H.323 Call Control Signalling</span>
     <span class="c1">#: - [UDP] H.323 Call Control Signalling</span>
     <span class="c1">#: - [SCTP] H.323 Call Control</span>
-    <span class="n">h323hostcall</span> <span class="o">=</span> <span class="mi">1720</span><span class="p">,</span> <span class="s1">'h323hostcall'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">h323hostcall</span> <span class="o">=</span> <span class="mi">1720</span><span class="p">,</span> <span class="s1">'h323hostcall'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Network File System - Sun Microsystems</span>
     <span class="c1">#: - [UDP] Network File System - Sun Microsystems</span>
     <span class="c1">#: - [SCTP] Network File System [:rfc:`5665`]</span>
-    <span class="n">nfs</span> <span class="o">=</span> <span class="mi">2049</span><span class="p">,</span> <span class="s1">'nfs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">nfs</span> <span class="o">=</span> <span class="mi">2049</span><span class="p">,</span> <span class="s1">'nfs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Resource Connection Initiation Protocol</span>
     <span class="c1">#: - [SCTP] Resource Connection Initiation Protocol</span>
-    <span class="n">rcip_itu</span> <span class="o">=</span> <span class="mi">2225</span><span class="p">,</span> <span class="s1">'rcip-itu'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">rcip_itu</span> <span class="o">=</span> <span class="mi">2225</span><span class="p">,</span> <span class="s1">'rcip-itu'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] M2UA</span>
     <span class="c1">#: - [UDP] M2UA</span>
     <span class="c1">#: - [SCTP] M2UA</span>
-    <span class="n">m2ua</span> <span class="o">=</span> <span class="mi">2904</span><span class="p">,</span> <span class="s1">'m2ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">m2ua</span> <span class="o">=</span> <span class="mi">2904</span><span class="p">,</span> <span class="s1">'m2ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] M3UA [:rfc:`4666`]</span>
     <span class="c1">#: - [SCTP] M3UA [:rfc:`4666`]</span>
-    <span class="n">m3ua</span> <span class="o">=</span> <span class="mi">2905</span><span class="p">,</span> <span class="s1">'m3ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">m3ua</span> <span class="o">=</span> <span class="mi">2905</span><span class="p">,</span> <span class="s1">'m3ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Megaco H-248</span>
     <span class="c1">#: - [UDP] Megaco H-248</span>
     <span class="c1">#: - [SCTP] Megaco-H.248 text</span>
-    <span class="n">megaco_h248</span> <span class="o">=</span> <span class="mi">2944</span><span class="p">,</span> <span class="s1">'megaco-h248'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">megaco_h248</span> <span class="o">=</span> <span class="mi">2944</span><span class="p">,</span> <span class="s1">'megaco-h248'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] H248 Binary</span>
     <span class="c1">#: - [UDP] H248 Binary</span>
     <span class="c1">#: - [SCTP] Megaco/H.248 binary</span>
-    <span class="n">h248_binary</span> <span class="o">=</span> <span class="mi">2945</span><span class="p">,</span> <span class="s1">'h248-binary'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">h248_binary</span> <span class="o">=</span> <span class="mi">2945</span><span class="p">,</span> <span class="s1">'h248-binary'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] ITU-T Q.1902.1/Q.2150.3</span>
     <span class="n">itu_bicc_stc</span> <span class="o">=</span> <span class="mi">3097</span><span class="p">,</span> <span class="s1">'itu-bicc-stc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] M2PA [:rfc:`4165`]</span>
     <span class="c1">#: - [SCTP] M2PA [:rfc:`4165`]</span>
-    <span class="n">m2pa</span> <span class="o">=</span> <span class="mi">3565</span><span class="p">,</span> <span class="s1">'m2pa'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">m2pa</span> <span class="o">=</span> <span class="mi">3565</span><span class="p">,</span> <span class="s1">'m2pa'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] asap sctp [:rfc:`5352`]</span>
     <span class="n">asap_sctp</span> <span class="o">=</span> <span class="mi">3863</span><span class="p">,</span> <span class="s1">'asap-sctp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -606,18 +607,18 @@
 
     <span class="c1">#: - [TCP] DIAMETER</span>
     <span class="c1">#: - [SCTP] DIAMETER [:rfc:`3588`]</span>
-    <span class="n">diameter</span> <span class="o">=</span> <span class="mi">3868</span><span class="p">,</span> <span class="s1">'diameter'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">diameter</span> <span class="o">=</span> <span class="mi">3868</span><span class="p">,</span> <span class="s1">'diameter'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [UDP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [SCTP] AWS protocol for cloud remoting solution</span>
     <span class="c1">#: - [DCCP] AWS protocol for cloud remoting solution</span>
-    <span class="n">aws_wsp</span> <span class="o">=</span> <span class="mi">4195</span><span class="p">,</span> <span class="s1">'aws-wsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">aws_wsp</span> <span class="o">=</span> <span class="mi">4195</span><span class="p">,</span> <span class="s1">'aws-wsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] ArrowHead Service Protocol (AHSP)</span>
     <span class="c1">#: - [UDP] ArrowHead Service Protocol (AHSP)</span>
     <span class="c1">#: - [SCTP] ArrowHead Service Protocol (AHSP)</span>
-    <span class="n">ahsp</span> <span class="o">=</span> <span class="mi">4333</span><span class="p">,</span> <span class="s1">'ahsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ahsp</span> <span class="o">=</span> <span class="mi">4333</span><span class="p">,</span> <span class="s1">'ahsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] A25 (FAP-FGW)</span>
     <span class="n">a25_fap_fgw</span> <span class="o">=</span> <span class="mi">4502</span><span class="p">,</span> <span class="s1">'a25-fap-fgw'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -625,27 +626,27 @@
     <span class="c1">#: - [TCP] Trinity Trust Network Node Communication</span>
     <span class="c1">#: - [UDP] Trinity Trust Network Node Communication</span>
     <span class="c1">#: - [SCTP] Trinity Trust Network Node Communication</span>
-    <span class="n">trinity_dist</span> <span class="o">=</span> <span class="mi">4711</span><span class="p">,</span> <span class="s1">'trinity-dist'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">trinity_dist</span> <span class="o">=</span> <span class="mi">4711</span><span class="p">,</span> <span class="s1">'trinity-dist'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] IP Flow Info Export</span>
     <span class="c1">#: - [UDP] IP Flow Info Export</span>
     <span class="c1">#: - [SCTP] IP Flow Info Export</span>
-    <span class="n">ipfix</span> <span class="o">=</span> <span class="mi">4739</span><span class="p">,</span> <span class="s1">'ipfix'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ipfix</span> <span class="o">=</span> <span class="mi">4739</span><span class="p">,</span> <span class="s1">'ipfix'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] ipfix protocol over TLS</span>
     <span class="c1">#: - [SCTP] ipfix protocol over DTLS</span>
     <span class="c1">#: - [UDP] ipfix protocol over DTLS</span>
-    <span class="n">ipfixs</span> <span class="o">=</span> <span class="mi">4740</span><span class="p">,</span> <span class="s1">'ipfixs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ipfixs</span> <span class="o">=</span> <span class="mi">4740</span><span class="p">,</span> <span class="s1">'ipfixs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] SIP [:rfc:`3263`]</span>
     <span class="c1">#: - [UDP] SIP [:rfc:`3263`]</span>
     <span class="c1">#: - [SCTP] SIP [:rfc:`4168`]</span>
-    <span class="n">sip</span> <span class="o">=</span> <span class="mi">5060</span><span class="p">,</span> <span class="s1">'sip'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">sip</span> <span class="o">=</span> <span class="mi">5060</span><span class="p">,</span> <span class="s1">'sip'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] SIP-TLS [:rfc:`3263`]</span>
     <span class="c1">#: - [UDP] SIP-TLS [:rfc:`3263`]</span>
     <span class="c1">#: - [SCTP] SIP-TLS [:rfc:`4168`]</span>
-    <span class="n">sips</span> <span class="o">=</span> <span class="mi">5061</span><span class="p">,</span> <span class="s1">'sips'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">sips</span> <span class="o">=</span> <span class="mi">5061</span><span class="p">,</span> <span class="s1">'sips'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] Candidate AR</span>
     <span class="n">car</span> <span class="o">=</span> <span class="mi">5090</span><span class="p">,</span> <span class="s1">'car'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -655,60 +656,60 @@
 
     <span class="c1">#: - [TCP] NOTEZA Data Safety Service</span>
     <span class="c1">#: - [SCTP] NOTEZA Data Safety Service</span>
-    <span class="n">noteza</span> <span class="o">=</span> <span class="mi">5215</span><span class="p">,</span> <span class="s1">'noteza'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">noteza</span> <span class="o">=</span> <span class="mi">5215</span><span class="p">,</span> <span class="s1">'noteza'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Server Message Block over Remote Direct Memory Access</span>
     <span class="c1">#: - [SCTP] Server Message Block over Remote Direct Memory Access</span>
-    <span class="n">smbdirect</span> <span class="o">=</span> <span class="mi">5445</span><span class="p">,</span> <span class="s1">'smbdirect'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">smbdirect</span> <span class="o">=</span> <span class="mi">5445</span><span class="p">,</span> <span class="s1">'smbdirect'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] AMQP</span>
     <span class="c1">#: - [UDP] AMQP</span>
     <span class="c1">#: - [SCTP] AMQP</span>
-    <span class="n">amqp</span> <span class="o">=</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">'amqp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">amqp</span> <span class="o">=</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">'amqp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] V5UA application port [:rfc:`3807`]</span>
     <span class="c1">#: - [UDP] V5UA application port [:rfc:`3807`]</span>
     <span class="c1">#: - [SCTP] V5UA application port [:rfc:`3807`]</span>
-    <span class="n">v5ua</span> <span class="o">=</span> <span class="mi">5675</span><span class="p">,</span> <span class="s1">'v5ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">v5ua</span> <span class="o">=</span> <span class="mi">5675</span><span class="p">,</span> <span class="s1">'v5ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Diameter over TLS/TCP [:rfc:`6733`]</span>
     <span class="c1">#: - [SCTP] Diameter over DTLS/SCTP [:rfc:`6733`]</span>
-    <span class="n">diameters</span> <span class="o">=</span> <span class="mi">5868</span><span class="p">,</span> <span class="s1">'diameters'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">diameters</span> <span class="o">=</span> <span class="mi">5868</span><span class="p">,</span> <span class="s1">'diameters'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Flight &amp; Flow Info for Collaborative Env</span>
     <span class="c1">#: - [UDP] Flight &amp; Flow Info for Collaborative Env</span>
     <span class="c1">#: - [SCTP] Flight &amp; Flow Info for Collaborative Env</span>
-    <span class="n">ff_ice</span> <span class="o">=</span> <span class="mi">5903</span><span class="p">,</span> <span class="s1">'ff-ice'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ff_ice</span> <span class="o">=</span> <span class="mi">5903</span><span class="p">,</span> <span class="s1">'ff-ice'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Air-Ground SWIM</span>
     <span class="c1">#: - [UDP] Air-Ground SWIM</span>
     <span class="c1">#: - [SCTP] Air-Ground SWIM</span>
-    <span class="n">ag_swim</span> <span class="o">=</span> <span class="mi">5904</span><span class="p">,</span> <span class="s1">'ag-swim'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ag_swim</span> <span class="o">=</span> <span class="mi">5904</span><span class="p">,</span> <span class="s1">'ag-swim'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Adv Surface Mvmnt and Guidance Cont Sys</span>
     <span class="c1">#: - [UDP] Adv Surface Mvmnt and Guidance Cont Sys</span>
     <span class="c1">#: - [SCTP] Adv Surface Mvmnt and Guidance Cont Sys</span>
-    <span class="n">asmgcs</span> <span class="o">=</span> <span class="mi">5905</span><span class="p">,</span> <span class="s1">'asmgcs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">asmgcs</span> <span class="o">=</span> <span class="mi">5905</span><span class="p">,</span> <span class="s1">'asmgcs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Remotely Piloted Vehicle C&amp;C</span>
     <span class="c1">#: - [UDP] Remotely Piloted Vehicle C&amp;C</span>
     <span class="c1">#: - [SCTP] Remotely Piloted Vehicle C&amp;C</span>
-    <span class="n">rpas_c2</span> <span class="o">=</span> <span class="mi">5906</span><span class="p">,</span> <span class="s1">'rpas-c2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">rpas_c2</span> <span class="o">=</span> <span class="mi">5906</span><span class="p">,</span> <span class="s1">'rpas-c2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Distress and Safety Data App</span>
     <span class="c1">#: - [UDP] Distress and Safety Data App</span>
     <span class="c1">#: - [SCTP] Distress and Safety Data App</span>
-    <span class="n">dsd</span> <span class="o">=</span> <span class="mi">5907</span><span class="p">,</span> <span class="s1">'dsd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">dsd</span> <span class="o">=</span> <span class="mi">5907</span><span class="p">,</span> <span class="s1">'dsd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] IPS Management Application</span>
     <span class="c1">#: - [UDP] IPS Management Application</span>
     <span class="c1">#: - [SCTP] IPS Management Application</span>
-    <span class="n">ipsma</span> <span class="o">=</span> <span class="mi">5908</span><span class="p">,</span> <span class="s1">'ipsma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ipsma</span> <span class="o">=</span> <span class="mi">5908</span><span class="p">,</span> <span class="s1">'ipsma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Air-ground media advisory</span>
     <span class="c1">#: - [UDP] Air-ground media advisory</span>
     <span class="c1">#: - [SCTP] Air-ground media advisory</span>
-    <span class="n">agma</span> <span class="o">=</span> <span class="mi">5909</span><span class="p">,</span> <span class="s1">'agma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">agma</span> <span class="o">=</span> <span class="mi">5909</span><span class="p">,</span> <span class="s1">'agma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] Context Management</span>
     <span class="n">cm</span> <span class="o">=</span> <span class="mi">5910</span><span class="p">,</span> <span class="s1">'cm'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -725,7 +726,7 @@
     <span class="c1">#: - [TCP] Security for Internet Protocol Suite</span>
     <span class="c1">#: - [UDP] Security for Internet Protocol Suite</span>
     <span class="c1">#: - [SCTP] Security for Internet Protocol Suite</span>
-    <span class="n">ipsdtls</span> <span class="o">=</span> <span class="mi">5914</span><span class="p">,</span> <span class="s1">'ipsdtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">ipsdtls</span> <span class="o">=</span> <span class="mi">5914</span><span class="p">,</span> <span class="s1">'ipsdtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] Unassigned</span>
     <span class="n">unassigned_6701</span> <span class="o">=</span> <span class="mi">6701</span><span class="p">,</span> <span class="s1">'unassigned'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -747,7 +748,7 @@
 
     <span class="c1">#: - [TCP] SImple Middlebox COnfiguration (SIMCO) Server [:rfc:`4540`]</span>
     <span class="c1">#: - [SCTP] SImple Middlebox COnfiguration (SIMCO)</span>
-    <span class="n">simco</span> <span class="o">=</span> <span class="mi">7626</span><span class="p">,</span> <span class="s1">'simco'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">simco</span> <span class="o">=</span> <span class="mi">7626</span><span class="p">,</span> <span class="s1">'simco'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] SCF nFAPI defining MAC/PHY split</span>
     <span class="n">nfapi</span> <span class="o">=</span> <span class="mi">7701</span><span class="p">,</span> <span class="s1">'nfapi'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -755,15 +756,15 @@
     <span class="c1">#: - [TCP] Open-Source Virtual Reality</span>
     <span class="c1">#: - [UDP] Open-Source Virtual Reality</span>
     <span class="c1">#: - [SCTP] Open-Source Virtual Reality</span>
-    <span class="n">osvr</span> <span class="o">=</span> <span class="mi">7728</span><span class="p">,</span> <span class="s1">'osvr'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">osvr</span> <span class="o">=</span> <span class="mi">7728</span><span class="p">,</span> <span class="s1">'osvr'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [SCTP] Reserved</span>
     <span class="c1">#: - [DCCP] Reserved</span>
-    <span class="n">reserved_8282</span> <span class="o">=</span> <span class="mi">8282</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">dccp</span>
+    <span class="n">reserved_8282</span> <span class="o">=</span> <span class="mi">8282</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] PIM over Reliable Transport [:rfc:`6559`]</span>
     <span class="c1">#: - [SCTP] PIM over Reliable Transport [:rfc:`6559`]</span>
-    <span class="n">pim_port</span> <span class="o">=</span> <span class="mi">8471</span><span class="p">,</span> <span class="s1">'pim-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">pim_port</span> <span class="o">=</span> <span class="mi">8471</span><span class="p">,</span> <span class="s1">'pim-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] LCS Application Protocol</span>
     <span class="n">lcs_ap</span> <span class="o">=</span> <span class="mi">9082</span><span class="p">,</span> <span class="s1">'lcs-ap'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -771,12 +772,12 @@
     <span class="c1">#: - [TCP] IBM AURORA Performance Visualizer</span>
     <span class="c1">#: - [UDP] IBM AURORA Performance Visualizer</span>
     <span class="c1">#: - [SCTP] IBM AURORA Performance Visualizer</span>
-    <span class="n">aurora</span> <span class="o">=</span> <span class="mi">9084</span><span class="p">,</span> <span class="s1">'aurora'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">aurora</span> <span class="o">=</span> <span class="mi">9084</span><span class="p">,</span> <span class="s1">'aurora'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] IUA</span>
     <span class="c1">#: - [UDP] IUA</span>
     <span class="c1">#: - [SCTP] IUA</span>
-    <span class="n">iua</span> <span class="o">=</span> <span class="mi">9900</span><span class="p">,</span> <span class="s1">'iua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">iua</span> <span class="o">=</span> <span class="mi">9900</span><span class="p">,</span> <span class="s1">'iua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] enrp server channel [:rfc:`5353`]</span>
     <span class="n">enrp_sctp</span> <span class="o">=</span> <span class="mi">9901</span><span class="p">,</span> <span class="s1">'enrp-sctp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -786,7 +787,7 @@
 
     <span class="c1">#: - [TCP] numerical systems messaging</span>
     <span class="c1">#: - [SCTP] numerical systems messaging</span>
-    <span class="n">xcompute</span> <span class="o">=</span> <span class="mi">11235</span><span class="p">,</span> <span class="s1">'xcompute'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">xcompute</span> <span class="o">=</span> <span class="mi">11235</span><span class="p">,</span> <span class="s1">'xcompute'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] WorldMailExpress</span>
     <span class="n">wmereceiving</span> <span class="o">=</span> <span class="mi">11997</span><span class="p">,</span> <span class="s1">'wmereceiving'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -800,22 +801,22 @@
     <span class="c1">#: - [TCP] SUA</span>
     <span class="c1">#: - [UDP] De-Registered</span>
     <span class="c1">#: - [SCTP] SUA</span>
-    <span class="n">sua</span> <span class="o">=</span> <span class="mi">14001</span><span class="p">,</span> <span class="s1">'sua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">sua</span> <span class="o">=</span> <span class="mi">14001</span><span class="p">,</span> <span class="s1">'sua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Distributed Network Protocol - Secure</span>
     <span class="c1">#: - [UDP] Distributed Network Protocol - Secure</span>
     <span class="c1">#: - [SCTP] Distributed Network Protocol - secured</span>
-    <span class="n">dnp_sec</span> <span class="o">=</span> <span class="mi">19999</span><span class="p">,</span> <span class="s1">'dnp-sec'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">dnp_sec</span> <span class="o">=</span> <span class="mi">19999</span><span class="p">,</span> <span class="s1">'dnp-sec'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] DNP</span>
     <span class="c1">#: - [UDP] DNP</span>
     <span class="c1">#: - [SCTP] Distributed Network Protocol</span>
-    <span class="n">dnp</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">,</span> <span class="s1">'dnp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">dnp</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">,</span> <span class="s1">'dnp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
     <span class="c1">#: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
     <span class="c1">#: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
-    <span class="n">nfsrdma</span> <span class="o">=</span> <span class="mi">20049</span><span class="p">,</span> <span class="s1">'nfsrdma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">nfsrdma</span> <span class="o">=</span> <span class="mi">20049</span><span class="p">,</span> <span class="s1">'nfsrdma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] RNSAP User Adaptation for Iurh</span>
     <span class="n">rna</span> <span class="o">=</span> <span class="mi">25471</span><span class="p">,</span> <span class="s1">'rna'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -831,7 +832,7 @@
 
     <span class="c1">#: - [TCP] Remote Window Protocol</span>
     <span class="c1">#: - [SCTP] Remote Window Protocol</span>
-    <span class="n">rwp</span> <span class="o">=</span> <span class="mi">30100</span><span class="p">,</span> <span class="s1">'rwp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">rwp</span> <span class="o">=</span> <span class="mi">30100</span><span class="p">,</span> <span class="s1">'rwp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: [SCTP] S1-Control Plane (3GPP)</span>
     <span class="n">s1_control</span> <span class="o">=</span> <span class="mi">36412</span><span class="p">,</span> <span class="s1">'s1-control'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
@@ -872,12 +873,12 @@
     <span class="c1">#: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]</span>
     <span class="c1">#: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]</span>
     <span class="c1">#: - [SCTP] HTTPS [:rfc:`9260`]</span>
-    <span class="n">https_443</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span> <span class="s1">'https'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
+    <span class="n">https_443</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span> <span class="s1">'https'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span>
 
     <span class="c1">#: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]</span>
     <span class="c1">#: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]</span>
     <span class="c1">#: - [SCTP] SSH [:rfc:`9260`]</span>
-    <span class="n">ssh_22</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">'ssh'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">tcp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span> <span class="o">|</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span></div>
+    <span class="n">ssh_22</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">'ssh'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">sctp</span></div>
 
 </pre></div>
         </article>
