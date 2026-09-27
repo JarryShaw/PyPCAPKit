@@ -2963,6 +2963,27 @@ since -- reaching #805 by the entries below.
   which fail 26 ways against the unfixed tree; live pyshark parsing itself
   stays unexercised, since ``pyshark.FileCapture`` does not run at all on
   Python 3.14 (#850).
+* **Added** -- ``util/pyshark_encap_map.py``, a generator that regenerates
+  ``ENCAP_TYPE_TO_LINKTYPE`` (152 entries) and ``FILTER_NAME_TO_LINKTYPE`` (58)
+  in place inside ``pcapkit/toolkit/pyshark.py``, so the two tables #850
+  hand-built stop being hand-maintained. It lives under ``util/`` rather than
+  ``pcapkit/vendor/`` because ``Vendor``'s base class is hardwired to an HTTP
+  fetch and a generated enum-class file, where this generator's source of truth
+  is the local ``tshark``/``editcap`` binaries. Guards against its own worst
+  failure mode: a naive ``LinkType(dlt)`` lookup cannot detect an unmapped DLT,
+  because ``_missing_`` mints a placeholder rather than raising, so the
+  generator snapshots every known ``LinkType`` value before any lookup and only
+  calls ``LinkType(dlt)`` once a value has already been confirmed a member. The
+  real-``tshark`` sweep is gated on a newly-declared ``HAS_WIRESHARK`` flag,
+  registered in ``tests/_dependency_gates.py``'s ``NON_DISTRIBUTION_FLAGS``
+  next to ``HAS_PROC_FD``, for things pip cannot install at all. The sweep
+  arithmetic is version-pinned -- ``editcap -T`` accepts 226 encapsulations on
+  Wireshark 4.6.9, 224 on 4.2.2 (CI's Ubuntu noble) -- so the count assertions
+  run only under exactly the measured version, with a separate
+  ``VersionIndependentInvariantTests`` class carrying what holds regardless.
+  One line of ``pcapkit/toolkit/pyshark.py`` itself changes as a result: the
+  ``IPMB_LINUX`` table entry becomes ``I2C_LINUX``, the canonical name #848
+  gave value 209 -- the same member either way (#853).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
