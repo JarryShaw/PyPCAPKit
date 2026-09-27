@@ -2859,10 +2859,12 @@ since -- reaching #805 by the entries below.
   independently proved by regenerating the 21 changed ones from live IANA data
   -- byte-identical to the hand-edit; a further seven regenerate with no change
   at all. ``get()``'s no-longer-minting miss applies to all 105 registries; the
-  ``_missing_`` fix only changes runtime behaviour for the **21** whose vendor
-  crawler leaves ``Vendor.process()`` unmodified -- the other 84 override
-  ``process()`` with their own ``extend_enum`` call and are unaffected here.
-  Two toolkit call sites, ``pcapkit/toolkit/scapy.py`` and
+  ``_missing_`` fix only changes runtime behaviour for the **21** whose
+  ``_missing_`` carries a bounded-range ``extend_enum`` branch -- the other 84
+  have no such branch to fix: 83 override ``process()`` with their own
+  ``extend_enum`` call, and one, ``hip.transport.Transport``, inherits the
+  unmodified template but has no unassigned gap for its FLAG-bound range to
+  mint against. Two toolkit call sites, ``pcapkit/toolkit/scapy.py`` and
   ``pcapkit/toolkit/pyshark.py``, fed ``get()`` a string key with no default
   and now raise ``MissingKeyError`` where they used to get back a minted
   placeholder; four protocol reader sites in ``hopopt.py``/``ipv6_opts.py``
@@ -2886,9 +2888,9 @@ since -- reaching #805 by the entries below.
   installs ``tshark`` with the same debconf pre-seed ``engine-tests`` already
   carries, and the test proves which engine actually ran: no ``EngineWarning``
   fires, ``extractor._exnam == 'pyshark'`` and the engine is a ``PyShark``
-  instance -- the same idiom the PyPCAP parity test already used. Only
-  ``tests/integration/test_engine_runtime.py`` and ``test_engine_parity.py``
-  change; the length assertion itself is kept, not weakened (#846).
+  instance -- the same idiom the PyPCAP parity test already used. Only these
+  two test files change; the length assertion itself is kept, not weakened
+  (#846).
 * **Fixed** -- **a breaking change to** ``pcapkit.const.ipx.socket.Socket``'s
   ``_missing_``: its five archived range branches were tested in table order,
   and three were strict subsets of a range tested earlier --
@@ -2943,18 +2945,19 @@ since -- reaching #805 by the entries below.
   needed the branch-protection ruleset's required-check list updated in the
   same window so a required check that stopped existing did not block every
   merge permanently (#849).
-* **Fixed** -- ``pcapkit/toolkit/pyshark.py`` resolved a frame's link type from
+* **Fixed** -- **a breaking change to** pyshark link-type resolution in
+  ``tcp_traceflow``: an unrecognised encapsulation or filter name now raises
+  ``MissingKeyError`` instead of substituting a plausible DLT.
+  ``pcapkit/toolkit/pyshark.py`` resolved a frame's link type from
   ``packet.layers[0].layer_name``, a Wireshark display-filter name, with a
   blanket ``Enum_LinkType.get(name.upper())`` fallback for anything not in its
   small lookup table. One filter name serves several encapsulations, so that
   fallback returned *wrong DLTs silently* -- ``null`` for a ``DLT_LOOP``
   capture, ``101`` (``RAW``) for ``rawip6``. Re-keyed onto
   ``frame.encap_type``, which is distinct per encapsulation, and the fallback
-  is gone: an unrecognised encapsulation or filter name now raises
-  ``MissingKeyError`` instead of substituting a plausible DLT. The two lookup
-  tables were measured rather than transcribed -- Wireshark's source is not on
-  the build host -- each entry round-tripped through
-  ``editcap -F pcap -T <encap>`` and read back with ``tshark``:
+  is gone. The two lookup tables were measured rather than transcribed --
+  Wireshark's source is not on the build host -- each entry round-tripped
+  through ``editcap -F pcap -T <encap>`` and read back with ``tshark``:
   ``ENCAP_TYPE_TO_LINKTYPE`` grows to 152 entries with no DLT serving two keys,
   and ``FILTER_NAME_TO_LINKTYPE`` grows from the two entries #838 added to 58,
   every root filter name measured single-DLT across the 157 (of the 226
