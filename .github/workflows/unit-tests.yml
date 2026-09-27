@@ -801,3 +801,170 @@ jobs:
       # above for why.
       - name: Run full test suite
         run: python -m pytest -q -n auto --dist load
+
+  # Ruleset 23497679's required_status_checks names 22 exact contexts: five
+  # each for `test` and `integration`, five for `Compat Python 3.10`-`3.14`
+  # (live -- emitted by the `compatibility` job in
+  # `.github/workflows/python-compatibility.yml`, on the same push/
+  # pull_request triggers as this file, confirmed by reading that file --
+  # NOT stale, and NOT something a `needs:` in this file could ever cover,
+  # since a job cannot depend on a job in a different workflow file), five
+  # for the old single-cell `Engines Python <version>` name that
+  # `engine-tests` stopped producing once it became a Python x engine matrix
+  # (the only five of the 22 that are genuinely dead), and two for
+  # `pypcap-parity`. GitHub rulesets match check names literally and support
+  # no wildcard, so the required list has to be hand-edited regardless -- to
+  # drop the five dead `Engines Python <version>` names and to either
+  # re-list every gating (3.10-3.14) `engine-tests` matrix cell name (30 of
+  # them, growing or shrinking with the matrix) or replace that slot with
+  # something that does not change shape when the matrix does. The
+  # maintainer's ruling was the latter: one aggregate job that `needs:`
+  # every gating job in *this* file, so the ruleset requires only this one
+  # context in place of the `test`, `integration`, `Engines`, and
+  # `pypcap-parity` slots (17 of the 22) -- the five live `Compat` names
+  # stay required exactly as they are, since nothing here can stand in for
+  # them.
+  #
+  # `if: ${{ always() && inputs.gate-only != true }}` and the explicit
+  # per-job check below are both required, not decorative:
+  #
+  #   * Without `always()`, this job would itself be *skipped* -- not
+  #     failed -- the instant any job it `needs:` failed or skipped, per
+  #     "Using jobs in a workflow" > "Defining prerequisite jobs": "If a job
+  #     fails or is skipped, all jobs that need it are skipped unless the
+  #     jobs use a conditional expression that causes the job to continue."
+  #     And a skipped required check is not automatically a blocked merge:
+  #     GitHub's own "Troubleshooting required status checks" page lists
+  #     `skipped` alongside `success` and `neutral` as a *passing* check
+  #     status, and its "Handling skipped but required checks" table says
+  #     plainly that when "A job depends on a failed job", the result is
+  #     "The dependent job is skipped and may not block merging" -- exactly
+  #     the silently-worse-than-no-gate failure this job exists to prevent.
+  #     That page's own recommended fix is this job's shape: "Use always()
+  #     with needs for required checks that depend on other jobs."
+  #   * `inputs.gate-only != true` mirrors the four jobs this needs: below.
+  #     They are all skipped by their own `if:` whenever this workflow is
+  #     called with `gate-only: true` (from create-release.yml), so without
+  #     this guard every needs.*.result below would read `skipped` on that
+  #     path and this job would report a spurious failure -- on a release
+  #     call, not a PR, which is not where ruleset 23497679 applies anyway.
+  #   * The check itself inspects every dependency explicitly and prints each
+  #     one's result before failing, so a red run names which leg broke
+  #     instead of leaving that to be re-discovered from the four jobs' own
+  #     logs.
+  #
+  # Note for whoever adds a second caller of this reusable workflow: under
+  # `workflow_call`, GitHub prefixes a called workflow's check names with the
+  # calling job's own name (`<caller job> / Required checks passed`), which
+  # would not match a ruleset entry naming just `Required checks passed`.
+  # Harmless today -- `create-release.yml`'s only call passes
+  # `gate-only: true`, which skips this job via the guard above before that
+  # renaming would ever matter -- but a future caller that does NOT set
+  # `gate-only: true` would produce a differently-named, unrequired check.
+  #
+  # Deliberately NOT `needs: gate`: `gate` only ever runs when this workflow
+  # is called with `gate-only: true` and is otherwise skipped by its own
+  # `if:`, so depending on it would leave this job permanently skipped on
+  # every ordinary PR -- the one case this job has to actually gate.
+  # `changelog` is deliberately left out too: it is a drift check, not one of
+  # the 22 contexts this job replaces, and folding it in here would silently
+  # widen what merging requires beyond what this job exists to cover -- the
+  # maintainer's call to make separately, not something to sneak in.
+  # `test`, `integration`, `engine-tests` and `pypcap-parity` are the four
+  # jobs in this file whose names the 17 live/dead contexts above (all but
+  # `Compat`) stand in for.
+  #
+  # `engine-tests`'s 6 `unsupported` and 4 `not-installable` cells are not a
+  # gap here, even though "some matrix cells succeed and others decline"
+  # sounds like it should risk a false red. It doesn't, because that job's
+  # own install step (see its comment) deliberately exits 0 for a cell that
+  # declined exactly as expected, and only skips that cell's own later
+  # *steps* via a step-level `if:` -- so every legitimately-declined cell
+  # still contributes `success` to `needs.engine-tests.result`, not
+  # `skipped`.
+  #
+  # `engine-tests` also carries `continue-on-error: ${{ matrix.python-version
+  # == '3.15' }}` (its own comment above explains why: 3.15 is experimental
+  # per #845's ruling, and a failure there must report without failing the
+  # run or the required-check set -- `python-compatibility.yml` states the
+  # same policy for its own 3.15 job). Whether a genuine 3.15-cell failure
+  # still surfaces as `failure` in `needs.engine-tests.result` here, or is
+  # neutralised to `success` the same way `continue-on-error` neutralises the
+  # *workflow run's* own conclusion, is NOT stated by GitHub's docs for jobs.
+  # The `continue-on-error` reference has four sentences: one scoping the
+  # flag to a single job, one about a failing job letting its matrix
+  # siblings keep running, two about letting the *workflow run* pass
+  # despite this job failing -- none of the four say anything about what a
+  # sibling job's `needs.<job>.result` sees.
+  # Suggestive, not conclusive, but the asymmetry favours caution: the
+  # Contexts reference documents this exact neutralisation for *steps*
+  # (`steps.<step_id>.conclusion` is defined as the step's result "after
+  # `continue-on-error` is applied", explicitly distinct from `.outcome`,
+  # which stays `failure`) and says nothing of the kind for
+  # `needs.<job_id>.result`, which lists only
+  # `success`/`failure`/`cancelled`/`skipped` with no `outcome`/`conclusion`
+  # split at all -- documented where it applies to steps, silent where the
+  # same question would apply to jobs. One could still argue `result` is
+  # simply the job-level analogue of `conclusion` and behaves the same way;
+  # that argument is evidence for that reading, not proof of it. Requiring
+  # exactly `success` below therefore carries one open, unverified risk: if
+  # the undocumented case resolves to `failure`, a 3.15-only engine regression
+  # would turn this sole required context red and block every merge --
+  # worse than the gate it replaces, and directly against #845's ruling that
+  # 3.15 must never block.
+  #
+  # Two ways to remove the dependence on that undocumented behaviour
+  # outright, both considered and neither taken here. Moving
+  # `continue-on-error` from the job level down to the individual steps
+  # inside `engine-tests` that can fail on a 3.15 leg would close the gap in
+  # about two lines, but it changes what "non-blocking" means: a step-level
+  # flag makes a failing 3.15 leg's *step* report `success` too, so the leg
+  # reads green instead of red -- hiding the regression rather than merely
+  # declining to block on it, which throws away the "a regression stays
+  # visible" half of #845's ruling that the current job-level flag
+  # preserves. Splitting the 3.15 legs into their own, non-`needs:`-ed job
+  # keeps that visibility, but means duplicating this job's system-package
+  # install, per-engine install logic, and test invocation -- measured at
+  # 182 raw lines across those three steps, and GitHub Actions has no YAML
+  # anchors to shrink that with -- into a second job immediately after #849
+  # rebuilt this one, to close a single unverified edge. Flagging the risk
+  # here instead: if a `required-checks` run ever goes red with only a 3.15
+  # `engine-tests` leg failing underneath it, that is this exact gap and not
+  # a genuine regression -- re-run to confirm, and revisit one of the two
+  # options above then.
+  #
+  # Excepting that one flagged case, there is no other path in this workflow
+  # where a real dependency legitimately reports anything other than
+  # `success` on a PR run, so requiring exactly `success` below is otherwise
+  # the accurate choice, not merely the cautious one. (GitHub's docs never
+  # spell out how one matrix job's several instances collapse into the
+  # single result a downstream `needs.<job>.result` sees; the reasoning
+  # above is from how `engine-tests` itself is built, not from a documented
+  # aggregation rule.)
+  required-checks:
+    name: Required checks passed
+    needs: [test, integration, engine-tests, pypcap-parity]
+    if: ${{ always() && inputs.gate-only != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check every required job succeeded
+        run: |
+          set -eu
+          echo "test: ${{ needs.test.result }}"
+          echo "integration: ${{ needs.integration.result }}"
+          echo "engine-tests: ${{ needs.engine-tests.result }}"
+          echo "pypcap-parity: ${{ needs.pypcap-parity.result }}"
+
+          failed=0
+          [ "${{ needs.test.result }}" = "success" ] || { echo "::error title=test did not succeed::result was '${{ needs.test.result }}', not 'success'."; failed=1; }
+          [ "${{ needs.integration.result }}" = "success" ] || { echo "::error title=integration did not succeed::result was '${{ needs.integration.result }}', not 'success'."; failed=1; }
+          [ "${{ needs.engine-tests.result }}" = "success" ] || { echo "::error title=engine-tests did not succeed::result was '${{ needs.engine-tests.result }}', not 'success'."; failed=1; }
+          [ "${{ needs.pypcap-parity.result }}" = "success" ] || { echo "::error title=pypcap-parity did not succeed::result was '${{ needs.pypcap-parity.result }}', not 'success'."; failed=1; }
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error title=Required checks did not all succeed::One or more of test, integration, engine-tests, pypcap-parity did not report 'success' -- see the per-job lines above. A skipped or cancelled dependency is not a pass; see this job's own comment for why that distinction is the point of this job existing."
+            exit 1
+          fi
+          echo "All required jobs reported success."
