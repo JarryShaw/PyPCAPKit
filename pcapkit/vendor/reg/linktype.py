@@ -63,6 +63,7 @@ class LinkType(Vendor):
 
         """
         enum = []  # type: list[str]
+        legacy = []  # type: list[str]
         miss = [
             "return extend_enum(cls, 'Unassigned_%d' % value, value)",
         ]
@@ -74,6 +75,15 @@ class LinkType(Vendor):
 
             if not name:
                 name = desc[4:]
+
+            # tcpdump's table lists a handful of rows -- today, only
+            # ``DLT_IPMB_LINUX`` -- as a legacy alias sharing its value with a
+            # later, current row (``DLT_I2C_LINUX``); its note column says so
+            # verbatim ("Legacy names (do not use) ..."). Sink those into a
+            # separate bucket appended after every current entry, so the
+            # *current* name -- not the legacy one -- is the first member
+            # defined for that value and therefore wins ``LinkType(value).name``.
+            sink = legacy if 'legacy' in cmmt.lower() else enum
 
             try:
                 code, _ = temp, int(temp)
@@ -90,7 +100,7 @@ class LinkType(Vendor):
                 #     sufs = f"\n{' '*80}{sufs}"
 
                 # enum.append(f'{pres.ljust(76)}{sufs}')
-                enum.append(f'{sufs}\n    {pres}')
+                sink.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = map(int, temp.split('–'))
                 for code in range(start, stop+1):
@@ -104,8 +114,8 @@ class LinkType(Vendor):
                     #     sufs = f"\n{' '*80}{sufs}"
 
                     # enum.append(f'{pres.ljust(76)}{sufs}')
-                    enum.append(f'{sufs}\n    {pres}')
-        return enum, miss
+                    sink.append(f'{sufs}\n    {pres}')
+        return enum + legacy, miss
 
 
 if __name__ == '__main__':
