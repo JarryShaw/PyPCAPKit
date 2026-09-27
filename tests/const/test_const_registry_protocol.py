@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for :class:`pcapkit.corekit.enums.EnumRegistry`, tier 2 of issue #775.
+"""Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
 Tier 1 (#838) removed the mint from the two sites in
 :data:`pcapkit.vendor.default.LINE` that the 105 default-template registries
@@ -13,7 +13,7 @@ they're to be moved to the base class. And AppType's sub-base class will do its
 necessary overrides and dispatching logic; AppType subclasses will have their
 necessary overrides again pertaining their different contracts."*
 
-:class:`~pcapkit.corekit.enums.EnumRegistry` is tier one of that hierarchy. This
+:class:`~pcapkit.corekit.enum.EnumRegistry` is tier one of that hierarchy. This
 module pins both halves of the claim: that the generated registries in this batch
 really do inherit the protocol rather than carry a copy of it, and that each of
 the four methods honours the contract the maintainer wrote for it.
@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag, StrEnum
 
-from pcapkit.corekit.enums import EnumRegistry
+from pcapkit.corekit.enum import EnumRegistry
 from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 #: Repository root, for reading generated sources as text.
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The batch converted onto :class:`~pcapkit.corekit.enums.EnumRegistry`: the
+#: The batch converted onto :class:`~pcapkit.corekit.enum.EnumRegistry`: the
 #: six bespoke-template registries whose members carry no extra attributes, so
 #: the shared ``_unregistered_member`` -- which sets only ``_name_`` and
 #: ``_value_`` -- builds a complete member for them. ``tcp/flags`` joined the
@@ -50,7 +50,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: ``_missing_`` still does its own 16-bit range check ending in
 #: ``super()._missing_(value)``, unchanged by the conversion: that call chain
 #: resolves through :mod:`aenum`'s own :class:`~aenum.Flag` machinery either
-#: way, since :class:`~pcapkit.corekit.enums.EnumRegistry` never defines
+#: way, since :class:`~pcapkit.corekit.enum.EnumRegistry` never defines
 #: ``_missing_`` itself. The remaining five bespoke templates (``ftp/command``,
 #: ``ftp/return_code``, ``http/method``, ``http/status_code``,
 #: ``pcapng/option_type``) do each define a custom ``__new__`` attaching further
@@ -122,7 +122,7 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
         for _, name, relpath in CONVERTED:
             with self.subTest(registry=name):
                 source = (REPO_ROOT / relpath).read_text()
-                self.assertIn('from pcapkit.corekit.enums import EnumRegistry', source)
+                self.assertIn('from pcapkit.corekit.enum import EnumRegistry', source)
                 self.assertIn(f'class {name}(EnumRegistry, ', source)
 
     def test_converted_const_modules_carry_no_copy_of_the_protocol(self) -> None:
@@ -138,7 +138,7 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
         for relpath in CONVERTED_VENDORS:
             with self.subTest(vendor=relpath):
                 source = (REPO_ROOT / relpath).read_text()
-                self.assertIn('from pcapkit.corekit.enums import EnumRegistry', source)
+                self.assertIn('from pcapkit.corekit.enum import EnumRegistry', source)
                 self.assertNotIn("def get(key: 'int | str'", source)
 
 
@@ -162,7 +162,7 @@ class ProtocolIsInheritedTests(unittest.TestCase):
         # entry from ``sys.modules``, so the freshly imported registries inherit
         # a *new* EnumRegistry class object -- identity against the outer one
         # would fail for a reason that says nothing about the product.
-        cls.base = importlib.import_module('pcapkit.corekit.enums').EnumRegistry
+        cls.base = importlib.import_module('pcapkit.corekit.enum').EnumRegistry
         cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
 
     def test_base_class_is_in_the_mro(self) -> None:
@@ -260,7 +260,7 @@ class TCPFlagsConversionTests(unittest.TestCase):
         """Fails on ``02296b5dd``, where ``Flags`` is a plain ``IntFlag``.
 
         Resolves ``EnumRegistry`` freshly from the just-reimported
-        ``pcapkit.corekit.enums`` rather than the module-scope import above --
+        ``pcapkit.corekit.enum`` rather than the module-scope import above --
         ``setUp`` purged ``pcapkit`` from ``sys.modules``, so ``Flags`` now
         inherits a *new* ``EnumRegistry`` class object, and identity against
         the stale outer one would fail for a reason that says nothing about
@@ -269,12 +269,12 @@ class TCPFlagsConversionTests(unittest.TestCase):
         """
         from pcapkit.const.tcp.flags import Flags
 
-        base = importlib.import_module('pcapkit.corekit.enums').EnumRegistry
+        base = importlib.import_module('pcapkit.corekit.enum').EnumRegistry
         self.assertIn(base, Flags.__mro__)
 
     def test_missing_resolves_identically_to_the_pre_conversion_shape(self) -> None:
         """The conversion changes *what the class inherits*, not
-        ``_missing_``'s own logic -- :class:`~pcapkit.corekit.enums.EnumRegistry`
+        ``_missing_``'s own logic -- :class:`~pcapkit.corekit.enum.EnumRegistry`
         never defines ``_missing_`` itself, so ``super()._missing_(value)``
         inside ``Flags._missing_`` resolves through :mod:`aenum`'s
         :class:`~aenum.Flag` machinery exactly as it did when ``Flags``
@@ -498,7 +498,7 @@ class RegisterContractTests(unittest.TestCase):
         docstring contract that ``register`` is what mints and nothing else
         does so silently. Reproduced against this exact shape on
         ``pcapkit.const.reg.apptype.apptype.TransportProtocol`` (a different,
-        non-:class:`~pcapkit.corekit.enums.EnumRegistry` registry, since
+        non-:class:`~pcapkit.corekit.enum.EnumRegistry` registry, since
         that one is not gated the same way) before this guard existed:
         ``TransportProtocol.register(6, 'TOTALLY_NEW_NAME')`` returned
         ``TransportProtocol.tcp`` unchanged and minted nothing. This pins the
@@ -529,7 +529,7 @@ class RegisterContractTests(unittest.TestCase):
     def test_register_over_a_taken_value_on_a_flag_registry_also_refuses(self) -> None:
         """The same guard, on an :class:`~aenum.IntFlag` registry: value
         collision is checked the same way regardless of member type, since
-        both share :meth:`~pcapkit.corekit.enums.EnumRegistry._extend`."""
+        both share :meth:`~pcapkit.corekit.enum.EnumRegistry._extend`."""
         from pcapkit.const.mh.binding_ack_flag import BindingACKFlag
 
         target = list(BindingACKFlag)[0]
@@ -544,14 +544,14 @@ class RegisterContractTests(unittest.TestCase):
     def test_register_alias_still_aliases_after_the_value_guard(self) -> None:
         """:meth:`register_alias` depends on :meth:`register` accepting an
         already-registered value -- that dependency moved to the shared,
-        ungated :meth:`~pcapkit.corekit.enums.EnumRegistry._extend` when this
+        ungated :meth:`~pcapkit.corekit.enum.EnumRegistry._extend` when this
         guard was added, so this pins that the move did not also gate the
         path :meth:`register_alias` needs. A naive guard placed directly in
         the body :meth:`register` calls would make every alias registration
         raise the exact error this test's sibling above checks for, rather
         than aliasing. Deliberately on ``ExtensionHeader`` rather than
         ``Flags``: this registry already inherited
-        :class:`~pcapkit.corekit.enums.EnumRegistry` before this change, so
+        :class:`~pcapkit.corekit.enum.EnumRegistry` before this change, so
         this is a regression pin on the internal refactor and holds on both
         the prior head and this one -- unlike this class's ``Flags``-based
         siblings above, which pin the guard itself and so only hold once
@@ -672,6 +672,383 @@ class UnregisteredMemberTests(unittest.TestCase):
         self.assertEqual(member.name, 'unit_test_absent')
         self.assertNotIn('absent', _Str._value2member_map_)
         self.assertNotIn('unit_test_absent', _Str.__members__)
+
+
+#: Sample of the 105 default-template registries GitHub issue #775's tier 3
+#: moved onto :class:`~pcapkit.corekit.enum.EnumRegistry`, chosen to cover
+#: the two shapes the census turned up in ``pcapkit/vendor/default.py``'s
+#: ``LINE`` template: a registry whose own ``_missing_`` mints directly via
+#: :func:`~aenum.extend_enum` for an unassigned value (``TransType``,
+#: ``LinkType``, ``RecordType``, ``Parameter`` -- the last two from crawlers
+#: that override ``process()`` to supply that ``_missing_`` body themselves),
+#: and one that resolves a bounded-but-unassigned value through the
+#: inherited ``_unregistered_member`` instead (``Hardware``). The template's
+#: own ``from aenum import IntEnum{, extend_enum}`` import line depends on
+#: which shape a given registry's crawler produces, so the sample deliberately
+#: covers both.
+GENERATED_SAMPLE = (
+    ('pcapkit.const.reg.transtype', 'TransType', 'pcapkit/const/reg/transtype.py'),
+    ('pcapkit.const.reg.linktype', 'LinkType', 'pcapkit/const/reg/linktype.py'),
+    ('pcapkit.const.arp.hardware', 'Hardware', 'pcapkit/const/arp/hardware.py'),
+    ('pcapkit.const.pcapng.record_type', 'RecordType', 'pcapkit/const/pcapng/record_type.py'),
+    ('pcapkit.const.hip.parameter', 'Parameter', 'pcapkit/const/hip/parameter.py'),
+)
+
+#: Const modules tier 3 deliberately leaves alone. The first six override
+#: their crawler's own ``process()``/``context()`` with a bespoke,
+#: mint-on-lookup ``get()``/``_missing_`` pair that does not share
+#: :mod:`pcapkit.vendor.default`'s template at all -- converting any of them
+#: onto :class:`~pcapkit.corekit.enum.EnumRegistry` would silently change
+#: behaviour rather than just move it, per the base ``get()``'s own
+#: str-key-never-tries-the-value-path limitation measured in
+#: :class:`StrEnumValuePathLimitationTests` below. The remaining four
+#: (``reg/apptype``'s transport subclasses) plus ``AppType``/
+#: ``TransportProtocol`` themselves are excluded for the separate reason
+#: :mod:`pcapkit.corekit.enum`'s own module docstring gives: they are tier 2
+#: of GitHub issue #842's three-tier hierarchy, not tier 3, and stay as they
+#: are until tier 2 lands.
+EXCLUDED_STILL_BESPOKE = frozenset({
+    'pcapkit/const/ftp/command.py',
+    'pcapkit/const/ftp/return_code.py',
+    'pcapkit/const/http/method.py',
+    'pcapkit/const/http/status_code.py',
+    'pcapkit/const/pcapng/option_type.py',
+    'pcapkit/const/reg/apptype/apptype.py',
+    'pcapkit/const/reg/apptype/dccp.py',
+    'pcapkit/const/reg/apptype/sctp.py',
+    'pcapkit/const/reg/apptype/tcp.py',
+    'pcapkit/const/reg/apptype/udp.py',
+})
+
+
+class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
+    """The 105 default-template registries must inherit the protocol too,
+    not just the six bespoke ones :class:`GeneratedSourceInheritsTests`
+    above (tier 2) already covers."""
+
+    def test_generated_sample_declares_the_base(self) -> None:
+        for _, name, relpath in GENERATED_SAMPLE:
+            with self.subTest(registry=name):
+                source = (REPO_ROOT / relpath).read_text()
+                self.assertIn('from pcapkit.corekit.enum import EnumRegistry', source)
+                self.assertIn(f'class {name}(EnumRegistry, IntEnum):', source)
+
+    def test_generated_sample_carries_no_copy_of_the_protocol(self) -> None:
+        """A ``def get``/``def register``/``def _unregistered_member`` left
+        behind would silently shadow the base -- the exact two-contract bug
+        this tier exists to remove. ``_missing_`` must survive, since it
+        carries each registry's own bounded ranges and was never meant to
+        move."""
+        for _, name, relpath in GENERATED_SAMPLE:
+            source = (REPO_ROOT / relpath).read_text()
+            for method in PROTOCOL:
+                with self.subTest(registry=name, method=method):
+                    self.assertNotIn(f'def {method}(', source)
+            with self.subTest(registry=name, method='_missing_'):
+                self.assertIn("def _missing_(cls, value: 'int')", source)
+
+    def test_every_generated_const_module_is_accounted_for(self) -> None:
+        """The full census, measured on this batch rather than assumed: 121
+        modules under :mod:`pcapkit.const`, splitting exactly three ways --
+        the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 10
+        :data:`EXCLUDED_STILL_BESPOKE` deliberately left alone, and the
+        remaining 105 this tier converts. Measured by me on the prior head
+        (commit ``05468a06b``, this batch's own base): of those 121, 6 carried
+        :class:`~pcapkit.corekit.enum.EnumRegistry` and 111 carried the
+        literal "Backport support for original codes." docstring (including
+        the 6 bespoke StrEnum/AppType files, since a hand-copied docstring is
+        not proof of a shared template) -- 105 is what is left once the 6
+        converted and the 10 excluded are both taken out.
+        """
+        const_root = REPO_ROOT / 'pcapkit' / 'const'
+        all_files = sorted(
+            path.relative_to(REPO_ROOT).as_posix()
+            for path in const_root.rglob('*.py')
+            if path.name != '__init__.py'
+        )
+        converted_relpaths = {relpath for _, _, relpath in CONVERTED}
+        generated = [path for path in all_files
+                     if path not in converted_relpaths and path not in EXCLUDED_STILL_BESPOKE]
+
+        self.assertEqual(len(all_files), 121)
+        self.assertEqual(len(generated), 105)
+
+        for relpath in generated:
+            with self.subTest(module=relpath):
+                source = (REPO_ROOT / relpath).read_text()
+                self.assertIn('from pcapkit.corekit.enum import EnumRegistry', source)
+                self.assertRegex(source, r'class \w+\(EnumRegistry, IntEnum\):')
+                for method in PROTOCOL:
+                    self.assertNotIn(f'def {method}(', source)
+
+
+class GeneratedProtocolIsInheritedTests(unittest.TestCase):
+    """The generated sample's protocol methods must resolve to the base
+    class, exactly as :class:`ProtocolIsInheritedTests` above pins for the
+    six bespoke ones."""
+
+    if TYPE_CHECKING:
+        registries: 'list[Any]'
+        base: 'Any'
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        cls.registries = [
+            getattr(importlib.import_module(module_name), class_name)
+            for module_name, class_name, _ in GENERATED_SAMPLE
+        ]
+        cls.base = importlib.import_module('pcapkit.corekit.enum').EnumRegistry
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_base_class_is_in_the_mro(self) -> None:
+        for registry in self.registries:
+            with self.subTest(registry=registry.__qualname__):
+                self.assertIn(self.base, registry.__mro__)
+
+    def test_every_method_resolves_to_the_base_implementation(self) -> None:
+        for registry in self.registries:
+            for method in PROTOCOL:
+                with self.subTest(registry=registry.__qualname__, method=method):
+                    self.assertEqual(getattr(registry, method).__func__,
+                                     getattr(self.base, method).__func__)
+
+    def test_member_type_stays_int_not_enumregistry(self) -> None:
+        """The base-class ordering rule #855 established:
+        ``class {NAME}(EnumRegistry, IntEnum)`` with the non-``Enum`` mixin
+        first is what keeps :mod:`aenum` resolving ``_member_type_`` from
+        ``IntEnum`` rather than from the mix-in -- verified rather than
+        assumed, per this tier's own instructions."""
+        for registry in self.registries:
+            with self.subTest(registry=registry.__qualname__):
+                self.assertIs(registry._member_type_, int)
+
+
+class GeneratedMissingRangeParityTests(unittest.TestCase):
+    """``_missing_``'s own bounded ranges must behave identically after the
+    conversion -- it was deliberately left untouched, so this is a
+    regression pin on that claim rather than a test of new behaviour."""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_hardware_still_bounds_and_resolves_its_unassigned_ranges(self) -> None:
+        """:class:`~pcapkit.const.arp.hardware.Hardware` declares ``0..38``
+        and ``39..255``/``258..65534`` as unassigned-but-in-range, ``65535``
+        as its own reserved member, and rejects anything else -- unchanged by
+        this tier, which only removed the duplicate ``get``/``register``/
+        ``_unregistered_member`` sitting next to it."""
+        from pcapkit.const.arp.hardware import Hardware
+
+        # In range, unassigned: resolves without minting a permanent member
+        # (tier 1's fix), reachable via the now-inherited get() too.
+        for value in (39, 255, 258, 65534):
+            with self.subTest(value=value):
+                self.assertEqual(Hardware(value).value, value)
+                self.assertEqual(Hardware(value).name, 'Unassigned')
+                self.assertNotIn(value, Hardware._value2member_map_)
+                self.assertEqual(Hardware.get(value).value, value)
+
+        # Out of the declared 0..65535 range: still raises, with or without
+        # a default -- the default is only consulted once _missing_ itself
+        # has already failed to resolve the key.
+        with self.assertRaises(ValueError):
+            Hardware(65536)
+        with self.assertRaises(ValueError):
+            Hardware.get(65536)
+        self.assertIs(Hardware.get(65536, 1), Hardware.Ethernet)
+
+    def test_transtype_still_mints_its_declared_unassigned_range(self) -> None:
+        """:class:`~pcapkit.const.reg.transtype.TransType` is the other
+        shape: its own ``_missing_`` mints permanently via
+        :func:`~aenum.extend_enum` for ``148..252`` rather than going through
+        ``_unregistered_member`` -- also unchanged by this tier."""
+        from pcapkit.const.reg.transtype import TransType
+
+        before = len(TransType._member_names_)
+        member = TransType(200)
+
+        self.assertEqual(member.value, 200)
+        self.assertEqual(member.name, 'Unassigned_200')
+        self.assertIn(200, TransType._value2member_map_)
+        self.assertEqual(before + 1, len(TransType._member_names_))
+
+        with self.assertRaises(ValueError):
+            TransType(9999)
+
+
+class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestCase):
+    """The residue #855 disclosed and this tier's own instructions name:
+    ``register()`` on an already-registered value used to silently alias
+    rather than mint or raise, on every one of the 105 generated registries
+    (they had no guard of their own -- only the six bespoke ones tier 2
+    already fixed did). Measured directly, before and after, in the
+    docstring below rather than only asserted.
+
+    Before (commit ``05468a06b``, this batch's own base)::
+
+        >>> TransType.register(6, 'TOTALLY_NEW_NAME')
+        <TransType.TCP: 6>              # returned the *existing* member
+        # 'TOTALLY_NEW_NAME' in TransType.__members__ == True
+        # _member_names_ grew by 0 -- nothing minted, nothing raised
+
+    After (this commit)::
+
+        >>> TransType.register(6, 'TOTALLY_NEW_NAME')
+        ValueError: 6 is already registered on TransType as 'TCP'; use
+        TransType.register_alias() to add a further name for it
+        # 'TOTALLY_NEW_NAME' in TransType.__members__ == False
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_register_over_a_taken_value_now_raises(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        names_before = list(TransType._member_names_)
+        members_before = dict(TransType.__members__)
+
+        with self.assertRaises(ValueError) as caught:
+            TransType.register(6, 'TOTALLY_NEW_NAME')
+
+        self.assertIn('6', str(caught.exception))
+        self.assertIn('TCP', str(caught.exception))
+        self.assertIn('register_alias', str(caught.exception))
+        self.assertEqual(names_before, list(TransType._member_names_))
+        self.assertEqual(members_before, dict(TransType.__members__))
+        self.assertNotIn('TOTALLY_NEW_NAME', TransType.__members__)
+        self.assertIs(TransType(6), TransType.TCP)
+
+    def test_register_still_mints_for_a_genuinely_new_value(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        value = _unused_value(TransType)
+        self.addCleanup(_purge_member, TransType, 'unit_test_generated_minted')
+
+        member = TransType.register(value, 'unit_test_generated_minted')
+
+        self.assertEqual(member.value, value)
+        self.assertIn(value, TransType._value2member_map_)
+
+
+class GetDispatchMatrixTests(unittest.TestCase):
+    """The dispatch flip this tier's own instructions name: the generated
+    ``get()`` checked ``isinstance(key, int)`` first and treated anything
+    else as a name; the inherited base checks ``isinstance(key, str)`` first
+    and treats anything else as a value. For a key that actually is an ``int``
+    or a ``str``, both orderings agree, so every probe below except the
+    "neither" one is a parity pin rather than a change; the "neither" probe
+    is the one documented, deliberate difference, measured before and after
+    on ``TransType`` (a plain generated ``IntEnum`` registry):
+
+    Before (commit ``05468a06b``)::
+
+        >>> TransType.get(3.5)
+        KeyError: 3.5          # not int -> treated as a name -> dict miss
+
+    After (this commit)::
+
+        >>> TransType.get(3.5)
+        ValueError: 3.5 is not a valid TransType   # not str -> treated as a
+        # value -> TransType(3.5) -> _missing_(3.5) -> not int -> ValueError
+
+    Neither raised exception mints anything, and both are still exactly the
+    kind of error :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own
+    docstring promises for an unresolvable key with no default.
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_valid_int_value(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        self.assertIs(TransType.get(6), TransType.TCP)
+
+    def test_valid_name(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        self.assertIs(TransType.get('TCP'), TransType.TCP)
+
+    def test_missing_name_without_default_raises_key_error(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        with self.assertRaises(KeyError):
+            TransType.get('Definitely_Not_A_Member')
+
+    def test_missing_name_with_default_falls_back(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        self.assertIs(TransType.get('Definitely_Not_A_Member', 6), TransType.TCP)
+
+    def test_missing_int_without_default_raises_value_error(self) -> None:
+        """``9999`` is outside TransType's declared ``0..255`` domain
+        entirely, so this is a genuine miss rather than an unassigned-but
+        in-range value that ``_missing_`` would otherwise mint."""
+        from pcapkit.const.reg.transtype import TransType
+
+        with self.assertRaises(ValueError):
+            TransType.get(9999)
+
+    def test_missing_int_with_default_falls_back(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+
+        self.assertIs(TransType.get(9999, 6), TransType.TCP)
+
+    def test_a_key_that_is_neither_int_nor_str_flips_exception_type(self) -> None:
+        """The one deliberate, documented behaviour change this tier makes,
+        pinned to the *new* (post-migration) shape: a key that is neither
+        ``int`` nor ``str`` now raises :exc:`ValueError` (treated as a value,
+        rejected by ``_missing_``'s own ``isinstance(value, int)`` guard)
+        rather than the old :exc:`KeyError` (treated as a name, rejected by
+        a plain dict lookup) -- measured before/after in this class's own
+        docstring above."""
+        from pcapkit.const.reg.transtype import TransType
+
+        for key in (3.5, None, b'x'):
+            with self.subTest(key=key):
+                with self.assertRaises(ValueError) as caught:
+                    TransType.get(key)
+                self.assertIn('is not a valid TransType', str(caught.exception))
+
+
+class StrEnumValuePathLimitationTests(unittest.TestCase):
+    """Justifies excluding every :class:`~aenum.StrEnum` const module from
+    this tier (:data:`EXCLUDED_STILL_BESPOKE`'s ``ftp``/``http``/``pcapng``/
+    ``reg.apptype`` entries): the base ``get()``'s ``isinstance(key, str)``
+    branch only ever tries ``cls._member_map_[key]`` -- a *name* lookup -- and
+    never falls back to treating a ``str`` key as a *value*, unlike the
+    integer path. That is pre-existing behaviour of
+    :class:`~pcapkit.corekit.enum.EnumRegistry` itself (added by tier 1,
+    #855, which never converted a :class:`~aenum.StrEnum` registry either),
+    not something this tier introduces -- reproduced here on a synthetic
+    registry so the exclusion decision is measured rather than assumed, and
+    so a future tier that does take on the ``StrEnum`` registries knows
+    exactly what it would need to fix first.
+    """
+
+    def test_a_str_key_that_is_a_value_but_not_a_name_is_not_resolved(self) -> None:
+        class _Str(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+
+        # The name resolves, as it always would.
+        self.assertIs(_Str.get('KNOWN'), _Str.KNOWN)
+
+        # The *value* -- a different string from the name -- does not, even
+        # though ``_Str('known-value')`` (the constructor) resolves it fine.
+        # This is the gap: get() never reaches the constructor for a str key.
+        self.assertIs(_Str('known-value'), _Str.KNOWN)
+        with self.assertRaises(KeyError):
+            _Str.get('known-value')
 
 
 if __name__ == '__main__':

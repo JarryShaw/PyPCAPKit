@@ -2,9 +2,9 @@
 """Constant Enumeration Base
 ==============================
 
-.. module:: pcapkit.corekit.enums
+.. module:: pcapkit.corekit.enum
 
-:mod:`pcapkit.corekit.enums` contains :class:`~pcapkit.corekit.enums.EnumRegistry`
+:mod:`pcapkit.corekit.enum` contains :class:`~pcapkit.corekit.enum.EnumRegistry`
 only, the base class every constant enumeration under :mod:`pcapkit.const` is to
 inherit the registry protocol from.
 

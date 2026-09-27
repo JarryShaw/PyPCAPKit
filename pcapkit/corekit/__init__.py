@@ -17,7 +17,7 @@ etc.
 
 """
 from pcapkit.corekit.io import SeekableReader
-from pcapkit.corekit.enums import EnumRegistry
+from pcapkit.corekit.enum import EnumRegistry
 from pcapkit.corekit.fields import *
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.module import ModuleDescriptor

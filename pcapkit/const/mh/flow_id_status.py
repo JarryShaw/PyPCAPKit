@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_status.F
 
 from aenum import IntEnum, extend_enum
 
+from pcapkit.corekit.enum import EnumRegistry
+
 __all__ = ['FlowIDStatus']
 
 
-class FlowIDStatus(IntEnum):
+class FlowIDStatus(EnumRegistry, IntEnum):
     """[FlowIDStatus] Flow Identification Mobility Option Status Codes"""
 
     #: Flow binding successful [:rfc:`6089`]
@@ -38,72 +40,6 @@ class FlowIDStatus(IntEnum):
 
     #: Traffic selector format not supported [:rfc:`6089`]
     Traffic_selector_format_not_supported = 133
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'FlowIDStatus':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return FlowIDStatus(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return FlowIDStatus(default)
-        try:
-            return FlowIDStatus[key]  # type: ignore[misc]
-        except KeyError:
-            if default == -1:
-                raise
-            return FlowIDStatus(default)
-
-    @classmethod
-    def register(cls, value: 'int', name: 'str') -> 'FlowIDStatus':
-        """Explicitly register a new member.
-
-        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
-        value without minting anything new, this is the caller-named entry
-        point that still grows the registry, via :func:`aenum.extend_enum`.
-
-        Args:
-            value: Value of the new member.
-            name: Name of the new member.
-
-        Returns:
-            The newly registered member.
-
-        """
-        return extend_enum(cls, name, value)
-
-    @classmethod
-    def _unregistered_member(cls, value: 'int', name: 'str') -> 'FlowIDStatus':
-        """Build a member absent from this registry's own lookup tables.
-
-        Used by :meth:`_missing_` for a bounded-but-unassigned value it
-        resolves without anyone asking for a name, so that such a lookup no
-        longer grows the registry -- contrast :meth:`register`, the explicit
-        path that still does.
-
-        Args:
-            value: The member's value.
-            name: The member's name.
-
-        Returns:
-            The unregistered member.
-
-        """
-        obj = int.__new__(cls, value)
-        obj._name_ = name  # pylint: disable=protected-access
-        obj._value_ = value  # pylint: disable=protected-access
-        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'FlowIDStatus':

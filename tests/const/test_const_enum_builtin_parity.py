@@ -1050,7 +1050,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         after the enumeration block is a ``classmethod``, because GitHub issue
         #775's tier 2 found ``tcp/flags``' own exclusion rationale did not hold
         -- see ``tests.const.test_const_registry_protocol`` -- and converted it
-        onto :class:`~pcapkit.corekit.enums.EnumRegistry` alongside the four
+        onto :class:`~pcapkit.corekit.enum.EnumRegistry` alongside the four
         ``mh/*_flag`` templates. The generated ``@staticmethod get`` that used
         to close the block is gone, leaving ``_missing_`` next, the same
         rewrite ``test_const_enum_lookup.py`` made for those four.

@@ -12,7 +12,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag
 
 from aenum import IntFlag
 
-from pcapkit.corekit.enums import EnumRegistry
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['BindingACKFlag']
 
