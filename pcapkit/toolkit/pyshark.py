@@ -28,60 +28,297 @@ if TYPE_CHECKING:
 
     from pyshark.packet.packet import Packet
 
-__all__ = ['packet2dict', 'tcp_traceflow', 'FILTER_NAME_TO_LINKTYPE']
+__all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAME_TO_LINKTYPE']
 
-#: Wireshark display-filter name -> :class:`~pcapkit.const.reg.linktype.LinkType` member, for the
-#: link-layer protocols :mod:`pyshark` can hand :func:`tcp_traceflow` as
-#: ``packet.layers[0].layer_name``. PyShark takes that name verbatim from the PDML ``<proto
-#: name=...>`` attribute, which is Wireshark's own dissector *filter* name -- the third argument to
-#: ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and that
-#: vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never ``ETHERNET``.
-#: This table exists so :mod:`pcapkit` can bridge the two without minting a DLT for a name it
-#: cannot actually place (see the NOTE in :func:`tcp_traceflow`).
+#: ``frame.encap_type`` -- Wireshark's internal ``WTAP_ENCAP_*`` number, which :mod:`pyshark`
+#: exposes as ``packet.frame_info.encap_type`` -- to the matching
+#: :class:`~pcapkit.const.reg.linktype.LinkType` member. This is :func:`tcp_traceflow`'s primary
+#: link-type source; ``FILTER_NAME_TO_LINKTYPE`` below is only its fallback.
 #:
-#: Both entries were checked two ways: against Wireshark's dissector registrations, and live with
-#: ``tshark`` 4.6.9 plus ``editcap -T <encap>`` to confirm the PDML root each encapsulation
-#: actually produces. Note the upper-casing is done by the call site in :func:`tcp_traceflow`,
-#: not by :meth:`LinkType.get`, which is a plain subscript.
+#: A ``WTAP_ENCAP_*`` number is **not** a DLT: it is 25 where the DLT is 113, 15 where it is 0, and
+#: 2 where it is 6, so it needs this table rather than a cast. What it does do is distinguish
+#: encapsulations that the PDML root layer's *filter* name cannot, which is the whole reason this
+#: table exists: ``sll`` is both ``LINUX_SLL`` (113) and ``LINUX_SLL2`` (276), ``null`` is both
+#: ``NULL`` (0) and ``LOOP`` (108), ``raw`` is ``RAW`` (101), ``IPV4`` (228) and ``IPV6`` (229),
+#: ``ppp`` is ``PPP`` (9) and ``PPP_WITH_DIR`` (204), ``lapd`` is ``LAPD`` (203) and
+#: ``LINUX_LAPD`` (177). ``frame.encap_type`` separates every one of those pairs.
 #:
-#: * ``eth`` -> :attr:`~LinkType.ETHERNET` -- ``packet-eth.c`` registers it against
-#:   ``WTAP_ENCAP_ETHERNET``, and ``ether`` is the only one of the 158 swept encapsulations that
-#:   roots at ``eth``. ``ether-nettl`` is among the 68 unswept, so "exactly one" is unproven.
-#: * ``tr`` -> :attr:`~LinkType.IEEE802_5` -- ``packet-tr.c``, ``WTAP_ENCAP_TOKEN_RING``; ``tr``
-#:   is the only swept encapsulation rooting at ``tr``, with ``tr-nettl`` likewise unswept.
-#:   :class:`LinkType`'s own ``#:`` comment records that ``DLT_IEEE802`` *is* Token Ring, the
-#:   missing ``_5`` being historical.
+#: Every entry was measured, not transcribed, with ``editcap``/``tshark`` 4.6.9::
 #:
-#: Everything else, measured rather than reasoned. A filter name serving several DLTs cannot be
-#: mapped, because the PDML node does not say which one arrived:
+#:     editcap -F pcap -T <encap> examples/captures/in.pcap out.pcap
+#:     # value := the ``network`` field at offset 20 of out.pcap's pcap file header
+#:     # key   := the ``frame.encap_type`` that ``tshark -r out.pcap -c 1 -T pdml`` then reports
 #:
-#: * ``sll`` -- serves :attr:`LinkType.LINUX_SLL` (113) and :attr:`LinkType.LINUX_SLL2` (276).
-#:   ``tshark -G protocols`` registers a single ``sll`` name, and ``editcap -T linux-sll`` and
-#:   ``-T linux-sll2`` both root at ``sll``. No entry; raises.
-#: * ``raw`` -- serves :attr:`LinkType.RAW` (101), :attr:`LinkType.IPV4` (228) and
-#:   :attr:`LinkType.IPV6` (229); ``editcap -T rawip``, ``-T rawip4`` and ``-T rawip6`` all root at
-#:   ``raw``. It does **not** raise: ``'RAW'`` is a member name, so the fallback answers 101 for all
-#:   three -- silently wrong for 228 and 229. Tracked in #843.
-#: * ``null`` -- serves :attr:`LinkType.NULL` (0) and :attr:`LinkType.LOOP` (108); ``editcap -T
-#:   null`` and ``-T loop`` both root at ``null``. Also does not raise: answers 0 for both, silently
-#:   wrong for 108. Tracked in #843. (``loop`` is a different protocol entirely -- ``tshark -G
-#:   protocols`` gives it as Configuration Test Protocol, an Ethernet payload on ethertype 0x9000.)
-#: * ``ip`` and ``ipv6`` -- never arrive as the root layer. ``editcap -T`` accepts 226
-#:   encapsulations; of the **158** an Ethernet source can be rewritten into, neither is ever
-#:   ``layers[0]`` -- a raw IPv6 capture roots at ``raw`` and carries ``ipv6`` as the *next* layer.
-#:   The other 68 refuse that rewrite (``can't be written as``, not an unknown type) and are
-#:   untested. No entry needed for either, and none would be reached.
-#: * ``ppp``, ``fddi``, ``lapd`` -- no entry needed; each upper-cases onto a real member name, so
-#:   the fallback resolves them. ``ppp`` and ``lapd`` each serve several DLTs and so answer with the
-#:   wrong one, which is the same #843 defect rather than anything this table introduces.
-#: * ``fr`` -- measured single-DLT after all: ``frelay`` and ``frelay-with-direction`` both write
-#:   DLT 107, so it is mappable. Left out only because adding it is scope this change does not need.
-#: * ``wlan`` -- not investigated. Left out rather than guessed.
-#: * every other :class:`LinkType` member -- no evidence was gathered either way; they are simply
-#:   untried, not ruled out.
+#: so each pair is one round trip through Wireshark's own ``wiretap/pcap-common.c``, in the read
+#: direction :mod:`pyshark` actually exercises. The trailing comment on each line names the
+#: ``editcap -T`` encapsulation that produced it.
+#:
+#: What the sweep does **not** cover, since that bounds this table: of the 226 encapsulations
+#: ``editcap -T`` accepts, 157 could be written as pcap from the Ethernet source above and the
+#: other 69 refused the rewrite, so they are untested. Those 157 yielded 153 distinct
+#: ``frame.encap_type`` keys, with no key mapping to two DLTs and no DLT reading back as two keys.
+#: 152 of them are below; ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121) is left out
+#: because :class:`LinkType` has no member for 121. An encapsulation absent from this table raises
+#: rather than resolving to a near-miss DLT.
+ENCAP_TYPE_TO_LINKTYPE = {
+    1: Enum_LinkType.ETHERNET,                     # ether
+    2: Enum_LinkType.IEEE802_5,                    # tr
+    3: Enum_LinkType.SLIP,                         # slip
+    4: Enum_LinkType.PPP,                          # ppp
+    6: Enum_LinkType.FDDI,                         # fddi,fddi-nettl,fddi-swapped
+    7: Enum_LinkType.RAW,                          # rawip
+    8: Enum_LinkType.ARCNET_BSD,                   # arcnet
+    9: Enum_LinkType.ARCNET_LINUX,                 # arcnet_linux
+    10: Enum_LinkType.ATM_RFC1483,                 # atm-rfc1483
+    11: Enum_LinkType.ATM_CLIP,                    # linux-atm-clip
+    13: Enum_LinkType.SUNATM,                      # atm-pdus
+    15: Enum_LinkType.NULL,                        # null
+    18: Enum_LinkType.IP_OVER_FC,                  # ip-over-fc
+    19: Enum_LinkType.PPP_WITH_DIR,                # ppp-with-direction
+    20: Enum_LinkType.IEEE802_11,                  # ieee-802-11,ieee-802-11-radio
+    21: Enum_LinkType.IEEE802_11_PRISM,            # ieee-802-11-prism
+    23: Enum_LinkType.IEEE802_11_RADIOTAP,         # ieee-802-11-radiotap
+    24: Enum_LinkType.IEEE802_11_AVS,              # ieee-802-11-avs
+    25: Enum_LinkType.LINUX_SLL,                   # linux-sll
+    26: Enum_LinkType.FRELAY,                      # frelay,frelay-with-direction
+    28: Enum_LinkType.C_HDLC,                      # chdlc
+    29: Enum_LinkType.CISCO_IOS,                   # ios
+    30: Enum_LinkType.LTALK,                       # ltalk
+    33: Enum_LinkType.DOCSIS,                      # docsis
+    36: Enum_LinkType.SDLC,                        # sdlc
+    37: Enum_LinkType.TZSP,                        # tzsp
+    38: Enum_LinkType.ENC,                         # enc
+    39: Enum_LinkType.PFLOG,                       # pflog
+    41: Enum_LinkType.BLUETOOTH_HCI_H4,            # bluetooth-h4
+    42: Enum_LinkType.MTP2,                        # mtp2
+    43: Enum_LinkType.MTP3,                        # mtp3
+    44: Enum_LinkType.LINUX_IRDA,                  # irda
+    45: Enum_LinkType.USER0,                       # user0
+    46: Enum_LinkType.USER1,                       # user1
+    47: Enum_LinkType.USER2,                       # user2
+    48: Enum_LinkType.USER3,                       # user3
+    49: Enum_LinkType.USER4,                       # user4
+    50: Enum_LinkType.USER5,                       # user5
+    51: Enum_LinkType.USER6,                       # user6
+    52: Enum_LinkType.USER7,                       # user7
+    53: Enum_LinkType.USER8,                       # user8
+    54: Enum_LinkType.USER9,                       # user9
+    55: Enum_LinkType.USER10,                      # user10
+    56: Enum_LinkType.USER11,                      # user11
+    57: Enum_LinkType.USER12,                      # user12
+    58: Enum_LinkType.USER13,                      # user13
+    59: Enum_LinkType.USER14,                      # user14
+    60: Enum_LinkType.USER15,                      # user15
+    61: Enum_LinkType.SYMANTEC_FIREWALL,           # symantec
+    62: Enum_LinkType.APPLE_IP_OVER_IEEE1394,      # ap1394
+    63: Enum_LinkType.BACNET_MS_TP,                # bacnet-ms-tp
+    66: Enum_LinkType.GPRS_LLC,                    # gprs-llc
+    67: Enum_LinkType.JUNIPER_ATM1,                # juniper-atm1
+    68: Enum_LinkType.JUNIPER_ATM2,                # juniper-atm2
+    69: Enum_LinkType.REDBACK_SMARTEDGE,           # redback
+    75: Enum_LinkType.MTP2_WITH_PHDR,              # mtp2-with-phdr
+    76: Enum_LinkType.JUNIPER_PPPOE,               # juniper-pppoe
+    77: Enum_LinkType.GCOM_T1E1,                   # gcom-tie1
+    78: Enum_LinkType.GCOM_SERIAL,                 # gcom-serial
+    81: Enum_LinkType.JUNIPER_MLPPP,               # juniper-mlppp
+    82: Enum_LinkType.JUNIPER_MLFR,                # juniper-mlfr
+    83: Enum_LinkType.JUNIPER_ETHER,               # juniper-ether
+    84: Enum_LinkType.JUNIPER_PPP,                 # juniper-ppp
+    85: Enum_LinkType.JUNIPER_FRELAY,              # juniper-frelay
+    86: Enum_LinkType.JUNIPER_CHDLC,               # juniper-chdlc
+    87: Enum_LinkType.JUNIPER_GGSN,                # juniper-ggsn
+    88: Enum_LinkType.LINUX_LAPD,                  # linux-lapd
+    91: Enum_LinkType.JUNIPER_VP,                  # juniper-vp
+    92: Enum_LinkType.USB_FREEBSD,                 # usb-freebsd
+    93: Enum_LinkType.IEEE802_16_MAC_CPS,          # ieee-802-16-mac-cps
+    95: Enum_LinkType.USB_LINUX,                   # usb-linux
+    97: Enum_LinkType.PPI,                         # ppi
+    98: Enum_LinkType.ERF,                         # erf
+    99: Enum_LinkType.BLUETOOTH_HCI_H4_WITH_PHDR,  # bluetooth-h4-linux
+    100: Enum_LinkType.SITA,                       # sita-wan
+    101: Enum_LinkType.SCCP,                       # sccp
+    103: Enum_LinkType.IPMB_KONTRON,               # ipmb-kontron
+    104: Enum_LinkType.IEEE802_15_4_WITHFCS,       # wpan
+    105: Enum_LinkType.X2E_XORAYA,                 # x2e-xoraya
+    106: Enum_LinkType.FLEXRAY,                    # flexray
+    107: Enum_LinkType.LIN,                        # lin
+    108: Enum_LinkType.MOST,                       # most
+    109: Enum_LinkType.CAN20B,                     # can20b
+    111: Enum_LinkType.X2E_SERIAL,                 # x2e-serial
+    112: Enum_LinkType.IPMB_LINUX,                 # i2c-linux
+    113: Enum_LinkType.IEEE802_15_4_NONASK_PHY,    # wpan-nonask-phy
+    115: Enum_LinkType.USB_LINUX_MMAPPED,          # usb-linux-mmap
+    121: Enum_LinkType.FC_2,                       # fc2
+    122: Enum_LinkType.FC_2_WITH_FRAME_DELIMS,     # fc2sof
+    124: Enum_LinkType.IPNET,                      # ipnet
+    125: Enum_LinkType.CAN_SOCKETCAN,              # socketcan
+    127: Enum_LinkType.IEEE802_15_4_NOFCS,         # wpan-nofcs
+    129: Enum_LinkType.IPV4,                       # rawip4
+    130: Enum_LinkType.IPV6,                       # rawip6
+    131: Enum_LinkType.LAPD,                       # lapd
+    132: Enum_LinkType.DVB_CI,                     # dvbci
+    133: Enum_LinkType.MUX27010,                   # mux27010
+    135: Enum_LinkType.NETANALYZER,                # netanalyzer
+    136: Enum_LinkType.NETANALYZER_TRANSPARENT,    # netanalyzer-transparent
+    138: Enum_LinkType.MPEG_2_TS,                  # mp2ts
+    139: Enum_LinkType.PPP_ETHER,                  # pppoes
+    140: Enum_LinkType.NFC_LLCP,                   # nfc-llcp
+    141: Enum_LinkType.NFLOG,                      # nflog
+    146: Enum_LinkType.DBUS,                       # dbus
+    147: Enum_LinkType.AX25_KISS,                  # ax25-kiss
+    148: Enum_LinkType.AX25,                       # ax25
+    149: Enum_LinkType.SCTP,                       # sctp
+    151: Enum_LinkType.JUNIPER_SERVICES,           # juniper-svcs
+    152: Enum_LinkType.USBPCAP,                    # usb-usbpcap
+    153: Enum_LinkType.RTAC_SERIAL,                # rtac-serial
+    154: Enum_LinkType.BLUETOOTH_LE_LL,            # bluetooth-le-ll
+    155: Enum_LinkType.WIRESHARK_UPPER_PDU,        # wireshark-upper-pdu
+    157: Enum_LinkType.STANAG_5066_D_PDU,          # s5066-dpdu
+    158: Enum_LinkType.NETLINK,                    # netlink
+    159: Enum_LinkType.BLUETOOTH_LINUX_MONITOR,    # bluetooth-linux-monitor
+    160: Enum_LinkType.BLUETOOTH_BREDR_BB,         # bluetooth-bredr-bb-rf
+    161: Enum_LinkType.BLUETOOTH_LE_LL_WITH_PHDR,  # bluetooth-le-ll-rf
+    171: Enum_LinkType.PKTAP,                      # pktap
+    172: Enum_LinkType.EPON,                       # epon
+    173: Enum_LinkType.IPMI_HPM_2,                 # ipmi-trace
+    174: Enum_LinkType.LOOP,                       # loop
+    177: Enum_LinkType.ISO_14443,                  # iso14443
+    178: Enum_LinkType.GPF_T,                      # gfp-t
+    179: Enum_LinkType.GPF_F,                      # gfp-f
+    180: Enum_LinkType.IPOIB,                      # ip-ib
+    181: Enum_LinkType.A429,                       # juniper-vn
+    182: Enum_LinkType.USB_DARWIN,                 # usb-darwin
+    183: Enum_LinkType.LORATAP,                    # loratap
+    184: Enum_LinkType.EXP_ETHERNET,               # xeth
+    185: Enum_LinkType.VSOCK,                      # vsock
+    186: Enum_LinkType.NORDIC_BLE,                 # nordic_ble
+    197: Enum_LinkType.JUNIPER_ST,                 # juniper-st
+    198: Enum_LinkType.ETHERNET_MPACKET,           # ether-mpacket
+    199: Enum_LinkType.DOCSIS31_XRA31,             # docsis31_xra31
+    200: Enum_LinkType.DISPLAYPORT_AUX,            # dpauxmon
+    204: Enum_LinkType.EBHSCR,                     # ebhscr
+    205: Enum_LinkType.VPP_DISPATCH,               # vpp
+    206: Enum_LinkType.IEEE802_15_4_TAP,           # wpan-tap
+    208: Enum_LinkType.USB_2_0,                    # usb-20
+    210: Enum_LinkType.LINUX_SLL2,                 # linux-sll2
+    211: Enum_LinkType.Z_WAVE_SERIAL,              # zwave-serial
+    212: Enum_LinkType.ETW,                        # etw
+    214: Enum_LinkType.ZBOSS_NCP,                  # zbncp
+    215: Enum_LinkType.USB_2_0_LOW_SPEED,          # usb-20-low
+    216: Enum_LinkType.USB_2_0_FULL_SPEED,         # usb-20-full
+    217: Enum_LinkType.USB_2_0_HIGH_SPEED,         # usb-20-high
+    219: Enum_LinkType.AUERSWALD_LOG,              # auerlog
+    220: Enum_LinkType.ATSC_ALP,                   # alp
+    221: Enum_LinkType.FIRA_UCI,                   # fira-uci
+    222: Enum_LinkType.SILABS_DEBUG_CHANNEL,       # silabs-dch
+    223: Enum_LinkType.MDB,                        # mdb
+    225: Enum_LinkType.DECT_NR,                    # dect_nr
+}  # type: dict[int, Enum_LinkType]
+
+#: Wireshark display-filter name -> :class:`~pcapkit.const.reg.linktype.LinkType` member, used by
+#: :func:`tcp_traceflow` **only** when the frame layer carries no ``frame.encap_type`` field for
+#: ``ENCAP_TYPE_TO_LINKTYPE`` above to key on -- every capture measured for that table did carry
+#: one, so this is a defensive path rather than the usual one. PyShark takes the name verbatim from
+#: the PDML
+#: ``<proto name=...>`` attribute, which is Wireshark's own dissector *filter* name -- the third
+#: argument to ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and
+#: that vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never
+#: ``ETHERNET``.
+#:
+#: Both entries were checked two ways: against Wireshark's dissector registrations
+#: (``packet-eth.c`` against ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` against
+#: ``WTAP_ENCAP_TOKEN_RING``), and live with ``editcap -T`` to confirm which PDML root each
+#: encapsulation produces.
+#:
+#: Every entry comes from the same sweep as ``ENCAP_TYPE_TO_LINKTYPE`` above: the root ``<proto
+#: name=...>`` of ``tshark -r out.pcap -c 1 -T pdml`` against the DLT in ``out.pcap``'s own file
+#: header. The trailing comment on each line names the ``editcap -T`` encapsulation that produced
+#: it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one
+#: rewrite. Names are listed even where they already spell their :class:`LinkType` member
+#: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named
+#: member, because upper-casing the name is exactly what answered 101 for a ``rawip6`` capture and
+#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (#843).
+#:
+#: Three classes of name are absent, all three measured rather than assumed:
+#:
+#: * **Ambiguous** -- one name, several DLTs, and the PDML node does not say which arrived. These
+#:   cannot be mapped at any size: ``user_dlt`` (16 DLTs), ``bluetooth`` (6), ``usb`` (5),
+#:   ``usbll`` (4), ``raw`` (3), and ``arcnet``, ``gfp``, ``i2c``, ``lapd``, ``mtp2``,
+#:   ``netanalyzer``, ``null``, ``ppp``, ``sll``, ``wlan``, ``wpan`` (2 each).
+#: * **Pseudo-protocols** -- ``fake-field-wrapper``, which :mod:`pyshark` reports as ``data`` and
+#:   which was the root for 29 of the swept encapsulations (no dissector), and ``_ws.malformed``,
+#:   the root for the one capture ``tshark`` could not parse. Neither names a link type.
+#: * **Unswept** -- the 69 encapsulations ``editcap -T`` would not write as pcap from an Ethernet
+#:   source. No evidence either way was gathered for them.
+#:
+#: Two caveats on what "unambiguous" means here. It means unambiguous *within* the 157 swept
+#: encapsulations: one of the 69 unswept could still root at the same name (``ether-nettl`` and
+#: ``tr-nettl`` are the obvious candidates, for ``eth`` and ``tr``). And five of the entries name a
+#: *payload* dissector that happened to be the outermost PDML node for exactly one encapsulation
+#: -- ``llc``, ``sctp``, ``pppoes``, ``fpp`` and ``irlap`` -- rather than a link-layer dissector
+#: registered against a ``WTAP_ENCAP_*``. Both are why this table is the fallback and
+#: ``frame.encap_type`` is the primary key; ``eth`` and ``tr`` additionally check out against
+#: Wireshark's own registrations (``packet-eth.c`` on ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` on
+#: ``WTAP_ENCAP_TOKEN_RING``).
 FILTER_NAME_TO_LINKTYPE = {
-    'eth': Enum_LinkType.ETHERNET,
-    'tr': Enum_LinkType.IEEE802_5,
+    'alp': Enum_LinkType.ATSC_ALP,                             # alp
+    'ap1394': Enum_LinkType.APPLE_IP_OVER_IEEE1394,            # ap1394
+    'atm': Enum_LinkType.SUNATM,                               # atm-pdus
+    'ax25': Enum_LinkType.AX25,                                # ax25
+    'ax25_kiss': Enum_LinkType.AX25_KISS,                      # ax25-kiss
+    'can': Enum_LinkType.CAN_SOCKETCAN,                        # socketcan
+    'chdlc': Enum_LinkType.C_HDLC,                             # chdlc
+    'clip': Enum_LinkType.ATM_CLIP,                            # linux-atm-clip
+    'dbus': Enum_LinkType.DBUS,                                # dbus
+    'dect_nr': Enum_LinkType.DECT_NR,                          # dect_nr
+    'docsis': Enum_LinkType.DOCSIS,                            # docsis
+    'dpauxmon': Enum_LinkType.DISPLAYPORT_AUX,                 # dpauxmon
+    'ebhscr': Enum_LinkType.EBHSCR,                            # ebhscr
+    'enc': Enum_LinkType.ENC,                                  # enc
+    'epon': Enum_LinkType.EPON,                                # epon
+    'erf': Enum_LinkType.ERF,                                  # erf
+    'eth': Enum_LinkType.ETHERNET,                             # ether
+    'exported_pdu': Enum_LinkType.WIRESHARK_UPPER_PDU,         # wireshark-upper-pdu
+    'fc': Enum_LinkType.FC_2,                                  # fc2
+    'fcsof': Enum_LinkType.FC_2_WITH_FRAME_DELIMS,             # fc2sof
+    'fddi': Enum_LinkType.FDDI,                                # fddi,fddi-nettl,fddi-swapped
+    'flexray': Enum_LinkType.FLEXRAY,                          # flexray
+    'fpp': Enum_LinkType.ETHERNET_MPACKET,                     # ether-mpacket
+    'fr': Enum_LinkType.FRELAY,                                # frelay,frelay-with-direction
+    'ipfc': Enum_LinkType.IP_OVER_FC,                          # ip-over-fc
+    'ipmi.trace': Enum_LinkType.IPMI_HPM_2,                    # ipmi-trace
+    'ipnet': Enum_LinkType.IPNET,                              # ipnet
+    'ipoib': Enum_LinkType.IPOIB,                              # ip-ib
+    'irlap': Enum_LinkType.LINUX_IRDA,                         # irda
+    'lin': Enum_LinkType.LIN,                                  # lin
+    'llap': Enum_LinkType.LTALK,                               # ltalk
+    'llc': Enum_LinkType.ATM_RFC1483,                          # atm-rfc1483
+    'llcgprs': Enum_LinkType.GPRS_LLC,                         # gprs-llc
+    'loratap': Enum_LinkType.LORATAP,                          # loratap
+    'mstp': Enum_LinkType.BACNET_MS_TP,                        # bacnet-ms-tp
+    'mtp3': Enum_LinkType.MTP3,                                # mtp3
+    'mux27010': Enum_LinkType.MUX27010,                        # mux27010
+    'nflog': Enum_LinkType.NFLOG,                              # nflog
+    'nordic_ble': Enum_LinkType.NORDIC_BLE,                    # nordic_ble
+    'pflog': Enum_LinkType.PFLOG,                              # pflog
+    'pktap': Enum_LinkType.PKTAP,                              # pktap
+    'ppi': Enum_LinkType.PPI,                                  # ppi
+    'pppoes': Enum_LinkType.PPP_ETHER,                         # pppoes
+    'radiotap': Enum_LinkType.IEEE802_11_RADIOTAP,             # ieee-802-11-radiotap
+    'redback': Enum_LinkType.REDBACK_SMARTEDGE,                # redback
+    'rtacser': Enum_LinkType.RTAC_SERIAL,                      # rtac-serial
+    'sccp': Enum_LinkType.SCCP,                                # sccp
+    'sctp': Enum_LinkType.SCTP,                                # sctp
+    'sdlc': Enum_LinkType.SDLC,                                # sdlc
+    'silabs-dch': Enum_LinkType.SILABS_DEBUG_CHANNEL,          # silabs-dch
+    'sita': Enum_LinkType.SITA,                                # sita-wan
+    'tr': Enum_LinkType.IEEE802_5,                             # tr
+    'tzsp': Enum_LinkType.TZSP,                                # tzsp
+    'uci': Enum_LinkType.FIRA_UCI,                             # fira-uci
+    'vpp': Enum_LinkType.VPP_DISPATCH,                         # vpp
+    'vsock': Enum_LinkType.VSOCK,                              # vsock
+    'wpan-nonask-phy': Enum_LinkType.IEEE802_15_4_NONASK_PHY,  # wpan-nonask-phy
+    'xra': Enum_LinkType.DOCSIS31_XRA31,                       # docsis31_xra31
 }  # type: dict[str, Enum_LinkType]
 
 
@@ -138,38 +375,43 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
     if 'TCP' in packet:
         tcp = cast('Packet', packet.tcp)
 
-        # NOTE: no default here, deliberately. Since #775 tier 1, ``get()``
-        # with no default raises on an unresolvable name instead of minting
-        # one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP
-        # framing, respectively -- each meant to go with its own handler
-        # protocol class, so neither is an honest stand-in for "unknown link
-        # type" and this must not paper over the miss with either.
+        # NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's
+        # internal ``WTAP_ENCAP_*`` number -- through
+        # ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the
+        # PDML root layer's *filter* name when the frame layer has no such
+        # field. That name cannot do the job on its own: one filter name
+        # serves several DLTs, so keying on it answered ``RAW`` (101) for a
+        # ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid
+        # DLTs, wrong ones, and silent (#843). ``frame.encap_type``
+        # distinguishes them; see that table's comment for the measurements.
         #
-        # PyShark's own layer name is Wireshark's PDML *filter* name (e.g.
-        # ``eth``, not ``ethernet``), which is generally not a LinkType member
-        # name -- so ``FILTER_NAME_TO_LINKTYPE`` (module level, above) is
-        # tried first, on the name as PyShark reports it. Only when that
-        # table has nothing for this name does this fall back to
-        # :meth:`LinkType.get` on the upper-cased name, which is what lets a
-        # filter name that happens to already spell a LinkType member (e.g.
-        # ``ppp``, ``fddi``) resolve without needing an entry of its own. The
-        # table is consulted first rather than second so that a curated,
-        # source-verified entry always wins over an incidental upper-case
-        # match, should a future LinkType member ever collide with one of
-        # this module's filter names by coincidence. The bare ``KeyError``
-        # from either lookup is re-raised as
+        # PyShark reports every field as ``LayerFieldsContainer``, a ``str``
+        # subclass, so the number arrives as text and needs ``int()``; and a
+        # field the frame layer does not carry raises ``AttributeError`` out
+        # of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is
+        # what the ``getattr`` default absorbs here.
+        #
+        # Neither path substitutes a DLT on a miss. Since #775 tier 1 a
+        # lookup raises on an unresolvable key instead of minting one, and
+        # NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,
+        # respectively -- each meant to go with its own handler protocol
+        # class, so neither is an honest stand-in for "unknown link type".
+        # The bare ``KeyError``/``ValueError`` is re-raised as
         # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
         # package's own house exception for a lookup miss -- rather than
         # letting it escape this public function.
-        name = packet.layers[0].layer_name
-        try:
-            protocol = FILTER_NAME_TO_LINKTYPE[name.lower()]
-        except KeyError:
-            name = name.upper()
+        encap_type = getattr(packet.frame_info, 'encap_type', None)
+        if encap_type is None:
+            name = packet.layers[0].layer_name
             try:
-                protocol = Enum_LinkType.get(name)
+                protocol = FILTER_NAME_TO_LINKTYPE[name.lower()]
             except KeyError:
                 raise MissingKeyError(name) from None
+        else:
+            try:
+                protocol = ENCAP_TYPE_TO_LINKTYPE[int(encap_type)]
+            except (KeyError, ValueError):
+                raise MissingKeyError('frame.encap_type=%s' % encap_type) from None
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=protocol,                                                   # data link type
