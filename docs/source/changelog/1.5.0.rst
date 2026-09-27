@@ -2923,6 +2923,26 @@ since -- reaching #805 by the entries below.
   disappears, no value changes and no membership changes;
   ``LinkType.IPMB_LINUX is LinkType.I2C_LINUX`` holds both before and after,
   and only the canonical name for the shared value moves (#848).
+* **Changed** -- ``engine-tests`` ran one Python-version leg per interpreter
+  regardless of which extraction engines that interpreter could actually
+  install, so ``pyproject.toml``'s own
+  ``PyPCAPFile = ["pypcapfile; python_version < '3.12'"]`` marker resolved to
+  *nothing* on 3.12--3.14, yet the ``Engines Python 3.12/3.13/3.14`` legs still
+  passed and, once promoted to a required check, gated merges while exercising
+  an engine that was never installed. Rebuilt as a genuine Python x engine
+  matrix -- 6 interpreters x 6 engines, 36 cells after 10 ``include`` overrides
+  -- with three honest outcomes: **26** ``supported`` cells that install
+  through the real ``pyproject.toml`` extra and must pass, **6**
+  ``unsupported`` cells (``PyPCAPFile`` on 3.12--3.15, ``PyShark`` on
+  3.14/3.15) installed by a raw ``pip install`` to bypass the marker and assert
+  the engine's own ``PYTHON_CEILING`` decline, and **4** ``not-installable``
+  cells (``PyPCAP`` on 3.12--3.15) where a genuine C-extension build failure is
+  logged and the test step skipped. The install step never passes silently in
+  either direction. 3.15 is ``continue-on-error`` throughout; job names change
+  shape (``Engines Python X`` becomes ``Engines Python X (engine)``), which
+  needed the branch-protection ruleset's required-check list updated in the
+  same window so a required check that stopped existing did not block every
+  merge permanently (#849).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
