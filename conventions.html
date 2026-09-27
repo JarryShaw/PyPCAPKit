@@ -513,18 +513,20 @@ it. <strong>Unmint.</strong></p></li>
 <section id="worked-examples">
 <h3>Worked examples<a class="headerlink" href="#worked-examples" title="Link to this heading">¶</a></h3>
 <p><em>Unmint.</em> <a class="reference internal" href="pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code>, <code class="docutils literal notranslate"><span class="pre">Experimental</span></code> and <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>
-ranges. Each describes <strong>who will assign the socket</strong>, not what the socket is; the
-name arrives with the assignment.</p>
+<code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code>, <code class="docutils literal notranslate"><span class="pre">Statically</span> <span class="pre">Assigned</span> <span class="pre">Socket</span> <span class="pre">Numbers</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Experimental</span></code> ranges. Each names <strong>how the socket will be allocated</strong>, not what
+occupies it; the real name arrives with the allocation.</p>
 <p><em>Mint.</em> <a class="reference internal" href="pcapkit/const/reg.html#module-pcapkit.const.reg.ethertype" title="pcapkit.const.reg.ethertype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype</span></code></a>’s company names – <code class="docutils literal notranslate"><span class="pre">Xyplex</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Datability</span></code>, <code class="docutils literal notranslate"><span class="pre">Qualcomm</span></code>, <code class="docutils literal notranslate"><span class="pre">Motorola</span></code> and others. IEEE’s record names <em>that
-specific value</em>, so the name is the assignment rather than a note about it.</p>
+<code class="docutils literal notranslate"><span class="pre">Datability</span></code>, <code class="docutils literal notranslate"><span class="pre">Qualcomm</span></code>, <code class="docutils literal notranslate"><span class="pre">Motorola</span></code> and some forty-five others – and, in the
+same file’s neighbour, <a class="reference internal" href="pcapkit/const/ipx.html#module-pcapkit.const.ipx.socket" title="pcapkit.const.ipx.socket"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ipx.socket</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code>. A
+company name is the assignment, for the reason in the next section.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Those two look similar and are not. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code> is a statement about a
-<strong>range</strong>; <code class="docutils literal notranslate"><span class="pre">Xyplex</span></code> at a single ethertype is a statement about <strong>that code</strong>.
-The line is drawn at whether the source names the value or names the arrangement
-covering it.</p>
+<p>Those two groups look alike and the line between them is <strong>not</strong> range-versus-single
+code. <code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">by</span> <span class="pre">Xerox</span></code> covers a range and still mints, because it names <em>who
+registered the socket</em>. <code class="docutils literal notranslate"><span class="pre">Dynamically</span> <span class="pre">Assigned</span></code> also covers a range and does not,
+because it names only the <em>mechanism</em> by which some future party will take it. Ask
+what the label tells you: a party, or a procedure.</p>
 </div>
 </section>
 <section id="why-the-company-names-mint">
