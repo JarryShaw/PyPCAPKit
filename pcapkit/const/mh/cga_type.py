@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_type.CGAType
 
 from aenum import IntEnum, extend_enum
 
+from pcapkit.corekit.enum import EnumRegistry
+
 __all__ = ['CGAType']
 
 
-class CGAType(IntEnum):
+class CGAType(EnumRegistry, IntEnum):
     """[CGAType] CGA Extension Type Tags"""
 
     #: 0x086F CA5E 10B2 00C9 9C8C E001 6427 7C08 [:rfc:`3971`]
@@ -38,72 +40,6 @@ class CGAType(IntEnum):
 
     #: 0x00B5 A69C 795D F5D5 F008 7F56 843F 2C40 [:rfc:`9374`]
     Tag_00B5_A69C_795D_F5D5_F008_7F56_843F_2C40 = 0x00B5_A69C_795D_F5D5_F008_7F56_843F_2C40
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'CGAType':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return CGAType(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return CGAType(default)
-        try:
-            return CGAType[key]  # type: ignore[misc]
-        except KeyError:
-            if default == -1:
-                raise
-            return CGAType(default)
-
-    @classmethod
-    def register(cls, value: 'int', name: 'str') -> 'CGAType':
-        """Explicitly register a new member.
-
-        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
-        value without minting anything new, this is the caller-named entry
-        point that still grows the registry, via :func:`aenum.extend_enum`.
-
-        Args:
-            value: Value of the new member.
-            name: Name of the new member.
-
-        Returns:
-            The newly registered member.
-
-        """
-        return extend_enum(cls, name, value)
-
-    @classmethod
-    def _unregistered_member(cls, value: 'int', name: 'str') -> 'CGAType':
-        """Build a member absent from this registry's own lookup tables.
-
-        Used by :meth:`_missing_` for a bounded-but-unassigned value it
-        resolves without anyone asking for a name, so that such a lookup no
-        longer grows the registry -- contrast :meth:`register`, the explicit
-        path that still does.
-
-        Args:
-            value: The member's value.
-            name: The member's name.
-
-        Returns:
-            The unregistered member.
-
-        """
-        obj = int.__new__(cls, value)
-        obj._name_ = name  # pylint: disable=protected-access
-        obj._value_ = value  # pylint: disable=protected-access
-        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'CGAType':

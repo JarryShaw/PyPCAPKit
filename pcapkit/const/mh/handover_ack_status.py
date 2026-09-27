@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_sta
 
 from aenum import IntEnum, extend_enum
 
+from pcapkit.corekit.enum import EnumRegistry
+
 __all__ = ['HandoverACKStatus']
 
 
-class HandoverACKStatus(IntEnum):
+class HandoverACKStatus(EnumRegistry, IntEnum):
     """[HandoverACKStatus] Handover Acknowledge Status Codes"""
 
     #: Handover Accepted or Successful (when 'P' flag is set) [:rfc:`5949`]
@@ -56,72 +58,6 @@ class HandoverACKStatus(IntEnum):
 
     #: Forwarding Not Available [:rfc:`5949`]
     Forwarding_Not_Available = 132
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'HandoverACKStatus':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return HandoverACKStatus(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return HandoverACKStatus(default)
-        try:
-            return HandoverACKStatus[key]  # type: ignore[misc]
-        except KeyError:
-            if default == -1:
-                raise
-            return HandoverACKStatus(default)
-
-    @classmethod
-    def register(cls, value: 'int', name: 'str') -> 'HandoverACKStatus':
-        """Explicitly register a new member.
-
-        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
-        value without minting anything new, this is the caller-named entry
-        point that still grows the registry, via :func:`aenum.extend_enum`.
-
-        Args:
-            value: Value of the new member.
-            name: Name of the new member.
-
-        Returns:
-            The newly registered member.
-
-        """
-        return extend_enum(cls, name, value)
-
-    @classmethod
-    def _unregistered_member(cls, value: 'int', name: 'str') -> 'HandoverACKStatus':
-        """Build a member absent from this registry's own lookup tables.
-
-        Used by :meth:`_missing_` for a bounded-but-unassigned value it
-        resolves without anyone asking for a name, so that such a lookup no
-        longer grows the registry -- contrast :meth:`register`, the explicit
-        path that still does.
-
-        Args:
-            value: The member's value.
-            name: The member's name.
-
-        Returns:
-            The unregistered member.
-
-        """
-        obj = int.__new__(cls, value)
-        obj._name_ = name  # pylint: disable=protected-access
-        obj._value_ = value  # pylint: disable=protected-access
-        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'HandoverACKStatus':

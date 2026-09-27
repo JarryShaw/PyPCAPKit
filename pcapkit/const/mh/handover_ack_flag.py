@@ -12,7 +12,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_fla
 
 from aenum import IntFlag
 
-from pcapkit.corekit.enums import EnumRegistry
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['HandoverACKFlag']
 

@@ -38,7 +38,7 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 
 from aenum import IntEnum
 
-from pcapkit.corekit.enums import EnumRegistry
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['{NAME}']
 

@@ -403,7 +403,7 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         # NOTE: the class statement names EnumRegistry and the first method after
         # the enumeration block is a classmethod, because #775's tier 2 moved
         # get/get_all/register/register_alias off these templates and onto
-        # pcapkit.corekit.enums.EnumRegistry -- the generated `@staticmethod get`
+        # pcapkit.corekit.enum.EnumRegistry -- the generated `@staticmethod get`
         # that used to close the block is gone, leaving `_missing_` next.
         block = re.compile(
             r'class \w+\(EnumRegistry, IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @classmethod',

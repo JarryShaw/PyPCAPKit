@@ -54,7 +54,6 @@ import importlib
 import importlib.util
 import inspect
 import pkgutil
-import re
 import unittest
 from typing import TYPE_CHECKING
 
@@ -287,10 +286,22 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_the_vendor_template_still_emits_the_fix(self) -> None:
         """A regeneration must not undo the fix.
 
-        :mod:`pcapkit.const` is generated from :mod:`pcapkit.vendor`, so the
-        committed tree passing is not evidence that the template agrees with it.
-        Renders the shared template and compares its ``get()`` block, character
-        for character, against the module generated from it.
+        GitHub issue #775's tier 3 moved #584's fix off the per-file generated
+        ``get()`` entirely: it now lives permanently in
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, which every one of the
+        105 default-template registries *inherits* rather than copies, so
+        there is no longer a ``get()`` block here for a regeneration to drop
+        the fix from -- the block this test used to extract and compare no
+        longer exists in either the template's output or the generated
+        module, in either case for the same reason.
+
+        What a regeneration could still undo is the inheritance itself, or
+        bring back a local copy of ``get``, ``register`` or
+        ``_unregistered_member`` that would shadow the base and silently
+        resurrect the pre-#775 two-contract bug -- this pins their absence,
+        and the presence of the mix-in, on both the freshly rendered template
+        (with synthetic content, as the pre-#775 version of this test did for
+        ``get()``) and the real, committed module.
         """
         import pathlib
 
@@ -304,14 +315,19 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         import pcapkit.const.arp.hardware as generated_module
         generated = pathlib.Path(generated_module.__file__).read_text(encoding='utf-8')
 
-        block = re.compile(r'    @staticmethod\n    def get\(.*?\n(?=    @)', re.S)
-        from_template = block.search(rendered)
-        from_generated = block.search(generated)
-
-        self.assertIsNotNone(from_template, 'the template rendered no get() block')
-        self.assertIsNotNone(from_generated, 'the generated module has no get() block')
-        self.assertIn('except ValueError:', from_template.group(0))
-        self.assertEqual(from_template.group(0), from_generated.group(0))
+        removed_signatures = (
+            "def get(key: 'int | str'",
+            "def register(cls, value: 'int', name: 'str')",
+            'def _unregistered_member(',
+        )
+        for label, rendering in (('template', rendered), ('generated module', generated)):
+            with self.subTest(rendering=label):
+                self.assertIn('from pcapkit.corekit.enum import EnumRegistry', rendering)
+                self.assertIn('class Hardware(EnumRegistry, IntEnum):', rendering)
+                for signature in removed_signatures:
+                    self.assertNotIn(signature, rendering,
+                                     f'{label} still carries a local {signature!r}, '
+                                     f'shadowing EnumRegistry')
 
 
 if __name__ == '__main__':
