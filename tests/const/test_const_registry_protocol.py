@@ -1051,5 +1051,150 @@ class StrEnumValuePathLimitationTests(unittest.TestCase):
             _Str.get('known-value')
 
 
+class NoDefaultSentinelTests(unittest.TestCase):
+    """GitHub issue #857: :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an
+    instance of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`
+    compared with ``is``, rather than the magic value ``-1`` compared with
+    ``==``. Owner ruling on #859: a bare :class:`object` -- this batch's first
+    attempt -- is no less safe under ``is``, but a dedicated class matches the
+    house convention :class:`~pcapkit.corekit.module.NullType` and
+    :class:`~pcapkit.corekit.fields.field.NoValueType` already set, and gives
+    a readable :func:`repr` in a signature, in :func:`help`, and in a
+    traceback.
+
+    Before #857, ``default == NO_DEFAULT`` read a caller-supplied ``-1`` --
+    or, worse, ``-1.0``, since ``-1.0 == -1`` -- as if no default had been
+    supplied at all, so the caller's own fallback silently never took effect.
+    There is no live defect in :mod:`pcapkit.const` today (no registry's
+    domain reaches ``-1``), so this batch pins the *clarity* fix: ``-1`` and
+    ``-1.0`` are ordinary defaults now, indistinguishable from any other
+    value a caller might pass.
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_no_default_is_not_equal_to_any_plausible_caller_value(self) -> None:
+        """The sentinel's whole point: unlike ``-1``, a
+        :class:`~pcapkit.corekit.enum.NoDefaultType` instance -- which defines
+        no ``__eq__`` of its own, so it inherits identity comparison from
+        :class:`object` -- cannot compare equal to anything a caller might
+        legitimately pass as ``default``, not even ``-1.0``, which the old
+        ``-1`` marker could not tell apart from itself."""
+        from pcapkit.corekit.enum import NO_DEFAULT
+
+        for value in (-1, -1.0, 0, '', None, False):
+            with self.subTest(value=value):
+                self.assertNotEqual(NO_DEFAULT, value)
+                self.assertIsNot(NO_DEFAULT, value)
+
+    def test_repr_is_the_readable_form_not_a_bare_object_address(self) -> None:
+        """The concrete reason #859 asked for a dedicated class over a bare
+        ``object()``: the latter prints as ``<object object at 0x...>``
+        wherever it turns up -- a signature, :func:`help`, a traceback --
+        and this prints as ``<NO_DEFAULT>`` instead."""
+        from pcapkit.corekit.enum import NO_DEFAULT
+
+        rendered = repr(NO_DEFAULT)
+        self.assertEqual(rendered, '<NO_DEFAULT>')
+        self.assertNotIn('0x', rendered)
+
+    def test_type_is_the_dedicated_sentinel_class_and_both_are_exported(self) -> None:
+        import pcapkit.corekit.enum as enum_module
+
+        self.assertIs(type(enum_module.NO_DEFAULT), enum_module.NoDefaultType)
+        self.assertIn('NO_DEFAULT', enum_module.__all__)
+        self.assertIn('NoDefaultType', enum_module.__all__)
+
+    def test_constructing_the_type_again_returns_the_same_instance(self) -> None:
+        """The ``__new__`` singleton guard: a caller who does not realise
+        :data:`~pcapkit.corekit.enum.NO_DEFAULT` already exists and writes
+        ``NoDefaultType()`` themselves still gets back the one canonical
+        sentinel, rather than a second, non-identical object that would
+        silently fail ``is NO_DEFAULT`` inside
+        :meth:`~pcapkit.corekit.enum.EnumRegistry.get` and be treated as a
+        real (if useless) default instead of *no default*."""
+        from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
+
+        self.assertIs(NoDefaultType(), NO_DEFAULT)
+        # And repeatedly -- not merely once by coincidence.
+        self.assertIs(NoDefaultType(), NoDefaultType())
+
+    def test_identity_survives_an_ordinary_second_import(self) -> None:
+        """An already-loaded module is cached in :data:`sys.modules`, so
+        importing it again -- by any of the usual spellings -- must not
+        construct a second sentinel. Only a genuine :func:`importlib.reload`
+        would do that (see :class:`~pcapkit.corekit.enum.NoDefaultType`'s own
+        docstring caveat, and :class:`~pcapkit.corekit.module.NullType`'s
+        before it), and nothing in this package reloads
+        :mod:`pcapkit.corekit.enum` after import."""
+        import importlib
+
+        from pcapkit.corekit.enum import NO_DEFAULT as first_import
+
+        module_again = importlib.import_module('pcapkit.corekit.enum')
+
+        self.assertIs(module_again.NO_DEFAULT, first_import)
+
+    def test_missing_name_with_default_negative_one_is_now_a_real_default(self) -> None:
+        """Fails on the pre-#857 tree: ``ExtensionHeader.get(<missing>, -1)``
+        raised :exc:`KeyError` there, because ``-1 == NO_DEFAULT`` read the
+        caller's ``-1`` as *no default* and re-raised the name lookup's own
+        error. On this head it raises :exc:`ValueError` instead, for the
+        *attempted fallback* ``ExtensionHeader(-1)`` -- ``-1`` is now a
+        genuine default, and every registry's domain starts at ``0``, so it
+        is itself unresolvable.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        before = len(ExtensionHeader.__members__)
+        with self.assertRaises(ValueError) as caught:
+            ExtensionHeader.get('Definitely-Not-A-Member', -1)
+        self.assertIn('-1', str(caught.exception))
+        self.assertNotIn('Definitely-Not-A-Member', str(caught.exception))
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_missing_name_with_default_negative_one_float_is_now_a_real_default(self) -> None:
+        """The float case that actually motivates #857: ``-1.0 == -1`` is
+        ``True``, so the old ``==`` comparison could not tell a caller's
+        ``-1.0`` apart from the ``-1`` marker either. Fails on the pre-#857
+        tree with :exc:`KeyError` for the same reason as the ``-1`` case
+        above; raises :exc:`ValueError` here, for ``ExtensionHeader(-1.0)``.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        before = len(ExtensionHeader.__members__)
+        with self.assertRaises(ValueError) as caught:
+            ExtensionHeader.get('Definitely-Not-A-Member', -1.0)
+        self.assertIn('-1.0', str(caught.exception))
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_missing_name_without_default_still_raises_on_an_int_enum(self) -> None:
+        """Omitting ``default`` entirely is unaffected by this change -- it
+        was, and remains, ``NO_DEFAULT`` by the parameter's own default
+        value, so identity trivially holds either way."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        before = len(ExtensionHeader.__members__)
+        with self.assertRaises(KeyError) as caught:
+            ExtensionHeader.get('Definitely-Not-A-Member')
+        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_missing_name_without_default_still_raises_on_an_int_flag(self) -> None:
+        """As above, on an :class:`~aenum.IntFlag` registry -- the base
+        ``get()`` does not branch on member type before consulting
+        ``NO_DEFAULT``."""
+        from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
+
+        before = len(BindingUpdateFlag.__members__)
+        with self.assertRaises(KeyError) as caught:
+            BindingUpdateFlag.get('Definitely-Not-A-Member')
+        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
+        self.assertEqual(before, len(BindingUpdateFlag.__members__))
+
+
 if __name__ == '__main__':
     unittest.main()
