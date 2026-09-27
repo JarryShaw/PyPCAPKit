@@ -639,7 +639,7 @@
 <span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
+            <span class="s2">"return cls._unregistered_member(value, 'Unassigned')"</span><span class="p">,</span>
         <span class="p">]</span>
 
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

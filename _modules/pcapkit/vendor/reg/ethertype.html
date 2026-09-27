@@ -482,6 +482,20 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'</span>
 
+    <span class="c1">#: Row labels that the historical Neil Sembower list itself marks as</span>
+    <span class="c1">#: carrying no real assignment -- a company holding the block but naming</span>
+    <span class="c1">#: nothing (``DEC Unassigned``), or a range the list says is dead/invalid</span>
+    <span class="c1">#: outright -- rather than a proprietary protocol's real name. Per the</span>
+    <span class="c1">#: owner's ruling on #775/#847: a proprietary protocol's company name IS</span>
+    <span class="c1">#: the final concrete name (no public name will ever exist), so every</span>
+    <span class="c1">#: *other* row here still mints; only these read as notation for the</span>
+    <span class="c1">#: reader and get a throwaway :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
+    <span class="c1">#: _unregistered_member` instead.</span>
+    <span class="n">UNASSIGNED_ROW_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
+        <span class="s1">'DEC Unassigned'</span><span class="p">,</span>
+        <span class="s1">'Old Xerox Experimental values. Invalid as an Ethertype since 1983.'</span><span class="p">,</span>
+    <span class="p">})</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count field records.</span>
 
@@ -563,7 +577,10 @@
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if 0x</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= 0x</span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNASSIGNED_ROW_NAMES</span><span class="p">:</span>
+                    <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">')"</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>  <span class="c1"># pylint: disable=line-too-long</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

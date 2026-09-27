@@ -492,7 +492,7 @@
 
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
+            <span class="s2">"return cls._unregistered_member(value, 'Unassigned')"</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
             <span class="n">long</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
