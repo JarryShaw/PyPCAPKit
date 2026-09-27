@@ -459,12 +459,14 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntFlag</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'BindingUpdateFlag'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="BindingUpdateFlag">
 <a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.binding_update_flag.BindingUpdateFlag">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BindingUpdateFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BindingUpdateFlag</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[BindingUpdateFlag] Binding Update Flags"""</span>
 
     <span class="c1">#: A [:rfc:`6275`]</span>
@@ -502,27 +504,6 @@
 
     <span class="c1">#: D [:rfc:`8885`]</span>
     <span class="n">D</span> <span class="o">=</span> <span class="mh">0x0010</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'BindingUpdateFlag'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found. The placeholder ``-1`` stands</span>
-<span class="sd">                for *no default*, in which case an unresolvable key propagates</span>
-<span class="sd">                the lookup error instead of falling back.</span>
-
-<span class="sd">        :meta private:</span>
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">BindingUpdateFlag</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">default</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="k">return</span> <span class="n">BindingUpdateFlag</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">BindingUpdateFlag</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="BindingUpdateFlag._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.binding_update_flag.BindingUpdateFlag._missing_">[docs]</a>
