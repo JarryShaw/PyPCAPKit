@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.vlan.priority_level
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -54,4 +54,4 @@ class PriorityLevel(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0b000 <= value <= 0b111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)
+        return cls._unregistered_member(value, 'Unassigned')

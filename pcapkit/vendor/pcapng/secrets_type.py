@@ -68,7 +68,7 @@ class SecretsType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_0x%08x' % value, value)",
+            "cls._unregistered_member(value, 'Unassigned')",
             'return cls(value)'
         ]
         for code, name in DATA.items():

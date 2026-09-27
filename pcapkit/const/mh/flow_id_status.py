@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_status.F
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -53,11 +53,11 @@ class FlowIDStatus(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 1 <= value <= 127:
             #: Unassigned; available for success codes
-            return extend_enum(cls, 'Unassigned_available_for_success_codes_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned_available_for_success_codes')
         if 134 <= value <= 250:
             #: Unassigned; available for reject codes
-            return extend_enum(cls, 'Unassigned_available_for_reject_codes_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned_available_for_reject_codes')
         if 251 <= value <= 255:
             #: Reserved for Experimental Use [:rfc:`6089`]
-            return extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Experimental_Use')
         return super()._missing_(value)

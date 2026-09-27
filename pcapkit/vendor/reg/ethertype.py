@@ -32,6 +32,20 @@ class EtherType(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'
 
+    #: Row labels that the historical Neil Sembower list itself marks as
+    #: carrying no real assignment -- a company holding the block but naming
+    #: nothing (``DEC Unassigned``), or a range the list says is dead/invalid
+    #: outright -- rather than a proprietary protocol's real name. Per the
+    #: owner's ruling on #775/#847: a proprietary protocol's company name IS
+    #: the final concrete name (no public name will ever exist), so every
+    #: *other* row here still mints; only these read as notation for the
+    #: reader and get a throwaway :meth:`~pcapkit.corekit.enum.EnumRegistry.
+    #: _unregistered_member` instead.
+    UNASSIGNED_ROW_NAMES = frozenset({
+        'DEC Unassigned',
+        'Old Xerox Experimental values. Invalid as an Ethertype since 1983.',
+    })
+
     def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
@@ -113,7 +127,10 @@ class EtherType(Vendor):
 
                 miss.append(f'if 0x{start} <= value <= 0x{stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
+                if name in self.UNASSIGNED_ROW_NAMES:
+                    miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
+                else:
+                    miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
         return enum, miss
 
 

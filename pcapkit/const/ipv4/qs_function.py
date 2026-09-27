@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipv4.qs_function.QS
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -34,4 +34,4 @@ class QSFunction(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 8):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        return cls._unregistered_member(value, 'Unassigned')

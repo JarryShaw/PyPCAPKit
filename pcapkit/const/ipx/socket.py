@@ -77,17 +77,17 @@ class Socket(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0020 <= value <= 0x003F:
             #: Experimental
-            return extend_enum(cls, 'Experimental_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Experimental')
         if 0x0001 <= value <= 0x0BB8:
             #: Registered by Xerox
             return extend_enum(cls, 'Registered by Xerox_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x4000 <= value <= 0x4FFF:
             #: Dynamically Assigned Socket Numbers
-            return extend_enum(cls, 'Dynamically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Dynamically Assigned Socket Numbers')
         if 0x8000 <= value <= 0xFFFF:
             #: Statically Assigned Socket Numbers
-            return extend_enum(cls, 'Statically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Statically Assigned Socket Numbers')
         if 0x0BB9 <= value <= 0xFFFF:
             #: Dynamically Assigned
-            return extend_enum(cls, 'Dynamically Assigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Dynamically Assigned')
         return super()._missing_(value)

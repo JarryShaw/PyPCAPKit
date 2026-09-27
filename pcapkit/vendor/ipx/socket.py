@@ -250,6 +250,18 @@ RANGES = [
     (0x0BB9, 0xFFFF, 'Dynamically Assigned'),
 ]  # type: list[tuple[int, int, str]]
 
+#: Range names from :data:`RANGES` above that name an allocation *policy* for
+#: the pool (who may claim a code, or that nobody has) rather than a specific
+#: assigned protocol -- the owner's ruling on #775/#847. ``Registered by
+#: Xerox`` stays a mint: it is a real ownership fact, not a placeholder, and
+#: kept notation for the reader is what only these four are.
+UNASSIGNED_RANGE_NAMES = frozenset({
+    'Experimental',
+    'Dynamically Assigned Socket Numbers',
+    'Statically Assigned Socket Numbers',
+    'Dynamically Assigned',
+})
+
 
 class Socket(Vendor):
     """Socket Types"""
@@ -304,7 +316,10 @@ class Socket(Vendor):
         for start, stop, name in RANGES:
             miss.append(f'if 0x{start:04X} <= value <= 0x{stop:04X}:')
             miss.append(f'    #: {self.wrap_comment(name)}')
-            miss.append(f"    return extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
+            if name in UNASSIGNED_RANGE_NAMES:
+                miss.append(f"    return cls._unregistered_member(value, '{name}')")
+            else:
+                miss.append(f"    return extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
         return enum, miss
 
 

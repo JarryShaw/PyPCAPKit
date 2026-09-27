@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipv6.router_alert.R
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -245,8 +245,8 @@ class RouterAlert(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 70 <= value <= 65502:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 65503 <= value <= 65534:
             #: Reserved [:rfc:`9805`]
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         return super()._missing_(value)

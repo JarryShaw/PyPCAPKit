@@ -178,15 +178,21 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         self.assertIs(field.unpack(b'\x0a\x0d\x0d\x0a', dict()),
                       BlockType.Section_Header_Block)
 
-    def test_a_missing_rule_still_mints_its_own_member(self) -> None:
+    def test_a_missing_rule_still_takes_precedence_over_the_fallback(self) -> None:
         """``_missing_`` keeps precedence over the fallback.
 
         ``0x0bad0bad`` is in one of the ``Reserved_*`` ranges
         :meth:`BlockType._missing_
-        <pcapkit.const.pcapng.block_type.BlockType._missing_>` extends, so it has
-        always resolved -- to a real ``BlockType`` member, named for its range.
-        The fallback must not shadow that: if it did, a reserved code would come
-        back nameless and lose the only thing the registry knows about it.
+        <pcapkit.const.pcapng.block_type.BlockType._missing_>` covers. Per the
+        mint/unmint ruling recorded for #775 (``docs/source/conventions.rst``),
+        ``Reserved`` names a procedure rather than a party, so this range no
+        longer *mints* a registered ``Reserved_0bad0bad`` member -- it now
+        returns an unregistered member via ``_unregistered_member``, bearing the
+        bare label ``Reserved`` and the original value. The fallback must still
+        not shadow ``_missing_``: if it did, a reserved code would come back
+        nameless and lose the only thing the registry knows about it. Because
+        the name alone (``Reserved``) no longer pins the value the way
+        ``Reserved_0bad0bad`` used to, the value is asserted explicitly too.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
@@ -196,7 +202,8 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         resolved = field.unpack(b'\x0b\xad\x0b\xad', dict())
 
         self.assertIsInstance(resolved, BlockType)
-        self.assertEqual(resolved.name, 'Reserved_0bad0bad')
+        self.assertEqual(resolved.name, 'Reserved')
+        self.assertEqual(int(resolved), 0x0bad0bad)
 
     def test_the_registry_own_guard_is_not_weakened(self) -> None:
         """The change is at the field layer and nowhere else.

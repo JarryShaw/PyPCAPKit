@@ -64,7 +64,7 @@ class RecordType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_0x%04x' % value, value)",
+            "cls._unregistered_member(value, 'Unassigned')",
             'return cls(value)'
         ]
         for content in data:

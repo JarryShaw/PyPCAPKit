@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.status_code.Stat
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -213,6 +213,6 @@ class StatusCode(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 7 <= value <= 127:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         #: Unspecified in the IANA registry
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        return cls._unregistered_member(value, 'Unassigned')

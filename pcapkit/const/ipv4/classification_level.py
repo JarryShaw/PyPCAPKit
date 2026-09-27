@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipv4.classification
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -46,5 +46,4 @@ class ClassificationLevel(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0b00000000 <= value <= 0b11111111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        temp = bin(value)[2:].upper().zfill(8)
-        return extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)
+        return cls._unregistered_member(value, 'Unassigned')

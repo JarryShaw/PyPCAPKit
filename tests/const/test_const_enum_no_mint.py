@@ -22,6 +22,27 @@ scoped to the registries that inherit both unmodified, which this module's
 the 12 vendor files that replace the shared template wholesale (and whatever
 they generate) are out of scope and untouched.
 
+Tier 1 fixed the *mechanism* (a lookup should never mint); it did not decide,
+registry by registry, which of the remaining ``_missing_`` bodies mint
+something worth keeping. That is tier 2, decided on #775 and carried out on
+#847: the owner's ruling, verbatim, is *"a final concrete assigned name ->
+mint; a notation for the readers -> unmint"*. Applied registry by registry to
+every ``_missing_`` that still called :func:`~aenum.extend_enum` -- measured
+at exactly 89 modules by an AST walk over ``pcapkit/const/*.py`` (not the
+"~92" an earlier pass in this programme estimated) -- the ruling converted 82
+of them outright (172 branches, :data:`RULING_CONVERTED_REGISTRIES` below),
+left :class:`~pcapkit.const.reg.ethertype.EtherType` and
+:class:`~pcapkit.const.ipx.socket.Socket` *mixed* (each keeps some branches
+minting and converts others -- see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
+:data:`IPX_SOCKET_UNASSIGNED_PROBES`), and left 9 classes across 6 files
+untouched because they do not inherit :class:`~pcapkit.corekit.enum.
+EnumRegistry` and so have no ``_unregistered_member`` to convert to until
+GitHub issue #860 lands (blocked on #859); :class:`~pcapkit.const.reg.
+apptype.apptype.AppType` is the largest of those at 766 still-minting
+branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
+for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
+range at all (see its own module for why), so the ruling never touched it.
+
 """
 from __future__ import annotations
 
@@ -30,6 +51,7 @@ import importlib
 import inspect
 import pathlib
 import re
+import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
@@ -209,6 +231,299 @@ def _first_unassigned_value(cls: 'type') -> 'int':
     match = _RANGE_RE.search(source)
     assert match is not None, f'{cls.__name__}._missing_ has no range branch'
     return int(match.group(1))
+
+
+#: (module, class name) for every one of the 82 registries the owner's
+#: #775/#847 ruling converted outright: every ``_missing_`` branch that used
+#: to mint via :func:`~aenum.extend_enum` now returns :meth:`~pcapkit.corekit.
+#: enum.EnumRegistry._unregistered_member` instead, because what it minted was
+#: a bare status word (``Unassigned``, ``Reserved [...]``, ``Reserved for
+#: Private/Experimental Use``, ``Unspecified in the IANA registry``, and
+#: similar) rather than a name anyone assigned. Derived from the same AST walk
+#: that measured 89 modules still minting on ``main`` before this change: 82
+#: of the 89 are here, including the two *mixed* registries (:class:`~pcapkit.
+#: const.reg.ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.
+#: Socket`, which convert some branches and keep minting others -- see
+#: :data:`ETHERTYPE_UNASSIGNED_PROBES` and :data:`IPX_SOCKET_UNASSIGNED_
+#: PROBES`). The other 7 of the 89 are untouched: 6 files on classes that do
+#: not inherit :class:`EnumRegistry` yet and so have no ``_unregistered_
+#: member`` to convert to (:class:`~pcapkit.const.reg.apptype.apptype.
+#: AppType`, :class:`~pcapkit.const.http.status_code.StatusCode`, :mod:
+#: `pcapkit.const.ftp.return_code`, :mod:`pcapkit.const.ftp.command`,
+#: :class:`~pcapkit.const.http.method.Method`, :class:`~pcapkit.const.pcapng.
+#: option_type.OptionType` -- see the module docstring), plus :class:
+#: `~pcapkit.const.mh.cga_type.CGAType`, which the ruling never touched
+#: because its mint is not an IANA-style range at all.
+RULING_CONVERTED_REGISTRIES = (
+    ('pcapkit.const.esp.cipher', 'Cipher'),
+    ('pcapkit.const.esp.integrity', 'Integrity'),
+    ('pcapkit.const.hip.eddsa_curve', 'EdDSACurve'),
+    ('pcapkit.const.hip.group', 'Group'),
+    ('pcapkit.const.hip.packet', 'Packet'),
+    ('pcapkit.const.hip.parameter', 'Parameter'),
+    ('pcapkit.const.http.error_code', 'ErrorCode'),
+    ('pcapkit.const.http.frame', 'Frame'),
+    ('pcapkit.const.http.setting', 'Setting'),
+    ('pcapkit.const.ipv4.classification_level', 'ClassificationLevel'),
+    ('pcapkit.const.ipv4.option_class', 'OptionClass'),
+    ('pcapkit.const.ipv4.option_number', 'OptionNumber'),
+    ('pcapkit.const.ipv4.protection_authority', 'ProtectionAuthority'),
+    ('pcapkit.const.ipv4.qs_function', 'QSFunction'),
+    ('pcapkit.const.ipv4.router_alert', 'RouterAlert'),
+    ('pcapkit.const.ipv4.tos_del', 'ToSDelay'),
+    ('pcapkit.const.ipv4.tos_ecn', 'ToSECN'),
+    ('pcapkit.const.ipv4.tos_pre', 'ToSPrecedence'),
+    ('pcapkit.const.ipv4.tos_rel', 'ToSReliability'),
+    ('pcapkit.const.ipv4.tos_thr', 'ToSThroughput'),
+    ('pcapkit.const.ipv4.ts_flag', 'TSFlag'),
+    ('pcapkit.const.ipv6.option', 'Option'),
+    ('pcapkit.const.ipv6.option_action', 'OptionAction'),
+    ('pcapkit.const.ipv6.qs_function', 'QSFunction'),
+    ('pcapkit.const.ipv6.router_alert', 'RouterAlert'),
+    ('pcapkit.const.ipv6.routing', 'Routing'),
+    ('pcapkit.const.ipv6.seed_id', 'SeedID'),
+    ('pcapkit.const.ipv6.smf_dpd_mode', 'SMFDPDMode'),
+    ('pcapkit.const.ipv6.tagger_id', 'TaggerID'),
+    ('pcapkit.const.ipx.packet', 'Packet'),
+    ('pcapkit.const.l2tp.type', 'Type'),
+    ('pcapkit.const.mh.access_type', 'AccessType'),
+    ('pcapkit.const.mh.ack_status_code', 'ACKStatusCode'),
+    ('pcapkit.const.mh.ani_suboption', 'ANISuboption'),
+    ('pcapkit.const.mh.auth_subtype', 'AuthSubtype'),
+    ('pcapkit.const.mh.binding_error', 'BindingError'),
+    ('pcapkit.const.mh.binding_revocation', 'BindingRevocation'),
+    ('pcapkit.const.mh.cga_extension', 'CGAExtension'),
+    ('pcapkit.const.mh.cga_sec', 'CGASec'),
+    ('pcapkit.const.mh.dhcp_support_mode', 'DHCPSupportMode'),
+    ('pcapkit.const.mh.dns_status_code', 'DNSStatusCode'),
+    ('pcapkit.const.mh.dsmip6_tls_packet', 'DSMIP6TLSPacket'),
+    ('pcapkit.const.mh.dsmipv6_home_address', 'DSMIPv6HomeAddress'),
+    ('pcapkit.const.mh.enumerating_algorithm', 'EnumeratingAlgorithm'),
+    ('pcapkit.const.mh.fb_ack_status', 'FlowBindingACKStatus'),
+    ('pcapkit.const.mh.fb_action', 'FlowBindingAction'),
+    ('pcapkit.const.mh.fb_indication_trigger', 'FlowBindingIndicationTrigger'),
+    ('pcapkit.const.mh.fb_type', 'FlowBindingType'),
+    ('pcapkit.const.mh.flow_id_status', 'FlowIDStatus'),
+    ('pcapkit.const.mh.flow_id_suboption', 'FlowIDSuboption'),
+    ('pcapkit.const.mh.handoff_type', 'HandoffType'),
+    ('pcapkit.const.mh.handover_ack_status', 'HandoverACKStatus'),
+    ('pcapkit.const.mh.handover_initiate_status', 'HandoverInitiateStatus'),
+    ('pcapkit.const.mh.home_address_reply', 'HomeAddressReply'),
+    ('pcapkit.const.mh.lla_code', 'LLACode'),
+    ('pcapkit.const.mh.lma_mag_suboption', 'LMAControlledMAGSuboption'),
+    ('pcapkit.const.mh.mn_group_id', 'MNGroupID'),
+    ('pcapkit.const.mh.mn_id_subtype', 'MNIDSubtype'),
+    ('pcapkit.const.mh.operator_id', 'OperatorID'),
+    ('pcapkit.const.mh.option', 'Option'),
+    ('pcapkit.const.mh.packet', 'Packet'),
+    ('pcapkit.const.mh.qos_attribute', 'QoSAttribute'),
+    ('pcapkit.const.mh.revocation_status_code', 'RevocationStatusCode'),
+    ('pcapkit.const.mh.revocation_trigger', 'RevocationTrigger'),
+    ('pcapkit.const.mh.status_code', 'StatusCode'),
+    ('pcapkit.const.mh.traffic_selector', 'TrafficSelector'),
+    ('pcapkit.const.mh.upa_status', 'UpdateNotificationACKStatus'),
+    ('pcapkit.const.mh.upn_reason', 'UpdateNotificationReason'),
+    ('pcapkit.const.pcapng.block_type', 'BlockType'),
+    ('pcapkit.const.pcapng.filter_type', 'FilterType'),
+    ('pcapkit.const.pcapng.hash_algorithm', 'HashAlgorithm'),
+    ('pcapkit.const.pcapng.record_type', 'RecordType'),
+    ('pcapkit.const.pcapng.secrets_type', 'SecretsType'),
+    ('pcapkit.const.pcapng.verdict_type', 'VerdictType'),
+    ('pcapkit.const.reg.ethertype', 'EtherType'),
+    ('pcapkit.const.reg.linktype', 'LinkType'),
+    ('pcapkit.const.reg.transtype', 'TransType'),
+    ('pcapkit.const.tcp.checksum', 'Checksum'),
+    ('pcapkit.const.tcp.mp_tcp_option', 'MPTCPOption'),
+    ('pcapkit.const.tcp.option', 'Option'),
+    ('pcapkit.const.vlan.priority_level', 'PriorityLevel'),
+)
+
+#: Subset of :data:`RULING_CONVERTED_REGISTRIES` whose converted branch a
+#: generic "first branch that converts, by source order" probe can actually
+#: exercise -- i.e. the registry's own bounds contain at least one value that
+#: is not already a declared member, *and* nothing earlier in the same
+#: ``_missing_`` masks it. Two different reasons hold registries out of this
+#: list:
+#:
+#: * 13 have no reachable gap at all -- the same situation :data:`ALL_
+#:   REGISTRIES` already documents for :class:`~pcapkit.const.hip.transport.
+#:   Transport`: every value inside the guard's own bounds names a real
+#:   member, so ``_missing_`` can never actually run for them (e.g. :class:
+#:   `~pcapkit.const.ipv4.tos_del.ToSDelay` is bounded to ``0 <= value <= 1``
+#:   and both 0 and 1 are declared). They are proved by :class:
+#:   `RulingConversionSourceTests` (a source sweep) instead.
+#: * :class:`~pcapkit.const.reg.ethertype.EtherType` is excluded for a third
+#:   reason: its *first* converted branch by source order ("Old Xerox
+#:   Experimental...", 0x0101-0x01FF) is itself unreachable, masked by the
+#:   wider 0x0000-0x05DC branch before it -- see :data:`ETHERTYPE_UNASSIGNED_
+#:   PROBES`'s comment. A naive probe would silently exercise the wrong
+#:   branch, so :class:`EtherTypeMixedMintTests` covers it explicitly instead
+#:   (behaviourally for ``DEC Unassigned``, by source for the masked row).
+#:
+#: Derived the same way as :data:`RULING_CONVERTED_REGISTRIES`: computed once
+#: by walking each candidate's own bounds for a gap, not hand-picked.
+RULING_CONVERTED_WITH_REACHABLE_GAP = (
+    ('pcapkit.const.esp.cipher', 'Cipher'),
+    ('pcapkit.const.esp.integrity', 'Integrity'),
+    ('pcapkit.const.hip.eddsa_curve', 'EdDSACurve'),
+    ('pcapkit.const.hip.group', 'Group'),
+    ('pcapkit.const.hip.packet', 'Packet'),
+    ('pcapkit.const.hip.parameter', 'Parameter'),
+    ('pcapkit.const.http.error_code', 'ErrorCode'),
+    ('pcapkit.const.http.frame', 'Frame'),
+    ('pcapkit.const.http.setting', 'Setting'),
+    ('pcapkit.const.ipv4.classification_level', 'ClassificationLevel'),
+    ('pcapkit.const.ipv4.option_number', 'OptionNumber'),
+    ('pcapkit.const.ipv4.qs_function', 'QSFunction'),
+    ('pcapkit.const.ipv4.router_alert', 'RouterAlert'),
+    ('pcapkit.const.ipv4.ts_flag', 'TSFlag'),
+    ('pcapkit.const.ipv6.option', 'Option'),
+    ('pcapkit.const.ipv6.qs_function', 'QSFunction'),
+    ('pcapkit.const.ipv6.router_alert', 'RouterAlert'),
+    ('pcapkit.const.ipv6.routing', 'Routing'),
+    ('pcapkit.const.ipv6.tagger_id', 'TaggerID'),
+    ('pcapkit.const.ipx.packet', 'Packet'),
+    ('pcapkit.const.ipx.socket', 'Socket'),
+    ('pcapkit.const.mh.access_type', 'AccessType'),
+    ('pcapkit.const.mh.ack_status_code', 'ACKStatusCode'),
+    ('pcapkit.const.mh.ani_suboption', 'ANISuboption'),
+    ('pcapkit.const.mh.auth_subtype', 'AuthSubtype'),
+    ('pcapkit.const.mh.binding_error', 'BindingError'),
+    ('pcapkit.const.mh.binding_revocation', 'BindingRevocation'),
+    ('pcapkit.const.mh.cga_extension', 'CGAExtension'),
+    ('pcapkit.const.mh.cga_sec', 'CGASec'),
+    ('pcapkit.const.mh.dns_status_code', 'DNSStatusCode'),
+    ('pcapkit.const.mh.dsmip6_tls_packet', 'DSMIP6TLSPacket'),
+    ('pcapkit.const.mh.dsmipv6_home_address', 'DSMIPv6HomeAddress'),
+    ('pcapkit.const.mh.enumerating_algorithm', 'EnumeratingAlgorithm'),
+    ('pcapkit.const.mh.fb_ack_status', 'FlowBindingACKStatus'),
+    ('pcapkit.const.mh.fb_action', 'FlowBindingAction'),
+    ('pcapkit.const.mh.fb_indication_trigger', 'FlowBindingIndicationTrigger'),
+    ('pcapkit.const.mh.fb_type', 'FlowBindingType'),
+    ('pcapkit.const.mh.flow_id_status', 'FlowIDStatus'),
+    ('pcapkit.const.mh.flow_id_suboption', 'FlowIDSuboption'),
+    ('pcapkit.const.mh.handoff_type', 'HandoffType'),
+    ('pcapkit.const.mh.handover_ack_status', 'HandoverACKStatus'),
+    ('pcapkit.const.mh.handover_initiate_status', 'HandoverInitiateStatus'),
+    ('pcapkit.const.mh.home_address_reply', 'HomeAddressReply'),
+    ('pcapkit.const.mh.lla_code', 'LLACode'),
+    ('pcapkit.const.mh.lma_mag_suboption', 'LMAControlledMAGSuboption'),
+    ('pcapkit.const.mh.mn_group_id', 'MNGroupID'),
+    ('pcapkit.const.mh.mn_id_subtype', 'MNIDSubtype'),
+    ('pcapkit.const.mh.operator_id', 'OperatorID'),
+    ('pcapkit.const.mh.option', 'Option'),
+    ('pcapkit.const.mh.packet', 'Packet'),
+    ('pcapkit.const.mh.qos_attribute', 'QoSAttribute'),
+    ('pcapkit.const.mh.revocation_status_code', 'RevocationStatusCode'),
+    ('pcapkit.const.mh.revocation_trigger', 'RevocationTrigger'),
+    ('pcapkit.const.mh.status_code', 'StatusCode'),
+    ('pcapkit.const.mh.traffic_selector', 'TrafficSelector'),
+    ('pcapkit.const.mh.upa_status', 'UpdateNotificationACKStatus'),
+    ('pcapkit.const.mh.upn_reason', 'UpdateNotificationReason'),
+    ('pcapkit.const.pcapng.block_type', 'BlockType'),
+    ('pcapkit.const.pcapng.filter_type', 'FilterType'),
+    ('pcapkit.const.pcapng.hash_algorithm', 'HashAlgorithm'),
+    ('pcapkit.const.pcapng.record_type', 'RecordType'),
+    ('pcapkit.const.pcapng.secrets_type', 'SecretsType'),
+    ('pcapkit.const.pcapng.verdict_type', 'VerdictType'),
+    ('pcapkit.const.reg.linktype', 'LinkType'),
+    ('pcapkit.const.reg.transtype', 'TransType'),
+    ('pcapkit.const.tcp.checksum', 'Checksum'),
+    ('pcapkit.const.tcp.mp_tcp_option', 'MPTCPOption'),
+    ('pcapkit.const.tcp.option', 'Option'),
+)
+
+#: :class:`~pcapkit.const.reg.ethertype.EtherType` probes for the owner's
+#: ruling: ``DEC Unassigned`` and the historical list's own "Old Xerox
+#: Experimental values. Invalid as an Ethertype since 1983." both convert,
+#: because the label itself says nothing was assigned. Every *other* named
+#: block -- companies the historical list attributes a real code range to --
+#: stays a mint; :data:`ETHERTYPE_KEPT_PROBE` pins one (``Xyplex``) as a
+#: regression guard.
+#:
+#: "Old Xerox Experimental" (0x0101-0x01FF) is not behaviourally probeable:
+#: it is a strict subset of the earlier, wider "IEEE802.3 Length Field" branch
+#: (0x0000-0x05DC), which the ``_missing_`` if-chain matches first and so
+#: masks it completely -- the same shape of pre-existing ordering bug GitHub
+#: issue #841 found in :mod:`pcapkit.const.ipx.socket`, present on ``main``
+#: before this change and not part of #775/#847's ruling, so it is left as a
+#: follow-up rather than reordered here. :class:`EtherTypeMixedMintTests`
+#: proves that row by source instead of by calling it.
+ETHERTYPE_UNASSIGNED_PROBES = {
+    0x8039: 'DEC_Unassigned',
+}
+ETHERTYPE_MASKED_UNASSIGNED_LABEL = 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983'
+ETHERTYPE_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
+
+#: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's ruling:
+#: ``Experimental`` and the three "who may claim this pool" policy labels
+#: convert; ``Registered by Xerox`` -- a real ownership fact, not a status
+#: word -- keeps minting, pinned by :data:`IPX_SOCKET_KEPT_PROBE`.
+IPX_SOCKET_UNASSIGNED_PROBES = {
+    0x0025: 'Experimental',
+    0x4001: 'Dynamically Assigned Socket Numbers',
+    0x8001: 'Statically Assigned Socket Numbers',
+    0x0BBA: 'Dynamically Assigned',
+}
+IPX_SOCKET_KEPT_PROBE = (0x0010, 'Registered by Xerox_0x0010')
+
+
+def _first_unregistered_value(cls: 'type') -> 'Optional[int]':
+    """The first value :meth:`cls._missing_ <object._missing_>` converts to a
+    throwaway :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+    pseudo-member, read from the class's own compiled ``_missing_`` by AST
+    rather than hardcoded.
+
+    Handles both shapes tier 2 produced: a per-range branch (``if lo <= value
+    <= hi: ... return cls._unregistered_member(...)``), whose lower bound is
+    the probe; and an unconditional mint straight after the guard (no range
+    branch of its own), for which any in-bounds value not already a member
+    will do -- so this scans forward from the guard's own lower bound for the
+    first gap. Returns :data:`None` if neither shape is reachable at all
+    (every in-bounds value is already a declared member), which
+    :data:`RULING_CONVERTED_WITH_REACHABLE_GAP` excludes from behavioural
+    testing for exactly that reason.
+
+    """
+    source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
+    tree = ast.parse(textwrap.dedent(source))
+    func = tree.body[0]
+
+    for node in ast.walk(func):
+        if not isinstance(node, ast.If):
+            continue
+        calls_unreg = any(
+            isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+            and n.func.attr == '_unregistered_member'
+            for n in ast.walk(node)
+        )
+        if not calls_unreg:
+            continue
+        test = node.test
+        if isinstance(test, ast.Compare) and len(test.ops) == 2:
+            return ast.literal_eval(test.left)  # type: ignore[no-any-return]
+
+    bounds = None
+    for node in ast.walk(func):
+        if not isinstance(node, ast.If):
+            continue
+        test = node.test
+        if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+            inner = test.operand
+            if isinstance(inner, ast.BoolOp) and isinstance(inner.op, ast.And):
+                for value in inner.values:
+                    if isinstance(value, ast.Compare) and len(value.ops) == 2:
+                        bounds = (ast.literal_eval(value.left), ast.literal_eval(value.comparators[-1]))
+                        break
+        if bounds is not None:
+            break
+    if bounds is None:
+        return None
+    lo, hi = bounds
+    for probe in range(lo, min(hi, lo + 100000) + 1):
+        if probe not in cls._value2member_map_:  # type: ignore[attr-defined]
+            return probe
+    return None
 
 
 def _purge_member(cls: 'type', name: 'str', value: 'int') -> 'None':
@@ -448,13 +763,24 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     than pinning one example -- and asserts that every
     ``cls._unregistered_member(...)`` call site passes a plain string
     literal with no ``%`` formatting. It therefore covers all 49 call sites
-    tier 1's follow-up touched, and any added by a later regeneration,
-    without caring which registry they belong to. A call site still using
-    ``extend_enum(...)`` -- the ~92 registries that still mint, such as
-    :mod:`pcapkit.const.mh` or :class:`~pcapkit.const.pcapng.block_type.
-    BlockType` -- is out of scope and untouched by this sweep, since a
-    minted name still needs its numeric suffix to avoid a genuine
-    ``__members__`` collision.
+    tier 1's follow-up touched, plus the 172 tier 2's #775/#847 ruling added
+    (221 total, measured on this tree -- see :data:`RULING_CONVERTED_
+    REGISTRIES` above), and any added by a later regeneration, without caring
+    which registry they belong to. A call site still using ``extend_enum(...)``
+    -- the 9 classes across 6 files tier 2 left untouched because they are not
+    :class:`~pcapkit.corekit.enum.EnumRegistry` yet (:class:`~pcapkit.const.
+    reg.apptype.apptype.AppType` and friends, see the module docstring), plus
+    the handful of still-minting branches on :class:`~pcapkit.const.reg.
+    ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.Socket` that the
+    ruling kept, plus :class:`~pcapkit.const.mh.cga_type.CGAType` -- is out of
+    scope and untouched by this sweep, since a minted name still needs its
+    numeric suffix to avoid a genuine ``__members__`` collision.
+
+    (Corrected from an earlier draft of this docstring, which estimated
+    "~92 registries still mint" and named ``pcapkit.const.mh`` and
+    ``BlockType`` as examples -- both were converted by tier 2 and no longer
+    apply; the AST walk in the module docstring above measured the real
+    figure at 89.)
 
     """
 
@@ -489,11 +815,207 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
                     offenders.append(f'{path.relative_to(repo_root)}:{node.lineno}: {segment}')
 
         # Sanity: the sweep itself must actually be exercising something --
-        # tier 1's follow-up touched exactly 49 call sites across 21 files.
-        self.assertGreaterEqual(call_count, 49,
-                                 f'expected at least 49 _unregistered_member call sites, found {call_count}')
+        # tier 1's follow-up touched exactly 49 call sites across 21 files,
+        # and tier 2's #775/#847 ruling added 172 more across 82 files, for
+        # 221 total measured on this tree.
+        self.assertGreaterEqual(call_count, 221,
+                                 f'expected at least 221 _unregistered_member call sites, found {call_count}')
         self.assertEqual(offenders, [],
                           'found _unregistered_member call(s) with a non-bare name:\n' + '\n'.join(offenders))
+
+
+class RulingConversionDoesNotMintTests(unittest.TestCase):
+    """Tier 2's #775/#847 ruling, behaviourally: a value that used to mint a
+    bare status word must now come back as a throwaway pseudo-member instead,
+    the same regression :class:`UnassignedRangeDoesNotMintTests` above proves
+    for tier 1's 21. Swept across :data:`RULING_CONVERTED_WITH_REACHABLE_GAP`
+    -- the 69 of the 82 converted registries whose branch a real lookup can
+    actually reach; the other 13 are proved by source instead, in
+    :class:`RulingConversionSourceTests` below."""
+
+    if TYPE_CHECKING:
+        registries: 'list[type]'
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        cls.registries = [
+            getattr(importlib.import_module(module_name), class_name)
+            for module_name, class_name in RULING_CONVERTED_WITH_REACHABLE_GAP
+        ]
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_converted_value_does_not_mint(self) -> None:
+        for cls in self.registries:
+            with self.subTest(registry=cls.__qualname__):
+                value = _first_unregistered_value(cls)
+                self.assertIsNotNone(value, f'{cls.__qualname__} has no reachable converted branch')
+                self.assertNotIn(value, cls._value2member_map_)  # type: ignore[attr-defined]
+
+                before = len(cls.__members__)
+                member = cls(value)
+                after = len(cls.__members__)
+
+                self.assertEqual(member.value, value)
+                self.assertEqual(before, after)
+                self.assertNotIn(value, cls._value2member_map_)  # type: ignore[attr-defined]
+                self.assertNotIn(member.name, cls.__members__)
+
+    def test_repeated_lookup_does_not_grow_members(self) -> None:
+        for cls in self.registries:
+            with self.subTest(registry=cls.__qualname__):
+                value = _first_unregistered_value(cls)
+                self.assertIsNotNone(value, f'{cls.__qualname__} has no reachable converted branch')
+                before = len(cls.__members__)
+
+                first = cls(value)
+                after_one = len(cls.__members__)
+                second = cls(value)
+                after_two = len(cls.__members__)
+
+                self.assertEqual(before, after_one)
+                self.assertEqual(before, after_two)
+                self.assertEqual(first, second)
+                self.assertIsNot(first, second)
+
+
+#: :class:`~pcapkit.const.reg.ethertype.EtherType` and :class:`~pcapkit.const.
+#: ipx.socket.Socket` are the two *mixed* registries: most of their
+#: ``_missing_`` legitimately keeps minting (real attributed names), so the
+#: blanket "no extend_enum left" sweep below does not apply to them --
+#: :class:`EtherTypeMixedMintTests` and :class:`IPXSocketMixedMintTests` cover
+#: their converted rows specifically instead.
+_MIXED_REGISTRIES = frozenset({('pcapkit.const.reg.ethertype', 'EtherType'), ('pcapkit.const.ipx.socket', 'Socket')})
+
+
+class RulingConversionSourceTests(unittest.TestCase):
+    """Source-level proof for the 13 of :data:`RULING_CONVERTED_REGISTRIES`
+    with no reachable gap (every in-bounds value already names a real member,
+    so no lookup can exercise the branch either before or after this change)
+    -- and, as a completeness check, for the 80 wholly-converted registries:
+    none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`
+    any more. Excludes the two mixed registries -- see :data:`_MIXED_
+    REGISTRIES` -- which keep some ``extend_enum`` calls by design."""
+
+    def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
+        # EtherType is also absent from RULING_CONVERTED_WITH_REACHABLE_GAP,
+        # but for the *masked-branch* reason documented on that data, not the
+        # no-gap-at-all reason this test is about -- and unlike the true 13 it
+        # still legitimately keeps other extend_enum calls, so it is excluded
+        # from this set too and covered by EtherTypeMixedMintTests instead.
+        excluded = set(RULING_CONVERTED_REGISTRIES) - set(RULING_CONVERTED_WITH_REACHABLE_GAP) - _MIXED_REGISTRIES
+        self.assertEqual(len(excluded), 13, 'expected exactly 13 registries with no reachable gap')
+        for module_name, class_name in sorted(excluded):
+            with self.subTest(registry=class_name):
+                cls = getattr(importlib.import_module(module_name), class_name)
+                source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
+                self.assertNotIn('extend_enum', source)
+                self.assertIn('_unregistered_member', source)
+
+    def test_every_wholly_converted_registry_no_longer_calls_extend_enum(self) -> None:
+        for module_name, class_name in RULING_CONVERTED_REGISTRIES:
+            if (module_name, class_name) in _MIXED_REGISTRIES:
+                continue
+            with self.subTest(registry=class_name):
+                cls = getattr(importlib.import_module(module_name), class_name)
+                source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
+                self.assertNotIn('extend_enum', source)
+
+
+class EtherTypeMixedMintTests(unittest.TestCase):
+    """:class:`~pcapkit.const.reg.ethertype.EtherType` is the ruling's mixed
+    case: ``DEC Unassigned`` and the "Old Xerox Experimental..." row convert,
+    every other attributed vendor block (a real company's own name for its
+    own code) keeps minting."""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_unassigned_rows_do_not_mint(self) -> None:
+        from pcapkit.const.reg.ethertype import EtherType
+
+        for value, name in ETHERTYPE_UNASSIGNED_PROBES.items():
+            with self.subTest(value=hex(value)):
+                self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
+                before = len(EtherType.__members__)
+
+                member = EtherType(value)
+
+                self.assertEqual(member.value, value)
+                self.assertEqual(member.name, name)
+                self.assertEqual(before, len(EtherType.__members__))
+                self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
+
+    def test_masked_old_xerox_row_converts_by_source(self) -> None:
+        """0x0101-0x01FF is unreachable at runtime -- masked by the wider
+        0x0000-0x05DC branch that precedes it, a pre-existing ordering issue
+        (see :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment) unrelated to this
+        ruling. Proved by source instead of by calling it."""
+        from pcapkit.const.reg.ethertype import EtherType
+
+        source = inspect.getsource(EtherType._missing_)  # type: ignore[attr-defined]
+        self.assertIn(f"cls._unregistered_member(value, '{ETHERTYPE_MASKED_UNASSIGNED_LABEL}')", source)
+        self.assertNotIn(f"extend_enum(cls, '{ETHERTYPE_MASKED_UNASSIGNED_LABEL}", source)
+
+    def test_attributed_vendor_block_still_mints(self) -> None:
+        from pcapkit.const.reg.ethertype import EtherType
+
+        value, name = ETHERTYPE_KEPT_PROBE
+        self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
+        before = len(EtherType.__members__)
+
+        member = EtherType(value)
+
+        self.assertEqual(member.value, value)
+        self.assertEqual(member.name, name)
+        self.assertEqual(before + 1, len(EtherType.__members__))
+        self.assertIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
+        self.assertIs(EtherType(value), member)
+
+
+class IPXSocketMixedMintTests(unittest.TestCase):
+    """:class:`~pcapkit.const.ipx.socket.Socket` is the ruling's other mixed
+    case: ``Experimental`` and the three "who may claim this pool" allocation-
+    policy labels convert; ``Registered by Xerox`` -- a real ownership fact --
+    keeps minting."""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_unassigned_rows_do_not_mint(self) -> None:
+        from pcapkit.const.ipx.socket import Socket
+
+        for value, name in IPX_SOCKET_UNASSIGNED_PROBES.items():
+            with self.subTest(value=hex(value)):
+                self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
+                before = len(Socket.__members__)
+
+                member = Socket(value)
+
+                self.assertEqual(member.value, value)
+                self.assertEqual(member.name, name)
+                self.assertEqual(before, len(Socket.__members__))
+                self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
+
+    def test_registered_by_xerox_still_mints(self) -> None:
+        from pcapkit.const.ipx.socket import Socket
+
+        value, name = IPX_SOCKET_KEPT_PROBE
+        self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
+        before = len(Socket.__members__)
+
+        member = Socket(value)
+
+        self.assertEqual(member.value, value)
+        self.assertEqual(member.name, name)
+        self.assertEqual(before + 1, len(Socket.__members__))
+        self.assertIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
+        self.assertIs(Socket(value), member)
 
 
 if __name__ == '__main__':

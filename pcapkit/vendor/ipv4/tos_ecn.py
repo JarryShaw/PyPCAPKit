@@ -83,7 +83,7 @@ class ToSECN(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "return extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code)

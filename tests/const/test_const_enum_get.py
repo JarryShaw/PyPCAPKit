@@ -70,8 +70,7 @@ from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, sn
 UNRESOLVABLE = 1 << 70
 
 #: Enums whose integer path resolves *anything* rather than raising, so there is
-#: no fallback for ``default`` to supply: both auto-extend their unassigned spans
-#: across the full integer range.
+#: no fallback for ``default`` to supply.
 #:
 #: :class:`~pcapkit.const.tcp.flags.Flags` was a third entry until GitHub issue
 #: #647. It resolved anything for a different reason -- it defined no
@@ -79,6 +78,16 @@ UNRESOLVABLE = 1 << 70
 #: and ``Flags(-1)`` read back as every TCP header flag set at once. It now
 #: bounds its own domain like the rest of the tree and so belongs in the sweep
 #: below rather than in this set.
+#:
+#: Both used to auto-*extend* their unassigned span across the full integer
+#: range, via :func:`~aenum.extend_enum`. GitHub issues #775/#847's
+#: mint-criterion ruling converted :class:`~pcapkit.const.ipv4.
+#: protection_authority.ProtectionAuthority`'s bare ``Unassigned`` label, so it
+#: now resolves via :meth:`~pcapkit.corekit.enum.EnumRegistry.
+#: _unregistered_member` instead -- it still resolves anything (the property
+#: that excuses it from the sweep below), it just no longer extends.
+#: :class:`~pcapkit.const.mh.cga_type.CGAType` is untouched: its ``Tag_<hex>``
+#: mint is not an IANA-style range at all, so the ruling never applied.
 EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
     'pcapkit.const.ipv4.protection_authority.ProtectionAuthority',
     'pcapkit.const.mh.cga_type.CGAType',
@@ -96,6 +105,24 @@ EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
     'pcapkit.const.ftp.return_code.GroupingInformation',
     'pcapkit.const.ftp.return_code.ResponseKind',
     'pcapkit.const.reg.apptype.apptype.TransportProtocol',
+})
+
+#: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
+#: members at all -- every one of its 256 codes reaches ``_missing_``. Before
+#: GitHub issues #775/#847's ruling that was masked by an accident: importing
+#: :mod:`pcapkit.protocols.misc.pcapng` evaluates ``Enum_FilterType(0)`` as a
+#: default argument at class-definition time, which used to permanently mint
+#: ``'Unassigned_0'`` as a side effect of merely importing the library --
+#: leaving exactly one member for this sweep's ``next(iter(obj))`` fallback to
+#: find. The ruling correctly converted FilterType's bare ``Unassigned`` label,
+#: so that same import no longer mints anything, and the registry is now
+#: genuinely empty: :func:`next` on it raises :exc:`StopIteration`, with no
+#: value at all that ``obj(fallback)`` would resolve to a *cached* identity
+#: for. Excused from the main sweep for that reason and covered by its own
+#: test instead, :meth:`ConstEnumGetDefaultTests.
+#: test_filter_type_default_is_consulted_without_a_cached_fallback`.
+EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK = frozenset({
+    'pcapkit.const.pcapng.filter_type.FilterType',
 })
 
 
@@ -226,10 +253,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
     def test_the_sweep_size_is_pinned(self) -> None:
         # If this drifts, a const enum was added, removed or renamed, and the
-        # two exception sets below need a fresh look rather than a silent pass.
+        # exception sets below need a fresh look rather than a silent pass.
         names = {_qualname(obj) for obj in self.enums}
         self.assertEqual(len(self.enums), 118)
-        for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT):
+        for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
+                          EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK):
             self.assertTrue(expected.issubset(names),
                             f'sweep is missing: {expected - names}')
 
@@ -252,37 +280,48 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 # subject is something else, and for these two the ``try``
                 # never raises, so it would assert nothing about the fix.
                 continue
+            if qualname in EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK:
+                # Covered by its own test below: it raises for UNRESOLVABLE
+                # like the rest of this sweep, but has no real member to use
+                # as ``fallback`` -- see the set's own comment.
+                continue
             with self.subTest(enum=qualname):
                 with self.assertRaises(ValueError):
                     obj.get(UNRESOLVABLE)
                 fallback = next(iter(obj)).value
                 self.assertIs(obj.get(UNRESOLVABLE, fallback), obj(fallback))
                 covered += 1
-        # 111 rather than 110 since GitHub issue #647 gave
-        # :class:`~pcapkit.const.tcp.flags.Flags` a range guard, which moved it
-        # out of ``EXPECTED_TO_RESOLVE_ANYTHING`` and into this sweep.
-        self.assertEqual(covered, 111)
+        # 111 from GitHub issue #647, which gave
+        # :class:`~pcapkit.const.tcp.flags.Flags` a range guard and moved it
+        # out of ``EXPECTED_TO_RESOLVE_ANYTHING`` and into this sweep; minus 1
+        # for ``FilterType``, which #775/#847's ruling moved the other way --
+        # it used to be counted here only because an import-time side effect
+        # (see ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``) happened to leave it
+        # one real member to use as ``fallback``, and the ruling removed that
+        # side effect along with the mint it came from.
+        self.assertEqual(covered, 110)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.
 
-        Their ``_missing_`` extends for *any* integer, so the integer path never
-        raises and ``default`` has nothing to supply. Asserted rather than merely
-        listed, so ``EXPECTED_TO_RESOLVE_ANYTHING`` cannot quietly grow to hide a
-        registry that does raise.
+        Their ``_missing_`` resolves for *any* integer, so the integer path
+        never raises and ``default`` has nothing to supply. Asserted rather
+        than merely listed, so ``EXPECTED_TO_RESOLVE_ANYTHING`` cannot quietly
+        grow to hide a registry that does raise.
 
-        Kept out of the sweep because probing them *mutates* the registry: the
-        call permanently registers a member on a module-global class. That is
-        done deliberately here, and ``setUpClass`` registers a class cleanup that
-        purges :mod:`pcapkit` afterwards so the pollution cannot reach another
-        module.
+        Probing :class:`~pcapkit.const.mh.cga_type.CGAType` still *mutates*
+        the registry: the call permanently registers a member on a
+        module-global class, because its mint is untouched by GitHub issues
+        #775/#847's ruling. That is done deliberately here, and
+        ``setUpClass`` registers a class cleanup that purges :mod:`pcapkit`
+        afterwards so the pollution cannot reach another module.
+        :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
+        no longer mutates anything -- its bare ``Unassigned`` converted, so it
+        resolves through a throwaway pseudo-member instead -- which is why the
+        identity check below only applies to ``CGAType``.
 
-        Measured: ``ProtectionAuthority`` grows 8 members to 9 and ``CGAType`` 7
-        to 8, because their ``_missing_`` calls ``extend_enum``. The shared
-        assertion below is still "resolves" rather than "extends" because that is
-        the property excusing them, and it is the property
-        :class:`~pcapkit.const.tcp.flags.Flags` stopped having in GitHub issue
-        #647 -- it resolved without extending, and now does neither.
+        Measured: ``CGAType`` still grows 7 members to 8; ``ProtectionAuthority``
+        stays at 8.
         """
         for qualname in sorted(EXPECTED_TO_RESOLVE_ANYTHING):
             module_name, _, class_name = qualname.rpartition('.')
@@ -294,8 +333,34 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 self.assertIsNotNone(resolved)
                 self.assertEqual(int(resolved), UNRESOLVABLE)
                 # It resolves with or without a default, so the sentinel branch
-                # this change added is never reached for these two.
-                self.assertIs(resolved, obj.get(UNRESOLVABLE, 0))
+                # this change added is never reached for either of them.
+                self.assertEqual(resolved, obj.get(UNRESOLVABLE, 0))
+                if qualname == 'pcapkit.const.mh.cga_type.CGAType':
+                    # Still mints permanently -- identity holds.
+                    self.assertIs(resolved, obj.get(UNRESOLVABLE, 0))
+                else:
+                    # Converted: a fresh, equal-but-not-identical pseudo-member
+                    # every time, and the registry never grows for it.
+                    self.assertIsNot(resolved, obj.get(UNRESOLVABLE, 0))
+
+    def test_filter_type_default_is_consulted_without_a_cached_fallback(self) -> None:
+        """:class:`~pcapkit.const.pcapng.filter_type.FilterType`'s own
+        replacement for the sweep above -- see
+        :data:`EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK` for why it needs one."""
+        from pcapkit.const.pcapng.filter_type import FilterType
+
+        with self.assertRaises(ValueError):
+            FilterType.get(UNRESOLVABLE)
+
+        # 0 is in-bounds (0x00-0xFF) but not a real member either -- FilterType
+        # declares none -- so this resolves via the same converted pseudo-member
+        # path as UNRESOLVABLE-with-a-default does, not via a cached identity.
+        before = len(FilterType.__members__)
+        resolved = FilterType.get(UNRESOLVABLE, 0)
+        self.assertEqual(int(resolved), 0)
+        self.assertEqual(resolved, FilterType(0))
+        self.assertIsNot(resolved, FilterType(0))
+        self.assertEqual(len(FilterType.__members__), before)
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')

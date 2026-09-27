@@ -100,9 +100,11 @@ EXPECTED_RANGES = (
 #: Sampled sockets and the member name each is expected to resolve to, at the
 #: bounds of every range plus the gaps between. The *name* is pinned as well as
 #: the value because the value alone cannot tell a live range branch from a
-#: masked one: every branch of the generated ``_missing_`` returns ``value``, so
-#: only the name says which branch ran, and asserting the value alone would pass
-#: just as happily with three of the five branches deleted.
+#: masked one: every branch of the generated ``_missing_`` returns ``value``,
+#: so only the name says which branch ran -- for ``Registered by Xerox``,
+#: which still mints, that name still carries the value as a numeric suffix;
+#: asserting the value alone would pass just as happily with the range
+#: branches deleted or reordered.
 #:
 #: Before GitHub issue #841 was fixed, three of these were unreachable --
 #: ``(0x0001, 0x0BB8)`` masked ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)``
@@ -110,21 +112,29 @@ EXPECTED_RANGES = (
 #: ``0x003F``, ``0x4000``, ``0x4FFF``, ``0x8000``, ``0x8061``, ``0x9094`` and
 #: ``0xFFFF`` all resolved under the wrong wide range's name. See
 #: :data:`pcapkit.vendor.ipx.socket.RANGES` for the reordering that fixed it.
+#:
+#: GitHub issues #775/#847's mint-criterion ruling then converted four of the
+#: five ranges -- ``Experimental``, ``Dynamically Assigned Socket Numbers``,
+#: ``Statically Assigned Socket Numbers`` and ``Dynamically Assigned`` each
+#: name an allocation *policy* for the pool rather than a specific assignment,
+#: so they no longer mint and their bare name carries no numeric suffix.
+#: ``Registered by Xerox`` is the one that stayed: it states a real ownership
+#: fact, not a status placeholder, so it still mints exactly as before.
 EXPECTED_MISSING_NAMES = {
     0x0000: 'Unspecified',                    # a defined member
     0x0001: 'Routing_Information_Packet',     # a defined member
     0x0004: 'Registered by Xerox_0x0004',
-    0x0020: 'Experimental_0x0020',
-    0x003F: 'Experimental_0x003F',
+    0x0020: 'Experimental',
+    0x003F: 'Experimental',
     0x0BB8: 'Registered by Xerox_0x0BB8',
-    0x0BB9: 'Dynamically Assigned_0x0BB9',
-    0x4000: 'Dynamically Assigned Socket Numbers_0x4000',
-    0x4FFF: 'Dynamically Assigned Socket Numbers_0x4FFF',
-    0x7FFF: 'Dynamically Assigned_0x7FFF',
-    0x8000: 'Statically Assigned Socket Numbers_0x8000',
-    0x8061: 'Statically Assigned Socket Numbers_0x8061',
-    0x9094: 'Statically Assigned Socket Numbers_0x9094',
-    0xFFFF: 'Statically Assigned Socket Numbers_0xFFFF',
+    0x0BB9: 'Dynamically Assigned',
+    0x4000: 'Dynamically Assigned Socket Numbers',
+    0x4FFF: 'Dynamically Assigned Socket Numbers',
+    0x7FFF: 'Dynamically Assigned',
+    0x8000: 'Statically Assigned Socket Numbers',
+    0x8061: 'Statically Assigned Socket Numbers',
+    0x9094: 'Statically Assigned Socket Numbers',
+    0xFFFF: 'Statically Assigned Socket Numbers',
 }
 
 
@@ -267,11 +277,13 @@ class IPXSocketVendorTests(unittest.TestCase):
         # 'Registered by Xerox_0x0030', 0x4080 and 0x8100 both as
         # 'Dynamically Assigned_0x...'. Pinned separately from
         # test_unlisted_sockets_still_resolve so the regression this issue
-        # describes has a test that names it.
+        # describes has a test that names it. Bare names, not the numeric-
+        # suffixed ones #841 pinned: GitHub issues #775/#847 converted all
+        # three of these ranges after #841 landed.
         for value, name in (
-            (0x0030, 'Experimental_0x0030'),
-            (0x4080, 'Dynamically Assigned Socket Numbers_0x4080'),
-            (0x8100, 'Statically Assigned Socket Numbers_0x8100'),
+            (0x0030, 'Experimental'),
+            (0x4080, 'Dynamically Assigned Socket Numbers'),
+            (0x8100, 'Statically Assigned Socket Numbers'),
         ):
             with self.subTest(socket=f'0x{value:04X}'):
                 member = self.const_module.Socket(value)

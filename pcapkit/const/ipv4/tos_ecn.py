@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_ecn.ToSECN
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -38,4 +38,4 @@ class ToSECN(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0b00 <= value <= 0b11):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)
+        return cls._unregistered_member(value, 'Unassigned')

@@ -85,7 +85,7 @@ class Cipher(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
+                miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
                 continue
 
             renm = self.rename(name, code)

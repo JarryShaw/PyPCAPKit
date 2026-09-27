@@ -777,6 +777,15 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownOption)
         from pcapkit.utilities.exceptions import ProtocolError
 
+        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
+        # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
+        # code 0 -- it returns an unregistered member bearing the bare label
+        # ``Unassigned``. ``FilterType(0)`` is used below wherever the fixtures
+        # need *some* valid ``FilterType`` value for code 0; this pins that the
+        # value obtained that way is the one the ruling now produces.
+        self.assertEqual(FilterType(0).name, 'Unassigned')
+
         pcapng = object.__new__(PCAPNG)
         pcapng._opt = collections.Counter()
 
@@ -886,7 +895,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         ).timezone, datetime.timezone(datetime.timedelta(hours=2)))
         self.assertEqual(pcapng._read_option_if_filter(
             IF_FilterOption(type=OptionType.if_filter, length=4,
-                            code=FilterType.Unassigned_0, filter=b'tcp'),
+                            code=FilterType(0), filter=b'tcp'),
             options=options,
         ).expression, b'tcp')
         self.assertEqual(pcapng._read_option_if_os(
@@ -926,7 +935,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                               BlockType.Interface_Description_Block)
         assert_protocol_error('_read_option_if_filter',
                               IF_FilterOption(type=OptionType.if_filter, length=0,
-                                              code=FilterType.Unassigned_0, filter=b''),
+                                              code=FilterType(0), filter=b''),
                               BlockType.Interface_Description_Block)
         interface_error_cases = [
             ('_read_option_if_description',
@@ -960,7 +969,7 @@ class PCAPNGUnitTests(unittest.TestCase):
              True, True),
             ('_read_option_if_filter',
              IF_FilterOption(type=OptionType.if_filter, length=4,
-                             code=FilterType.Unassigned_0, filter=b'tcp'),
+                             code=FilterType(0), filter=b'tcp'),
              True, False),
             ('_read_option_if_os',
              IF_OSOption(type=OptionType.if_os, length=2, os='OS'),
@@ -1891,6 +1900,15 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownSecrets as SchemaUnknownSecrets)
         from pcapkit.utilities.exceptions import ProtocolError
 
+        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
+        # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
+        # code 0 -- it returns an unregistered member bearing the bare label
+        # ``Unassigned``. ``FilterType(0)`` is used below wherever the fixtures
+        # need *some* valid ``FilterType`` value for code 0; this pins that the
+        # value obtained that way is the one the ruling now produces.
+        self.assertEqual(FilterType(0).name, 'Unassigned')
+
         pcapng = object.__new__(PCAPNG)
         pcapng._byte = 'little'
         pcapng._ctx = None
@@ -2046,7 +2064,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             ('_make_option_if_tzone', OptionType.if_tzone,
              DummyData(timezone=datetime.timezone(datetime.timedelta(hours=3))), 'tzone', 10800),
             ('_make_option_if_filter', OptionType.if_filter,
-             DummyData(code=FilterType.Unassigned_0, expression=b'udp'), 'filter', b'udp'),
+             DummyData(code=FilterType(0), expression=b'udp'), 'filter', b'udp'),
             ('_make_option_if_os', OptionType.if_os, DummyData(os='data-os'), 'os', 'data-os'),
             ('_make_option_if_fcslen', OptionType.if_fcslen, DummyData(fcs_length=8), 'fcslen', 8),
             ('_make_option_if_tsoffset', OptionType.if_tsoffset, DummyData(offset=11), 'tsoffset', 11),
