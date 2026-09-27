@@ -418,9 +418,6 @@ class LinkType(IntEnum):
     #: documented.
     Unassigned_208 = 208
 
-    #: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.
-    IPMB_LINUX = 209
-
     #: [``DLT_I2C_LINUX``] Linux I2C packets.
     I2C_LINUX = 209
 
@@ -745,6 +742,9 @@ class LinkType(IntEnum):
     #: [``DLT_DECT_NR_TAP``] DECT-2020 New Radio (NR) TAP with a custom metadata
     #: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.
     DECT_NR_TAP = 304
+
+    #: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.
+    IPMB_LINUX = 209
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
