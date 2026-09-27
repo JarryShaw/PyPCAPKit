@@ -512,6 +512,7 @@
 
 <span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">legacy</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
         <span class="p">]</span>
@@ -523,6 +524,15 @@
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+            <span class="c1"># tcpdump's table lists a handful of rows -- today, only</span>
+            <span class="c1"># ``DLT_IPMB_LINUX`` -- as a legacy alias sharing its value with a</span>
+            <span class="c1"># later, current row (``DLT_I2C_LINUX``); its note column says so</span>
+            <span class="c1"># verbatim ("Legacy names (do not use) ..."). Sink those into a</span>
+            <span class="c1"># separate bucket appended after every current entry, so the</span>
+            <span class="c1"># *current* name -- not the legacy one -- is the first member</span>
+            <span class="c1"># defined for that value and therefore wins ``LinkType(value).name``.</span>
+            <span class="n">sink</span> <span class="o">=</span> <span class="n">legacy</span> <span class="k">if</span> <span class="s1">'legacy'</span> <span class="ow">in</span> <span class="n">cmmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="n">enum</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
@@ -539,7 +549,7 @@
                 <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
 
                 <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
-                <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'–'</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
@@ -553,8 +563,8 @@
                     <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
 
                     <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
-                    <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
+                    <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">enum</span> <span class="o">+</span> <span class="n">legacy</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 
