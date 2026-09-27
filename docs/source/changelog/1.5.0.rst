@@ -3035,6 +3035,32 @@ since -- reaching #805 by the entries below.
   five ``Compat`` names are deliberately excluded from that replacement. One
   file, ``.github/workflows/unit-tests.yml``, 167 lines added; no library or
   test code changes (#856).
+* **Fixed** -- **a breaking change to** ``EnumRegistry.register()``, extended:
+  the 105 const registries still on the generated template's bare
+  ``extend_enum(cls, name, value)`` now inherit the guard #855 (above) added,
+  so e.g. ``TransType.register(6, 'TOTALLY_NEW_NAME')`` now raises
+  ``ValueError``, naming the value and the member that already holds it and
+  pointing at ``register_alias()``, where it used to mint nothing and raise
+  nothing. ``pcapkit/vendor/default.py``'s generated template now emits
+  ``class {NAME}(EnumRegistry, IntEnum)`` and drops its own
+  ``get``/``register``/``_unregistered_member`` entirely, so every const-enum
+  class it produces inherits them from the shared base instead. Census across
+  the 121 const modules holding 127 enum classes: 6 classes, one module each,
+  already used ``EnumRegistry`` (tier 1, #855); of the other 115 modules, 105
+  share the generated template byte-for-byte and are converted here, and the
+  remaining 10 -- three of which define more than one class -- keep their own
+  bespoke ``__new__`` and are left alone: ``ftp/command`` (4 classes),
+  ``ftp/return_code`` (3), ``http/method``, ``http/status_code``,
+  ``pcapng/option_type``, ``reg/apptype/apptype.py`` (2, ``AppType`` and
+  ``TransportProtocol``) and its four transport subclasses
+  ``dccp.DCCP``/``sctp.SCTP``/``tcp.TCP``/``udp.UDP``. That brings the total
+  inheriting ``EnumRegistry`` to **111 of the 127 classes**, up from 6.
+  ``get()``'s dispatch matrix shifts only for a key that is neither ``int`` nor
+  ``str``: ``KeyError`` before (tried as a name), ``ValueError`` now (tried as
+  a value) -- a key type nothing in the library passes. Also renames
+  ``pcapkit/corekit/enums.py`` to **``enum.py``** (no ``-s``), the maintainer's
+  ruling. Five of the 105 hand-edited files were independently regenerated live
+  and came back byte-identical (#858).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
