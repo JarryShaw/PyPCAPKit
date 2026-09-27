@@ -64,8 +64,7 @@ class RecordType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "cls._unregistered_member(value, 'Unassigned')",
-            'return cls(value)'
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for content in data:
             name = content.select('td')[0].text.strip()
