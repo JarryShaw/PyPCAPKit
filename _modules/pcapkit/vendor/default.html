@@ -539,9 +539,52 @@
 <span class="s1">                if default == -1:</span>
 <span class="s1">                    raise</span>
 <span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
-<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">        try:</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">        except KeyError:</span>
+<span class="s1">            if default == -1:</span>
+<span class="s1">                raise</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def register(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Explicitly register a new member.</span>
+
+<span class="s1">        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a</span>
+<span class="s1">        value without minting anything new, this is the caller-named entry</span>
+<span class="s1">        point that still grows the registry, via :func:`aenum.extend_enum`.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value of the new member.</span>
+<span class="s1">            name: Name of the new member.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The newly registered member.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        return extend_enum(cls, name, value)</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _unregistered_member(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Build a member absent from this registry's own lookup tables.</span>
+
+<span class="s1">        Used by :meth:`_missing_` for a bounded-but-unassigned value it</span>
+<span class="s1">        resolves without anyone asking for a name, so that such a lookup no</span>
+<span class="s1">        longer grows the registry -- contrast :meth:`register`, the explicit</span>
+<span class="s1">        path that still does.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: The member's value.</span>
+<span class="s1">            name: The member's name.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The unregistered member.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        obj = int.__new__(cls, value)</span>
+<span class="s1">        obj._name_ = name  # pylint: disable=protected-access</span>
+<span class="s1">        obj._value_ = value  # pylint: disable=protected-access</span>
+<span class="s1">        return obj</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
@@ -827,7 +870,7 @@
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d' % value, value)"</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">')"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

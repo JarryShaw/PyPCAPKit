@@ -558,6 +558,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.classification_level.ClassificationLevel.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_" title="pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel" title="pcapkit.const.ipv4.classification_level.ClassificationLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationLevel</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.classification_level.ClassificationLevel._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_" title="pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.register" title="pcapkit.const.ipv4.classification_level.ClassificationLevel.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel" title="pcapkit.const.ipv4.classification_level.ClassificationLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationLevel</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -602,6 +649,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_3">
 <span class="sig-name descname"><span class="pre">reserved_for_future_use_3</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_3" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.option_class.OptionClass.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/option_class.html#OptionClass.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.option_class.OptionClass._missing_" title="pcapkit.const.ipv4.option_class.OptionClass._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.option_class.OptionClass" title="pcapkit.const.ipv4.option_class.OptionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionClass</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.option_class.OptionClass._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/option_class.html#OptionClass._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.option_class.OptionClass._missing_" title="pcapkit.const.ipv4.option_class.OptionClass._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.option_class.OptionClass.register" title="pcapkit.const.ipv4.option_class.OptionClass.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.option_class.OptionClass" title="pcapkit.const.ipv4.option_class.OptionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionClass</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.option_class.OptionClass._missing_">
@@ -810,6 +904,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.option_number.OptionNumber.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.option_number.OptionNumber._missing_" title="pcapkit.const.ipv4.option_number.OptionNumber._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionNumber</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.option_number.OptionNumber._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.option_number.OptionNumber._missing_" title="pcapkit.const.ipv4.option_number.OptionNumber._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.option_number.OptionNumber.register" title="pcapkit.const.ipv4.option_number.OptionNumber.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionNumber</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.option_number.OptionNumber._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -876,6 +1017,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtectionAuthority</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.register" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority" title="pcapkit.const.ipv4.protection_authority.ProtectionAuthority"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtectionAuthority</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -910,6 +1098,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.qs_function.QSFunction.Report_of_Approved_Rate">
 <span class="sig-name descname"><span class="pre">Report_of_Approved_Rate</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction.Report_of_Approved_Rate" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.qs_function.QSFunction.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/qs_function.html#QSFunction.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.qs_function.QSFunction._missing_" title="pcapkit.const.ipv4.qs_function.QSFunction._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.qs_function.QSFunction" title="pcapkit.const.ipv4.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.qs_function.QSFunction._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/qs_function.html#QSFunction._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.qs_function.QSFunction._missing_" title="pcapkit.const.ipv4.qs_function.QSFunction._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.qs_function.QSFunction.register" title="pcapkit.const.ipv4.qs_function.QSFunction.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.qs_function.QSFunction" title="pcapkit.const.ipv4.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.qs_function.QSFunction._missing_">
@@ -1340,6 +1575,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.router_alert.RouterAlert.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.router_alert.RouterAlert._missing_" title="pcapkit.const.ipv4.router_alert.RouterAlert._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.router_alert.RouterAlert" title="pcapkit.const.ipv4.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">RouterAlert</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.router_alert.RouterAlert._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.router_alert.RouterAlert._missing_" title="pcapkit.const.ipv4.router_alert.RouterAlert._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.router_alert.RouterAlert.register" title="pcapkit.const.ipv4.router_alert.RouterAlert.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.router_alert.RouterAlert" title="pcapkit.const.ipv4.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">RouterAlert</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.router_alert.RouterAlert._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1374,6 +1656,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_del.ToSDelay.LOW">
 <span class="sig-name descname"><span class="pre">LOW</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay.LOW" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_del.ToSDelay.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_del.html#ToSDelay.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.tos_del.ToSDelay._missing_" title="pcapkit.const.ipv4.tos_del.ToSDelay._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_del.ToSDelay" title="pcapkit.const.ipv4.tos_del.ToSDelay"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSDelay</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_del.ToSDelay._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_del.html#ToSDelay._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.tos_del.ToSDelay._missing_" title="pcapkit.const.ipv4.tos_del.ToSDelay._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.tos_del.ToSDelay.register" title="pcapkit.const.ipv4.tos_del.ToSDelay.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_del.ToSDelay" title="pcapkit.const.ipv4.tos_del.ToSDelay"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSDelay</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_del.ToSDelay._missing_">
@@ -1420,6 +1749,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_ecn.ToSECN.CE">
 <span class="sig-name descname"><span class="pre">CE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.CE" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_ecn.ToSECN.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_ecn.html#ToSECN.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.tos_ecn.ToSECN._missing_" title="pcapkit.const.ipv4.tos_ecn.ToSECN._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_ecn.ToSECN" title="pcapkit.const.ipv4.tos_ecn.ToSECN"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSECN</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_ecn.ToSECN._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_ecn.html#ToSECN._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.tos_ecn.ToSECN._missing_" title="pcapkit.const.ipv4.tos_ecn.ToSECN._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.register" title="pcapkit.const.ipv4.tos_ecn.ToSECN.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_ecn.ToSECN" title="pcapkit.const.ipv4.tos_ecn.ToSECN"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSECN</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_ecn.ToSECN._missing_">
@@ -1488,6 +1864,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSPrecedence</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_pre.ToSPrecedence._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.register" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence" title="pcapkit.const.ipv4.tos_pre.ToSPrecedence"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSPrecedence</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1524,6 +1947,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_rel.ToSReliability.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.tos_rel.ToSReliability._missing_" title="pcapkit.const.ipv4.tos_rel.ToSReliability._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_rel.ToSReliability" title="pcapkit.const.ipv4.tos_rel.ToSReliability"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSReliability</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_rel.ToSReliability._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.tos_rel.ToSReliability._missing_" title="pcapkit.const.ipv4.tos_rel.ToSReliability._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.tos_rel.ToSReliability.register" title="pcapkit.const.ipv4.tos_rel.ToSReliability.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_rel.ToSReliability" title="pcapkit.const.ipv4.tos_rel.ToSReliability"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSReliability</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_rel.ToSReliability._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1558,6 +2028,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_thr.ToSThroughput.HIGH">
 <span class="sig-name descname"><span class="pre">HIGH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.HIGH" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_thr.ToSThroughput.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_thr.html#ToSThroughput.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_" title="pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput" title="pcapkit.const.ipv4.tos_thr.ToSThroughput"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSThroughput</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_thr.ToSThroughput._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/tos_thr.html#ToSThroughput._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_" title="pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.register" title="pcapkit.const.ipv4.tos_thr.ToSThroughput.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput" title="pcapkit.const.ipv4.tos_thr.ToSThroughput"><code class="xref py py-class docutils literal notranslate"><span class="pre">ToSThroughput</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_">
@@ -1599,6 +2116,53 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.ts_flag.TSFlag.Prespecified_IP_with_Timestamp">
 <span class="sig-name descname"><span class="pre">Prespecified_IP_with_Timestamp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.ipv4.ts_flag.TSFlag.Prespecified_IP_with_Timestamp" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.ts_flag.TSFlag.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/ts_flag.html#TSFlag.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.ts_flag.TSFlag.register" title="Link to this definition">¶</a></dt>
+<dd><p>Explicitly register a new member.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipv4.ts_flag.TSFlag._missing_" title="pcapkit.const.ipv4.ts_flag.TSFlag._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
+value without minting anything new, this is the caller-named entry
+point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.ts_flag.TSFlag" title="pcapkit.const.ipv4.ts_flag.TSFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">TSFlag</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly registered member.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv4.ts_flag.TSFlag._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv4/ts_flag.html#TSFlag._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv4.ts_flag.TSFlag._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.ipv4.ts_flag.TSFlag._missing_" title="pcapkit.const.ipv4.ts_flag.TSFlag._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
+resolves without anyone asking for a name, so that such a lookup no
+longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipv4.ts_flag.TSFlag.register" title="pcapkit.const.ipv4.ts_flag.TSFlag.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
+path that still does.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipv4.ts_flag.TSFlag" title="pcapkit.const.ipv4.ts_flag.TSFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">TSFlag</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unregistered member.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipv4.ts_flag.TSFlag._missing_">

@@ -502,9 +502,58 @@
                 <span class="k">if</span> <span class="n">default</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                     <span class="k">raise</span>
                 <span class="k">return</span> <span class="n">LLACode</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LLACode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">LLACode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">LLACode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LLACode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">return</span> <span class="n">LLACode</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LLACode.register">
+<a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode.register">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LLACode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Explicitly register a new member.</span>
+
+<span class="sd">        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a</span>
+<span class="sd">        value without minting anything new, this is the caller-named entry</span>
+<span class="sd">        point that still grows the registry, via :func:`aenum.extend_enum`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value of the new member.</span>
+<span class="sd">            name: Name of the new member.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The newly registered member.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LLACode._unregistered_member">
+<a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode._unregistered_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unregistered_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LLACode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a member absent from this registry's own lookup tables.</span>
+
+<span class="sd">        Used by :meth:`_missing_` for a bounded-but-unassigned value it</span>
+<span class="sd">        resolves without anyone asking for a name, so that such a lookup no</span>
+<span class="sd">        longer grows the registry -- contrast :meth:`register`, the explicit</span>
+<span class="sd">        path that still does.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: The member's value.</span>
+<span class="sd">            name: The member's name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The unregistered member.</span>
+
+<span class="sd">        """</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_name_</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
 
 <div class="viewcode-block" id="LLACode._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode._missing_">[docs]</a>

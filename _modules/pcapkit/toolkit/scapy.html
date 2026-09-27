@@ -490,7 +490,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ModuleNotFoundError</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleNotFound</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span><span class="p">,</span> <span class="n">ModuleNotFound</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScapyWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -784,8 +784,30 @@
         <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span> <span class="k">if</span> <span class="s1">'IP'</span> <span class="ow">in</span> <span class="n">packet</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv6'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IPv6'</span><span class="p">])</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'TCP'</span><span class="p">])</span>
 
+        <span class="c1"># NOTE: no default here, deliberately. Since #775 tier 1, ``get()``</span>
+        <span class="c1"># with no default raises on an unresolvable name instead of minting</span>
+        <span class="c1"># one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP</span>
+        <span class="c1"># framing, respectively -- each meant to go with its own handler</span>
+        <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
+        <span class="c1"># type" and this must not paper over the miss with either. An</span>
+        <span class="c1"># IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is</span>
+        <span class="c1"># not a LinkType member name, and now raises. Note the asymmetry, which</span>
+        <span class="c1"># is not a choice made here: an IPv6-rooted packet's name uppercases to</span>
+        <span class="c1"># ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it</span>
+        <span class="c1"># resolves silently -- to a DLT the caller never chose. Only the v4 name</span>
+        <span class="c1"># happens to miss. The bare ``KeyError``</span>
+        <span class="c1"># from :meth:`LinkType.get` is caught and re-raised as</span>
+        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
+        <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
+        <span class="c1"># letting it escape this public function.</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>     <span class="c1"># data link type from global header</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                   <span class="c1"># data link type</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                         <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                           <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">S</span><span class="p">),</span>                               <span class="c1"># TCP synchronise (SYN) flag</span>

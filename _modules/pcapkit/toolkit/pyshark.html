@@ -468,13 +468,68 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MissingKeyError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span> <span class="s1">'FILTER_NAME_TO_LINKTYPE'</span><span class="p">]</span>
+
+<span class="c1">#: Wireshark display-filter name -&gt; :class:`~pcapkit.const.reg.linktype.LinkType` member, for the</span>
+<span class="c1">#: link-layer protocols :mod:`pyshark` can hand :func:`tcp_traceflow` as</span>
+<span class="c1">#: ``packet.layers[0].layer_name``. PyShark takes that name verbatim from the PDML ``&lt;proto</span>
+<span class="c1">#: name=...&gt;`` attribute, which is Wireshark's own dissector *filter* name -- the third argument to</span>
+<span class="c1">#: ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and that</span>
+<span class="c1">#: vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never ``ETHERNET``.</span>
+<span class="c1">#: This table exists so :mod:`pcapkit` can bridge the two without minting a DLT for a name it</span>
+<span class="c1">#: cannot actually place (see the NOTE in :func:`tcp_traceflow`).</span>
+<span class="c1">#:</span>
+<span class="c1">#: Both entries were checked two ways: against Wireshark's dissector registrations, and live with</span>
+<span class="c1">#: ``tshark`` 4.6.9 plus ``editcap -T &lt;encap&gt;`` to confirm the PDML root each encapsulation</span>
+<span class="c1">#: actually produces. Note the upper-casing is done by the call site in :func:`tcp_traceflow`,</span>
+<span class="c1">#: not by :meth:`LinkType.get`, which is a plain subscript.</span>
+<span class="c1">#:</span>
+<span class="c1">#: * ``eth`` -&gt; :attr:`~LinkType.ETHERNET` -- ``packet-eth.c`` registers it against</span>
+<span class="c1">#:   ``WTAP_ENCAP_ETHERNET``, and ``ether`` is the only one of the 158 swept encapsulations that</span>
+<span class="c1">#:   roots at ``eth``. ``ether-nettl`` is among the 68 unswept, so "exactly one" is unproven.</span>
+<span class="c1">#: * ``tr`` -&gt; :attr:`~LinkType.IEEE802_5` -- ``packet-tr.c``, ``WTAP_ENCAP_TOKEN_RING``; ``tr``</span>
+<span class="c1">#:   is the only swept encapsulation rooting at ``tr``, with ``tr-nettl`` likewise unswept.</span>
+<span class="c1">#:   :class:`LinkType`'s own ``#:`` comment records that ``DLT_IEEE802`` *is* Token Ring, the</span>
+<span class="c1">#:   missing ``_5`` being historical.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Everything else, measured rather than reasoned. A filter name serving several DLTs cannot be</span>
+<span class="c1">#: mapped, because the PDML node does not say which one arrived:</span>
+<span class="c1">#:</span>
+<span class="c1">#: * ``sll`` -- serves :attr:`LinkType.LINUX_SLL` (113) and :attr:`LinkType.LINUX_SLL2` (276).</span>
+<span class="c1">#:   ``tshark -G protocols`` registers a single ``sll`` name, and ``editcap -T linux-sll`` and</span>
+<span class="c1">#:   ``-T linux-sll2`` both root at ``sll``. No entry; raises.</span>
+<span class="c1">#: * ``raw`` -- serves :attr:`LinkType.RAW` (101), :attr:`LinkType.IPV4` (228) and</span>
+<span class="c1">#:   :attr:`LinkType.IPV6` (229); ``editcap -T rawip``, ``-T rawip4`` and ``-T rawip6`` all root at</span>
+<span class="c1">#:   ``raw``. It does **not** raise: ``'RAW'`` is a member name, so the fallback answers 101 for all</span>
+<span class="c1">#:   three -- silently wrong for 228 and 229. Tracked in #843.</span>
+<span class="c1">#: * ``null`` -- serves :attr:`LinkType.NULL` (0) and :attr:`LinkType.LOOP` (108); ``editcap -T</span>
+<span class="c1">#:   null`` and ``-T loop`` both root at ``null``. Also does not raise: answers 0 for both, silently</span>
+<span class="c1">#:   wrong for 108. Tracked in #843. (``loop`` is a different protocol entirely -- ``tshark -G</span>
+<span class="c1">#:   protocols`` gives it as Configuration Test Protocol, an Ethernet payload on ethertype 0x9000.)</span>
+<span class="c1">#: * ``ip`` and ``ipv6`` -- never arrive as the root layer. ``editcap -T`` accepts 226</span>
+<span class="c1">#:   encapsulations; of the **158** an Ethernet source can be rewritten into, neither is ever</span>
+<span class="c1">#:   ``layers[0]`` -- a raw IPv6 capture roots at ``raw`` and carries ``ipv6`` as the *next* layer.</span>
+<span class="c1">#:   The other 68 refuse that rewrite (``can't be written as``, not an unknown type) and are</span>
+<span class="c1">#:   untested. No entry needed for either, and none would be reached.</span>
+<span class="c1">#: * ``ppp``, ``fddi``, ``lapd`` -- no entry needed; each upper-cases onto a real member name, so</span>
+<span class="c1">#:   the fallback resolves them. ``ppp`` and ``lapd`` each serve several DLTs and so answer with the</span>
+<span class="c1">#:   wrong one, which is the same #843 defect rather than anything this table introduces.</span>
+<span class="c1">#: * ``fr`` -- measured single-DLT after all: ``frelay`` and ``frelay-with-direction`` both write</span>
+<span class="c1">#:   DLT 107, so it is mappable. Left out only because adding it is scope this change does not need.</span>
+<span class="c1">#: * ``wlan`` -- not investigated. Left out rather than guessed.</span>
+<span class="c1">#: * every other :class:`LinkType` member -- no evidence was gathered either way; they are simply</span>
+<span class="c1">#:   untried, not ruled out.</span>
+<span class="n">FILTER_NAME_TO_LINKTYPE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'eth'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span>
+    <span class="s1">'tr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_5</span><span class="p">,</span>
+<span class="p">}</span>  <span class="c1"># type: dict[str, Enum_LinkType]</span>
 
 
 <div class="viewcode-block" id="packet2dict">
@@ -535,8 +590,41 @@
     <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
 
+        <span class="c1"># NOTE: no default here, deliberately. Since #775 tier 1, ``get()``</span>
+        <span class="c1"># with no default raises on an unresolvable name instead of minting</span>
+        <span class="c1"># one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP</span>
+        <span class="c1"># framing, respectively -- each meant to go with its own handler</span>
+        <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
+        <span class="c1"># type" and this must not paper over the miss with either.</span>
+        <span class="c1">#</span>
+        <span class="c1"># PyShark's own layer name is Wireshark's PDML *filter* name (e.g.</span>
+        <span class="c1"># ``eth``, not ``ethernet``), which is generally not a LinkType member</span>
+        <span class="c1"># name -- so ``FILTER_NAME_TO_LINKTYPE`` (module level, above) is</span>
+        <span class="c1"># tried first, on the name as PyShark reports it. Only when that</span>
+        <span class="c1"># table has nothing for this name does this fall back to</span>
+        <span class="c1"># :meth:`LinkType.get` on the upper-cased name, which is what lets a</span>
+        <span class="c1"># filter name that happens to already spell a LinkType member (e.g.</span>
+        <span class="c1"># ``ppp``, ``fddi``) resolve without needing an entry of its own. The</span>
+        <span class="c1"># table is consulted first rather than second so that a curated,</span>
+        <span class="c1"># source-verified entry always wins over an incidental upper-case</span>
+        <span class="c1"># match, should a future LinkType member ever collide with one of</span>
+        <span class="c1"># this module's filter names by coincidence. The bare ``KeyError``</span>
+        <span class="c1"># from either lookup is re-raised as</span>
+        <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
+        <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
+        <span class="c1"># letting it escape this public function.</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">protocol</span> <span class="o">=</span> <span class="n">FILTER_NAME_TO_LINKTYPE</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>     <span class="c1"># data link type from global header</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                                   <span class="c1"># data link type</span>
             <span class="n">index</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="p">),</span>                                            <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                                           <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_syn</span><span class="p">)),</span>                                        <span class="c1"># TCP synchronise (SYN) flag</span>
