@@ -803,9 +803,12 @@ since -- reaching #805 by the entries below.
   ``ValueError: 99999 is not a valid Hardware`` instead of returning the
   fallback it was handed. The integer path now consults ``default`` before
   letting the lookup error escape. ``-1``, the placeholder the generated
-  signature already carried, is what separates "no default was supplied" from
-  "a default was supplied and should be used", so a caller that asked for no
-  fallback still gets the error rather than a silent substitution. The sweep
+  signature already carried, was what separated "no default was supplied"
+  from "a default was supplied and should be used" at the time, so a caller
+  that asked for no fallback got the error rather than a silent substitution.
+  That ``-1`` convention was later replaced by an identity sentinel object,
+  once the shared base class #858 (below) put ``get()`` behind one call site
+  for most of these registries instead of many (#859). The sweep
   #584 asked for puts the scope at 110 of the 118 integer registries, not the
   three the issue named; the two carrying a bespoke integer fallback of their
   own, ``pcapng`` ``OptionType`` and ``reg`` ``AppType``, are deliberately left
