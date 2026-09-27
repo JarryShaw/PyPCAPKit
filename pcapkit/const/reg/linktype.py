@@ -743,6 +743,10 @@ class LinkType(IntEnum):
     #: header prepended to a standard DLT\_DECT\_NR MAC-layer frame.
     DECT_NR_TAP = 304
 
+    # The following legacy alias(es) are emitted here, after every
+    # current entry above, instead of at their original numeric
+    # position -- see pcapkit.vendor.reg.linktype.LinkType.process
+    # for why.
     #: [``DLT_IPMB_LINUX``] Legacy names (do not use) for Linux I2C below.
     IPMB_LINUX = 209
 
