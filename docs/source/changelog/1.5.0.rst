@@ -2907,6 +2907,22 @@ since -- reaching #805 by the entries below.
   tests had pinned the shadowing as intended behaviour, with comments reading
   ``# masks 'Experimental'``; those assertions are corrected here rather than
   dropped, and a new test pins all three ranges as reachable (#847).
+* **Fixed** -- ``LinkType(209).name`` returned ``'IPMB_LINUX'``, the name
+  tcpdump's own table (and pcapkit's generated comment) marks "Legacy names (do
+  not use)", because that row was emitted above the current ``I2C_LINUX = 209``
+  and ``aenum`` gives a value to whichever member is defined first --
+  introduced by a 2024-05-04 regeneration that inserted the legacy row above
+  the current one. Fixed in the generator: ``pcapkit/vendor/reg/linktype.py``
+  now sinks any row whose note mentions "legacy" into a bucket appended after
+  every current row, so the current name is always defined first for a value
+  the table double-assigns; today that is value 209 alone.
+  ``pcapkit/const/reg/linktype.py`` changes by a 3-line move, verified
+  byte-reproducible from the generator. ``IPMB_LINUX`` is not removed -- it
+  stays a reachable alias, so ``LinkType['IPMB_LINUX']`` still resolves to 209
+  -- only the value-to-name direction changes. Not breaking: no name
+  disappears, no value changes and no membership changes;
+  ``LinkType.IPMB_LINUX is LinkType.I2C_LINUX`` holds both before and after,
+  and only the canonical name for the shared value moves (#848).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
