@@ -186,19 +186,35 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         self.assertEqual(Hardware.get(40), Hardware(40))
         self.assertIs(Hardware.get('Ethernet'), Hardware.Ethernet)
 
-    def test_the_placeholder_still_raises(self) -> None:
-        """``-1`` means *no default*, so the lookup error must still propagate."""
+    def test_omitting_the_default_still_raises_for_the_original_key(self) -> None:
+        """GitHub issue #857: ``-1`` used to be compared with ``==`` against
+        :data:`~pcapkit.corekit.enum.NO_DEFAULT`, so a caller-supplied ``-1``
+        was silently read as *no default was supplied* -- "explicitly passing
+        the placeholder is the same as omitting it", as this test used to
+        assert. :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an exported
+        instance of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`
+        compared with ``is``, so ``-1`` is a genuine default like any other:
+        omitting ``default`` entirely still raises for the *original* key
+        (unchanged, pinned below), while explicitly passing ``-1`` now raises
+        for the *attempted fallback* ``cls(-1)`` instead -- no longer the same
+        error, since every registry's domain here starts at ``0`` and ``-1``
+        is never a legitimate value.
+        """
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
 
         for enum in (Hardware, Operation):
             with self.subTest(enum=_qualname(enum)):
-                with self.assertRaises(ValueError) as caught:
+                with self.assertRaises(ValueError) as omitted:
                     enum.get(99999)
-                self.assertIn('99999', str(caught.exception))
-                # Explicitly passing the placeholder is the same as omitting it.
-                with self.assertRaises(ValueError):
+                self.assertIn('99999', str(omitted.exception))
+
+                # No longer "the same as omitting it": this now names the
+                # failed fallback (``-1``), not the original key (``99999``).
+                with self.assertRaises(ValueError) as supplied:
                     enum.get(99999, -1)
+                self.assertIn('-1', str(supplied.exception))
+                self.assertNotIn('99999', str(supplied.exception))
 
     def test_the_two_unverified_enums_from_the_issue(self) -> None:
         """#584 named ``Operation`` and ``LinkType`` but verified only ``Hardware``."""
