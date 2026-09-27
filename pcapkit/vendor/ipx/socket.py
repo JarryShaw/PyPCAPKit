@@ -231,20 +231,23 @@ DATA = {
 #: processes." ``(0x4000, 0x4FFF)`` is *contradicted*, not merely rounded: the
 #: preceding sentence reads "Socket numbers between 0x4000 and 0x7FFF are
 #: dynamic sockets", so the upper bound is 0x7FFF. The transcribed 0x4FFF is
-#: kept because widening it would change the generated ``_missing_``; the
-#: archived table is what is wrong here, and this range is masked by
-#: ``(0x0BB9, 0xFFFF)`` in any case (see the note below), so the bound has no
-#: observable effect today.
+#: kept because widening it would change the generated ``_missing_``.
 RANGES = [
-    # NOTE: order is significant, and is the order the rows appeared in. The
-    # generated ``_missing_`` tests these in sequence and returns on the first
-    # match, so the wide ranges here mask the narrow ones that follow them --
-    # reordering the list silently changes which name an unlisted socket gets.
-    (0x0001, 0x0BB8, 'Registered by Xerox'),
+    # NOTE: order is significant. The generated ``_missing_`` tests these in
+    # sequence and returns on the first match, so a wide range placed before a
+    # narrower one it fully contains would mask that narrower one -- it would
+    # never be reached, and the socket would be misdescribed under the wide
+    # range's name instead. See GitHub issue #841, which found exactly that:
+    # ``(0x0020, 0x003F)`` is a strict subset of ``(0x0001, 0x0BB8)``, and both
+    # ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` are strict subsets of
+    # ``(0x0BB9, 0xFFFF)``. Each subset range is therefore listed ahead of the
+    # wider range that contains it, rather than in the order the rows appeared
+    # in the archived revision.
     (0x0020, 0x003F, 'Experimental'),
-    (0x0BB9, 0xFFFF, 'Dynamically Assigned'),
+    (0x0001, 0x0BB8, 'Registered by Xerox'),
     (0x4000, 0x4FFF, 'Dynamically Assigned Socket Numbers'),
     (0x8000, 0xFFFF, 'Statically Assigned Socket Numbers'),
+    (0x0BB9, 0xFFFF, 'Dynamically Assigned'),
 ]  # type: list[tuple[int, int, str]]
 
 
