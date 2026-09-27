@@ -46,9 +46,9 @@ what the generated code happens to look like:
    something the registry genuinely says. **Mint.**
 *  The source says only that the codes are spoken for, without naming them --
    ``Unassigned``, ``Reserved``, ``Reserved for Private Use``,
-   ``Reserved for Experimental Use``, ``Deprecated``, ``Dynamically Assigned``,
-   ``Statically Assigned``, ``Registered by`` some organisation. These are written
-   for a human reading the table. Minting them **manufactures a name nobody
+   ``Reserved for Experimental Use``, ``Deprecated``, ``Dynamically Assigned``
+   and ``Statically Assigned``. These are written for a human reading the
+   table. Minting them **manufactures a name nobody
    assigned**, and the value will get its real name if and when something assigns
    it. **Unmint.**
 
