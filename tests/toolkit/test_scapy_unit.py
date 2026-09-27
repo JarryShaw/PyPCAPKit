@@ -87,6 +87,21 @@ class ScapyToolkitTests(unittest.TestCase):
 
         return Ether(bytes(Ether(**self._ether_kwargs()) / Raw(b'raw')))
 
+    def _make_ip_rooted_tcp_packet(self):
+        # No Ether layer, so ``packet.name`` (what #775's tier 1 fix at
+        # scapy.py:324 feeds ``Enum_LinkType.get()``) is ``'IP'`` -- not a
+        # LinkType member name, unlike the Ether-rooted packets above whose
+        # name is ``'Ethernet'``.
+        from scapy.layers.inet import IP, TCP
+        from scapy.packet import Raw
+
+        packet = (
+            IP(src='192.0.2.1', dst='198.51.100.1', id=123) /
+            TCP(sport=1234, dport=80, seq=10, ack=5, flags='SA') /
+            Raw(b'data')
+        )
+        return IP(bytes(packet))
+
     def test_import_without_scapy_sets_none_and_warns(self) -> None:
         purge_modules(['pcapkit.toolkit.scapy'])
         real_import = builtins.__import__
@@ -279,6 +294,38 @@ class ScapyToolkitTests(unittest.TestCase):
         self.assertIsNone(toolkit.tcp_reassembly(self._make_ipv4_fragment(), count=1))
         self.assertIsNone(toolkit.tcp_reassembly(self._make_ether_raw(), count=1))
         self.assertIsNone(toolkit.tcp_traceflow(self._make_ipv4_fragment(), count=1))
+
+    def test_tcp_traceflow_raises_for_an_ip_rooted_packet(self) -> None:
+        """An IP-rooted (Ether-less) packet's ``.name`` is ``'IP'``, which is
+        not a LinkType member name. Since #775 tier 1, ``Enum_LinkType.get()``
+        with no default raises on an unresolvable name instead of minting
+        one -- and per the ruling on #838, NULL and RAW are genuine DLTs with
+        their own handler protocol classes, not stand-ins for "unknown link
+        type", so this call site no longer papers over the miss with a
+        ``LinkType.NULL`` default. This pins that the miss now raises
+        :exc:`~pcapkit.utilities.exceptions.MissingKeyError` naming the
+        offending value, and that the registry is still not grown by it.
+
+        Contrast an Ether-rooted packet, exercised in
+        ``test_tcp_reassembly_and_traceflow`` above: ``(Ether()/IP()/TCP()).
+        name`` is ``'Ethernet'``, which *does* resolve to
+        ``LinkType.ETHERNET``, so only the IP-rooted path raises here.
+
+        """
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.toolkit import scapy as toolkit
+        from pcapkit.utilities.exceptions import MissingKeyError
+
+        packet = self._make_ip_rooted_tcp_packet()
+        self.assertEqual(packet.name, 'IP')
+
+        before = len(LinkType.__members__)
+        with self.assertRaises(MissingKeyError) as ctx:
+            toolkit.tcp_traceflow(packet, count=1)
+        after = len(LinkType.__members__)
+
+        self.assertEqual(ctx.exception.args[0], 'IP')
+        self.assertEqual(before, after)
 
 
 if __name__ == '__main__':

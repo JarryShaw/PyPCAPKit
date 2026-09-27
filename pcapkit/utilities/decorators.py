@@ -161,16 +161,19 @@ def beholder(
             #
             # Measured, because the layers differ and it is easy to state this too
             # broadly: SCTP's unregistered path keeps its enumeration -- an unknown
-            # PPID gives ``SCTP:Unassigned_4243`` and ``protocol=4243`` -- so
+            # PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so
             # without this line, *registering* NGAP on PPID 60 would have made a
             # failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less
-            # than the same bytes gave while unregistered. TCP's unregistered path
-            # does not: an unknown port yields ``protocol=None`` already, because
+            # than the same bytes gave while unregistered. TCP's unregistered
+            # path keeps its code too, but as a plain integer: an unknown port
+            # yields ``TCP:Raw`` with ``protocol=49998``, because
             # ``Transport._decode_next_layer`` resolves ports through
-            # ``__proto__`` and never reaches here. So this makes the *failure*
-            # path uniform while the *unknown* paths stay inconsistent with each
-            # other, which is #418 rather than something to fix from inside a
-            # decorator.
+            # ``__proto__`` and never reaches here, and forwards the port
+            # whether or not it is registered. So both *unknown* paths preserve
+            # the code that arrived; what differs is only that SCTP's is an
+            # enumeration the protochain can name, while TCP's is an ``int`` and
+            # renders as ``Raw``. That was #418, closed by #426; this line is
+            # about the *failure* path, which it makes uniform.
             next_ = protocol(file_, length, error=str(exc), alias=proto)
             return cast('R_beholder', next_)
     return behold

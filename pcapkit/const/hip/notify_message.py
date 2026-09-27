@@ -151,9 +151,52 @@ class NotifyMessage(IntEnum):
                 if default == -1:
                     raise
                 return NotifyMessage(default)
-        if key not in NotifyMessage._member_map_:  # pylint: disable=no-member
-            return extend_enum(NotifyMessage, key, default)
-        return NotifyMessage[key]  # type: ignore[misc]
+        try:
+            return NotifyMessage[key]  # type: ignore[misc]
+        except KeyError:
+            if default == -1:
+                raise
+            return NotifyMessage(default)
+
+    @classmethod
+    def register(cls, value: 'int', name: 'str') -> 'NotifyMessage':
+        """Explicitly register a new member.
+
+        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
+        value without minting anything new, this is the caller-named entry
+        point that still grows the registry, via :func:`aenum.extend_enum`.
+
+        Args:
+            value: Value of the new member.
+            name: Name of the new member.
+
+        Returns:
+            The newly registered member.
+
+        """
+        return extend_enum(cls, name, value)
+
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> 'NotifyMessage':
+        """Build a member absent from this registry's own lookup tables.
+
+        Used by :meth:`_missing_` for a bounded-but-unassigned value it
+        resolves without anyone asking for a name, so that such a lookup no
+        longer grows the registry -- contrast :meth:`register`, the explicit
+        path that still does.
+
+        Args:
+            value: The member's value.
+            name: The member's name.
+
+        Returns:
+            The unregistered member.
+
+        """
+        obj = int.__new__(cls, value)
+        obj._name_ = name  # pylint: disable=protected-access
+        obj._value_ = value  # pylint: disable=protected-access
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NotifyMessage':
@@ -167,41 +210,41 @@ class NotifyMessage(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 6:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 8 <= value <= 13:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 21 <= value <= 23:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 29 <= value <= 31:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 33 <= value <= 39:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 52 <= value <= 59:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 65 <= value <= 69:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 71 <= value <= 89:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 91 <= value <= 99:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 101 <= value <= 8191:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 8192 <= value <= 16383:
             #: Reserved for Private Use [:rfc:`7401`]
-            return extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         if 16386 <= value <= 40959:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 40960 <= value <= 65535:
             #: Reserved for Private Use [:rfc:`7401`]
-            return extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)

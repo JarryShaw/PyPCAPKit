@@ -43,7 +43,7 @@ from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
-from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
+from pcapkit.utilities.exceptions import MissingKeyError, ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
 
 try:
@@ -320,8 +320,30 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
 
+        # NOTE: no default here, deliberately. Since #775 tier 1, ``get()``
+        # with no default raises on an unresolvable name instead of minting
+        # one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP
+        # framing, respectively -- each meant to go with its own handler
+        # protocol class, so neither is an honest stand-in for "unknown link
+        # type" and this must not paper over the miss with either. An
+        # IP-rooted Scapy packet's ``(IP()/TCP()).name`` is ``'IP'``, which is
+        # not a LinkType member name, and now raises. Note the asymmetry, which
+        # is not a choice made here: an IPv6-rooted packet's name uppercases to
+        # ``'IPV6'``, which *is* a member (``LinkType.IPV6``, 229), so it
+        # resolves silently -- to a DLT the caller never chose. Only the v4 name
+        # happens to miss. The bare ``KeyError``
+        # from :meth:`LinkType.get` is caught and re-raised as
+        # :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this
+        # package's own house exception for a lookup miss -- rather than
+        # letting it escape this public function.
+        name = packet.name.upper()
+        try:
+            protocol = Enum_LinkType.get(name)
+        except KeyError:
+            raise MissingKeyError(name) from None
+
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=Enum_LinkType.get(packet.name.upper()),     # data link type from global header
+            protocol=protocol,                                   # data link type
             index=count,                                         # frame number
             frame=packet2dict(packet),                           # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag

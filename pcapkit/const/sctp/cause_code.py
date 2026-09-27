@@ -110,9 +110,52 @@ class CauseCode(IntEnum):
                 if default == -1:
                     raise
                 return CauseCode(default)
-        if key not in CauseCode._member_map_:  # pylint: disable=no-member
-            return extend_enum(CauseCode, key, default)
-        return CauseCode[key]  # type: ignore[misc]
+        try:
+            return CauseCode[key]  # type: ignore[misc]
+        except KeyError:
+            if default == -1:
+                raise
+            return CauseCode(default)
+
+    @classmethod
+    def register(cls, value: 'int', name: 'str') -> 'CauseCode':
+        """Explicitly register a new member.
+
+        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a
+        value without minting anything new, this is the caller-named entry
+        point that still grows the registry, via :func:`aenum.extend_enum`.
+
+        Args:
+            value: Value of the new member.
+            name: Name of the new member.
+
+        Returns:
+            The newly registered member.
+
+        """
+        return extend_enum(cls, name, value)
+
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> 'CauseCode':
+        """Build a member absent from this registry's own lookup tables.
+
+        Used by :meth:`_missing_` for a bounded-but-unassigned value it
+        resolves without anyone asking for a name, so that such a lookup no
+        longer grows the registry -- contrast :meth:`register`, the explicit
+        path that still does.
+
+        Args:
+            value: The member's value.
+            name: The member's name.
+
+        Returns:
+            The unregistered member.
+
+        """
+        obj = int.__new__(cls, value)
+        obj._name_ = name  # pylint: disable=protected-access
+        obj._value_ = value  # pylint: disable=protected-access
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'CauseCode':
@@ -126,14 +169,14 @@ class CauseCode(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 14 <= value <= 99:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 104 <= value <= 159:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 165 <= value <= 260:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 262 <= value <= 65535:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

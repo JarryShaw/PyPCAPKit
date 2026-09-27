@@ -973,7 +973,7 @@ class SCTPUnitTests(unittest.TestCase):
         # 4243 is the first code in the trailing "Unassigned" block of the IANA
         # registry, i.e. a PPID that is well-formed but cannot be registered.
         UNREGISTERED = 4243
-        self.assertEqual(PayloadProtocolIdentifier(UNREGISTERED).name, 'Unassigned_4243')
+        self.assertEqual(PayloadProtocolIdentifier(UNREGISTERED).name, 'Unassigned')
 
         raw = self._build([(Chunk.Payload_Data,
                             dict(I=True, U=True, B=True, E=True, tsn=1,
@@ -993,7 +993,7 @@ class SCTPUnitTests(unittest.TestCase):
             self.assertEqual(bytes(first.payload), b'unknown-pdu')
             self.assertEqual(int(first.ppid), UNREGISTERED)
             self.assertEqual(first.payload.info.protocol, UNREGISTERED)
-            self.assertEqual(str(first.protochain), 'SCTP:Unassigned_4243')
+            self.assertEqual(str(first.protochain), 'SCTP:Unassigned')
 
             # (b) The class-level registry gained nothing: no ``None`` key, and
             #     no key for the unregistered PPID either.
@@ -1006,7 +1006,7 @@ class SCTPUnitTests(unittest.TestCase):
             second = self._packet(raw)
             self.assertIsInstance(second.payload, Raw)
             self.assertEqual(bytes(second.payload), b'unknown-pdu')
-            self.assertEqual(str(second.protochain), 'SCTP:Unassigned_4243')
+            self.assertEqual(str(second.protochain), 'SCTP:Unassigned')
             self.assertEqual(set(SCTP.__proto__), before)
 
             # And the PPID is still registrable without a bogus overwrite
