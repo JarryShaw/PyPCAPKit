@@ -17,6 +17,7 @@ etc.
 
 """
 from pcapkit.corekit.io import SeekableReader
+from pcapkit.corekit.enums import EnumRegistry
 from pcapkit.corekit.fields import *
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.module import ModuleDescriptor
@@ -25,6 +26,8 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.version import VersionInfo
 
 __all__ = [
+    'EnumRegistry',
+
     'Info', 'info_final',
 
     'ProtoChain',
