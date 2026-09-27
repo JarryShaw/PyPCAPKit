@@ -3016,6 +3016,25 @@ since -- reaching #805 by the entries below.
   (tried as a value) where the generated template's own ``get``, still used by
   the other 105, raises ``KeyError`` (tried as a name) -- a new cross-registry
   divergence, degenerate today since no caller passes one (#855).
+* **Changed** -- Ruleset ``23497679``'s ``required_status_checks`` names 22
+  exact check contexts, and GitHub rulesets match literally with no wildcard,
+  so the required list needs hand-editing on every matrix change. Five of the
+  22, the old single-cell ``Engines Python <version>`` names, are already dead
+  since #849; the five ``Compat Python 3.10``-``3.14`` names stay live, emitted
+  independently by ``python-compatibility.yml``, and are not touched. Adds one
+  job, ``required-checks`` (context ``Required checks passed``), depending on
+  ``[test, integration, engine-tests, pypcap-parity]`` with
+  ``if: always() && inputs.gate-only != true`` and an explicit per-dependency
+  check that fails loudly, naming the job, on anything but ``success`` -- a
+  bare ``needs:`` list would leave this job silently *skipped* rather than
+  failed the moment a dependency failed, and GitHub's own troubleshooting docs
+  list a skipped required check as passing. That one context is meant to
+  replace 17 of the ruleset's 22 hand-listed entries (``test``,
+  ``integration``, ``Engines``, ``pypcap-parity``) once the ruleset itself is
+  updated separately -- a repository setting this PR does not touch, and the
+  five ``Compat`` names are deliberately excluded from that replacement. One
+  file, ``.github/workflows/unit-tests.yml``, 167 lines added; no library or
+  test code changes (#856).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
