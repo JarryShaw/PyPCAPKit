@@ -2879,8 +2879,8 @@ since -- reaching #805 by the entries below.
   tier; ``register``/``register_alias`` account for a further 106 sites that
   are the by-design caller-named path and stay untouched (#838).
 * **Changed** -- ``engine='pyshark'`` had no CI job driving it through a real
-  ``tshark``-parsed capture. ``pypcap-parity`` installs ``pyshark`` but not
-  ``tshark`` (0 hits for ``tshark`` anywhere in that job's log), so
+  ``tshark``-parsed capture. ``pypcap-parity`` installs ``pyshark`` but its
+  ``apt-get install`` step named no ``tshark`` package, so
   ``PyShark.unsupported_reason()`` declined the engine, the extractor fell back
   to the built-in parser, and the one real-extraction assertion,
   ``assertGreater(extractor.length, 0)``, passed against the fallback's output
@@ -2888,9 +2888,10 @@ since -- reaching #805 by the entries below.
   installs ``tshark`` with the same debconf pre-seed ``engine-tests`` already
   carries, and the test proves which engine actually ran: no ``EngineWarning``
   fires, ``extractor._exnam == 'pyshark'`` and the engine is a ``PyShark``
-  instance -- the same idiom the PyPCAP parity test already used. Only these
-  two test files change; the length assertion itself is kept, not weakened
-  (#846).
+  instance -- the same idiom the PyPCAP parity test already used. Only
+  ``tests/integration/test_engine_runtime.py`` and ``test_engine_parity.py``
+  change among the test files; the length assertion itself is kept, not
+  weakened (#846).
 * **Fixed** -- **a breaking change to** ``pcapkit.const.ipx.socket.Socket``'s
   ``_missing_``: its five archived range branches were tested in table order,
   and three were strict subsets of a range tested earlier --
