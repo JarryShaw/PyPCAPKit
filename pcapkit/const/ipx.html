@@ -485,7 +485,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ipx.packet.Packet">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipx.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.packet.Packet" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Packet] IPX Packet Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ipx.packet.Packet.Unknown">
@@ -537,53 +537,6 @@ Protocol)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.ipx.packet.Packet.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/packet.html#Packet.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.packet.Packet.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipx.packet.Packet._missing_" title="pcapkit.const.ipx.packet.Packet._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipx.packet.Packet" title="pcapkit.const.ipx.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.ipx.packet.Packet._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/packet.html#Packet._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.packet.Packet._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.ipx.packet.Packet._missing_" title="pcapkit.const.ipx.packet.Packet._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipx.packet.Packet.register" title="pcapkit.const.ipx.packet.Packet.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipx.packet.Packet" title="pcapkit.const.ipx.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ipx.packet.Packet._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/packet.html#Packet._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.packet.Packet._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -607,7 +560,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ipx.socket.Socket">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipx.socket.</span></span><span class="sig-name descname"><span class="pre">Socket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.socket.Socket" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Socket] Socket Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ipx.socket.Socket.Unspecified">
@@ -697,53 +650,6 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.ipx.socket.Socket.IPXF">
 <span class="sig-name descname"><span class="pre">IPXF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37011</span></span><a class="headerlink" href="#pcapkit.const.ipx.socket.Socket.IPXF" title="Link to this definition">¶</a></dt>
 <dd><p>IPXF, IPX Fragmentation Protocol</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.ipx.socket.Socket.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/socket.html#Socket.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.socket.Socket.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.ipx.socket.Socket._missing_" title="pcapkit.const.ipx.socket.Socket._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipx.socket.Socket" title="pcapkit.const.ipx.socket.Socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">Socket</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.ipx.socket.Socket._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipx/socket.html#Socket._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipx.socket.Socket._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.ipx.socket.Socket._missing_" title="pcapkit.const.ipx.socket.Socket._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.ipx.socket.Socket.register" title="pcapkit.const.ipx.socket.Socket.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ipx.socket.Socket" title="pcapkit.const.ipx.socket.Socket"><code class="xref py py-class docutils literal notranslate"><span class="pre">Socket</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

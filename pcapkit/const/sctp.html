@@ -491,7 +491,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.chunk.</span></span><span class="sig-name descname"><span class="pre">Chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/chunk.html#Chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Chunk] SCTP Chunk Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk.Payload_Data">
@@ -675,53 +675,6 @@ tsvwg-sctp-dtls-chunk-01]</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/chunk.html#Chunk.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.sctp.chunk.Chunk._missing_" title="pcapkit.const.sctp.chunk.Chunk._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chunk</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/chunk.html#Chunk._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.sctp.chunk.Chunk._missing_" title="pcapkit.const.sctp.chunk.Chunk._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.sctp.chunk.Chunk.register" title="pcapkit.const.sctp.chunk.Chunk.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.chunk.Chunk" title="pcapkit.const.sctp.chunk.Chunk"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chunk</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.chunk.Chunk._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/chunk.html#Chunk._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.chunk.Chunk._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -745,7 +698,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.parameter.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/parameter.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.parameter.Parameter" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Parameter] SCTP Chunk Parameter Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter.Heartbeat_Info">
@@ -941,53 +894,6 @@ which is automatically generated from <a class="reference internal" href="../ven
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/parameter.html#Parameter.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.parameter.Parameter.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.sctp.parameter.Parameter._missing_" title="pcapkit.const.sctp.parameter.Parameter._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/parameter.html#Parameter._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.parameter.Parameter._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.sctp.parameter.Parameter._missing_" title="pcapkit.const.sctp.parameter.Parameter._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.sctp.parameter.Parameter.register" title="pcapkit.const.sctp.parameter.Parameter.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.parameter.Parameter" title="pcapkit.const.sctp.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.parameter.Parameter._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/parameter.html#Parameter._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.parameter.Parameter._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1011,7 +917,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.cause_code.</span></span><span class="sig-name descname"><span class="pre">CauseCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/cause_code.html#CauseCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.cause_code.CauseCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[CauseCode] SCTP Error Cause Codes</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode.Invalid_Stream_Identifier">
@@ -1156,53 +1062,6 @@ expires 2027-08-13) [draft-ietf-tsvwg-sctp-dtls-chunk-04]</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/cause_code.html#CauseCode.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.cause_code.CauseCode.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.sctp.cause_code.CauseCode._missing_" title="pcapkit.const.sctp.cause_code.CauseCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.cause_code.CauseCode" title="pcapkit.const.sctp.cause_code.CauseCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">CauseCode</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/cause_code.html#CauseCode._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.cause_code.CauseCode._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.sctp.cause_code.CauseCode._missing_" title="pcapkit.const.sctp.cause_code.CauseCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.sctp.cause_code.CauseCode.register" title="pcapkit.const.sctp.cause_code.CauseCode.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.cause_code.CauseCode" title="pcapkit.const.sctp.cause_code.CauseCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">CauseCode</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.cause_code.CauseCode._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/cause_code.html#CauseCode._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.cause_code.CauseCode._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1226,7 +1085,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.sctp.payload_protocol_identifier.</span></span><span class="sig-name descname"><span class="pre">PayloadProtocolIdentifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/payload_protocol_identifier.html#PayloadProtocolIdentifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[PayloadProtocolIdentifier] SCTP Payload Protocol Identifiers</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.Reserved_by_SCTP">
@@ -1727,53 +1586,6 @@ Franusic][<a class="reference external" href="https://github.com/link-mink">http
 <span class="sig-name descname"><span class="pre">DTLS_Chunk_Key_Management_Messages</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4242</span></span><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.DTLS_Chunk_Key_Management_Messages" title="Link to this definition">¶</a></dt>
 <dd><p>DTLS Chunk Key-Management Messages [draft-westerlund-tsvwg-sctp-dtls-
 chunk-01]</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/payload_protocol_identifier.html#PayloadProtocolIdentifier.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._missing_" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/sctp/payload_protocol_identifier.html#PayloadProtocolIdentifier._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._missing_" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.register" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier" title="pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">PayloadProtocolIdentifier</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

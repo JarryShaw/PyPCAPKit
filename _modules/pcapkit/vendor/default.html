@@ -510,81 +510,17 @@
 
 <span class="s1">"""</span>
 
-<span class="s1">from aenum import IntEnum, extend_enum</span>
+<span class="s1">from aenum import IntEnum</span><span class="si">{</span><span class="s1">', extend_enum'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">'extend_enum('</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">MISS</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span>
+
+<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
 
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 
-<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(IntEnum):</span>
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, IntEnum):</span>
 <span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
-
-<span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: 'int | str', default: 'int' = -1) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Backport support for original codes.</span>
-
-<span class="s1">        Args:</span>
-<span class="s1">            key: Key to get enum item.</span>
-<span class="s1">            default: Default value if not found. The placeholder ``-1`` stands</span>
-<span class="s1">                for *no default*, in which case an unresolvable key propagates</span>
-<span class="s1">                the lookup error instead of falling back.</span>
-
-<span class="s1">        :meta private:</span>
-<span class="s1">        """</span>
-<span class="s1">        if isinstance(key, int):</span>
-<span class="s1">            try:</span>
-<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
-<span class="s1">            except ValueError:</span>
-<span class="s1">                if default == -1:</span>
-<span class="s1">                    raise</span>
-<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
-<span class="s1">        try:</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
-<span class="s1">        except KeyError:</span>
-<span class="s1">            if default == -1:</span>
-<span class="s1">                raise</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
-
-<span class="s1">    @classmethod</span>
-<span class="s1">    def register(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Explicitly register a new member.</span>
-
-<span class="s1">        Unlike :meth:`get` and :meth:`_missing_`, which resolve a key or a</span>
-<span class="s1">        value without minting anything new, this is the caller-named entry</span>
-<span class="s1">        point that still grows the registry, via :func:`aenum.extend_enum`.</span>
-
-<span class="s1">        Args:</span>
-<span class="s1">            value: Value of the new member.</span>
-<span class="s1">            name: Name of the new member.</span>
-
-<span class="s1">        Returns:</span>
-<span class="s1">            The newly registered member.</span>
-
-<span class="s1">        """</span>
-<span class="s1">        return extend_enum(cls, name, value)</span>
-
-<span class="s1">    @classmethod</span>
-<span class="s1">    def _unregistered_member(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Build a member absent from this registry's own lookup tables.</span>
-
-<span class="s1">        Used by :meth:`_missing_` for a bounded-but-unassigned value it</span>
-<span class="s1">        resolves without anyone asking for a name, so that such a lookup no</span>
-<span class="s1">        longer grows the registry -- contrast :meth:`register`, the explicit</span>
-<span class="s1">        path that still does.</span>
-
-<span class="s1">        Args:</span>
-<span class="s1">            value: The member's value.</span>
-<span class="s1">            name: The member's name.</span>
-
-<span class="s1">        Returns:</span>
-<span class="s1">            The unregistered member.</span>
-
-<span class="s1">        """</span>
-<span class="s1">        obj = int.__new__(cls, value)</span>
-<span class="s1">        obj._name_ = name  # pylint: disable=protected-access</span>
-<span class="s1">        obj._value_ = value  # pylint: disable=protected-access</span>
-<span class="s1">        return obj</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>

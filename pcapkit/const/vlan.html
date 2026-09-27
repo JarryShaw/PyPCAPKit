@@ -482,7 +482,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.vlan.priority_level.PriorityLevel">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.vlan.priority_level.</span></span><span class="sig-name descname"><span class="pre">PriorityLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[PriorityLevel] Priority levels defined in IEEE 802.1p</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.vlan.priority_level.PriorityLevel.BK">
@@ -530,53 +530,6 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.vlan.priority_level.PriorityLevel.NC">
 <span class="sig-name descname"><span class="pre">NC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></span><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.NC" title="Link to this definition">¶</a></dt>
 <dd><p>Network control (highest)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.vlan.priority_level.PriorityLevel.register">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.register" title="Link to this definition">¶</a></dt>
-<dd><p>Explicitly register a new member.</p>
-<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.vlan.priority_level.PriorityLevel._missing_" title="pcapkit.const.vlan.priority_level.PriorityLevel._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>, which resolve a key or a
-value without minting anything new, this is the caller-named entry
-point that still grows the registry, via <code class="xref py py-func docutils literal notranslate"><span class="pre">aenum.extend_enum()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value of the new member.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the new member.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.vlan.priority_level.PriorityLevel" title="pcapkit.const.vlan.priority_level.PriorityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PriorityLevel</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The newly registered member.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.vlan.priority_level.PriorityLevel._unregistered_member">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel._unregistered_member" title="Link to this definition">¶</a></dt>
-<dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Used by <a class="reference internal" href="#pcapkit.const.vlan.priority_level.PriorityLevel._missing_" title="pcapkit.const.vlan.priority_level.PriorityLevel._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> for a bounded-but-unassigned value it
-resolves without anyone asking for a name, so that such a lookup no
-longer grows the registry – contrast <a class="reference internal" href="#pcapkit.const.vlan.priority_level.PriorityLevel.register" title="pcapkit.const.vlan.priority_level.PriorityLevel.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit
-path that still does.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The member’s value.</p></li>
-<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The member’s name.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.vlan.priority_level.PriorityLevel" title="pcapkit.const.vlan.priority_level.PriorityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PriorityLevel</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The unregistered member.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
