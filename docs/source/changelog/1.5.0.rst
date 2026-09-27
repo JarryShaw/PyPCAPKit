@@ -2943,6 +2943,26 @@ since -- reaching #805 by the entries below.
   needed the branch-protection ruleset's required-check list updated in the
   same window so a required check that stopped existing did not block every
   merge permanently (#849).
+* **Fixed** -- ``pcapkit/toolkit/pyshark.py`` resolved a frame's link type from
+  ``packet.layers[0].layer_name``, a Wireshark display-filter name, with a
+  blanket ``Enum_LinkType.get(name.upper())`` fallback for anything not in its
+  small lookup table. One filter name serves several encapsulations, so that
+  fallback returned *wrong DLTs silently* -- ``null`` for a ``DLT_LOOP``
+  capture, ``101`` (``RAW``) for ``rawip6``. Re-keyed onto
+  ``frame.encap_type``, which is distinct per encapsulation, and the fallback
+  is gone: an unrecognised encapsulation or filter name now raises
+  ``MissingKeyError`` instead of substituting a plausible DLT. The two lookup
+  tables were measured rather than transcribed -- Wireshark's source is not on
+  the build host -- each entry round-tripped through
+  ``editcap -F pcap -T <encap>`` and read back with ``tshark``:
+  ``ENCAP_TYPE_TO_LINKTYPE`` grows to 152 entries with no DLT serving two keys,
+  and ``FILTER_NAME_TO_LINKTYPE`` grows from the two entries #838 added to 58,
+  every root filter name measured single-DLT across the 157 (of the 226
+  ``editcap -T`` accepts) encapsulations this host's Wireshark can write.
+  ``pcapkit/toolkit/pyshark.py`` reaches 100% coverage under the new tests,
+  which fail 26 ways against the unfixed tree; live pyshark parsing itself
+  stays unexercised, since ``pyshark.FileCapture`` does not run at all on
+  Python 3.14 (#850).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
