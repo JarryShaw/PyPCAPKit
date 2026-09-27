@@ -10,12 +10,14 @@ which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_head
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
+
+from pcapkit.corekit.enums import EnumRegistry
 
 __all__ = ['ExtensionHeader']
 
 
-class ExtensionHeader(IntEnum):
+class ExtensionHeader(EnumRegistry, IntEnum):
     """[ExtensionHeader] IPv6 Extension Header Types"""
 
     #: HOPOPT, IPv6 Hop-by-Hop Option [:rfc:`8200`]
@@ -53,24 +55,3 @@ class ExtensionHeader(IntEnum):
 
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_254 = 254
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'ExtensionHeader':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return ExtensionHeader(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return ExtensionHeader(default)
-        return ExtensionHeader[key]  # type: ignore[misc]

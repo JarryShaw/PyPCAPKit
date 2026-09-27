@@ -10,16 +10,13 @@ which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
 
 """
 
-from typing import TYPE_CHECKING
-
 from aenum import IntFlag
 
-if TYPE_CHECKING:
-    from typing import Optional
+from pcapkit.corekit.enums import EnumRegistry
 
 __all__ = ['Flags']
 
-class Flags(IntFlag):
+class Flags(EnumRegistry, IntFlag):
     """[Flags] TCP Header Flags"""
 
     #: Reserved for future use [:rfc:`9293`]
@@ -57,27 +54,6 @@ class Flags(IntFlag):
 
     #: No more data from sender (FIN) [:rfc:`9293`]
     FIN = 1 << 15
-
-    @staticmethod
-    def get(key: 'int | str', default: 'Optional[int]' = -1) -> 'Flags':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return Flags(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return Flags(default)
-        return Flags[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Flags':

@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiat
 
 from aenum import IntFlag
 
+from pcapkit.corekit.enums import EnumRegistry
+
 __all__ = ['HandoverInitiateFlag']
 
 
-class HandoverInitiateFlag(IntFlag):
+class HandoverInitiateFlag(EnumRegistry, IntFlag):
     """[HandoverInitiateFlag] Handover Initiate Flags"""
 
     #: Assigned Address Configuration flag [:rfc:`5568`]
@@ -29,27 +31,6 @@ class HandoverInitiateFlag(IntFlag):
 
     #: Forwarding flag [:rfc:`5949`]
     F = 0x10
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'HandoverInitiateFlag':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return HandoverInitiateFlag(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return HandoverInitiateFlag(default)
-        return HandoverInitiateFlag[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'HandoverInitiateFlag':

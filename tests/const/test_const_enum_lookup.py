@@ -400,8 +400,13 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         """
         import pathlib
 
+        # NOTE: the class statement names EnumRegistry and the first method after
+        # the enumeration block is a classmethod, because #775's tier 2 moved
+        # get/get_all/register/register_alias off these templates and onto
+        # pcapkit.corekit.enums.EnumRegistry -- the generated `@staticmethod get`
+        # that used to close the block is gone, leaving `_missing_` next.
         block = re.compile(
-            r'class \w+\(IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @staticmethod',
+            r'class \w+\(EnumRegistry, IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @classmethod',
             re.S)
 
         for stem, name, _, _ in MH_FLAG_ENUMS:

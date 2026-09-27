@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_fla
 
 from aenum import IntFlag
 
+from pcapkit.corekit.enums import EnumRegistry
+
 __all__ = ['HandoverACKFlag']
 
 
-class HandoverACKFlag(IntFlag):
+class HandoverACKFlag(EnumRegistry, IntFlag):
     """[HandoverACKFlag] Handover Acknowledge Flags"""
 
     #: Buffer flag [:rfc:`5949`]
@@ -26,27 +28,6 @@ class HandoverACKFlag(IntFlag):
 
     #: Forwarding flag [:rfc:`5949`]
     F = 0x20
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'HandoverACKFlag':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return HandoverACKFlag(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return HandoverACKFlag(default)
-        return HandoverACKFlag[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'HandoverACKFlag':

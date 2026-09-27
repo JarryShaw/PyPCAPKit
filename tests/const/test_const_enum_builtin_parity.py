@@ -1045,6 +1045,15 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         :mod:`tests.const.test_const_enum_lookup`, which does this for the four
         Mobility Header templates. Needs no network: the crawl supplies only the
         enumeration block, which is read back out of the committed module.
+
+        NOTE: the class statement names ``EnumRegistry`` and the first method
+        after the enumeration block is a ``classmethod``, because GitHub issue
+        #775's tier 2 found ``tcp/flags``' own exclusion rationale did not hold
+        -- see ``tests.const.test_const_registry_protocol`` -- and converted it
+        onto :class:`~pcapkit.corekit.enums.EnumRegistry` alongside the four
+        ``mh/*_flag`` templates. The generated ``@staticmethod get`` that used
+        to close the block is gone, leaving ``_missing_`` next, the same
+        rewrite ``test_const_enum_lookup.py`` made for those four.
         """
         import pathlib
 
@@ -1059,7 +1068,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         ).read_text(encoding='utf-8')
 
         block = re.compile(
-            r'class \w+\(IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @staticmethod', re.S)
+            r'class \w+\(EnumRegistry, IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @classmethod', re.S)
         enum_block = block.search(committed)
         self.assertIsNotNone(enum_block, 'no enumeration block in pcapkit.const.tcp.flags')
 
