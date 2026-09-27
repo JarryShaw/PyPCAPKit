@@ -516,6 +516,58 @@
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">"return extend_enum(cls, 'Unassigned_</span><span class="si">%d</span><span class="s2">' % value, value)"</span><span class="p">,</span>
         <span class="p">]</span>
+
+        <span class="c1"># Value-aware guard for the ``sink`` decision below (GitHub issue #852,</span>
+        <span class="c1"># a follow-up to #848/#844). A row's notes mentioning "legacy" is</span>
+        <span class="c1"># tcpdump's only textual signal for *which* member of a duplicated</span>
+        <span class="c1"># value is the deprecated one, but that word can appear in a row's</span>
+        <span class="c1"># notes for an unrelated reason -- e.g. referencing some other,</span>
+        <span class="c1"># differently-valued code as "the legacy DLT_FOO". Computing which</span>
+        <span class="c1"># values are genuinely duplicated in this table upfront, independent</span>
+        <span class="c1"># of row order, stops the sink from firing on a value that has no</span>
+        <span class="c1"># duplicate to disambiguate in the first place. It does not, on its</span>
+        <span class="c1"># own, guarantee which member of a *genuine* duplicate pair is</span>
+        <span class="c1"># correct if tcpdump's own wording is attached to the wrong one of</span>
+        <span class="c1"># the two -- that residual case still relies on the wording being</span>
+        <span class="c1"># trustworthy.</span>
+        <span class="c1">#</span>
+        <span class="c1"># A range row (``DLT_USER0``..``DLT_USER15``) is never itself routed</span>
+        <span class="c1"># through ``sink`` (see item 2 in #852), but its *expanded* values</span>
+        <span class="c1"># still have to count here: a single-value row can legitimately</span>
+        <span class="c1"># duplicate one of the values a range expands to, and missing that</span>
+        <span class="c1"># would silently under-count the duplicate the same way the</span>
+        <span class="c1"># word-only rule did before #852.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The single-value branch accepts whatever ``int()`` accepts --</span>
+        <span class="c1"># a leading sign, PEP 515 underscores -- rather than the narrower</span>
+        <span class="c1"># ``str.isdigit()``, so it recognises exactly the same values the</span>
+        <span class="c1"># main loop's own ``int(temp)`` below does. A signed or underscored</span>
+        <span class="c1"># value is not reachable in tcpdump's live table today (every</span>
+        <span class="c1"># committed member matches a plain unsigned decimal), but a</span>
+        <span class="c1"># narrower recognition set here than in the main loop would be the</span>
+        <span class="c1"># same class of silent under-count this pre-scan exists to close</span>
+        <span class="c1"># for ranges: a legacy row's value would go uncounted, so its alias</span>
+        <span class="c1"># would stop being sunk without anything failing loudly.</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_expand</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[int]'</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">if</span> <span class="s1">'–'</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">:</span>  <span class="c1"># en dash, not a hyphen -- see the ``except ValueError`` below</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'–'</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[]</span>
+                <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">value_counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+            <span class="n">value</span>
+            <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'td.number'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_expand</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># type: Counter[int]</span>
+        <span class="n">dup_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">value_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">}</span>
+
         <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'td.symbol'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">9</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">temp</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'td.number'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -525,17 +577,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">desc</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
 
-            <span class="c1"># tcpdump's table lists a handful of rows -- today, only</span>
-            <span class="c1"># ``DLT_IPMB_LINUX`` -- as a legacy alias sharing its value with a</span>
-            <span class="c1"># later, current row (``DLT_I2C_LINUX``); its note column says so</span>
-            <span class="c1"># verbatim ("Legacy names (do not use) ..."). Sink those into a</span>
-            <span class="c1"># separate bucket appended after every current entry, so the</span>
-            <span class="c1"># *current* name -- not the legacy one -- is the first member</span>
-            <span class="c1"># defined for that value and therefore wins ``LinkType(value).name``.</span>
-            <span class="n">sink</span> <span class="o">=</span> <span class="n">legacy</span> <span class="k">if</span> <span class="s1">'legacy'</span> <span class="ow">in</span> <span class="n">cmmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="n">enum</span>
-
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+                <span class="n">code</span><span class="p">,</span> <span class="n">code_int</span> <span class="o">=</span> <span class="n">temp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Unassigned_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">'</span>
 
@@ -549,6 +592,13 @@
                 <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
 
                 <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
+
+                <span class="c1"># Sink this row after every current entry only when its value</span>
+                <span class="c1"># is a genuine duplicate (``dup_values`` above) *and* its own</span>
+                <span class="c1"># notes mention "legacy", so the current name -- not the</span>
+                <span class="c1"># legacy one -- is the first member defined for that value</span>
+                <span class="c1"># and therefore wins ``LinkType(value).name``.</span>
+                <span class="n">sink</span> <span class="o">=</span> <span class="n">legacy</span> <span class="k">if</span> <span class="p">(</span><span class="n">code_int</span> <span class="ow">in</span> <span class="n">dup_values</span> <span class="ow">and</span> <span class="s1">'legacy'</span> <span class="ow">in</span> <span class="n">cmmt</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="k">else</span> <span class="n">enum</span>
                 <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'–'</span><span class="p">))</span>
@@ -563,7 +613,34 @@
                     <span class="c1">#     sufs = f"\n{' '*80}{sufs}"</span>
 
                     <span class="c1"># enum.append(f'{pres.ljust(76)}{sufs}')</span>
-                    <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+                    <span class="c1"># Range rows are generic, user-definable placeholders,</span>
+                    <span class="c1"># never a deprecated/current pair -- so every expanded</span>
+                    <span class="c1"># member always lands in ``enum`` unconditionally,</span>
+                    <span class="c1"># rather than through the per-row ``sink`` above.</span>
+                    <span class="c1"># Otherwise one range row whose notes happened to mention</span>
+                    <span class="c1"># "legacy" would sink all sixteen expanded members at</span>
+                    <span class="c1"># once instead of just itself (item 2 in #852).</span>
+                    <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">legacy</span><span class="p">:</span>
+            <span class="c1"># A reader scanning the generated file by value will find these</span>
+            <span class="c1"># members out of numeric order: sinking appends them here, after</span>
+            <span class="c1"># every current entry, rather than leaving them at their</span>
+            <span class="c1"># original position in tcpdump's table (item 4 in #852). Say so</span>
+            <span class="c1"># once, right where they are emitted -- as a plain ``#`` comment,</span>
+            <span class="c1"># deliberately, not a ``#:`` one: a ``#:`` line immediately above</span>
+            <span class="c1"># an attribute becomes that attribute's rendered Sphinx docstring,</span>
+            <span class="c1"># and this note is about the generator's own source layout, not</span>
+            <span class="c1"># about what ``IPMB_LINUX`` (or whichever name is sunk here) means</span>
+            <span class="c1"># to a caller.</span>
+            <span class="n">legacy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">"# The following legacy alias(es) are emitted here, after every</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    # current entry above, instead of at their original numeric</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    # position -- see pcapkit.vendor.reg.linktype.LinkType.process</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    # for why.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    "</span> <span class="o">+</span> <span class="n">legacy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span> <span class="o">+</span> <span class="n">legacy</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
