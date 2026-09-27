@@ -475,60 +475,297 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyshark.packet.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span> <span class="s1">'FILTER_NAME_TO_LINKTYPE'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'packet2dict'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span> <span class="s1">'ENCAP_TYPE_TO_LINKTYPE'</span><span class="p">,</span> <span class="s1">'FILTER_NAME_TO_LINKTYPE'</span><span class="p">]</span>
 
-<span class="c1">#: Wireshark display-filter name -&gt; :class:`~pcapkit.const.reg.linktype.LinkType` member, for the</span>
-<span class="c1">#: link-layer protocols :mod:`pyshark` can hand :func:`tcp_traceflow` as</span>
-<span class="c1">#: ``packet.layers[0].layer_name``. PyShark takes that name verbatim from the PDML ``&lt;proto</span>
-<span class="c1">#: name=...&gt;`` attribute, which is Wireshark's own dissector *filter* name -- the third argument to</span>
-<span class="c1">#: ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and that</span>
-<span class="c1">#: vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never ``ETHERNET``.</span>
-<span class="c1">#: This table exists so :mod:`pcapkit` can bridge the two without minting a DLT for a name it</span>
-<span class="c1">#: cannot actually place (see the NOTE in :func:`tcp_traceflow`).</span>
+<span class="c1">#: ``frame.encap_type`` -- Wireshark's internal ``WTAP_ENCAP_*`` number, which :mod:`pyshark`</span>
+<span class="c1">#: exposes as ``packet.frame_info.encap_type`` -- to the matching</span>
+<span class="c1">#: :class:`~pcapkit.const.reg.linktype.LinkType` member. This is :func:`tcp_traceflow`'s primary</span>
+<span class="c1">#: link-type source; ``FILTER_NAME_TO_LINKTYPE`` below is only its fallback.</span>
 <span class="c1">#:</span>
-<span class="c1">#: Both entries were checked two ways: against Wireshark's dissector registrations, and live with</span>
-<span class="c1">#: ``tshark`` 4.6.9 plus ``editcap -T &lt;encap&gt;`` to confirm the PDML root each encapsulation</span>
-<span class="c1">#: actually produces. Note the upper-casing is done by the call site in :func:`tcp_traceflow`,</span>
-<span class="c1">#: not by :meth:`LinkType.get`, which is a plain subscript.</span>
+<span class="c1">#: A ``WTAP_ENCAP_*`` number is **not** a DLT: it is 25 where the DLT is 113, 15 where it is 0, and</span>
+<span class="c1">#: 2 where it is 6, so it needs this table rather than a cast. What it does do is distinguish</span>
+<span class="c1">#: encapsulations that the PDML root layer's *filter* name cannot, which is the whole reason this</span>
+<span class="c1">#: table exists: ``sll`` is both ``LINUX_SLL`` (113) and ``LINUX_SLL2`` (276), ``null`` is both</span>
+<span class="c1">#: ``NULL`` (0) and ``LOOP`` (108), ``raw`` is ``RAW`` (101), ``IPV4`` (228) and ``IPV6`` (229),</span>
+<span class="c1">#: ``ppp`` is ``PPP`` (9) and ``PPP_WITH_DIR`` (204), ``lapd`` is ``LAPD`` (203) and</span>
+<span class="c1">#: ``LINUX_LAPD`` (177). ``frame.encap_type`` separates every one of those pairs.</span>
 <span class="c1">#:</span>
-<span class="c1">#: * ``eth`` -&gt; :attr:`~LinkType.ETHERNET` -- ``packet-eth.c`` registers it against</span>
-<span class="c1">#:   ``WTAP_ENCAP_ETHERNET``, and ``ether`` is the only one of the 158 swept encapsulations that</span>
-<span class="c1">#:   roots at ``eth``. ``ether-nettl`` is among the 68 unswept, so "exactly one" is unproven.</span>
-<span class="c1">#: * ``tr`` -&gt; :attr:`~LinkType.IEEE802_5` -- ``packet-tr.c``, ``WTAP_ENCAP_TOKEN_RING``; ``tr``</span>
-<span class="c1">#:   is the only swept encapsulation rooting at ``tr``, with ``tr-nettl`` likewise unswept.</span>
-<span class="c1">#:   :class:`LinkType`'s own ``#:`` comment records that ``DLT_IEEE802`` *is* Token Ring, the</span>
-<span class="c1">#:   missing ``_5`` being historical.</span>
+<span class="c1">#: Every entry was measured, not transcribed, with ``editcap``/``tshark`` 4.6.9::</span>
 <span class="c1">#:</span>
-<span class="c1">#: Everything else, measured rather than reasoned. A filter name serving several DLTs cannot be</span>
-<span class="c1">#: mapped, because the PDML node does not say which one arrived:</span>
+<span class="c1">#:     editcap -F pcap -T &lt;encap&gt; examples/captures/in.pcap out.pcap</span>
+<span class="c1">#:     # value := the ``network`` field at offset 20 of out.pcap's pcap file header</span>
+<span class="c1">#:     # key   := the ``frame.encap_type`` that ``tshark -r out.pcap -c 1 -T pdml`` then reports</span>
 <span class="c1">#:</span>
-<span class="c1">#: * ``sll`` -- serves :attr:`LinkType.LINUX_SLL` (113) and :attr:`LinkType.LINUX_SLL2` (276).</span>
-<span class="c1">#:   ``tshark -G protocols`` registers a single ``sll`` name, and ``editcap -T linux-sll`` and</span>
-<span class="c1">#:   ``-T linux-sll2`` both root at ``sll``. No entry; raises.</span>
-<span class="c1">#: * ``raw`` -- serves :attr:`LinkType.RAW` (101), :attr:`LinkType.IPV4` (228) and</span>
-<span class="c1">#:   :attr:`LinkType.IPV6` (229); ``editcap -T rawip``, ``-T rawip4`` and ``-T rawip6`` all root at</span>
-<span class="c1">#:   ``raw``. It does **not** raise: ``'RAW'`` is a member name, so the fallback answers 101 for all</span>
-<span class="c1">#:   three -- silently wrong for 228 and 229. Tracked in #843.</span>
-<span class="c1">#: * ``null`` -- serves :attr:`LinkType.NULL` (0) and :attr:`LinkType.LOOP` (108); ``editcap -T</span>
-<span class="c1">#:   null`` and ``-T loop`` both root at ``null``. Also does not raise: answers 0 for both, silently</span>
-<span class="c1">#:   wrong for 108. Tracked in #843. (``loop`` is a different protocol entirely -- ``tshark -G</span>
-<span class="c1">#:   protocols`` gives it as Configuration Test Protocol, an Ethernet payload on ethertype 0x9000.)</span>
-<span class="c1">#: * ``ip`` and ``ipv6`` -- never arrive as the root layer. ``editcap -T`` accepts 226</span>
-<span class="c1">#:   encapsulations; of the **158** an Ethernet source can be rewritten into, neither is ever</span>
-<span class="c1">#:   ``layers[0]`` -- a raw IPv6 capture roots at ``raw`` and carries ``ipv6`` as the *next* layer.</span>
-<span class="c1">#:   The other 68 refuse that rewrite (``can't be written as``, not an unknown type) and are</span>
-<span class="c1">#:   untested. No entry needed for either, and none would be reached.</span>
-<span class="c1">#: * ``ppp``, ``fddi``, ``lapd`` -- no entry needed; each upper-cases onto a real member name, so</span>
-<span class="c1">#:   the fallback resolves them. ``ppp`` and ``lapd`` each serve several DLTs and so answer with the</span>
-<span class="c1">#:   wrong one, which is the same #843 defect rather than anything this table introduces.</span>
-<span class="c1">#: * ``fr`` -- measured single-DLT after all: ``frelay`` and ``frelay-with-direction`` both write</span>
-<span class="c1">#:   DLT 107, so it is mappable. Left out only because adding it is scope this change does not need.</span>
-<span class="c1">#: * ``wlan`` -- not investigated. Left out rather than guessed.</span>
-<span class="c1">#: * every other :class:`LinkType` member -- no evidence was gathered either way; they are simply</span>
-<span class="c1">#:   untried, not ruled out.</span>
+<span class="c1">#: so each pair is one round trip through Wireshark's own ``wiretap/pcap-common.c``, in the read</span>
+<span class="c1">#: direction :mod:`pyshark` actually exercises. The trailing comment on each line names the</span>
+<span class="c1">#: ``editcap -T`` encapsulation that produced it.</span>
+<span class="c1">#:</span>
+<span class="c1">#: What the sweep does **not** cover, since that bounds this table: of the 226 encapsulations</span>
+<span class="c1">#: ``editcap -T`` accepts, 157 could be written as pcap from the Ethernet source above and the</span>
+<span class="c1">#: other 69 refused the rewrite, so they are untested. Those 157 yielded 153 distinct</span>
+<span class="c1">#: ``frame.encap_type`` keys, with no key mapping to two DLTs and no DLT reading back as two keys.</span>
+<span class="c1">#: 152 of them are below; ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121) is left out</span>
+<span class="c1">#: because :class:`LinkType` has no member for 121. An encapsulation absent from this table raises</span>
+<span class="c1">#: rather than resolving to a near-miss DLT.</span>
+<span class="n">ENCAP_TYPE_TO_LINKTYPE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span>                     <span class="c1"># ether</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_5</span><span class="p">,</span>                    <span class="c1"># tr</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SLIP</span><span class="p">,</span>                         <span class="c1"># slip</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPP</span><span class="p">,</span>                          <span class="c1"># ppp</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FDDI</span><span class="p">,</span>                         <span class="c1"># fddi,fddi-nettl,fddi-swapped</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span>                          <span class="c1"># rawip</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ARCNET_BSD</span><span class="p">,</span>                   <span class="c1"># arcnet</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ARCNET_LINUX</span><span class="p">,</span>                 <span class="c1"># arcnet_linux</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATM_RFC1483</span><span class="p">,</span>                 <span class="c1"># atm-rfc1483</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATM_CLIP</span><span class="p">,</span>                    <span class="c1"># linux-atm-clip</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SUNATM</span><span class="p">,</span>                      <span class="c1"># atm-pdus</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span>                        <span class="c1"># null</span>
+    <span class="mi">18</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IP_OVER_FC</span><span class="p">,</span>                  <span class="c1"># ip-over-fc</span>
+    <span class="mi">19</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPP_WITH_DIR</span><span class="p">,</span>                <span class="c1"># ppp-with-direction</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_11</span><span class="p">,</span>                  <span class="c1"># ieee-802-11,ieee-802-11-radio</span>
+    <span class="mi">21</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_11_PRISM</span><span class="p">,</span>            <span class="c1"># ieee-802-11-prism</span>
+    <span class="mi">23</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_11_RADIOTAP</span><span class="p">,</span>         <span class="c1"># ieee-802-11-radiotap</span>
+    <span class="mi">24</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_11_AVS</span><span class="p">,</span>              <span class="c1"># ieee-802-11-avs</span>
+    <span class="mi">25</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LINUX_SLL</span><span class="p">,</span>                   <span class="c1"># linux-sll</span>
+    <span class="mi">26</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FRELAY</span><span class="p">,</span>                      <span class="c1"># frelay,frelay-with-direction</span>
+    <span class="mi">28</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">C_HDLC</span><span class="p">,</span>                      <span class="c1"># chdlc</span>
+    <span class="mi">29</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">CISCO_IOS</span><span class="p">,</span>                   <span class="c1"># ios</span>
+    <span class="mi">30</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LTALK</span><span class="p">,</span>                       <span class="c1"># ltalk</span>
+    <span class="mi">33</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS</span><span class="p">,</span>                      <span class="c1"># docsis</span>
+    <span class="mi">36</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SDLC</span><span class="p">,</span>                        <span class="c1"># sdlc</span>
+    <span class="mi">37</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">TZSP</span><span class="p">,</span>                        <span class="c1"># tzsp</span>
+    <span class="mi">38</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ENC</span><span class="p">,</span>                         <span class="c1"># enc</span>
+    <span class="mi">39</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PFLOG</span><span class="p">,</span>                       <span class="c1"># pflog</span>
+    <span class="mi">41</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_HCI_H4</span><span class="p">,</span>            <span class="c1"># bluetooth-h4</span>
+    <span class="mi">42</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MTP2</span><span class="p">,</span>                        <span class="c1"># mtp2</span>
+    <span class="mi">43</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MTP3</span><span class="p">,</span>                        <span class="c1"># mtp3</span>
+    <span class="mi">44</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LINUX_IRDA</span><span class="p">,</span>                  <span class="c1"># irda</span>
+    <span class="mi">45</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER0</span><span class="p">,</span>                       <span class="c1"># user0</span>
+    <span class="mi">46</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER1</span><span class="p">,</span>                       <span class="c1"># user1</span>
+    <span class="mi">47</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER2</span><span class="p">,</span>                       <span class="c1"># user2</span>
+    <span class="mi">48</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER3</span><span class="p">,</span>                       <span class="c1"># user3</span>
+    <span class="mi">49</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER4</span><span class="p">,</span>                       <span class="c1"># user4</span>
+    <span class="mi">50</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER5</span><span class="p">,</span>                       <span class="c1"># user5</span>
+    <span class="mi">51</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER6</span><span class="p">,</span>                       <span class="c1"># user6</span>
+    <span class="mi">52</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER7</span><span class="p">,</span>                       <span class="c1"># user7</span>
+    <span class="mi">53</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER8</span><span class="p">,</span>                       <span class="c1"># user8</span>
+    <span class="mi">54</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER9</span><span class="p">,</span>                       <span class="c1"># user9</span>
+    <span class="mi">55</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER10</span><span class="p">,</span>                      <span class="c1"># user10</span>
+    <span class="mi">56</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER11</span><span class="p">,</span>                      <span class="c1"># user11</span>
+    <span class="mi">57</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER12</span><span class="p">,</span>                      <span class="c1"># user12</span>
+    <span class="mi">58</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER13</span><span class="p">,</span>                      <span class="c1"># user13</span>
+    <span class="mi">59</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER14</span><span class="p">,</span>                      <span class="c1"># user14</span>
+    <span class="mi">60</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USER15</span><span class="p">,</span>                      <span class="c1"># user15</span>
+    <span class="mi">61</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SYMANTEC_FIREWALL</span><span class="p">,</span>           <span class="c1"># symantec</span>
+    <span class="mi">62</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">APPLE_IP_OVER_IEEE1394</span><span class="p">,</span>      <span class="c1"># ap1394</span>
+    <span class="mi">63</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BACNET_MS_TP</span><span class="p">,</span>                <span class="c1"># bacnet-ms-tp</span>
+    <span class="mi">66</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GPRS_LLC</span><span class="p">,</span>                    <span class="c1"># gprs-llc</span>
+    <span class="mi">67</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_ATM1</span><span class="p">,</span>                <span class="c1"># juniper-atm1</span>
+    <span class="mi">68</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_ATM2</span><span class="p">,</span>                <span class="c1"># juniper-atm2</span>
+    <span class="mi">69</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">REDBACK_SMARTEDGE</span><span class="p">,</span>           <span class="c1"># redback</span>
+    <span class="mi">75</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MTP2_WITH_PHDR</span><span class="p">,</span>              <span class="c1"># mtp2-with-phdr</span>
+    <span class="mi">76</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_PPPOE</span><span class="p">,</span>               <span class="c1"># juniper-pppoe</span>
+    <span class="mi">77</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GCOM_T1E1</span><span class="p">,</span>                   <span class="c1"># gcom-tie1</span>
+    <span class="mi">78</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GCOM_SERIAL</span><span class="p">,</span>                 <span class="c1"># gcom-serial</span>
+    <span class="mi">81</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_MLPPP</span><span class="p">,</span>               <span class="c1"># juniper-mlppp</span>
+    <span class="mi">82</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_MLFR</span><span class="p">,</span>                <span class="c1"># juniper-mlfr</span>
+    <span class="mi">83</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_ETHER</span><span class="p">,</span>               <span class="c1"># juniper-ether</span>
+    <span class="mi">84</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_PPP</span><span class="p">,</span>                 <span class="c1"># juniper-ppp</span>
+    <span class="mi">85</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_FRELAY</span><span class="p">,</span>              <span class="c1"># juniper-frelay</span>
+    <span class="mi">86</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_CHDLC</span><span class="p">,</span>               <span class="c1"># juniper-chdlc</span>
+    <span class="mi">87</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_GGSN</span><span class="p">,</span>                <span class="c1"># juniper-ggsn</span>
+    <span class="mi">88</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LINUX_LAPD</span><span class="p">,</span>                  <span class="c1"># linux-lapd</span>
+    <span class="mi">91</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_VP</span><span class="p">,</span>                  <span class="c1"># juniper-vp</span>
+    <span class="mi">92</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_FREEBSD</span><span class="p">,</span>                 <span class="c1"># usb-freebsd</span>
+    <span class="mi">93</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_16_MAC_CPS</span><span class="p">,</span>          <span class="c1"># ieee-802-16-mac-cps</span>
+    <span class="mi">95</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_LINUX</span><span class="p">,</span>                   <span class="c1"># usb-linux</span>
+    <span class="mi">97</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPI</span><span class="p">,</span>                         <span class="c1"># ppi</span>
+    <span class="mi">98</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ERF</span><span class="p">,</span>                         <span class="c1"># erf</span>
+    <span class="mi">99</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_HCI_H4_WITH_PHDR</span><span class="p">,</span>  <span class="c1"># bluetooth-h4-linux</span>
+    <span class="mi">100</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SITA</span><span class="p">,</span>                       <span class="c1"># sita-wan</span>
+    <span class="mi">101</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SCCP</span><span class="p">,</span>                       <span class="c1"># sccp</span>
+    <span class="mi">103</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPMB_KONTRON</span><span class="p">,</span>               <span class="c1"># ipmb-kontron</span>
+    <span class="mi">104</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_WITHFCS</span><span class="p">,</span>       <span class="c1"># wpan</span>
+    <span class="mi">105</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">X2E_XORAYA</span><span class="p">,</span>                 <span class="c1"># x2e-xoraya</span>
+    <span class="mi">106</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FLEXRAY</span><span class="p">,</span>                    <span class="c1"># flexray</span>
+    <span class="mi">107</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LIN</span><span class="p">,</span>                        <span class="c1"># lin</span>
+    <span class="mi">108</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MOST</span><span class="p">,</span>                       <span class="c1"># most</span>
+    <span class="mi">109</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">CAN20B</span><span class="p">,</span>                     <span class="c1"># can20b</span>
+    <span class="mi">111</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">X2E_SERIAL</span><span class="p">,</span>                 <span class="c1"># x2e-serial</span>
+    <span class="mi">112</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPMB_LINUX</span><span class="p">,</span>                 <span class="c1"># i2c-linux</span>
+    <span class="mi">113</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_NONASK_PHY</span><span class="p">,</span>    <span class="c1"># wpan-nonask-phy</span>
+    <span class="mi">115</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_LINUX_MMAPPED</span><span class="p">,</span>          <span class="c1"># usb-linux-mmap</span>
+    <span class="mi">121</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FC_2</span><span class="p">,</span>                       <span class="c1"># fc2</span>
+    <span class="mi">122</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FC_2_WITH_FRAME_DELIMS</span><span class="p">,</span>     <span class="c1"># fc2sof</span>
+    <span class="mi">124</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPNET</span><span class="p">,</span>                      <span class="c1"># ipnet</span>
+    <span class="mi">125</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">CAN_SOCKETCAN</span><span class="p">,</span>              <span class="c1"># socketcan</span>
+    <span class="mi">127</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_NOFCS</span><span class="p">,</span>         <span class="c1"># wpan-nofcs</span>
+    <span class="mi">129</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">,</span>                       <span class="c1"># rawip4</span>
+    <span class="mi">130</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">,</span>                       <span class="c1"># rawip6</span>
+    <span class="mi">131</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LAPD</span><span class="p">,</span>                       <span class="c1"># lapd</span>
+    <span class="mi">132</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DVB_CI</span><span class="p">,</span>                     <span class="c1"># dvbci</span>
+    <span class="mi">133</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MUX27010</span><span class="p">,</span>                   <span class="c1"># mux27010</span>
+    <span class="mi">135</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NETANALYZER</span><span class="p">,</span>                <span class="c1"># netanalyzer</span>
+    <span class="mi">136</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NETANALYZER_TRANSPARENT</span><span class="p">,</span>    <span class="c1"># netanalyzer-transparent</span>
+    <span class="mi">138</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MPEG_2_TS</span><span class="p">,</span>                  <span class="c1"># mp2ts</span>
+    <span class="mi">139</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPP_ETHER</span><span class="p">,</span>                  <span class="c1"># pppoes</span>
+    <span class="mi">140</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NFC_LLCP</span><span class="p">,</span>                   <span class="c1"># nfc-llcp</span>
+    <span class="mi">141</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NFLOG</span><span class="p">,</span>                      <span class="c1"># nflog</span>
+    <span class="mi">146</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DBUS</span><span class="p">,</span>                       <span class="c1"># dbus</span>
+    <span class="mi">147</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">AX25_KISS</span><span class="p">,</span>                  <span class="c1"># ax25-kiss</span>
+    <span class="mi">148</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">AX25</span><span class="p">,</span>                       <span class="c1"># ax25</span>
+    <span class="mi">149</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SCTP</span><span class="p">,</span>                       <span class="c1"># sctp</span>
+    <span class="mi">151</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_SERVICES</span><span class="p">,</span>           <span class="c1"># juniper-svcs</span>
+    <span class="mi">152</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USBPCAP</span><span class="p">,</span>                    <span class="c1"># usb-usbpcap</span>
+    <span class="mi">153</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RTAC_SERIAL</span><span class="p">,</span>                <span class="c1"># rtac-serial</span>
+    <span class="mi">154</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_LE_LL</span><span class="p">,</span>            <span class="c1"># bluetooth-le-ll</span>
+    <span class="mi">155</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">WIRESHARK_UPPER_PDU</span><span class="p">,</span>        <span class="c1"># wireshark-upper-pdu</span>
+    <span class="mi">157</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">STANAG_5066_D_PDU</span><span class="p">,</span>          <span class="c1"># s5066-dpdu</span>
+    <span class="mi">158</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NETLINK</span><span class="p">,</span>                    <span class="c1"># netlink</span>
+    <span class="mi">159</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_LINUX_MONITOR</span><span class="p">,</span>    <span class="c1"># bluetooth-linux-monitor</span>
+    <span class="mi">160</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_BREDR_BB</span><span class="p">,</span>         <span class="c1"># bluetooth-bredr-bb-rf</span>
+    <span class="mi">161</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BLUETOOTH_LE_LL_WITH_PHDR</span><span class="p">,</span>  <span class="c1"># bluetooth-le-ll-rf</span>
+    <span class="mi">171</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PKTAP</span><span class="p">,</span>                      <span class="c1"># pktap</span>
+    <span class="mi">172</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">EPON</span><span class="p">,</span>                       <span class="c1"># epon</span>
+    <span class="mi">173</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPMI_HPM_2</span><span class="p">,</span>                 <span class="c1"># ipmi-trace</span>
+    <span class="mi">174</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LOOP</span><span class="p">,</span>                       <span class="c1"># loop</span>
+    <span class="mi">177</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ISO_14443</span><span class="p">,</span>                  <span class="c1"># iso14443</span>
+    <span class="mi">178</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GPF_T</span><span class="p">,</span>                      <span class="c1"># gfp-t</span>
+    <span class="mi">179</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GPF_F</span><span class="p">,</span>                      <span class="c1"># gfp-f</span>
+    <span class="mi">180</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPOIB</span><span class="p">,</span>                      <span class="c1"># ip-ib</span>
+    <span class="mi">181</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">A429</span><span class="p">,</span>                       <span class="c1"># juniper-vn</span>
+    <span class="mi">182</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_DARWIN</span><span class="p">,</span>                 <span class="c1"># usb-darwin</span>
+    <span class="mi">183</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LORATAP</span><span class="p">,</span>                    <span class="c1"># loratap</span>
+    <span class="mi">184</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">EXP_ETHERNET</span><span class="p">,</span>               <span class="c1"># xeth</span>
+    <span class="mi">185</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">VSOCK</span><span class="p">,</span>                      <span class="c1"># vsock</span>
+    <span class="mi">186</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NORDIC_BLE</span><span class="p">,</span>                 <span class="c1"># nordic_ble</span>
+    <span class="mi">197</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">JUNIPER_ST</span><span class="p">,</span>                 <span class="c1"># juniper-st</span>
+    <span class="mi">198</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET_MPACKET</span><span class="p">,</span>           <span class="c1"># ether-mpacket</span>
+    <span class="mi">199</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS31_XRA31</span><span class="p">,</span>             <span class="c1"># docsis31_xra31</span>
+    <span class="mi">200</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DISPLAYPORT_AUX</span><span class="p">,</span>            <span class="c1"># dpauxmon</span>
+    <span class="mi">204</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">EBHSCR</span><span class="p">,</span>                     <span class="c1"># ebhscr</span>
+    <span class="mi">205</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">VPP_DISPATCH</span><span class="p">,</span>               <span class="c1"># vpp</span>
+    <span class="mi">206</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_TAP</span><span class="p">,</span>           <span class="c1"># wpan-tap</span>
+    <span class="mi">208</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_2_0</span><span class="p">,</span>                    <span class="c1"># usb-20</span>
+    <span class="mi">210</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LINUX_SLL2</span><span class="p">,</span>                 <span class="c1"># linux-sll2</span>
+    <span class="mi">211</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">Z_WAVE_SERIAL</span><span class="p">,</span>              <span class="c1"># zwave-serial</span>
+    <span class="mi">212</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETW</span><span class="p">,</span>                        <span class="c1"># etw</span>
+    <span class="mi">214</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ZBOSS_NCP</span><span class="p">,</span>                  <span class="c1"># zbncp</span>
+    <span class="mi">215</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_2_0_LOW_SPEED</span><span class="p">,</span>          <span class="c1"># usb-20-low</span>
+    <span class="mi">216</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_2_0_FULL_SPEED</span><span class="p">,</span>         <span class="c1"># usb-20-full</span>
+    <span class="mi">217</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">USB_2_0_HIGH_SPEED</span><span class="p">,</span>         <span class="c1"># usb-20-high</span>
+    <span class="mi">219</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">AUERSWALD_LOG</span><span class="p">,</span>              <span class="c1"># auerlog</span>
+    <span class="mi">220</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATSC_ALP</span><span class="p">,</span>                   <span class="c1"># alp</span>
+    <span class="mi">221</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FIRA_UCI</span><span class="p">,</span>                   <span class="c1"># fira-uci</span>
+    <span class="mi">222</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SILABS_DEBUG_CHANNEL</span><span class="p">,</span>       <span class="c1"># silabs-dch</span>
+    <span class="mi">223</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MDB</span><span class="p">,</span>                        <span class="c1"># mdb</span>
+    <span class="mi">225</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DECT_NR</span><span class="p">,</span>                    <span class="c1"># dect_nr</span>
+<span class="p">}</span>  <span class="c1"># type: dict[int, Enum_LinkType]</span>
+
+<span class="c1">#: Wireshark display-filter name -&gt; :class:`~pcapkit.const.reg.linktype.LinkType` member, used by</span>
+<span class="c1">#: :func:`tcp_traceflow` **only** when the frame layer carries no ``frame.encap_type`` field for</span>
+<span class="c1">#: ``ENCAP_TYPE_TO_LINKTYPE`` above to key on -- every capture measured for that table did carry</span>
+<span class="c1">#: one, so this is a defensive path rather than the usual one. PyShark takes the name verbatim from</span>
+<span class="c1">#: the PDML</span>
+<span class="c1">#: ``&lt;proto name=...&gt;`` attribute, which is Wireshark's own dissector *filter* name -- the third</span>
+<span class="c1">#: argument to ``proto_register_protocol()`` in the relevant ``epan/dissectors/packet-*.c`` -- and</span>
+<span class="c1">#: that vocabulary is not :class:`LinkType`'s: Ethernet's filter name is ``eth``, never</span>
+<span class="c1">#: ``ETHERNET``.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Both entries were checked two ways: against Wireshark's dissector registrations</span>
+<span class="c1">#: (``packet-eth.c`` against ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` against</span>
+<span class="c1">#: ``WTAP_ENCAP_TOKEN_RING``), and live with ``editcap -T`` to confirm which PDML root each</span>
+<span class="c1">#: encapsulation produces.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Every entry comes from the same sweep as ``ENCAP_TYPE_TO_LINKTYPE`` above: the root ``&lt;proto</span>
+<span class="c1">#: name=...&gt;`` of ``tshark -r out.pcap -c 1 -T pdml`` against the DLT in ``out.pcap``'s own file</span>
+<span class="c1">#: header. The trailing comment on each line names the ``editcap -T`` encapsulation that produced</span>
+<span class="c1">#: it, so an entry can be re-checked, or corrected when upstream moves, by rerunning that one</span>
+<span class="c1">#: rewrite. Names are listed even where they already spell their :class:`LinkType` member</span>
+<span class="c1">#: (``docsis``, ``fddi``, ``pflog``, ...): there is deliberately **no** fallback onto a like-named</span>
+<span class="c1">#: member, because upper-casing the name is exactly what answered 101 for a ``rawip6`` capture and</span>
+<span class="c1">#: 0 for a ``DLT_LOOP`` one -- valid DLTs, wrong ones, and silent (#843).</span>
+<span class="c1">#:</span>
+<span class="c1">#: Three classes of name are absent, all three measured rather than assumed:</span>
+<span class="c1">#:</span>
+<span class="c1">#: * **Ambiguous** -- one name, several DLTs, and the PDML node does not say which arrived. These</span>
+<span class="c1">#:   cannot be mapped at any size: ``user_dlt`` (16 DLTs), ``bluetooth`` (6), ``usb`` (5),</span>
+<span class="c1">#:   ``usbll`` (4), ``raw`` (3), and ``arcnet``, ``gfp``, ``i2c``, ``lapd``, ``mtp2``,</span>
+<span class="c1">#:   ``netanalyzer``, ``null``, ``ppp``, ``sll``, ``wlan``, ``wpan`` (2 each).</span>
+<span class="c1">#: * **Pseudo-protocols** -- ``fake-field-wrapper``, which :mod:`pyshark` reports as ``data`` and</span>
+<span class="c1">#:   which was the root for 29 of the swept encapsulations (no dissector), and ``_ws.malformed``,</span>
+<span class="c1">#:   the root for the one capture ``tshark`` could not parse. Neither names a link type.</span>
+<span class="c1">#: * **Unswept** -- the 69 encapsulations ``editcap -T`` would not write as pcap from an Ethernet</span>
+<span class="c1">#:   source. No evidence either way was gathered for them.</span>
+<span class="c1">#:</span>
+<span class="c1">#: Two caveats on what "unambiguous" means here. It means unambiguous *within* the 157 swept</span>
+<span class="c1">#: encapsulations: one of the 69 unswept could still root at the same name (``ether-nettl`` and</span>
+<span class="c1">#: ``tr-nettl`` are the obvious candidates, for ``eth`` and ``tr``). And five of the entries name a</span>
+<span class="c1">#: *payload* dissector that happened to be the outermost PDML node for exactly one encapsulation</span>
+<span class="c1">#: -- ``llc``, ``sctp``, ``pppoes``, ``fpp`` and ``irlap`` -- rather than a link-layer dissector</span>
+<span class="c1">#: registered against a ``WTAP_ENCAP_*``. Both are why this table is the fallback and</span>
+<span class="c1">#: ``frame.encap_type`` is the primary key; ``eth`` and ``tr`` additionally check out against</span>
+<span class="c1">#: Wireshark's own registrations (``packet-eth.c`` on ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` on</span>
+<span class="c1">#: ``WTAP_ENCAP_TOKEN_RING``).</span>
 <span class="n">FILTER_NAME_TO_LINKTYPE</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'eth'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span>
-    <span class="s1">'tr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_5</span><span class="p">,</span>
+    <span class="s1">'alp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATSC_ALP</span><span class="p">,</span>                             <span class="c1"># alp</span>
+    <span class="s1">'ap1394'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">APPLE_IP_OVER_IEEE1394</span><span class="p">,</span>            <span class="c1"># ap1394</span>
+    <span class="s1">'atm'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SUNATM</span><span class="p">,</span>                               <span class="c1"># atm-pdus</span>
+    <span class="s1">'ax25'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">AX25</span><span class="p">,</span>                                <span class="c1"># ax25</span>
+    <span class="s1">'ax25_kiss'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">AX25_KISS</span><span class="p">,</span>                      <span class="c1"># ax25-kiss</span>
+    <span class="s1">'can'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">CAN_SOCKETCAN</span><span class="p">,</span>                        <span class="c1"># socketcan</span>
+    <span class="s1">'chdlc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">C_HDLC</span><span class="p">,</span>                             <span class="c1"># chdlc</span>
+    <span class="s1">'clip'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATM_CLIP</span><span class="p">,</span>                            <span class="c1"># linux-atm-clip</span>
+    <span class="s1">'dbus'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DBUS</span><span class="p">,</span>                                <span class="c1"># dbus</span>
+    <span class="s1">'dect_nr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DECT_NR</span><span class="p">,</span>                          <span class="c1"># dect_nr</span>
+    <span class="s1">'docsis'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS</span><span class="p">,</span>                            <span class="c1"># docsis</span>
+    <span class="s1">'dpauxmon'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DISPLAYPORT_AUX</span><span class="p">,</span>                 <span class="c1"># dpauxmon</span>
+    <span class="s1">'ebhscr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">EBHSCR</span><span class="p">,</span>                            <span class="c1"># ebhscr</span>
+    <span class="s1">'enc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ENC</span><span class="p">,</span>                                  <span class="c1"># enc</span>
+    <span class="s1">'epon'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">EPON</span><span class="p">,</span>                                <span class="c1"># epon</span>
+    <span class="s1">'erf'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ERF</span><span class="p">,</span>                                  <span class="c1"># erf</span>
+    <span class="s1">'eth'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span>                             <span class="c1"># ether</span>
+    <span class="s1">'exported_pdu'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">WIRESHARK_UPPER_PDU</span><span class="p">,</span>         <span class="c1"># wireshark-upper-pdu</span>
+    <span class="s1">'fc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FC_2</span><span class="p">,</span>                                  <span class="c1"># fc2</span>
+    <span class="s1">'fcsof'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FC_2_WITH_FRAME_DELIMS</span><span class="p">,</span>             <span class="c1"># fc2sof</span>
+    <span class="s1">'fddi'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FDDI</span><span class="p">,</span>                                <span class="c1"># fddi,fddi-nettl,fddi-swapped</span>
+    <span class="s1">'flexray'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FLEXRAY</span><span class="p">,</span>                          <span class="c1"># flexray</span>
+    <span class="s1">'fpp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET_MPACKET</span><span class="p">,</span>                     <span class="c1"># ether-mpacket</span>
+    <span class="s1">'fr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FRELAY</span><span class="p">,</span>                                <span class="c1"># frelay,frelay-with-direction</span>
+    <span class="s1">'ipfc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IP_OVER_FC</span><span class="p">,</span>                          <span class="c1"># ip-over-fc</span>
+    <span class="s1">'ipmi.trace'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPMI_HPM_2</span><span class="p">,</span>                    <span class="c1"># ipmi-trace</span>
+    <span class="s1">'ipnet'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPNET</span><span class="p">,</span>                              <span class="c1"># ipnet</span>
+    <span class="s1">'ipoib'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPOIB</span><span class="p">,</span>                              <span class="c1"># ip-ib</span>
+    <span class="s1">'irlap'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LINUX_IRDA</span><span class="p">,</span>                         <span class="c1"># irda</span>
+    <span class="s1">'lin'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LIN</span><span class="p">,</span>                                  <span class="c1"># lin</span>
+    <span class="s1">'llap'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LTALK</span><span class="p">,</span>                               <span class="c1"># ltalk</span>
+    <span class="s1">'llc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATM_RFC1483</span><span class="p">,</span>                          <span class="c1"># atm-rfc1483</span>
+    <span class="s1">'llcgprs'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">GPRS_LLC</span><span class="p">,</span>                         <span class="c1"># gprs-llc</span>
+    <span class="s1">'loratap'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">LORATAP</span><span class="p">,</span>                          <span class="c1"># loratap</span>
+    <span class="s1">'mstp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">BACNET_MS_TP</span><span class="p">,</span>                        <span class="c1"># bacnet-ms-tp</span>
+    <span class="s1">'mtp3'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MTP3</span><span class="p">,</span>                                <span class="c1"># mtp3</span>
+    <span class="s1">'mux27010'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MUX27010</span><span class="p">,</span>                        <span class="c1"># mux27010</span>
+    <span class="s1">'nflog'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NFLOG</span><span class="p">,</span>                              <span class="c1"># nflog</span>
+    <span class="s1">'nordic_ble'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">NORDIC_BLE</span><span class="p">,</span>                    <span class="c1"># nordic_ble</span>
+    <span class="s1">'pflog'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PFLOG</span><span class="p">,</span>                              <span class="c1"># pflog</span>
+    <span class="s1">'pktap'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PKTAP</span><span class="p">,</span>                              <span class="c1"># pktap</span>
+    <span class="s1">'ppi'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPI</span><span class="p">,</span>                                  <span class="c1"># ppi</span>
+    <span class="s1">'pppoes'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">PPP_ETHER</span><span class="p">,</span>                         <span class="c1"># pppoes</span>
+    <span class="s1">'radiotap'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_11_RADIOTAP</span><span class="p">,</span>             <span class="c1"># ieee-802-11-radiotap</span>
+    <span class="s1">'redback'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">REDBACK_SMARTEDGE</span><span class="p">,</span>                <span class="c1"># redback</span>
+    <span class="s1">'rtacser'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">RTAC_SERIAL</span><span class="p">,</span>                      <span class="c1"># rtac-serial</span>
+    <span class="s1">'sccp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SCCP</span><span class="p">,</span>                                <span class="c1"># sccp</span>
+    <span class="s1">'sctp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SCTP</span><span class="p">,</span>                                <span class="c1"># sctp</span>
+    <span class="s1">'sdlc'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SDLC</span><span class="p">,</span>                                <span class="c1"># sdlc</span>
+    <span class="s1">'silabs-dch'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SILABS_DEBUG_CHANNEL</span><span class="p">,</span>          <span class="c1"># silabs-dch</span>
+    <span class="s1">'sita'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SITA</span><span class="p">,</span>                                <span class="c1"># sita-wan</span>
+    <span class="s1">'tr'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_5</span><span class="p">,</span>                             <span class="c1"># tr</span>
+    <span class="s1">'tzsp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">TZSP</span><span class="p">,</span>                                <span class="c1"># tzsp</span>
+    <span class="s1">'uci'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">FIRA_UCI</span><span class="p">,</span>                             <span class="c1"># fira-uci</span>
+    <span class="s1">'vpp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">VPP_DISPATCH</span><span class="p">,</span>                         <span class="c1"># vpp</span>
+    <span class="s1">'vsock'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">VSOCK</span><span class="p">,</span>                              <span class="c1"># vsock</span>
+    <span class="s1">'wpan-nonask-phy'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_NONASK_PHY</span><span class="p">,</span>  <span class="c1"># wpan-nonask-phy</span>
+    <span class="s1">'xra'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS31_XRA31</span><span class="p">,</span>                       <span class="c1"># docsis31_xra31</span>
 <span class="p">}</span>  <span class="c1"># type: dict[str, Enum_LinkType]</span>
 
 
@@ -590,38 +827,43 @@
     <span class="k">if</span> <span class="s1">'TCP'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Packet'</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: no default here, deliberately. Since #775 tier 1, ``get()``</span>
-        <span class="c1"># with no default raises on an unresolvable name instead of minting</span>
-        <span class="c1"># one. NULL and RAW are genuine DLTs -- BSD loopback and raw IP</span>
-        <span class="c1"># framing, respectively -- each meant to go with its own handler</span>
-        <span class="c1"># protocol class, so neither is an honest stand-in for "unknown link</span>
-        <span class="c1"># type" and this must not paper over the miss with either.</span>
+        <span class="c1"># NOTE: the link type is keyed on ``frame.encap_type`` -- Wireshark's</span>
+        <span class="c1"># internal ``WTAP_ENCAP_*`` number -- through</span>
+        <span class="c1"># ``ENCAP_TYPE_TO_LINKTYPE`` (module level, above), and only on the</span>
+        <span class="c1"># PDML root layer's *filter* name when the frame layer has no such</span>
+        <span class="c1"># field. That name cannot do the job on its own: one filter name</span>
+        <span class="c1"># serves several DLTs, so keying on it answered ``RAW`` (101) for a</span>
+        <span class="c1"># ``rawip6`` capture and ``NULL`` (0) for a ``DLT_LOOP`` one -- valid</span>
+        <span class="c1"># DLTs, wrong ones, and silent (#843). ``frame.encap_type``</span>
+        <span class="c1"># distinguishes them; see that table's comment for the measurements.</span>
         <span class="c1">#</span>
-        <span class="c1"># PyShark's own layer name is Wireshark's PDML *filter* name (e.g.</span>
-        <span class="c1"># ``eth``, not ``ethernet``), which is generally not a LinkType member</span>
-        <span class="c1"># name -- so ``FILTER_NAME_TO_LINKTYPE`` (module level, above) is</span>
-        <span class="c1"># tried first, on the name as PyShark reports it. Only when that</span>
-        <span class="c1"># table has nothing for this name does this fall back to</span>
-        <span class="c1"># :meth:`LinkType.get` on the upper-cased name, which is what lets a</span>
-        <span class="c1"># filter name that happens to already spell a LinkType member (e.g.</span>
-        <span class="c1"># ``ppp``, ``fddi``) resolve without needing an entry of its own. The</span>
-        <span class="c1"># table is consulted first rather than second so that a curated,</span>
-        <span class="c1"># source-verified entry always wins over an incidental upper-case</span>
-        <span class="c1"># match, should a future LinkType member ever collide with one of</span>
-        <span class="c1"># this module's filter names by coincidence. The bare ``KeyError``</span>
-        <span class="c1"># from either lookup is re-raised as</span>
+        <span class="c1"># PyShark reports every field as ``LayerFieldsContainer``, a ``str``</span>
+        <span class="c1"># subclass, so the number arrives as text and needs ``int()``; and a</span>
+        <span class="c1"># field the frame layer does not carry raises ``AttributeError`` out</span>
+        <span class="c1"># of ``pyshark.packet.layers.base.BaseLayer.__getattr__``, which is</span>
+        <span class="c1"># what the ``getattr`` default absorbs here.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Neither path substitutes a DLT on a miss. Since #775 tier 1 a</span>
+        <span class="c1"># lookup raises on an unresolvable key instead of minting one, and</span>
+        <span class="c1"># NULL and RAW are genuine DLTs -- BSD loopback and raw IP framing,</span>
+        <span class="c1"># respectively -- each meant to go with its own handler protocol</span>
+        <span class="c1"># class, so neither is an honest stand-in for "unknown link type".</span>
+        <span class="c1"># The bare ``KeyError``/``ValueError`` is re-raised as</span>
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.MissingKeyError` -- this</span>
         <span class="c1"># package's own house exception for a lookup miss -- rather than</span>
         <span class="c1"># letting it escape this public function.</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">protocol</span> <span class="o">=</span> <span class="n">FILTER_NAME_TO_LINKTYPE</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">encap_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="s1">'encap_type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">encap_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">protocol</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">FILTER_NAME_TO_LINKTYPE</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="n">ENCAP_TYPE_TO_LINKTYPE</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">encap_type</span><span class="p">)]</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">MissingKeyError</span><span class="p">(</span><span class="s1">'frame.encap_type=</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">encap_type</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>                                                   <span class="c1"># data link type</span>
