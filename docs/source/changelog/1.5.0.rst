@@ -3012,10 +3012,11 @@ since -- reaching #805 by the entries below.
   ``KeyError``-catching on a missing name, which the hand-copied ``get`` never
   had, so e.g. ``Flags.get('NOPE', 0)`` returns ``0`` now rather than raising
   -- a widening, not a regression, though undisclosed until this PR; and a key
-  that is neither ``int`` nor ``str`` now raises ``ValueError`` on these six
-  (tried as a value) where the generated template's own ``get``, still used by
-  the other 105, raises ``KeyError`` (tried as a name) -- a new cross-registry
-  divergence, degenerate today since no caller passes one (#855).
+  that is neither ``int`` nor ``str`` used to raise ``TypeError`` on these
+  six's own hand-copied ``get`` -- e.g. ``Flags.get(3.5)`` -- and now raises
+  ``ValueError`` instead, tried as a value by the base; a new divergence from
+  the still-unconverted 105's generated ``get``, which raises ``KeyError`` on
+  the same input, degenerate today since no caller passes one (#855).
 * **Changed** -- Ruleset ``23497679``'s ``required_status_checks`` names 22
   exact check contexts, and GitHub rulesets match literally with no wildcard,
   so the required list needs hand-editing on every matrix change. Five of the
