@@ -32,8 +32,8 @@ repository-code: https://github.com/JarryShaw/PyPCAPKit
 url: https://jarryshaw.github.io/PyPCAPKit/
 repository-artifact: https://pypi.org/project/pypcapkit/
 license: BSD-3-Clause
-version: 1.5.0b4
-date-released: '2026-09-20'
+version: 1.5.0b5
+date-released: '2026-09-27'
 keywords:
   - network
   - pcap
