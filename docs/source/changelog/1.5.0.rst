@@ -2991,6 +2991,31 @@ since -- reaching #805 by the entries below.
   One line of ``pcapkit/toolkit/pyshark.py`` itself changes as a result: the
   ``IPMB_LINUX`` table entry becomes ``I2C_LINUX``, the canonical name #848
   gave value 209 -- the same member either way (#853).
+* **Fixed** -- **a breaking change to** ``EnumRegistry.register()``: it now
+  raises ``ValueError`` naming the existing member and pointing at
+  ``register_alias()``, where it used to silently alias an already-registered
+  value under the caller's new name -- ``aenum`` treats a taken value as an
+  alias request, so ``register(existing_value, 'TOTALLY_NEW_NAME')`` returned
+  the existing member unchanged, minted nothing and raised nothing,
+  contradicting the method's own docstring.
+  ``pcapkit.corekit.enums.EnumRegistry`` is a new mixin implementing ``get``,
+  ``get_all``, ``register``, ``register_alias``, ``register_aliases`` and
+  ``_unregistered_member`` in one place, per the maintainer's ruling on #842;
+  it converts the first six registries with no bespoke ``__new__`` --
+  ``ipv6.extension_header.ExtensionHeader``, ``tcp.flags.Flags`` and four
+  ``mh.*_flag`` modules -- and the one base serves ``IntEnum``, ``IntFlag`` and
+  ``StrEnum`` alike. The new guard reaches only those six: the other 105 const
+  registries still carry the old generator's bare
+  ``extend_enum(cls, name, value)``, so ``pcapkit.const`` ships two
+  contradictory ``register`` contracts until #858 (below) migrates the rest.
+  Riding along: the six also gain the generated template's
+  ``KeyError``-catching on a missing name, which the hand-copied ``get`` never
+  had, so e.g. ``Flags.get('NOPE', 0)`` returns ``0`` now rather than raising
+  -- a widening, not a regression, though undisclosed until this PR; and a key
+  that is neither ``int`` nor ``str`` now raises ``ValueError`` on these six
+  (tried as a value) where the generated template's own ``get``, still used by
+  the other 105, raises ``KeyError`` (tried as a name) -- a new cross-registry
+  divergence, degenerate today since no caller passes one (#855).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
