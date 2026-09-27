@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag
 
 from aenum import IntFlag
 
+from pcapkit.corekit.enums import EnumRegistry
+
 __all__ = ['BindingACKFlag']
 
 
-class BindingACKFlag(IntFlag):
+class BindingACKFlag(EnumRegistry, IntFlag):
     """[BindingACKFlag] Binding Acknowledgment Flags"""
 
     #: K [:rfc:`6275`]
@@ -38,27 +40,6 @@ class BindingACKFlag(IntFlag):
 
     #: D [:rfc:`8885`]
     D = 0x02
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'BindingACKFlag':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return BindingACKFlag(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return BindingACKFlag(default)
-        return BindingACKFlag[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'BindingACKFlag':

@@ -12,10 +12,12 @@ which is automatically generated from :class:`pcapkit.vendor.mh.binding_update_f
 
 from aenum import IntFlag
 
+from pcapkit.corekit.enums import EnumRegistry
+
 __all__ = ['BindingUpdateFlag']
 
 
-class BindingUpdateFlag(IntFlag):
+class BindingUpdateFlag(EnumRegistry, IntFlag):
     """[BindingUpdateFlag] Binding Update Flags"""
 
     #: A [:rfc:`6275`]
@@ -53,27 +55,6 @@ class BindingUpdateFlag(IntFlag):
 
     #: D [:rfc:`8885`]
     D = 0x0010
-
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'BindingUpdateFlag':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
-
-        :meta private:
-        """
-        if isinstance(key, int):
-            try:
-                return BindingUpdateFlag(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return BindingUpdateFlag(default)
-        return BindingUpdateFlag[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'BindingUpdateFlag':

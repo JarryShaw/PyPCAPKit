@@ -1,0 +1,678 @@
+# -*- coding: utf-8 -*-
+"""Tests for :class:`pcapkit.corekit.enums.EnumRegistry`, tier 2 of issue #775.
+
+Tier 1 (#838) removed the mint from the two sites in
+:data:`pcapkit.vendor.default.LINE` that the 105 default-template registries
+inherit. It could not reach the eleven crawlers that replace that template with
+their own, because each of those carries a hand-copied ``get()`` -- and none of
+them carries ``register``, ``register_alias`` or ``get_all`` at all.
+
+The maintainer's ruling on #842, verbatim: *"to finalise the abstraction idea,
+get/get_all/register/register_alias should always exist on the const enums - so
+they're to be moved to the base class. And AppType's sub-base class will do its
+necessary overrides and dispatching logic; AppType subclasses will have their
+necessary overrides again pertaining their different contracts."*
+
+:class:`~pcapkit.corekit.enums.EnumRegistry` is tier one of that hierarchy. This
+module pins both halves of the claim: that the generated registries in this batch
+really do inherit the protocol rather than carry a copy of it, and that each of
+the four methods honours the contract the maintainer wrote for it.
+
+"""
+from __future__ import annotations
+
+import importlib
+import pathlib
+import unittest
+from typing import TYPE_CHECKING
+
+from aenum import IntEnum, IntFlag, StrEnum
+
+from pcapkit.corekit.enums import EnumRegistry
+from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
+
+if TYPE_CHECKING:
+    from typing import Any
+
+#: Repository root, for reading generated sources as text.
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
+
+#: The batch converted onto :class:`~pcapkit.corekit.enums.EnumRegistry`: the
+#: six bespoke-template registries whose members carry no extra attributes, so
+#: the shared ``_unregistered_member`` -- which sets only ``_name_`` and
+#: ``_value_`` -- builds a complete member for them. ``tcp/flags`` joined the
+#: original five once measurement showed its exclusion rationale did not hold:
+#: the PR description had grouped it with the five templates below on the
+#: strength of "each attach extra attributes in ``__new__``", but
+#: ``grep -c 'def __new__'`` reports ``0`` for both ``pcapkit/vendor/tcp/flags.py``
+#: and ``pcapkit/const/tcp/flags.py`` -- it never defined one, so it is the same
+#: shape as the four ``mh/*_flag`` registries, not the five below. Its own
+#: ``_missing_`` still does its own 16-bit range check ending in
+#: ``super()._missing_(value)``, unchanged by the conversion: that call chain
+#: resolves through :mod:`aenum`'s own :class:`~aenum.Flag` machinery either
+#: way, since :class:`~pcapkit.corekit.enums.EnumRegistry` never defines
+#: ``_missing_`` itself. The remaining five bespoke templates (``ftp/command``,
+#: ``ftp/return_code``, ``http/method``, ``http/status_code``,
+#: ``pcapng/option_type``) do each define a custom ``__new__`` attaching further
+#: attributes, so an unregistered member of theirs would be missing them; they
+#: need their own override and stay out of this batch.
+CONVERTED = (
+    ('pcapkit.const.mh.binding_ack_flag', 'BindingACKFlag', 'pcapkit/const/mh/binding_ack_flag.py'),
+    ('pcapkit.const.mh.binding_update_flag', 'BindingUpdateFlag', 'pcapkit/const/mh/binding_update_flag.py'),
+    ('pcapkit.const.mh.handover_ack_flag', 'HandoverACKFlag', 'pcapkit/const/mh/handover_ack_flag.py'),
+    ('pcapkit.const.mh.handover_initiate_flag', 'HandoverInitiateFlag', 'pcapkit/const/mh/handover_initiate_flag.py'),
+    ('pcapkit.const.ipv6.extension_header', 'ExtensionHeader', 'pcapkit/const/ipv6/extension_header.py'),
+    ('pcapkit.const.tcp.flags', 'Flags', 'pcapkit/const/tcp/flags.py'),
+)
+
+#: The crawlers whose bespoke templates were converted, and which must therefore
+#: no longer spell a ``get()`` of their own.
+CONVERTED_VENDORS = (
+    'pcapkit/vendor/mh/binding_ack_flag.py',
+    'pcapkit/vendor/mh/binding_update_flag.py',
+    'pcapkit/vendor/mh/handover_ack_flag.py',
+    'pcapkit/vendor/mh/handover_initiate_flag.py',
+    'pcapkit/vendor/ipv6/extension_header.py',
+    'pcapkit/vendor/tcp/flags.py',
+)
+
+#: Every method of the protocol the ruling says must always exist.
+PROTOCOL = ('get', 'get_all', 'register', 'register_alias', 'register_aliases',
+            '_unregistered_member')
+
+
+def _unused_value(cls: 'Any') -> 'int':
+    """First non-negative integer no member of ``cls`` carries.
+
+    Read from ``_value2member_map_`` rather than by calling ``cls(value)``:
+    after tier 1 a declared-but-unassigned value resolves to an unregistered
+    member instead of raising, so a successful call proves nothing about
+    membership -- the same reason ``register_alias`` itself tests that table.
+
+    """
+    for candidate in range(1 << 16):
+        if candidate not in cls._value2member_map_:
+            return candidate
+    raise AssertionError(f'{cls.__name__} has no unused value below 65536')
+
+
+def _purge_member(cls: 'Any', name: 'str') -> 'None':
+    """Undo an :func:`~aenum.extend_enum` so a test's explicit ``register()`` or
+    ``register_alias()`` call does not leak into the rest of the suite.
+
+    Mirrors ``tests.const.test_const_enum_no_mint._purge_member``, but leaves
+    ``_value2member_map_`` alone when the name being dropped was an *alias*:
+    that entry belongs to the pre-existing member, and removing it would make
+    the alias case destructive where the mint case's is not.
+
+    """
+    member = cls._member_map_.pop(name, None)
+    if member is None:
+        return
+    if name in cls._member_names_:
+        cls._member_names_.remove(name)
+    if cls._value2member_map_.get(member.value) is member and member.name == name:
+        cls._value2member_map_.pop(member.value, None)
+
+
+class GeneratedSourceInheritsTests(unittest.TestCase):
+    """The generated registries must *inherit* the protocol, not copy it."""
+
+    def test_converted_const_modules_declare_the_base(self) -> None:
+        for _, name, relpath in CONVERTED:
+            with self.subTest(registry=name):
+                source = (REPO_ROOT / relpath).read_text()
+                self.assertIn('from pcapkit.corekit.enums import EnumRegistry', source)
+                self.assertIn(f'class {name}(EnumRegistry, ', source)
+
+    def test_converted_const_modules_carry_no_copy_of_the_protocol(self) -> None:
+        """A ``def get``/``def register`` left behind would silently shadow the
+        base class, which is the failure this batch exists to remove."""
+        for _, name, relpath in CONVERTED:
+            source = (REPO_ROOT / relpath).read_text()
+            for method in PROTOCOL:
+                with self.subTest(registry=name, method=method):
+                    self.assertNotIn(f'def {method}(', source)
+
+    def test_converted_crawlers_no_longer_spell_their_own_get(self) -> None:
+        for relpath in CONVERTED_VENDORS:
+            with self.subTest(vendor=relpath):
+                source = (REPO_ROOT / relpath).read_text()
+                self.assertIn('from pcapkit.corekit.enums import EnumRegistry', source)
+                self.assertNotIn("def get(key: 'int | str'", source)
+
+
+class ProtocolIsInheritedTests(unittest.TestCase):
+    """All of the protocol must be present, and reached from the base class."""
+
+    if TYPE_CHECKING:
+        registries: 'list[Any]'
+        base: 'Any'
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        cls.registries = [
+            getattr(importlib.import_module(module_name), class_name)
+            for module_name, class_name, _ in CONVERTED
+        ]
+        # NOTE: resolved from the re-imported module rather than reusing the
+        # module-scope import. purge_modules() above drops every ``pcapkit``
+        # entry from ``sys.modules``, so the freshly imported registries inherit
+        # a *new* EnumRegistry class object -- identity against the outer one
+        # would fail for a reason that says nothing about the product.
+        cls.base = importlib.import_module('pcapkit.corekit.enums').EnumRegistry
+        cls.addClassCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_base_class_is_in_the_mro(self) -> None:
+        for registry in self.registries:
+            with self.subTest(registry=registry.__qualname__):
+                self.assertIn(self.base, registry.__mro__)
+
+    def test_every_method_resolves_to_the_base_implementation(self) -> None:
+        for registry in self.registries:
+            for method in PROTOCOL:
+                with self.subTest(registry=registry.__qualname__, method=method):
+                    self.assertEqual(getattr(registry, method).__func__,
+                                     getattr(self.base, method).__func__)
+
+    def test_mixing_in_the_base_leaves_the_member_type_alone(self) -> None:
+        """One base for three member types is what a generated fragment could
+        not do, so the mix-in must not become the member data type itself."""
+        class _Int(EnumRegistry, IntEnum):
+            one = 1
+
+        class _Flag(EnumRegistry, IntFlag):
+            two = 2
+
+        class _Str(EnumRegistry, StrEnum):
+            three = 'three'
+
+        self.assertIs(_Int._member_type_, int)
+        self.assertIs(_Flag._member_type_, int)
+        self.assertIs(_Str._member_type_, str)
+        self.assertEqual(int(_Int.one), 1)
+        self.assertEqual(str(_Str.three), 'three')
+
+
+class _PreConversionFlags(IntFlag):
+    """A reproduction of ``pcapkit.const.tcp.flags.Flags`` exactly as it stood
+    on commit ``02296b5dd`` (this batch's prior head), before ``tcp/flags``
+    joined :data:`CONVERTED`: a plain ``class Flags(IntFlag)`` with its own
+    hand-copied ``get`` (omitted here -- irrelevant to ``_missing_``) and this
+    ``_missing_``, copied verbatim. Kept inline rather than fetched from git
+    history so :class:`TCPFlagsConversionTests` runs offline and the
+    comparison is exact rather than approximate.
+    """
+
+    Reserved_4 = 1 << 4
+    Reserved_5 = 1 << 5
+    Reserved_6 = 1 << 6
+    AE = 1 << 7
+    CWR = 1 << 8
+    ECE = 1 << 9
+    URG = 1 << 10
+    ACK = 1 << 11
+    PSH = 1 << 12
+    RST = 1 << 13
+    SYN = 1 << 14
+    FIN = 1 << 15
+
+    @classmethod
+    def _missing_(cls, value: 'Any') -> 'Any':
+        if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
+            raise ValueError(f'{value!r} is not a valid {cls.__name__}')
+        return super()._missing_(value)
+
+
+def _resolve_or_raise(cls: 'Any', value: 'Any') -> 'Any':
+    """``(int value, name)`` on success, or the exception type on failure.
+
+    The shared probe :meth:`TCPFlagsConversionTests.test_missing_resolves_identically_to_the_pre_conversion_shape`
+    runs against both the reference above and the real, converted registry.
+
+    """
+    try:
+        member = cls(value)
+    except Exception as error:  # pylint: disable=broad-except
+        return type(error)
+    return (int(member), member.name)
+
+
+class TCPFlagsConversionTests(unittest.TestCase):
+    """GitHub issue #775's own finding: the PR description's stated reason
+    for excluding ``tcp/flags`` from this batch -- "each attach extra
+    attributes in ``__new__``" -- does not hold for it.
+    ``grep -c 'def __new__'`` reports ``0`` for both
+    ``pcapkit/vendor/tcp/flags.py`` and ``pcapkit/const/tcp/flags.py``, the
+    same shape as the four ``mh/*_flag`` registries this batch already
+    converts, so it belongs in :data:`CONVERTED` rather than in the five
+    templates excluded for actually defining one.
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_tcp_flags_now_inherits_the_base(self) -> None:
+        """Fails on ``02296b5dd``, where ``Flags`` is a plain ``IntFlag``.
+
+        Resolves ``EnumRegistry`` freshly from the just-reimported
+        ``pcapkit.corekit.enums`` rather than the module-scope import above --
+        ``setUp`` purged ``pcapkit`` from ``sys.modules``, so ``Flags`` now
+        inherits a *new* ``EnumRegistry`` class object, and identity against
+        the stale outer one would fail for a reason that says nothing about
+        the product (see ``ProtocolIsInheritedTests.setUpClass`` above, which
+        hits the same trap).
+        """
+        from pcapkit.const.tcp.flags import Flags
+
+        base = importlib.import_module('pcapkit.corekit.enums').EnumRegistry
+        self.assertIn(base, Flags.__mro__)
+
+    def test_missing_resolves_identically_to_the_pre_conversion_shape(self) -> None:
+        """The conversion changes *what the class inherits*, not
+        ``_missing_``'s own logic -- :class:`~pcapkit.corekit.enums.EnumRegistry`
+        never defines ``_missing_`` itself, so ``super()._missing_(value)``
+        inside ``Flags._missing_`` resolves through :mod:`aenum`'s
+        :class:`~aenum.Flag` machinery exactly as it did when ``Flags``
+        inherited from ``IntFlag`` directly. Swept rather than sampled at a
+        few boundary values, across every declared member, every boundary of
+        the 16-bit field the range check bounds, and several composites,
+        so a widened or narrowed range check would be caught here rather
+        than only in the composite-specific tests in
+        ``tests/const/test_const_enum_builtin_parity.py``.
+        """
+        from pcapkit.const.tcp.flags import Flags
+
+        probes = [0, 1, 0xF, 0x10, 0xFFFF, 0x10000, -1, -0x10000,
+                  1 << 70, 0xFFF0]
+        for member in _PreConversionFlags:
+            probes.append(int(member))
+        for first, second in (('PSH', 'ACK'), ('SYN', 'FIN'), ('RST', 'URG')):
+            probes.append(int(_PreConversionFlags[first]) | int(_PreConversionFlags[second]))
+
+        for value in probes:
+            with self.subTest(value=value):
+                self.assertEqual(_resolve_or_raise(_PreConversionFlags, value),
+                                 _resolve_or_raise(Flags, value))
+
+    def test_tcp_flags_gains_the_protocol_it_never_had(self) -> None:
+        """On ``02296b5dd`` none of these exist on ``Flags`` at all -- its own
+        hand-copied ``get`` was the only member of the protocol it carried,
+        and it had no ``get_all``, ``register``, ``register_alias``,
+        ``register_aliases`` or ``_unregistered_member`` -- so this raises
+        :exc:`AttributeError` there and only passes once the conversion lands.
+        """
+        from pcapkit.const.tcp.flags import Flags
+
+        target = list(Flags)[0]
+        self.assertEqual(Flags.get_all(target.name), (target,))
+
+        value = _unused_value(Flags)
+        self.addCleanup(_purge_member, Flags, 'unit_test_tcp_flags_minted')
+        member = Flags.register(value, 'unit_test_tcp_flags_minted')
+        self.assertEqual(member.value, value)
+
+        unregistered = Flags._unregistered_member(_unused_value(Flags), 'unit_test_tcp_flags_absent')
+        self.assertEqual(unregistered.name, 'unit_test_tcp_flags_absent')
+        self.assertNotIn('unit_test_tcp_flags_absent', Flags.__members__)
+
+
+class GetContractTests(unittest.TestCase):
+    """*"get is a shortcut for ``[]`` operation and returns the canonical enum."*"""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_name_and_value_both_resolve_to_the_same_member(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        self.assertIs(ExtensionHeader.get(target.name), target)
+        self.assertIs(ExtensionHeader.get(target.value), target)
+        self.assertIs(ExtensionHeader.get(target.name), ExtensionHeader[target.name])
+
+    def test_an_alias_resolves_to_its_canonical_member(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        self.addCleanup(_purge_member, ExtensionHeader, 'unit_test_canonical')
+        ExtensionHeader.register_alias(target.value, 'unit_test_canonical')
+
+        self.assertIs(ExtensionHeader.get('unit_test_canonical'), target)
+        self.assertEqual(ExtensionHeader.get('unit_test_canonical').name, target.name)
+
+    def test_string_miss_without_default_raises_and_does_not_mint(self) -> None:
+        from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag
+
+        before = len(BindingUpdateFlag.__members__)
+        with self.assertRaises(KeyError):
+            BindingUpdateFlag.get('Definitely-Not-A-Member')
+        self.assertEqual(before, len(BindingUpdateFlag.__members__))
+
+    def test_string_miss_with_default_falls_back_by_value(self) -> None:
+        """The normalisation half of this batch: the hand-copied ``get()`` ended
+        in a bare ``return NAME[key]``, so ``default`` silently applied to
+        integer keys only."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        before = len(ExtensionHeader.__members__)
+
+        self.assertIs(ExtensionHeader.get('Definitely-Not-A-Member', target.value), target)
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_value_miss_without_default_raises(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        before = len(ExtensionHeader.__members__)
+        with self.assertRaises(ValueError):
+            ExtensionHeader.get(_unused_value(ExtensionHeader))
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_value_miss_with_default_falls_back(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        before = len(ExtensionHeader.__members__)
+
+        result = ExtensionHeader.get(_unused_value(ExtensionHeader), target.value)
+
+        self.assertIs(result, target)
+        self.assertEqual(before, len(ExtensionHeader.__members__))
+
+    def test_get_never_mints_on_any_converted_registry(self) -> None:
+        for module_name, class_name, _ in CONVERTED:
+            with self.subTest(registry=class_name):
+                registry = getattr(importlib.import_module(module_name), class_name)
+                before = len(registry.__members__)
+                with self.assertRaises(KeyError):
+                    registry.get('Definitely-Not-A-Member')
+                self.assertEqual(before, len(registry.__members__))
+
+
+class GetAllContractTests(unittest.TestCase):
+    """*"get_all returns all matching enums."*"""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_a_one_to_one_registry_matches_exactly_one_member(self) -> None:
+        """An alias is a second *name* for the canonical member, not a second
+        member, so a registry that maps one key to one member answers with one
+        entry even after an alias is registered."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        self.assertEqual(ExtensionHeader.get_all(target.value), (target,))
+
+        self.addCleanup(_purge_member, ExtensionHeader, 'unit_test_all')
+        ExtensionHeader.register_alias(target.value, 'unit_test_all')
+
+        self.assertEqual(ExtensionHeader.get_all(target.value), (target,))
+        self.assertEqual(ExtensionHeader.get_all('unit_test_all'), (target,))
+
+    def test_get_all_is_present_on_every_converted_registry(self) -> None:
+        for module_name, class_name, _ in CONVERTED:
+            with self.subTest(registry=class_name):
+                registry = getattr(importlib.import_module(module_name), class_name)
+                target = list(registry)[0]
+                self.assertEqual(registry.get_all(target.name), (target,))
+
+    def test_get_all_propagates_a_miss(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        with self.assertRaises(KeyError):
+            HandoverACKFlag.get_all('Definitely-Not-A-Member')
+
+
+class RegisterContractTests(unittest.TestCase):
+    """*"register mints new enum to the class at runtime with specified names."*"""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_register_adds_a_new_member_under_the_given_name(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        value = _unused_value(ExtensionHeader)
+        self.addCleanup(_purge_member, ExtensionHeader, 'unit_test_minted')
+        before = len(ExtensionHeader._member_names_)
+
+        member = ExtensionHeader.register(value, 'unit_test_minted')
+
+        self.assertEqual(member.value, value)
+        self.assertEqual(member.name, 'unit_test_minted')
+        self.assertIn(value, ExtensionHeader._value2member_map_)
+        self.assertEqual(before + 1, len(ExtensionHeader._member_names_))
+
+    def test_register_on_a_flag_registry_resolves_by_name_and_value(self) -> None:
+        """Measured on :class:`~aenum.IntFlag`: a value that is the bitwise
+        composite of existing flags -- which the first unused integer often is --
+        registers as a *composite* pseudo-member, so ``_member_names_`` does not
+        grow even though the name and value both resolve. That is
+        :mod:`aenum`'s own flag semantics rather than anything this base does,
+        so the assertion here is what actually holds for a flag registry."""
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        value = _unused_value(HandoverACKFlag)
+        self.addCleanup(_purge_member, HandoverACKFlag, 'unit_test_minted')
+
+        member = HandoverACKFlag.register(value, 'unit_test_minted')
+
+        self.assertEqual(member.value, value)
+        self.assertIn(value, HandoverACKFlag._value2member_map_)
+        self.assertIn('unit_test_minted', HandoverACKFlag.__members__)
+
+    def test_register_over_a_taken_name_raises_value_error(self) -> None:
+        """:mod:`aenum` reports a name collision as :exc:`TypeError`; the base
+        translates it so one call has one failure type."""
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        target = list(HandoverACKFlag)[0]
+        before = len(HandoverACKFlag.__members__)
+
+        with self.assertRaises(ValueError):
+            HandoverACKFlag.register(_unused_value(HandoverACKFlag), target.name)
+
+        self.assertEqual(before, len(HandoverACKFlag.__members__))
+
+    def test_register_over_a_taken_value_raises_value_error_and_does_not_alias(self) -> None:
+        """The guard this batch adds: :func:`~aenum.extend_enum` does not mint
+        anything for a value that already has a member -- :mod:`aenum` treats
+        that as a request to *alias* the existing member under the caller's
+        name instead, silently. Without a guard, ``register(existing_value,
+        'TOTALLY_NEW_NAME')`` returns the *existing* member (``.name`` still
+        the original), makes ``'TOTALLY_NEW_NAME'`` reachable in
+        ``__members__`` pointing at it, and mints nothing -- reachable under
+        the wrong method, unannounced, and contradicting the method's own
+        docstring contract that ``register`` is what mints and nothing else
+        does so silently. Reproduced against this exact shape on
+        ``pcapkit.const.reg.apptype.apptype.TransportProtocol`` (a different,
+        non-:class:`~pcapkit.corekit.enums.EnumRegistry` registry, since
+        that one is not gated the same way) before this guard existed:
+        ``TransportProtocol.register(6, 'TOTALLY_NEW_NAME')`` returned
+        ``TransportProtocol.tcp`` unchanged and minted nothing. This pins the
+        fix on the base class every :data:`CONVERTED` registry actually uses.
+        """
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        names_before = list(ExtensionHeader._member_names_)
+        members_before = dict(ExtensionHeader.__members__)
+
+        with self.assertRaises(ValueError) as caught:
+            ExtensionHeader.register(target.value, 'TOTALLY_NEW_NAME')
+
+        self.assertIn(str(target.value), str(caught.exception))
+        self.assertIn(target.name, str(caught.exception))
+        self.assertIn('register_alias', str(caught.exception))
+        # Nothing minted, and the wrong name never became reachable at all --
+        # the failure mode this guard exists to rule out.
+        self.assertEqual(names_before, list(ExtensionHeader._member_names_))
+        self.assertEqual(members_before, dict(ExtensionHeader.__members__))
+        self.assertNotIn('TOTALLY_NEW_NAME', ExtensionHeader.__members__)
+        # And the pre-existing member is exactly as it was -- not renamed, not
+        # replaced.
+        self.assertIs(ExtensionHeader(target.value), target)
+        self.assertEqual(target.name, ExtensionHeader(target.value).name)
+
+    def test_register_over_a_taken_value_on_a_flag_registry_also_refuses(self) -> None:
+        """The same guard, on an :class:`~aenum.IntFlag` registry: value
+        collision is checked the same way regardless of member type, since
+        both share :meth:`~pcapkit.corekit.enums.EnumRegistry._extend`."""
+        from pcapkit.const.mh.binding_ack_flag import BindingACKFlag
+
+        target = list(BindingACKFlag)[0]
+        before = len(BindingACKFlag.__members__)
+
+        with self.assertRaises(ValueError):
+            BindingACKFlag.register(target.value, 'TOTALLY_NEW_FLAG_NAME')
+
+        self.assertEqual(before, len(BindingACKFlag.__members__))
+        self.assertNotIn('TOTALLY_NEW_FLAG_NAME', BindingACKFlag.__members__)
+
+    def test_register_alias_still_aliases_after_the_value_guard(self) -> None:
+        """:meth:`register_alias` depends on :meth:`register` accepting an
+        already-registered value -- that dependency moved to the shared,
+        ungated :meth:`~pcapkit.corekit.enums.EnumRegistry._extend` when this
+        guard was added, so this pins that the move did not also gate the
+        path :meth:`register_alias` needs. A naive guard placed directly in
+        the body :meth:`register` calls would make every alias registration
+        raise the exact error this test's sibling above checks for, rather
+        than aliasing. Deliberately on ``ExtensionHeader`` rather than
+        ``Flags``: this registry already inherited
+        :class:`~pcapkit.corekit.enums.EnumRegistry` before this change, so
+        this is a regression pin on the internal refactor and holds on both
+        the prior head and this one -- unlike this class's ``Flags``-based
+        siblings above, which pin the guard itself and so only hold once
+        ``tcp/flags`` has joined :data:`CONVERTED` too."""
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        self.addCleanup(_purge_member, ExtensionHeader, 'unit_test_alias_after_guard')
+
+        result = ExtensionHeader.register_alias(target.value, 'unit_test_alias_after_guard')
+
+        self.assertIs(result, target)
+        self.assertIs(ExtensionHeader['unit_test_alias_after_guard'], target)
+
+
+class RegisterAliasContractTests(unittest.TestCase):
+    """*"register_alias(es) adds additional alias(es) to a given enum's mapping."*
+
+    And, on whether an enum must be given: *"actually i think it should always be
+    for an existing member"*.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_alias_adds_a_name_not_a_member(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
+
+        target = list(ExtensionHeader)[0]
+        self.addCleanup(_purge_member, ExtensionHeader, 'unit_test_alias')
+        names_before = list(ExtensionHeader._member_names_)
+        members_before = len(ExtensionHeader.__members__)
+
+        result = ExtensionHeader.register_alias(target.value, 'unit_test_alias')
+
+        self.assertIs(result, target)
+        self.assertIs(ExtensionHeader['unit_test_alias'], target)
+        self.assertEqual(names_before, list(ExtensionHeader._member_names_))
+        self.assertEqual(members_before + 1, len(ExtensionHeader.__members__))
+
+    def test_alias_for_an_unregistered_value_is_refused(self) -> None:
+        from pcapkit.const.mh.binding_ack_flag import BindingACKFlag
+
+        value = _unused_value(BindingACKFlag)
+        before = len(BindingACKFlag.__members__)
+
+        with self.assertRaises(ValueError) as caught:
+            BindingACKFlag.register_alias(value, 'unit_test_alias')
+
+        self.assertIn('is not a registered BindingACKFlag', str(caught.exception))
+        self.assertEqual(before, len(BindingACKFlag.__members__))
+        self.assertNotIn('unit_test_alias', BindingACKFlag.__members__)
+
+    def test_alias_over_a_taken_name_raises_value_error(self) -> None:
+        from pcapkit.const.mh.binding_ack_flag import BindingACKFlag
+
+        target = list(BindingACKFlag)[0]
+        before = len(BindingACKFlag.__members__)
+
+        with self.assertRaises(ValueError):
+            BindingACKFlag.register_alias(target.value, target.name)
+
+        self.assertEqual(before, len(BindingACKFlag.__members__))
+
+    def test_register_aliases_adds_several(self) -> None:
+        from pcapkit.const.mh.handover_initiate_flag import HandoverInitiateFlag
+
+        target = list(HandoverInitiateFlag)[0]
+        for name in ('unit_test_a', 'unit_test_b'):
+            self.addCleanup(_purge_member, HandoverInitiateFlag, name)
+        names_before = list(HandoverInitiateFlag._member_names_)
+
+        result = HandoverInitiateFlag.register_aliases(
+            target.value, 'unit_test_a', 'unit_test_b')
+
+        self.assertEqual(result, (target, target))
+        self.assertIs(HandoverInitiateFlag['unit_test_a'], target)
+        self.assertIs(HandoverInitiateFlag['unit_test_b'], target)
+        self.assertEqual(names_before, list(HandoverInitiateFlag._member_names_))
+
+
+class UnregisteredMemberTests(unittest.TestCase):
+    """``_unregistered_member`` must stay outside the lookup tables, for both
+    member types the base serves."""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_int_valued_registries(self) -> None:
+        for module_name, class_name, _ in CONVERTED:
+            with self.subTest(registry=class_name):
+                registry = getattr(importlib.import_module(module_name), class_name)
+                value = _unused_value(registry)
+
+                member = registry._unregistered_member(value, 'unit_test_absent')
+
+                self.assertEqual(member.value, value)
+                self.assertEqual(member.name, 'unit_test_absent')
+                self.assertNotIn(value, registry._value2member_map_)
+                self.assertNotIn('unit_test_absent', registry.__members__)
+
+    def test_str_valued_registries(self) -> None:
+        """``cls._member_type_.__new__`` is what generalises this beyond ``int``
+        -- the generated fragment it replaces hardcoded ``int.__new__``, so the
+        five :class:`~aenum.StrEnum` registries could not have shared it."""
+        class _Str(EnumRegistry, StrEnum):
+            known = 'known'
+
+        member = _Str._unregistered_member('absent', 'unit_test_absent')
+
+        self.assertEqual(member.value, 'absent')
+        self.assertEqual(str(member), 'absent')
+        self.assertEqual(member.name, 'unit_test_absent')
+        self.assertNotIn('absent', _Str._value2member_map_)
+        self.assertNotIn('unit_test_absent', _Str.__members__)
+
+
+if __name__ == '__main__':
+    unittest.main()
