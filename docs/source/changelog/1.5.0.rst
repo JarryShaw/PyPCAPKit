@@ -2876,6 +2876,19 @@ since -- reaching #805 by the entries below.
   and ``pcapkit/protocols/application/ngap.py`` -- all deferred to a later
   tier; ``register``/``register_alias`` account for a further 106 sites that
   are the by-design caller-named path and stay untouched (#838).
+* **Changed** -- ``engine='pyshark'`` had no CI job driving it through a real
+  ``tshark``-parsed capture. ``pypcap-parity`` installs ``pyshark`` but not
+  ``tshark`` (0 hits for ``tshark`` anywhere in that job's log), so
+  ``PyShark.unsupported_reason()`` declined the engine, the extractor fell back
+  to the built-in parser, and the one real-extraction assertion,
+  ``assertGreater(extractor.length, 0)``, passed against the fallback's output
+  -- a vacuous pass invisible in every skip count. ``pypcap-parity`` now
+  installs ``tshark`` with the same debconf pre-seed ``engine-tests`` already
+  carries, and the test proves which engine actually ran: no ``EngineWarning``
+  fires, ``extractor._exnam == 'pyshark'`` and the engine is a ``PyShark``
+  instance -- the same idiom the PyPCAP parity test already used. Only
+  ``tests/integration/test_engine_runtime.py`` and ``test_engine_parity.py``
+  change; the length assertion itself is kept, not weakened (#846).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
