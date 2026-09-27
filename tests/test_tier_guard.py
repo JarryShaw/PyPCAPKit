@@ -1300,24 +1300,30 @@ class DependencyGateSelectionTests(unittest.TestCase):
                 self.assertEqual(section, job_section(text, name))
 
     def test_each_job_selection_is_one_of_the_three_recognised_shapes(self) -> None:
-        """A fourth shape has to fail here rather than be guessed at.
+        """A fifth shape has to fail here rather than be guessed at.
 
-        The three are the three the workflow uses: subtract ``--ignore`` flags
-        from the whole suite (``test``), ask
-        :func:`~tests._tiers.fixture_tier_paths` (``integration``), or pass no
-        selection at all (``gate``). A new job selecting some fourth way would
-        otherwise be classified ``'whole-suite'`` by the fallback and credited
-        with reaching gates it does not run.
+        Four are recognised: subtract ``--ignore`` flags from the whole suite
+        (``test``), ask :func:`~tests._tiers.fixture_tier_paths`
+        (``integration``), pass no selection at all (``gate``), or name
+        literal test-file paths (``engine-tests``, one :class:`Job` per
+        ``matrix.engine`` cell, #849). A new job selecting some fifth way
+        would otherwise be classified ``'whole-suite'`` by the fallback and
+        credited with reaching gates it does not run.
 
         """
         for job in _dependency_gates.pytest_jobs():
             with self.subTest(job=job.name):
-                self.assertIn(job.selection, ('ignore', 'fixture-tier', 'whole-suite'))
+                self.assertIn(job.selection, ('ignore', 'fixture-tier', 'whole-suite', 'explicit'))
 
-        selections = {job.name: job.selection for job in _dependency_gates.pytest_jobs()}
-        self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
-                                      'gate': 'whole-suite', 'engine-tests': 'ignore',
-                                      'pypcap-parity': 'fixture-tier'})
+        # engine-tests yields several Job entries sharing that one name --
+        # one per matrix.engine cell, all ``'explicit'`` -- so this collects
+        # the *set* of selections seen per name rather than assuming one.
+        selections = {}  # type: dict[str, set[str]]
+        for job in _dependency_gates.pytest_jobs():
+            selections.setdefault(job.name, set()).add(job.selection)
+        self.assertEqual(selections, {'test': {'ignore'}, 'integration': {'fixture-tier'},
+                                      'gate': {'whole-suite'}, 'engine-tests': {'explicit'},
+                                      'pypcap-parity': {'fixture-tier'}})
 
     def test_the_selection_is_read_off_the_step_that_runs_pytest(self) -> None:
         """Not off the job, whose comments contradict it.
@@ -1342,11 +1348,16 @@ class DependencyGateSelectionTests(unittest.TestCase):
         """The step is found by what it runs, not by what it is called."""
         doctored = doctored_workflow(self, '- name: Run unit tests',
                                      '- name: Execute the unit tier')
-        selections = {job.name: job.selection
-                      for job in _dependency_gates.pytest_jobs(doctored)}
-        self.assertEqual(selections, {'test': 'ignore', 'integration': 'fixture-tier',
-                                      'gate': 'whole-suite', 'engine-tests': 'ignore',
-                                      'pypcap-parity': 'fixture-tier'})
+        # engine-tests yields one Job per matrix.engine cell (all
+        # ``'explicit'``, and unaffected by this doctoring since its own
+        # pytest step -- "Run this engine's test suite" -- is not the one
+        # renamed here), so de-duplicate to the set of selections per name.
+        selections = {}  # type: dict[str, set[str]]
+        for job in _dependency_gates.pytest_jobs(doctored):
+            selections.setdefault(job.name, set()).add(job.selection)
+        self.assertEqual(selections, {'test': {'ignore'}, 'integration': {'fixture-tier'},
+                                      'gate': {'whole-suite'}, 'engine-tests': {'explicit'},
+                                      'pypcap-parity': {'fixture-tier'}})
 
     def test_two_install_lines_in_one_pytest_job_is_refused(self) -> None:
         """Ambiguity fails loudly instead of the first line winning."""
@@ -1582,17 +1593,22 @@ class DependencyGateCoverageTests(unittest.TestCase):
         self.assertEqual(_dependency_gates.extras_providing('mypy'), frozenset())
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
-        for job in ('test', 'engine-tests', 'gate'):
+        for job in ('test', 'gate'):
             with self.subTest(reaches=job):
                 self.assertIn(('HAS_MYPY', job), gaps)
-        # Both select by fixture tier and never collect tests/vendor/ at all --
-        # the same reason they are absent from HAS_VENDOR_DEPS above.
-        for job in ('integration', 'pypcap-parity'):
+        # integration and pypcap-parity select by fixture tier and never
+        # collect tests/vendor/ at all -- the same reason they are absent from
+        # HAS_VENDOR_DEPS above. engine-tests (#849) no longer reaches it
+        # either: each matrix.engine cell now runs an explicit TEST_PATHS list
+        # and none of the six names tests/vendor/ -- see the HAS_MYPY
+        # exclusion's own reason for why that is a real, disclosed change
+        # rather than a mistake here.
+        for job in ('integration', 'pypcap-parity', 'engine-tests'):
             with self.subTest(does_not_reach=job):
                 self.assertNotIn(('HAS_MYPY', job), gaps)
 
         exclusion = _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS['HAS_MYPY']
-        self.assertEqual(set(exclusion.dark), {'test', 'engine-tests', 'gate'})
+        self.assertEqual(set(exclusion.dark), {'test', 'gate'})
 
     def test_the_isort_gate_is_visible_and_closed_by_the_test_extra(self) -> None:
         """#766: the same invisible shape as ``mypy``, resolved the opposite way.
@@ -1640,10 +1656,12 @@ class DependencyGateCoverageTests(unittest.TestCase):
         reaching = {job.name for job in _dependency_gates.pytest_jobs()
                     if _dependency_gates.job_reaches(job, gates[0])}
         self.assertEqual(
-            reaching, {'test', 'engine-tests', 'gate'},
-            'the two ignore-shape legs and the whole-suite one collect '
-            'tests/project/; integration and pypcap-parity select by fixture tier and '
-            'never reach it, the same reason they are absent from HAS_MYPY above')
+            reaching, {'test', 'gate'},
+            'the ignore-shape leg and the whole-suite one collect tests/project/; '
+            'integration and pypcap-parity select by fixture tier and never reach it, '
+            'the same reason they are absent from HAS_MYPY above. engine-tests (#849) '
+            'no longer reaches it either -- none of its six explicit TEST_PATHS lists '
+            'names tests/project/, the same change that dropped it out of HAS_MYPY above')
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
         for job in sorted(reaching):
@@ -1919,9 +1937,11 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             gaps = {(gap.flag, gap.job): gap
                     for gap in _dependency_gates.dependency_gate_gaps()}
 
+            # engine-tests (#849) no longer reaches tests/project/ at all -- see
+            # test_the_isort_gate_is_visible_and_closed_by_the_test_extra above.
             self.assertEqual(
                 sorted(job for (flag, job) in gaps if flag == 'HAS_ISORT'),
-                ['engine-tests', 'gate', 'test'])
+                ['gate', 'test'])
 
             gap = gaps[('HAS_ISORT', 'test')]
             self.assertEqual(gap.missing, ('isort',))
@@ -1938,7 +1958,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             'the exclusion list would swallow the gap this test relies on')
 
     def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
-        """#729's defect, restaged. Five jobs install ``DPKT``; all five go dark.
+        """#729's defect, restaged. Four jobs install ``DPKT`` via a comma list; all four go dark.
 
         #751 added ``engine-tests`` and ``pypcap-parity`` to the three this test
         used to name, each carrying its own ``DPKT`` for the same reason as the
@@ -1947,14 +1967,22 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         ``HAS_RUNTIME``, ``pypcap-parity`` for
         :file:`examples/generators/make_samples.py`.
 
+        #849's rebuild moves engine-tests off the shared comma-joined extras
+        list this test doctors: DPKT is now chosen per matrix.engine cell by a
+        ``case "$ENGINE" in DPKT) EXTRA=DPKT; ... esac`` block, so the literal
+        ``'DPKT,'``/``',DPKT'`` substitution below no longer touches it at all
+        -- and, separately, engine-tests no longer reaches
+        test_runtime_engines.py regardless (see the HAS_RUNTIME exclusion),
+        so there is no longer a DPKT-via-engine-tests gap for this doctoring
+        to reopen. Four jobs, not five.
+
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
         doctored = doctored_workflow(self, text, text.replace('DPKT,', '').replace(',DPKT', ''))
 
         gaps = {gap.job: gap for gap in _dependency_gates.dependency_gate_gaps(doctored)
                 if gap.flag == 'HAS_DPKT'}
-        self.assertEqual(sorted(gaps),
-                         ['engine-tests', 'gate', 'integration', 'pypcap-parity', 'test'])
+        self.assertEqual(sorted(gaps), ['gate', 'integration', 'pypcap-parity', 'test'])
         for job, gap in sorted(gaps.items()):
             with self.subTest(job=job):
                 self.assertEqual(gap.missing, ('dpkt',))
@@ -2022,19 +2050,21 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
     def test_swapping_engine_tests_to_pypcap_is_an_ambiguous_satisfaction(self) -> None:
         """#762, direction two: the wrong half of the ``pcap._pcap`` ambiguity.
 
-        ``engine-tests`` swapped from ``PCAP_CT`` to ``PyPCAP`` still reaches the
-        1 ``HAS_PCAP_CT`` gate and still reads as satisfied to
-        :func:`~tests._dependency_gates.dependency_gate_gaps`, for the mirrored
-        reason: ``extras_providing`` truncates ``pcap._pcap`` to ``pcap`` before
-        its lookup, per this module's own docstring.
+        ``engine-tests``'s ``PCAP_CT`` cell (#849: a ``case "$ENGINE" in ...``
+        block chooses the extra, not a shared comma-joined install line)
+        swapped to install ``PyPCAP`` instead still reaches the 1
+        ``HAS_PCAP_CT`` gate -- its ``TEST_PATHS`` mapping is keyed on the
+        engine name ``'PCAP_CT'``, untouched by this doctoring -- and still
+        reads as satisfied to
+        :func:`~tests._dependency_gates.dependency_gate_gaps`, for the
+        mirrored reason: ``extras_providing`` truncates ``pcap._pcap`` to
+        ``pcap`` before its lookup, per this module's own docstring.
 
         """
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
-            "PCAP_CT,vendor]'",
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
-            "PyPCAP,vendor]'",
+            'PCAP_CT) EXTRA=PCAP_CT;',
+            'PCAP_CT) EXTRA=PyPCAP;',
         )
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
@@ -2102,10 +2132,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         )
         doctored_engine_tests = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
-            "PCAP_CT,vendor]'",
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,Scapy,PyShark,PyPCAPFile,"
-            "PyPCAP,vendor]'",
+            'PCAP_CT) EXTRA=PCAP_CT;',
+            'PCAP_CT) EXTRA=PyPCAP;',
         )
 
         with self.subTest(mutation='flag_exclusions stubbed to report nothing'):
@@ -2182,6 +2210,125 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             findings = {(f.job, f.flag)
                        for f in _dependency_gates.ambiguous_satisfactions(doctored)}
         self.assertNotIn(('pypcap-parity', 'HAS_PYPCAP'), findings)
+
+    def test_deleting_an_engine_from_the_matrix_list_is_caught(self) -> None:
+        """#849's second cross-review, verbatim: ``_engine_matrix_variants`` never read ``engine:``.
+
+        Before this test's fix, the function built its :class:`Job` set purely from the
+        ``case "$ENGINE" in ...`` arms and never checked them against the ``engine:``
+        matrix list at all, so deleting ``- PyShark`` -- the ordinary way anyone retires a
+        cell -- left the case arms (still naming ``PyShark``) as the only source of truth.
+        Measured against the unfixed function: ``pytest_jobs`` raised nothing, the
+        returned :class:`Job` set still credited a ``PyShark`` engine-tests cell with
+        ``test_pyshark_engine.py``'s 3 ``HAS_PYSHARK`` methods, and
+        ``dependency_gate_gaps`` reported no ``('HAS_PYSHARK', 'engine-tests')`` gap --
+        green, while the retired cell no longer runs in CI at all. This is the hard
+        acceptance criterion: this exact doctoring must raise :class:`AssertionError` now.
+
+        """
+        doctored = doctored_workflow(self, '          - PyShark\n', '')
+
+        with self.assertRaises(AssertionError) as ctx:
+            _dependency_gates.pytest_jobs(doctored)
+
+        message = str(ctx.exception)
+        self.assertIn("engine-tests", message)
+        self.assertIn('PyShark', message)
+
+    def test_a_second_baseline_install_line_is_caught(self) -> None:
+        """The pre-existing ``base_installs`` branch, exercised for the first time.
+
+        Grepping this file for ``_engine_matrix_variants`` before this change returned
+        nothing at all -- none of this function's ``raise AssertionError`` branches had a
+        test, this guard's own docstring notwithstanding ("the only honest way to show a
+        guard works is to break the thing it guards and watch it fire"). Doctoring in a
+        second literal ``pip install -e '.[...]'`` baseline line makes the count the
+        function checks for (exactly one) come out to two.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            "python -m pip install -e '.[test]'",
+            "python -m pip install -e '.[test]'\n          python -m pip install -e '.[test]'",
+        )
+
+        with self.assertRaises(AssertionError) as ctx:
+            _dependency_gates.pytest_jobs(doctored)
+
+        message = str(ctx.exception)
+        self.assertIn('engine-tests', message)
+        self.assertIn('2', message)
+
+    def test_deleting_every_test_paths_case_arm_is_caught(self) -> None:
+        """The pre-existing ``engine_paths`` empty branch, exercised for the first time.
+
+        Without a single ``ENGINE) TEST_PATHS="..."`` arm left, this guard has nothing to
+        build a :class:`Job` from at all and must say so rather than returning an empty,
+        silently-vacuous result.
+
+        """
+        text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
+        # Two `case "$ENGINE" in ... esac` blocks exist in this job -- the install step's
+        # (`EXTRA=` arms) and the pytest step's (`TEST_PATHS=` arms) -- so finding the
+        # first match is not enough; pick the one that actually carries `TEST_PATHS=`.
+        matches = [m for m in re.finditer(r'(?m)^( +)case "\$ENGINE" in\n(?:.*\n)*?\1esac\n', text)
+                  if 'TEST_PATHS=' in m.group(0)]
+        self.assertEqual(len(matches), 1, 'expected exactly one TEST_PATHS case block to doctor')
+        match = matches[0]
+        block = match.group(0)
+        indent = match.group(1)
+        doctored = doctored_workflow(self, block, f'{indent}case "$ENGINE" in\n{indent}esac\n')
+
+        with self.assertRaises(AssertionError) as ctx:
+            _dependency_gates.pytest_jobs(doctored)
+
+        message = str(ctx.exception)
+        self.assertIn('engine-tests', message)
+        self.assertIn('TEST_PATHS', message)
+
+    def test_a_test_paths_arm_with_no_matching_extra_arm_is_caught(self) -> None:
+        """The pre-existing per-engine ``extra is None`` branch, exercised for the first time.
+
+        Commenting out one engine's ``EXTRA=`` arm -- rather than renaming it, which the
+        new matrix-list-vs-case-arms equality check above would catch first, for a
+        different reason -- leaves DPKT declared in the ``engine:`` list and still
+        present in ``engine_paths`` (so the equality check sees the same six engines on
+        both sides and stays quiet), but with no ``EXTRA=`` arm of its own: exactly the
+        shape the per-engine loop's own check exists for.
+
+        """
+        doctored = doctored_workflow(self, 'DPKT) EXTRA=DPKT;', '# DPKT) EXTRA=DPKT;')
+
+        with self.assertRaises(AssertionError) as ctx:
+            _dependency_gates.pytest_jobs(doctored)
+
+        message = str(ctx.exception)
+        self.assertIn('engine-tests', message)
+        self.assertIn('DPKT', message)
+
+    def test_a_commented_out_test_paths_arm_does_not_silently_win(self) -> None:
+        """The relocated blocker the second cross-review flagged, not just commented on.
+
+        ``dict()`` over ``re.findall()`` is last-wins, so a *commented-out*
+        ``ENGINE) TEST_PATHS="..."`` arm placed after the live one would silently
+        override it -- the exact comment-vs-code confusion #849's first cross-review
+        found in this module's ``pip install -e`` scan, relocated into this function's
+        case-arm scan instead. Stripping ``#``-prefixed lines before every regex in
+        :func:`~tests._dependency_gates._engine_matrix_variants` is what keeps a
+        commented-out arm from being read as a live one.
+
+        """
+        doctored = doctored_workflow(
+            self,
+            'DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;',
+            'DPKT) TEST_PATHS="tests/toolkit/test_dpkt_unit.py" ;;\n'
+            '            # DPKT) TEST_PATHS="tests/toolkit/test_pypcap_unit.py" ;;',
+        )
+
+        jobs = _dependency_gates.pytest_jobs(doctored)
+        dpkt_jobs = [job for job in jobs if job.name == 'engine-tests' and 'DPKT' in job.extras]
+        self.assertEqual(len(dpkt_jobs), 1)
+        self.assertEqual(dpkt_jobs[0].paths, ('tests/toolkit/test_dpkt_unit.py',))
 
     def test_the_undoctored_workflow_produces_no_unexplained_gap(self) -> None:
         """The control: the tests above fail for the doctoring, not by default."""

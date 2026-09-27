@@ -313,8 +313,11 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'the runner at run time. A green install would therefore not imply the '
             'engine can start.\n\n'
             "#751's dedicated engine-tests job now takes this: it installs PCAP_CT and a "
-            'system libpcap (apt-get libpcap0.8) across the full 3.10-3.14 matrix, kept '
-            'in a venv of its own since pypcap and pcap-ct both install a top-level '
+            'system libpcap (apt-get libpcap0.8) on its own PCAP_CT matrix cell, across '
+            'the same 3.10-3.14 (plus non-blocking 3.15) matrix -- rebuilt per #849 as one '
+            'venv per (Python version, engine) pair rather than the one shared venv #751 '
+            'first landed, so PCAP_CT is kept apart from PyPCAP by construction now, not '
+            'merely by convention -- since pypcap and pcap-ct both install a top-level '
             '``pcap`` module and cannot coexist -- see '
             "pcapkit/foundation/engines/_pcap_backend.py's own docstring. test and gate "
             "stay dark on purpose, per #751's ruling that per-engine coverage gets its "
@@ -334,17 +337,27 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'model markers -- while 3.12, 3.13 and 3.14 went on skipping: two legs of '
             'real coverage bought with exactly the false confidence #745 exists to '
             "remove.\n\n"
-            "#751's ruling was to take that trade: engine-tests now installs PyPCAPFile "
-            "across the full 3.10-3.14 matrix, covering the 9 HAS_PYPCAPFILE methods in "
-            'test_pypcapfile_unit.py on the 3.10/3.11 legs where the marker lets it '
-            'resolve, and pypcap-parity does the same for the other 6 in '
-            'test_new_engine_parity_runtime.py. This guard still cannot see that only '
-            'two of five legs run for real -- it does not evaluate markers, by this '
-            "module's own docstring -- so that partial coverage is recorded here in "
-            'prose rather than modelled: the alternative, teaching this guard markers, '
-            'is out of scope for a workflow-only change. test, integration and gate stay '
-            "dark on purpose, per #751's ruling that per-engine coverage gets its own "
-            'job rather than one more install line on any of the three.'
+            "#751's ruling was to take that trade: engine-tests installs PyPCAPFile on its "
+            'own PyPCAPFile cell, covering the 9 HAS_PYPCAPFILE methods in '
+            'test_pypcapfile_unit.py (plus test_pypcapfile_engine.py) genuinely on every '
+            "one of the matrix's Python versions rather than only two of five -- #849's "
+            "rebuild is exactly what closes the partial-coverage problem this paragraph "
+            'used to describe: on 3.10/3.11 the cell installs the ordinary extra, and on '
+            "3.12-3.15, where pyproject.toml's marker would resolve it to nothing, the "
+            "install step installs the raw pypcapfile distribution instead (expect: "
+            "unsupported), deliberately bypassing the marker so the tests run for real and "
+            "assert the engine's own version-aware decline (see this workflow's own "
+            'engine-tests comment). pypcap-parity does the same for the other 6 methods in '
+            'test_new_engine_parity_runtime.py, on the two legs its own marker allows. This '
+            'guard still does not evaluate markers by itself -- it takes selection and '
+            'extras from the YAML, not from what a given cell resolves to -- but for this '
+            'flag the workflow now does the marker-bypassing work directly, so the guard '
+            "\"models markers\" caveat this paragraph used to carry no longer describes a "
+            'real gap for PyPCAPFile specifically; it stays true in general (see this '
+            "module's docstring) for any extra whose own marker is left unbypassed. test, "
+            "integration and gate stay dark on purpose, per #751's ruling that per-engine "
+            'coverage gets its own job rather than one more install line on any of the '
+            'three.'
         ),
     ),
     'HAS_VENDOR_DEPS': Exclusion(
@@ -358,31 +371,35 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'extra since #507 and are installed on every job, so these classes are one '
             '*requirement extra* short -- html5lib, which only beautifulsoup4[html5lib] '
             'provides, i.e. the vendor and all extras.\n\n'
-            'engine-tests (#751) is that leg. It already mirrors test\'s ignore-shape '
-            'exactly (same --ignore flags), so it already reached these unit-tier '
-            'HAS_VENDOR_DEPS gates; adding vendor to its install line is what closes '
-            'them, and #738\'s own precedent for a job that "exists and reports" without '
-            "gating a merge -- 3.15 in python-compatibility.yml (b7f51401b) -- already "
-            'describes this job: "Engines Python X" has never been one of ruleset '
-            "23497679's 15 required checks, so it was already the non-blocking leg the "
-            'ruling asked for, and no new job was needed to get one. It is also the only '
-            '*per-pull-request* job with that property: gate reaches these gates too but '
-            "never runs on a pull request at all (only via a release's "
-            "gate-only: true call), and integration's fixture-tier selection never "
-            'reaches tests/vendor/ in the first place -- so engine-tests was the forced '
-            'choice, not merely a convenient one.\n\n'
+            'engine-tests (#751) used to be that leg: it mirrored test\'s ignore-shape '
+            'exactly (same --ignore flags) and carried vendor on its one shared install '
+            'line, so it reached and closed these unit-tier HAS_VENDOR_DEPS gates as a '
+            "side effect of installing everything together. #849's rebuild removes that "
+            'shared venv: each matrix.engine cell now installs only "test" plus its own '
+            'engine extra and runs only that engine\'s own explicit TEST_PATHS -- '
+            'tests/toolkit/test_dpkt_unit.py and five siblings, never tests/vendor/ -- so '
+            'no cell reaches these gates at all any more, let alone installs vendor for '
+            'them. This is not a *new* gap this guard reports, because '
+            ':func:`dependency_gate_gaps` only counts a job that reaches a gate without '
+            "installing what it needs; a job that no longer reaches the gate at all is "
+            'invisible to it either way, which is exactly the "silence is the failure '
+            'mode" problem this module\'s own docstring opens with. It is a real, '
+            'disclosed regression rather than a silent one: #849\'s own PR description '
+            "records vendor coverage as dropped, not restored, and worth its own issue. "
+            'test and gate stay dark for their own, unrelated reasons below; engine-tests '
+            'is simply no longer part of the answer for this flag.\n\n'
             'test and gate stay dark for different reasons, not the same one. test '
             'declines html5lib per the non-blocking-leg ruling itself -- that is the '
             'whole reason it is dark. gate is not part of the blocking matrix at all -- '
             "it only runs on the release path (workflow_call's gate-only: true), never "
-            'on a pull request -- so the ruling does not require it dark; nothing about '
-            '"non-blocking" would stop vendor being added there too. It stays dark on a '
-            'separate, substantive ground instead: by the time a commit reaches the '
-            'release path it has already run test, integration and engine-tests, and '
-            'engine-tests already carries vendor, so gate would be re-verifying coverage '
-            'that already ran rather than adding any. Gaining a network-and-parser '
-            'extra on the one job that gates an actual release, for coverage the release '
-            'path already has by the time it runs, is not worth the footprint.\n\n'
+            'on a pull request -- and now that engine-tests no longer carries vendor '
+            'either, no per-PR job does, so this flag\'s only per-PR-visible install '
+            'point is test\'s own decline above. gate could add vendor without '
+            'contradicting the "non-blocking" ruling, but doing so on the one job that '
+            'gates an actual release, for a network-and-parser extra whose own crawlers '
+            "#518 already documents as flaky, is not worth the footprint on its own -- "
+            "and it would not restore the per-PR coverage #849 removed regardless, since "
+            'gate never runs on a pull request at all.\n\n'
             'Worth recording since it bears on the ruling itself, though this exclusion '
             'is not the place to relitigate it: none of the 41 methods this closes make '
             'a live network call, though not for one reason across all four files. '
@@ -427,14 +444,35 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             "only where a caller passes gate-only: true -- the three Saturday schedules "
             '(deploy-pages, cron-vendor, cron-conda) and a v* release tag -- never on a '
             'pull request or a push to main. So no per-PR leg runs them at all.\n\n'
-            "#751's engine-tests job now installs Scapy across the full 3.10-3.14 "
-            'matrix, closing the "no per-PR leg" problem this exclusion used to '
-            'describe -- it reaches 10 of this guard\'s 14 HAS_SCAPY methods, the same '
-            'unit-tier subset #738 counted; the other 4 live in tests/integration/ or '
-            "match the *_runtime.py ignore-glob, already covered by Scapy on the "
-            "integration and gate jobs. test stays dark on purpose: the ruling on #751 "
-            'was a dedicated job precisely so test would not have to reconsider the '
-            'cost question it already answered.'
+            "#751's engine-tests job used to install Scapy across the full 3.10-3.14 "
+            'matrix and run it against the whole unit tier (same --ignore shape as '
+            'test), closing the "no per-PR leg" problem this exclusion used to describe '
+            "for all 10 of this guard's 14 unit-tier HAS_SCAPY methods at once.\n\n"
+            "#849's rebuild only partially keeps that closure. engine-tests's Scapy cell "
+            'now runs an explicit TEST_PATHS list -- tests/toolkit/test_scapy_unit.py, '
+            'tests/foundation/engines/test_scapy_engine.py and '
+            "tests/protocols/transport/test_sctp_unit.py -- which covers 8 of the 10 (5 "
+            '+ 2 + 1), but not the other 2, one each in test_core.py and test_misc.py: '
+            "those are simply not in that cell's path list, so no per-PR job reaches "
+            'them with Scapy installed any more -- the exact "no per-PR leg runs them '
+            'at all" state from before #751, reopened for those two. This is not '
+            'visible as a wider Gap here: :func:`dependency_gate_gaps` only reports a job '
+            'that reaches a gate without installing for it, and a job that no longer '
+            "reaches the gate at all is invisible to it either way, by construction -- "
+            "which is why this paragraph exists to say so in prose rather than leave it "
+            "to the tool. test_sctp_unit.py's one method was added to the Scapy cell's "
+            'TEST_PATHS at zero new-dark-flag cost: unlike test_core.py and '
+            'test_misc.py, it carries no HAS_DPKT-gated tests of its own, so restoring '
+            'it traded nothing away. test_core.py and test_misc.py each still carry '
+            "their own HAS_DPKT-gated tests (see the test job's own install-step "
+            "comment), and adding them here without DPKT would trade one dark flag for "
+            'another on a cell that installs neither -- disclosed rather than '
+            'restored, a decision worth its own review rather than folding into a '
+            'workflow-only CR. The other 4 of the 14 live in '
+            'tests/integration/ or match the *_runtime.py ignore-glob, unaffected by any '
+            'of this, already covered by Scapy on the integration and gate jobs. test '
+            'stays dark on purpose: the ruling on #751 was a dedicated job precisely so '
+            'test would not have to reconsider the cost question it already answered.'
         ),
     ),
     'HAS_PYSHARK': Exclusion(
@@ -458,11 +496,21 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'precedence can make disagree with -- matching what its sibling '
             'test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous already '
             'used, so the file no longer disagrees with itself about whether tshark may '
-            'be present. engine-tests now installs both the distribution and tshark '
-            '(apt-get, with a debconf pre-seed so the postinst prompt does not block) '
-            'across the full 3.10-3.14 matrix, closing the test-job gap this exclusion '
-            "used to describe. integration and gate stay dark on purpose, per #751's "
-            'ruling that per-engine coverage gets its own job.'
+            'be present. engine-tests installs both the distribution and tshark (apt-get, '
+            'with a debconf pre-seed so the postinst prompt does not block) on its own '
+            'PyShark cell, and that cell\'s explicit TEST_PATHS (#849) -- '
+            'tests/toolkit/test_pyshark_unit.py (0 of the 4; it carries no HAS_PYSHARK '
+            'gate of its own, only its DPKT/PyPCAPFile/etc. siblings do) and '
+            'tests/foundation/engines/test_pyshark_engine.py (the other 3) -- reaches 3 '
+            'of the 4 HAS_PYSHARK methods. The fourth, '
+            'tests/integration/test_engine_runtime.py:70\'s '
+            'test_pyshark_engine_is_refused_before_asyncio_can_break, is integration-tier '
+            "and outside any engine-tests cell's reach -- it stays dark on the integration "
+            'job exactly as recorded above, unaffected by any of this. So the rebuild '
+            "from one shared ignore-shape venv to one venv per engine leaves this flag's "
+            "closure unchanged, closing the test-job gap this exclusion used to describe "
+            "for those 3. integration and gate stay dark on purpose, per #751's ruling "
+            'that per-engine coverage gets its own job.'
         ),
     ),
     'HAS_RUNTIME': Exclusion(
@@ -481,15 +529,25 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             "module #751 did not otherwise need to change, and this guard does not "
             'care what a flag is named, only whether the job that reaches it installs '
             'what it asks for.\n\n'
-            "#751's engine-tests job installs DPKT, Scapy and PyShark together, closing "
-            "this gap as a side effect of the per-engine extras rather than a separate "
-            'install line: all 5 methods run wherever engine-tests does. test and gate '
-            'stay dark on purpose, for the same reason HAS_SCAPY and HAS_PYSHARK above '
-            'do.'
+            "#751's engine-tests job used to install DPKT, Scapy and PyShark together in "
+            "one shared venv, closing this gap as a side effect: all 5 methods ran "
+            "wherever engine-tests did. #849's rebuild removes that shared venv -- each "
+            'matrix.engine cell now installs exactly one engine\'s own extra, so no cell '
+            'installs all three together any more, and none of the six explicit '
+            'TEST_PATHS lists names test_runtime_engines.py at all, so engine-tests no '
+            'longer reaches this gate either. Like the HAS_SCAPY and HAS_VENDOR_DEPS '
+            'entries above, this does not surface as a wider Gap -- a job that stops '
+            "reaching a gate is invisible to :func:`dependency_gate_gaps` the same way a "
+            'job that never reached it would be -- so it is recorded here in prose. '
+            "Disclosed, not silent: #849's own PR description names this exact loss "
+            '("the multi-engine HAS_RUNTIME gate ... needs DPKT+Scapy+PyShark together") '
+            'and defers restoring it to a follow-up issue rather than reopening this '
+            'workflow-only change to add a seventh venv shape. test and gate stay dark on '
+            'purpose, for the same reason HAS_SCAPY and HAS_PYSHARK above do.'
         ),
     ),
     'HAS_MYPY': Exclusion(
-        dark={'test': ('mypy',), 'engine-tests': ('mypy',), 'gate': ('mypy',)},
+        dark={'test': ('mypy',), 'gate': ('mypy',)},
         reason=(
             'The one entry here that is not a missing *runtime* dependency, and the only '
             'one whose fix is not an install line. mypy is a type checker: the single '
@@ -526,13 +584,21 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'This entry is therefore narrow: it is not a precedent that a gate on a lint '
             'tool gets excluded, only that a gate duplicating an existing lint.yml check '
             'does.\n\n'
-            'test, engine-tests and gate are exactly the three jobs whose selection '
-            'reaches tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the two '
-            'ignore-shape legs and the whole-suite one. integration and pypcap-parity '
-            'select by fixture tier and never collect that module, which is why they are '
-            'not listed, the same reason they are absent from HAS_VENDOR_DEPS above. If a '
-            'lint extra is ever declared in pyproject.toml, the right change is to delete '
-            'this entry and let the gap close on its own rather than to widen it.'
+            'test and gate are exactly the two jobs whose selection reaches '
+            'tests/vendor/test_vendor_reg_apptype_generator_unit.py -- the ignore-shape '
+            'leg and the whole-suite one. engine-tests used to be a third, back when its '
+            "one shared venv mirrored test's ignore-shape exactly; #849's rebuild to one "
+            "explicit TEST_PATHS list per matrix.engine cell means none of the six now "
+            'names tests/vendor/ at all, so engine-tests no longer reaches this gate and '
+            'has dropped out of this entry\'s dark dict accordingly -- not widened or '
+            'narrowed against a gap that is still there, but genuinely gone, the case '
+            ':meth:`~tests.test_tier_guard.DependencyGateCoverageTests\
+.test_each_exclusion_still_describes_a_gap_that_is_really_there` exists to catch if this '
+            'entry is not kept in step with it. integration and pypcap-parity select by '
+            'fixture tier and never collect that module, which is why they are not listed, '
+            'the same reason they are absent from HAS_VENDOR_DEPS above. If a lint extra '
+            'is ever declared in pyproject.toml, the right change is to delete this entry '
+            'and let the gap close on its own rather than to widen it.'
         ),
     ),
 }
@@ -569,7 +635,20 @@ class Gate(NamedTuple):
 
 
 class Job(NamedTuple):
-    """A job of :data:`WORKFLOW` that runs :program:`pytest`."""
+    """A job of :data:`WORKFLOW` that runs :program:`pytest`.
+
+    Normally one :class:`Job` per YAML job -- but ``engine-tests`` (#849) is
+    not one static install line and one static selection: each
+    ``matrix.engine`` cell installs a different extra and runs a different,
+    explicit list of test files, so :func:`pytest_jobs` yields one
+    :class:`Job` per engine for it, all sharing the one YAML job ``name``.
+    That is deliberate rather than an oddity to special-case away:
+    :func:`dependency_gate_gaps` aggregates by ``(flag, job.name)``, and a gate
+    reached by *any* of a job's per-engine variants is exactly what "this job
+    reaches this gate" has to mean once one job's cells no longer all install
+    and select the same thing.
+
+    """
 
     #: Job name as the workflow spells it.
     name: 'str'
@@ -578,8 +657,14 @@ class Job(NamedTuple):
     #: How the job selects tests: ``'fixture-tier'`` when it asks
     #: :func:`~tests._tiers.fixture_tier_paths` for the selection,
     #: ``'ignore'`` when it subtracts ``--ignore`` flags from the whole suite,
-    #: ``'whole-suite'`` when it passes no selection at all.
+    #: ``'whole-suite'`` when it passes no selection at all, ``'explicit'``
+    #: when it names literal test-file paths (see :attr:`paths`).
     selection: 'str'
+    #: The literal test-file paths named by an ``'explicit'`` selection, empty
+    #: for every other shape. Compared to :class:`Gate`.\ ``module`` by exact
+    #: string equality -- unlike ``'fixture-tier'``, there is no directory or
+    #: node-ID form here, because that is not the shape ``TEST_PATHS`` takes.
+    paths: 'tuple[str, ...]' = ()
 
 
 class Gap(NamedTuple):
@@ -1204,6 +1289,106 @@ def job_sections(text: 'str') -> 'dict[str, str]':
     return sections
 
 
+def _engine_matrix_variants(name: 'str', section: 'str') -> 'Optional[tuple[Job, ...]]':
+    """One :class:`Job` per ``matrix.engine`` cell, for a job shaped like ``engine-tests``.
+
+    Returns :data:`None` when ``section`` shows no such structure, so
+    :func:`pytest_jobs`'s caller falls back to its ordinary one-install-line
+    reading. Detected on ``matrix.engine`` appearing at all, rather than on the
+    job's name: this guard finds things by what a section *does*, the same
+    rule :func:`pytest_jobs` already applies to the step that runs
+    :program:`pytest`.
+
+    ``engine-tests`` (#849) installs a shared baseline (``pip install -e
+    '.[test]'``) and then, per cell, one more extra chosen by a ``case
+    "$ENGINE" in ...`` block assigning ``EXTRA=``, and runs a *different*,
+    explicit ``TEST_PATHS=`` list chosen by an identically-shaped ``case``
+    in its pytest step. Modelling that as one :class:`Job` with every engine's
+    extra and a ``'whole-suite'`` selection -- the reading a single static
+    install-line/selection pair would produce -- is exactly the false
+    confidence #745 exists to catch: it would credit the DPKT cell with
+    PyPCAP's install and credit every cell with reaching every other engine's
+    tests. One :class:`Job` per engine, sharing this job's ``name``, is what
+    :func:`dependency_gate_gaps`'s ``(flag, job.name)`` aggregation expects --
+    see :class:`Job`'s own docstring.
+
+    Every regex below runs against a comment-stripped copy of ``section``
+    (bare ``#``-prefixed lines dropped), not ``section`` itself. Without that,
+    a *commented-out* ``ENGINE) TEST_PATHS="..."`` arm placed after the live
+    one would silently win a later cell's entry -- ``dict()`` over
+    ``re.findall()`` is last-wins -- which is the same comment-vs-code
+    confusion #849's own cross-review found in this file's ``pip install -e``
+    scan, relocated into this function's case-arm scan instead.
+
+    This also, separately, asserts that the workflow's own ``engine:`` matrix
+    list agrees with the ``case "$ENGINE" in ...`` arms it is supposed to
+    describe: earlier versions of this function built :class:`Job` entries
+    purely from the case arms and never looked at the ``engine:`` list at
+    all, so deleting a cell from that list (the ordinary way to retire one)
+    left this guard still crediting the retired engine with coverage it no
+    longer has, silently.
+
+    """
+    code = '\n'.join(line for line in section.splitlines() if not line.strip().startswith('#'))
+
+    if 'matrix.engine' not in code:
+        return None
+
+    declared_match = re.search(r'(?m)^[ \t]*engine:\n((?:[ \t]*-[ \t]*\w+[ \t]*\n)+)', code)
+    if declared_match is None:
+        raise AssertionError(
+            f'the {name!r} job varies by matrix.engine but this guard found no '
+            f"'engine:' matrix list of bare '- NAME' entries, and cannot tell which "
+            f'engines the matrix itself declares'
+        )
+    declared_engines = frozenset(re.findall(r'-[ \t]*(\w+)', declared_match.group(1)))
+
+    base_installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", code)
+    if len(base_installs) != 1:
+        raise AssertionError(
+            f'the {name!r} job varies by matrix.engine but has {len(base_installs)} '
+            f"baseline \"pip install -e '.[...]'\" lines, and this guard cannot tell "
+            f'which extras every cell would always have'
+        )
+    base_extras = tuple(extra.strip() for extra in base_installs[0].split(','))
+
+    engine_extra = dict(re.findall(r'(\w+)\)\s*EXTRA=(\w+);', code))
+    engine_paths = {
+        engine: tuple(paths.split())
+        for engine, paths in re.findall(r'(\w+)\)\s*TEST_PATHS="([^"]+)"', code)
+    }
+    if not engine_paths:
+        raise AssertionError(
+            f'the {name!r} job varies by matrix.engine but this guard found no '
+            f'\'ENGINE) TEST_PATHS="..."\' case mapping engine names to test paths, and '
+            f'cannot tell what any cell runs'
+        )
+
+    case_engines = frozenset(engine_paths) | frozenset(engine_extra)
+    if declared_engines != case_engines:
+        only_declared = sorted(declared_engines - case_engines)
+        only_case = sorted(case_engines - declared_engines)
+        raise AssertionError(
+            f'the {name!r} job\'s matrix.engine list ({sorted(declared_engines)}) does not '
+            f'match the engines its \'case "$ENGINE" in ...\' arms cover '
+            f'({sorted(case_engines)}): {only_declared} have no case arm, '
+            f'{only_case} have a case arm but are not in the matrix list -- this guard '
+            f'cannot tell which of the two is stale'
+        )
+
+    variants = []  # type: list[Job]
+    for engine, paths in engine_paths.items():
+        extra = engine_extra.get(engine)
+        if extra is None:
+            raise AssertionError(
+                f'the {name!r} job runs {engine!r}\'s tests ({" ".join(paths)}) but this '
+                f"guard found no matching 'ENGINE) EXTRA=...' case for it, and cannot tell "
+                f'what that cell installs'
+            )
+        variants.append(Job(name, base_extras + (extra,), 'explicit', paths))
+    return tuple(variants)
+
+
 def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
     """The jobs of ``workflow`` that run :program:`pytest`.
 
@@ -1223,6 +1408,11 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
     jobs = []  # type: list[Job]
     for name, section in job_sections(text).items():
         if 'python -m pytest' not in section:
+            continue
+
+        variants = _engine_matrix_variants(name, section)
+        if variants is not None:
+            jobs.extend(variants)
             continue
 
         installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", section)
@@ -1264,7 +1454,7 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
 def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     """Whether ``job``'s selection would collect the tests ``gate`` guards.
 
-    The three selection shapes are answered three ways, and none of them
+    The four selection shapes are answered four ways, and none of them
     reimplements the workflow's own list:
 
     * ``'whole-suite'`` reaches everything under :file:`tests/`.
@@ -1273,6 +1463,9 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
 .test_ignore_flags_match_the_fixture_tier_constants`
       is what keeps that equivalence true.
+    * ``'explicit'`` is exact membership in :attr:`Job.paths` -- the literal
+      ``TEST_PATHS`` list a ``matrix.engine`` cell of ``engine-tests`` (#849)
+      runs, at file granularity (that job names whole files, never node IDs).
     * ``'fixture-tier'`` is whatever
       :func:`~tests._tiers.fixture_tier_paths` returns, which is what the job
       itself runs. Its node-ID entries are honoured at method granularity: a
@@ -1294,6 +1487,8 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
         return True
     if job.selection == 'ignore':
         return _tiers.is_unit_tier(gate.module)
+    if job.selection == 'explicit':
+        return gate.module in job.paths
 
     for entry in _tiers.fixture_tier_paths():
         module, _, scope = entry.partition('::')
