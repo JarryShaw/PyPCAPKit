@@ -2889,6 +2889,24 @@ since -- reaching #805 by the entries below.
   instance -- the same idiom the PyPCAP parity test already used. Only
   ``tests/integration/test_engine_runtime.py`` and ``test_engine_parity.py``
   change; the length assertion itself is kept, not weakened (#846).
+* **Fixed** -- **a breaking change to** ``pcapkit.const.ipx.socket.Socket``'s
+  ``_missing_``: its five archived range branches were tested in table order,
+  and three were strict subsets of a range tested earlier --
+  ``(0x0020, 0x003F)`` after ``(0x0001, 0x0BB8)``, and both
+  ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` after ``(0x0BB9, 0xFFFF)`` --
+  so they never fired. Fixed in the generator,
+  ``pcapkit/vendor/ipx/socket.py``, which now lists each subset range ahead of
+  the range containing it; ``pcapkit/const/ipx/socket.py`` changes only as the
+  regenerated, byte-identical consequence. **36891 of the 65521
+  ``_missing_``-resolved values (56.3%) change name** -- 32 from
+  ``Registered by Xerox`` to ``Experimental``, 4095 from
+  ``Dynamically Assigned`` to ``Dynamically Assigned Socket Numbers`` and 32764
+  from ``Dynamically Assigned`` to ``Statically Assigned Socket Numbers``. No
+  defined member changes and every value still resolves; the shift is entirely
+  in which archived row's name a previously-shadowed value receives. The prior
+  tests had pinned the shadowing as intended behaviour, with comments reading
+  ``# masks 'Experimental'``; those assertions are corrected here rather than
+  dropped, and a new test pins all three ranges as reachable (#847).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
