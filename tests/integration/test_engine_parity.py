@@ -5,9 +5,11 @@ Translates :file:`examples/legacy_smoke/test_engine.py`, which ran the same
 capture through each engine and wrote four reports nobody compared, into
 assertions that the engines agree.
 
-``pyshark`` is left out on purpose. It needs :program:`tshark`, which is not
-installed here, and on Python 3.14 it fails inside its own
-``get_event_loop()`` before it reads a byte;
+``pyshark`` is left out on purpose -- not for want of :program:`tshark`, which
+the ``pypcap-parity`` job (the one whose selection collects this file) now
+installs, but because on Python 3.14 it fails inside its own
+``get_event_loop()`` before it reads a byte, so it cannot take part in a parity
+comparison that runs on every version;
 :file:`tests/integration/test_engine_runtime.py` already pins that. The
 ``pipeline`` and ``server`` engines are commented out in the original script and
 are not covered here either.

@@ -452,10 +452,25 @@ jobs:
       # pypcap ships no wheel: it compiles pcap.c against libpcap, so both the
       # headers and the shared library have to be present before pip is asked
       # to build it.
-      - name: Install libpcap headers and a C toolchain
+      #
+      # tshark joins them per #845's finding 1: this job installs pyshark and
+      # its fixture-tier selection (see this job's own comment above) is the
+      # only place tests/integration/test_engine_runtime.py's real
+      # ``engine='pyshark'`` extraction is reachable at all --
+      # `engine-tests`'s own selection ignores tests/integration and
+      # *_runtime.py wholesale. Without tshark, PyShark.unsupported_reason()
+      # declines the engine, the extractor silently falls back to the default
+      # parser, and the test's assertions used to pass on that fallback's
+      # output -- a vacuous pass, invisible in skip counts. The debconf
+      # pre-seed and DEBIAN_FRONTEND mirror `engine-tests`'s "Install system
+      # libpcap and tshark" step exactly, for the same reason: tshark's
+      # postinst otherwise blocks on the "allow non-superusers to capture
+      # packets" prompt.
+      - name: Install libpcap headers, a C toolchain, and tshark
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends build-essential libpcap-dev
+          echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential libpcap-dev tshark
 
       - name: Install package, test and generator dependencies
         run: |

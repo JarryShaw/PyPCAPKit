@@ -4,6 +4,7 @@ import asyncio
 import importlib.util
 import sys
 import unittest
+from unittest import mock
 
 from tests._support import close_extractor, purge_modules, sample_path
 
@@ -99,8 +100,25 @@ class EngineRuntimeTests(unittest.TestCase):
             # And the fall back is a working extraction, not an empty one.
             self.assertEqual(extractor.length, 6)
         else:
-            extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
+            # Prove pyshark actually ran, rather than the built-in parser wearing
+            # its label -- see test_new_engine_parity_runtime.py's own `extract`
+            # helper, which asserts the same thing for PyPCAP/PyPCAPFile. Without
+            # this, a CI leg missing the ``tshark`` binary makes
+            # ``PyShark.unsupported_reason()`` decline the engine, the extractor
+            # silently falls back to the default parser, and the length assertion
+            # below passes on the fallback's output -- a vacuous pass (#845).
+            from pcapkit.foundation.engines.pyshark import PyShark
+
+            with mock.patch('pcapkit.foundation.extraction.warn') as warn:
+                extractor = extract(fin=sample_path('in.pcap'), fout='/tmp/out', format='tree', store=True, nofile=True, engine='pyshark')
             self.addCleanup(close_extractor, extractor)
+
+            engines = [call.args[0] for call in warn.call_args_list
+                       if len(call.args) > 1 and call.args[1] is EngineWarning]
+            self.assertEqual(engines, [], "'pyshark' was replaced by the fallback engine")
+            self.assertEqual(extractor._exnam, 'pyshark')
+            self.assertIsInstance(extractor.engine, PyShark)
+
             self.assertGreater(extractor.length, 0)
 
 
