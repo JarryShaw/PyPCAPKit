@@ -21,6 +21,16 @@ sinks any row whose notes column mentions "legacy" into a bucket appended
 *after* every other row, so the current name is always the first one defined
 for a shared value regardless of the source table's own row order.
 
+GitHub issue #852, a follow-up to the cross-review of #848, pointed out that
+the original predicate tested the notes column for the word "legacy" alone,
+with no check that the row's value was actually claimed by another row --
+meaning a future *current* row whose notes happened to mention "legacy" about
+some unrelated code would be wrongly sunk, and a single ``USER0``-style range
+row would sink all sixteen expanded members at once instead of none.
+:meth:`~pcapkit.vendor.reg.linktype.LinkType.process` now only sinks a
+single-value row when its value is a genuine duplicate elsewhere in the same
+table, and never routes a range row through the sink at all.
+
 This module pins both the symptom and the root cause:
 
 - :class:`LinkType209ConstResolutionTests` -- against the committed, generated
@@ -34,6 +44,12 @@ This module pins both the symptom and the root cause:
   CI while still exercising the exact code path a real crawl runs. A
   regeneration that drops the fix reintroduces the wrong order here before it
   ever reaches the committed const file.
+- :class:`LinkTypeGeneratorValueAwareTests` -- issue #852 item 1: a row whose
+  value has no duplicate must never be sunk merely for mentioning "legacy",
+  and the canonical member of a genuine duplicate pair must be the current
+  one regardless of which table position it occupies.
+- :class:`LinkTypeGeneratorRangeSinkIsolationTests` -- issue #852 item 2: a
+  single range row's wording must never sink its whole expansion.
 
 """
 from __future__ import annotations
@@ -153,8 +169,8 @@ class LinkTypeGeneratorLegacyOrderingTests(unittest.TestCase):
 
         self.assertEqual(len(enum), 2, f'expected exactly 2 rendered members, got: {enum!r}')
 
-        first_name = enum[0].splitlines()[1].split(' = ', 1)[0].strip()
-        second_name = enum[1].splitlines()[1].split(' = ', 1)[0].strip()
+        first_name = enum[0].splitlines()[-1].split(' = ', 1)[0].strip()
+        second_name = enum[1].splitlines()[-1].split(' = ', 1)[0].strip()
 
         self.assertEqual(first_name, 'I2C_LINUX',
                          f'the current name must be emitted first so it is '
@@ -170,6 +186,213 @@ class LinkTypeGeneratorLegacyOrderingTests(unittest.TestCase):
         self.assertIn('IPMB_LINUX = 209', rendered)
         self.assertIn('Linux I2C packets', rendered)
         self.assertIn('Legacy names (do not use) for Linux I2C below.', rendered)
+
+
+#: Two rows for two *different*, otherwise-unrelated values -- neither shares
+#: its value with anything else in the (2-row) table. ``FOO_LEGACY_WORDED``'s
+#: notes mention "legacy" only incidentally, about a different, unnamed old
+#: code -- not because ``FOO_LEGACY_WORDED`` itself is a deprecated alias of
+#: ``BAR_PLAIN``. This is GitHub issue #852 item 1's own example: "a future
+#: current row's notes say something like 'supersedes the legacy DLT_FOO'".
+NON_DUPLICATE_LEGACY_WORDING_TABLE_HTML = """
+<table class="linktypedlt">
+<tr><th>header row, skipped by request()</th></tr>
+<tr>
+<td class="symbol">LINKTYPE_FOO_LEGACY_WORDED</td>
+<td class="number">500</td>
+<td class="symbol">DLT_FOO_LEGACY_WORDED</td>
+<td>
+Supersedes the legacy DLT_BAZ encoding used by very old capture tools.
+</td>
+</tr>
+<tr>
+<td class="symbol">LINKTYPE_BAR_PLAIN</td>
+<td class="number">501</td>
+<td class="symbol">DLT_BAR_PLAIN</td>
+<td>
+An ordinary, unrelated link type.
+</td>
+</tr>
+</table>
+"""
+
+#: A genuine duplicate pair for a third value, worded exactly the way 209 is
+#: (the legacy row's own notes say "legacy", the current row's do not) but
+#: listed in the *opposite* order from tcpdump's real table for 209 -- current
+#: row first, legacy row second. Regression-guards that :meth:`process` picks
+#: the canonical member by wording, not by table position, in either order.
+CURRENT_FIRST_DUPLICATE_TABLE_HTML = """
+<table class="linktypedlt">
+<tr><th>header row, skipped by request()</th></tr>
+<tr>
+<td class="symbol">LINKTYPE_QUX_CURRENT</td>
+<td class="number">600</td>
+<td class="symbol">DLT_QUX_CURRENT</td>
+<td>
+The current name for this link type.
+</td>
+</tr>
+<tr>
+<td class="symbol">LINKTYPE_QUX_OLD</td>
+<td class="number">600</td>
+<td class="symbol">DLT_QUX_OLD</td>
+<td>
+Legacy name (do not use) for the same link type.
+</td>
+</tr>
+</table>
+"""
+
+
+@unittest.skipUnless(HAS_VENDOR_DEPS, 'requests, bs4 and/or html5lib not installed')
+class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
+    """Item 1 of GitHub issue #852: the sink predicate must be value-aware.
+
+    :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`'s sink rule
+    (added by #848) tested a row's notes for the word "legacy" alone, with no
+    check that the row's value is actually claimed by another row. Issue
+    #852 pointed out this can invert in the *other* direction: a future
+    *current* row whose notes happen to mention "legacy" about some unrelated
+    code gets sunk even though nothing else shares its value -- silently
+    reordering the generated file's *emission order* for a value that was
+    never ambiguous in the first place. (It also cannot, by itself, save a
+    row from being wrongly sunk when tcpdump's wording is attached to the
+    wrong member of a *genuine* duplicate pair; that residual risk is
+    documented at the ``dup_values`` computation in
+    :meth:`~pcapkit.vendor.reg.linktype.LinkType.process` rather than
+    claimed as solved here.)
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    @staticmethod
+    def _process(html: str) -> 'list[str]':
+        import bs4
+
+        from pcapkit.vendor.reg.linktype import LinkType
+
+        soup = bs4.BeautifulSoup(html, 'html5lib')
+        rows = soup.select('table.linktypedlt tr')[1:]
+
+        inst = object.__new__(LinkType)
+        enum, _miss = inst.process(rows)
+        return enum
+
+    def test_non_duplicated_legacy_wording_does_not_reorder(self) -> None:
+        """A row cannot be sunk unless another row actually shares its value.
+
+        Fails against the value-blind, word-only predicate on ``main``: that
+        predicate sinks ``FOO_LEGACY_WORDED`` purely because its notes
+        contain "legacy", swapping it after ``BAR_PLAIN`` in the returned
+        list even though value 500 has no duplicate anywhere in this table.
+        The value-aware predicate leaves both rows in table order, because
+        neither of their values is duplicated.
+        """
+        enum = self._process(NON_DUPLICATE_LEGACY_WORDING_TABLE_HTML)
+
+        self.assertEqual(len(enum), 2, f'expected exactly 2 rendered members, got: {enum!r}')
+
+        first_name = enum[0].splitlines()[-1].split(' = ', 1)[0].strip()
+        second_name = enum[1].splitlines()[-1].split(' = ', 1)[0].strip()
+
+        self.assertEqual(
+            [first_name, second_name], ['FOO_LEGACY_WORDED', 'BAR_PLAIN'],
+            f'a row whose value has no duplicate must never be sunk, regardless '
+            f'of its own wording; got order {[first_name, second_name]!r} -- see '
+            f'GitHub issue #852 item 1'
+        )
+
+    def test_duplicate_pair_canonical_member_is_order_independent(self) -> None:
+        """The *current* row must win regardless of which table position it is in.
+
+        tcpdump lists value 209's legacy row before its current row; this
+        fixture lists a correctly-worded duplicate pair in the *opposite*
+        order (current first, legacy second) and pins that the current name
+        still ends up first -- canonical -- either way. Together with
+        :class:`LinkTypeGeneratorLegacyOrderingTests` (which pins the 209
+        table's own order), this is the "both directions" the acceptance
+        criteria for #852 ask for.
+        """
+        enum = self._process(CURRENT_FIRST_DUPLICATE_TABLE_HTML)
+
+        self.assertEqual(len(enum), 2, f'expected exactly 2 rendered members, got: {enum!r}')
+
+        first_name = enum[0].splitlines()[-1].split(' = ', 1)[0].strip()
+        second_name = enum[1].splitlines()[-1].split(' = ', 1)[0].strip()
+
+        self.assertEqual(
+            [first_name, second_name], ['QUX_CURRENT', 'QUX_OLD'],
+            f'the current member of a duplicated value must be canonical '
+            f'regardless of table order; got {[first_name, second_name]!r}'
+        )
+
+
+#: A range row (``USER0``..``USER3``, values 900-903) whose notes mention
+#: "legacy", followed by an unrelated plain row. The plain row is what makes
+#: mis-sinking the range *observable* through ordering: if the range branch
+#: shared the per-row ``sink`` the single-value branch computes, this single
+#: row's wording would route all four expanded members through ``legacy``
+#: at once, and they would come out *after* ``PLAIN_ROW`` instead of before
+#: it (table order).
+LEGACY_WORDED_RANGE_TABLE_HTML = """
+<table class="linktypedlt">
+<tr><th>header row, skipped by request()</th></tr>
+<tr>
+<td class="symbol">LINKTYPE_USER0</td>
+<td class="number">900–903</td>
+<td class="symbol">DLT_USER0</td>
+<td>
+Legacy user-defined range, retained for compatibility.
+</td>
+</tr>
+<tr>
+<td class="symbol">LINKTYPE_PLAIN_ROW</td>
+<td class="number">999</td>
+<td class="symbol">DLT_PLAIN_ROW</td>
+<td>
+An ordinary, unrelated link type.
+</td>
+</tr>
+</table>
+"""
+
+
+@unittest.skipUnless(HAS_VENDOR_DEPS, 'requests, bs4 and/or html5lib not installed')
+class LinkTypeGeneratorRangeSinkIsolationTests(unittest.TestCase):
+    """Item 2 of GitHub issue #852: a range row must never sink its whole expansion.
+
+    The ``ValueError`` branch that expands a ``USER0``-style range used to
+    reuse the same per-row ``sink`` the single-value branch computed, so one
+    range row whose notes mentioned "legacy" would have sunk every expanded
+    member at once. :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`
+    now always appends range-expanded members straight into ``enum``,
+    unconditionally, and this pins that deliberately.
+    """
+
+    def setUp(self) -> None:
+        purge_modules(['pcapkit'])
+
+    def test_legacy_worded_range_row_still_lands_entirely_in_enum(self) -> None:
+        import bs4
+
+        from pcapkit.vendor.reg.linktype import LinkType
+
+        soup = bs4.BeautifulSoup(LEGACY_WORDED_RANGE_TABLE_HTML, 'html5lib')
+        rows = soup.select('table.linktypedlt tr')[1:]
+
+        inst = object.__new__(LinkType)
+        enum, _miss = inst.process(rows)
+
+        self.assertEqual(len(enum), 5, f'expected 4 expanded USER0..USER3 members plus PLAIN_ROW, got: {enum!r}')
+
+        names = [element.splitlines()[-1].split(' = ', 1)[0].strip() for element in enum]
+        self.assertEqual(
+            names, ['USER0', 'USER1', 'USER2', 'USER3', 'PLAIN_ROW'],
+            f'a range row whose notes mention "legacy" must emit every expanded '
+            f'member into `enum`, in table order, never sunk into `legacy` as a '
+            f'block after a later row -- got {names!r}'
+        )
 
 
 if __name__ == '__main__':
