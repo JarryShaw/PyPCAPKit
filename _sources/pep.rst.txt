@@ -970,6 +970,22 @@ pair alone would answer it twice. ``LINUX_SLL`` matters out of proportion to its
 size: every ``tcpdump -i any`` capture uses it, and neither variant has even a
 stub.
 
+**Wave 2 or 3 — handlers for the** ``DLT_NULL`` **and** ``DLT_RAW`` **link
+types.** Both are genuine DLTs that a capture can legitimately be rooted in —
+``DLT_NULL`` (0) is BSD's loopback encapsulation, ``DLT_RAW`` (101) an IP packet
+with no link header at all — and neither has a handler protocol class. The frame
+dispatcher registers exactly three link types
+(:file:`pcapkit/protocols/misc/pcap/frame.py`, ``__proto__``):
+:attr:`~pcapkit.const.reg.linktype.LinkType.ETHERNET`,
+:attr:`~pcapkit.const.reg.linktype.LinkType.IPV4` and
+:attr:`~pcapkit.const.reg.linktype.LinkType.IPV6`, so a ``DLT_NULL`` or
+``DLT_RAW`` capture reaches no dissector. This is a sibling of the ``LINUX_SLL``
+work above rather than a separate concern — all four are link types the library
+enumerates but cannot parse. It surfaced while deciding what an unresolvable
+link-layer name should do: neither value is an honest stand-in for "unknown link
+type", which is why the toolkit now raises instead of defaulting to
+``LinkType.NULL``.
+
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
 new transport and wants that settled first, the other three because a capture in
