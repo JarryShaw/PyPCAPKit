@@ -237,6 +237,17 @@ NON_DISTRIBUTION_FLAGS = {
         'asks whether /proc/self/fd is a directory, i.e. whether this kernel '
         'exposes the procfs file-descriptor listing -- nothing pip installs'
     ),
+    # tests/project/test_pyshark_encap_map.py (#851/#853). Asks whether the
+    # tshark/editcap binaries are on PATH -- a Wireshark install, not a Python
+    # distribution any pyproject.toml extra could ever provide. Declared here
+    # rather than left as an unprefixed shutil.which check: the latter was
+    # tried first and made the AST scan blind to two classes skipping on every
+    # CI leg, which is the opposite of what "no unaccounted HAS_* gate" was
+    # meant to prevent.
+    'HAS_WIRESHARK': (
+        'asks whether the tshark/editcap binaries are on PATH -- a Wireshark '
+        'install, not a Python distribution any extra could provide'
+    ),
 }
 
 #: Top-level import names two (or more) genuinely *mutually exclusive*
