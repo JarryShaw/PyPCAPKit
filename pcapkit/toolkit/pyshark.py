@@ -145,7 +145,7 @@ ENCAP_TYPE_TO_LINKTYPE = {
     108: Enum_LinkType.MOST,                       # most
     109: Enum_LinkType.CAN20B,                     # can20b
     111: Enum_LinkType.X2E_SERIAL,                 # x2e-serial
-    112: Enum_LinkType.IPMB_LINUX,                 # i2c-linux
+    112: Enum_LinkType.I2C_LINUX,                  # i2c-linux
     113: Enum_LinkType.IEEE802_15_4_NONASK_PHY,    # wpan-nonask-phy
     115: Enum_LinkType.USB_LINUX_MMAPPED,          # usb-linux-mmap
     121: Enum_LinkType.FC_2,                       # fc2
