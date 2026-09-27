@@ -806,9 +806,9 @@ since -- reaching #805 by the entries below.
   signature already carried, was what separated "no default was supplied"
   from "a default was supplied and should be used" at the time, so a caller
   that asked for no fallback got the error rather than a silent substitution.
-  That ``-1`` convention was later replaced by an identity sentinel object,
-  once the shared base class #858 (below) put ``get()`` behind one call site
-  for most of these registries instead of many (#859). The sweep
+  That ``-1`` convention is being replaced by an identity sentinel object in
+  #859, not yet landed, once the shared base class #858 (below) puts ``get()``
+  behind one call site for most of these registries instead of many. The sweep
   #584 asked for puts the scope at 110 of the 118 integer registries, not the
   three the issue named; the two carrying a bespoke integer fallback of their
   own, ``pcapng`` ``OptionType`` and ``reg`` ``AppType``, are deliberately left
@@ -3012,11 +3012,15 @@ since -- reaching #805 by the entries below.
   ``KeyError``-catching on a missing name, which the hand-copied ``get`` never
   had, so e.g. ``Flags.get('NOPE', 0)`` returns ``0`` now rather than raising
   -- a widening, not a regression, though undisclosed until this PR; and a key
-  that is neither ``int`` nor ``str`` used to raise ``TypeError`` on these
-  six's own hand-copied ``get`` -- e.g. ``Flags.get(3.5)`` -- and now raises
-  ``ValueError`` instead, tried as a value by the base; a new divergence from
-  the still-unconverted 105's generated ``get``, which raises ``KeyError`` on
-  the same input, degenerate today since no caller passes one (#855).
+  that is neither ``int`` nor ``str`` used to raise ``TypeError`` on
+  the five ``IntFlag`` registries' hand-copied ``get`` -- e.g.
+  ``Flags.get(3.5)`` -- since ``cls[key]`` is a containment test on a ``Flag``
+  subclass rather than a name lookup there; all five now raise ``ValueError``
+  instead, tried as a value by the base. ``ExtensionHeader``, the sixth and the
+  only ``IntEnum`` among them, already raised ``KeyError`` on the same input
+  before this PR -- the shift #858's entry attributes to the other 105 -- so
+  for it this is not a new divergence at all, only the same one arriving six
+  registries early (#855).
 * **Changed** -- Ruleset ``23497679``'s ``required_status_checks`` names 22
   exact check contexts, and GitHub rulesets match literally with no wildcard,
   so the required list needs hand-editing on every matrix change. Five of the
