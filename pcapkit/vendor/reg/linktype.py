@@ -65,7 +65,7 @@ class LinkType(Vendor):
         enum = []  # type: list[str]
         legacy = []  # type: list[str]
         miss = [
-            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
 
         # Value-aware guard for the ``sink`` decision below (GitHub issue #852,

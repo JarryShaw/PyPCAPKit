@@ -79,11 +79,11 @@ class CGAExtension(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%04x' % value, value)")
+                miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
 
         # TODO: figure out how to handle this programmatically
         miss.append('#: Unspecified in the IANA registry')
-        miss.append("return extend_enum(cls, 'Unassigned_%04x' % value, value)")
+        miss.append("return cls._unregistered_member(value, 'Unassigned')")
         return enum, miss
 
 

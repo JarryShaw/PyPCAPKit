@@ -66,7 +66,7 @@ class ToSReliability(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code).upper()  # type: ignore[arg-type]

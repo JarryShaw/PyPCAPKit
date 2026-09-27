@@ -87,11 +87,22 @@ ISSUE_647_OUTLIERS = (
      "raised AttributeError: 'int' object has no attribute 'upper'"),
 )
 
-#: The registries whose ``_missing_`` ends in :func:`~aenum.extend_enum`, so an
-#: unassigned value in their span is *registered* rather than rejected. This is
-#: the deliberate divergence from the built-in, not an oversight: their backing
-#: registries carry open "Unassigned" spans that a capture can legitimately
-#: contain. They still reject a *negative* value, which no span covers.
+#: The registries whose ``_missing_`` resolves an unassigned value in their
+#: span rather than rejecting it -- this is the deliberate divergence from the
+#: built-in, not an oversight: their backing registries carry open
+#: "Unassigned" spans that a capture can legitimately contain. They still
+#: reject a *negative* value, which no span covers.
+#:
+#: Only :class:`~pcapkit.const.mh.cga_type.CGAType` still ends in
+#: :func:`~aenum.extend_enum` (its mint is not an IANA-style range at all, so
+#: GitHub issues #775/#847's ruling never touched it).
+#: :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
+#: resolves the same way but no longer *registers* -- its bare ``Unassigned``
+#: converted, so it now goes through ``_unregistered_member`` and the
+#: resolution is not permanent; see
+#: :meth:`ConstEnumRegisterFallbackTests.test_protection_authority_now_
+#: resolves_without_extending`. The name is kept for both because this set's
+#: own test only checks "does it raise", not "does it grow".
 EXPECTED_TO_REGISTER = frozenset({
     'pcapkit.const.ipv4.protection_authority.ProtectionAuthority',
     'pcapkit.const.mh.cga_type.CGAType',
@@ -688,10 +699,21 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             Flags.get(UNRESOLVABLE)
 
     def test_the_auto_extending_integer_registries_still_extend(self) -> None:
-        from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
+        """:class:`~pcapkit.const.mh.cga_type.CGAType` is the one true survivor
+        here: its ``Tag_<hex>`` mint is not an IANA-style range at all (a CGA
+        extension type tag is a collision-avoidance random 128-bit value), so
+        GitHub issues #775/#847's mint-criterion ruling never touched it.
+
+        :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
+        used to stand here beside it -- its own unbounded ``_missing_`` also
+        auto-extended for any non-negative integer -- but its label is a bare
+        ``Unassigned``, which the ruling converts; see
+        :meth:`test_protection_authority_now_resolves_without_extending` for
+        its replacement.
+        """
         from pcapkit.const.mh.cga_type import CGAType
 
-        for obj in (ProtectionAuthority, CGAType):
+        for obj in (CGAType,):
             with self.subTest(enum=_qualname(obj)):
                 before = len(obj.__members__)
                 registered = obj(UNRESOLVABLE)
@@ -701,6 +723,29 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
                 # ... and still reject a value no span covers.
                 with self.assertRaises(ValueError):
                     obj(-1)
+
+    def test_protection_authority_now_resolves_without_extending(self) -> None:
+        """The other half of the split :meth:`test_the_auto_extending_integer_
+        registries_still_extend` used to cover as one case. Still resolves any
+        non-negative integer -- its ``_missing_`` bound is unchanged -- but
+        since #775/#847 that no longer mints a permanent member: a bare
+        ``Unassigned`` is a notation for the reader, not a name IANA assigned,
+        so two lookups of the same value are equal but no longer identical."""
+        from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
+
+        before = len(ProtectionAuthority.__members__)
+        first = ProtectionAuthority(UNRESOLVABLE)
+        second = ProtectionAuthority(UNRESOLVABLE)
+
+        self.assertEqual(len(ProtectionAuthority.__members__), before)
+        self.assertEqual(int(first), UNRESOLVABLE)
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+        self.assertNotIn(UNRESOLVABLE, ProtectionAuthority._value2member_map_)
+
+        # ... and still reject a value no span covers.
+        with self.assertRaises(ValueError):
+            ProtectionAuthority(-1)
 
     def test_apptype_still_registers_an_unassigned_port(self) -> None:
         """GitHub issue #584's machinery, which runs through ``_missing_``."""

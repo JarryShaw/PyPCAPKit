@@ -61,7 +61,7 @@ class OptionNumber(Vendor):
 
         enum = []  # type: list[str]
         miss = [
-            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for item in reader:
             code = item[3]

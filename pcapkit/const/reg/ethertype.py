@@ -534,7 +534,7 @@ class EtherType(EnumRegistry, IntEnum):
         if 0x0101 <= value <= 0x01FF:
             #: Old Xerox Experimental values. Invalid as an Ethertype since 1983. [Neil
     #: Sembower]
-            return extend_enum(cls, 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983')
         if 0x0888 <= value <= 0x088A:
             #: Xyplex [Neil Sembower]
             return extend_enum(cls, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4), value)
@@ -543,7 +543,7 @@ class EtherType(EnumRegistry, IntEnum):
             return extend_enum(cls, 'Berkeley_Trailer_encap_IP_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x6008 <= value <= 0x6009:
             #: DEC Unassigned [Neil Sembower]
-            return extend_enum(cls, 'DEC_Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'DEC_Unassigned')
         if 0x6010 <= value <= 0x6014:
             #: 3Com Corporation [Neil Sembower]
             return extend_enum(cls, 'EtherType_3Com_Corporation_0x%s' % hex(value)[2:].upper().zfill(4), value)
@@ -552,10 +552,10 @@ class EtherType(EnumRegistry, IntEnum):
             return extend_enum(cls, 'LRT_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x8039 <= value <= 0x803C:
             #: DEC Unassigned [Neil Sembower]
-            return extend_enum(cls, 'DEC_Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'DEC_Unassigned')
         if 0x8040 <= value <= 0x8042:
             #: DEC Unassigned [Neil Sembower]
-            return extend_enum(cls, 'DEC_Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'DEC_Unassigned')
         if 0x806E <= value <= 0x8077:
             #: Landmark Graphics Corp. [Neil Sembower]
             return extend_enum(cls, 'Landmark_Graphics_Corp_0x%s' % hex(value)[2:].upper().zfill(4), value)

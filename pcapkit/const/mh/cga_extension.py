@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_extension.CG
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -44,9 +44,9 @@ class CGAExtension(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0000 <= value <= 0x0011:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%04x' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 0x0013 <= value <= 0xFFFC:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%04x' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         #: Unspecified in the IANA registry
-        return extend_enum(cls, 'Unassigned_%04x' % value, value)
+        return cls._unregistered_member(value, 'Unassigned')

@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.mn_id_subtype.MN
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -56,8 +56,8 @@ class MNIDSubtype(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 15:
             #: Reserved [:rfc:`8371`]
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 16 <= value <= 255:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

@@ -66,7 +66,7 @@ class Type(Vendor):
         """
         enum = list()
         miss = [
-            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for code, name in data.items():
             renm = self.rename(name, code)  # type: ignore[arg-type]

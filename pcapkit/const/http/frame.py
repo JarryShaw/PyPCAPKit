@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.http.frame.Frame`.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -74,8 +74,8 @@ class Frame(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0D <= value <= 0x0F:
             #: ``Unassigned``
-            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 0x11 <= value <= 0xFF:
             #: ``Unassigned``
-            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

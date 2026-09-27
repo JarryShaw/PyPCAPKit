@@ -85,7 +85,7 @@ class Setting(Vendor):
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
+                miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")  # pylint: disable=line-too-long
         return enum, miss
 
 

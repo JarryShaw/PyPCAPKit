@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.record_type.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -39,5 +39,5 @@ class RecordType(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_0x%04x' % value, value)
+        return cls._unregistered_member(value, 'Unassigned')
         return cls(value)

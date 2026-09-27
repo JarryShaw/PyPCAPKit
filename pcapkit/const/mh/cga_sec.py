@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_sec.CGASec`.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -40,4 +40,4 @@ class CGASec(EnumRegistry, IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 0b111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         #: Unspecified in the IANA registry
-        return extend_enum(cls, 'Unassigned_%s' % bin(value)[2:], value)
+        return cls._unregistered_member(value, 'Unassigned')

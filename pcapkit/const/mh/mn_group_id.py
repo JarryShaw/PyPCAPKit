@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.mn_group_id.MNGr
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -41,5 +41,5 @@ class MNGroupID(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 254:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.fb_indication_tr
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -44,8 +44,8 @@ class FlowBindingIndicationTrigger(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 249:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 250 <= value <= 255:
             #: Reserved for Testing Purposes Only [:rfc:`7109`]
-            return extend_enum(cls, 'Reserved_for_Testing_Purposes_Only_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Testing_Purposes_Only')
         return super()._missing_(value)

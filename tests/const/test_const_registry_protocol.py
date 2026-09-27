@@ -861,20 +861,25 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
             Hardware.get(65536)
         self.assertIs(Hardware.get(65536, 1), Hardware.Ethernet)
 
-    def test_transtype_still_mints_its_declared_unassigned_range(self) -> None:
-        """:class:`~pcapkit.const.reg.transtype.TransType` is the other
-        shape: its own ``_missing_`` mints permanently via
+    def test_transtype_no_longer_mints_its_declared_unassigned_range(self) -> None:
+        """:class:`~pcapkit.const.reg.transtype.TransType` used to be the
+        other shape: its own ``_missing_`` minted permanently via
         :func:`~aenum.extend_enum` for ``148..252`` rather than going through
-        ``_unregistered_member`` -- also unchanged by this tier."""
+        ``_unregistered_member``. GitHub issues #775/#847's mint-criterion
+        ruling converted it: the label is a bare ``Unassigned``, which is a
+        notation for the reader rather than a name IANA assigned, so it now
+        matches :class:`~pcapkit.const.arp.hardware.Hardware`'s shape above
+        instead of standing apart from it."""
         from pcapkit.const.reg.transtype import TransType
 
         before = len(TransType._member_names_)
         member = TransType(200)
 
         self.assertEqual(member.value, 200)
-        self.assertEqual(member.name, 'Unassigned_200')
-        self.assertIn(200, TransType._value2member_map_)
-        self.assertEqual(before + 1, len(TransType._member_names_))
+        self.assertEqual(member.name, 'Unassigned')
+        self.assertNotIn(200, TransType._value2member_map_)
+        self.assertEqual(before, len(TransType._member_names_))
+        self.assertEqual(TransType(200), TransType.get(200))
 
         with self.assertRaises(ValueError):
             TransType(9999)

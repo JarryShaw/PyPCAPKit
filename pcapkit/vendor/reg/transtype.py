@@ -103,7 +103,7 @@ class TransType(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{name}_%d' % value, value)")
+                miss.append(f"    return cls._unregistered_member(value, '{name}')")
         return enum, miss
 
 

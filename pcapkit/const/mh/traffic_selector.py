@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.mh.traffic_selector
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -41,8 +41,8 @@ class TrafficSelector(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 250:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 251 <= value <= 255:
             #: Reserved for Experimental Use [:rfc:`6089`]
-            return extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Experimental_Use')
         return super()._missing_(value)

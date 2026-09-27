@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.block_type.B
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -122,17 +122,17 @@ class BlockType(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0a0d0a00 <= value <= 0x0a0d0aff:
             #: Reserved. Used to detect trace files corrupted because of file transfers using the HTTP protocol in text mode.
-            return extend_enum(cls, 'Reserved_%08x' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 0x000a0d0a <= value <= 0xff0a0d0a:
             #: Reserved. Used to detect trace files corrupted because of file transfers using the HTTP protocol in text mode.
-            return extend_enum(cls, 'Reserved_%08x' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 0x000a0d0d <= value <= 0xff0a0d0d:
             #: Reserved. Used to detect trace files corrupted because of file transfers using the HTTP protocol in text mode.
-            return extend_enum(cls, 'Reserved_%08x' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 0x0d0d0a00 <= value <= 0x0d0d0aff:
             #: Reserved. Used to detect trace files corrupted because of file transfers using the FTP protocol in text mode.
-            return extend_enum(cls, 'Reserved_%08x' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 0x80000000 <= value <= 0xffffffff:
             #: Reserved for local use.
-            return extend_enum(cls, 'Reserved_%08x' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         return super()._missing_(value)

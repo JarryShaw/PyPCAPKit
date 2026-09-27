@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.esp.cipher.Cipher`.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -230,8 +230,8 @@ class Cipher(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 36 <= value <= 1023:
             #: Unassigned
-            return extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls._unregistered_member(value, 'Unassigned')
         if 1024 <= value <= 65535:
             #: Reserved for Private Use [:rfc:`7296`]
-            return extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved_for_Private_Use')
         return super()._missing_(value)

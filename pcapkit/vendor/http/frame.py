@@ -83,7 +83,7 @@ class Frame(Vendor):
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(2), value)")
+                miss.append(f"    return cls._unregistered_member(value, '{name}')")
         return enum, miss
 
 

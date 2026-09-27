@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -169,14 +169,14 @@ class Option(EnumRegistry, IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 35 <= value <= 68:
             #: Reserved
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 71 <= value <= 75:
             #: Reserved
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 79 <= value <= 171:
             #: Reserved
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         if 175 <= value <= 252:
             #: Reserved
-            return extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls._unregistered_member(value, 'Reserved')
         return super()._missing_(value)
