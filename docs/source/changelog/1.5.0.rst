@@ -2849,6 +2849,33 @@ since -- reaching #805 by the entries below.
   ``Raw`` outright regardless of shape -- the 12 fall-throughs above are that
   arm firing on this corpus, and a caller depending on the old direct bind
   for traffic that is neither is the one who would notice (#682).
+* **Fixed** -- ``get()``'s string-key miss and every generated registry's
+  ``_missing_`` bounded-range branch both called ``aenum.extend_enum()`` on an
+  unrecognised value, so e.g. ``Hardware(40)`` minted a permanent member on
+  first call, forever. Fixed at the two shared sites in
+  ``pcapkit/vendor/default.py``, plus a new ``register(value, name)`` base
+  classmethod for the caller-named path that is still meant to mint. All 105
+  generated ``pcapkit/const/`` registries are hand-edited to match and
+  independently proved by regenerating the 21 changed ones from live IANA data
+  -- byte-identical to the hand-edit; a further seven regenerate with no change
+  at all. ``get()``'s no-longer-minting miss applies to all 105 registries; the
+  ``_missing_`` fix only changes runtime behaviour for the **21** whose vendor
+  crawler leaves ``Vendor.process()`` unmodified -- the other 84 override
+  ``process()`` with their own ``extend_enum`` call and are unaffected here.
+  Two toolkit call sites, ``pcapkit/toolkit/scapy.py`` and
+  ``pcapkit/toolkit/pyshark.py``, fed ``get()`` a string key with no default
+  and now raise ``MissingKeyError`` where they used to get back a minted
+  placeholder; four protocol reader sites in ``hopopt.py``/``ipv6_opts.py``
+  convert the same ``KeyError`` into ``ProtocolError``. Riding along:
+  ``pcapkit/toolkit/pyshark.py`` gains a two-entry ``FILTER_NAME_TO_LINKTYPE``
+  (``eth`` to ``ETHERNET``, ``tr`` to ``IEEE802_5``), consulted ahead of
+  ``LinkType.get`` since pyshark reports a filter name, not a DLT name. An AST
+  census puts what remains out of scope at 1026 minting call sites -- 1007 in
+  ``_missing_`` and 7 in ``get`` across ``pcapkit/const/``, plus 12
+  hand-written ``extend_enum`` calls in ``pcapkit/protocols/internet/mh.py``
+  and ``pcapkit/protocols/application/ngap.py`` -- all deferred to a later
+  tier; ``register``/``register_alias`` account for a further 106 sites that
+  are the by-design caller-named path and stay untouched (#838).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
