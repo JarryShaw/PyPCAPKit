@@ -79,15 +79,22 @@ EXPECTED_MEMBERS = (
 
 #: The socket number ranges, in the order :meth:`Socket.process` emits them and
 #: therefore the order the generated ``_missing_`` tests them in. Pinned because
-#: that order decides which name an unlisted socket is given: the wide ranges
-#: mask the narrow ones after them, so reordering the list changes behaviour
-#: without changing any member.
+#: that order decides which name an unlisted socket is given: a wide range
+#: placed before a narrower one it fully contains masks that narrower one, so
+#: reordering the list changes behaviour without changing any member.
+#:
+#: GitHub issue #841: three ranges used to be listed after a wider range that
+#: fully contained them -- ``(0x0020, 0x003F)`` after ``(0x0001, 0x0BB8)``, and
+#: both ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` after ``(0x0BB9, 0xFFFF)``
+#: -- which made those three branches of the generated ``_missing_``
+#: unreachable. Each subset range is now listed ahead of the wider range that
+#: contains it, so every branch fires for at least the values only it covers.
 EXPECTED_RANGES = (
-    (0x0001, 0x0BB8, 'Registered by Xerox'),
     (0x0020, 0x003F, 'Experimental'),
-    (0x0BB9, 0xFFFF, 'Dynamically Assigned'),
+    (0x0001, 0x0BB8, 'Registered by Xerox'),
     (0x4000, 0x4FFF, 'Dynamically Assigned Socket Numbers'),
     (0x8000, 0xFFFF, 'Statically Assigned Socket Numbers'),
+    (0x0BB9, 0xFFFF, 'Dynamically Assigned'),
 )
 
 #: Sampled sockets and the member name each is expected to resolve to, at the
@@ -97,27 +104,27 @@ EXPECTED_RANGES = (
 #: only the name says which branch ran, and asserting the value alone would pass
 #: just as happily with three of the five branches deleted.
 #:
-#: Three of them are in fact unreachable -- ``(0x0001, 0x0BB8)`` masks
-#: ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)`` masks both
-#: ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)``. That is preserved scrape
-#: behaviour rather than a defect this change introduces, and it is documented on
-#: :data:`pcapkit.vendor.ipx.socket.RANGES`; pinning the names is what makes that
-#: documentation fail here if it ever stops being true.
+#: Before GitHub issue #841 was fixed, three of these were unreachable --
+#: ``(0x0001, 0x0BB8)`` masked ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)``
+#: masked both ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` -- so ``0x0020``,
+#: ``0x003F``, ``0x4000``, ``0x4FFF``, ``0x8000``, ``0x8061``, ``0x9094`` and
+#: ``0xFFFF`` all resolved under the wrong wide range's name. See
+#: :data:`pcapkit.vendor.ipx.socket.RANGES` for the reordering that fixed it.
 EXPECTED_MISSING_NAMES = {
     0x0000: 'Unspecified',                    # a defined member
     0x0001: 'Routing_Information_Packet',     # a defined member
     0x0004: 'Registered by Xerox_0x0004',
-    0x0020: 'Registered by Xerox_0x0020',     # masks 'Experimental'
-    0x003F: 'Registered by Xerox_0x003F',     # masks 'Experimental'
+    0x0020: 'Experimental_0x0020',
+    0x003F: 'Experimental_0x003F',
     0x0BB8: 'Registered by Xerox_0x0BB8',
     0x0BB9: 'Dynamically Assigned_0x0BB9',
-    0x4000: 'Dynamically Assigned_0x4000',    # masks 'Dynamically Assigned Socket Numbers'
-    0x4FFF: 'Dynamically Assigned_0x4FFF',    # masks 'Dynamically Assigned Socket Numbers'
+    0x4000: 'Dynamically Assigned Socket Numbers_0x4000',
+    0x4FFF: 'Dynamically Assigned Socket Numbers_0x4FFF',
     0x7FFF: 'Dynamically Assigned_0x7FFF',
-    0x8000: 'Dynamically Assigned_0x8000',    # masks 'Statically Assigned Socket Numbers'
-    0x8061: 'Dynamically Assigned_0x8061',    # masks 'Statically Assigned Socket Numbers'
-    0x9094: 'Dynamically Assigned_0x9094',    # masks 'Statically Assigned Socket Numbers'
-    0xFFFF: 'Dynamically Assigned_0xFFFF',    # masks 'Statically Assigned Socket Numbers'
+    0x8000: 'Statically Assigned Socket Numbers_0x8000',
+    0x8061: 'Statically Assigned Socket Numbers_0x8061',
+    0x9094: 'Statically Assigned Socket Numbers_0x9094',
+    0xFFFF: 'Statically Assigned Socket Numbers_0xFFFF',
 }
 
 
@@ -253,6 +260,23 @@ class IPXSocketVendorTests(unittest.TestCase):
 
     def test_range_order_is_preserved(self) -> None:
         self.assertEqual(tuple(self.vendor_module.RANGES), EXPECTED_RANGES)
+
+    def test_previously_shadowed_ranges_are_reachable(self) -> None:
+        # GitHub issue #841: under the old ``RANGES`` order each of these three
+        # values resolved as the wider range that masked its own -- 0x0030 as
+        # 'Registered by Xerox_0x0030', 0x4080 and 0x8100 both as
+        # 'Dynamically Assigned_0x...'. Pinned separately from
+        # test_unlisted_sockets_still_resolve so the regression this issue
+        # describes has a test that names it.
+        for value, name in (
+            (0x0030, 'Experimental_0x0030'),
+            (0x4080, 'Dynamically Assigned Socket Numbers_0x4080'),
+            (0x8100, 'Statically Assigned Socket Numbers_0x8100'),
+        ):
+            with self.subTest(socket=f'0x{value:04X}'):
+                member = self.const_module.Socket(value)
+                self.assertEqual(int(member), value)
+                self.assertEqual(member.name, name)
 
     def test_unlisted_sockets_still_resolve(self) -> None:
         # _missing_ has to cover the whole 16-bit space, so no legal wire value
