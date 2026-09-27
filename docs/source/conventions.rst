@@ -56,20 +56,22 @@ Worked examples
 ~~~~~~~~~~~~~~~
 
 *Unmint.* :mod:`pcapkit.const.ipx.socket`'s ``Dynamically Assigned``,
-``Statically Assigned Socket Numbers``, ``Experimental`` and ``Registered by Xerox``
-ranges. Each describes **who will assign the socket**, not what the socket is; the
-name arrives with the assignment.
+``Dynamically Assigned Socket Numbers``, ``Statically Assigned Socket Numbers`` and
+``Experimental`` ranges. Each names **how the socket will be allocated**, not what
+occupies it; the real name arrives with the allocation.
 
 *Mint.* :mod:`pcapkit.const.reg.ethertype`'s company names -- ``Xyplex``,
-``Datability``, ``Qualcomm``, ``Motorola`` and others. IEEE's record names *that
-specific value*, so the name is the assignment rather than a note about it.
+``Datability``, ``Qualcomm``, ``Motorola`` and some forty-five others -- and, in the
+same file's neighbour, :mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A
+company name is the assignment, for the reason in the next section.
 
 .. note::
 
-   Those two look similar and are not. ``Registered by Xerox`` is a statement about a
-   **range**; ``Xyplex`` at a single ethertype is a statement about **that code**.
-   The line is drawn at whether the source names the value or names the arrangement
-   covering it.
+   Those two groups look alike and the line between them is **not** range-versus-single
+   code. ``Registered by Xerox`` covers a range and still mints, because it names *who
+   registered the socket*. ``Dynamically Assigned`` also covers a range and does not,
+   because it names only the *mechanism* by which some future party will take it. Ask
+   what the label tells you: a party, or a procedure.
 
 Why the company names mint
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
