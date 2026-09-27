@@ -120,7 +120,7 @@ EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
 #: value at all that ``obj(fallback)`` would resolve to a *cached* identity
 #: for. Excused from the main sweep for that reason and covered by its own
 #: test instead, :meth:`ConstEnumGetDefaultTests.
-#: test_filter_type_default_is_consulted_without_a_cached_fallback`.
+#: test_filter_type_default_never_resolves_but_key_path_still_uses_an_uncached_member`.
 EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK = frozenset({
     'pcapkit.const.pcapng.filter_type.FilterType',
 })
@@ -191,18 +191,27 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         from pcapkit.const.arp.hardware import Hardware
 
         # Before the fix this raised ValueError('99999 is not a valid Hardware'),
-        # dropping the caller's default entirely.
+        # dropping the caller's default entirely. Both ``0`` (``Reserved_0``)
+        # and ``1`` (``Ethernet``) are genuinely registered members, so #864
+        # leaves this half of the repro untouched: a registered default still
+        # resolves, exactly as #584 asked for.
         self.assertIs(Hardware.get(99999, 0), Hardware(0))
         self.assertIs(Hardware.get(99999, 1), Hardware.Ethernet)
 
-        # The default is genuinely consulted rather than merely swallowing the
-        # error: a default that is itself unresolvable is now what fails, and
-        # the message names it rather than the original key. #584 passed a
-        # ``str`` where the signature says ``int``, and that is still invalid.
+        # GitHub issue #864 changes what an *unresolvable* default does,
+        # though: #584 passed a ``str`` where the signature says ``int``,
+        # and ``'X'`` is not a registered value either way -- before #864
+        # that failed with ``cls('X')``'s own error, naming ``'X'``; #864's
+        # ruling ("get should not mint unless it falls through the
+        # _missing_'s minted ranges") replaces ``cls(default)`` with a plain
+        # ``_value2member_map_`` lookup for exactly this reason, so an
+        # unresolvable default no longer gets an attempt of its own to fail
+        # from -- it now falls through to the *original* key lookup's own
+        # error instead, same as if no default had been supplied at all.
         with self.assertRaises(ValueError) as caught:
             Hardware.get(99999, 'X')
-        self.assertIn('X', str(caught.exception))
-        self.assertNotIn('99999', str(caught.exception))
+        self.assertIn('99999', str(caught.exception))
+        self.assertNotIn('X', str(caught.exception))
 
         # A resolvable key is untouched.
         self.assertIs(Hardware.get(1), Hardware.Ethernet)
@@ -216,16 +225,35 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_omitting_the_default_still_raises_for_the_original_key(self) -> None:
         """GitHub issue #857: ``-1`` used to be compared with ``==`` against
         :data:`~pcapkit.corekit.enum.NO_DEFAULT`, so a caller-supplied ``-1``
-        was silently read as *no default was supplied* -- "explicitly passing
-        the placeholder is the same as omitting it", as this test used to
-        assert. :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an exported
-        instance of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`
-        compared with ``is``, so ``-1`` is a genuine default like any other:
-        omitting ``default`` entirely still raises for the *original* key
-        (unchanged, pinned below), while explicitly passing ``-1`` now raises
-        for the *attempted fallback* ``cls(-1)`` instead -- no longer the same
-        error, since every registry's domain here starts at ``0`` and ``-1``
-        is never a legitimate value.
+        was silently read as *no default was supplied*.
+        :data:`~pcapkit.corekit.enum.NO_DEFAULT` is now an exported instance
+        of the dedicated :class:`~pcapkit.corekit.enum.NoDefaultType`,
+        compared with ``is`` rather than ``==`` -- so a caller-supplied
+        ``-1`` is never confused with the sentinel. That fact is pinned
+        directly, independent of ``get()``, by
+        :class:`~tests.const.test_const_registry_protocol.NoDefaultSentinelTests
+        .test_no_default_is_not_equal_to_any_plausible_caller_value`.
+
+        Before GitHub issue #864, that distinction was *also* observable
+        through ``get()`` itself: a supplied-but-unresolvable ``-1`` failed
+        with its own name (``cls(-1)`` raising directly), differently from
+        the omitted case's original-key error. #864's ruling ("get should
+        not mint unless it falls through the _missing_'s minted ranges")
+        removes that particular observation for an *unregistered* default
+        specifically: ``default`` no longer reaches ``cls(default)`` at
+        all, and ``-1`` is not a registered value on either registry here
+        (both domains start at ``0``), so supplying it now converges on
+        exactly the *same* original-key error as omitting it outright,
+        rather than a distinguishable one of its own. The test's own title
+        is, if anything, more true after #864 than before: *omitting* the
+        default raises for the original key, and now so does supplying an
+        unregistered one -- pinned below for both.
+
+        The genuinely-consulted half of #857's claim is repinned with a
+        *registered* default instead (``0``, ``Reserved_0`` on both
+        registries), which still resolves rather than raising -- the
+        observable proof #864 leaves available once ``-1`` no longer
+        provides it.
         """
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
@@ -236,12 +264,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                     enum.get(99999)
                 self.assertIn('99999', str(omitted.exception))
 
-                # No longer "the same as omitting it": this now names the
-                # failed fallback (``-1``), not the original key (``99999``).
+                # Since #864: an unregistered default (neither registry here
+                # has a member at ``-1``) converges on the *same*
+                # original-key error as omission, rather than a distinct one
+                # naming ``-1``.
                 with self.assertRaises(ValueError) as supplied:
                     enum.get(99999, -1)
-                self.assertIn('-1', str(supplied.exception))
-                self.assertNotIn('99999', str(supplied.exception))
+                self.assertIn('99999', str(supplied.exception))
+                self.assertNotIn('-1', str(supplied.exception))
+
+                # A *registered* default, by contrast, is still genuinely
+                # consulted rather than raising at all.
+                self.assertIs(enum.get(99999, 0), enum(0))
 
     def test_the_two_unverified_enums_from_the_issue(self) -> None:
         """#584 named ``Operation`` and ``LinkType`` but verified only ``Hardware``."""
@@ -343,20 +377,54 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                     # every time, and the registry never grows for it.
                     self.assertIsNot(resolved, obj.get(UNRESOLVABLE, 0))
 
-    def test_filter_type_default_is_consulted_without_a_cached_fallback(self) -> None:
+    def test_filter_type_default_never_resolves_but_key_path_still_uses_an_uncached_member(self) -> None:
         """:class:`~pcapkit.const.pcapng.filter_type.FilterType`'s own
         replacement for the sweep above -- see
-        :data:`EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK` for why it needs one."""
+        :data:`EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK` for why it needs one.
+
+        FilterType declares *no* static members at all, so its own
+        ``_value2member_map_`` is permanently empty -- not ``0``, not
+        anything. Before GitHub issue #864, ``default=0`` still resolved
+        because ``get`` called ``cls(0)`` directly, reaching ``_missing_``
+        and its converted, uncached pseudo-member path. #864's ruling
+        closes exactly that path for ``default``: it is restricted to a
+        plain ``_value2member_map_`` lookup, and FilterType's is
+        permanently empty, so *no* default can ever resolve for this
+        registry any more -- the strongest instance of the ruling's own
+        accepted cost, since it is not one range that stops resolving but
+        the registry's entire domain.
+
+        ``key`` resolution is untouched by #864, though, and it is where
+        the uncached pseudo-member path this test was written to cover
+        still lives: ``FilterType.get(0)`` -- ``0`` as the *key*, no
+        default at all -- still reaches ``cls(0)`` -> ``_missing_``
+        directly, resolving to a fresh, equal-but-not-identical
+        pseudo-member every call, exactly as before. Restored here through
+        the path #864 does not touch, now that ``default`` can no longer
+        demonstrate it.
+        """
         from pcapkit.const.pcapng.filter_type import FilterType
 
         with self.assertRaises(ValueError):
             FilterType.get(UNRESOLVABLE)
 
-        # 0 is in-bounds (0x00-0xFF) but not a real member either -- FilterType
-        # declares none -- so this resolves via the same converted pseudo-member
-        # path as UNRESOLVABLE-with-a-default does, not via a cached identity.
+        # No default can resolve on FilterType any more -- it has no
+        # registered members at all -- so even a value that is in-bounds
+        # (0x00-0xFF) for the *key* path, like ``0``, now falls through to
+        # the *original* ``UNRESOLVABLE`` error rather than resolving.
         before = len(FilterType.__members__)
-        resolved = FilterType.get(UNRESOLVABLE, 0)
+        with self.assertRaises(ValueError) as caught:
+            FilterType.get(UNRESOLVABLE, 0)
+        self.assertIn(str(UNRESOLVABLE), str(caught.exception))
+        self.assertEqual(len(FilterType.__members__), before)
+
+        # The uncached pseudo-member path itself is unaffected: as a *key*
+        # (no default supplied), ``0`` still resolves via ``cls(0)`` ->
+        # ``_missing_``, returning a fresh, equal-but-not-identical member
+        # every time rather than a cached identity -- the strength this
+        # test was written to add over the generic sweep, now demonstrated
+        # through ``key`` instead of ``default``.
+        resolved = FilterType.get(0)
         self.assertEqual(int(resolved), 0)
         self.assertEqual(resolved, FilterType(0))
         self.assertIsNot(resolved, FilterType(0))

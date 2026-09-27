@@ -1291,36 +1291,65 @@ class NoDefaultSentinelTests(unittest.TestCase):
         self.assertIs(module_again.NO_DEFAULT, first_import)
 
     def test_missing_name_with_default_negative_one_is_now_a_real_default(self) -> None:
-        """Fails on the pre-#857 tree: ``ExtensionHeader.get(<missing>, -1)``
-        raised :exc:`KeyError` there, because ``-1 == NO_DEFAULT`` read the
-        caller's ``-1`` as *no default* and re-raised the name lookup's own
-        error. On this head it raises :exc:`ValueError` instead, for the
-        *attempted fallback* ``ExtensionHeader(-1)`` -- ``-1`` is now a
-        genuine default, and every registry's domain starts at ``0``, so it
-        is itself unresolvable.
+        """Coincidentally passes on the pre-#857 tree too, not just this one:
+        ``ExtensionHeader.get(<missing>, -1)`` raised :exc:`KeyError` there
+        as well, because ``-1 == NO_DEFAULT`` read the caller's ``-1`` as *no
+        default* and re-raised the name lookup's own error -- the same
+        exception type and content this test asserts, but for the wrong
+        reason (silently discarding an explicit default rather than
+        genuinely attempting and failing to resolve it). This test no longer
+        discriminates that defect; the pin for it is
+        :meth:`NoDefaultSentinelTests.test_no_default_is_not_equal_to_any_plausible_caller_value`,
+        which checks the sentinel's identity comparison directly, never
+        touches :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, and so is
+        unaffected by #864 -- look there, not here, for that discrimination.
+
+        ``-1`` is a genuine default here, not a rediscovered sentinel; it is
+        simply not a *resolvable* one, since #864 restricts
+        ``default`` to :attr:`~pcapkit.corekit.enum.EnumRegistry._value2member_map_`,
+        every registry's domain starts at ``0``, and there is no
+        ``cls(default)`` fallback left to attempt and raise a fresh
+        :exc:`ValueError` from. So the original name lookup's own
+        :exc:`KeyError` propagates instead, exactly as it would with no
+        default at all. Updated from the pre-#864 tree, which asserted
+        :exc:`ValueError` mentioning ``-1`` and not the original key -- that
+        assertion described ``cls(-1)`` failing, a code path #864 removes; it
+        is not weakened here, it is retargeted at the deliberate replacement
+        contract, and still pins that ``-1`` never mints anything.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 
         before = len(ExtensionHeader.__members__)
-        with self.assertRaises(ValueError) as caught:
+        with self.assertRaises(KeyError) as caught:
             ExtensionHeader.get('Definitely-Not-A-Member', -1)
-        self.assertIn('-1', str(caught.exception))
-        self.assertNotIn('Definitely-Not-A-Member', str(caught.exception))
+        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
         self.assertEqual(before, len(ExtensionHeader.__members__))
 
     def test_missing_name_with_default_negative_one_float_is_now_a_real_default(self) -> None:
         """The float case that actually motivates #857: ``-1.0 == -1`` is
         ``True``, so the old ``==`` comparison could not tell a caller's
-        ``-1.0`` apart from the ``-1`` marker either. Fails on the pre-#857
-        tree with :exc:`KeyError` for the same reason as the ``-1`` case
-        above; raises :exc:`ValueError` here, for ``ExtensionHeader(-1.0)``.
+        ``-1.0`` apart from the ``-1`` marker either. Coincidentally passes
+        on the pre-#857 tree too, for the same reason its sibling test above
+        explains -- the old comparison read ``-1.0`` as the sentinel there,
+        producing the very same :exc:`KeyError` this asserts, for the wrong
+        reason. The discriminating pin for #857 lives in
+        :meth:`NoDefaultSentinelTests.test_no_default_is_not_equal_to_any_plausible_caller_value`
+        instead, not here -- see that sibling test's docstring for why.
+
+        Raises :exc:`KeyError` here, post-#864, for the reason its sibling
+        test above explains: ``-1.0`` is not a registered value, ``default``
+        no longer reaches ``cls(default)`` to fail on its own terms, and the
+        original name lookup's error propagates instead. Updated from the
+        pre-#864 tree, which asserted :exc:`ValueError` mentioning ``-1.0``
+        for ``ExtensionHeader(-1.0)`` -- that path no longer exists; this is
+        the same no-weaker retargeting as above.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
 
         before = len(ExtensionHeader.__members__)
-        with self.assertRaises(ValueError) as caught:
+        with self.assertRaises(KeyError) as caught:
             ExtensionHeader.get('Definitely-Not-A-Member', -1.0)
-        self.assertIn('-1.0', str(caught.exception))
+        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
         self.assertEqual(before, len(ExtensionHeader.__members__))
 
     def test_missing_name_without_default_still_raises_on_an_int_enum(self) -> None:
@@ -1346,6 +1375,133 @@ class NoDefaultSentinelTests(unittest.TestCase):
             BindingUpdateFlag.get('Definitely-Not-A-Member')
         self.assertIn('Definitely-Not-A-Member', str(caught.exception))
         self.assertEqual(before, len(BindingUpdateFlag.__members__))
+
+
+class GetDefaultNoMintTests(unittest.TestCase):
+    """GitHub issue #864. Both ``cls(default)`` sites -- the ``str`` branch's
+    and the value branch's -- reached ``_missing_`` for a ``default`` that
+    fell inside a still-minting registry's own range, growing the registry
+    as a side effect of resolving ``default`` rather than ``key``. The
+    owner's ruling, verbatim: *"Take (b). Only register can mint. get should
+    not mint unless it falls through the ``_missing_``'s minted ranges."*,
+    and on the implementation, choosing option 1 of three: *"I think 1 is
+    correct mechanism we'd like."* -- ``default`` now resolves through a
+    plain ``_value2member_map_`` lookup only, so it cannot mint by
+    construction, while ``key`` resolution -- and whatever it lets
+    ``_missing_`` do -- is deliberately unchanged.
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_the_issues_own_case_no_longer_mints_and_raises_instead(self) -> None:
+        """The exact reproduction from #864, on the real shipped registry.
+        Measured live on ``main`` before this fix::
+
+            >>> len(EtherType.__members__)
+            160
+            >>> EtherType.get(0x1234, 0x0888)
+            <EtherType.Xyplex_0x0888: 2184>
+            >>> len(EtherType.__members__)
+            161
+
+        ``0x1234`` (4660) falls in no ``_missing_`` range, so the lookup
+        falls to ``default``; ``0x0888`` (2184) falls inside the ``Xyplex``
+        range #775's ruling deliberately kept minting -- but only when
+        reached as a ``key``. Fails on the pre-#864 tree for that reason;
+        passes here because ``default`` no longer reaches ``cls(default)``
+        at all, so ``0x0888`` not being an *already-registered* value
+        propagates the ``0x1234`` lookup's own failure instead of minting
+        anything."""
+        from pcapkit.const.reg.ethertype import EtherType
+
+        before = len(EtherType.__members__)
+        self.assertEqual(before, 160)  # the issue's own measured baseline
+        self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
+
+        with self.assertRaises(ValueError) as caught:
+            EtherType.get(0x1234, 0x0888)
+        self.assertIn('4660', str(caught.exception))  # 0x1234 -- the key
+        self.assertNotIn('2184', str(caught.exception))  # 0x0888 -- the default
+
+        self.assertEqual(before, len(EtherType.__members__))
+        self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
+
+    def test_key_path_minting_is_preserved(self) -> None:
+        """No-change guard: ``EtherType.get(0x0888)`` -- no ``default`` at
+        all -- still mints ``Xyplex_0x0888`` through its own ``_missing_``,
+        exactly as before. Ruling one permits this explicitly (*"get should
+        not mint unless it falls through the _missing_'s minted ranges"*),
+        and #864 closes only the ``default`` path, so this passes on both
+        the pre- and post-#864 tree -- ``key`` resolution is untouched."""
+        from pcapkit.const.reg.ethertype import EtherType
+
+        before = len(EtherType.__members__)
+        self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
+
+        result = EtherType.get(0x0888)
+
+        self.assertEqual(result.name, 'Xyplex_0x0888')
+        self.assertEqual(result.value, 0x0888)
+        self.assertIn('Xyplex_0x0888', EtherType.__members__)
+        self.assertEqual(before + 1, len(EtherType.__members__))
+
+    def test_default_still_resolves_when_registered_int(self) -> None:
+        """The ruling's other half: a ``default`` that *is* already a member
+        still resolves, on an ``int``-valued (and, here, still-minting)
+        registry -- #864 restricts ``default`` to
+        ``_value2member_map_``, it does not disable it."""
+        from pcapkit.const.reg.ethertype import EtherType
+
+        target = EtherType.Internet_Protocol_version_4
+        before = len(EtherType.__members__)
+
+        result = EtherType.get(0x1234, target.value)
+
+        self.assertIs(result, target)
+        self.assertEqual(before, len(EtherType.__members__))
+
+    def test_default_still_resolves_when_registered_str(self) -> None:
+        """As above, on a ``str``-valued registry -- synthetic, since no
+        shipped :class:`~aenum.StrEnum` registry mixes in the base yet (see
+        :data:`EXCLUDED_STILL_BESPOKE`)."""
+        class _Str(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+            OTHER = 'other-value'
+
+        result = _Str.get('totally-unknown-name', 'other-value')
+
+        self.assertIs(result, _Str.OTHER)
+        self.assertEqual({'KNOWN', 'OTHER'}, set(_Str.__members__))
+
+    def test_default_naming_no_registered_member_raises_the_original_error(self) -> None:
+        """Ruling one's accepted cost, made concrete: a ``default`` inside a
+        declared-but-unassigned range used to resolve via ``cls(default)`` ->
+        ``_missing_``; now it simply does not resolve, on either branch, and
+        the *original* lookup error -- the one ``key`` itself would have
+        raised -- propagates rather than a new error about ``default``."""
+        from pcapkit.const.reg.ethertype import EtherType
+
+        before = len(EtherType.__members__)
+
+        # Non-``str`` branch: the original error is ValueError, about ``key``.
+        with self.assertRaises(ValueError) as caught_value:
+            EtherType.get(0x1234, 0x0888)
+        self.assertIn('4660', str(caught_value.exception))
+        self.assertNotIn('2184', str(caught_value.exception))
+
+        # ``str`` branch: the original error is KeyError, about ``key``.
+        class _Str(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+
+        with self.assertRaises(KeyError) as caught_key:
+            _Str.get('totally-unknown-name', 'also-not-a-member')
+        self.assertIn('totally-unknown-name', str(caught_key.exception))
+        self.assertNotIn('also-not-a-member', str(caught_key.exception))
+
+        self.assertEqual(before, len(EtherType.__members__))
 
 
 if __name__ == '__main__':
