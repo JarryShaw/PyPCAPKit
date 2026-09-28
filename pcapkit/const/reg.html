@@ -3905,32 +3905,25 @@ the base registry’s <code class="docutils literal notranslate"><span class="pr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.tcp">
 <span class="sig-name descname"><span class="pre">tcp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.tcp" title="Link to this definition">¶</a></dt>
-<dd><p>Transmission Control Protocol. Value fixed at <code class="docutils literal notranslate"><span class="pre">1</span></code> rather than
-renumbered sequentially – GitHub issue #808 dropped the <code class="docutils literal notranslate"><span class="pre">IntFlag</span></code>
-base once nothing built a composite, but did not revisit the four
-values themselves, which predate this class and are not its call to
-renumber.</p>
+<dd><p>Transmission Control Protocol.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.udp">
 <span class="sig-name descname"><span class="pre">udp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.udp" title="Link to this definition">¶</a></dt>
-<dd><p>User Datagram Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the value stays <code class="docutils literal notranslate"><span class="pre">2</span></code>
-rather than becoming sequential.</p>
+<dd><p>User Datagram Protocol.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.sctp">
-<span class="sig-name descname"><span class="pre">sctp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.sctp" title="Link to this definition">¶</a></dt>
-<dd><p>Stream Control Transmission Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the
-value stays <code class="docutils literal notranslate"><span class="pre">4</span></code> rather than becoming sequential.</p>
+<span class="sig-name descname"><span class="pre">sctp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.sctp" title="Link to this definition">¶</a></dt>
+<dd><p>Stream Control Transmission Protocol.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.TransportProtocol.dccp">
-<span class="sig-name descname"><span class="pre">dccp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.dccp" title="Link to this definition">¶</a></dt>
-<dd><p>Datagram Congestion Control Protocol. See <code class="docutils literal notranslate"><span class="pre">tcp</span></code> above for why the
-value stays <code class="docutils literal notranslate"><span class="pre">8</span></code> rather than becoming sequential.</p>
+<span class="sig-name descname"><span class="pre">dccp</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.dccp" title="Link to this definition">¶</a></dt>
+<dd><p>Datagram Congestion Control Protocol.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3938,7 +3931,7 @@ value stays <code class="docutils literal notranslate"><span class="pre">8</span
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.reg.apptype.apptype.</span></span><span class="sig-name descname"><span class="pre">AppType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_class_name</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[AppType] Application Layer Protocol Numbers</p>
 <p>This is the transport-agnostic base of the per-transport registries in
 <a class="reference internal" href="#module-pcapkit.const.reg.apptype" title="pcapkit.const.reg.apptype"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.reg.apptype</span></code></a>, and it declares <strong>no members of its own</strong>.
@@ -6873,8 +6866,13 @@ the same as any caller passing a literal port-transport bitmask
 – falls through to <code class="docutils literal notranslate"><span class="pre">int.__or__</span></code> and returns a bare
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> rather than a member. Never split back into the
 transports its bits would each name – owner ruling on this PR
-(#836) – so it is refused as a whole exactly like any other
-value naming no registry.</p></li>
+(#836) – so it is looked up as the one whole value it
+already is, exactly like any other bare int: refused when
+that whole value names no registry, resolved when it
+happens to equal one instead. Since GitHub issue #860 moved
+this class off power-of-two spacing, a hand-built composite
+is no longer guaranteed to be the former – see
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a>’s own body for a value that resolves.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -6922,6 +6920,83 @@ is minted rather than answered with an empty result.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType._sanitize_identifier">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_sanitize_identifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType._sanitize_identifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType._sanitize_identifier" title="Link to this definition">¶</a></dt>
+<dd><p>Derive a valid Python attribute name from a raw service name.</p>
+<p>Shared by <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>, both of which
+mint a name-carrying member at runtime and need the same sanitising
+steps <a class="reference internal" href="../vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">safe_name()</span></code></a> applies to
+every statically declared member’s name at generation time (minus its
+fallback; each caller raises instead – see their own <code class="docutils literal notranslate"><span class="pre">Raises</span></code>).
+Reproduced here rather than imported, since this module is generated
+<em>from</em> <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> and importing back would run a crawler
+built for one pass over IANA’s CSV for what is otherwise a plain
+string transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Raw label, exactly as a caller would want it to read on
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The sanitised identifier – not guaranteed to be a valid Python
+identifier at all (empty, or leading with a digit); callers check
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str.isidentifier" title="(in Python v3.14)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.isidentifier()</span></code></a> themselves and raise with the context
+appropriate to their own call.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.register">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="Link to this definition">¶</a></dt>
+<dd><p>Mint the first, canonical member at <code class="docutils literal notranslate"><span class="pre">port</span></code>, in this registry alone.</p>
+<p>The counterpart of <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>: that method requires
+<code class="docutils literal notranslate"><span class="pre">port</span></code> to already carry a member and adds a further name for it;
+this requires the opposite – <code class="docutils literal notranslate"><span class="pre">port</span></code> unclaimed in this registry –
+and mints the first. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> can no longer do this itself as of
+GitHub issue #860 (the owner’s ruling: <em>“only IANA registered ones
+are legit values and we need register to properly create new
+entries. get will not have sufficient information to create new
+ones.”</em>), so this is now the only way to add a service this registry
+does not already carry.</p>
+<p>Deliberately scoped like <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> to <strong>this</strong>
+per-transport registry rather than dispatched through
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._dispatch" title="pcapkit.const.reg.apptype.apptype.AppType._dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_dispatch()</span></code></a>: minting on one transport must never leak onto a
+transport IANA never assigned the service to, and a write is exactly
+the operation where guessing the right transport for the caller is
+the wrong default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number to register under. Must not already carry a
+member of this registry – see <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="pcapkit.const.reg.apptype.apptype.AppType.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> for
+that case.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The service name, i.e. what <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a> reads on the new
+member.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The newly minted member.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If called on a class that holds no members, i.e. on
+    <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> itself, which is not one of the four
+    per-transport registries; if <code class="docutils literal notranslate"><span class="pre">port</span></code> already carries a
+    member of this registry; if <code class="docutils literal notranslate"><span class="pre">name</span></code> sanitises to text that
+    is not a valid Python identifier at all; or if the identifier
+    it does sanitise to already names an unrelated member of this
+    registry.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType.register_alias">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_alias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType.register_alias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType.register_alias" title="Link to this definition">¶</a></dt>
 <dd><p>Register <code class="docutils literal notranslate"><span class="pre">name</span></code> as a new alias on <code class="docutils literal notranslate"><span class="pre">port</span></code>, in this registry alone.</p>
@@ -6933,20 +7008,14 @@ registering <code class="docutils literal notranslate"><span class="pre">www</sp
 <code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code> leaves it absent from <code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code>’s port 80, exactly as
 IANA itself never registered it there.</p>
 <p>No new storage: the new member simply joins <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code> at
-<code class="docutils literal notranslate"><span class="pre">port</span></code>, through the same <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>
-already uses to mint an unknown one below. It is then reachable
+<code class="docutils literal notranslate"><span class="pre">port</span></code>, through the same <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> uses to mint the first one. It is then reachable
 through <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.aliases" title="pcapkit.const.reg.apptype.apptype.AppType.aliases"><code class="xref py py-attr docutils literal notranslate"><span class="pre">aliases</span></code></a> on every other member already on <code class="docutils literal notranslate"><span class="pre">port</span></code>, and
 vice versa, with nothing further to keep in sync.</p>
-<p>The Python attribute name is derived from <code class="docutils literal notranslate"><span class="pre">name</span></code> through the same
-sanitising steps the generator uses for every statically declared
-member’s – <code class="docutils literal notranslate"><span class="pre">www-http</span></code> becomes <code class="docutils literal notranslate"><span class="pre">www_http</span></code> at
-<a class="reference internal" href="../vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">safe_name()</span></code></a>, reproduced below
-(minus its fallback; see Raises below) rather than imported, since
-this module is generated <em>from</em> <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> and importing
-back would run a crawler built for one pass over IANA’s CSV for what
-is otherwise a plain attribute lookup. It has to be <code class="docutils literal notranslate"><span class="pre">name</span></code>, not
-<code class="docutils literal notranslate"><span class="pre">port</span></code> and a counter: an alias whose own name does not resolve
-through subscription is most of the point of registering one, and
+<p>The Python attribute name is derived from <code class="docutils literal notranslate"><span class="pre">name</span></code> through
+<a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._sanitize_identifier" title="pcapkit.const.reg.apptype.apptype.AppType._sanitize_identifier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_sanitize_identifier()</span></code></a>. It has to be <code class="docutils literal notranslate"><span class="pre">name</span></code>, not <code class="docutils literal notranslate"><span class="pre">port</span></code> and
+a counter: an alias whose own name does not resolve through
+subscription is most of the point of registering one, and
 <code class="docutils literal notranslate"><span class="pre">TCP['www_http']</span></code> resolving is exactly what lets a caller reach an
 alias the same way every statically declared member already is.</p>
 <dl class="field-list simple">
@@ -6955,9 +7024,8 @@ alias the same way every statically declared member already is.</p>
 <li><p><strong>port</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number to register the alias under. Must already carry
 at least one member of this registry – aliasing names a
 second service on a port that already has one, rather than
-declaring a fresh port out of nothing, which stays the
-generator’s job (or, for an unassigned port, <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>’s own
-mint-on-miss).</p></li>
+declaring a fresh port out of nothing, which is <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>’s
+job.</p></li>
 <li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The alias’s service name, i.e. what <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a> reads on the
 new member – kept exactly as given, unlike the identifier
 sanitised from it below. Checked against every member already
@@ -6979,6 +7047,40 @@ on <code class="docutils literal notranslate"><span class="pre">port</span></cod
     not a valid Python identifier at all – empty, or leading with
     a digit; or if the identifier it does sanitise to already
     names an unrelated member of this registry.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.reg.apptype.apptype.AppType._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;TransportProtocol.undefined:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/reg/apptype/apptype.html#AppType._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.AppType._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables and
+its <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code> side table alike.</p>
+<p>Used by <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType._missing_" title="pcapkit.const.reg.apptype.apptype.AppType._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> for a port neither resolves
+to a real, IANA-registered service, so that such a lookup no longer
+grows either table – contrast <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit,
+caller-named path that still does.</p>
+<p>Reconstructs <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a>, <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.port" title="pcapkit.const.reg.apptype.apptype.AppType.port"><code class="xref py py-attr docutils literal notranslate"><span class="pre">port</span></code></a> and <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.proto" title="pcapkit.const.reg.apptype.apptype.AppType.proto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">proto</span></code></a> the same way
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would: <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely
+(it builds through <code class="docutils literal notranslate"><span class="pre">cls._member_type_.__new__</span></code> directly), so this
+class’s own three attributes would otherwise be missing and every
+method reading them (<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__int__()</span></code>,
+the comparison operators, <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.aliases" title="pcapkit.const.reg.apptype.apptype.AppType.aliases"><code class="xref py py-attr docutils literal notranslate"><span class="pre">aliases</span></code></a>) would raise on the result.
+Deliberately <em>not</em> added to <code class="xref py py-data docutils literal notranslate"><span class="pre">__registry__</span></code> – unlike
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>, which always does – since an unregistered member is
+exactly the one this registry must not remember past the call that
+built it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Port number.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – what
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> calls <code class="docutils literal notranslate"><span class="pre">name</span></code> and stores as <a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType.svc" title="pcapkit.const.reg.apptype.apptype.AppType.svc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">svc</span></code></a>.</p></li>
+<li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol" title="pcapkit.const.reg.apptype.apptype.TransportProtocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransportProtocol</span></code></a></span>) – Transport protocol the label names, if any.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
