@@ -271,8 +271,12 @@ class PacketReception(enum.IntEnum):
 
 
 class TLSKeyLabel(StrEnum):
-    """TLS key log label."""
+    """TLS key log label, c.f., :rfc:`9850`."""
 
+    #: NSS-historical: not a registered label of :rfc:`9850#section-4.2`'s "TLS
+    #: SSLKEYLOGFILE Labels" registry. Defined by the Mozilla NSS
+    #: ``SSLKEYLOGFILE`` convention and removed in NSS 3.34; kept here only so
+    #: that key logs predating :rfc:`9850` still read.
     RSA = 'RSA'
     CLIENT_RANDOM = 'CLIENT_RANDOM'
     CLIENT_EARLY_TRAFFIC_SECRET = 'CLIENT_EARLY_TRAFFIC_SECRET'  # nosec B105
@@ -282,6 +286,10 @@ class TLSKeyLabel(StrEnum):
     SERVER_TRAFFIC_SECRET_0 = 'SERVER_TRAFFIC_SECRET_0'  # nosec B105
     EARLY_EXPORTER_SECRET = 'EARLY_EXPORTER_SECRET'  # nosec B105
     EXPORTER_SECRET = 'EXPORTER_SECRET'  # nosec B105
+    #: HPKE KEM shared secret used in the ECH, c.f., :rfc:`9850#section-4.2`.
+    ECH_SECRET = 'ECH_SECRET'  # nosec B105
+    #: ECHConfig used for construction of the ECH, c.f., :rfc:`9850#section-4.2`.
+    ECH_CONFIG = 'ECH_CONFIG'
 
 
 class WireGuardKeyLabel(StrEnum):

@@ -1258,6 +1258,30 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         self.assertEqual(PCAPNG.__dict__['__secrets__'][SecretsType.TLS_Key_Log], 'tls')
 
+    def test_tls_key_label_tracks_rfc_9850_plus_documented_rsa_exception(self) -> None:
+        from pcapkit.protocols.misc.pcapng import TLSKeyLabel
+
+        # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry,
+        # plus the NSS-historical ``RSA`` label this module documents and retains.
+        expected = {
+            'RSA',
+            'CLIENT_RANDOM',
+            'CLIENT_EARLY_TRAFFIC_SECRET',
+            'EARLY_EXPORTER_SECRET',
+            'CLIENT_HANDSHAKE_TRAFFIC_SECRET',
+            'SERVER_HANDSHAKE_TRAFFIC_SECRET',
+            'CLIENT_TRAFFIC_SECRET_0',
+            'SERVER_TRAFFIC_SECRET_0',
+            'EXPORTER_SECRET',
+            'ECH_SECRET',
+            'ECH_CONFIG',
+        }
+        self.assertEqual(set(TLSKeyLabel.__members__), expected)
+
+        self.assertIs(TLSKeyLabel('ECH_SECRET'), TLSKeyLabel.ECH_SECRET)
+        self.assertIs(TLSKeyLabel('ECH_CONFIG'), TLSKeyLabel.ECH_CONFIG)
+        self.assertIs(TLSKeyLabel('RSA'), TLSKeyLabel.RSA)
+
     def test_pcapng_schema_helpers_and_post_process_branches(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType

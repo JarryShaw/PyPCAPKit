@@ -22,7 +22,7 @@ __all__ = ['SecretsType']
 
 #: Secrets type registry.
 DATA = {
-    0x544c534b: 'TLS Key Log',     # NSS Key Log Format
+    0x544c534b: 'TLS Key Log',     # RFC 9850
     0x57474b4c: 'WireGuard Key Log',
     0x5a4e574b: 'ZigBee NWK Key',  # ZigBee Specification
     0x5a415053: 'ZigBee APS Key',  # ZigBee Specification
