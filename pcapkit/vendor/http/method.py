@@ -36,15 +36,30 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 
 from typing import TYPE_CHECKING
 
-from aenum import StrEnum, extend_enum
+from aenum import StrEnum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Optional, Type
 
 __all__ = ['{NAME}']
 
-class {NAME}(StrEnum):
-    """[{NAME}] {DOCS}"""
+class {NAME}(EnumRegistry, StrEnum):
+    """[{NAME}] {DOCS}
+
+    .. note::
+
+       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's
+       ruling on GitHub issue #860: *"only IANA registered ones are legit
+       values and we need register to properly create new entries. get will
+       not have sufficient information to create new ones."* Concretely true
+       here -- a bare wire method verb carries no
+       :attr:`safe`/:attr:`idempotent`, so minting one used to register a
+       permanent member with both hollowed out to their defaults;
+       :meth:`register` is the path that can actually supply them.
+
+    """
 
     if TYPE_CHECKING:
         #: Safe method.
@@ -67,6 +82,56 @@ class {NAME}(StrEnum):
 
     {ENUM}
 
+    @classmethod
+    def _unregistered_member(cls, value: 'str', name: 'str') -> '{NAME}':
+        """Build a member absent from this registry's own lookup tables.
+
+        Leaves :attr:`safe` and :attr:`idempotent` at the same defaults
+        :meth:`__new__` itself would, rather than missing entirely --
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        bypasses :meth:`__new__` (it calls :class:`str`'s directly), so
+        those two attributes would otherwise be absent. There is no more
+        specific value to reconstruct them from -- a bare wire method verb
+        carries neither, which is exactly the owner's reasoning for why
+        ``get()``/``_missing_`` must not mint one: :meth:`register` is the
+        path that can actually supply them.
+
+        Args:
+            value: Value to get enum item -- the convention here, shared with
+                :class:`~pcapkit.const.ftp.command.FEATCode` and
+                :class:`~pcapkit.const.ftp.command.Command`, is the caller's
+                own casing, unchanged: an unregistered member's *value* is
+                exactly what was observed on the wire, matching how a
+                *registered* member's own value is exactly what was
+                declared, never reformatted. Only :attr:`name` -- the
+                identifier, not the value -- is canonicalised.
+
+                This is deliberately *not* the same as what a *registered*
+                member of this class carries, though, and that asymmetry is
+                left as-is here rather than fixed: :meth:`__new__` itself is
+                untouched, and it calls ``str.__new__(cls)`` with no
+                argument at all, so every one of the 40 declared members'
+                underlying :class:`str` payload is permanently empty
+                regardless of ``value`` (``str(Method.GET) == ''``, and
+                ``Method.GET == 'GET'`` is :obj:`False`) -- true on ``main``
+                as well as here. An *unregistered* member built through this
+                method, by contrast, now carries real content
+                (``str(Method('frob')) == 'frob'``). Tracked as GitHub issue
+                #870 rather than fixed in this PR: changing :meth:`__new__`
+                changes what all 40 public members compare equal to, which
+                is its own review.
+            name: Bare label for the unregistered member -- here, the
+                canonical upper-case form of ``value``, matching the name
+                every *registered* member of this class is looked up by,
+                since #860's open-vocabulary registries have no manufactured
+                placeholder label to fall back to.
+
+        """
+        obj = super()._unregistered_member(value, name)
+        obj.safe = False
+        obj.idempotent = False
+        return obj
+
     @staticmethod
     def get(key: 'str', default: 'Optional[str]' = None) -> '{NAME}':
         """Backport support for original codes.
@@ -79,8 +144,20 @@ class {NAME}(StrEnum):
         :meta private:
         """
         name = key.upper()
-        if name not in {NAME}._member_map_:  # pylint: disable=no-member
-            return extend_enum({NAME}, name, default if default is not None else key)
+        if name not in {NAME}._member_map_:  # type: ignore[misc]  # pylint: disable=no-member
+            # NOTE: the value is ``default`` if the caller supplied one, or
+            # else ``key`` exactly as given -- never ``name`` -- so an
+            # unregistered member's value is the caller's own casing, the
+            # same convention :meth:`_unregistered_member` documents and
+            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed
+            # unchanged. Two calls naming the same method in different
+            # case, e.g. ``get('frob')`` and ``get('FROB')``, therefore build
+            # results that are *not* equal -- each is exactly what its own
+            # caller passed, which minting's ``_member_map_`` cache used to
+            # paper over by returning the *first* casing seen for every
+            # later call regardless of case. Losing that is the one
+            # observable behaviour change in GitHub issue #860's conversion.
+            return {NAME}._unregistered_member(default if default is not None else key, name)
         return {NAME}[name]  # type: ignore[misc]
 
     @classmethod
@@ -97,7 +174,7 @@ class {NAME}(StrEnum):
         name = value.upper()
         if name in cls._member_map_:
             return cls._member_map_[name]  # type: ignore[return-value]
-        return extend_enum(cls, name, value)
+        return cls._unregistered_member(value, name)
 '''.strip()  # type: Callable[[str, str, str, str], str]
 
 

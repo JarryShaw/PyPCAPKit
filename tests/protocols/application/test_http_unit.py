@@ -1497,9 +1497,30 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual([name for name in Method._member_map_
                           if name.upper() == 'GET'], ['GET'])
 
+        # GitHub issue #860: a genuinely unknown method no longer registers
+        # at all -- the owner's ruling is that ``get``/``_missing_`` have no
+        # way to supply ``safe``/``idempotent``, so minting one would
+        # register a permanently hollowed-out member; only ``register()``
+        # can do that properly. The *value* keeps the caller's own casing
+        # (unchanged from before #860, and the same convention
+        # :class:`~pcapkit.const.ftp.command.FEATCode` already used) --
+        # only the *name* is canonicalised -- so a repeated call with the
+        # same casing is *equal* but never *identical* (nothing is cached
+        # to be identical to any more), while a different-case call is a
+        # genuinely different value and is correctly *not* equal: on
+        # ``main`` minting's cache silently returned the first casing seen
+        # for every later call regardless of case, which is exactly the
+        # "registered enum out of an unrecognised value" #860 removes.
         unknown = Method.get('frob')
         self.assertEqual(unknown._name_, 'FROB')
-        self.assertIs(Method.get('FROB'), unknown)
+        self.assertEqual(unknown, 'frob')
+        repeated = Method.get('frob')
+        self.assertEqual(repeated, unknown)
+        self.assertIsNot(repeated, unknown)
+        different_case = Method.get('FROB')
+        self.assertEqual(different_case, 'FROB')
+        self.assertNotEqual(different_case, unknown)
+        self.assertNotIn('FROB', Method.__members__)
 
     def test_httpv1_method_regex_is_anchored(self) -> None:
         """``_RE_METHOD`` was unanchored and :func:`re.match` anchors only at the

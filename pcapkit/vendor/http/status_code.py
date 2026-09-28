@@ -38,7 +38,9 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 
 from typing import TYPE_CHECKING
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Type
@@ -46,7 +48,7 @@ if TYPE_CHECKING:
 __all__ = ['{NAME}']
 
 
-class {NAME}(IntEnum):
+class {NAME}(EnumRegistry, IntEnum):
     """[{NAME}] {DOCS}"""
 
     if TYPE_CHECKING:
@@ -69,28 +71,26 @@ class {NAME}(IntEnum):
 
     {ENUM}
 
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
-        """Backport support for original codes.
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> '{NAME}':
+        """Build a member absent from this registry's own lookup tables.
+
+        Reconstructs :attr:`message` the same way :meth:`__new__` would,
+        rather than leaving it unset -- :meth:`~pcapkit.corekit.enum.
+        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        (it calls :class:`int`'s directly), so :attr:`message` would
+        otherwise be missing from the result and :meth:`__str__` would raise
+        on it.
 
         Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
+            value: Value to get enum item.
+            name: Bare label for the unregistered member, per the ranged
+                mint/unmint criterion.
 
-        :meta private:
         """
-        if isinstance(key, int):
-            try:
-                return {NAME}(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return {NAME}(default)
-        if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]  # type: ignore[misc]
+        obj = super()._unregistered_member(value, name)
+        obj.message = name
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':
@@ -167,7 +167,7 @@ class StatusCode(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    return extend_enum(cls, 'CODE_%d' % value, value, {name!r})")
+                miss.append(f"    return cls._unregistered_member(value, {name!r})")
         return enum, miss
 
     def context(self, data: 'list[str]') -> 'str':

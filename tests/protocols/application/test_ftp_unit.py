@@ -92,11 +92,30 @@ class FTPUnitTests(unittest.TestCase):
         # form raised too.
         self.assertIs(Command('retr'), Command.RETR)
 
-        # A genuinely unknown command still registers, under its canonical
-        # upper-case name, and does not create a case-variant duplicate.
+        # GitHub issue #860: a genuinely unknown command no longer registers
+        # at all -- the owner's ruling is that ``get``/``_missing_`` have no
+        # way to supply ``feat``/``desc``/``type``/``conf``, so minting one
+        # would register a permanently hollowed-out member; only
+        # ``register()`` can do that properly. The *value* keeps the
+        # caller's own casing (unchanged from before #860, and the same
+        # convention :class:`~pcapkit.const.ftp.command.FEATCode` already
+        # used) -- only the *name* is canonicalised -- so a repeated call
+        # with the same casing is *equal* but never *identical* (nothing is
+        # cached to be identical to any more), while a different-case call
+        # is a genuinely different value and is correctly *not* equal: on
+        # ``main`` minting's cache silently returned the first casing seen
+        # for every later call regardless of case, which is exactly the
+        # "registered enum out of an unrecognised value" #860 removes.
         unknown = Command.get('xyzw')
         self.assertEqual(unknown._name_, 'XYZW')
-        self.assertIs(Command.get('XYZW'), unknown)
+        self.assertEqual(unknown, 'xyzw')
+        repeated = Command.get('xyzw')
+        self.assertEqual(repeated, unknown)
+        self.assertIsNot(repeated, unknown)
+        different_case = Command.get('XYZW')
+        self.assertEqual(different_case, 'XYZW')
+        self.assertNotEqual(different_case, unknown)
+        self.assertNotIn('XYZW', Command.__members__)
         self.assertEqual([name for name in Command._member_map_
                           if name.upper() == 'RETR'], ['RETR'])
 

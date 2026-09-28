@@ -629,34 +629,56 @@ class ConstFlagCompositeTests(unittest.TestCase):
 
 
 class ConstEnumRegisterFallbackTests(unittest.TestCase):
-    """The one sanctioned divergence: look up, miss, then register.
+    """A once-sanctioned divergence, now retired for these three specific
+    registries.
 
-    In the owner's words, the const enums mirror the built-in "with one
-    exception: they contain the missing then register fallback (mutable enums)".
-    A guard that turned a registration into a rejection would be the regression
-    GitHub issues #584 and #623 are both about, so it is pinned here rather than
-    left to the guard tests above to imply.
+    In the owner's words, the const enums used to mirror the built-in "with
+    one exception: they contain the missing then register fallback (mutable
+    enums)". :class:`~pcapkit.const.http.method.Method`,
+    :class:`~pcapkit.const.ftp.command.Command` and
+    :class:`~pcapkit.const.ftp.command.FEATCode` were, until GitHub issue
+    #860 step 2, the last three registries still living that divergence for
+    an *unrecognised* value (every numeric registry had already lost it
+    under #775/#847's ruling). The owner's #860 ruling retired it for these
+    three too, verbatim: *"I think we should not mint on get still
+    actually. For all three, only IANA registered ones are legit values and
+    we need register to properly create new entries. get will not have
+    sufficient information to create new ones."* Concretely,
+    :class:`Command` needs :attr:`~pcapkit.const.ftp.command.Command.feat`/
+    :attr:`~pcapkit.const.ftp.command.Command.desc`/
+    :attr:`~pcapkit.const.ftp.command.Command.type`/
+    :attr:`~pcapkit.const.ftp.command.Command.conf` and
+    :class:`Method` needs :attr:`~pcapkit.const.http.method.Method.safe`/
+    :attr:`~pcapkit.const.http.method.Method.idempotent`, neither of which a
+    bare unrecognised string carries, so the old fallback used to register a
+    permanently hollowed-out member; :meth:`register` is the path that can
+    supply them properly now. What GitHub issues #584 and #623 guarded
+    against -- a guard turning a registration into an outright crash rather
+    than a clean rejection -- is still checked below, just as "resolves to
+    an equal, unregistered pseudo-member" rather than "registers".
     """
 
     def setUp(self) -> None:
         purge_modules(['pcapkit'])
 
     def tearDown(self) -> None:
-        # Every test here registers members on module-global classes.
+        # Every test here may register members on module-global classes.
         purge_modules(['pcapkit'])
 
-    def test_a_string_registry_still_registers_an_unknown_name(self) -> None:
+    def test_a_string_registry_no_longer_registers_an_unknown_name(self) -> None:
         from pcapkit.const.ftp.command import Command, FEATCode
         from pcapkit.const.http.method import Method
 
         for obj, unknown in ((Method, 'FROBNICATE'), (Command, 'XYZZY'), (FEATCode, '<zzzz>')):
             with self.subTest(enum=_qualname(obj), value=unknown):
                 before = len(obj.__members__)
-                registered = obj(unknown)
-                self.assertGreater(len(obj.__members__), before,
-                                   f'{_qualname(obj)}({unknown!r}) did not register; '
-                                   f'see GitHub issue #647')
-                self.assertIs(obj(unknown), registered)
+                first = obj(unknown)
+                self.assertEqual(len(obj.__members__), before,
+                                 f'{_qualname(obj)}({unknown!r}) registered; '
+                                 f'see GitHub issue #860')
+                second = obj(unknown)
+                self.assertEqual(first, second)
+                self.assertIsNot(first, second)
 
     def test_a_string_registry_still_matches_case_insensitively(self) -> None:
         from pcapkit.const.ftp.command import Command
@@ -1016,7 +1038,11 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         vendor_ftp = importlib.import_module('pcapkit.vendor.ftp.command')
         command = vendor_ftp.Command.__new__(vendor_ftp.Command)
         command.record = collections.Counter()
-        emitted = command.process([
+        # GitHub issue #860: process() now returns (enum rows, distinct
+        # per-command FEAT codes) rather than just the enum rows, since
+        # FEATCode must declare the latter as real members instead of
+        # minting them as a side effect of evaluating Command's own rows.
+        emitted, _feat_codes = command.process([
             'h0,h1,h2,h3,h4,h5',
             'ABOR,base,Abort a transfer,s,m,[RFC959]',
         ])
@@ -1029,7 +1055,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
         # ``desc`` is Optional[str], and ``%s`` renders None as 'None'; the
         # f-string has to agree, so the empty-description row is exercised too.
-        emitted_none = command.process([
+        emitted_none, _feat_codes_none = command.process([
             'h0,h1,h2,h3,h4,h5',
             'ABOR,base,,s,m,[RFC959]',
         ])
@@ -1089,17 +1115,41 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                     const_module.__file__  # type: ignore[arg-type]
                 ).read_text(encoding='utf-8')
 
+                # GitHub issue #860: both classes now mix in EnumRegistry,
+                # and both now close their enumeration block with a
+                # ``_unregistered_member`` classmethod (the override each
+                # needed for its own extra per-member attributes) rather
+                # than falling straight through to the ``get()``
+                # staticmethod each still keeps.
                 block = re.compile(
-                    rf'class {cls_name}\(StrEnum\):\n    """.*?\n\n    (#:.*?)'
-                    r'\n\n    @staticmethod', re.S)
+                    rf'class {cls_name}\(EnumRegistry, StrEnum\):\n    """.*?\n\n    (#:.*?)'
+                    r'\n\n    @classmethod', re.S)
                 enum_block = block.search(committed)
                 self.assertIsNotNone(enum_block, f'no enumeration block in {const_name}')
 
-                rendered = _normalize(vendor_module.LINE(
-                    vendor_class.__name__, vendor_class.__doc__,
-                    enum_block.group(1),  # type: ignore[union-attr]
-                    vendor_name,
-                ))
+                if cls_name == 'Command':
+                    # GitHub issue #860: Command's LINE gained a fifth
+                    # positional argument, FEAT -- the per-command FEATCode
+                    # members FEATCode must now declare as real members
+                    # rather than mint as an import-time side effect (see
+                    # BespokeOpenVocabularyUnmintConvertedTests). Read back
+                    # out of the committed module the same way as ENUM.
+                    feat_block_re = re.compile(
+                        r"nat6 = '<nat6>'\n\n    (#:.*?)\n\n    def __repr__", re.S)
+                    feat_block = feat_block_re.search(committed)
+                    self.assertIsNotNone(feat_block, f'no FEAT block in {const_name}')
+                    rendered = _normalize(vendor_module.LINE(
+                        vendor_class.__name__, vendor_class.__doc__,
+                        enum_block.group(1),  # type: ignore[union-attr]
+                        feat_block.group(1),  # type: ignore[union-attr]
+                        vendor_name,
+                    ))
+                else:
+                    rendered = _normalize(vendor_module.LINE(
+                        vendor_class.__name__, vendor_class.__doc__,
+                        enum_block.group(1),  # type: ignore[union-attr]
+                        vendor_name,
+                    ))
 
                 self.assertIn("def __repr__(self) -> 'str':", rendered)
                 self.assertNotIn('consider-using-f-string', rendered)

@@ -695,18 +695,24 @@ GENERATED_SAMPLE = (
 )
 
 #: Const modules tier 3 deliberately leaves alone. The first six override
-#: their crawler's own ``process()``/``context()`` with a bespoke,
-#: mint-on-lookup ``get()``/``_missing_`` pair that does not share
-#: :mod:`pcapkit.vendor.default`'s template at all -- converting any of them
-#: onto :class:`~pcapkit.corekit.enum.EnumRegistry` would still silently
-#: change behaviour rather than just move it, since four of the six are
-#: :class:`~aenum.StrEnum` registries whose own ``__new__`` attaches further
-#: attributes ``_unregistered_member`` does not set. GitHub issue #860 fixed
+#: their crawler's own ``process()``/``context()`` with a bespoke ``get()``/
+#: ``_missing_`` pair that does not share :mod:`pcapkit.vendor.default`'s
+#: template at all -- mixing :class:`~pcapkit.corekit.enum.EnumRegistry` in
+#: without further care would still have silently changed behaviour rather
+#: than just moved it, since four of the six are :class:`~aenum.StrEnum`
+#: registries whose own ``__new__`` attaches further attributes the base's
+#: generic ``_unregistered_member`` does not set. GitHub issue #860 fixed
 #: the base ``get()``'s own str-key-never-tries-the-value-path limitation
 #: this comment used to cite -- measured on a synthetic registry in
-#: :class:`StrEnumValueFallbackTests` below -- but that fix only reaches a
-#: registry that already mixes in the base; actually converting these six is
-#: issue #860's still-open step 2, not this tier. The remaining four
+#: :class:`StrEnumValueFallbackTests` below -- and issue #860's step 2 has
+#: since actually converted five of these six (``FEATCode``, ``Command``,
+#: ``Method``, ``ReturnCode``/``ResponseKind``/``GroupingInformation``,
+#: ``StatusCode`` and ``OptionType``, each with its own
+#: ``_unregistered_member`` override where a custom ``__new__`` needed one --
+#: PR 1), leaving only ``AppType`` (PR 2). They stay excluded from *this*
+#: file's tier-3 sweep regardless, because the exclusion here is about their
+#: bespoke ``process()``/``get()`` shape not sharing the generated template,
+#: which conversion onto the base does not change. The remaining four
 #: (``reg/apptype``'s transport subclasses) plus ``AppType``/
 #: ``TransportProtocol`` themselves are excluded for the separate reason
 #: :mod:`pcapkit.corekit.enum`'s own module docstring gives: they are tier 2
@@ -1098,20 +1104,31 @@ class StrEnumValueFallbackTests(unittest.TestCase):
     :class:`~pcapkit.corekit.enum.EnumRegistry` itself (added by tier 1,
     #855, which never converted a :class:`~aenum.StrEnum` registry either),
     found during #858's review on a synthetic registry rather than a real
-    one, since none of the four bespoke ``StrEnum`` const registries mix in
-    this base yet (:data:`EXCLUDED_STILL_BESPOKE` above) -- that conversion
-    is #860's separate, still-open step 2.
+    one, since at the time none of the four bespoke ``StrEnum`` const
+    registries mixed in this base yet (:data:`EXCLUDED_STILL_BESPOKE` above,
+    which still holds them out of *this* file's tier-3 sweep for a different
+    reason -- their bespoke ``__new__``/``get()`` shapes, not their base) --
+    that conversion was #860's separate step 2, landed by PR 1 for three of
+    the four (``FEATCode``, ``Command``, ``Method``) and still open for the
+    fourth (``AppType``, PR 2).
 
     Fixed here by falling back to a plain ``_value2member_map_`` lookup, not
-    ``cls(key)``: :class:`~pcapkit.const.ftp.command.FEATCode`'s own
-    ``_missing_`` mints directly via :func:`~aenum.extend_enum` for any
-    unrecognised value (that minting call reproduced verbatim in
+    ``cls(key)``: at the time this was written, :class:`~pcapkit.const.ftp.
+    command.FEATCode`'s own ``_missing_`` minted directly via
+    :func:`~aenum.extend_enum` for any unrecognised value (that minting call
+    reproduced verbatim in
     :meth:`test_get_never_mints_on_a_registry_whose_missing_mints_directly`
-    below), so routing the value fallback through the constructor would let
-    a failed *name* lookup mint a permanent member the moment #860's step 2
-    converts a registry like it onto this base -- exactly the "never mints"
-    defect :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own docstring
-    rules out. A raw dict lookup can never reach ``_missing_``, so it cannot
+    below), so routing the value fallback through the constructor would have
+    let a failed *name* lookup mint a permanent member the moment #860's
+    step 2 converted a registry like it onto this base -- exactly the
+    "never mints" defect :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s
+    own docstring rules out. Step 2 has since landed and converted
+    ``FEATCode`` itself (its ``_missing_`` now calls
+    ``_unregistered_member`` rather than ``extend_enum``, per the owner's
+    #860 ruling), which is why the fixture below is a synthetic local class
+    reproducing the *old* shape rather than importing the real one -- the
+    defect this test guards against is general, not tied to one now-fixed
+    example. A raw dict lookup can never reach ``_missing_``, so it cannot
     mint regardless of what a subclass's own ``_missing_`` does.
     """
 
@@ -1171,11 +1188,17 @@ class StrEnumValueFallbackTests(unittest.TestCase):
 
     def test_get_never_mints_on_a_registry_whose_missing_mints_directly(self) -> None:
         """The crux this fix has to get right: the minting half of this
-        fixture's ``_missing_`` is verbatim
-        :meth:`~pcapkit.const.ftp.command.FEATCode._missing_`
-        (``pcapkit/const/ftp/command.py:52``) -- ``extend_enum(cls,
-        value.upper(), value)`` for any unrecognised string. Its non-``str``
-        branch differs (delegates to ``super()._missing_`` rather than
+        fixture's ``_missing_`` was, at the time this test was written,
+        verbatim :meth:`~pcapkit.const.ftp.command.FEATCode._missing_`'s own
+        body -- ``extend_enum(cls, value.upper(), value)`` for any
+        unrecognised string. GitHub issue #860 step 2 has since converted
+        the real ``FEATCode`` onto ``_unregistered_member`` (per the owner's
+        ruling that ``get``/``_missing_`` should not mint there either), so
+        this fixture is kept as a synthetic, self-contained reproduction of
+        the *old* shape rather than updated to import the real class --
+        the point of this test is the general defect class, which a fixed
+        example can no longer demonstrate. Its non-``str`` branch differs
+        from that old shape (delegates to ``super()._missing_`` rather than
         ``FEATCode``'s own explicit ``ValueError``), which is immaterial to
         what this test proves. A naive ``return cls(key)`` fallback would
         mint a permanent member from a mere failed lookup; the

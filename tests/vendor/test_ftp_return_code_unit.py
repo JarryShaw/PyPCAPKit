@@ -188,7 +188,8 @@ class FTPReturnCodeEmptyRowTests(unittest.TestCase):
 
         self.assertIn("CODE_110: 'ReturnCode' = 110", context)
         self.assertIn("CODE_200: 'ReturnCode' = 200", context)
-        self.assertIn('class ReturnCode(IntEnum):', context)
+        # GitHub issue #860: ReturnCode now mixes in EnumRegistry.
+        self.assertIn('class ReturnCode(EnumRegistry, IntEnum):', context)
 
 
 if __name__ == '__main__':

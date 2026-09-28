@@ -573,19 +573,57 @@ class OptionEnumField(EnumField):
             issue #575.
 
         Notes:
-            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` mints a
+            Until GitHub issue #860,
+            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` minted a
             fresh member -- via :func:`aenum.extend_enum` -- for any code
-            neither namespace's row covers, and does so unconditionally on a
-            miss: unlike :class:`~pcapkit.const.reg.apptype.AppType`, its
-            ``_missing_`` never declines, so it cannot be consulted the way
-            :meth:`pcapkit.protocols.schema.transport.tcp.PortEnumField.post_process`
-            consults :class:`~pcapkit.const.reg.apptype.AppType`'s. This
-            instead replicates the read-only membership test
-            :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` itself
-            runs first, and only calls it once that test finds the code
-            already declared, so an undeclared option type gets
-            :meth:`EnumField._unregistered_member` instead of a fresh
-            registry row.
+            neither namespace's row covers, unconditionally on a miss. #860
+            converted that miss path to
+            :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+            instead, so calling it now would no longer grow the registry
+            either. This still does not call it unconditionally, though, for
+            a reason that survives that fix: :meth:`EnumField.
+            _unregistered_member` (used below) carries its own
+            ``__reduce_ex__``, so a member built this way still round-trips
+            through :mod:`pickle` -- see that method's own docstring --
+            which :meth:`~pcapkit.const.pcapng.option_type.OptionType.
+            _unregistered_member`'s own override does not: its
+            :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is
+            the *formatted* display string (``'opt_unknown [8888]'``, not
+            ``8888``), so ``pickle.dumps`` on one succeeds but
+            ``pickle.loads`` of the result raises ``ValueError`` (measured
+            on Python 3.14.7) -- the default reduction reconstructs through
+            ``cls(self._value_)``, and ``_missing_``'s own int-only guard
+            rejects that formatted string outright. The base
+            :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+            it overrides fails differently and earlier instead of not at
+            all: ``pickle.loads`` of its plain-built member's raw-code
+            ``_value_`` does succeed, but only by reconstructing through
+            ``_missing_`` -- and so through this override, not the base --
+            which is why the result's own ``_value_`` comes back as the
+            *formatted* string rather than the original code, and comparing
+            the two directly raises ``AttributeError`` on ``opt_value``.
+            What actually fails immediately on the base path is ``repr()``
+            itself, since
+            :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_name`/
+            :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_value`
+            are never set (measured) -- which is *why* the override exists
+            at all, choosing to render correctly over round-tripping
+            correctly. This method still reaches for
+            :meth:`EnumField._unregistered_member` rather than either of
+            :class:`OptionType`'s own two paths, base or override, because
+            it is the only one of the three that gets both right at once.
+            :func:`copy.deepcopy` is not the difference -- it succeeds on
+            both, unaffected by any of that: :class:`aenum.Enum` subclasses
+            the standard library's :class:`enum.Enum`, and it is *that*
+            stdlib base (not :class:`aenum.Enum` itself) that defines
+            ``__copy__``/``__deepcopy__`` to return ``self`` outright, so
+            deep-copying any member of either kind never reaches
+            ``__reduce_ex__`` in the first place. So this replicates the read-only
+            membership test :meth:`~pcapkit.const.pcapng.option_type.
+            OptionType.get` itself runs first, and only calls it once that
+            test finds the code already declared, so an undeclared option
+            type still gets :meth:`EnumField._unregistered_member` instead of
+            a registry row -- now for pickle-safety, not to avoid minting.
 
         """
         value = super(EnumField, self).post_process(value, packet)

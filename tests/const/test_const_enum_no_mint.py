@@ -43,6 +43,70 @@ branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
 for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
 range at all (see its own module for why), so the ruling never touched it.
 
+GitHub issue #860 (step 2, PR 1) has now brought 8 of those 9 classes onto
+:class:`~pcapkit.corekit.enum.EnumRegistry` and converted their branches --
+15 in total, see :data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` and
+:class:`BespokeOpenVocabularyUnmintConvertedTests` below. Two distinct
+shapes:
+
+Five range-bounded registries whose old mint used a manufactured
+placeholder label (``Unassigned``, ``Unknown_%d``, ``opt_unknown_%d``):
+:class:`~pcapkit.const.http.status_code.StatusCode` (8),
+:class:`~pcapkit.const.ftp.return_code.ReturnCode`,
+:class:`~pcapkit.const.ftp.return_code.ResponseKind` and
+:class:`~pcapkit.const.ftp.return_code.GroupingInformation` (1 each), and
+:class:`~pcapkit.const.pcapng.option_type.OptionType` (1) -- 12 branches,
+unambiguous under the mint/unmint criterion from the first measurement.
+Each carries a custom ``__new__`` with extra per-member attributes (unlike
+any of the 82 tier-2 registries above), so each needed its own
+``_unregistered_member`` override reconstructing those attributes rather
+than the shared base's generic one, and two of the five
+(:class:`StatusCode`, :class:`ReturnCode`) had their own hand-written
+``get()`` replaced by the base's -- see :class:`BespokeGetReplacementTests`
+for the ``default == -1`` -> ``NO_DEFAULT`` behaviour change that implies.
+:class:`OptionType` keeps its own ``get()`` (genuine multi-namespace
+dispatch the base does not replicate), but round 2 review found that
+``get()`` still minted on both its int/namespace path and its ``str`` path
+-- the same "leaving ``get()`` minting while ``_missing_`` does not
+contradicts the ruling" argument that converted :class:`Command`'s and
+:class:`Method`'s own ``get()`` mint sites below, just missed the first
+time round for the third registry that has one. Both are now
+``_unregistered_member`` calls too; see
+:meth:`BespokeUnmintConvertedRegistriesTests.
+test_optiontype_get_int_path_no_longer_mints`,
+``..._namespace_path_...`` and ``..._str_path_...``.
+
+Three open-vocabulary registries whose old mint used the exact, unmodified
+observed value as its own name rather than any manufactured label:
+:class:`~pcapkit.const.ftp.command.FEATCode`,
+:class:`~pcapkit.const.ftp.command.Command` and
+:class:`~pcapkit.const.http.method.Method` -- 1 ``_missing_`` branch each,
+initially left minting pending the owner's ruling (this measurement's own
+report flagged them as genuinely ambiguous under the criterion, since
+nothing about them is a manufactured placeholder). The owner's ruling on
+#860, verbatim: *"I think we should not mint on get still actually. For all
+three, only IANA registered ones are legit values and we need register to
+properly create new entries. get will not have sufficient information to
+create new ones."* That reasoning reaches ``get()`` as well as
+``_missing_`` -- :class:`Command` needs ``feat``/``desc``/``type``/``conf``
+and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
+wire string carries -- so both classes' own ``get()`` (a second, independent
+mint site bypassing ``_missing_`` entirely) converts too, alongside
+``_missing_``; :class:`FEATCode` has no custom ``__new__`` and no ``get()``
+of its own, so only its one ``_missing_`` branch was in play.
+
+Left untouched: :class:`~pcapkit.const.reg.apptype.apptype.AppType` (766
+``_missing_`` branches plus one more in its own ``get()``, tracked as #860
+step 2's PR 2), and the two classes the owner also floated a rename/base
+change for and this programme pushed back on with measurements --
+:class:`~pcapkit.const.ftp.command.CommandType` (``IntFlag`` -> ``IntEnum``
+would break its real ``A/P`` composites) and
+:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
+(``auto()`` would make ``tcp | udp == sctp``) -- both re-opened as
+`needs: decision` on #860 and explicitly out of this PR's scope; see
+:class:`BespokeOpenVocabularyUnmintConvertedTests`'s own
+``test_commandtype_and_transportprotocol_are_untouched``.
+
 """
 from __future__ import annotations
 
@@ -768,6 +832,257 @@ class UnregisteredMemberHelperTests(unittest.TestCase):
                 self.assertNotIn(name, cls.__members__)
 
 
+def _combining_operands(expr: 'ast.expr') -> 'Optional[list[ast.expr]]':
+    """Every sub-expression ``expr`` *combines* with other, fixed text to
+    build a new string, for the five shapes this tree's ``name`` arguments
+    are ever manufactured from: ``%``-formatting, string concatenation, an
+    f-string, ``str.format``, and ``sep.join([...])``. :obj:`None` if
+    ``expr`` is not one of those five combining shapes *at its own top
+    level* -- callers that want to see through a wrapping call
+    (``.upper()``, ``str(...)``) around one of these do that separately;
+    this function only recognises the combination itself.
+
+    """
+    if isinstance(expr, ast.BinOp) and isinstance(expr.op, ast.Mod):
+        rhs = expr.right
+        return list(rhs.elts) if isinstance(rhs, ast.Tuple) else [rhs]
+    if isinstance(expr, ast.BinOp) and isinstance(expr.op, ast.Add):
+        return [expr.left, expr.right]
+    if isinstance(expr, ast.JoinedStr):
+        # Both the interpolated value and its format spec can carry a
+        # combined operand -- ``f'x_{y:{value}}'`` embeds ``value`` in
+        # ``y``'s format spec, not in ``y`` itself.
+        operands = []  # type: list[ast.expr]
+        for part in expr.values:
+            if isinstance(part, ast.FormattedValue):
+                operands.append(part.value)
+                if part.format_spec is not None:
+                    operands.append(part.format_spec)
+        return operands
+    if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Attribute):
+        if expr.func.attr == 'format':
+            return list(expr.args) + [keyword.value for keyword in expr.keywords]
+        if (expr.func.attr == 'join' and expr.args
+                and isinstance(expr.args[0], (ast.List, ast.Tuple))):
+            # ``sep.join([...])`` combines every element of the list/tuple
+            # it is given -- ``sep`` itself (``expr.func.value``) is not an
+            # operand in the same sense (it is the glue, not a part being
+            # glued), so it is deliberately not included here.
+            return list(expr.args[0].elts)
+    return None
+
+
+#: The conventional parameter names, across every ``_missing_``/``get()`` in
+#: :mod:`pcapkit.const`, for the datum being looked up -- the one thing a
+#: manufactured label must never be built *from*, since that is exactly what
+#: risks an unbounded ``__members__`` collision. Anything else a combined
+#: operand might reference (a namespace prefix, a fixed default, ...) is
+#: provably not the value and is left alone.
+_VALUE_PARAMETER_NAMES = frozenset({'value', 'key'})
+
+
+def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
+    """Whether an ``_unregistered_member(...)`` call's ``name`` argument is
+    built *from the value being looked up*, rather than being independent of
+    it -- the one shape #775/#860's ruling forbids, because a label that
+    varies with the value risks the exact ``__members__`` collision minting
+    used to risk. Keyed on *which operand is combined*, not on the format
+    spec: ``'%s_unknown' % namespace`` on :class:`~pcapkit.const.pcapng.
+    option_type.OptionType`'s ``get()`` is a ``%``-format and is not
+    flagged, because the combined operand is ``namespace`` (one of a
+    handful of known prefixes) and not the value. ``'%s_unknown' % value``
+    would be exactly the same shape and *would* be flagged, because there
+    the combined operand is the value itself -- checking the format spec
+    alone (e.g. "only ``%d`` is dangerous") would have missed that, and
+    missed the identical risk written as ``'x_' + str(value)``,
+    ``'x_{}'.format(value)`` or an f-string.
+
+    ``sep.join([...])`` is a fifth combining shape in its own right --
+    :func:`_combining_operands` treats every element of the list/tuple
+    ``.join()`` is given as something combined, the same as a ``%``
+    operand -- and recurses through any *other* wrapping call --
+    ``('x_%s' % value).upper()``, ``str('x_%s' % value)``, ``f'x_{value}'.
+    upper()`` -- rather than stopping at the outermost node: a
+    ``.upper()``/``.zfill()``/``str(...)`` call around a combining shape
+    does not undo the combination underneath it, so the receiver and every
+    argument of *any* call are checked in turn. A bare
+    reference to the value alone (``value``, ``value.upper()``,
+    ``value.upper().zfill(4)``) is different in kind and is not flagged --
+    nothing is combined with anything else there, which is exactly why the
+    open-vocabulary registries (:class:`~pcapkit.const.ftp.command.
+    FEATCode`/:class:`~pcapkit.const.ftp.command.Command`/
+    :class:`~pcapkit.const.http.method.Method`) may use the value itself,
+    case-folded, as the name: the ruling's target is a *manufactured*
+    label, and folding case manufactures nothing.
+
+    A bare string constant carries nothing substituted into it at all, so
+    it is never flagged regardless of what characters it happens to
+    contain. An :class:`~ast.IfExp` choosing between two safe branches, and
+    a ``super()`` forward of the caller's own already-checked ``name``, are
+    likewise left alone by recursing into their own sub-expressions rather
+    than being hardcoded exemptions -- so a combining shape hidden inside
+    either would still be caught.
+
+    Round 5's review found that a call's *arguments* need a plainer rule
+    than its receiver does: a bare ``value``/``key`` passed as data to
+    ``str(...)``, ``operator.mod(...)``, ``.format_map(...)``, or nested
+    inside a set/generator/list-comprehension/``map(...)`` argument to
+    ``.join(...)``, is a reference this function used to clear the same
+    way it clears a receiver -- wrongly, since an argument being the value
+    at all is already how each of those shapes glues it to something
+    else. Every argument of any call is therefore walked bluntly for
+    ``value``/``key`` regardless of how deeply it is wrapped, while a
+    receiver keeps the narrower, recursive check that preserves
+    ``value.upper()``'s exemption.
+
+    Known latent gap, deliberately not closed here: ``'x_%s' %
+    self._value_`` (or ``cls._value_``) refers to the same datum through
+    the enum machinery's own attribute rather than through the
+    conventional ``value``/``key`` parameter name, which this function has
+    no way to recognise without hardcoding attribute names as well as
+    parameter names -- a broader heuristic than round 5 asked for. Nothing
+    under :mod:`pcapkit.const` writes a ``name`` argument this way today.
+
+    """
+    if name_arg is None:
+        return True
+    if isinstance(name_arg, ast.Constant):
+        return False
+    if isinstance(name_arg, ast.Name):
+        return False
+
+    combined = _combining_operands(name_arg)
+    if combined is not None:
+        return any(
+            isinstance(node, ast.Name) and node.id in _VALUE_PARAMETER_NAMES
+            for operand in combined
+            for node in ast.walk(operand)
+        )
+
+    if isinstance(name_arg, ast.Call):
+        # The receiver of a method call (``<receiver>.upper()``) is
+        # checked recursively, the same as the top-level expression would
+        # be: a bare reference to the value alone stays exempt there (that
+        # is the open-vocabulary case), while a combining shape hiding
+        # behind it (``('x_%s' % value).upper()``) is still caught by
+        # recursing into ``_combining_operands`` again.
+        if isinstance(name_arg.func, ast.Attribute) and is_manufactured(name_arg.func.value):
+            return True
+        # Every argument, by contrast, is walked *bluntly* for a value/key
+        # reference anywhere inside it, however deeply wrapped (a set,
+        # generator or list comprehension, ``map(...)``, a further call,
+        # ...) -- deliberately blunt, not because an argument can never be
+        # an innocent reference, but because the failure direction is the
+        # safe one (a false positive is loud and gets a fixture; a false
+        # negative ships quietly), and no real call site under
+        # ``pcapkit/const``/``pcapkit/vendor`` is affected either way
+        # (measured: the sweep stays at 244/0). It genuinely does over-flag:
+        # ``value.upper()`` alone is exempt (it is the receiver case just
+        # above), but the exact same expression as an *argument* --
+        # ``str(value.upper())``, ``helper(value.upper())`` -- flags, so
+        # wrapping an already-exempt transform in one more call changes the
+        # verdict. ``NAMES.get(value, 'unknown')`` flags while the
+        # semantically identical ``NAMES[value]`` does not, because one is
+        # an ``ast.Call`` and the other an ``ast.Subscript`` -- this walk
+        # only triggers on the former. A comprehension's loop variable or a
+        # ``lambda``'s parameter that merely happens to be *spelled*
+        # ``value``/``key`` also flags even when it is bound to something
+        # entirely unrelated (``map(lambda value: value, namespace)``), since
+        # nothing here tracks binding, only spelling. A keyword *name* that
+        # happens to be ``value`` (``helper(value=namespace)``) does not
+        # flag -- only the keyword's *own* value expression is walked, never
+        # its argument name. If this fires on a real, innocent site: check
+        # that the substituted operand truly is independent of the
+        # looked-up datum, then add that site to the negative fixtures --
+        # do not loosen this walk to make one site pass, since the whole
+        # point of blunt-on-arguments is to keep it that way.
+        for argument in list(name_arg.args) + [keyword.value for keyword in name_arg.keywords]:
+            for node in ast.walk(argument):
+                if isinstance(node, ast.Name) and node.id in _VALUE_PARAMETER_NAMES:
+                    return True
+        return False
+
+    # Anything else -- an IfExp's test/body/orelse, a container literal
+    # such as the list argument to ``.join([...])``, ... -- recurse into
+    # its immediate children rather than giving up, since a combining
+    # shape may be nested inside without the wrapper itself being one of
+    # the shapes handled above.
+    return any(is_manufactured(child) for child in ast.iter_child_nodes(name_arg))
+
+
+#: Fixtures for :func:`is_manufactured`'s own self-check, run before it is
+#: pointed at the real tree -- same discipline as :mod:`tests.const.
+#: test_const_enum_builtin_parity`'s ``REPR_PERCENT_WALK_FIXTURES``: a
+#: detector not shown to fire on a positive on purpose, and to stay quiet on
+#: a negative, is not trustworthy on real code either. ``(label, source,
+#: expected)`` where ``source`` is a full ``return cls._unregistered_member(
+#: value, <name-expr>)`` statement parsed for its own ``name`` argument.
+IS_MANUFACTURED_FIXTURES = (
+    # The four manufactured shapes the round-2 review named explicitly --
+    # each embeds ``value``, the thing being looked up, into the label.
+    ('percent-s-value', "cls._unregistered_member(value, 'x_%s' % value)", True),
+    ('percent-x-value', "cls._unregistered_member(value, 'x_%x' % value)", True),
+    ('concat-str-value', "cls._unregistered_member(value, 'x_' + str(value))", True),
+    ('format-method-value', "cls._unregistered_member(value, 'x_{}'.format(value))", True),
+    # An f-string embedding value is the same shape as the four above.
+    ('fstring-value', "cls._unregistered_member(value, f'x_{value}')", True),
+    # Round-3 review's gap: a wrapping call around a combining shape --
+    # hoisting a .upper()/.zfill()/str()/.join() outside the %/+/f-string
+    # must not silently disable the guard.
+    ('percent-value-then-upper', "cls._unregistered_member(value, ('x_%s' % value).upper())", True),
+    ('percent-value-then-zfill', "cls._unregistered_member(value, ('x_%d' % value).zfill(8))", True),
+    ('str-wrapping-percent', "cls._unregistered_member(value, str('x_%s' % value))", True),
+    ('fstring-then-upper', "cls._unregistered_member(value, f'x_{value}'.upper())", True),
+    ('join-list-with-value', "cls._unregistered_member(value, ''.join(['x_', str(value)]))", True),
+    # Round-5 review's gap: on the generic call-recursion path, a bare
+    # ``ast.Name`` argument (as opposed to the outermost expression) was
+    # treated as exempt the same way ``value`` alone is at the top level --
+    # which missed the value being glued in as *data* to a call rather than
+    # merely transformed. None of these nine exists under pcapkit/const/
+    # today (latent, not live), but the census that found them is exactly
+    # what this fixture set exists to keep honest.
+    ('join-set-with-value', "cls._unregistered_member(value, ''.join({'x_', str(value)}))", True),
+    ('join-genexp-with-value',
+     "cls._unregistered_member(value, ''.join(str(v) for v in [value]))", True),
+    ('join-listcomp-with-value',
+     "cls._unregistered_member(value, ''.join([str(v) for v in [value]]))", True),
+    ('join-map-with-value',
+     "cls._unregistered_member(value, ''.join(map(str, ['x_', value])))", True),
+    ('dunder-mod-value', "cls._unregistered_member(value, 'x_%s'.__mod__(value))", True),
+    ('operator-mod-value',
+     "cls._unregistered_member(value, operator.mod('x_%s', value))", True),
+    ('functools-reduce-value',
+     "cls._unregistered_member(value, functools.reduce(operator.add, ['x_', str(value)]))", True),
+    ('format-map-value',
+     "cls._unregistered_member(value, 'x_{v}'.format_map({'v': value}))", True),
+    ('fstring-format-spec-value',
+     "cls._unregistered_member(value, f'x_{y:{value}}')", True),
+    # The one real exemption: substitutes a bounded, non-value operand.
+    ('percent-s-namespace', "cls._unregistered_member(key, '%s_unknown' % namespace)", False),
+    # Every other real call site in the tree: nothing substituted at all.
+    ('bare-literal', "cls._unregistered_member(value, 'Unassigned')", False),
+    ('bare-name', "cls._unregistered_member(value, name)", False),
+    ('upper-call', "cls._unregistered_member(value, value.upper())", False),
+    ('upper-zfill-chain', "cls._unregistered_member(value, value.upper().zfill(4))", False),
+    ('ifexp-names', "cls._unregistered_member(value, default if default is not None else name)", False),
+    ('super-forward', "super()._unregistered_member(value, name)", False),
+)
+
+
+class IsManufacturedSelfCheckTests(unittest.TestCase):
+    """:func:`is_manufactured` against its own fixtures, before it is
+    trusted against the real tree below."""
+
+    def test_self_check(self) -> None:
+        for label, source, expected in IS_MANUFACTURED_FIXTURES:
+            with self.subTest(fixture=label):
+                call = ast.parse(source, mode='eval').body
+                assert isinstance(call, ast.Call)
+                name_arg = call.args[1]
+                self.assertEqual(is_manufactured(name_arg), expected,
+                                 f'{label}: {source!r}')
+
+
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     """#775's Q1 follow-up, the maintainer's ruling verbatim: *"Q1 - bare it
     is."* Asked whether the non-minting path should honour the registry's
@@ -781,20 +1096,61 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
 
     This walks every generated :mod:`pcapkit.const` module by AST -- rather
     than pinning one example -- and asserts that every
-    ``cls._unregistered_member(...)`` call site passes a plain string
-    literal with no ``%`` formatting. It therefore covers all 49 call sites
-    tier 1's follow-up touched, plus the 172 tier 2's #775/#847 ruling added
-    (221 total, measured on this tree -- see :data:`RULING_CONVERTED_
-    REGISTRIES` above), and any added by a later regeneration, without caring
-    which registry they belong to. A call site still using ``extend_enum(...)``
-    -- the 9 classes across 6 files tier 2 left untouched because they are not
-    :class:`~pcapkit.corekit.enum.EnumRegistry` yet (:class:`~pcapkit.const.
-    reg.apptype.apptype.AppType` and friends, see the module docstring), plus
+    ``cls._unregistered_member(...)`` call site's ``name`` argument is not a
+    *manufactured* numeric-suffixed label: a bare string constant containing
+    ``%`` (the old ``'Unassigned_%d' % value`` shape, spelled out as a
+    literal), or an equivalent ``%``-formatted :class:`~ast.BinOp` or
+    f-string. It therefore covers all 49 call sites tier 1's follow-up
+    touched, the 172 tier 2's #775/#847 ruling added, and -- since #860
+    step 2's PR 1 -- the 15 more across :class:`~pcapkit.const.http.
+    status_code.StatusCode`, :class:`~pcapkit.const.ftp.return_code.
+    ReturnCode`, :class:`~pcapkit.const.ftp.return_code.ResponseKind`,
+    :class:`~pcapkit.const.ftp.return_code.GroupingInformation`,
+    :class:`~pcapkit.const.pcapng.option_type.OptionType`,
+    :class:`~pcapkit.const.ftp.command.FEATCode`,
+    :class:`~pcapkit.const.ftp.command.Command` and
+    :class:`~pcapkit.const.http.method.Method` (see
+    :data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` above), plus every
+    ``super()._unregistered_member(value, name)`` forwarding call each of
+    those five ``__new__``-carrying overrides makes internally -- not a
+    fresh call site with a label of its own, just relaying whatever the true
+    call site already passed, so it is walked and counted here too rather
+    than specially excluded -- plus 2 more round 2 review found still
+    minting on :class:`OptionType`'s own ``get()`` (its int/namespace path
+    and its ``str`` path, both independent of ``_missing_``), for 244 total.
+    ``'%s_unknown' % namespace`` on the first of those two is deliberately
+    *not* flagged as manufactured despite being a ``%``-formatted
+    :class:`~ast.BinOp`: unlike ``'Unassigned_%d' % value``, the substituted
+    operand is a bounded namespace prefix, not the value being minted, so it
+    carries none of the numeric-suffix collision risk the check exists to
+    catch -- see :func:`is_manufactured`'s own docstring below.
+
+    The last three of those fifteen are a genuinely different shape from
+    every other converted registry: the ``name`` argument (the identifier
+    each is looked up by, canonicalised to upper case for all three --
+    matching how every *registered* member of :class:`Command`/
+    :class:`Method`/:class:`FEATCode` is already looked up) is not a
+    manufactured placeholder at all, it is the exact wire keyword itself,
+    just upper-cased -- so the argument is a bare :class:`~ast.Name` or a
+    plain (non-``%``) expression rather than a string constant. The
+    ``value`` argument, by contrast, is deliberately *not* touched on any
+    of the three: it stays exactly the caller's own casing, matching what
+    :meth:`~pcapkit.const.ftp.command.Command._unregistered_member`'s own
+    docstring documents as the shared convention (see
+    :meth:`BespokeOpenVocabularyUnmintConvertedTests.
+    test_command_missing_no_longer_mints` and its siblings). Neither
+    argument is *formatted* with a numeric suffix on any of the three,
+    which is the one thing that would risk a genuine ``__members__``
+    collision if these were ever minted instead of built unregistered.
+
+    A call site still using ``extend_enum(...)`` instead of
+    ``_unregistered_member(...)`` at all -- :class:`~pcapkit.const.reg.
+    apptype.apptype.AppType` (766 branches, not yet touched -- PR 2), plus
     the handful of still-minting branches on :class:`~pcapkit.const.reg.
-    ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.Socket` that the
-    ruling kept, plus :class:`~pcapkit.const.mh.cga_type.CGAType` -- is out of
-    scope and untouched by this sweep, since a minted name still needs its
-    numeric suffix to avoid a genuine ``__members__`` collision.
+    ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.Socket` that
+    the ruling kept, plus :class:`~pcapkit.const.mh.cga_type.CGAType` -- is
+    out of scope and untouched by this sweep entirely, since it never calls
+    ``_unregistered_member`` in the first place.
 
     (Corrected from an earlier draft of this docstring, which estimated
     "~92 registries still mint" and named ``pcapkit.const.mh`` and
@@ -804,7 +1160,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
 
     """
 
-    def test_every_unregistered_member_call_passes_a_bare_name(self) -> None:
+    def test_every_unregistered_member_call_passes_a_non_manufactured_name(self) -> None:
         repo_root = pathlib.Path(__file__).resolve().parents[2]
         const_root = repo_root / 'pcapkit' / 'const'
         self.assertTrue(const_root.is_dir(), f'{const_root} is not a directory')
@@ -825,23 +1181,22 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
                 call_count += 1
                 args = node.args
                 name_arg = args[1] if len(args) > 1 else None
-                is_bare_literal = (
-                    isinstance(name_arg, ast.Constant)
-                    and isinstance(name_arg.value, str)
-                    and '%' not in name_arg.value
-                )
-                if not is_bare_literal:
+                if is_manufactured(name_arg):
                     segment = ast.get_source_segment(source, node)
                     offenders.append(f'{path.relative_to(repo_root)}:{node.lineno}: {segment}')
 
         # Sanity: the sweep itself must actually be exercising something --
         # tier 1's follow-up touched exactly 49 call sites across 21 files,
-        # and tier 2's #775/#847 ruling added 172 more across 82 files, for
-        # 221 total measured on this tree.
-        self.assertGreaterEqual(call_count, 221,
-                                 f'expected at least 221 _unregistered_member call sites, found {call_count}')
+        # tier 2's #775/#847 ruling added 172 more across 82 files, and
+        # #860 step 2's PR 1 added 11 more (true call sites plus each
+        # override's own ``super()`` forward, plus the 2 round-2 review found
+        # still minting on OptionType.get()'s own two paths) across 2 files,
+        # for 244 total measured on this tree.
+        self.assertGreaterEqual(call_count, 244,
+                                 f'expected at least 244 _unregistered_member call sites, found {call_count}')
         self.assertEqual(offenders, [],
-                          'found _unregistered_member call(s) with a non-bare name:\n' + '\n'.join(offenders))
+                          'found _unregistered_member call(s) with a manufactured name:\n'
+                          + '\n'.join(offenders))
 
 
 class RulingConversionDoesNotMintTests(unittest.TestCase):
@@ -1044,6 +1399,678 @@ class IPXSocketMixedMintTests(unittest.TestCase):
         self.assertEqual(before + 1, len(Socket.__members__))
         self.assertIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
         self.assertIs(Socket(value), member)
+
+
+#: The 5 (of #860's original 9 bespoke) classes step 2's PR 1 brought onto
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` and converted: (module, class
+#: name, a probe value inside the converted range, the bare label the
+#: conversion uses). Every one of these five has a custom ``__new__`` with
+#: extra per-member attributes, unlike any of the 82 tier-2 registries in
+#: :data:`RULING_CONVERTED_REGISTRIES` above, which is exactly why each needed
+#: its own ``_unregistered_member`` override rather than the shared generic
+#: one -- see :class:`BespokeUnmintConvertedRegistriesTests`.
+BESPOKE_UNMINT_CONVERTED_REGISTRIES = (
+    ('pcapkit.const.http.status_code', 'StatusCode', 105, 'Unassigned'),
+    ('pcapkit.const.ftp.return_code', 'ReturnCode', 199, 'Unassigned'),
+    ('pcapkit.const.ftp.return_code', 'ResponseKind', 9, 'Unknown'),
+    ('pcapkit.const.ftp.return_code', 'GroupingInformation', 9, 'Unknown'),
+    ('pcapkit.const.pcapng.option_type', 'OptionType', 65000, 'opt_unknown'),
+)
+
+
+class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
+    """GitHub issue #860 step 2, PR 1: 5 of the 9 bespoke, non-
+    :class:`~pcapkit.corekit.enum.EnumRegistry` classes brought onto the base
+    and converted. Unlike every registry above, each of these five carries a
+    custom ``__new__`` setting extra attributes (``message``;
+    ``description``/``kind``/``group``; ``opt_name``/``opt_value``), so the
+    base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.
+    _unregistered_member` -- which calls the member type's ``__new__``
+    directly and sets only ``_name_``/``_value_`` -- would leave those
+    attributes unset and make ``str()``/``repr()`` raise on the result. Each
+    class therefore overrides :meth:`_unregistered_member` to reconstruct
+    them the same way ``__new__`` would. These tests exercise that
+    reconstruction directly, not just that lookup no longer mints.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_unassigned_value_resolves_without_minting(self) -> None:
+        """Swept across all 5: resolves, does not mint, repeated lookup is
+        equal but not identical -- the same shape as
+        :class:`UnassignedRangeDoesNotMintTests` above, generalised to
+        registries whose ``_unregistered_member`` is not the generic one."""
+        for module_name, class_name, value, label in BESPOKE_UNMINT_CONVERTED_REGISTRIES:
+            with self.subTest(registry=class_name):
+                cls = getattr(importlib.import_module(module_name), class_name)
+
+                self.assertNotIn(value, cls._value2member_map_)  # type: ignore[attr-defined]
+                before = len(cls.__members__)
+
+                first = cls(value)
+                after_one = len(cls.__members__)
+                second = cls(value)
+                after_two = len(cls.__members__)
+
+                self.assertEqual(before, after_one)
+                self.assertEqual(before, after_two)
+                self.assertEqual(first, second)
+                self.assertIsNot(first, second)
+                self.assertEqual(first.name, label)
+                self.assertNotIn(value, cls._value2member_map_)  # type: ignore[attr-defined]
+                self.assertNotIn(label, cls.__members__)
+
+    def test_out_of_bound_value_still_fails(self) -> None:
+        for module_name, class_name, _, _label in BESPOKE_UNMINT_CONVERTED_REGISTRIES:
+            with self.subTest(registry=class_name):
+                cls = getattr(importlib.import_module(module_name), class_name)
+                with self.assertRaises(ValueError):
+                    cls(1 << 32)
+
+    def test_statuscode_unregistered_member_displays_correctly(self) -> None:
+        """Pins that :attr:`message` -- set only by ``__new__`` on the base
+        template -- is reconstructed, since :meth:`__str__` reads it and
+        would raise :exc:`AttributeError` on a member built the generic way."""
+        from pcapkit.const.http.status_code import StatusCode
+
+        member = StatusCode(105)
+        self.assertEqual(member.message, 'Unassigned')
+        self.assertEqual(repr(member), '<StatusCode [105]>')
+        self.assertEqual(str(member), '[105] Unassigned')
+
+    def test_statuscode_every_unassigned_range_resolves_without_minting(self) -> None:
+        """All 8 of :meth:`~pcapkit.const.http.status_code.StatusCode.
+        _missing_`'s ``if`` branches, not just the first -- each is its own
+        source line and its own converted call, so covering only one leaves
+        seven untested."""
+        from pcapkit.const.http.status_code import StatusCode
+
+        for value in (105, 209, 227, 309, 419, 432, 452, 512):
+            with self.subTest(value=value):
+                before = len(StatusCode.__members__)
+                member = StatusCode(value)
+                self.assertEqual(len(StatusCode.__members__), before)
+                self.assertEqual(member.message, 'Unassigned')
+                self.assertEqual(member.value, value)
+                self.assertNotIn(value, StatusCode._value2member_map_)  # type: ignore[attr-defined]
+
+    def test_returncode_unregistered_member_displays_correctly(self) -> None:
+        """Pins that :attr:`description`, :attr:`kind` and :attr:`group` are
+        all reconstructed -- :attr:`kind`/:attr:`group` are themselves derived
+        by looking the two code digits up on :class:`ResponseKind` and
+        :class:`GroupingInformation`, which must resolve (through their own
+        conversion above) without minting either."""
+        from pcapkit.const.ftp.return_code import (GroupingInformation, ReturnCode,
+                                                    ResponseKind)
+
+        rk_before = len(ResponseKind.__members__)
+        gi_before = len(GroupingInformation.__members__)
+
+        member = ReturnCode(199)
+        self.assertIsNone(member.description)
+        self.assertIsInstance(member.kind, ResponseKind)
+        self.assertEqual(member.kind, 1)
+        self.assertIsInstance(member.group, GroupingInformation)
+        self.assertEqual(member.group, 9)
+        self.assertEqual(repr(member), '<ReturnCode [199]>')
+        self.assertEqual(str(member), '[199] None')
+
+        # The nested ResponseKind(1)/GroupingInformation(9) resolutions must
+        # not mint on either sub-registry either -- 1 is a real ResponseKind
+        # member (PositivePreliminary) so it resolves directly, but 9 is
+        # itself in GroupingInformation's own unassigned range and must go
+        # through *its* conversion above rather than minting.
+        self.assertEqual(gi_before, len(GroupingInformation.__members__))
+        self.assertEqual(rk_before, len(ResponseKind.__members__))
+
+    def test_responsekind_and_groupinginformation_unregistered_member_bare_name(self) -> None:
+        """Neither has a custom ``__new__``, so the base's generic
+        ``_unregistered_member`` needs no override for either -- pinned here
+        so a future edit that adds one notices it changed something that
+        used to be free."""
+        from pcapkit.const.ftp.return_code import GroupingInformation, ResponseKind
+
+        self.assertNotIn('_unregistered_member', ResponseKind.__dict__)
+        self.assertNotIn('_unregistered_member', GroupingInformation.__dict__)
+
+        rk = ResponseKind(9)
+        self.assertEqual(rk.name, 'Unknown')
+        gi = GroupingInformation(9)
+        self.assertEqual(gi.name, 'Unknown')
+
+    def test_optiontype_unregistered_member_displays_correctly(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        member = OptionType(65000)
+        self.assertEqual(member.opt_name, 'opt_unknown')
+        self.assertEqual(member.opt_value, 65000)
+        self.assertEqual(repr(member), '<OptionType.opt_unknown: 65000>')
+        self.assertEqual(str(member), 'opt_unknown [65000]')
+
+    def test_optiontype_members_ns_is_not_corrupted(self) -> None:
+        """The maintainer's own second lookup table, :attr:`__members_ns__`,
+        sits alongside ``_value2member_map_`` and must not grow from an
+        unregistered lookup either -- growing it would silently defeat the
+        whole point of *unregistered* through a side channel the generic
+        ``_value2member_map_``/``__members__`` assertions above cannot see.
+        This is deliberately the opposite of what the pre-conversion mint did
+        (it *did* add to ``__members_ns__``, every time), so it is pinned
+        both ways: the table must not grow, and the value must not appear in
+        it, either directly under the resolving namespace."""
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        before = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        first = OptionType(65000)
+        second = OptionType(65000)
+
+        after = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+        self.assertEqual(before, after)
+        for members in OptionType.__members_ns__.values():
+            self.assertNotIn(65000, members)
+        # And, since it never entered the table, two lookups build two
+        # independent (equal, non-identical) objects rather than the single
+        # cached one a real namespace entry would have returned.
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+    def test_optiontype_get_int_path_no_longer_mints(self) -> None:
+        """:meth:`OptionType.get` used to mint directly on a miss (bypassing
+        ``_missing_`` entirely) -- a second, independent mint site this PR's
+        first pass left alone. Round 2 review measured it live on the
+        wire-facing path (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG.
+        _make_pcapng_options` calls ``get()`` with raw option-code bytes),
+        and the owner's ruling names ``get`` explicitly -- the same reason
+        :class:`~pcapkit.const.ftp.command.Command`/:class:`~pcapkit.const.
+        http.method.Method`'s own ``get()`` mint sites converted. Leaving
+        this one minting while ``_missing_`` did not would have been the
+        exact contradiction that conversion was for."""
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        before = len(OptionType.__members__)
+        ns_before = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        first = OptionType.get(65001)
+        after = len(OptionType.__members__)
+        ns_after = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        self.assertEqual(after, before)
+        self.assertEqual(ns_before, ns_after)
+        self.assertNotIn(65001, OptionType.__members_ns__.get('opt', {}))
+
+        second = OptionType.get(65001)
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+    def test_optiontype_get_namespace_path_no_longer_mints(self) -> None:
+        """The same call, through a non-default ``namespace=`` -- a
+        different branch of the same ``if isinstance(key, int)`` block."""
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        before = len(OptionType.__members__)
+        ns_before = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        first = OptionType.get(65002, namespace='if')
+        after = len(OptionType.__members__)
+        ns_after = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        self.assertEqual(after, before)
+        self.assertEqual(ns_before, ns_after)
+        self.assertNotIn(65002, OptionType.__members_ns__.get('if', {}))
+        self.assertEqual(first.opt_name, 'if_unknown')
+
+        second = OptionType.get(65002, namespace='if')
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+    def test_optiontype_get_str_path_no_longer_mints(self) -> None:
+        """The subtler of the two: ``get()``'s ``str``-keyed branch used to
+        mint ``key`` itself as the member's *name*, with ``default`` as its
+        value -- the same "no information to register one properly"
+        reasoning as the int path, just with the roles of ``key`` and
+        ``default`` swapped in the old ``extend_enum`` call."""
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        before = len(OptionType.__members__)
+        ns_before = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        first = OptionType.get('pypcapkit_860_probe', 42)
+        after = len(OptionType.__members__)
+        ns_after = {ns: dict(members) for ns, members in OptionType.__members_ns__.items()}
+
+        self.assertEqual(after, before)
+        self.assertEqual(ns_before, ns_after)
+        self.assertNotIn('pypcapkit_860_probe', OptionType.__members__)
+        self.assertEqual(first.opt_name, 'pypcapkit_860_probe')
+        self.assertEqual(first.opt_value, 42)
+
+        second = OptionType.get('pypcapkit_860_probe', 42)
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+
+class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
+    """The 3 open-vocabulary ``StrEnum`` classes -- unlike every other unmint
+    branch converted above or on tier 2, none of these three minted a
+    synthetic numeric placeholder under a procedural label
+    (``Unassigned_%d``, ``Unknown_%d``); each minted the literal, exact
+    string it was asked to resolve, as its own name. That initially read as
+    a case for keeping them minting (the label was never manufactured), but
+    the owner's ruling on #860 settled it the other way, verbatim: *"I think
+    we should not mint on get still actually. For all three, only IANA
+    registered ones are legit values and we need register to properly
+    create new entries. get will not have sufficient information to create
+    new ones."* Concretely: :class:`~pcapkit.const.ftp.command.Command`
+    needs ``feat``/``desc``/``type``/``conf`` and
+    :class:`~pcapkit.const.http.method.Method` needs
+    ``safe``/``idempotent``, neither of which a bare wire string carries, so
+    minting used to register a permanently hollowed-out member for each.
+    :class:`~pcapkit.const.ftp.command.FEATCode` has no custom ``__new__``
+    at all and needed no override.
+
+    Both ``_missing_`` and each class's own ``get()`` (a *second*,
+    independent mint site bypassing ``_missing_`` entirely, the same shape
+    as :class:`~pcapkit.const.pcapng.option_type.OptionType`'s) are
+    converted, since the owner's reasoning names ``get`` explicitly and
+    leaving it minting while ``_missing_`` did not would have been a
+    direct contradiction. ``Command``/``Method``'s ``_unregistered_member``
+    override canonicalises the constructed value to the same upper-case
+    ``name`` used for the lookup (rather than the caller's incidental input
+    casing), which is also what makes ``get('frob')`` and ``get('FROB')``
+    compare *equal* even though, with nothing cached any more, they can
+    never again be *identical* -- see the two production regression tests
+    this forced: ``tests/protocols/application/test_ftp_unit.py::
+    FTPTestCase::test_command_get_is_case_insensitive`` and
+    ``tests/protocols/application/test_http_unit.py::HTTPTestCase::
+    test_method_get_is_case_insensitive``, both updated from ``assertIs`` to
+    ``assertEqual`` + ``assertIsNot`` for exactly this reason.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_featcode_import_mints_nothing(self) -> None:
+        """The guard against the import-time mutation coming back -- count-
+        agnostic on purpose.
+
+        Before this fix, importing :mod:`pcapkit.const.ftp.command` minted
+        :class:`~pcapkit.const.ftp.command.FEATCode` members as a side
+        effect of evaluating :class:`~pcapkit.const.ftp.command.Command`'s
+        own class body -- each row referencing an upper-case ``FEAT code``
+        called ``FEATCode('AUTH')`` etc., and :meth:`FEATCode._missing_`
+        minted one the first time. The generator now declares every ``FEAT
+        code`` the live IANA registry's own column names as a real member,
+        so every :class:`Command` row references one by plain attribute
+        access and nothing is minted merely by importing the module.
+
+        Deliberately not a literal member count: the owner's own words,
+        *"this might break when IANA updated their list. i dont like this
+        guard on the test cases"* -- a regeneration that correctly picks up
+        a newly-registered FEAT code would fail a hardcoded number for being
+        *right*. The invariant that survives a table update instead: every
+        name in ``__members__`` is a real declaration in the generated
+        source, not something built by a call at import time. A
+        regeneration moves declarations and members together; only an
+        import-time mint would leave a member with no matching declaration.
+        """
+        from pcapkit.const.ftp import command
+        from pcapkit.const.ftp.command import FEATCode
+
+        source = pathlib.Path(command.__file__).read_text(encoding='utf-8')
+        self.assertGreater(len(FEATCode.__members__), 0)
+        for name in FEATCode.__members__:
+            with self.subTest(member=name):
+                self.assertRegex(
+                    source, rf'(?m)^\s+{re.escape(name)} = ',
+                    f'{name!r} is in FEATCode.__members__ but is not declared in '
+                    f'{command.__file__!r}, so something minted it at import time')
+
+    def test_command_rows_reference_declared_featcode_members(self) -> None:
+        """Every :class:`~pcapkit.const.ftp.command.Command` row naming an
+        upper-case ``FEAT code`` must resolve to the *same* declared
+        :class:`~pcapkit.const.ftp.command.FEATCode` member as every other
+        row naming the same code -- not a fresh, unregistered one apiece,
+        which is what calling ``FEATCode(...)`` at class-body-evaluation
+        time used to build."""
+        from pcapkit.const.ftp.command import Command, FEATCode
+
+        self.assertIs(Command.AUTH.feat, FEATCode.AUTH)  # type: ignore[attr-defined]
+        self.assertIs(Command.HOST.feat, FEATCode.HOST)  # type: ignore[attr-defined]
+        self.assertIs(Command.LANG.feat, FEATCode.UTF8)  # type: ignore[attr-defined]
+        # Two different commands sharing one FEAT code resolve to the one
+        # declared member, not two distinct unregistered ones.
+        self.assertIs(Command.MLSD.feat, FEATCode.MLST)  # type: ignore[attr-defined]
+        self.assertIs(Command.MLST.feat, FEATCode.MLST)  # type: ignore[attr-defined]
+        self.assertIs(Command.MLSD.feat, Command.MLST.feat)  # type: ignore[attr-defined]
+
+    def test_featcode_missing_no_longer_mints(self) -> None:
+        """The convention pinned across all three open-vocabulary classes:
+        an unregistered member's *value* is the caller's own casing,
+        unchanged -- ``FEATCode`` never minted any other way, and
+        :class:`~pcapkit.const.ftp.command.Command`/:class:`~pcapkit.const.
+        http.method.Method` are pinned to match it below."""
+        from pcapkit.const.ftp.command import FEATCode
+
+        before = len(FEATCode.__members__)
+        first = FEATCode('pypcapkit860probe')
+        after = len(FEATCode.__members__)
+        second = FEATCode('pypcapkit860probe')
+
+        self.assertEqual(before, after)
+        self.assertNotIn('PYPCAPKIT860PROBE', FEATCode.__members__)
+        self.assertEqual(first.value, 'pypcapkit860probe')
+        self.assertEqual(first, 'pypcapkit860probe')
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+        self.assertEqual(repr(first), '<FEATCode [PYPCAPKIT860PROBE]>')
+
+    def test_command_missing_no_longer_mints(self) -> None:
+        """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s:
+        the *value* is exactly what was observed (``value == 'wire casing'``
+        holds), matching ``main``'s own pre-#860 behaviour for this class --
+        only the *name* is canonicalised. Verified directly against a
+        measured regression risk: swapping the value for the canonicalised
+        name (as an earlier revision of this conversion did) would make
+        ``Command('xyzw') == 'xyzw'`` false, which never held on ``main``
+        and would have been this PR's one real behaviour break."""
+        from pcapkit.const.ftp.command import Command, CommandType, ConformanceRequirement
+
+        before = len(Command.__members__)
+        first = Command('pypcapkit860probe')
+        after = len(Command.__members__)
+        second = Command('pypcapkit860probe')
+
+        self.assertEqual(before, after)
+        self.assertNotIn('PYPCAPKIT860PROBE', Command.__members__)
+        self.assertEqual(first.value, 'pypcapkit860probe')
+        self.assertEqual(first, 'pypcapkit860probe')
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+        # Every attribute __new__ would have set, read without raising.
+        self.assertIsNone(first.feat)
+        self.assertIsNone(first.desc)
+        self.assertEqual(first.type, CommandType.undefined)
+        self.assertEqual(first.conf, ConformanceRequirement.O)
+        self.assertEqual(repr(first), '<Command.PYPCAPKIT860PROBE: None>')
+
+    def test_command_get_unknown_no_longer_mints(self) -> None:
+        """The value keeps the caller's own casing (see :meth:`Command.
+        _unregistered_member`'s own docstring) -- so a repeated call with
+        the *same* casing is equal but not identical, while a *different*
+        casing is a genuinely different value and correctly not equal. On
+        ``main`` minting's cache made both calls return the identical,
+        first-seen-casing object regardless; losing that is #860's one
+        observable behaviour change here, not a casing change."""
+        from pcapkit.const.ftp.command import Command
+
+        before = len(Command.__members__)
+        first = Command.get('pypcapkit860probe2')
+        after = len(Command.__members__)
+        repeated = Command.get('pypcapkit860probe2')
+        different_case = Command.get('PYPCAPKIT860PROBE2')
+
+        self.assertEqual(before, after)
+        self.assertNotIn('PYPCAPKIT860PROBE2', Command.__members__)
+        self.assertEqual(first, 'pypcapkit860probe2')
+        self.assertEqual(first, repeated)
+        self.assertIsNot(first, repeated)
+        self.assertEqual(different_case, 'PYPCAPKIT860PROBE2')
+        self.assertNotEqual(first, different_case)
+
+    def test_method_missing_no_longer_mints(self) -> None:
+        """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s
+        and :class:`~pcapkit.const.ftp.command.Command`'s: an *unregistered*
+        member's value is the caller's own casing, with real :class:`str`
+        content. That leaves a genuine asymmetry with every *registered*
+        member of this class, tracked as GitHub issue #870 rather than
+        fixed here: :meth:`Method.__new__` is untouched, and it calls
+        ``str.__new__(cls)`` with no argument at all, so all 40 declared
+        members' own :class:`str` payload is permanently empty regardless
+        of value (``str(Method.GET) == ''``, ``Method.GET == 'GET'`` is
+        :obj:`False`) -- on ``main`` as well as here. This test is about
+        the *unregistered* path only, which -- because it bypasses
+        ``__new__`` entirely rather than being routed through its bug --
+        gets real content where a *minted* lookup of the same unrecognised
+        word used to get the same permanently-empty payload on ``main``
+        too."""
+        from pcapkit.const.http.method import Method
+
+        # The asymmetry itself, pinned directly: a registered member's
+        # payload is still empty, unchanged and not addressed by this PR.
+        self.assertEqual(str(Method.GET), '')
+        self.assertNotEqual(Method.GET, 'GET')
+
+        before = len(Method.__members__)
+        first = Method('pypcapkit860probe')
+        after = len(Method.__members__)
+        second = Method('pypcapkit860probe')
+
+        self.assertEqual(before, after)
+        self.assertNotIn('PYPCAPKIT860PROBE', Method.__members__)
+        self.assertEqual(str(first), 'pypcapkit860probe')
+        self.assertEqual(first, 'pypcapkit860probe')
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+
+        # Every attribute __new__ would have set, read without raising.
+        self.assertFalse(first.safe)
+        self.assertFalse(first.idempotent)
+        # Method.__repr__ reads _value_, not _name_ (unlike Command's,
+        # which reads _name_ -- see the difference reflected here), so the
+        # caller's own casing shows through in the repr too.
+        self.assertEqual(repr(first), '<Method.pypcapkit860probe>')
+
+    def test_method_get_unknown_no_longer_mints(self) -> None:
+        """Same convention and same reasoning as :meth:`Command.
+        _unregistered_member`'s -- the value keeps the caller's own
+        casing, so same-casing repeats are equal-not-identical and a
+        different casing is correctly not equal."""
+        from pcapkit.const.http.method import Method
+
+        before = len(Method.__members__)
+        first = Method.get('pypcapkit860probe2')
+        after = len(Method.__members__)
+        repeated = Method.get('pypcapkit860probe2')
+        different_case = Method.get('PYPCAPKIT860PROBE2')
+
+        self.assertEqual(before, after)
+        self.assertNotIn('PYPCAPKIT860PROBE2', Method.__members__)
+        self.assertEqual(first, 'pypcapkit860probe2')
+        self.assertEqual(first, repeated)
+        self.assertIsNot(first, repeated)
+        self.assertEqual(different_case, 'PYPCAPKIT860PROBE2')
+        self.assertNotEqual(first, different_case)
+
+    def test_registered_lookups_are_still_unaffected(self) -> None:
+        """A word IANA already assigned still resolves to the same,
+        genuinely-registered, identical member every time -- this
+        conversion only changes what happens for a word that is not one of
+        those."""
+        from pcapkit.const.ftp.command import Command
+        from pcapkit.const.http.method import Method
+
+        self.assertIs(Command('RETR'), Command.RETR)  # type: ignore[attr-defined]
+        self.assertIs(Command.get('retr'), Command.RETR)  # type: ignore[attr-defined]
+        self.assertIs(Method('GET'), Method.GET)  # type: ignore[attr-defined]
+        self.assertIs(Method.get('get'), Method.GET)  # type: ignore[attr-defined]
+
+    def test_all_three_carry_the_registry_protocol(self) -> None:
+        """#842's ruling is that ``get``/``get_all``/``register``/
+        ``register_alias`` exist on every registry -- #860 step 2 is what
+        actually delivers that for these three."""
+        from pcapkit.const.ftp.command import Command, FEATCode
+        from pcapkit.const.http.method import Method
+        from pcapkit.corekit.enum import EnumRegistry
+
+        for cls in (FEATCode, Command, Method):
+            with self.subTest(registry=cls.__name__):
+                self.assertTrue(issubclass(cls, EnumRegistry))
+                self.assertTrue(callable(getattr(cls, 'get_all', None)))
+                self.assertTrue(callable(getattr(cls, 'register', None)))
+                self.assertTrue(callable(getattr(cls, 'register_alias', None)))
+
+    def test_commandtype_and_transportprotocol_are_untouched(self) -> None:
+        """The owner's ruling also floated ``CommandType`` -> ``IntEnum`` and
+        ``TransportProtocol`` -> ``auto()``. Both are re-opened as
+        `needs: decision` on #860 and are explicitly out of PR 1's scope --
+        ``CommandType`` composes for real (measured: 2 occurrences in the
+        generated data join two kinds with ``/``, e.g. access *and*
+        parameter, which a plain ``IntEnum`` cannot represent), and
+        ``TransportProtocol`` is already ``IntEnum`` (#808 dropped
+        ``IntFlag``), so only ``auto()`` would apply there -- and under
+        ``auto()`` ``tcp | udp == 3 == sctp``, silently misrouting a
+        composite #836 documented as refused outright. Pinned here so a
+        future change to either is noticed as a scope change rather than
+        folded silently into this PR."""
+        from pcapkit.const.ftp.command import CommandType
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.corekit.enum import EnumRegistry
+
+        self.assertFalse(issubclass(CommandType, EnumRegistry))
+        self.assertFalse(issubclass(TransportProtocol, EnumRegistry))
+        self.assertEqual(CommandType.A | CommandType.P, 3)
+        self.assertEqual(int(TransportProtocol.tcp) | int(TransportProtocol.udp), 3)
+
+
+class BespokeGetReplacementTests(unittest.TestCase):
+    """:class:`~pcapkit.const.http.status_code.StatusCode` and
+    :class:`~pcapkit.const.ftp.return_code.ReturnCode` are the two of the
+    five converted classes whose hand-written ``get()`` -- on the
+    ``default == -1`` convention #857/#859 already retired everywhere else
+    -- was removed in favour of the base's :meth:`~pcapkit.corekit.enum.
+    EnumRegistry.get`, which uses :data:`~pcapkit.corekit.enum.NO_DEFAULT`
+    and never mints while resolving ``default`` (#864).
+
+    Verified before this replacement that no caller in :mod:`pcapkit` or
+    :mod:`tests` depends on the retired form: ``grep`` found exactly one
+    production call site each (:mod:`pcapkit.protocols.application.httpv1`
+    and :mod:`pcapkit.protocols.application.ftp`), neither passing a
+    ``default`` or a ``str`` key -- both call ``get(<int>)`` with no default,
+    which raises identically either way on an unresolvable key. Their own
+    ``str``-key ``get()`` branch (look up-or-mint *by name*, keyed on
+    ``default``) had no caller anywhere in this tree and is simply gone; the
+    base's ``str``-key path does an ordinary name-then-value lookup instead
+    and never mints.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_statuscode_get_omitted_default_still_raises(self) -> None:
+        """The one production call site's shape: no default passed, so an
+        unresolvable key must still raise -- true under both the old
+        ``default == -1`` convention and the new ``NO_DEFAULT`` one."""
+        from pcapkit.const.http.status_code import StatusCode
+
+        with self.assertRaises(ValueError):
+            StatusCode.get(9999)
+
+    def test_statuscode_get_minus_one_is_now_an_ordinary_default(self) -> None:
+        """Behaviour change, stated plainly: ``-1`` used to be the sentinel
+        for *no default*; it is now just an :class:`int` that -- like any
+        other -- is only honoured if it already names a registered member.
+        ``-1`` never has, on this registry, so passing it explicitly now
+        raises the *original* key's error instead of re-raising because it
+        matched the old sentinel."""
+        from pcapkit.const.http.status_code import StatusCode
+
+        with self.assertRaises(ValueError) as caught:
+            StatusCode.get(9999, -1)
+        self.assertIn('9999', str(caught.exception))
+
+    def test_statuscode_get_default_never_mints(self) -> None:
+        """#864's ruling, on this registry for the first time: a ``default``
+        landing inside a now-converted unassigned range does not resolve to
+        an unregistered member the way ``key`` does -- it simply does not
+        resolve, and ``key``'s own error propagates."""
+        from pcapkit.const.http.status_code import StatusCode
+
+        before = len(StatusCode.__members__)
+        with self.assertRaises(ValueError) as caught:
+            StatusCode.get(9999, 105)  # 105 is itself in the Unassigned range
+        self.assertIn('9999', str(caught.exception))
+        self.assertEqual(before, len(StatusCode.__members__))
+
+    def test_returncode_get_omitted_default_still_raises(self) -> None:
+        from pcapkit.const.ftp.return_code import ReturnCode
+
+        with self.assertRaises(ValueError):
+            ReturnCode.get(9999)
+
+    def test_returncode_get_default_resolves_to_a_real_member(self) -> None:
+        """The common, still-supported case: an unresolvable key falls back
+        to a ``default`` that already names a real member."""
+        from pcapkit.const.ftp.return_code import ReturnCode
+
+        result = ReturnCode.get(9999, 226)
+        self.assertIs(result, ReturnCode.CODE_226)  # type: ignore[attr-defined]
+
+    def test_statuscode_and_returncode_gained_get_all_register(self) -> None:
+        from pcapkit.const.http.status_code import StatusCode
+        from pcapkit.const.ftp.return_code import ReturnCode
+
+        for cls in (StatusCode, ReturnCode):
+            with self.subTest(registry=cls.__name__):
+                self.assertTrue(callable(getattr(cls, 'get_all', None)))
+                self.assertTrue(callable(getattr(cls, 'register', None)))
+                self.assertTrue(callable(getattr(cls, 'register_alias', None)))
+
+
+class BespokeGetUnchangedTests(unittest.TestCase):
+    """:class:`~pcapkit.const.ftp.command.Command`,
+    :class:`~pcapkit.const.http.method.Method` and
+    :class:`~pcapkit.const.pcapng.option_type.OptionType` keep their own
+    hand-written ``get()`` in PR 1, because each does real dispatch the
+    base's generic ``get()`` does not replicate and at least two of the three
+    are pinned, tested behaviour already: :class:`Command`/:class:`Method`
+    resolve case-insensitively (GitHub issues #582/#583 -- ``Command.
+    get('abor')`` must return :attr:`Command.ABOR`, not raise, and
+    ``Method.get('Get')`` must return :attr:`Method.GET` with its
+    :attr:`safe`/:attr:`idempotent` attributes intact), which the base's
+    plain ``_member_map_``/``_value2member_map_`` lookup does not do --
+    swapping in the base would silently reintroduce #582/#583.
+    :class:`OptionType`'s ``get()`` does its own multi-namespace dispatch via
+    :attr:`__members_ns__` with no base equivalent at all. These are
+    regression guards, not new coverage.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_command_get_is_still_case_insensitive(self) -> None:
+        from pcapkit.const.ftp.command import Command
+
+        for key in ('RETR', 'retr', 'ReTr', 'rEtR'):
+            with self.subTest(key=key):
+                self.assertIs(Command.get(key), Command.RETR)  # type: ignore[attr-defined]
+
+    def test_method_get_is_still_case_insensitive(self) -> None:
+        from pcapkit.const.http.method import Method
+
+        for key in ('GET', 'Get', 'get', 'gEt'):
+            with self.subTest(key=key):
+                self.assertIs(Method.get(key), Method.GET)  # type: ignore[attr-defined]
+        self.assertTrue(Method.get('Get').safe)
+
+    def test_optiontype_get_namespace_dispatch_is_unchanged(self) -> None:
+        from pcapkit.const.pcapng.option_type import OptionType
+
+        self.assertIs(OptionType.get(2, namespace='if'), OptionType.if_name)  # type: ignore[attr-defined]
+        self.assertIs(OptionType.get(2, namespace='epb'), OptionType.epb_flags)  # type: ignore[attr-defined]
 
 
 if __name__ == '__main__':
