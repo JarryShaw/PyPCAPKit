@@ -264,15 +264,25 @@ class EnumRegistry:
         returns the member the alias points at, not a separate object -- so
         two names for one assignment resolve to one enum.
 
-        It never mints -- see #864 for the ``default`` path, which does and
-        should not. Registering a member is :meth:`register`'s job and
-        nobody else's, which is the ruling #775 exists to carry out: *"so that
-        we dont create registered enums out of unrecognised/unregistered
-        values, unless user/caller explicitly created them"*. A value inside a
-        registry's declared-but-unassigned range still resolves, through that
-        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a
-        member that is deliberately absent from the lookup tables -- for a
-        non-``str`` key; the ``str`` case is qualified below.
+        It never mints while resolving ``default``; ``key`` may still mint
+        through a ``_missing_`` that GitHub issue #775's ruling deliberately
+        kept minting, on three registries (``EtherType``, ``Socket``,
+        ``CGAType``). Registering a member any other way is
+        :meth:`register`'s job and nobody else's, which is the ruling #775
+        exists to carry out: *"so that we dont create registered enums out
+        of unrecognised/unregistered values, unless user/caller explicitly
+        created them"*. A value inside a registry's declared-but-unassigned
+        range still resolves, through that registry's own ``_missing_`` and
+        :meth:`_unregistered_member`, to a member that is deliberately
+        absent from the lookup tables -- true outside the three registries
+        named above, where such a value instead lands in *both* tables,
+        exactly as :meth:`register` would leave it -- for a non-``str`` key;
+        the ``str`` case is qualified below. Both describe ``key`` resolution
+        only. ``default`` never reaches ``_missing_`` on either branch: a
+        declared-but-unassigned ``default`` does not resolve to an
+        unregistered member the way such a ``key`` does -- it simply does
+        not resolve, and the lookup error ``key`` itself would have raised
+        propagates instead.
 
         For a ``str`` key, a name match wins over a value match -- the two are
         checked in that order, so a string that happens to be both a member's
@@ -286,9 +296,11 @@ class EnumRegistry:
         mint a permanent member where it previously just raised. Restricting
         the value side of ``key`` to an already-registered value keeps *that
         side* non-minting on every ``str``-valued registry, not only the ones
-        without a minting ``_missing_`` -- it is a claim about the value side
-        alone, not about this method as a whole: an unregistered ``default``
-        still reaches ``cls(default)`` below, and can mint there just the same.
+        without a minting ``_missing_``. Since #864, that is no longer merely
+        a claim about the value side alone: ``default`` resolves through the
+        same kind of ``_value2member_map_`` lookup rather than
+        ``cls(default)``, so for a ``str`` key every path through this
+        method -- name, value and ``default`` alike -- is non-minting.
 
         That restriction has a cost the paragraph above glosses over: a
         *declared-but-unassigned* value -- the case resolved there through
@@ -304,9 +316,13 @@ class EnumRegistry:
 
         Args:
             key: Name or value to look up.
-            default: Value to fall back to when ``key`` does not resolve.
-                :data:`NO_DEFAULT` stands for *no default*, in which case the
-                lookup error propagates instead.
+            default: An already-registered value to fall back to when
+                ``key`` does not resolve. Resolved through a plain
+                ``_value2member_map_`` lookup, never through
+                ``cls(default)``, so it cannot mint -- see #864.
+                :data:`NO_DEFAULT` stands for *no default*; that and a
+                ``default`` naming no registered member both fall through to
+                the same lookup error ``key`` itself would have raised.
 
         Returns:
             The canonical member for ``key``, or for ``default``.
@@ -324,15 +340,15 @@ class EnumRegistry:
             except KeyError:
                 if key in cls._value2member_map_:
                     return cls._value2member_map_[key]
-                if default is NO_DEFAULT:
+                if default is NO_DEFAULT or default not in cls._value2member_map_:
                     raise
-                return cls(default)  # type: ignore[call-arg]
+                return cls._value2member_map_[default]
         try:
             return cls(key)  # type: ignore[call-arg]
         except ValueError:
-            if default is NO_DEFAULT:
+            if default is NO_DEFAULT or default not in cls._value2member_map_:
                 raise
-            return cls(default)  # type: ignore[call-arg]
+            return cls._value2member_map_[default]
 
     @classmethod
     def get_all(cls, key: 'Any') -> 'tuple[Self, ...]':

@@ -676,6 +676,23 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         and the integer path reaches it inside a ``try``. Both are exercised here
         for the four modules GitHub issue #647 touched, so a guard that had
         broken either would fail rather than merely go unmeasured.
+
+        This used to also probe the fallback with ``Flags.get(UNRESOLVABLE,
+        0)``, expecting it to resolve -- ``0`` is in-bounds for ``Flags``'s
+        own ``_missing_`` (``0 <= value <= 0xFFFF``), so before GitHub issue
+        #864 it reached ``cls(0)`` and resolved via the converted pseudo-member
+        path, uncaught. It is not a *registered* ``Flags`` member, though
+        (``Flags``'s smallest declared value is ``1 << 4``), so under #864's
+        restriction of ``default`` to a plain ``_value2member_map_`` lookup it
+        no longer resolves at all -- the same accepted cost as an unassigned
+        integer range, here on an :class:`~aenum.IntFlag` registry instead.
+        That is why the prior version of this assertion errored rather than
+        failed: the ``ValueError`` from the *key* (``UNRESOLVABLE``) now
+        propagates uncaught through a bare ``assertEqual`` that expected
+        success. Replaced with the same two-part check used elsewhere in this
+        batch: a *registered* default (``1 << 14``, ``SYN``) is still
+        genuinely consulted and resolves, while the unregistered ``0`` now
+        raises the same original-key error as no default at all.
         """
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.http.method import Method
@@ -694,7 +711,14 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
 
         # And the fallback the guard's ValueError is what triggers: GitHub issue
         # #584's ``get(key, default)``, which an EnumError would have walked past.
-        self.assertEqual(int(Flags.get(UNRESOLVABLE, 0)), 0)
+        # A registered default is still genuinely consulted and resolves.
+        self.assertIs(Flags.get(UNRESOLVABLE, 1 << 14), Flags.SYN)
+        # Since #864: ``0`` is not a registered ``Flags`` member, so it no
+        # longer resolves either -- the original key's error propagates, the
+        # same as omitting the default outright.
+        with self.assertRaises(ValueError) as caught:
+            Flags.get(UNRESOLVABLE, 0)
+        self.assertIn(str(UNRESOLVABLE), str(caught.exception))
         with self.assertRaises(ValueError):
             Flags.get(UNRESOLVABLE)
 

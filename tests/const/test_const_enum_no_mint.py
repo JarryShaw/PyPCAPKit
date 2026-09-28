@@ -657,15 +657,21 @@ class GetNoLongerMintsTests(unittest.TestCase):
         self.assertEqual(before, len(Hardware.__members__))
 
     def test_unresolvable_string_key_with_default_in_unassigned_range(self) -> None:
-        """The fallback is itself a value lookup, so a default landing in a
-        bounded-unassigned range returns the same kind of pseudo-member the
-        int path does -- rather than minting a member literally named after
-        the caller's unresolved key, which is what this used to do."""
+        """The fallback is itself a value lookup (GitHub issue #864), so a
+        default landing in a bounded-unassigned range no longer returns the
+        pseudo-member the int path does -- it simply does not resolve, and
+        the original key's own error propagates instead. Before #864 this
+        resolved via ``cls(default)`` -> ``_missing_`` to an unregistered
+        pseudo-member; that is exactly the cost the owner's ruling accepts
+        ("a default naming a value with no registered member stops
+        resolving, on every registry... today such a default returns an
+        unregistered member via _missing_")."""
         from pcapkit.const.arp.hardware import Hardware
 
         before = len(Hardware.__members__)
-        result = Hardware.get('Definitely-Not-A-Member', 40)
-        self.assertEqual(result.value, 40)
+        with self.assertRaises(KeyError) as caught:
+            Hardware.get('Definitely-Not-A-Member', 40)
+        self.assertIn('Definitely-Not-A-Member', str(caught.exception))
         self.assertEqual(before, len(Hardware.__members__))
         self.assertNotIn('Definitely-Not-A-Member', Hardware.__members__)
 
