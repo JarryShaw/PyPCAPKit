@@ -3180,6 +3180,35 @@ since -- reaching #805 by the entries below.
   instead. Verified against the four reverted source files: 4 of 6 new tests
   fail as methods; the other two pass either way, by design, since #866's own
   body still ended on a return. Closes #866 (#867).
+* **Fixed** -- **a breaking change to** ``EnumRegistry.get()``: its docstring
+  claimed "It never mints", but both of its ``cls(default)`` call sites reached
+  ``_missing_`` for a ``default`` that fell inside a still-minting registry's
+  own range, growing the registry as a side effect of resolving ``default``
+  rather than ``key``. Per the owner's ruling (*"Only register can mint. get
+  should not mint unless it falls through the _missing_'s minted ranges"*,
+  endorsing resolving ``default`` through a plain ``_value2member_map_`` lookup
+  only), both sites are replaced; ``key`` resolution is unchanged, so
+  ``EtherType.get(0x0888)`` still mints ``Xyplex_0x0888`` through its own
+  ``_missing_`` exactly as #775's deliberate exception permits, landing in both
+  lookup tables the way ``register`` would. A ``default`` naming no registered
+  member now falls through to the same lookup error ``key`` itself would have
+  raised, rather than a fresh error about the default -- the accepted cost of
+  the ruling. The docstring's "It never mints" is now qualified to ``default``
+  only, since ``key`` may still mint on the three still-minting registries. New
+  ``GetDefaultNoMintTests`` pin the issue's repro on the real ``EtherType``
+  registry with member count asserted unchanged, the preserved key-path mint as
+  a no-change guard, and default resolution on both an ``int`` and a ``str``
+  registry. Four pre-existing assertions in
+  ``tests/const/test_const_enum_get.py`` and
+  ``tests/const/test_const_enum_builtin_parity.py`` that encoded the old
+  contract (an unregistered default failing with its own error, or resolving
+  into a declared-but-unassigned range) are retargeted rather than weakened. A
+  fifth case -- ``Hardware.get('Definitely-Not-A-Member', 40)``, where ``40``
+  sits in ``Hardware``'s declared-but-unassigned range and now raises
+  ``KeyError`` naming the original key rather than resolving -- was deferred a
+  round because its test file was contended with #865, then applied once #865
+  (above) merged, re-measured with ``Hardware``'s member count unchanged at 42
+  before and after. Closes #864 (#868).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
