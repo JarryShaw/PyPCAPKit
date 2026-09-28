@@ -1829,24 +1829,23 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s
         and :class:`~pcapkit.const.ftp.command.Command`'s: an *unregistered*
         member's value is the caller's own casing, with real :class:`str`
-        content. That leaves a genuine asymmetry with every *registered*
-        member of this class, tracked as GitHub issue #870 rather than
-        fixed here: :meth:`Method.__new__` is untouched, and it calls
-        ``str.__new__(cls)`` with no argument at all, so all 40 declared
-        members' own :class:`str` payload is permanently empty regardless
-        of value (``str(Method.GET) == ''``, ``Method.GET == 'GET'`` is
-        :obj:`False`) -- on ``main`` as well as here. This test is about
-        the *unregistered* path only, which -- because it bypasses
-        ``__new__`` entirely rather than being routed through its bug --
-        gets real content where a *minted* lookup of the same unrecognised
-        word used to get the same permanently-empty payload on ``main``
-        too."""
+        content. This test used to also pin a genuine asymmetry with every
+        *registered* member of this class, tracked as GitHub issue #870:
+        :meth:`Method.__new__` called ``str.__new__(cls)`` with no argument
+        at all, so all 40 declared members' own :class:`str` payload was
+        permanently empty regardless of value (``str(Method.GET) == ''``,
+        ``Method.GET == 'GET'`` was :obj:`False`) -- true on ``main`` at
+        ``60b85e3a4`` as well as when this test was first written. #870
+        fixed :meth:`Method.__new__` to ``str.__new__(cls, value)``,
+        mirroring :class:`~pcapkit.const.ftp.command.Command`'s own
+        ``__new__``, so a registered member now carries its value as its
+        :class:`str` payload too -- see
+        :mod:`tests.const.test_const_str_payload_870_unit` for the direct
+        pin of that fix, registry-wide. What is left here is what this
+        test was always really about: the *unregistered* path, which
+        already carried real content before #870 (it bypasses ``__new__``
+        entirely) and is unaffected by that fix."""
         from pcapkit.const.http.method import Method
-
-        # The asymmetry itself, pinned directly: a registered member's
-        # payload is still empty, unchanged and not addressed by this PR.
-        self.assertEqual(str(Method.GET), '')
-        self.assertNotEqual(Method.GET, 'GET')
 
         before = len(Method.__members__)
         first = Method('pypcapkit860probe')
