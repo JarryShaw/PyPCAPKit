@@ -69,7 +69,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
     def __new__(cls, value: 'str', safe: 'bool' = False,
                 idempotent: 'bool' = False) -> 'Type[{NAME}]':
-        obj = str.__new__(cls)
+        obj = str.__new__(cls, value)
         obj._value_ = value
 
         obj.safe = safe
@@ -106,20 +106,21 @@ class {NAME}(EnumRegistry, StrEnum):
                 declared, never reformatted. Only :attr:`name` -- the
                 identifier, not the value -- is canonicalised.
 
-                This is deliberately *not* the same as what a *registered*
-                member of this class carries, though, and that asymmetry is
-                left as-is here rather than fixed: :meth:`__new__` itself is
-                untouched, and it calls ``str.__new__(cls)`` with no
+                A *registered* member of this class used to carry something
+                different here: GitHub issue #870 found that
+                :meth:`__new__` called ``str.__new__(cls)`` with no
                 argument at all, so every one of the 40 declared members'
-                underlying :class:`str` payload is permanently empty
-                regardless of ``value`` (``str(Method.GET) == ''``, and
-                ``Method.GET == 'GET'`` is :obj:`False`) -- true on ``main``
-                as well as here. An *unregistered* member built through this
-                method, by contrast, now carries real content
-                (``str(Method('frob')) == 'frob'``). Tracked as GitHub issue
-                #870 rather than fixed in this PR: changing :meth:`__new__`
-                changes what all 40 public members compare equal to, which
-                is its own review.
+                own :class:`str` payload was permanently empty regardless
+                of ``value`` (``str(Method.GET) == ''``, and
+                ``Method.GET == 'GET'`` was :obj:`False`) -- true on
+                ``main`` at ``60b85e3a4`` as well as when this docstring
+                was first written. #870 fixed :meth:`__new__` to
+                ``str.__new__(cls, value)``, mirroring
+                :class:`~pcapkit.const.ftp.command.Command`'s own
+                ``__new__``, so a registered member's payload now agrees
+                with an *unregistered* member built through this method:
+                both carry their own value as real :class:`str` content
+                (``str(Method('frob')) == 'frob'``).
             name: Bare label for the unregistered member -- here, the
                 canonical upper-case form of ``value``, matching the name
                 every *registered* member of this class is looked up by,
