@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.ipx.socket.Socket`.
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -80,7 +80,7 @@ class Socket(EnumRegistry, IntEnum):
             return cls._unregistered_member(value, 'Experimental')
         if 0x0001 <= value <= 0x0BB8:
             #: Registered by Xerox
-            return extend_enum(cls, 'Registered by Xerox_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Registered by Xerox_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x4000 <= value <= 0x4FFF:
             #: Dynamically Assigned Socket Numbers
             return cls._unregistered_member(value, 'Dynamically Assigned Socket Numbers')

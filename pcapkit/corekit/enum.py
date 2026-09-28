@@ -272,15 +272,17 @@ class EnumRegistry:
 
         It never mints while resolving ``default``; ``key`` may still mint
         through a ``_missing_`` that GitHub issue #775's ruling deliberately
-        kept minting, on three registries (``EtherType``, ``Socket``,
-        ``CGAType``). Registering a member any other way is
-        :meth:`register`'s job and nobody else's, which is the ruling #775
-        exists to carry out: *"so that we dont create registered enums out
-        of unrecognised/unregistered values, unless user/caller explicitly
+        kept minting, on one registry (``CGAType``) -- the ruling's final
+        round converted the other two it originally held out,
+        ``EtherType`` and ``Socket``, so they no longer mint on any path
+        either. Registering a member any other way is :meth:`register`'s
+        job and nobody else's, which is the ruling #775 exists to carry
+        out: *"so that we dont create registered enums out of
+        unrecognised/unregistered values, unless user/caller explicitly
         created them"*. A value inside a registry's declared-but-unassigned
         range still resolves, through that registry's own ``_missing_`` and
         :meth:`_unregistered_member`, to a member that is deliberately
-        absent from the lookup tables -- true outside the three registries
+        absent from the lookup tables -- true outside the one registry
         named above, where such a value instead lands in *both* tables,
         exactly as :meth:`register` would leave it -- for a non-``str`` key;
         the ``str`` case is qualified below. Both describe ``key`` resolution
@@ -309,15 +311,16 @@ class EnumRegistry:
         :class:`~pcapkit.const.reg.apptype.udp.UDP`,
         :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
         :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) no longer mint
-        on any path, so no live witness exists in this tree today. The
-        registries that still mint directly via
-        :func:`~aenum.extend_enum` --
-        :class:`~pcapkit.const.ipx.socket.Socket`,
-        :class:`~pcapkit.const.mh.cga_type.CGAType` and
-        :class:`~pcapkit.const.reg.ethertype.EtherType` -- are all
-        :class:`int`-valued, so a ``str`` name could not reach their mint
-        branches even if this restriction did not exist; they are not
-        exceptions to it, just not reachable by it. This is about a future
+        on any path, so no live witness exists in this tree today. The one
+        registry that still mints directly via :func:`~aenum.extend_enum`,
+        :class:`~pcapkit.const.mh.cga_type.CGAType`, is
+        :class:`int`-valued, so a ``str`` name could not reach its mint
+        branch even if this restriction did not exist; it is not an
+        exception to it, just not reachable by it. GitHub issue #775's final
+        round converted the other two that used to share this footnote,
+        :class:`~pcapkit.const.ipx.socket.Socket` and
+        :class:`~pcapkit.const.reg.ethertype.EtherType`, so ``CGAType`` is
+        now the only one left. This is about a future
         ``str``-valued registry (or a present one whose ``_missing_``
         someday changes) reaching this base with a minting ``_missing_`` of
         its own, which the restriction below is written to stay correct

@@ -102,9 +102,9 @@ EXPECTED_RANGES = (
 #: the value because the value alone cannot tell a live range branch from a
 #: masked one: every branch of the generated ``_missing_`` returns ``value``,
 #: so only the name says which branch ran -- for ``Registered by Xerox``,
-#: which still mints, that name still carries the value as a numeric suffix;
-#: asserting the value alone would pass just as happily with the range
-#: branches deleted or reordered.
+#: that name still carries the value as a numeric suffix even though it no
+#: longer mints (see below); asserting the value alone would pass just as
+#: happily with the range branches deleted or reordered.
 #:
 #: Before GitHub issue #841 was fixed, three of these were unreachable --
 #: ``(0x0001, 0x0BB8)`` masked ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)``
@@ -113,13 +113,18 @@ EXPECTED_RANGES = (
 #: ``0xFFFF`` all resolved under the wrong wide range's name. See
 #: :data:`pcapkit.vendor.ipx.socket.RANGES` for the reordering that fixed it.
 #:
-#: GitHub issues #775/#847's mint-criterion ruling then converted four of the
-#: five ranges -- ``Experimental``, ``Dynamically Assigned Socket Numbers``,
-#: ``Statically Assigned Socket Numbers`` and ``Dynamically Assigned`` each
-#: name an allocation *policy* for the pool rather than a specific assignment,
-#: so they no longer mint and their bare name carries no numeric suffix.
-#: ``Registered by Xerox`` is the one that stayed: it states a real ownership
-#: fact, not a status placeholder, so it still mints exactly as before.
+#: GitHub issue #775/#847's original mint-criterion ruling then converted four
+#: of the five ranges -- ``Experimental``, ``Dynamically Assigned Socket
+#: Numbers``, ``Statically Assigned Socket Numbers`` and ``Dynamically
+#: Assigned`` each name an allocation *policy* for the pool rather than a
+#: specific assignment, so they no longer mint and their bare name carries no
+#: numeric suffix. ``Registered by Xerox`` was the one that stayed at the
+#: time, on the theory that it states a real ownership fact rather than a
+#: status placeholder -- #775's *final* round converts it too, keeping its
+#: hex-suffixed name unchanged (the owner's ruling: preserve the existing
+#: name argument exactly, this is about not registering, not about renaming),
+#: so all five ranges resolve through :meth:`~pcapkit.corekit.enum.
+#: EnumRegistry._unregistered_member` now and none of them mint.
 EXPECTED_MISSING_NAMES = {
     0x0000: 'Unspecified',                    # a defined member
     0x0001: 'Routing_Information_Packet',     # a defined member

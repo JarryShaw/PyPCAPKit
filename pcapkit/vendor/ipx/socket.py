@@ -252,9 +252,13 @@ RANGES = [
 
 #: Range names from :data:`RANGES` above that name an allocation *policy* for
 #: the pool (who may claim a code, or that nobody has) rather than a specific
-#: assigned protocol -- the owner's ruling on #775/#847. ``Registered by
-#: Xerox`` stays a mint: it is a real ownership fact, not a placeholder, and
-#: kept notation for the reader is what only these four are.
+#: assigned protocol. The owner's original ruling on #775/#847 held
+#: ``Registered by Xerox`` out of this set as a real ownership fact rather
+#: than a placeholder. #775's final round converts it too, so this set no
+#: longer decides *whether* a range registers -- only *how its name is
+#: spelled*: these four keep the bare label with no hex suffix, since the
+#: label itself already says nothing was assigned, while ``Registered by
+#: Xerox`` keeps the hex-suffixed name it always rendered.
 UNASSIGNED_RANGE_NAMES = frozenset({
     'Experimental',
     'Dynamically Assigned Socket Numbers',
@@ -319,7 +323,7 @@ class Socket(Vendor):
             if name in UNASSIGNED_RANGE_NAMES:
                 miss.append(f"    return cls._unregistered_member(value, '{name}')")
             else:
-                miss.append(f"    return extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
+                miss.append(f"    return cls._unregistered_member(value, '{name}_0x%s' % hex(value)[2:].upper().zfill(4))")
         return enum, miss
 
 
