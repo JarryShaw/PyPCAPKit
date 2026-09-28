@@ -41,7 +41,9 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from aenum import StrEnum, extend_enum
+from aenum import StrEnum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['{NAME}']
 
@@ -49,7 +51,7 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
 
-class {NAME}(StrEnum):
+class {NAME}(EnumRegistry, StrEnum):
     """[{NAME}] {DOCS}"""
 
     if TYPE_CHECKING:
@@ -107,6 +109,41 @@ class {NAME}(StrEnum):
 
     {ENUM}
 
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> '{NAME}':
+        """Build a member absent from this registry's own lookup tables.
+
+        Cannot reuse the base's generic construction --
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` calls
+        :class:`str`'s ``__new__`` directly on the raw ``value``, but
+        {NAME} stores a *formatted* string (``'{{name}} [{{value}}]'``) as
+        its own :attr:`~aenum.Enum._value_`, not ``value`` itself, so that
+        approach would build a member whose value looks nothing like this
+        registry's real members.
+
+        Deliberately does **not** add to :attr:`__members_ns__` either --
+        that dict is this registry's own second lookup table, alongside
+        :attr:`~aenum.Enum._value2member_map_`, and growing it would defeat
+        the whole point of an *unregistered* member exactly as growing
+        ``_value2member_map_`` would.
+
+        Args:
+            value: Value to get enum item.
+            name: Bare label for the unregistered member, per the ranged
+                mint/unmint criterion.
+
+        """
+        temp = '%s [%d]' % (name, value)
+
+        obj = str.__new__(cls, temp)
+        obj._name_ = name  # pylint: disable=attribute-defined-outside-init
+        obj._value_ = temp
+
+        obj.opt_name = name
+        obj.opt_value = value
+
+        return obj
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -> '{NAME}':
         """Backport support for original codes.
@@ -123,10 +160,25 @@ class {NAME}(StrEnum):
             temp_ns.update({NAME}.__members_ns__.get(namespace, {{}}))
             if key in temp_ns:
                 return temp_ns[key]
-            return extend_enum({NAME}, '%s_unknown_%d' % (namespace, key), key, '%s_unknown' % namespace)
+            # NOTE: GitHub issue #860. This used to extend_enum(...) a
+            # permanent member as a side effect of a mere lookup -- exactly
+            # the ``get``/``_missing_`` minting the owner's ruling forbids,
+            # here on the wire-facing path
+            # (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
+            # calls this with raw option-code bytes off the wire).
+            # ``_unregistered_member`` never touches ``__members_ns__``
+            # either, so a genuinely unknown option code no longer grows
+            # either lookup table.
+            return {NAME}._unregistered_member(key, '%s_unknown' % namespace)
         if key in {NAME}.__members__:
             return getattr({NAME}, key)
-        return extend_enum({NAME}, key, default, key)
+        # NOTE: same ruling, the str-keyed path: this used to mint ``key``
+        # itself as the member's name with ``default`` as its value. Neither
+        # ``get`` nor ``_missing_`` has enough information to register one
+        # properly -- there is no namespace, description or anything else
+        # IANA would attach to it -- so this now returns an unregistered
+        # pseudo-member with the same attributes the old mint would have set.
+        return {NAME}._unregistered_member(default, key)
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':
@@ -196,7 +248,7 @@ class OptionType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "return extend_enum(cls, 'opt_unknown_%d' % value, value, 'opt_unknown')",
+            "return cls._unregistered_member(value, 'opt_unknown')",
         ]  # type: list[str]
 
         for content in data['table-1']:

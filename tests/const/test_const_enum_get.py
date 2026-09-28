@@ -20,10 +20,25 @@ defect was live in 110 -- not just the three the issue named. Three of the
 remaining eight never raise on an out-of-range integer because they auto-extend
 the whole space, and five carry no ``get(key, default)`` at all.
 
-GitHub issue #647 moved one of those three into the sweep, so the arithmetic is
-now 111 + 2 + 5. :class:`~pcapkit.const.tcp.flags.Flags` resolved every integer
-only because it defined no ``_missing_`` to bound its domain; it does now, so its
-``get`` has a failure for ``default`` to fall back from like the other 110.
+GitHub issue #647 moved one of those three into the sweep, so the arithmetic
+was 111 + 2 + 5. :class:`~pcapkit.const.tcp.flags.Flags` resolved every
+integer only because it defined no ``_missing_`` to bound its domain; it does
+now, so its ``get`` has a failure for ``default`` to fall back from like the
+other 110.
+
+GitHub issue #860 step 2 then brought :class:`~pcapkit.const.ftp.return_code.
+GroupingInformation` and :class:`~pcapkit.const.ftp.return_code.ResponseKind`
+onto :class:`~pcapkit.corekit.enum.EnumRegistry`, giving each the base
+``get(key, default)`` it never had before -- two fewer of the five with no
+integer ``default`` at all, two more in the main sweep. The full arithmetic,
+spelled out completely rather than left to imply a total that silently
+dropped :class:`~pcapkit.const.pcapng.filter_type.FilterType` (in
+:data:`EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK`, excused from the main sweep
+for a separate reason and covered by its own test below) the way the "111 +
+2 + 5" phrasing above always did: 112 (main sweep) + 2
+(:data:`EXPECTED_TO_RESOLVE_ANYTHING`) + 3
+(:data:`EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`) + 1 (``FilterType``) = 118,
+matching :meth:`test_the_sweep_size_is_pinned`.
 
 Two more registries are outside this sweep because they are
 :class:`~aenum.StrEnum` rather than integer enums, and both were deliberately
@@ -94,16 +109,20 @@ EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
 })
 
 #: Enums carrying no ``get(key, default)``, so there is no ``default`` to drop.
-#: The first four are helper enums describing a registry's columns rather than
+#: The first two are helper enums describing a registry's columns rather than
 #: registries themselves and have no ``get`` at all;
 #: :class:`~pcapkit.const.reg.apptype.TransportProtocol` has a ``get`` whose
 #: signature takes no ``default`` -- which is why the rewrite had to check the
 #: signature rather than pattern-match the body.
+#:
+#: :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
+#: :class:`~pcapkit.const.ftp.return_code.ResponseKind` were here too until
+#: GitHub issue #860 step 2 brought them onto
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` -- they inherit the base
+#: ``get(key, default)`` now, so they moved into the main sweep below instead.
 EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
     'pcapkit.const.ftp.command.CommandType',
     'pcapkit.const.ftp.command.ConformanceRequirement',
-    'pcapkit.const.ftp.return_code.GroupingInformation',
-    'pcapkit.const.ftp.return_code.ResponseKind',
     'pcapkit.const.reg.apptype.apptype.TransportProtocol',
 })
 
@@ -332,8 +351,12 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # it used to be counted here only because an import-time side effect
         # (see ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``) happened to leave it
         # one real member to use as ``fallback``, and the ruling removed that
-        # side effect along with the mint it came from.
-        self.assertEqual(covered, 110)
+        # side effect along with the mint it came from; plus 2 for GitHub
+        # issue #860 step 2, which gave ``GroupingInformation`` and
+        # ``ResponseKind`` the base ``get(key, default)`` they never had
+        # before, moving them out of ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT``
+        # and into this sweep.
+        self.assertEqual(covered, 112)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

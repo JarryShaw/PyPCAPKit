@@ -290,10 +290,26 @@ class EnumRegistry:
         matching what already happened for a name that resolves today. The
         value side of that check is a plain ``_value2member_map_`` lookup, not
         ``cls(key)``: on a registry whose own ``_missing_`` mints for an
-        unrecognised value -- :class:`~pcapkit.const.ftp.command.FEATCode`'s
-        does, directly, via :func:`~aenum.extend_enum` -- routing a failed
-        *name* lookup through the constructor would let a mere ``get()`` call
-        mint a permanent member where it previously just raised. Restricting
+        unrecognised value, routing a failed *name* lookup through the
+        constructor would let a mere ``get()`` call mint a permanent member
+        where it previously just raised. Defensive rather than observed: of
+        the 119 classes that mix in this base, the ``str``-valued ones
+        (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
+        ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
+        :class:`~pcapkit.const.pcapng.option_type.OptionType`) no longer mint
+        on any path as of GitHub issue #860, so no live witness exists in
+        this tree today. The registries that still mint directly via
+        :func:`~aenum.extend_enum` --
+        :class:`~pcapkit.const.ipx.socket.Socket`,
+        :class:`~pcapkit.const.mh.cga_type.CGAType` and
+        :class:`~pcapkit.const.reg.ethertype.EtherType` -- are all
+        :class:`int`-valued, so a ``str`` name could not reach their mint
+        branches even if this restriction did not exist; they are not
+        exceptions to it, just not reachable by it. This is about a future
+        ``str``-valued registry (or a present one whose ``_missing_``
+        someday changes) reaching this base with a minting ``_missing_`` of
+        its own, which the restriction below is written to stay correct
+        for regardless. Restricting
         the value side of ``key`` to an already-registered value keeps *that
         side* non-minting on every ``str``-valued registry, not only the ones
         without a minting ``_missing_``. Since #864, that is no longer merely

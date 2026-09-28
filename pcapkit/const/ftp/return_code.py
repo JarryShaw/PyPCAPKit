@@ -13,7 +13,9 @@ which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.Ret
 
 from typing import TYPE_CHECKING
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -31,7 +33,7 @@ INFO = {
 }  # type: dict[str, str]
 
 
-class ResponseKind(IntEnum):
+class ResponseKind(EnumRegistry, IntEnum):
     """Response kind; whether the response is good, bad or incomplete."""
 
     PositivePreliminary = 1
@@ -50,11 +52,12 @@ class ResponseKind(IntEnum):
 
         """
         if isinstance(value, int) and 0 <= value <= 9:
-            return extend_enum(cls, 'Unknown_%d' % value, value)
+            #: Unknown
+            return cls._unregistered_member(value, 'Unknown')
         return super()._missing_(value)
 
 
-class GroupingInformation(IntEnum):
+class GroupingInformation(EnumRegistry, IntEnum):
     """Grouping information."""
 
     Syntax = 0
@@ -73,11 +76,12 @@ class GroupingInformation(IntEnum):
 
         """
         if isinstance(value, int) and 0 <= value <= 9:
-            return extend_enum(cls, 'Unknown_%d' % value, value)
+            #: Unknown
+            return cls._unregistered_member(value, 'Unknown')
         return super()._missing_(value)
 
 
-class ReturnCode(IntEnum):
+class ReturnCode(EnumRegistry, IntEnum):
     """[ReturnCode] FTP Server Return Code"""
 
     if TYPE_CHECKING:
@@ -280,28 +284,29 @@ class ReturnCode(IntEnum):
     #: Confidentiality protected reply.
     CODE_633: 'ReturnCode' = 633, 'Confidentiality protected reply.'
 
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'ReturnCode':
-        """Backport support for original codes.
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> 'ReturnCode':
+        """Build a member absent from this registry's own lookup tables.
+
+        Reconstructs :attr:`description`, :attr:`kind` and :attr:`group` the
+        same way :meth:`__new__` would, rather than leaving them unset --
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+        bypasses :meth:`__new__` entirely (it calls :class:`int`'s directly),
+        so those three attributes would otherwise be missing from the result
+        and :meth:`__str__`/:meth:`__repr__` would raise on it.
 
         Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
+            value: Value to get enum item.
+            name: Bare label for the unregistered member, per the ranged
+                mint/unmint criterion.
 
-        :meta private:
         """
-        if isinstance(key, int):
-            try:
-                return ReturnCode(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return ReturnCode(default)
-        if key not in ReturnCode._member_map_:  # pylint: disable=no-member
-            return extend_enum(ReturnCode, key, default)
-        return ReturnCode[key]  # type: ignore[misc]
+        obj = super()._unregistered_member(value, name)
+        code = str(value)
+        obj.description = None
+        obj.kind = ResponseKind(int(code[0]))
+        obj.group = GroupingInformation(int(code[1]))
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'ReturnCode':
@@ -313,4 +318,5 @@ class ReturnCode(IntEnum):
         """
         if not (isinstance(value, int) and 100 <= value <= 659):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return extend_enum(cls, 'CODE_%s' % value, value)
+        #: Unassigned
+        return cls._unregistered_member(value, 'Unassigned')

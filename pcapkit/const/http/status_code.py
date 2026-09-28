@@ -13,7 +13,9 @@ which is automatically generated from :class:`pcapkit.vendor.http.status_code.St
 
 from typing import TYPE_CHECKING
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Type
@@ -21,7 +23,7 @@ if TYPE_CHECKING:
 __all__ = ['StatusCode']
 
 
-class StatusCode(IntEnum):
+class StatusCode(EnumRegistry, IntEnum):
     """[StatusCode] HTTP Status Code"""
 
     if TYPE_CHECKING:
@@ -246,28 +248,26 @@ class StatusCode(IntEnum):
     #: Network Authentication Required [:rfc:`6585`]
     CODE_511 = 511, 'Network Authentication Required'
 
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'StatusCode':
-        """Backport support for original codes.
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str') -> 'StatusCode':
+        """Build a member absent from this registry's own lookup tables.
+
+        Reconstructs :attr:`message` the same way :meth:`__new__` would,
+        rather than leaving it unset -- :meth:`~pcapkit.corekit.enum.
+        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        (it calls :class:`int`'s directly), so :attr:`message` would
+        otherwise be missing from the result and :meth:`__str__` would raise
+        on it.
 
         Args:
-            key: Key to get enum item.
-            default: Default value if not found. The placeholder ``-1`` stands
-                for *no default*, in which case an unresolvable key propagates
-                the lookup error instead of falling back.
+            value: Value to get enum item.
+            name: Bare label for the unregistered member, per the ranged
+                mint/unmint criterion.
 
-        :meta private:
         """
-        if isinstance(key, int):
-            try:
-                return StatusCode(key)
-            except ValueError:
-                if default == -1:
-                    raise
-                return StatusCode(default)
-        if key not in StatusCode._member_map_:  # pylint: disable=no-member
-            extend_enum(StatusCode, key, default)
-        return StatusCode[key]  # type: ignore[misc]
+        obj = super()._unregistered_member(value, name)
+        obj.message = name
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'StatusCode':
@@ -281,26 +281,26 @@ class StatusCode(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 105 <= value <= 199:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 209 <= value <= 225:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 227 <= value <= 299:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 309 <= value <= 399:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 419 <= value <= 420:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 432 <= value <= 450:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 452 <= value <= 499:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         if 512 <= value <= 599:
             #: Unassigned
-            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
+            return cls._unregistered_member(value, 'Unassigned')
         return super()._missing_(value)

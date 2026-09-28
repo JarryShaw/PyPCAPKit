@@ -13,7 +13,9 @@ which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command
 
 from typing import TYPE_CHECKING
 
-from aenum import IntEnum, IntFlag, StrEnum, auto, extend_enum
+from aenum import IntEnum, IntFlag, StrEnum, auto
+
+from pcapkit.corekit.enum import EnumRegistry
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -21,9 +23,29 @@ if TYPE_CHECKING:
 __all__ = ['Command']
 
 
-class FEATCode(StrEnum):
+class FEATCode(EnumRegistry, StrEnum):
     """Keyword returned in FEAT response line for this command/extension,
-    c.f., :rfc:`5797#secion-3`."""
+    c.f., :rfc:`5797#secion-3`.
+
+    .. note::
+
+       Declares every FEAT keyword the IANA registry's own ``FEAT code``
+       column names -- the 5 group markers below plus the per-command
+       keywords generated after them (data-driven, not hand-picked; see
+       :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than
+       minting the per-command ones at import time as an incidental side
+       effect of building :class:`Command`'s own rows. GitHub issue #860:
+       that import-time mutation was the same defect shape #861 removed
+       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not
+       previously noticed here. ``_missing_`` still unmints for a keyword
+       that turns up on the wire but names none of these -- the
+       extendability the owner asked to keep, verbatim: *"If it is expected
+       to be handled as our current approach in industry convention, then
+       we keep it extendable as is."* No custom ``__new__`` here, so the
+       base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.
+       _unregistered_member` needs no override.
+
+    """
 
     #: FTP standard commands [:rfc:`0959`].
     base = '<base>'
@@ -35,6 +57,36 @@ class FEATCode(StrEnum):
     feat = '<feat>'
     #: FTP Extensions for NAT/IPv6 [:rfc:`2428`].
     nat6 = '<nat6>'
+
+    #: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]
+    AUTH = 'AUTH'
+
+    #: Hostname [:rfc:`7151`]
+    HOST = 'HOST'
+
+    #: Language (for Server Messages) [:rfc:`2640`]
+    UTF8 = 'UTF8'
+
+    #: File Modification Time [:rfc:`3659`]
+    MDTM = 'MDTM'
+
+    #: List Directory (for machine) [:rfc:`3659`]
+    MLST = 'MLST'
+
+    #: Protection Buffer Size [:rfc:`4217`]
+    PBSZ = 'PBSZ'
+
+    #: Data Channel Protection Level [:rfc:`4217`]
+    PROT = 'PROT'
+
+    #: Restart (for STREAM mode) [3][:rfc:`3659`]
+    REST = 'REST'
+
+    #: File Size [:rfc:`3659`]
+    SIZE = 'SIZE'
+
+    #: Trivial Virtual File Store [:rfc:`3659`]
+    TVFS = 'TVFS'
 
     def __repr__(self) -> 'str':
         return f'<{self.__class__.__name__} [{self._name_}]>'
@@ -49,7 +101,7 @@ class FEATCode(StrEnum):
         """
         if not isinstance(value, str):
             raise ValueError(f'{value!r} is not a valid {cls.__name__}')
-        return extend_enum(cls, value.upper(), value)
+        return cls._unregistered_member(value, value.upper())
 
 
 class CommandType(IntFlag):
@@ -88,8 +140,22 @@ class ConformanceRequirement(IntEnum):
     H = auto()
 
 
-class Command(StrEnum):
-    """[Command] FTP Command"""
+class Command(EnumRegistry, StrEnum):
+    """[Command] FTP Command
+
+    .. note::
+
+       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's
+       ruling on GitHub issue #860: *"only IANA registered ones are legit
+       values and we need register to properly create new entries. get will
+       not have sufficient information to create new ones."* Concretely
+       true here -- a bare wire command word carries no
+       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one
+       used to register a permanent member with all four hollowed out to
+       their defaults; :meth:`register` is the path that can actually supply
+       them.
+
+    """
 
     if TYPE_CHECKING:
         #: Feature code. Keyword returned in FEAT response line for this command/extension,
@@ -137,7 +203,7 @@ class Command(StrEnum):
     APPE: 'Command' = 'APPE', FEATCode.base, 'Append (with create)', CommandType.S, ConformanceRequirement.M
 
     #: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]
-    AUTH: 'Command' = 'AUTH', FEATCode('AUTH'), 'Authentication/Security Mechanism', CommandType.A, ConformanceRequirement.O
+    AUTH: 'Command' = 'AUTH', FEATCode.AUTH, 'Authentication/Security Mechanism', CommandType.A, ConformanceRequirement.O
 
     #: Clear Command Channel [:rfc:`2228`]
     CCC: 'Command' = 'CCC', FEATCode.secu, 'Clear Command Channel', CommandType.A, ConformanceRequirement.O
@@ -170,10 +236,10 @@ class Command(StrEnum):
     HELP: 'Command' = 'HELP', FEATCode.base, 'Help', CommandType.S, ConformanceRequirement.M
 
     #: Hostname [:rfc:`7151`]
-    HOST: 'Command' = 'HOST', FEATCode('HOST'), 'Hostname', CommandType.A, ConformanceRequirement.O
+    HOST: 'Command' = 'HOST', FEATCode.HOST, 'Hostname', CommandType.A, ConformanceRequirement.O
 
     #: Language (for Server Messages) [:rfc:`2640`]
-    LANG: 'Command' = 'LANG', FEATCode('UTF8'), 'Language (for Server Messages)', CommandType.P, ConformanceRequirement.O
+    LANG: 'Command' = 'LANG', FEATCode.UTF8, 'Language (for Server Messages)', CommandType.P, ConformanceRequirement.O
 
     #: List [:rfc:`959`][:rfc:`1123`]
     LIST: 'Command' = 'LIST', FEATCode.base, 'List', CommandType.S, ConformanceRequirement.M
@@ -185,7 +251,7 @@ class Command(StrEnum):
     LPSV: 'Command' = 'LPSV', FEATCode.hist, 'Passive Mode', CommandType.P, ConformanceRequirement.H
 
     #: File Modification Time [:rfc:`3659`]
-    MDTM: 'Command' = 'MDTM', FEATCode('MDTM'), 'File Modification Time', CommandType.S, ConformanceRequirement.O
+    MDTM: 'Command' = 'MDTM', FEATCode.MDTM, 'File Modification Time', CommandType.S, ConformanceRequirement.O
 
     #: Integrity Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
     MIC: 'Command' = 'MIC', FEATCode.secu, 'Integrity Protected Command', CommandType.A, ConformanceRequirement.O
@@ -194,10 +260,10 @@ class Command(StrEnum):
     MKD: 'Command' = 'MKD', FEATCode.base, 'Make Directory', CommandType.S, ConformanceRequirement.O
 
     #: List Directory (for machine) [:rfc:`3659`]
-    MLSD: 'Command' = 'MLSD', FEATCode('MLST'), 'List Directory (for machine)', CommandType.S, ConformanceRequirement.O
+    MLSD: 'Command' = 'MLSD', FEATCode.MLST, 'List Directory (for machine)', CommandType.S, ConformanceRequirement.O
 
     #: List Single Object [:rfc:`3659`]
-    MLST: 'Command' = 'MLST', FEATCode('MLST'), 'List Single Object', CommandType.S, ConformanceRequirement.O
+    MLST: 'Command' = 'MLST', FEATCode.MLST, 'List Single Object', CommandType.S, ConformanceRequirement.O
 
     #: Transfer Mode [:rfc:`959`]
     MODE: 'Command' = 'MODE', FEATCode.base, 'Transfer Mode', CommandType.P, ConformanceRequirement.M
@@ -218,13 +284,13 @@ class Command(StrEnum):
     PASV: 'Command' = 'PASV', FEATCode.base, 'Passive Mode', CommandType.P, ConformanceRequirement.M
 
     #: Protection Buffer Size [:rfc:`4217`]
-    PBSZ: 'Command' = 'PBSZ', FEATCode('PBSZ'), 'Protection Buffer Size', CommandType.P, ConformanceRequirement.O
+    PBSZ: 'Command' = 'PBSZ', FEATCode.PBSZ, 'Protection Buffer Size', CommandType.P, ConformanceRequirement.O
 
     #: Data Port [:rfc:`959`]
     PORT: 'Command' = 'PORT', FEATCode.base, 'Data Port', CommandType.P, ConformanceRequirement.M
 
     #: Data Channel Protection Level [:rfc:`4217`]
-    PROT: 'Command' = 'PROT', FEATCode('PROT'), 'Data Channel Protection Level', CommandType.P, ConformanceRequirement.O
+    PROT: 'Command' = 'PROT', FEATCode.PROT, 'Data Channel Protection Level', CommandType.P, ConformanceRequirement.O
 
     #: Print Directory [:rfc:`959`]
     PWD: 'Command' = 'PWD', FEATCode.base, 'Print Directory', CommandType.S, ConformanceRequirement.O
@@ -236,7 +302,7 @@ class Command(StrEnum):
     REIN: 'Command' = 'REIN', FEATCode.base, 'Reinitialize', CommandType.A, ConformanceRequirement.M
 
     #: Restart (for STREAM mode) [3][:rfc:`3659`]
-    REST: 'Command' = 'REST', FEATCode('REST'), 'Restart (for STREAM mode)', CommandType.S | CommandType.P, ConformanceRequirement.M
+    REST: 'Command' = 'REST', FEATCode.REST, 'Restart (for STREAM mode)', CommandType.S | CommandType.P, ConformanceRequirement.M
 
     #: Retrieve [:rfc:`959`]
     RETR: 'Command' = 'RETR', FEATCode.base, 'Retrieve', CommandType.S, ConformanceRequirement.M
@@ -254,7 +320,7 @@ class Command(StrEnum):
     SITE: 'Command' = 'SITE', FEATCode.base, 'Site Parameters', CommandType.S, ConformanceRequirement.M
 
     #: File Size [:rfc:`3659`]
-    SIZE: 'Command' = 'SIZE', FEATCode('SIZE'), 'File Size', CommandType.S, ConformanceRequirement.O
+    SIZE: 'Command' = 'SIZE', FEATCode.SIZE, 'File Size', CommandType.S, ConformanceRequirement.O
 
     #: Structure Mount [:rfc:`959`]
     SMNT: 'Command' = 'SMNT', FEATCode.base, 'Structure Mount', CommandType.A, ConformanceRequirement.O
@@ -296,7 +362,46 @@ class Command(StrEnum):
     XRMD: 'Command' = 'XRMD', FEATCode.hist, None, CommandType.S, ConformanceRequirement.H
 
     #: Trivial Virtual File Store [:rfc:`3659`]
-    TVFS: 'Command' = 'TVFS', FEATCode('TVFS'), 'Trivial Virtual File Store', CommandType.P, ConformanceRequirement.O
+    TVFS: 'Command' = 'TVFS', FEATCode.TVFS, 'Trivial Virtual File Store', CommandType.P, ConformanceRequirement.O
+
+    @classmethod
+    def _unregistered_member(cls, value: 'str', name: 'str') -> 'Command':
+        """Build a member absent from this registry's own lookup tables.
+
+        Leaves :attr:`feat`, :attr:`desc`, :attr:`type` and :attr:`conf` at
+        the same defaults :meth:`__new__` itself would, rather than missing
+        entirely -- :meth:`~pcapkit.corekit.enum.EnumRegistry.
+        _unregistered_member` bypasses :meth:`__new__` (it calls
+        :class:`str`'s directly), so those four attributes would otherwise
+        be absent and :meth:`__repr__` (which reads :attr:`desc`) would
+        raise on the result. There is no more specific value to reconstruct
+        them from -- a bare wire command word carries none of the four,
+        which is exactly the owner's reasoning for why ``get()``/
+        ``_missing_`` must not mint one: :meth:`register` is the path that
+        can actually supply them.
+
+        Args:
+            value: Value to get enum item -- the convention here, shared with
+                :class:`~pcapkit.const.ftp.command.FEATCode` and
+                :class:`~pcapkit.const.http.method.Method`, is the caller's
+                own casing, unchanged: an unregistered member's *value* is
+                exactly what was observed on the wire, matching how a
+                *registered* member's own value is exactly what was
+                declared, never reformatted. Only :attr:`name` -- the
+                identifier, not the value -- is canonicalised.
+            name: Bare label for the unregistered member -- here, the
+                canonical upper-case form of ``value``, matching the name
+                every *registered* member of this class is looked up by,
+                since #860's open-vocabulary registries have no manufactured
+                placeholder label to fall back to.
+
+        """
+        obj = super()._unregistered_member(value, name)
+        obj.feat = None
+        obj.desc = None
+        obj.type = CommandType.undefined
+        obj.conf = ConformanceRequirement.O
+        return obj
 
     @staticmethod
     def get(key: 'str', default: 'Optional[str]' = None) -> 'Command':
@@ -310,8 +415,20 @@ class Command(StrEnum):
         :meta private:
         """
         name = key.upper()
-        if name not in Command._member_map_:  # pylint: disable=no-member
-            return extend_enum(Command, name, default if default is not None else key)
+        if name not in Command._member_map_:  # type: ignore[misc]  # pylint: disable=no-member
+            # NOTE: the value is ``default`` if the caller supplied one, or
+            # else ``key`` exactly as given -- never ``name`` -- so an
+            # unregistered member's value is the caller's own casing, the
+            # same convention :meth:`_unregistered_member` documents and
+            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed
+            # unchanged. Two calls naming the same command in different
+            # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build
+            # results that are *not* equal -- each is exactly what its own
+            # caller passed, which minting's ``_member_map_`` cache used to
+            # paper over by returning the *first* casing seen for every
+            # later call regardless of case. Losing that is the one
+            # observable behaviour change in GitHub issue #860's conversion.
+            return Command._unregistered_member(default if default is not None else key, name)
         return Command[name]  # type: ignore[misc]
 
     @classmethod
@@ -328,4 +445,4 @@ class Command(StrEnum):
         name = value.upper()
         if name in cls._member_map_:
             return cls._member_map_[name]  # type: ignore[return-value]
-        return extend_enum(cls, name, value)
+        return cls._unregistered_member(value, name)
