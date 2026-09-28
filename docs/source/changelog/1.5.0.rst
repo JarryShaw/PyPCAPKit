@@ -3209,6 +3209,47 @@ since -- reaching #805 by the entries below.
   round because its test file was contended with #865, then applied once #865
   (above) merged, re-measured with ``Hardware``'s member count unchanged at 42
   before and after. Closes #864 (#868).
+* **Fixed** -- **a breaking change to** 8 more bespoke registries: step 2 of
+  #860, PR 1 of 2 (``AppType`` is PR 2, #874 below), bringing ``StatusCode``,
+  ``ReturnCode``, ``ResponseKind``, ``GroupingInformation``, ``OptionType``,
+  ``FEATCode``, ``Command`` and ``Method`` onto ``EnumRegistry`` and applying
+  #775's mint/unmint ruling to their ``get()`` as well as their ``_missing_``.
+  The first five convert 12 unambiguous placeholder branches (``Unassigned``,
+  ``Unknown``, ``opt_unknown``) to ``_unregistered_member``; each of the three
+  with a custom ``__new__`` (``StatusCode``, ``ReturnCode``, ``OptionType``)
+  gets its own override reconstructing the attributes the base's generic helper
+  would otherwise leave unset, and ``StatusCode``/``ReturnCode``'s hand-written
+  ``get()`` -- still on the retired ``default == -1`` convention -- is replaced
+  by the base's, with no caller in this tree found relying on the old form.
+  ``OptionType`` keeps its own ``get()`` for its genuine multi-namespace
+  dispatch, but a round-2 review found ``get()`` itself still minted on both
+  its int/namespace path and its ``str`` path -- the live pcapng parse path
+  (``PCAPNG._make_pcapng_options``) calls it with wire bytes, so parsing an
+  undeclared option code was still registering a permanent member; both paths
+  now build an unregistered member too. ``FEATCode``, ``Command`` and
+  ``Method`` mint the literal, unmodified wire value as its own name rather
+  than any manufactured placeholder; per the owner's ruling (*"get will not
+  have sufficient information to create new ones"* -- ``Command`` needs
+  ``feat``/``desc``/``type``/``conf`` and ``Method`` needs
+  ``safe``/``idempotent``, neither of which a bare wire string carries), both
+  ``_missing_`` and each class's own ``get()`` -- a second, independent mint
+  site bypassing ``_missing_`` -- now build an unregistered member instead.
+  ``FEATCode``'s own crawler now declares all 15 real FEAT-code values from the
+  live IANA table instead of minting 10 of them as a side effect of evaluating
+  ``Command``'s rows at import time, the same import-time-mutation shape #861
+  removed from ``FilterType``; pinned count-agnostically so a future IANA
+  update cannot fail a correct regeneration. Untouched, per explicit rulings:
+  ``CommandType`` stays ``IntFlag`` (real ``A|P`` composites in the generated
+  data), and ``TransportProtocol``'s ``auto()`` renumbering plus ``AppType``
+  itself are PR 2's territory. All five crawlers regenerate byte-identically on
+  a third run. 332 test methods pass across the seven touched test files plus
+  ``tests/protocols/misc/test_pcapng_unit.py``; touched const modules land at
+  92-100% coverage. ``pcapkit/protocols/schema/misc/pcapng.py``'s
+  ``OptionEnumField.post_process`` docstring is corrected to explain that it
+  still bypasses ``OptionType.get()`` directly -- now for ``pickle`` round-trip
+  safety, since #860 already stops the minting that used to be the reason, and
+  neither of ``OptionType``'s own two paths gets both pickling and correct
+  rendering right at once (#869).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
