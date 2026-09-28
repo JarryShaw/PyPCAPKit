@@ -342,23 +342,28 @@ RULING_CONVERTED_REGISTRIES = (
 #: generic "first branch that converts, by source order" probe can actually
 #: exercise -- i.e. the registry's own bounds contain at least one value that
 #: is not already a declared member, *and* nothing earlier in the same
-#: ``_missing_`` masks it. Two different reasons hold registries out of this
-#: list:
+#: ``_missing_`` masks it. One reason holds registries out of this list: 13
+#: have no reachable gap at all -- the same situation :data:`ALL_REGISTRIES`
+#: already documents for :class:`~pcapkit.const.hip.transport.Transport`:
+#: every value inside the guard's own bounds names a real member, so
+#: ``_missing_`` can never actually run for them (e.g. :class:`~pcapkit.const.
+#: ipv4.tos_del.ToSDelay` is bounded to ``0 <= value <= 1`` and both 0 and 1
+#: are declared). They are proved by :class:`RulingConversionSourceTests` (a
+#: source sweep) instead.
 #:
-#: * 13 have no reachable gap at all -- the same situation :data:`ALL_
-#:   REGISTRIES` already documents for :class:`~pcapkit.const.hip.transport.
-#:   Transport`: every value inside the guard's own bounds names a real
-#:   member, so ``_missing_`` can never actually run for them (e.g. :class:
-#:   `~pcapkit.const.ipv4.tos_del.ToSDelay` is bounded to ``0 <= value <= 1``
-#:   and both 0 and 1 are declared). They are proved by :class:
-#:   `RulingConversionSourceTests` (a source sweep) instead.
-#: * :class:`~pcapkit.const.reg.ethertype.EtherType` is excluded for a third
-#:   reason: its *first* converted branch by source order ("Old Xerox
-#:   Experimental...", 0x0101-0x01FF) is itself unreachable, masked by the
-#:   wider 0x0000-0x05DC branch before it -- see :data:`ETHERTYPE_UNASSIGNED_
-#:   PROBES`'s comment. A naive probe would silently exercise the wrong
-#:   branch, so :class:`EtherTypeMixedMintTests` covers it explicitly instead
-#:   (behaviourally for ``DEC Unassigned``, by source for the masked row).
+#: :class:`~pcapkit.const.reg.ethertype.EtherType` used to be held out for a
+#: second, distinct reason on top of those 13: its *first* converted branch by
+#: source order ("Old Xerox Experimental...", 0x0101-0x01FF) was itself
+#: unreachable, masked by the wider 0x0000-0x05DC branch before it, so a naive
+#: probe would have silently exercised the wrong branch. GitHub issue #862
+#: (fixed by #865) reordered :meth:`pcapkit.vendor.reg.ethertype.EtherType.
+#: process` so the narrower range is tested first, which makes that branch
+#: directly probeable like any other reachable-gap registry -- the same shape
+#: :class:`~pcapkit.const.ipx.socket.Socket` (also mixed) already demonstrates
+#: in this list below. EtherType has therefore joined this set; see
+#: :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment for the probe itself, still
+#: covered explicitly by :class:`EtherTypeMixedMintTests` as well since it
+#: remains a mixed registry.
 #:
 #: Derived the same way as :data:`RULING_CONVERTED_REGISTRIES`: computed once
 #: by walking each candidate's own bounds for a gap, not hand-picked.
@@ -426,6 +431,7 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
     ('pcapkit.const.pcapng.record_type', 'RecordType'),
     ('pcapkit.const.pcapng.secrets_type', 'SecretsType'),
     ('pcapkit.const.pcapng.verdict_type', 'VerdictType'),
+    ('pcapkit.const.reg.ethertype', 'EtherType'),
     ('pcapkit.const.reg.linktype', 'LinkType'),
     ('pcapkit.const.reg.transtype', 'TransType'),
     ('pcapkit.const.tcp.checksum', 'Checksum'),
@@ -441,18 +447,26 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
 #: stays a mint; :data:`ETHERTYPE_KEPT_PROBE` pins one (``Xyplex``) as a
 #: regression guard.
 #:
-#: "Old Xerox Experimental" (0x0101-0x01FF) is not behaviourally probeable:
-#: it is a strict subset of the earlier, wider "IEEE802.3 Length Field" branch
-#: (0x0000-0x05DC), which the ``_missing_`` if-chain matches first and so
-#: masks it completely -- the same shape of pre-existing ordering bug GitHub
+#: "Old Xerox Experimental" (0x0101-0x01FF) used to not be behaviourally
+#: probeable: it was a strict subset of the earlier, wider "IEEE802.3 Length
+#: Field" branch (0x0000-0x05DC), which the ``_missing_`` if-chain matched
+#: first and so masked it completely -- the same shape of ordering bug GitHub
 #: issue #841 found in :mod:`pcapkit.const.ipx.socket`, present on ``main``
-#: before this change and not part of #775/#847's ruling, so it is left as a
-#: follow-up rather than reordered here. :class:`EtherTypeMixedMintTests`
-#: proves that row by source instead of by calling it.
+#: before this change and not part of #775/#847's ruling, so it was left as a
+#: follow-up rather than reordered as part of that ruling. GitHub issue #862
+#: is that follow-up, fixed by #865: :meth:`pcapkit.vendor.reg.ethertype.
+#: EtherType.process` now tests the narrower Old Xerox range before the wider
+#: IEEE802.3 one, so 0x0101 resolves to Old Xerox and is directly probeable --
+#: it is included below alongside ``DEC Unassigned``, giving it the same
+#: behavioural no-mint proof :class:`EtherTypeMixedMintTests` already gives
+#: DEC Unassigned, rather than the weaker source-text check that stood in for
+#: it before #865 (an order-insensitive string search that would keep passing
+#: even if the ordering regressed).
+ETHERTYPE_OLD_XEROX_LABEL = 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983'
 ETHERTYPE_UNASSIGNED_PROBES = {
     0x8039: 'DEC_Unassigned',
+    0x0101: ETHERTYPE_OLD_XEROX_LABEL,
 }
-ETHERTYPE_MASKED_UNASSIGNED_LABEL = 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983'
 ETHERTYPE_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
 #: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's ruling:
@@ -899,11 +913,16 @@ class RulingConversionSourceTests(unittest.TestCase):
     REGISTRIES` -- which keep some ``extend_enum`` calls by design."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
-        # EtherType is also absent from RULING_CONVERTED_WITH_REACHABLE_GAP,
-        # but for the *masked-branch* reason documented on that data, not the
-        # no-gap-at-all reason this test is about -- and unlike the true 13 it
-        # still legitimately keeps other extend_enum calls, so it is excluded
-        # from this set too and covered by EtherTypeMixedMintTests instead.
+        # EtherType now belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
+        # masked-branch exclusion (Old Xerox shadowed by the wider IEEE802.3
+        # range) was fixed by GitHub issue #862/#865, and its first converted
+        # branch by source order is directly probeable like any other
+        # reachable-gap registry now. The `_MIXED_REGISTRIES` subtraction
+        # below is a defensive no-op today -- neither mixed registry needs
+        # removing from `RCR - RG` any more (EtherType is already in RG;
+        # Socket never appeared in RULING_CONVERTED_REGISTRIES to begin with)
+        # -- kept so a mixed registry that regains a masked or absent branch
+        # in the future does not silently inflate this count.
         excluded = set(RULING_CONVERTED_REGISTRIES) - set(RULING_CONVERTED_WITH_REACHABLE_GAP) - _MIXED_REGISTRIES
         self.assertEqual(len(excluded), 13, 'expected exactly 13 registries with no reachable gap')
         for module_name, class_name in sorted(excluded):
@@ -949,16 +968,19 @@ class EtherTypeMixedMintTests(unittest.TestCase):
                 self.assertEqual(before, len(EtherType.__members__))
                 self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
 
-    def test_masked_old_xerox_row_converts_by_source(self) -> None:
-        """0x0101-0x01FF is unreachable at runtime -- masked by the wider
-        0x0000-0x05DC branch that precedes it, a pre-existing ordering issue
-        (see :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment) unrelated to this
-        ruling. Proved by source instead of by calling it."""
-        from pcapkit.const.reg.ethertype import EtherType
-
-        source = inspect.getsource(EtherType._missing_)  # type: ignore[attr-defined]
-        self.assertIn(f"cls._unregistered_member(value, '{ETHERTYPE_MASKED_UNASSIGNED_LABEL}')", source)
-        self.assertNotIn(f"extend_enum(cls, '{ETHERTYPE_MASKED_UNASSIGNED_LABEL}", source)
+    # ``test_masked_old_xerox_row_converts_by_source`` retired here, not simply
+    # deleted: it used to prove 0x0101-0x01FF converts *by source* (an
+    # order-insensitive string search for the two calls in
+    # EtherType._missing_'s text) because the row was unreachable at runtime,
+    # masked by the wider 0x0000-0x05DC branch that preceded it. GitHub issue
+    # #862, fixed by #865, reordered the generator so that row is no longer
+    # masked, and 0x0101 is now one of the values ``test_unassigned_rows_do_
+    # not_mint`` above probes directly via ``ETHERTYPE_UNASSIGNED_PROBES`` --
+    # a strictly stronger, behavioural proof of the same fact (it also catches
+    # a regression the old source check would have missed: the string search
+    # never checked *order*, so it would keep passing even if the ordering
+    # regressed and 0x0101 started minting again). Nothing this test checked
+    # is left unchecked; it is subsumed rather than replaced by a weaker test.
 
     def test_attributed_vendor_block_still_mints(self) -> None:
         from pcapkit.const.reg.ethertype import EtherType
