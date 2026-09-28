@@ -3250,6 +3250,31 @@ since -- reaching #805 by the entries below.
   safety, since #860 already stops the minting that used to be the reason, and
   neither of ``OptionType``'s own two paths gets both pickling and correct
   rendering right at once (#869).
+* **Fixed** -- **a breaking change to** ``Method``: ``__new__`` called
+  ``str.__new__(cls)`` with no argument, so every one of the 40 registered
+  members' ``str`` payload was permanently empty regardless of its declared
+  value -- ``str(Method.GET) == ''``, and ``Method.GET == 'GET'`` was
+  ``False``; ``.value`` was always correct. #869 (above) had fixed this class's
+  *unregistered* path only, exposing the asymmetry:
+  ``str(Method('frob')) == 'frob'`` but ``str(Method.GET) == ''``. Fixed to
+  ``str.__new__(cls, value)``, mirroring ``Command.__new__`` (never had this
+  defect), in both the generator (``pcapkit/vendor/http/method.py``) and the
+  generated module; a second regeneration is byte-identical. A survey of every
+  hand-rolled ``__new__`` under ``pcapkit/const/`` found no sibling with the
+  same defect: ``Command`` already passes its value, ``FEATCode`` has no custom
+  ``__new__``, and ``OptionType``/``AppType`` deliberately store a formatted
+  display string as their value. The consequences, all in the correcting
+  direction and all measured: ``Method.GET == 'GET'`` is ``True`` for all 40
+  members where it was ``False``; ``bool(Method.GET)`` flips ``False`` to
+  ``True``, since an empty payload made every member falsy;
+  ``json.dumps(Method.GET)`` now emits ``"GET"`` where it emitted ``""``;
+  ``sorted()`` over members is now lexicographic rather than
+  input-order-stable; and a member-keyed ``dict``/``set`` no longer collapses
+  -- ``{m: ... for m in Method}`` gains 40 entries where it had 1, because
+  ``str.__hash__`` wins the MRO and all 40 members previously hashed as ``''``
+  and compared equal to one another. Nothing under ``pcapkit/protocols`` relied
+  on the old behaviour; the one caller in ``httpv1.py``/``httpv2.py`` only
+  reads ``.value`` via ``Method.get()``. Closes #870 (#871).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
