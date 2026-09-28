@@ -3275,6 +3275,44 @@ since -- reaching #805 by the entries below.
   and compared equal to one another. Nothing under ``pcapkit/protocols`` relied
   on the old behaviour; the one caller in ``httpv1.py``/``httpv2.py`` only
   reads ``.value`` via ``Method.get()``. Closes #870 (#871).
+* **Fixed** -- ``python -m pcapkit.vendor <target>`` could not fail: ``run()``
+  swallowed every crawler exception as a filterable ``VendorRuntimeWarning``,
+  and ``main()`` always returned ``0``, so a broken crawler regenerating
+  nothing looked like success both to a human and to the cron job. Per the
+  owner's ruling (*"only discard changes made by a non-zero sub-vendor... for
+  cron jobs, at most warn about failed sub-vendors, but never fail the entire
+  job"*), this lands in three pieces. **Exit code**
+  (``pcapkit/vendor/__main__.py``): ``run()`` now returns whether its target
+  succeeded; ``main()`` attempts every target regardless of earlier failures
+  and returns ``1`` if any raised, with the failing target's qualified name and
+  exception ``repr`` written to stderr unconditionally via ``print()`` rather
+  than through the filterable warning. **Per-target snapshot and restore**: a
+  new ``_snapshot_and_restore`` context manager backs up a target's const file
+  with ``tempfile.mkstemp`` before it runs -- resolving the destination through
+  ``Vendor._dest_path``, now a ``classmethod`` (``pcapkit/vendor/default.py``)
+  so it can be called before ``Vendor.__init__`` ever fetches, renders or
+  writes -- and on any exception restores the backup via ``os.replace`` before
+  re-raising, or discards it quietly on success. A target whose destination
+  cannot be resolved (a crawler outside the real tree) runs unprotected rather
+  than failing the snapshot step, since ``Vendor.__init__`` will hit the
+  identical resolution failure on its own; a destination that does not exist
+  yet is left alone, since there is nothing for a failure to discard.
+  **Workflow** (``.github/workflows/cron-vendor.yml``): the "Update Vendor"
+  step no longer aborts under ``bash -e`` when ``pcapkit-vendor`` exits
+  non-zero -- the exit code is captured explicitly around that one command, so
+  targets that did succeed still get ``isort``ed, diffed, committed and pushed,
+  while a "Warning" block naming the failed target(s) is appended to
+  ``$GITHUB_STEP_SUMMARY`` and a ``::warning::`` annotation is emitted per
+  failure; the step's own exit code is always ``0`` so later steps still run. A
+  per-target ``git checkout -- <path>`` restore step was considered and
+  dropped: with the snapshot/restore in place, a failed target's own const file
+  is never touched at all, so there is nothing for the workflow itself to
+  discard. ``tests/vendor/test_vendor_exit_code_unit.py`` (5 methods, through
+  the real entrypoints with stub ``Vendor`` subclasses) and
+  ``tests/vendor/test_vendor_snapshot_restore_unit.py`` (3: a successful run
+  replaces the previous content, a failure leaves the previous file
+  byte-for-byte intact, and a read-only destination is left exactly as it was)
+  -- no network calls. Closes #872 (#873).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
