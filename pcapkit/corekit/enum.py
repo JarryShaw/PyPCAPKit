@@ -21,11 +21,17 @@ That is a three-tier hierarchy, of which this module is **tier one**:
    :mod:`pcapkit.const` inherits them from here.
 2. ``AppType``'s sub-base -- overrides all four to route through its
    ``_dispatch``, because a port lookup needs a transport protocol to be
-   answerable at all. Not in this module, and not yet written: today's
-   :class:`pcapkit.const.reg.apptype.apptype.AppType` carries that logic
-   directly and stays as it is until tier two lands.
+   answerable at all. Landed as of GitHub issue #860: not in this module, but
+   in :class:`pcapkit.const.reg.apptype.apptype.AppType` itself, which now
+   mixes in :class:`EnumRegistry` directly and overrides ``get``, ``get_all``,
+   ``register`` and ``register_alias`` with that dispatch, plus
+   ``_unregistered_member`` for its own three extra attributes (``svc``,
+   ``port``, ``proto``) that the generic one below does not know to set.
 3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
-   -- override again for their own contracts.
+   -- turned out to need no override of their own at all: ``_dispatch``
+   already returns ``cls`` unchanged the moment ``cls.__registry__`` is not
+   :obj:`None`, which is true for exactly these four, so tier 2's methods
+   already answer correctly on each of them without a further layer.
 
 Before this, the four methods lived as generated *text*: written out longhand in
 :data:`pcapkit.vendor.default.LINE` and copied verbatim into each of the eleven
@@ -293,12 +299,18 @@ class EnumRegistry:
         unrecognised value, routing a failed *name* lookup through the
         constructor would let a mere ``get()`` call mint a permanent member
         where it previously just raised. Defensive rather than observed: of
-        the 119 classes that mix in this base, the ``str``-valued ones
+        the 124 classes that mix in this base, the ``str``-valued ones
         (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
         ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
-        :class:`~pcapkit.const.pcapng.option_type.OptionType`) no longer mint
-        on any path as of GitHub issue #860, so no live witness exists in
-        this tree today. The registries that still mint directly via
+        :class:`~pcapkit.const.pcapng.option_type.OptionType`, and --
+        completing the count as of GitHub issue #860's own PR 2 --
+        :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
+        transport subclasses :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+        :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+        :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
+        :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) no longer mint
+        on any path, so no live witness exists in this tree today. The
+        registries that still mint directly via
         :func:`~aenum.extend_enum` --
         :class:`~pcapkit.const.ipx.socket.Socket`,
         :class:`~pcapkit.const.mh.cga_type.CGAType` and

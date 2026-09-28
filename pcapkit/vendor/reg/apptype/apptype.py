@@ -106,7 +106,9 @@ import keyword
 import re
 from typing import TYPE_CHECKING, cast
 
-from aenum import IntEnum, StrEnum, extend_enum
+from aenum import IntEnum, StrEnum, auto, extend_enum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['TransportProtocol', '{NAME}']
 
@@ -120,38 +122,63 @@ class TransportProtocol(IntEnum):
     """Transport layer protocol."""
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
-    # member below is a literal int rather than an auto()-valued one -- GitHub
-    # issue #808 dropped the IntFlag base, so auto() would number sequentially
-    # instead of by the power-of-two spacing the values must keep -- and a
-    # literal infers as int while the TransportProtocol annotations that use
-    # each member (__transport__, and the proto default on __new__, get and
-    # get_all) expect TransportProtocol. cast is the identity function at run
-    # time, so this changes nothing that runs -- see GitHub issue #770, which
-    # cast only this member while the rest still inferred Any from auto().
-    # mypy.ini sets warn_redundant_casts, so if aenum ever ships type stubs
-    # letting it infer TransportProtocol on its own, these casts start
-    # erroring instead of lingering as dead scaffolding.
+    # member below is cast rather than left as a bare auto()-valued one --
+    # a bare auto() infers as Any, while the TransportProtocol annotations
+    # that use each member (__transport__, and the proto default on
+    # __new__, get and get_all) expect TransportProtocol. cast is the
+    # identity function at run time, so this changes nothing that runs --
+    # see GitHub issue #770. mypy.ini sets warn_redundant_casts, so if aenum
+    # ever ships type stubs letting it infer TransportProtocol on its own,
+    # these casts start erroring instead of lingering as dead scaffolding.
+    #
+    # Values are sequential from 0 rather than the power-of-two spacing
+    # this class carried while it still mixed in ``IntFlag`` --
+    # ``undefined`` is declared explicitly as ``0`` and every other member
+    # is ``auto()``, which continues from the preceding explicit value
+    # rather than needing its own ``_start_ = 0`` to begin there; the
+    # owner's own ruling on this issue (#860) is explicit that
+    # ``undefined`` stays a direct ``0`` for that reason: "undefined
+    # direct uses 0. then other real transport use auto. so we don't have
+    # to define a _start_ and the undefined declaration is explicit."
+    # GitHub issue #808 already dropped the ``IntFlag`` base once
+    # nothing built a composite, and GitHub PR #836's ruling later
+    # retired ``|``-composite decoding entirely: "since it's no longer a
+    # Flag, `|` joined values are no longer parsed and accepted, we will
+    # treat it as a whole, instead of splitting." With no decoding left to
+    # protect, the owner's own further ruling on GitHub issue #860 retired
+    # the power-of-two spacing itself too: "2-power on TransportProtocol is
+    # mainly for the consideration of previously `tcp | udp`-alike code.
+    # But we dont accept this kind of piping anymore in the new logic so I
+    # think `auto()` is the expected behaviour." :meth:`AppType._dispatch`
+    # never decodes an ``int`` -- composed by hand with ``|`` or passed
+    # bare -- into anything narrower than the whole value it already is, on
+    # either numbering; a plain ``dict.get`` lookup cannot tell a composed
+    # ``int`` from any other one that happens to equal it. Treating every
+    # int as a whole is exactly what #836's ruling above asks for, and it
+    # is also why this renumbering changes what specific ints mean, not
+    # only what composed ones do:
+    # ``tcp | udp`` (``3``) used to name no registry and now resolves as
+    # ``sctp``'s own value, and a bare, uncomposed ``4`` -- previously
+    # ``sctp``'s value -- now resolves as ``dccp``'s, silently, with no
+    # exception, since a real member sits at ``4`` either way. A caller
+    # holding an integer under the old spacing (composed or not) can
+    # therefore land on a different real transport's registry after this
+    # change, not merely be refused where it previously resolved.
+
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
     #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what
     #: the base registry's ``_missing_`` extends unassigned/reserved rows from.
     undefined = cast('TransportProtocol', 0)
 
-    #: Transmission Control Protocol. Value fixed at ``1`` rather than
-    #: renumbered sequentially -- GitHub issue #808 dropped the ``IntFlag``
-    #: base once nothing built a composite, but did not revisit the four
-    #: values themselves, which predate this class and are not its call to
-    #: renumber.
-    tcp = cast('TransportProtocol', 1)
-    #: User Datagram Protocol. See ``tcp`` above for why the value stays ``2``
-    #: rather than becoming sequential.
-    udp = cast('TransportProtocol', 2)
-    #: Stream Control Transmission Protocol. See ``tcp`` above for why the
-    #: value stays ``4`` rather than becoming sequential.
-    sctp = cast('TransportProtocol', 4)
-    #: Datagram Congestion Control Protocol. See ``tcp`` above for why the
-    #: value stays ``8`` rather than becoming sequential.
-    dccp = cast('TransportProtocol', 8)
+    #: Transmission Control Protocol.
+    tcp = cast('TransportProtocol', auto())
+    #: User Datagram Protocol.
+    udp = cast('TransportProtocol', auto())
+    #: Stream Control Transmission Protocol.
+    sctp = cast('TransportProtocol', auto())
+    #: Datagram Congestion Control Protocol.
+    dccp = cast('TransportProtocol', auto())
 
     @staticmethod
     def get(key: 'int | str') -> 'TransportProtocol':
@@ -197,7 +224,7 @@ class TransportProtocol(IntEnum):
     # reproducing what the base class already does.
 
 
-class {NAME}(StrEnum):
+class {NAME}(EnumRegistry, StrEnum):
     """[{NAME}] {DOCS}
 
     This is the transport-agnostic base of the per-transport registries in
@@ -376,8 +403,13 @@ class {NAME}(StrEnum):
                 -- falls through to ``int.__or__`` and returns a bare
                 :class:`int` rather than a member. Never split back into the
                 transports its bits would each name -- owner ruling on this PR
-                (#836) -- so it is refused as a whole exactly like any other
-                value naming no registry.
+                (#836) -- so it is looked up as the one whole value it
+                already is, exactly like any other bare int: refused when
+                that whole value names no registry, resolved when it
+                happens to equal one instead. Since GitHub issue #860 moved
+                this class off power-of-two spacing, a hand-built composite
+                is no longer guaranteed to be the former -- see
+                :meth:`_dispatch`'s own body for a value that resolves.
 
         Returns:
             The registry class to search.
@@ -415,37 +447,43 @@ class {NAME}(StrEnum):
         if subclass is not None:
             return subclass
 
-        # NOTE: everything that reaches here names no registry, and nothing
-        # below decodes ``proto``'s bits looking for a partial answer. A
-        # genuine member reaching this point is ``undefined`` -- the four
-        # real transports would already have resolved above, and
-        # :meth:`TransportProtocol.get` cannot mint anything else, per this
-        # PR's own maintainer ruling against extending TransportProtocol at
-        # all -- and a bare :class:`int` is refused exactly the same way
-        # whether it is a single stray bit, e.g. ``17``, or a composite of
-        # several real transports, e.g. ``3`` (``tcp | udp``). That composite
-        # case used to get its own
-        # :exc:`~pcapkit.utilities.exceptions.ProtocolError`, decoded through
-        # :func:`~pcapkit.utilities.compat.show_flag_values` and naming every
-        # transport whose bit was set -- the fix for GitHub issue #759, where
-        # resolving a composite by picking its lowest set bit dispatched
-        # every one containing ``tcp`` into the TCP registry regardless of
-        # what else it named. The owner's further ruling on this PR (#836)
-        # retired that decoding along with the rest of the composite
-        # handling: "since it's no longer a Flag, `|` joined values are no
-        # longer parsed and accepted, we will treat it as a whole, instead of
-        # splitting." So ``AppType.get(80, proto=3)`` now says "3 names no
-        # transport protocol registry" rather than naming ``tcp`` and ``udp``
-        # individually -- the same answer a caller resolving a parsed port
-        # already gets right, since it knows which single transport carried
-        # it and passes that one bit, and the same answer a caller wanting
-        # every service on a port already has to ask each registry for in
-        # turn regardless.
+        # NOTE: everything that reaches here has already failed to match a
+        # real member's value at the dict lookup above, and nothing below
+        # decodes ``proto``'s bits looking for a partial answer either -- on
+        # either numbering. A genuine member reaching this point is
+        # ``undefined`` -- the four real transports would already have
+        # resolved above, and :meth:`TransportProtocol.get` cannot mint
+        # anything else, per this PR's own maintainer ruling against
+        # extending TransportProtocol at all -- and a bare :class:`int`
+        # reaches here whenever it matches no real member's value, e.g. a
+        # stray bit like ``17``. A composite built by hand used to reach
+        # here just as reliably, since no combination of the old power-of-
+        # two bits ever equalled a single real member's value; that is no
+        # longer true under this class's current sequential numbering --
+        # ``TransportProtocol.tcp | TransportProtocol.udp`` (``3``) is
+        # ``sctp``'s own value now, so it resolves at the dict lookup above
+        # instead of reaching this point at all. A composite used to get
+        # its own :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+        # decoded through :func:`~pcapkit.utilities.compat.show_flag_values`
+        # and naming every transport whose bit was set -- the fix for
+        # GitHub issue #759, where resolving a composite by picking its
+        # lowest set bit dispatched every one containing ``tcp`` into the
+        # TCP registry regardless of what else it named. The owner's
+        # further ruling on this PR (#836) retired that decoding along with
+        # the rest of the composite handling: "since it's no longer a Flag,
+        # `|` joined values are no longer parsed and accepted, we will
+        # treat it as a whole, instead of splitting." So a composite's bits
+        # are never decoded looking for a partial answer any more, on
+        # either numbering -- it is looked up as the one whole value it
+        # already is, exactly like any int a caller might have written
+        # directly, and whether that whole value resolves or reaches this
+        # point depends only on whether some real member happens to equal
+        # it, never on whether a caller built it with ``|`` by hand.
         raise ValueError(f'{{proto!r}} names no transport protocol registry of '
                          f'{{cls.__name__}}')
 
     @classmethod
-    def get(cls, key: 'int', *,
+    def get(cls, key: 'int', *,  # type: ignore[override] # pylint: disable=arguments-differ
             proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> '{NAME}':
         """Backport support for original codes.
 
@@ -458,7 +496,10 @@ class {NAME}(StrEnum):
                 when it does select, since one registry is what a port lookup can
                 answer from -- a member's own ``proto`` names exactly one, so
                 passing it straight back in always resolves, while a composite
-                built by hand is refused rather than resolved to a guess.
+                built by hand is looked up as the whole value it is rather
+                than decoded into a guess -- refused if that whole value
+                names no registry, resolved to whichever real member it
+                happens to equal otherwise (see :meth:`_dispatch`).
 
         Returns:
             The **canonical** service for ``key``. IANA assigns several services
@@ -475,9 +516,11 @@ class {NAME}(StrEnum):
                 one outside ``0..65535``, whose rejection by :meth:`_missing_` this
                 method propagates rather than minting over, so that ``get`` is
                 never more permissive than ``{NAME}(...)``. Also covers a
-                ``proto`` naming more than one transport protocol -- a
-                composite built by hand is refused as a whole rather than
-                answered from any one of the registries it names -- see
+                ``proto`` int that matches no registry at all, composite or
+                not -- looked up as the whole value it is rather than
+                decoded into the registries its bits would each name, so it
+                is refused only when that whole value itself names none of
+                them, not simply for being composite -- see
                 :meth:`_dispatch`.
 
         :meta private:
@@ -498,16 +541,20 @@ class {NAME}(StrEnum):
             return matched[0]
 
         # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
-        # for, which is what minting is for, and *raises* for a value that is not a
-        # port at all. Catching that rejection was GitHub issue #758's defect: it
-        # minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
-        # attribute access can reach, and left ``get`` more permissive than
-        # ``{NAME}(...)``, which has always raised here. The rejection now
-        # propagates, so both entry points answer an out-of-range port identically.
+        # for -- GitHub issue #860 stopped that from minting, on the owner's
+        # ruling: *"we should not mint on get still actually... get will not
+        # have sufficient information to create new ones."* A port outside
+        # ``0..65535`` still *raises* rather than reaching here at all. Before
+        # #860, catching the ``None`` answer minted ``PORT_{{key}}_{{transport}}``
+        # here directly -- GitHub issue #758's defect (it also minted for
+        # ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
+        # attribute access could reach) -- and this was the second, independent
+        # mint site on this method, distinct from the one inside
+        # :meth:`_missing_` itself: neither is a value anyone asked to be named,
+        # so both build an unregistered member instead of registering one.
         ret = owner._missing_(key)
         if ret is None:
-            ret = extend_enum(owner, f'PORT_{{key}}_{{owner.__transport__.name}}',
-                              key, 'unknown', owner.__transport__)
+            ret = owner._unregistered_member(key, 'unknown', owner.__transport__)
         return ret
 
     @classmethod
@@ -541,7 +588,106 @@ class {NAME}(StrEnum):
         return (canonical, *(member for member in matched if member is not canonical))
 
     @classmethod
-    def register_alias(cls, port: 'int', name: 'str') -> '{NAME}':
+    def _sanitize_identifier(cls, name: 'str') -> 'str':
+        """Derive a valid Python attribute name from a raw service name.
+
+        Shared by :meth:`register` and :meth:`register_alias`, both of which
+        mint a name-carrying member at runtime and need the same sanitising
+        steps :meth:`~pcapkit.vendor.default.Vendor.safe_name` applies to
+        every statically declared member's name at generation time (minus its
+        fallback; each caller raises instead -- see their own ``Raises``).
+        Reproduced here rather than imported, since this module is generated
+        *from* :mod:`pcapkit.vendor` and importing back would run a crawler
+        built for one pass over IANA's CSV for what is otherwise a plain
+        string transform.
+
+        Args:
+            name: Raw label, exactly as a caller would want it to read on
+                :attr:`svc`.
+
+        Returns:
+            The sanitised identifier -- not guaranteed to be a valid Python
+            identifier at all (empty, or leading with a digit); callers check
+            :meth:`str.isidentifier` themselves and raise with the context
+            appropriate to their own call.
+
+        """
+        stripped = re.sub(r'\\(.*\\)', '', name)
+        collapsed = '_'.join(stripped.split())
+        replaced = re.sub(r'\\W', '_', collapsed)
+        identifier = '_'.join(filter(None, replaced.split('_')))
+        # NOTE: matches process()'s own keyword guard below -- a name that
+        # sanitises to a reserved word is not usable as an attribute as is,
+        # and a trailing underscore is the same fix the generator already
+        # applies to a statically declared member with the same problem.
+        if keyword.iskeyword(identifier):
+            identifier = f'{{identifier}}_'
+        return identifier
+
+    @classmethod
+    def register(cls, port: 'int', name: 'str') -> '{NAME}':  # pylint: disable=arguments-renamed
+        """Mint the first, canonical member at ``port``, in this registry alone.
+
+        The counterpart of :meth:`register_alias`: that method requires
+        ``port`` to already carry a member and adds a further name for it;
+        this requires the opposite -- ``port`` unclaimed in this registry --
+        and mints the first. :meth:`get` can no longer do this itself as of
+        GitHub issue #860 (the owner's ruling: *"only IANA registered ones
+        are legit values and we need register to properly create new
+        entries. get will not have sufficient information to create new
+        ones."*), so this is now the only way to add a service this registry
+        does not already carry.
+
+        Deliberately scoped like :meth:`register_alias` to **this**
+        per-transport registry rather than dispatched through
+        :meth:`_dispatch`: minting on one transport must never leak onto a
+        transport IANA never assigned the service to, and a write is exactly
+        the operation where guessing the right transport for the caller is
+        the wrong default.
+
+        Args:
+            port: Port number to register under. Must not already carry a
+                member of this registry -- see :meth:`register_alias` for
+                that case.
+            name: The service name, i.e. what :attr:`svc` reads on the new
+                member.
+
+        Returns:
+            The newly minted member.
+
+        Raises:
+            ValueError: If called on a class that holds no members, i.e. on
+                :class:`{NAME}` itself, which is not one of the four
+                per-transport registries; if ``port`` already carries a
+                member of this registry; if ``name`` sanitises to text that
+                is not a valid Python identifier at all; or if the identifier
+                it does sanitise to already names an unrelated member of this
+                registry.
+
+        """
+        if cls.__registry__ is None:
+            raise ValueError(f'{{cls.__name__}} holds no members; register on one of its '
+                             'per-transport subclasses instead')
+
+        existing = cls.__registry__.getlist(port)
+        if existing:
+            raise ValueError(f'{{port!r}} already has a member registered on {{cls.__name__}} '
+                             f'({{", ".join(member.svc for member in existing)}}); use '
+                             f'{{cls.__name__}}.register_alias() to add a further service name '
+                             'for it')
+
+        identifier = cls._sanitize_identifier(name)
+        if not identifier.isidentifier():
+            raise ValueError(f'{{name!r}} has no valid Python identifier to register '
+                             f'{{cls.__name__}} with (sanitises to {{identifier!r}})')
+        if identifier in cls.__members__:
+            raise ValueError(f'{{identifier!r}} already names a member of {{cls.__name__}}; '
+                             'choose a name whose identifier does not collide')
+
+        return extend_enum(cls, identifier, port, name, cls.__transport__)
+
+    @classmethod
+    def register_alias(cls, port: 'int', name: 'str') -> '{NAME}':  # pylint: disable=arguments-renamed
         """Register ``name`` as a new alias on ``port``, in this registry alone.
 
         GitHub issue #807's third ask, deliberately scoped to **this**
@@ -553,21 +699,15 @@ class {NAME}(StrEnum):
         IANA itself never registered it there.
 
         No new storage: the new member simply joins :data:`__registry__` at
-        ``port``, through the same :func:`~aenum.extend_enum` call :meth:`get`
-        already uses to mint an unknown one below. It is then reachable
+        ``port``, through the same :func:`~aenum.extend_enum` call
+        :meth:`register` uses to mint the first one. It is then reachable
         through :attr:`aliases` on every other member already on ``port``, and
         vice versa, with nothing further to keep in sync.
 
-        The Python attribute name is derived from ``name`` through the same
-        sanitising steps the generator uses for every statically declared
-        member's -- ``www-http`` becomes ``www_http`` at
-        :meth:`~pcapkit.vendor.default.Vendor.safe_name`, reproduced below
-        (minus its fallback; see Raises below) rather than imported, since
-        this module is generated *from* :mod:`pcapkit.vendor` and importing
-        back would run a crawler built for one pass over IANA's CSV for what
-        is otherwise a plain attribute lookup. It has to be ``name``, not
-        ``port`` and a counter: an alias whose own name does not resolve
-        through subscription is most of the point of registering one, and
+        The Python attribute name is derived from ``name`` through
+        :meth:`_sanitize_identifier`. It has to be ``name``, not ``port`` and
+        a counter: an alias whose own name does not resolve through
+        subscription is most of the point of registering one, and
         ``TCP['www_http']`` resolving is exactly what lets a caller reach an
         alias the same way every statically declared member already is.
 
@@ -575,9 +715,8 @@ class {NAME}(StrEnum):
             port: Port number to register the alias under. Must already carry
                 at least one member of this registry -- aliasing names a
                 second service on a port that already has one, rather than
-                declaring a fresh port out of nothing, which stays the
-                generator's job (or, for an unassigned port, :meth:`get`'s own
-                mint-on-miss).
+                declaring a fresh port out of nothing, which is :meth:`register`'s
+                job.
             name: The alias's service name, i.e. what :attr:`svc` reads on the
                 new member -- kept exactly as given, unlike the identifier
                 sanitised from it below. Checked against every member already
@@ -608,31 +747,19 @@ class {NAME}(StrEnum):
         if any(member.svc == name for member in existing):
             raise ValueError(f'{{name!r}} is already registered on port {{port}} of {{cls.__name__}}')
 
-        # NOTE: mirrors Vendor.safe_name (pcapkit/vendor/default.py)'s
-        # sanitising steps -- strip a parenthetical aside, collapse whitespace
-        # to single underscores, replace every remaining non-word character
-        # with ``_``, then collapse and trim the underscores that step leaves
-        # behind. ``rename``'s further dedup -- appending ``_{{port}}`` when a
-        # name already recurs elsewhere in the registry -- is deliberately
-        # not reproduced: that decision is curated from a full CSV pass at
-        # generation time, and synthesising a different fallback name here
-        # would be exactly the silent rename the collision check below
-        # refuses to do instead. ``safe_name``'s own fallback -- minting
-        # ``{{cls.__name__}}_{{residue}}`` when the sanitised residue is not a
-        # valid identifier -- is not reproduced either: this method raises
-        # instead (see Raises above), so the 58 members the generator mints
-        # that way in the shipped const (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) are
-        # names this runtime path refuses rather than accepts.
-        stripped = re.sub(r'\\(.*\\)', '', name)
-        collapsed = '_'.join(stripped.split())
-        replaced = re.sub(r'\\W', '_', collapsed)
-        identifier = '_'.join(filter(None, replaced.split('_')))
-        # NOTE: matches process()'s own keyword guard below -- a name that
-        # sanitises to a reserved word is not usable as an attribute as is,
-        # and a trailing underscore is the same fix the generator already
-        # applies to a statically declared member with the same problem.
-        if keyword.iskeyword(identifier):
-            identifier = f'{{identifier}}_'
+        # NOTE: the 58 members the generator mints via safe_name's own
+        # fallback -- ``{{cls.__name__}}_{{residue}}``, when the sanitised
+        # residue is not a valid identifier (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) --
+        # are names this runtime path refuses rather than accepts: that
+        # fallback is deliberately not reproduced in
+        # :meth:`_sanitize_identifier`, which raises here instead (see Raises
+        # above). ``rename``'s further dedup -- appending ``_{{port}}`` when a
+        # name already recurs elsewhere in the registry -- is not reproduced
+        # either: that decision is curated from a full CSV pass at generation
+        # time, and synthesising a different fallback name here would be
+        # exactly the silent rename the collision check above refuses to do
+        # instead.
+        identifier = cls._sanitize_identifier(name)
 
         if not identifier.isidentifier():
             raise ValueError(f'{{name!r}} has no valid Python identifier to register '
@@ -642,6 +769,46 @@ class {NAME}(StrEnum):
                              'choose a name whose identifier does not collide')
 
         return extend_enum(cls, identifier, port, name, cls.__transport__)
+
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str',
+                              proto: 'TransportProtocol' = TransportProtocol.undefined) -> '{NAME}':
+        """Build a member absent from this registry's own lookup tables and
+        its :data:`__registry__` side table alike.
+
+        Used by :meth:`_missing_` and :meth:`get` for a port neither resolves
+        to a real, IANA-registered service, so that such a lookup no longer
+        grows either table -- contrast :meth:`register`, the explicit,
+        caller-named path that still does.
+
+        Reconstructs :attr:`svc`, :attr:`port` and :attr:`proto` the same way
+        :meth:`__new__` would: :meth:`~pcapkit.corekit.enum.
+        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        (it builds through ``cls._member_type_.__new__`` directly), so this
+        class's own three attributes would otherwise be missing and every
+        method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,
+        the comparison operators, :attr:`aliases`) would raise on the result.
+        Deliberately *not* added to :data:`__registry__` -- unlike
+        :meth:`__new__`, which always does -- since an unregistered member is
+        exactly the one this registry must not remember past the call that
+        built it.
+
+        Args:
+            value: Port number.
+            name: Bare label for the unregistered member -- what
+                :meth:`__new__` calls ``name`` and stores as :attr:`svc`.
+            proto: Transport protocol the label names, if any.
+
+        """
+        if cls.__registry__ is None:
+            raise ValueError(f'{{cls.__name__}} holds no members; they belong to its '
+                             'per-transport subclasses')
+        temp = f'{{name}} [{{value}} - {{proto.name}}]'
+        obj = super()._unregistered_member(temp, name)
+        obj.svc = name
+        obj.port = value
+        obj.proto = proto
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Optional[{NAME}]':
@@ -664,7 +831,11 @@ class {NAME}(StrEnum):
         # one tests ``cls.__transport__`` and answers that registry alone --
         # GitHub issue #760, where source order decided instead and a UDP lookup in
         # 6000-6063 came back carrying ``tcp``. A registry a named span excludes
-        # falls through to a mint, which is what IANA assigning it nothing means.
+        # falls through to :meth:`_unregistered_member`, which is what IANA
+        # assigning it nothing means -- GitHub issue #860 stopped this from
+        # growing either lookup table or :data:`__registry__`, on the owner's
+        # ruling for the whole family: *"only IANA registered ones are legit
+        # values and we need register to properly create new entries."*
         {MISS}
         {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
@@ -947,10 +1118,18 @@ class AppType(Vendor):
                 flag = self.flag([proto])
                 claim = '' if proto == 'undefined' else f' and cls.__transport__ is {flag}'
 
+                # NOTE: GitHub issue #860. This used to extend_enum(...) a
+                # brand-new, permanent member under a generated Python
+                # identifier (``f'{self.safe_name(svc)}_{{value}}'``) every
+                # time a port in this span was looked up. It no longer takes a
+                # Python identifier at all -- an unregistered member is never
+                # set as a class attribute, so there is nothing for one to
+                # collide with -- only the bare label IANA (or this span)
+                # assigns the whole range, exactly what used to be the third
+                # positional argument to extend_enum.
                 miss.append(f'if {start} <= value <= {stop}{claim}:')
                 miss.append(f'    #: {cmmt}')
-                miss.append(f"    return extend_enum(cls, f'{self.safe_name(svc)}_{{value}}', "
-                            f"value, {svc!r}, {flag})")
+                miss.append(f'    return cls._unregistered_member(value, {svc!r}, {flag})')
 
         return line, miss
 
@@ -978,8 +1157,12 @@ class AppType(Vendor):
                 key = '%s_' % key
 
             # NOTE: the member's ``proto`` is this registry's own transport
-            # protocol and nothing else, so it is a single bit -- GitHub issue
-            # #806. Rendering ``record.protos`` here instead put the whole
+            # protocol and nothing else, so it names one transport rather
+            # than the whole IANA set -- GitHub issue #806, and what makes
+            # ``flag([self.TRANSPORT])`` below render a single name; the
+            # values are no longer bit-flags at all since GitHub issue #860
+            # dropped the power-of-two spacing they used to need. Rendering
+            # ``record.protos`` here instead put the whole
             # ``(service, port)`` IANA set on every member, which made
             # ``TCP.http.proto`` name UDP and SCTP as well. That was a second
             # copy of what the four registries already encode, it is the copy

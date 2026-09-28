@@ -95,17 +95,46 @@ mint site bypassing ``_missing_`` entirely) converts too, alongside
 ``_missing_``; :class:`FEATCode` has no custom ``__new__`` and no ``get()``
 of its own, so only its one ``_missing_`` branch was in play.
 
-Left untouched: :class:`~pcapkit.const.reg.apptype.apptype.AppType` (766
-``_missing_`` branches plus one more in its own ``get()``, tracked as #860
-step 2's PR 2), and the two classes the owner also floated a rename/base
-change for and this programme pushed back on with measurements --
-:class:`~pcapkit.const.ftp.command.CommandType` (``IntFlag`` -> ``IntEnum``
-would break its real ``A/P`` composites) and
-:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
-(``auto()`` would make ``tcp | udp == sctp``) -- both re-opened as
-`needs: decision` on #860 and explicitly out of this PR's scope; see
-:class:`BespokeOpenVocabularyUnmintConvertedTests`'s own
-``test_commandtype_and_transportprotocol_are_untouched``.
+GitHub issue #860 step 2's PR 2 has now converted the last of the 9:
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four per-transport
+registries (:class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+:class:`~pcapkit.const.reg.apptype.udp.UDP`,
+:class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
+:class:`~pcapkit.const.reg.apptype.dccp.DCCP`) now mix in
+:class:`~pcapkit.corekit.enum.EnumRegistry` and no longer mint on either of
+AppType's two mint sites -- the 766 ``_missing_`` branches, and the one more
+inside ``get()`` itself. See :class:`AppTypeUnmintConvertedTests` below,
+including the deliberate scope decision on the 8 of those 766 branches that
+name a real (if IANA-assigned to a whole span rather than declared
+individually) service rather than a placeholder.
+
+Untouched, per the owner's ruling settling the ``needs: decision`` this PR
+re-opened: :class:`~pcapkit.const.ftp.command.CommandType` keeps ``IntFlag``,
+verbatim: *"okay, let's keep IntFlag if that's how RFC/IANA data is
+constructed (`|` may exist on the CSV data)"* -- measured, 2 occurrences in
+the generated data join two kinds with ``/`` and would break under a plain
+``IntEnum``; see :class:`BespokeOpenVocabularyUnmintConvertedTests`'s own
+``test_commandtype_is_untouched``.
+:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, by contrast,
+*did* change -- on a different ruling than CommandType's, not the same one.
+GitHub PR #836 is what first retired ``|``-composite decoding, verbatim:
+*"since it's no longer a Flag, `|` joined values are no longer parsed and
+accepted, we will treat it as a whole, instead of splitting"* -- and it was
+this issue, #860, that later drew the further consequence once nothing
+decoded a composite any more: *"2-power on TransportProtocol is mainly for
+the consideration of previously `tcp | udp`-alike code. But we dont accept
+this kind of piping anymore in the new logic so I think `auto()` is the
+expected behaviour."* So it now numbers its five members sequentially from
+0 -- ``undefined`` a direct, explicit ``0``, the rest continuing from it
+via ``auto()`` with no ``_start_`` needed, per the owner's own further
+ruling settling the declaration shape -- rather than by the power-of-two
+spacing that composition used to need; per the owner's own follow-up,
+*"no need to add test around
+that"* for the one behavioural consequence -- and it is a real consequence,
+not a refusal: a hand-composed ``tcp | udp`` (or a bare, uncomposed ``3``)
+now silently resolves as ``sctp``'s own value through
+:meth:`AppType._dispatch`, where it used to name no registry at all and
+raise. None of the tests below pin that, per the same instruction.
 
 """
 from __future__ import annotations
@@ -976,7 +1005,7 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
         # safe one (a false positive is loud and gets a fixture; a false
         # negative ships quietly), and no real call site under
         # ``pcapkit/const``/``pcapkit/vendor`` is affected either way
-        # (measured: the sweep stays at 244/0). It genuinely does over-flag:
+        # (measured: the sweep stays at 1012/0). It genuinely does over-flag:
         # ``value.upper()`` alone is exempt (it is the receiver case just
         # above), but the exact same expression as an *argument* --
         # ``str(value.upper())``, ``helper(value.upper())`` -- flags, so
@@ -1117,7 +1146,12 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     call site already passed, so it is walked and counted here too rather
     than specially excluded -- plus 2 more round 2 review found still
     minting on :class:`OptionType`'s own ``get()`` (its int/namespace path
-    and its ``str`` path, both independent of ``_missing_``), for 244 total.
+    and its ``str`` path, both independent of ``_missing_``), for 244 total
+    as of PR 1. PR 2 then added the 766 ``_missing_`` branches on
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType` itself, the one more
+    inside its own ``get()``, and the one ``super()._unregistered_member(...)``
+    forward its own override makes -- 768 more, for 1012 total; see
+    :class:`AppTypeUnmintConvertedTests` below.
     ``'%s_unknown' % namespace`` on the first of those two is deliberately
     *not* flagged as manufactured despite being a ``%``-formatted
     :class:`~ast.BinOp`: unlike ``'Unassigned_%d' % value``, the substituted
@@ -1144,13 +1178,15 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     collision if these were ever minted instead of built unregistered.
 
     A call site still using ``extend_enum(...)`` instead of
-    ``_unregistered_member(...)`` at all -- :class:`~pcapkit.const.reg.
-    apptype.apptype.AppType` (766 branches, not yet touched -- PR 2), plus
-    the handful of still-minting branches on :class:`~pcapkit.const.reg.
-    ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.Socket` that
-    the ruling kept, plus :class:`~pcapkit.const.mh.cga_type.CGAType` -- is
-    out of scope and untouched by this sweep entirely, since it never calls
-    ``_unregistered_member`` in the first place.
+    ``_unregistered_member(...)`` at all -- the handful of still-minting
+    branches on :class:`~pcapkit.const.reg.ethertype.EtherType` and
+    :class:`~pcapkit.const.ipx.socket.Socket` that the ruling kept, plus
+    :class:`~pcapkit.const.mh.cga_type.CGAType`, plus ``register``/
+    ``register_alias`` on every registry (including
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own, added by PR 2)
+    -- is out of scope and untouched by this sweep entirely, since it never
+    calls ``_unregistered_member`` in the first place; minting there is the
+    explicit, caller-named path the sweep is not about.
 
     (Corrected from an earlier draft of this docstring, which estimated
     "~92 registries still mint" and named ``pcapkit.const.mh`` and
@@ -1191,9 +1227,13 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         # #860 step 2's PR 1 added 11 more (true call sites plus each
         # override's own ``super()`` forward, plus the 2 round-2 review found
         # still minting on OptionType.get()'s own two paths) across 2 files,
-        # for 244 total measured on this tree.
-        self.assertGreaterEqual(call_count, 244,
-                                 f'expected at least 244 _unregistered_member call sites, found {call_count}')
+        # for 244 total. #860 step 2's PR 2 then added the 766 ``_missing_``
+        # branches on AppType itself, the one more inside its own ``get()``,
+        # and the one ``super()._unregistered_member(...)`` forward its own
+        # override makes -- 768 more, in one file, for 1012 total measured
+        # on this tree.
+        self.assertGreaterEqual(call_count, 1012,
+                                 f'expected at least 1012 _unregistered_member call sites, found {call_count}')
         self.assertEqual(offenders, [],
                           'found _unregistered_member call(s) with a manufactured name:\n'
                           + '\n'.join(offenders))
@@ -1916,27 +1956,23 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
                 self.assertTrue(callable(getattr(cls, 'register', None)))
                 self.assertTrue(callable(getattr(cls, 'register_alias', None)))
 
-    def test_commandtype_and_transportprotocol_are_untouched(self) -> None:
-        """The owner's ruling also floated ``CommandType`` -> ``IntEnum`` and
-        ``TransportProtocol`` -> ``auto()``. Both are re-opened as
-        `needs: decision` on #860 and are explicitly out of PR 1's scope --
-        ``CommandType`` composes for real (measured: 2 occurrences in the
-        generated data join two kinds with ``/``, e.g. access *and*
-        parameter, which a plain ``IntEnum`` cannot represent), and
-        ``TransportProtocol`` is already ``IntEnum`` (#808 dropped
-        ``IntFlag``), so only ``auto()`` would apply there -- and under
-        ``auto()`` ``tcp | udp == 3 == sctp``, silently misrouting a
-        composite #836 documented as refused outright. Pinned here so a
-        future change to either is noticed as a scope change rather than
-        folded silently into this PR."""
+    def test_commandtype_is_untouched(self) -> None:
+        """The owner's ruling also floated ``CommandType`` -> ``IntEnum``.
+        Re-opened as `needs: decision` on #860 and settled the other way,
+        verbatim: *"okay, let's keep IntFlag if that's how RFC/IANA data is
+        constructed (`|` may exist on the CSV data)."* Measured: 2 occurrences
+        in the generated data join two kinds with ``/``, e.g. access *and*
+        parameter, which a plain ``IntEnum`` cannot represent. Pinned here so
+        a future change is noticed as a scope change rather than folded
+        silently into some other PR. (``TransportProtocol`` was the other
+        half of that same ruling comment -- its own ``auto()`` conversion is
+        #860 step 2 PR 2's, covered by
+        :class:`AppTypeUnmintConvertedTests` below rather than here.)"""
         from pcapkit.const.ftp.command import CommandType
-        from pcapkit.const.reg.apptype.apptype import TransportProtocol
         from pcapkit.corekit.enum import EnumRegistry
 
         self.assertFalse(issubclass(CommandType, EnumRegistry))
-        self.assertFalse(issubclass(TransportProtocol, EnumRegistry))
         self.assertEqual(CommandType.A | CommandType.P, 3)
-        self.assertEqual(int(TransportProtocol.tcp) | int(TransportProtocol.udp), 3)
 
 
 class BespokeGetReplacementTests(unittest.TestCase):
@@ -2070,6 +2106,377 @@ class BespokeGetUnchangedTests(unittest.TestCase):
 
         self.assertIs(OptionType.get(2, namespace='if'), OptionType.if_name)  # type: ignore[attr-defined]
         self.assertIs(OptionType.get(2, namespace='epb'), OptionType.epb_flags)  # type: ignore[attr-defined]
+
+
+class AppTypeUnmintConvertedTests(unittest.TestCase):
+    """GitHub issue #860 step 2, PR 2 (the second and final PR of this step):
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
+    per-transport registries -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+    :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+    :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
+    :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- brought onto
+    :class:`~pcapkit.corekit.enum.EnumRegistry` and stopped from minting.
+
+    Largest of the 9 bespoke classes #860 step 2 converts: measured on
+    ``c411d072a`` by an AST walk over :meth:`AppType._missing_`, 766
+    range-bounded branches -- 754 ``unassigned_<port>`` and 4
+    ``reserved_<port>`` placeholders, plus 8 branches naming a real service
+    IANA assigns to a whole span rather than to one declared member each
+    (``x11`` for TCP and again for UDP, ``active-net``, ``satvid-datalnk``,
+    ``vrml-multi-use``, ``ircu``, ``swx``, ``flex-lm``) -- plus one more,
+    independent mint site inside :meth:`AppType.get` itself
+    (``PORT_<port>_<transport>``, labelled ``'unknown'``, for a port neither
+    ``_missing_``'s ranges nor the registry's own declared members cover).
+
+    A deliberate scope decision, stated here because a reviewer could
+    reasonably expect the ``FEATCode`` precedent instead: the 8 real-name
+    spans above convert to :meth:`~pcapkit.corekit.enum.
+    EnumRegistry._unregistered_member` exactly like the 758 placeholder
+    spans, *not* declared as real, individually-listed members the way #860
+    step 2's PR 1 declared ``FEATCode``'s 15. ``FEATCode``'s fix addressed a
+    *different* defect -- a const module minting members as a side effect of
+    merely being imported, which does not exist here, since every one of
+    these 766 spans mints only on an actual port lookup -- and the owner's
+    ruling for the whole ``AppType`` family draws no distinction between a
+    real name and a placeholder: *"only IANA registered ones are legit
+    values and we need register to properly create new entries. get will
+    not have sufficient information to create new ones."* A lookup resolving
+    ``TCP(6010)`` after this PR therefore returns an *unregistered* ``x11``
+    member -- correct as a service name, but absent from
+    ``__members__``/``_value2member_map_`` until someone calls
+    ``TCP.register(6010, 'x11')`` explicitly.
+
+    Unlike every bespoke class #860 step 2's PR 1 converted,
+    :meth:`AppType.get` already existed before this PR and does genuine
+    transport-protocol dispatch through :meth:`~AppType._dispatch` -- so,
+    unlike :class:`~pcapkit.const.http.status_code.StatusCode`/
+    :class:`~pcapkit.const.ftp.return_code.ReturnCode`, it keeps its own
+    ``get()`` rather than being replaced by the base's; and, unlike
+    :class:`~pcapkit.const.ftp.command.Command`/
+    :class:`~pcapkit.const.http.method.Method`/
+    :class:`~pcapkit.const.pcapng.option_type.OptionType`, its own
+    ``_unregistered_member`` override reconstructs three attributes
+    (``svc``, ``port``, ``proto``) rather than one or two, because
+    :meth:`AppType.__new__` sets all three and none is optional for
+    :meth:`__repr__`/:meth:`__str__`/:meth:`__int__`/the comparison
+    operators/:attr:`~AppType.aliases` to run on the result without raising.
+
+    :meth:`AppType.register` is new on this PR. ``AppType`` already had a
+    working ``get``/``get_all``/``register_alias`` of its own, but never a
+    working ``register`` -- and the base's generic one (which calls
+    ``cls.__new__(cls, value)`` with only ``value``) would have built a
+    member with ``svc='<null>'`` and ``proto=TransportProtocol.undefined``,
+    silently wrong, the moment this class mixed in
+    :class:`~pcapkit.corekit.enum.EnumRegistry` without an override. Scoped
+    like :meth:`~AppType.register_alias` to **this** per-transport registry
+    rather than dispatched through :meth:`~AppType._dispatch`, for the same
+    reason register_alias already was: minting on one transport must never
+    leak onto a transport IANA never assigned the service to.
+
+    """
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_apptype_family_carries_the_registry_protocol(self) -> None:
+        """#842's ruling is that ``get``/``get_all``/``register``/
+        ``register_alias`` exist on every registry -- #860 step 2 PR 2 is
+        what actually delivers that for this family, including ``register``,
+        which none of the five had a working version of before this PR."""
+        from pcapkit.const.reg.apptype.apptype import AppType
+        from pcapkit.const.reg.apptype.dccp import DCCP
+        from pcapkit.const.reg.apptype.sctp import SCTP
+        from pcapkit.const.reg.apptype.tcp import TCP
+        from pcapkit.const.reg.apptype.udp import UDP
+        from pcapkit.corekit.enum import EnumRegistry
+
+        for cls in (AppType, TCP, UDP, SCTP, DCCP):
+            with self.subTest(registry=cls.__name__):
+                self.assertTrue(issubclass(cls, EnumRegistry))
+                self.assertTrue(callable(getattr(cls, 'get_all', None)))
+                self.assertTrue(callable(getattr(cls, 'register', None)))
+                self.assertTrue(callable(getattr(cls, 'register_alias', None)))
+                self.assertTrue(callable(getattr(cls, '_unregistered_member', None)))
+
+    def test_unassigned_range_resolves_without_minting(self) -> None:
+        """226 sits in the base registry's 225-241 ``reserved`` span, which
+        names no transport protocol, so it answers every one of the four
+        per-transport registries identically -- the same shape as
+        :class:`UnassignedRangeDoesNotMintTests` above, generalised to a
+        registry whose ``_unregistered_member`` reconstructs three
+        attributes rather than the generic zero."""
+        from pcapkit.const.reg.apptype.dccp import DCCP
+        from pcapkit.const.reg.apptype.sctp import SCTP
+        from pcapkit.const.reg.apptype.tcp import TCP
+        from pcapkit.const.reg.apptype.udp import UDP
+
+        for cls in (TCP, UDP, SCTP, DCCP):
+            with self.subTest(registry=cls.__name__):
+                # NOTE: ``_value2member_map_`` is keyed by AppType's own
+                # formatted ``_value_`` string (``'svc [port - proto]'``),
+                # never by the bare port -- so the side table that would grow
+                # from a mint here is ``__registry__``, checked below, not
+                # this one.
+                self.assertFalse(cls.__registry__.getlist(226))
+                before = len(cls.__members__)
+
+                first = cls(226)
+                after_one = len(cls.__members__)
+                second = cls(226)
+                after_two = len(cls.__members__)
+
+                self.assertEqual(before, after_one)
+                self.assertEqual(before, after_two)
+                self.assertEqual(first, second)
+                self.assertIsNot(first, second)
+                self.assertEqual(first.svc, 'reserved')
+                self.assertEqual(first.port, 226)
+                self.assertFalse(cls.__registry__.getlist(226))
+                self.assertNotIn('reserved', cls.__members__)
+
+    def test_out_of_bound_port_still_fails(self) -> None:
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        with self.assertRaises(ValueError):
+            TCP(1 << 32)
+        with self.assertRaises(ValueError):
+            TCP(-1)
+
+    def test_named_transport_span_still_dispatches_and_does_not_mint(self) -> None:
+        """GitHub issue #760's own regression: 6000-6063 is ``x11`` on TCP
+        and ``x11`` on UDP too, both testing ``cls.__transport__`` so a UDP
+        lookup cannot come back carrying TCP's label -- and 6665-6669 is the
+        sharper case, ``ircu`` on TCP but IANA's own ``reserved`` marker on
+        UDP for the *same* span, so a merged branch could not have kept both.
+        Converting ``extend_enum(...)`` to ``_unregistered_member(...)`` left
+        every ``if``/``cls.__transport__ is ...`` test untouched -- this pins
+        that the dispatch survived the conversion, not just that minting
+        stopped."""
+        from pcapkit.const.reg.apptype.tcp import TCP
+        from pcapkit.const.reg.apptype.udp import UDP
+
+        tcp_before = len(TCP.__members__)
+        udp_before = len(UDP.__members__)
+
+        tcp_x11 = TCP(6010)
+        udp_x11 = UDP(6010)
+        self.assertEqual(tcp_x11.svc, 'x11')
+        self.assertEqual(udp_x11.svc, 'x11')
+        self.assertEqual(len(TCP.__members__), tcp_before)
+        self.assertEqual(len(UDP.__members__), udp_before)
+
+        tcp_ircu = TCP(6667)
+        udp_reserved = UDP(6667)
+        self.assertEqual(tcp_ircu.svc, 'ircu')
+        self.assertEqual(udp_reserved.svc, 'reserved')
+        self.assertEqual(len(TCP.__members__), tcp_before)
+        self.assertEqual(len(UDP.__members__), udp_before)
+
+    def test_get_second_mint_site_no_longer_mints(self) -> None:
+        """54321 is not a declared member and not inside any of
+        ``_missing_``'s ranges either, so it used to reach :meth:`AppType.
+        get`'s own, second, independent ``extend_enum(...)`` call --
+        distinct from the one inside ``_missing_``, and easy to miss when
+        converting only the latter (exactly what round 2 review of #860 step
+        2 PR 1 caught on :class:`~pcapkit.const.pcapng.option_type.
+        OptionType` for the same reason)."""
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        before = len(TCP.__members__)
+        first = TCP.get(54321)
+        after = len(TCP.__members__)
+        second = TCP.get(54321)
+
+        self.assertEqual(before, after)
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
+        self.assertEqual(first.svc, 'unknown')
+        self.assertEqual(first.port, 54321)
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        self.assertIs(first.proto, TransportProtocol.tcp)
+        self.assertFalse(TCP.__registry__.getlist(54321))
+
+    def test_missing_direct_call_still_raises_for_the_same_port(self) -> None:
+        """The asymmetry this PR leaves in place, deliberately: a direct
+        ``TCP(54321)`` has no ``get()`` around it to catch ``_missing_``'s
+        :obj:`None` answer and build an ``'unknown'`` member from it, so it
+        still raises exactly as it did on ``main`` -- only :meth:`AppType.
+        get` gained the fallback, matching the constructor's own long-
+        standing behaviour of raising rather than minting for a value inside
+        ``0..65535`` but outside every declared member and every
+        ``_missing_`` span."""
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        with self.assertRaises(ValueError):
+            TCP(54321)
+
+    def test_unregistered_member_reconstructs_every_attribute(self) -> None:
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        before = len(TCP.__members__)
+        member = TCP._unregistered_member(59998, 'probe-svc', TransportProtocol.tcp)
+        after = len(TCP.__members__)
+
+        self.assertEqual(before, after)
+        self.assertEqual(member.svc, 'probe-svc')
+        self.assertEqual(member.port, 59998)
+        self.assertIs(member.proto, TransportProtocol.tcp)
+        self.assertEqual(int(member), 59998)
+        self.assertEqual(member.aliases, ())
+        self.assertEqual(repr(member), '<TCP.probe-svc: 59998 [tcp]>')
+        self.assertEqual(str(member), 'probe-svc [59998 - tcp]')
+        self.assertFalse(TCP.__registry__.getlist(59998))
+        self.assertNotIn('probe-svc', TCP.__members__)
+
+    def test_unregistered_member_on_apptype_itself_raises(self) -> None:
+        """:class:`AppType` holds no members of its own -- the same guard
+        :meth:`AppType.__new__` and :meth:`AppType.register` both already
+        enforce."""
+        from pcapkit.const.reg.apptype.apptype import AppType
+
+        with self.assertRaises(ValueError):
+            AppType._unregistered_member(1, 'x')
+
+    def test_register_mints_a_real_member_and_refuses_a_duplicate_port(self) -> None:
+        """``AppType._value_`` is the formatted ``'svc [port - proto]'``
+        string, not the bare port -- so ``TCP(port)`` is not how a
+        registered member is reached at all, on ``main`` as well as here
+        (verified directly: ``TCP(80)`` raises for the real, declared
+        ``http`` member too). ``TCP.get(port)`` and the ``__registry__``
+        side table are the two things a real ``register()`` call is checked
+        against below."""
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        port = 59991
+        self.assertFalse(TCP.__registry__.getlist(port))
+
+        member = TCP.register(port, 'pypcapkit-860-probe')
+        self.assertEqual(member.svc, 'pypcapkit-860-probe')
+        self.assertEqual(member.port, port)
+        self.assertIn(member, TCP.__registry__.getlist(port))
+        self.assertIn(member._value_, TCP._value2member_map_)  # type: ignore[misc]
+        self.assertIs(TCP.pypcapkit_860_probe, member)
+        self.assertIs(TCP.get(port), member)
+
+        with self.assertRaises(ValueError):
+            TCP.register(port, 'again')
+        with self.assertRaises(ValueError):
+            TCP.register(60005, '123')  # sanitises to '123', not a valid identifier
+
+    def test_register_on_apptype_itself_raises(self) -> None:
+        from pcapkit.const.reg.apptype.apptype import AppType
+
+        with self.assertRaises(ValueError):
+            AppType.register(1234, 'x')
+
+    def test_register_alias_still_works_after_the_sanitizer_refactor(self) -> None:
+        """:meth:`AppType.register`/:meth:`AppType.register_alias` now share
+        :meth:`AppType._sanitize_identifier` rather than each carrying its
+        own copy of the sanitising steps -- this is the regression check
+        that the refactor changed nothing observable about the alias path."""
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        port = 59992
+        canonical = TCP.register(port, 'pypcapkit-860-canonical')
+        alias = TCP.register_alias(port, 'pypcapkit-860-alias')
+
+        self.assertEqual(alias.port, port)
+        self.assertIn(canonical, alias.aliases)
+        self.assertIn(alias, canonical.aliases)
+        self.assertIs(TCP.pypcapkit_860_alias, alias)
+
+        with self.assertRaises(ValueError):
+            TCP.register_alias(60006, 'no canonical member yet')
+
+    def test_apptype_get_dispatches_via_proto_without_minting(self) -> None:
+        from pcapkit.const.reg.apptype.apptype import AppType
+        from pcapkit.const.reg.apptype.tcp import TCP
+
+        before = len(TCP.__members__)
+        member = AppType.get(80, proto='tcp')
+        after = len(TCP.__members__)
+
+        self.assertIs(member, TCP.get(80))
+        self.assertEqual(before, after)
+
+    def test_apptype_unrecognised_proto_is_still_refused(self) -> None:
+        """A ``proto`` naming no registry at all -- not one of the two real
+        collision cases ``auto()`` introduced, just an ordinary invalid value
+        -- is still refused by :meth:`AppType._dispatch`, unaffected by this
+        PR. (Deliberately not a composite like ``tcp | udp``: under
+        ``auto()`` that now equals ``sctp`` numerically and dispatches
+        there rather than raising, which is the one accepted, explicitly
+        untested consequence of the ``auto()`` change -- see
+        :class:`TransportProtocolAutoTests`.)"""
+        from pcapkit.const.reg.apptype.apptype import AppType
+
+        with self.assertRaises(ValueError):
+            AppType.get(80, proto=99)
+
+
+class TransportProtocolAutoTests(unittest.TestCase):
+    """:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
+    ``auto()`` conversion, #860 step 2 PR 2's other change. The owner's
+    ruling, verbatim: *"since we do not allow `|` anymore, using `auto()`
+    instead of 2-power is the right move (breaking change but accepted)."*
+    And, on the one behavioural consequence -- a hand-composed
+    ``tcp | udp`` now equalling ``sctp`` numerically (``1 | 2 == 3``), where it
+    used to name no member at all and be refused as a whole -- the explicit
+    follow-up settling that no test should pin it: *"No need to add test
+    around that honestly. This is an obsoleted path from a breaking
+    change."* So this class deliberately covers only the values and the
+    stale comment's removal, not the composition consequence: no test here
+    calls ``_dispatch`` with a composed value at all, unlike
+    :meth:`AppTypeUnmintConvertedTests.
+    test_apptype_unrecognised_proto_is_still_refused`, which uses an
+    ordinary invalid value instead precisely to stay clear of it.
+
+    """
+
+    def test_values_are_sequential_from_zero(self) -> None:
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+
+        self.assertEqual(int(TransportProtocol.undefined), 0)
+        self.assertEqual(int(TransportProtocol.tcp), 1)
+        self.assertEqual(int(TransportProtocol.udp), 2)
+        self.assertEqual(int(TransportProtocol.sctp), 3)
+        self.assertEqual(int(TransportProtocol.dccp), 4)
+
+    def test_still_not_a_registry(self) -> None:
+        """Unaffected by this PR: ``TransportProtocol`` never minted through
+        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, and
+        does not mix in :class:`~pcapkit.corekit.enum.EnumRegistry` now
+        either -- only ``AppType`` and its four transport subclasses do."""
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.corekit.enum import EnumRegistry
+
+        self.assertFalse(issubclass(TransportProtocol, EnumRegistry))
+
+    def test_get_still_refuses_an_unrecognised_name(self) -> None:
+        """GitHub PR #836's ruling against extending ``TransportProtocol``
+        at all is untouched by the ``auto()`` change -- :meth:`~pcapkit.const.
+        reg.apptype.apptype.TransportProtocol.get` still has no ``_missing_``
+        of its own and still refuses outright rather than minting."""
+        from pcapkit.const.reg.apptype.apptype import TransportProtocol
+
+        with self.assertRaises(ValueError):
+            TransportProtocol.get('not-a-real-transport')
+
+    def test_stale_power_of_two_comment_is_gone(self) -> None:
+        """The owner's instruction, verbatim: the in-code comment claiming
+        the values "must keep" power-of-two spacing contradicted GitHub
+        PR #836's own ruling once nothing decomposed a composite any
+        more, and is deleted rather than merely superseded -- checked
+        against the generated source itself, not the docstring here, so a
+        regeneration that reintroduces it fails this test."""
+        import pcapkit.const.reg.apptype.apptype as apptype_module
+
+        source = pathlib.Path(apptype_module.__file__).read_text(encoding='utf-8')
+        self.assertNotIn('must keep', source)
+        self.assertNotIn('the power-of-two spacing the values', source)
 
 
 if __name__ == '__main__':
