@@ -3445,6 +3445,24 @@ since -- reaching #805 by the entries below.
   forces a human look. One file changed,
   ``tests/const/test_const_enum_no_mint.py``; nothing under ``pcapkit/`` or
   ``docs/``. Closes #879 (#881).
+* **Fixed** -- ``TLSKeyLabel`` tracked the Mozilla NSS key-log wiki, but
+  ``draft-ietf-opsawg-pcapng-06`` S4.7 now points at
+  ``[I-D.ietf-tls-keylogfile]`` (draft-05), published as :rfc:`9850`, "The
+  SSLKEYLOGFILE Format for TLS", whose S4.2 creates the IANA "TLS SSLKEYLOGFILE
+  Labels" registry. Against that registry, ``TLSKeyLabel`` was missing
+  ``ECH_SECRET`` and ``ECH_CONFIG`` (:rfc:`9850` SS2.3/4.2), so
+  ``TLSKeyLabel('ECH_SECRET')`` raised ``ValueError`` on an
+  otherwise-legitimate Decryption Secrets Block; both are added, ``ECH_SECRET``
+  keeping the file's ``# nosec B105`` bandit convention for ``*_SECRET``
+  members. ``RSA`` has no row in :rfc:`9850`'s registry -- it is an NSS-only
+  label the NSS wiki records as removed in NSS 3.34 -- and is kept rather than
+  deleted, since removing a public member is a breaking change, with a new
+  docstring comment marking it the historical exception.
+  ``pcapkit/vendor/pcapng/secrets_type.py``'s stale ``# NSS Key Log Format``
+  comment is repointed at RFC 9850 to match, and ``TLSKeyLabel``'s own
+  docstring now cites it. A new test pins the member set against RFC 9850 plus
+  the documented ``RSA`` exception, and asserts ``ECH_SECRET``, ``ECH_CONFIG``
+  and ``RSA`` all resolve. Closes #882 (#883).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
