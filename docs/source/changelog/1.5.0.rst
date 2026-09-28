@@ -3355,6 +3355,38 @@ since -- reaching #805 by the entries below.
   pass across ``tests/const/`` and ``tests/protocols/transport/``, plus a
   further 142 across ``tests/vendor/`` and the other
   ``TransportProtocol``-consuming suites (#874).
+* **Fixed** -- three follow-ups from #873's own review, none of which changed
+  the behaviour that merged; one invariant was unpinned and two pieces of
+  prose/lint were inaccurate. **1.** ``except BaseException:`` in
+  ``_snapshot_and_restore`` is now pinned: a new
+  ``test_a_keyboard_interrupt_still_restores_and_propagates`` asserts all three
+  halves of the invariant -- content restored byte-for-byte, no ``.bak`` file
+  surviving, and the ``KeyboardInterrupt`` itself still propagating rather than
+  being converted into a ``False`` return. It discriminates: the real code
+  passes clean, while mutating the clause to ``except Exception:`` fails on the
+  restored content with the predicted ``.bak`` file left behind. **2.** A false
+  docstring clause is corrected: it claimed a crawler whose ``_dest_path``
+  cannot be resolved "goes on to fail loudly anyway once ``Vendor.__init__``
+  calls the same ``_dest_path`` itself", which holds for one of the function's
+  two triggers and not the other -- an instance-method-only override raises
+  ``TypeError`` on the *class* call ``_snapshot_and_restore`` makes (no
+  ``self`` to bind), but the *instance* call inside ``__init__`` binds ``self``
+  correctly and resolves fine, so that target runs to completion unprotected
+  and **succeeds silently**: ``run()`` returns ``True``, the file is replaced,
+  and nothing warns that no snapshot was ever taken. Measured with a
+  constructed instance-method-only stub. **3.** The
+  ``# pylint: disable=no-else-raise`` pragma is **kept** -- removing it was
+  going to be a third fix, on the mistaken belief that R1720 never applies to a
+  ``try``/``except``/``else``; that belief rested on a message-control artefact
+  (``--disable=all --enable=no-else-raise`` does not re-enable the check the
+  way ``--enable=R`` does), and under the ``Makefile``'s own flags -- what CI
+  actually runs -- pylint 4.0.8 does flag it. The ``else:`` is deliberate: it
+  is what makes the backup cleanup unreachable from the ``except``, and
+  deleting the ``raise`` that makes it so would be a mutation the suite must
+  catch. Deliberately left out of scope: an untested ``os.close(fd)`` leak
+  (harmless, since the path still exists and ``copy2`` reopens it) and the
+  semantically-identical unindented-statement form of the same ``else:``, which
+  no test can distinguish from the current one. Closes #875 (#876).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
