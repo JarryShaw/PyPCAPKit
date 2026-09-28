@@ -3420,6 +3420,31 @@ since -- reaching #805 by the entries below.
   falsifies -- its code tokens are unchanged and its ``EXPECTED_MISSING_NAMES``
   still carries ``0x0010: 'Registered by Xerox_0x0010'`` and still passes,
   since the name itself is preserved (#878).
+* **Changed** -- ``test_const_enum_no_mint.py``'s ``is_manufactured()``
+  exemption for #878's (above) 53 preserved hex-suffixed names moves from a
+  per-*file* exemption to a per-*name-shape* one. Keying it on
+  ``HEX_SUFFIXED_NAME_EXEMPT_PATHS`` made the exemption shape-blind inside
+  those two files: rewriting a branch to ``'Xyplex_%d' % value`` -- exactly the
+  value-derived shape the predicate exists to flag -- still left the sweep
+  green, since ``exempt_hits`` stayed at 53 regardless of what the name
+  actually was. The check now does an AST structural comparison instead: a
+  ``%``-``BinOp`` whose left side is a string constant ending in ``'_0x%s'``
+  and whose right side is structurally identical to a parsed
+  ``hex(value)[2:].upper().zfill(4)`` template, matched via ``ast.dump()``
+  equality rather than a source-text or per-prefix pattern -- there are 53
+  distinct prefixes, ``Xyplex_`` through ``Registered by Xerox_``, and the AST
+  match is immune to quote-style or whitespace drift in generated source.
+  ``HEX_SUFFIXED_NAME_EXEMPT_PATHS`` is dropped entirely. Verified
+  independently: mutating ``pcapkit/const/reg/ethertype.py``'s
+  ``Xyplex_0x%s``-style branch to the bare value-derived form now fails with
+  ``52 != 53: expected exactly 53 hex-suffixed-name exemptions to fire``, where
+  it used to pass; the unmutated file stays green, and a value-derived name in
+  an unrelated file (mutating ``pcapkit/const/arp/hardware.py`` to
+  ``'Unassigned_%d' % value``) is still flagged, naming that path. The exact
+  ``exempt_hits == 53`` bound is kept, so adding or removing a branch still
+  forces a human look. One file changed,
+  ``tests/const/test_const_enum_no_mint.py``; nothing under ``pcapkit/`` or
+  ``docs/``. Closes #879 (#881).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
