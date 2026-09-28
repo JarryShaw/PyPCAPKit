@@ -528,13 +528,13 @@ class EtherType(EnumRegistry, IntEnum):
         """
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 0x0000 <= value <= 0x05DC:
-            #: IEEE802.3 Length Field [IEEE Std 802.3]
-            return extend_enum(cls, 'IEEE802_3_Length_Field_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0101 <= value <= 0x01FF:
             #: Old Xerox Experimental values. Invalid as an Ethertype since 1983. [Neil
     #: Sembower]
             return cls._unregistered_member(value, 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983')
+        if 0x0000 <= value <= 0x05DC:
+            #: IEEE802.3 Length Field [IEEE Std 802.3]
+            return extend_enum(cls, 'IEEE802_3_Length_Field_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0888 <= value <= 0x088A:
             #: Xyplex [Neil Sembower]
             return extend_enum(cls, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4), value)

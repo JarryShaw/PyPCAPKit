@@ -79,6 +79,34 @@ class EtherType(Vendor):
             name = f'{name}_0x{code}'
         return self.safe_name(name)
 
+    @staticmethod
+    def _insert_range(ranges: 'list[tuple[int, int, list[str]]]', entry: 'tuple[int, int, list[str]]') -> 'None':
+        """Insert a range block ahead of the first already-placed range that fully contains it.
+
+        The generated :meth:`~EtherType._missing_` tests these ``if`` blocks in
+        list order and returns on the first match, so a range that is fully
+        contained within an earlier, wider one would never be reached -- see
+        GitHub issue #862, where the source table lists ``0x0101-0x01FF``
+        after the ``0x0000-0x05DC`` range that wholly contains it.
+
+        The IANA CSV is not otherwise sorted by range, so this only reorders
+        the pairs where containment would otherwise shadow one of them;
+        every other pair keeps the source table's row order, appended in the
+        order it was read.
+
+        Args:
+            ranges: Range blocks already placed for emission, as
+                ``(start, stop, lines)``.
+            entry: The ``(start, stop, lines)`` tuple to place.
+
+        """
+        lo, hi, _ = entry
+        for index, (rlo, rhi, _) in enumerate(ranges):
+            if rlo <= lo and hi <= rhi:
+                ranges.insert(index, entry)
+                return
+        ranges.append(entry)
+
     def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
@@ -93,7 +121,7 @@ class EtherType(Vendor):
         next(reader)  # header
 
         enum = []  # type: list[str]
-        miss = []  # type: list[str]
+        ranges = []  # type: list[tuple[int, int, list[str]]]
         for item in reader:
             name = item[4]
             rfcs = item[5]
@@ -125,12 +153,14 @@ class EtherType(Vendor):
             except ValueError:
                 start, stop = item[1].split('-')
 
-                miss.append(f'if 0x{start} <= value <= 0x{stop}:')
-                miss.append(f'    #: {desc}')
+                block = [f'if 0x{start} <= value <= 0x{stop}:', f'    #: {desc}']
                 if name in self.UNASSIGNED_ROW_NAMES:
-                    miss.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
+                    block.append(f"    return cls._unregistered_member(value, '{self.safe_name(name)}')")
                 else:
-                    miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
+                    block.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
+                self._insert_range(ranges, (int(start, base=16), int(stop, base=16), block))
+
+        miss = [line for _, _, block in ranges for line in block]  # type: list[str]
         return enum, miss
 
 
