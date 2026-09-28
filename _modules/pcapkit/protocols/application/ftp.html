@@ -470,7 +470,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">Data_Response</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Schema_FTP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -491,9 +491,9 @@
 <span class="w">    </span><span class="sd">"""FTP packet type."""</span>
 
     <span class="c1">#: Request packet.</span>
-    <span class="n">REQUEST</span> <span class="o">=</span> <span class="s1">'request'</span>
+    <span class="n">REQUEST</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="c1">#: Response packet.</span>
-    <span class="n">RESPONSE</span> <span class="o">=</span> <span class="s1">'response'</span></div>
+    <span class="n">RESPONSE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span></div>
 
 
 
