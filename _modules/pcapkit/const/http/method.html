@@ -495,7 +495,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">safe</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="n">idempotent</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Method]'</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="n">obj</span><span class="o">.</span><span class="n">safe</span> <span class="o">=</span> <span class="n">safe</span>
@@ -653,20 +653,21 @@
 <span class="sd">                declared, never reformatted. Only :attr:`name` -- the</span>
 <span class="sd">                identifier, not the value -- is canonicalised.</span>
 
-<span class="sd">                This is deliberately *not* the same as what a *registered*</span>
-<span class="sd">                member of this class carries, though, and that asymmetry is</span>
-<span class="sd">                left as-is here rather than fixed: :meth:`__new__` itself is</span>
-<span class="sd">                untouched, and it calls ``str.__new__(cls)`` with no</span>
+<span class="sd">                A *registered* member of this class used to carry something</span>
+<span class="sd">                different here: GitHub issue #870 found that</span>
+<span class="sd">                :meth:`__new__` called ``str.__new__(cls)`` with no</span>
 <span class="sd">                argument at all, so every one of the 40 declared members'</span>
-<span class="sd">                underlying :class:`str` payload is permanently empty</span>
-<span class="sd">                regardless of ``value`` (``str(Method.GET) == ''``, and</span>
-<span class="sd">                ``Method.GET == 'GET'`` is :obj:`False`) -- true on ``main``</span>
-<span class="sd">                as well as here. An *unregistered* member built through this</span>
-<span class="sd">                method, by contrast, now carries real content</span>
-<span class="sd">                (``str(Method('frob')) == 'frob'``). Tracked as GitHub issue</span>
-<span class="sd">                #870 rather than fixed in this PR: changing :meth:`__new__`</span>
-<span class="sd">                changes what all 40 public members compare equal to, which</span>
-<span class="sd">                is its own review.</span>
+<span class="sd">                own :class:`str` payload was permanently empty regardless</span>
+<span class="sd">                of ``value`` (``str(Method.GET) == ''``, and</span>
+<span class="sd">                ``Method.GET == 'GET'`` was :obj:`False`) -- true on</span>
+<span class="sd">                ``main`` at ``60b85e3a4`` as well as when this docstring</span>
+<span class="sd">                was first written. #870 fixed :meth:`__new__` to</span>
+<span class="sd">                ``str.__new__(cls, value)``, mirroring</span>
+<span class="sd">                :class:`~pcapkit.const.ftp.command.Command`'s own</span>
+<span class="sd">                ``__new__``, so a registered member's payload now agrees</span>
+<span class="sd">                with an *unregistered* member built through this method:</span>
+<span class="sd">                both carry their own value as real :class:`str` content</span>
+<span class="sd">                (``str(Method('frob')) == 'frob'``).</span>
 <span class="sd">            name: Bare label for the unregistered member -- here, the</span>
 <span class="sd">                canonical upper-case form of ``value``, matching the name</span>
 <span class="sd">                every *registered* member of this class is looked up by,</span>

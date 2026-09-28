@@ -1007,20 +1007,21 @@ exactly what was observed on the wire, matching how a
 <em>registered</em> member’s own value is exactly what was
 declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
 identifier, not the value – is canonicalised.</p>
-<p>This is deliberately <em>not</em> the same as what a <em>registered</em>
-member of this class carries, though, and that asymmetry is
-left as-is here rather than fixed: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself is
-untouched, and it calls <code class="docutils literal notranslate"><span class="pre">str.__new__(cls)</span></code> with no
+<p>A <em>registered</em> member of this class used to carry something
+different here: GitHub issue #870 found that
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> called <code class="docutils literal notranslate"><span class="pre">str.__new__(cls)</span></code> with no
 argument at all, so every one of the 40 declared members’
-underlying <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload is permanently empty
-regardless of <code class="docutils literal notranslate"><span class="pre">value</span></code> (<code class="docutils literal notranslate"><span class="pre">str(Method.GET)</span> <span class="pre">==</span> <span class="pre">''</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – true on <code class="docutils literal notranslate"><span class="pre">main</span></code>
-as well as here. An <em>unregistered</em> member built through this
-method, by contrast, now carries real content
-(<code class="docutils literal notranslate"><span class="pre">str(Method('frob'))</span> <span class="pre">==</span> <span class="pre">'frob'</span></code>). Tracked as GitHub issue
-#870 rather than fixed in this PR: changing <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>
-changes what all 40 public members compare equal to, which
-is its own review.</p>
+own <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload was permanently empty regardless
+of <code class="docutils literal notranslate"><span class="pre">value</span></code> (<code class="docutils literal notranslate"><span class="pre">str(Method.GET)</span> <span class="pre">==</span> <span class="pre">''</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> was <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – true on
+<code class="docutils literal notranslate"><span class="pre">main</span></code> at <code class="docutils literal notranslate"><span class="pre">60b85e3a4</span></code> as well as when this docstring
+was first written. #870 fixed <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> to
+<code class="docutils literal notranslate"><span class="pre">str.__new__(cls,</span> <span class="pre">value)</span></code>, mirroring
+<a class="reference internal" href="ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s own
+<code class="docutils literal notranslate"><span class="pre">__new__</span></code>, so a registered member’s payload now agrees
+with an <em>unregistered</em> member built through this method:
+both carry their own value as real <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> content
+(<code class="docutils literal notranslate"><span class="pre">str(Method('frob'))</span> <span class="pre">==</span> <span class="pre">'frob'</span></code>).</p>
 </p></li>
 <li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
 canonical upper-case form of <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching the name

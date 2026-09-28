@@ -517,7 +517,7 @@
 
 <span class="s1">    def __new__(cls, value: 'str', safe: 'bool' = False,</span>
 <span class="s1">                idempotent: 'bool' = False) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
-<span class="s1">        obj = str.__new__(cls)</span>
+<span class="s1">        obj = str.__new__(cls, value)</span>
 <span class="s1">        obj._value_ = value</span>
 
 <span class="s1">        obj.safe = safe</span>
@@ -554,20 +554,21 @@
 <span class="s1">                declared, never reformatted. Only :attr:`name` -- the</span>
 <span class="s1">                identifier, not the value -- is canonicalised.</span>
 
-<span class="s1">                This is deliberately *not* the same as what a *registered*</span>
-<span class="s1">                member of this class carries, though, and that asymmetry is</span>
-<span class="s1">                left as-is here rather than fixed: :meth:`__new__` itself is</span>
-<span class="s1">                untouched, and it calls ``str.__new__(cls)`` with no</span>
+<span class="s1">                A *registered* member of this class used to carry something</span>
+<span class="s1">                different here: GitHub issue #870 found that</span>
+<span class="s1">                :meth:`__new__` called ``str.__new__(cls)`` with no</span>
 <span class="s1">                argument at all, so every one of the 40 declared members'</span>
-<span class="s1">                underlying :class:`str` payload is permanently empty</span>
-<span class="s1">                regardless of ``value`` (``str(Method.GET) == ''``, and</span>
-<span class="s1">                ``Method.GET == 'GET'`` is :obj:`False`) -- true on ``main``</span>
-<span class="s1">                as well as here. An *unregistered* member built through this</span>
-<span class="s1">                method, by contrast, now carries real content</span>
-<span class="s1">                (``str(Method('frob')) == 'frob'``). Tracked as GitHub issue</span>
-<span class="s1">                #870 rather than fixed in this PR: changing :meth:`__new__`</span>
-<span class="s1">                changes what all 40 public members compare equal to, which</span>
-<span class="s1">                is its own review.</span>
+<span class="s1">                own :class:`str` payload was permanently empty regardless</span>
+<span class="s1">                of ``value`` (``str(Method.GET) == ''``, and</span>
+<span class="s1">                ``Method.GET == 'GET'`` was :obj:`False`) -- true on</span>
+<span class="s1">                ``main`` at ``60b85e3a4`` as well as when this docstring</span>
+<span class="s1">                was first written. #870 fixed :meth:`__new__` to</span>
+<span class="s1">                ``str.__new__(cls, value)``, mirroring</span>
+<span class="s1">                :class:`~pcapkit.const.ftp.command.Command`'s own</span>
+<span class="s1">                ``__new__``, so a registered member's payload now agrees</span>
+<span class="s1">                with an *unregistered* member built through this method:</span>
+<span class="s1">                both carry their own value as real :class:`str` content</span>
+<span class="s1">                (``str(Method('frob')) == 'frob'``).</span>
 <span class="s1">            name: Bare label for the unregistered member -- here, the</span>
 <span class="s1">                canonical upper-case form of ``value``, matching the name</span>
 <span class="s1">                every *registered* member of this class is looked up by,</span>
