@@ -461,7 +461,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -479,7 +481,7 @@
 <span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">ResponseKind</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ResponseKind</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Response kind; whether the response is good, bad or incomplete."""</span>
 
     <span class="n">PositivePreliminary</span> <span class="o">=</span> <span class="mi">1</span>
@@ -498,11 +500,12 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unknown_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="c1">#: Unknown</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unknown'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">GroupingInformation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GroupingInformation</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Grouping information."""</span>
 
     <span class="n">Syntax</span> <span class="o">=</span> <span class="mi">0</span>
@@ -521,13 +524,14 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unknown_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="c1">#: Unknown</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unknown'</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ReturnCode">
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ReturnCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReturnCode</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[ReturnCode] FTP Server Return Code"""</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -730,28 +734,32 @@
     <span class="c1">#: Confidentiality protected reply.</span>
     <span class="n">CODE_633</span><span class="p">:</span> <span class="s1">'ReturnCode'</span> <span class="o">=</span> <span class="mi">633</span><span class="p">,</span> <span class="s1">'Confidentiality protected reply.'</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ReturnCode'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+<div class="viewcode-block" id="ReturnCode._unregistered_member">
+<a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode._unregistered_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unregistered_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ReturnCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a member absent from this registry's own lookup tables.</span>
+
+<span class="sd">        Reconstructs :attr:`description`, :attr:`kind` and :attr:`group` the</span>
+<span class="sd">        same way :meth:`__new__` would, rather than leaving them unset --</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`</span>
+<span class="sd">        bypasses :meth:`__new__` entirely (it calls :class:`int`'s directly),</span>
+<span class="sd">        so those three attributes would otherwise be missing from the result</span>
+<span class="sd">        and :meth:`__str__`/:meth:`__repr__` would raise on it.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found. The placeholder ``-1`` stands</span>
-<span class="sd">                for *no default*, in which case an unresolvable key propagates</span>
-<span class="sd">                the lookup error instead of falling back.</span>
+<span class="sd">            value: Value to get enum item.</span>
+<span class="sd">            name: Bare label for the unregistered member, per the ranged</span>
+<span class="sd">                mint/unmint criterion.</span>
 
-<span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ReturnCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">default</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="k">return</span> <span class="n">ReturnCode</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ReturnCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">ReturnCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ReturnCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">ResponseKind</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">GroupingInformation</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
 
 <div class="viewcode-block" id="ReturnCode._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode._missing_">[docs]</a>
@@ -765,7 +773,8 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">100</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">659</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'CODE_</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="c1">#: Unassigned</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'Unassigned'</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

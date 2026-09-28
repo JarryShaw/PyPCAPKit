@@ -485,7 +485,7 @@
 <span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
 
 <span class="c1">#: Default constant template of enumerate registry from IANA CSV.</span>
-<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
+<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">FEAT</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'''</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
 <span class="s1"># mypy: disable-error-code=assignment</span>
 <span class="s1"># pylint: disable=line-too-long</span>
@@ -501,7 +501,9 @@
 
 <span class="s1">from typing import TYPE_CHECKING</span>
 
-<span class="s1">from aenum import IntEnum, IntFlag, StrEnum, auto, extend_enum</span>
+<span class="s1">from aenum import IntEnum, IntFlag, StrEnum, auto</span>
+
+<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Optional, Type</span>
@@ -509,9 +511,29 @@
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 
-<span class="s1">class FEATCode(StrEnum):</span>
+<span class="s1">class FEATCode(EnumRegistry, StrEnum):</span>
 <span class="s1">    """Keyword returned in FEAT response line for this command/extension,</span>
-<span class="s1">    c.f., :rfc:`5797#secion-3`."""</span>
+<span class="s1">    c.f., :rfc:`5797#secion-3`.</span>
+
+<span class="s1">    .. note::</span>
+
+<span class="s1">       Declares every FEAT keyword the IANA registry's own ``FEAT code``</span>
+<span class="s1">       column names -- the 5 group markers below plus the per-command</span>
+<span class="s1">       keywords generated after them (data-driven, not hand-picked; see</span>
+<span class="s1">       :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than</span>
+<span class="s1">       minting the per-command ones at import time as an incidental side</span>
+<span class="s1">       effect of building :class:`Command`'s own rows. GitHub issue #860:</span>
+<span class="s1">       that import-time mutation was the same defect shape #861 removed</span>
+<span class="s1">       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not</span>
+<span class="s1">       previously noticed here. ``_missing_`` still unmints for a keyword</span>
+<span class="s1">       that turns up on the wire but names none of these -- the</span>
+<span class="s1">       extendability the owner asked to keep, verbatim: *"If it is expected</span>
+<span class="s1">       to be handled as our current approach in industry convention, then</span>
+<span class="s1">       we keep it extendable as is."* No custom ``__new__`` here, so the</span>
+<span class="s1">       base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
+<span class="s1">       _unregistered_member` needs no override.</span>
+
+<span class="s1">    """</span>
 
 <span class="s1">    #: FTP standard commands [:rfc:`0959`].</span>
 <span class="s1">    base = '&lt;base&gt;'</span>
@@ -523,6 +545,8 @@
 <span class="s1">    feat = '&lt;feat&gt;'</span>
 <span class="s1">    #: FTP Extensions for NAT/IPv6 [:rfc:`2428`].</span>
 <span class="s1">    nat6 = '&lt;nat6&gt;'</span>
+
+<span class="s1">    </span><span class="si">{</span><span class="n">FEAT</span><span class="si">}</span>
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
 <span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self._name_</span><span class="se">}}</span><span class="s1">]&gt;'</span>
@@ -537,7 +561,7 @@
 <span class="s1">        """</span>
 <span class="s1">        if not isinstance(value, str):</span>
 <span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is not a valid </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">')</span>
-<span class="s1">        return extend_enum(cls, value.upper(), value)</span>
+<span class="s1">        return cls._unregistered_member(value, value.upper())</span>
 
 
 <span class="s1">class CommandType(IntFlag):</span>
@@ -576,8 +600,22 @@
 <span class="s1">    H = auto()</span>
 
 
-<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
-<span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, StrEnum):</span>
+<span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span>
+
+<span class="s1">    .. note::</span>
+
+<span class="s1">       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's</span>
+<span class="s1">       ruling on GitHub issue #860: *"only IANA registered ones are legit</span>
+<span class="s1">       values and we need register to properly create new entries. get will</span>
+<span class="s1">       not have sufficient information to create new ones."* Concretely</span>
+<span class="s1">       true here -- a bare wire command word carries no</span>
+<span class="s1">       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one</span>
+<span class="s1">       used to register a permanent member with all four hollowed out to</span>
+<span class="s1">       their defaults; :meth:`register` is the path that can actually supply</span>
+<span class="s1">       them.</span>
+
+<span class="s1">    """</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
 <span class="s1">        #: Feature code. Keyword returned in FEAT response line for this command/extension,</span>
@@ -608,6 +646,45 @@
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _unregistered_member(cls, value: 'str', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Build a member absent from this registry's own lookup tables.</span>
+
+<span class="s1">        Leaves :attr:`feat`, :attr:`desc`, :attr:`type` and :attr:`conf` at</span>
+<span class="s1">        the same defaults :meth:`__new__` itself would, rather than missing</span>
+<span class="s1">        entirely -- :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
+<span class="s1">        _unregistered_member` bypasses :meth:`__new__` (it calls</span>
+<span class="s1">        :class:`str`'s directly), so those four attributes would otherwise</span>
+<span class="s1">        be absent and :meth:`__repr__` (which reads :attr:`desc`) would</span>
+<span class="s1">        raise on the result. There is no more specific value to reconstruct</span>
+<span class="s1">        them from -- a bare wire command word carries none of the four,</span>
+<span class="s1">        which is exactly the owner's reasoning for why ``get()``/</span>
+<span class="s1">        ``_missing_`` must not mint one: :meth:`register` is the path that</span>
+<span class="s1">        can actually supply them.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item -- the convention here, shared with</span>
+<span class="s1">                :class:`~pcapkit.const.ftp.command.FEATCode` and</span>
+<span class="s1">                :class:`~pcapkit.const.http.method.Method`, is the caller's</span>
+<span class="s1">                own casing, unchanged: an unregistered member's *value* is</span>
+<span class="s1">                exactly what was observed on the wire, matching how a</span>
+<span class="s1">                *registered* member's own value is exactly what was</span>
+<span class="s1">                declared, never reformatted. Only :attr:`name` -- the</span>
+<span class="s1">                identifier, not the value -- is canonicalised.</span>
+<span class="s1">            name: Bare label for the unregistered member -- here, the</span>
+<span class="s1">                canonical upper-case form of ``value``, matching the name</span>
+<span class="s1">                every *registered* member of this class is looked up by,</span>
+<span class="s1">                since #860's open-vocabulary registries have no manufactured</span>
+<span class="s1">                placeholder label to fall back to.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        obj = super()._unregistered_member(value, name)</span>
+<span class="s1">        obj.feat = None</span>
+<span class="s1">        obj.desc = None</span>
+<span class="s1">        obj.type = CommandType.undefined</span>
+<span class="s1">        obj.conf = ConformanceRequirement.O</span>
+<span class="s1">        return obj</span>
+
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>
@@ -620,8 +697,20 @@
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
 <span class="s1">        name = key.upper()</span>
-<span class="s1">        if name not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, name, default if default is not None else key)</span>
+<span class="s1">        if name not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # type: ignore[misc]  # pylint: disable=no-member</span>
+<span class="s1">            # NOTE: the value is ``default`` if the caller supplied one, or</span>
+<span class="s1">            # else ``key`` exactly as given -- never ``name`` -- so an</span>
+<span class="s1">            # unregistered member's value is the caller's own casing, the</span>
+<span class="s1">            # same convention :meth:`_unregistered_member` documents and</span>
+<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
+<span class="s1">            # unchanged. Two calls naming the same command in different</span>
+<span class="s1">            # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build</span>
+<span class="s1">            # results that are *not* equal -- each is exactly what its own</span>
+<span class="s1">            # caller passed, which minting's ``_member_map_`` cache used to</span>
+<span class="s1">            # paper over by returning the *first* casing seen for every</span>
+<span class="s1">            # later call regardless of case. Losing that is the one</span>
+<span class="s1">            # observable behaviour change in GitHub issue #860's conversion.</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(default if default is not None else key, name)</span>
 <span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[name]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>
@@ -638,8 +727,8 @@
 <span class="s1">        name = value.upper()</span>
 <span class="s1">        if name in cls._member_map_:</span>
 <span class="s1">            return cls._member_map_[name]  # type: ignore[return-value]</span>
-<span class="s1">        return extend_enum(cls, name, value)</span>
-<span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
+<span class="s1">        return cls._unregistered_member(value, name)</span>
+<span class="s1">'''</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str], str]</span>
 
 
 <div class="viewcode-block" id="Command">
@@ -650,20 +739,26 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Process CSV data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: CSV data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Enumeration fields.</span>
+<span class="sd">            :class:`Command`'s enumeration fields, and every distinct</span>
+<span class="sd">            per-command keyword the ``FEAT code`` column names --</span>
+<span class="sd">            :class:`FEATCode` must declare these as real members (GitHub</span>
+<span class="sd">            issue #860), rather than the old approach of minting one as an</span>
+<span class="sd">            incidental side effect the first time a :class:`Command` row</span>
+<span class="sd">            referencing it was evaluated at import time.</span>
 
 <span class="sd">        """</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
 
         <span class="n">enum</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># type: OrderedDict[str, str]</span>
+        <span class="n">feat_codes</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># type: OrderedDict[str, str]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
             <span class="n">cmmd</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'+'</span><span class="p">)</span>
             <span class="n">feat</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span>
@@ -685,16 +780,23 @@
                 <span class="n">cmmd</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'str'</span><span class="p">,</span> <span class="n">feat</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">feat</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
-                    <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'FEATCode.</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">'</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'FEATCode(</span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">)'</span>
+                <span class="c1"># NOTE: GitHub issue #860. Every FEAT code the registry</span>
+                <span class="c1"># names -- lower-case group marker or upper-case per-command</span>
+                <span class="c1"># keyword alike -- is now a declared member of FEATCode (see</span>
+                <span class="c1"># feat_codes below and FEATCode's own template), so both</span>
+                <span class="c1"># cases resolve by plain attribute access; neither ever</span>
+                <span class="c1"># calls FEATCode(...) at import time any more, which used to</span>
+                <span class="c1"># mint the upper-case ones as a side effect of evaluating</span>
+                <span class="c1"># this very module.</span>
+                <span class="k">if</span> <span class="n">feat</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feat_codes</span><span class="p">:</span>
+                    <span class="n">feat_codes</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">'</span>
+                <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'FEATCode.</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">'</span>
 
             <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cmmd</span><span class="si">}</span><span class="s2">: 'Command' = </span><span class="si">{</span><span class="n">cmmd</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">desc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">kind</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">conf</span><span class="si">}</span><span class="s2">"</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'#: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span>
 
             <span class="n">enum</span><span class="p">[</span><span class="n">cmmd</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">feat_codes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Generate constant context.</span>
@@ -706,10 +808,11 @@
 <span class="sd">            Constant context.</span>
 
 <span class="sd">        """</span>
-        <span class="n">enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">enum</span><span class="p">,</span> <span class="n">feat_codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n\n</span><span class="s1">    '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">FEAT</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n\n</span><span class="s1">    '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">feat_codes</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">FEAT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
 
 
 

@@ -760,7 +760,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.option_type.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/option_type.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[OptionType] Option Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.opt_name">
@@ -1012,6 +1012,36 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.pack_hash">
 <span class="sig-name descname"><span class="pre">pack_hash</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><span class="pre">OptionType</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pack_hash</span> <span class="pre">[3]'</span></span><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.pack_hash" title="Link to this definition">¶</a></dt>
 <dd><p>pack_hash</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/option_type.html#OptionType._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Cannot reuse the base’s generic construction –
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> calls
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">__new__</span></code> directly on the raw <code class="docutils literal notranslate"><span class="pre">value</span></code>, but
+OptionType stores a <em>formatted</em> string (<code class="docutils literal notranslate"><span class="pre">'{name}</span> <span class="pre">[{value}]'</span></code>) as
+its own <code class="xref py py-attr docutils literal notranslate"><span class="pre">_value_</span></code>, not <code class="docutils literal notranslate"><span class="pre">value</span></code> itself, so that
+approach would build a member whose value looks nothing like this
+registry’s real members.</p>
+<p>Deliberately does <strong>not</strong> add to <code class="xref py py-attr docutils literal notranslate"><span class="pre">__members_ns__</span></code> either –
+that dict is this registry’s own second lookup table, alongside
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, and growing it would defeat
+the whole point of an <em>unregistered</em> member exactly as growing
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> would.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member, per the ranged
+mint/unmint criterion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

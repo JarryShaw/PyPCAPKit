@@ -461,7 +461,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span><span class="p">,</span> <span class="n">extend_enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -469,9 +471,29 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Command'</span><span class="p">]</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">FEATCode</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FEATCode</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Keyword returned in FEAT response line for this command/extension,</span>
-<span class="sd">    c.f., :rfc:`5797#secion-3`."""</span>
+<span class="sd">    c.f., :rfc:`5797#secion-3`.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       Declares every FEAT keyword the IANA registry's own ``FEAT code``</span>
+<span class="sd">       column names -- the 5 group markers below plus the per-command</span>
+<span class="sd">       keywords generated after them (data-driven, not hand-picked; see</span>
+<span class="sd">       :meth:`~pcapkit.vendor.ftp.command.Command.process`) -- rather than</span>
+<span class="sd">       minting the per-command ones at import time as an incidental side</span>
+<span class="sd">       effect of building :class:`Command`'s own rows. GitHub issue #860:</span>
+<span class="sd">       that import-time mutation was the same defect shape #861 removed</span>
+<span class="sd">       from :class:`~pcapkit.const.pcapng.filter_type.FilterType`, just not</span>
+<span class="sd">       previously noticed here. ``_missing_`` still unmints for a keyword</span>
+<span class="sd">       that turns up on the wire but names none of these -- the</span>
+<span class="sd">       extendability the owner asked to keep, verbatim: *"If it is expected</span>
+<span class="sd">       to be handled as our current approach in industry convention, then</span>
+<span class="sd">       we keep it extendable as is."* No custom ``__new__`` here, so the</span>
+<span class="sd">       base's generic :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
+<span class="sd">       _unregistered_member` needs no override.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: FTP standard commands [:rfc:`0959`].</span>
     <span class="n">base</span> <span class="o">=</span> <span class="s1">'&lt;base&gt;'</span>
@@ -483,6 +505,36 @@
     <span class="n">feat</span> <span class="o">=</span> <span class="s1">'&lt;feat&gt;'</span>
     <span class="c1">#: FTP Extensions for NAT/IPv6 [:rfc:`2428`].</span>
     <span class="n">nat6</span> <span class="o">=</span> <span class="s1">'&lt;nat6&gt;'</span>
+
+    <span class="c1">#: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="n">AUTH</span> <span class="o">=</span> <span class="s1">'AUTH'</span>
+
+    <span class="c1">#: Hostname [:rfc:`7151`]</span>
+    <span class="n">HOST</span> <span class="o">=</span> <span class="s1">'HOST'</span>
+
+    <span class="c1">#: Language (for Server Messages) [:rfc:`2640`]</span>
+    <span class="n">UTF8</span> <span class="o">=</span> <span class="s1">'UTF8'</span>
+
+    <span class="c1">#: File Modification Time [:rfc:`3659`]</span>
+    <span class="n">MDTM</span> <span class="o">=</span> <span class="s1">'MDTM'</span>
+
+    <span class="c1">#: List Directory (for machine) [:rfc:`3659`]</span>
+    <span class="n">MLST</span> <span class="o">=</span> <span class="s1">'MLST'</span>
+
+    <span class="c1">#: Protection Buffer Size [:rfc:`4217`]</span>
+    <span class="n">PBSZ</span> <span class="o">=</span> <span class="s1">'PBSZ'</span>
+
+    <span class="c1">#: Data Channel Protection Level [:rfc:`4217`]</span>
+    <span class="n">PROT</span> <span class="o">=</span> <span class="s1">'PROT'</span>
+
+    <span class="c1">#: Restart (for STREAM mode) [3][:rfc:`3659`]</span>
+    <span class="n">REST</span> <span class="o">=</span> <span class="s1">'REST'</span>
+
+    <span class="c1">#: File Size [:rfc:`3659`]</span>
+    <span class="n">SIZE</span> <span class="o">=</span> <span class="s1">'SIZE'</span>
+
+    <span class="c1">#: Trivial Virtual File Store [:rfc:`3659`]</span>
+    <span class="n">TVFS</span> <span class="o">=</span> <span class="s1">'TVFS'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name_</span><span class="si">}</span><span class="s1">]&gt;'</span>
@@ -497,7 +549,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CommandType</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
@@ -538,8 +590,22 @@
 
 <div class="viewcode-block" id="Command">
 <a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""[Command] FTP Command"""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[Command] FTP Command</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's</span>
+<span class="sd">       ruling on GitHub issue #860: *"only IANA registered ones are legit</span>
+<span class="sd">       values and we need register to properly create new entries. get will</span>
+<span class="sd">       not have sufficient information to create new ones."* Concretely</span>
+<span class="sd">       true here -- a bare wire command word carries no</span>
+<span class="sd">       :attr:`feat`/:attr:`desc`/:attr:`type`/:attr:`conf`, so minting one</span>
+<span class="sd">       used to register a permanent member with all four hollowed out to</span>
+<span class="sd">       their defaults; :meth:`register` is the path that can actually supply</span>
+<span class="sd">       them.</span>
+
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Feature code. Keyword returned in FEAT response line for this command/extension,</span>
@@ -587,7 +653,7 @@
     <span class="n">APPE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'APPE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Append (with create)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]</span>
-    <span class="n">AUTH</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'AUTH'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'AUTH'</span><span class="p">),</span> <span class="s1">'Authentication/Security Mechanism'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">AUTH</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'AUTH'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">AUTH</span><span class="p">,</span> <span class="s1">'Authentication/Security Mechanism'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Clear Command Channel [:rfc:`2228`]</span>
     <span class="n">CCC</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'CCC'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Clear Command Channel'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
@@ -620,10 +686,10 @@
     <span class="n">HELP</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'HELP'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Help'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Hostname [:rfc:`7151`]</span>
-    <span class="n">HOST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'HOST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'HOST'</span><span class="p">),</span> <span class="s1">'Hostname'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">HOST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'HOST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">HOST</span><span class="p">,</span> <span class="s1">'Hostname'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Language (for Server Messages) [:rfc:`2640`]</span>
-    <span class="n">LANG</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LANG'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'UTF8'</span><span class="p">),</span> <span class="s1">'Language (for Server Messages)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">LANG</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LANG'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">UTF8</span><span class="p">,</span> <span class="s1">'Language (for Server Messages)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: List [:rfc:`959`][:rfc:`1123`]</span>
     <span class="n">LIST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LIST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'List'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
@@ -635,7 +701,7 @@
     <span class="n">LPSV</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'LPSV'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="s1">'Passive Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
     <span class="c1">#: File Modification Time [:rfc:`3659`]</span>
-    <span class="n">MDTM</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MDTM'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'MDTM'</span><span class="p">),</span> <span class="s1">'File Modification Time'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">MDTM</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MDTM'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MDTM</span><span class="p">,</span> <span class="s1">'File Modification Time'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Integrity Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
     <span class="n">MIC</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MIC'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">secu</span><span class="p">,</span> <span class="s1">'Integrity Protected Command'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
@@ -644,10 +710,10 @@
     <span class="n">MKD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MKD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Make Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: List Directory (for machine) [:rfc:`3659`]</span>
-    <span class="n">MLSD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLSD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'MLST'</span><span class="p">),</span> <span class="s1">'List Directory (for machine)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">MLSD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLSD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MLST</span><span class="p">,</span> <span class="s1">'List Directory (for machine)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: List Single Object [:rfc:`3659`]</span>
-    <span class="n">MLST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'MLST'</span><span class="p">),</span> <span class="s1">'List Single Object'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">MLST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MLST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">MLST</span><span class="p">,</span> <span class="s1">'List Single Object'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Transfer Mode [:rfc:`959`]</span>
     <span class="n">MODE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'MODE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Transfer Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
@@ -668,13 +734,13 @@
     <span class="n">PASV</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PASV'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Passive Mode'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Protection Buffer Size [:rfc:`4217`]</span>
-    <span class="n">PBSZ</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PBSZ'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'PBSZ'</span><span class="p">),</span> <span class="s1">'Protection Buffer Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">PBSZ</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PBSZ'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">PBSZ</span><span class="p">,</span> <span class="s1">'Protection Buffer Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Data Port [:rfc:`959`]</span>
     <span class="n">PORT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PORT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Data Port'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Data Channel Protection Level [:rfc:`4217`]</span>
-    <span class="n">PROT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PROT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'PROT'</span><span class="p">),</span> <span class="s1">'Data Channel Protection Level'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">PROT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PROT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">PROT</span><span class="p">,</span> <span class="s1">'Data Channel Protection Level'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Print Directory [:rfc:`959`]</span>
     <span class="n">PWD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'PWD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Print Directory'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
@@ -686,7 +752,7 @@
     <span class="n">REIN</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'REIN'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Reinitialize'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Restart (for STREAM mode) [3][:rfc:`3659`]</span>
-    <span class="n">REST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'REST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'REST'</span><span class="p">),</span> <span class="s1">'Restart (for STREAM mode)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span> <span class="o">|</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
+    <span class="n">REST</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'REST'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">REST</span><span class="p">,</span> <span class="s1">'Restart (for STREAM mode)'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span> <span class="o">|</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: Retrieve [:rfc:`959`]</span>
     <span class="n">RETR</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'RETR'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Retrieve'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
@@ -704,7 +770,7 @@
     <span class="n">SITE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SITE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Site Parameters'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">M</span>
 
     <span class="c1">#: File Size [:rfc:`3659`]</span>
-    <span class="n">SIZE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SIZE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'SIZE'</span><span class="p">),</span> <span class="s1">'File Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">SIZE</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SIZE'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">SIZE</span><span class="p">,</span> <span class="s1">'File Size'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
 
     <span class="c1">#: Structure Mount [:rfc:`959`]</span>
     <span class="n">SMNT</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'SMNT'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="s1">'Structure Mount'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
@@ -746,7 +812,49 @@
     <span class="n">XRMD</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'XRMD'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">hist</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">H</span>
 
     <span class="c1">#: Trivial Virtual File Store [:rfc:`3659`]</span>
-    <span class="n">TVFS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'TVFS'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="p">(</span><span class="s1">'TVFS'</span><span class="p">),</span> <span class="s1">'Trivial Virtual File Store'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+    <span class="n">TVFS</span><span class="p">:</span> <span class="s1">'Command'</span> <span class="o">=</span> <span class="s1">'TVFS'</span><span class="p">,</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">TVFS</span><span class="p">,</span> <span class="s1">'Trivial Virtual File Store'</span><span class="p">,</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+
+<div class="viewcode-block" id="Command._unregistered_member">
+<a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command._unregistered_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unregistered_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a member absent from this registry's own lookup tables.</span>
+
+<span class="sd">        Leaves :attr:`feat`, :attr:`desc`, :attr:`type` and :attr:`conf` at</span>
+<span class="sd">        the same defaults :meth:`__new__` itself would, rather than missing</span>
+<span class="sd">        entirely -- :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
+<span class="sd">        _unregistered_member` bypasses :meth:`__new__` (it calls</span>
+<span class="sd">        :class:`str`'s directly), so those four attributes would otherwise</span>
+<span class="sd">        be absent and :meth:`__repr__` (which reads :attr:`desc`) would</span>
+<span class="sd">        raise on the result. There is no more specific value to reconstruct</span>
+<span class="sd">        them from -- a bare wire command word carries none of the four,</span>
+<span class="sd">        which is exactly the owner's reasoning for why ``get()``/</span>
+<span class="sd">        ``_missing_`` must not mint one: :meth:`register` is the path that</span>
+<span class="sd">        can actually supply them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item -- the convention here, shared with</span>
+<span class="sd">                :class:`~pcapkit.const.ftp.command.FEATCode` and</span>
+<span class="sd">                :class:`~pcapkit.const.http.method.Method`, is the caller's</span>
+<span class="sd">                own casing, unchanged: an unregistered member's *value* is</span>
+<span class="sd">                exactly what was observed on the wire, matching how a</span>
+<span class="sd">                *registered* member's own value is exactly what was</span>
+<span class="sd">                declared, never reformatted. Only :attr:`name` -- the</span>
+<span class="sd">                identifier, not the value -- is canonicalised.</span>
+<span class="sd">            name: Bare label for the unregistered member -- here, the</span>
+<span class="sd">                canonical upper-case form of ``value``, matching the name</span>
+<span class="sd">                every *registered* member of this class is looked up by,</span>
+<span class="sd">                since #860's open-vocabulary registries have no manufactured</span>
+<span class="sd">                placeholder label to fall back to.</span>
+
+<span class="sd">        """</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">feat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">undefined</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Command'</span><span class="p">:</span>
@@ -760,8 +868,20 @@
 <span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Command</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">Command</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Command</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># type: ignore[misc]  # pylint: disable=no-member</span>
+            <span class="c1"># NOTE: the value is ``default`` if the caller supplied one, or</span>
+            <span class="c1"># else ``key`` exactly as given -- never ``name`` -- so an</span>
+            <span class="c1"># unregistered member's value is the caller's own casing, the</span>
+            <span class="c1"># same convention :meth:`_unregistered_member` documents and</span>
+            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
+            <span class="c1"># unchanged. Two calls naming the same command in different</span>
+            <span class="c1"># case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build</span>
+            <span class="c1"># results that are *not* equal -- each is exactly what its own</span>
+            <span class="c1"># caller passed, which minting's ``_member_map_`` cache used to</span>
+            <span class="c1"># paper over by returning the *first* casing seen for every</span>
+            <span class="c1"># later call regardless of case. Losing that is the one</span>
+            <span class="c1"># observable behaviour change in GitHub issue #860's conversion.</span>
+            <span class="k">return</span> <span class="n">Command</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Command</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="Command._missing_">
@@ -780,7 +900,7 @@
         <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[return-value]</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

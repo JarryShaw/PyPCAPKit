@@ -486,8 +486,20 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.command.</span></span><span class="sig-name descname"><span class="pre">Command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[Command] FTP Command</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more, per the owner’s
+ruling on GitHub issue #860: <em>“only IANA registered ones are legit
+values and we need register to properly create new entries. get will
+not have sufficient information to create new ones.”</em> Concretely
+true here – a bare wire command word carries no
+<a class="reference internal" href="#pcapkit.const.ftp.command.Command.feat" title="pcapkit.const.ftp.command.Command.feat"><code class="xref py py-attr docutils literal notranslate"><span class="pre">feat</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.type" title="pcapkit.const.ftp.command.Command.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a>/<a class="reference internal" href="#pcapkit.const.ftp.command.Command.conf" title="pcapkit.const.ftp.command.Command.conf"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conf</span></code></a>, so minting one
+used to register a permanent member with all four hollowed out to
+their defaults; <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply
+them.</p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.feat">
 <span class="sig-name descname"><span class="pre">feat</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FEATCode</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.const.ftp.command.Command.feat" title="Link to this definition">¶</a></dt>
@@ -874,6 +886,45 @@ c.f., <span class="target" id="index-0"></span><a class="rfc reference external"
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Leaves <a class="reference internal" href="#pcapkit.const.ftp.command.Command.feat" title="pcapkit.const.ftp.command.Command.feat"><code class="xref py py-attr docutils literal notranslate"><span class="pre">feat</span></code></a>, <a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>, <a class="reference internal" href="#pcapkit.const.ftp.command.Command.type" title="pcapkit.const.ftp.command.Command.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">type</span></code></a> and <a class="reference internal" href="#pcapkit.const.ftp.command.Command.conf" title="pcapkit.const.ftp.command.Command.conf"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conf</span></code></a> at
+the same defaults <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself would, rather than missing
+entirely – <code class="xref py py-meth docutils literal notranslate">
+<span class="pre">_unregistered_member()</span></code> bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> (it calls
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so those four attributes would otherwise
+be absent and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> (which reads <a class="reference internal" href="#pcapkit.const.ftp.command.Command.desc" title="pcapkit.const.ftp.command.Command.desc"><code class="xref py py-attr docutils literal notranslate"><span class="pre">desc</span></code></a>) would
+raise on the result. There is no more specific value to reconstruct
+them from – a bare wire command word carries none of the four,
+which is exactly the owner’s reasoning for why <code class="docutils literal notranslate"><span class="pre">get()</span></code>/
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> must not mint one: <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that
+can actually supply them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item – the convention here, shared with
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code> and
+<a class="reference internal" href="http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>, is the caller’s
+own casing, unchanged: an unregistered member’s <em>value</em> is
+exactly what was observed on the wire, matching how a
+<em>registered</em> member’s own value is exactly what was
+declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
+identifier, not the value – is canonicalised.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
+canonical upper-case form of <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching the name
+every <em>registered</em> member of this class is looked up by,
+since #860’s open-vocabulary registries have no manufactured
+placeholder label to fall back to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -904,7 +955,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.return_code.</span></span><span class="sig-name descname"><span class="pre">ReturnCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/return_code.html#ReturnCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[ReturnCode] FTP Server Return Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.description">
@@ -1259,6 +1310,30 @@ directory or dataset).</p>
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_633">
 <span class="sig-name descname"><span class="pre">CODE_633</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><span class="pre">ReturnCode</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">633</span></span><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_633" title="Link to this definition">¶</a></dt>
 <dd><p>Confidentiality protected reply.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/return_code.html#ReturnCode._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Reconstructs <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.description" title="pcapkit.const.ftp.return_code.ReturnCode.description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">description</span></code></a>, <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.kind" title="pcapkit.const.ftp.return_code.ReturnCode.kind"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> and <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.group" title="pcapkit.const.ftp.return_code.ReturnCode.group"><code class="xref py py-attr docutils literal notranslate"><span class="pre">group</span></code></a> the
+same way <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would, rather than leaving them unset –
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>
+bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely (it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly),
+so those three attributes would otherwise be missing from the result
+and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> would raise on it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member, per the ranged
+mint/unmint criterion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReturnCode</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -717,8 +717,19 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.method.</span></span><span class="sig-name descname"><span class="pre">Method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[Method] HTTP Method</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Neither <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">get()</span></code> mints any more, per the owner’s
+ruling on GitHub issue #860: <em>“only IANA registered ones are legit
+values and we need register to properly create new entries. get will
+not have sufficient information to create new ones.”</em> Concretely true
+here – a bare wire method verb carries no
+<a class="reference internal" href="#pcapkit.const.http.method.Method.safe" title="pcapkit.const.http.method.Method.safe"><code class="xref py py-attr docutils literal notranslate"><span class="pre">safe</span></code></a>/<a class="reference internal" href="#pcapkit.const.http.method.Method.idempotent" title="pcapkit.const.http.method.Method.idempotent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idempotent</span></code></a>, so minting one used to register a
+permanent member with both hollowed out to their defaults;
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the path that can actually supply them.</p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method.safe">
 <span class="sig-name descname"><span class="pre">safe</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.const.http.method.Method.safe" title="Link to this definition">¶</a></dt>
@@ -973,6 +984,58 @@ which is automatically generated from <a class="reference internal" href="../ven
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.method.Method._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Leaves <a class="reference internal" href="#pcapkit.const.http.method.Method.safe" title="pcapkit.const.http.method.Method.safe"><code class="xref py py-attr docutils literal notranslate"><span class="pre">safe</span></code></a> and <a class="reference internal" href="#pcapkit.const.http.method.Method.idempotent" title="pcapkit.const.http.method.Method.idempotent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idempotent</span></code></a> at the same defaults
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself would, rather than missing entirely –
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>
+bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> (it calls <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so
+those two attributes would otherwise be absent. There is no more
+specific value to reconstruct them from – a bare wire method verb
+carries neither, which is exactly the owner’s reasoning for why
+<code class="docutils literal notranslate"><span class="pre">get()</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> must not mint one: <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> is the
+path that can actually supply them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – <p>Value to get enum item – the convention here, shared with
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code> and
+<a class="reference internal" href="ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>, is the caller’s
+own casing, unchanged: an unregistered member’s <em>value</em> is
+exactly what was observed on the wire, matching how a
+<em>registered</em> member’s own value is exactly what was
+declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
+identifier, not the value – is canonicalised.</p>
+<p>This is deliberately <em>not</em> the same as what a <em>registered</em>
+member of this class carries, though, and that asymmetry is
+left as-is here rather than fixed: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself is
+untouched, and it calls <code class="docutils literal notranslate"><span class="pre">str.__new__(cls)</span></code> with no
+argument at all, so every one of the 40 declared members’
+underlying <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload is permanently empty
+regardless of <code class="docutils literal notranslate"><span class="pre">value</span></code> (<code class="docutils literal notranslate"><span class="pre">str(Method.GET)</span> <span class="pre">==</span> <span class="pre">''</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – true on <code class="docutils literal notranslate"><span class="pre">main</span></code>
+as well as here. An <em>unregistered</em> member built through this
+method, by contrast, now carries real content
+(<code class="docutils literal notranslate"><span class="pre">str(Method('frob'))</span> <span class="pre">==</span> <span class="pre">'frob'</span></code>). Tracked as GitHub issue
+#870 rather than fixed in this PR: changing <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code>
+changes what all 40 public members compare equal to, which
+is its own review.</p>
+</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member – here, the
+canonical upper-case form of <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching the name
+every <em>registered</em> member of this class is looked up by,
+since #860’s open-vocabulary registries have no manufactured
+placeholder label to fall back to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
@@ -1147,7 +1210,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.status_code.</span></span><span class="sig-name descname"><span class="pre">StatusCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[StatusCode] HTTP Status Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.message">
@@ -1558,6 +1621,29 @@ Historic]</p>
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_511">
 <span class="sig-name descname"><span class="pre">CODE_511</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">511</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_511" title="Link to this definition">¶</a></dt>
 <dd><p>Network Authentication Required [<span class="target" id="index-144"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode._unregistered_member">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode._unregistered_member" title="Link to this definition">¶</a></dt>
+<dd><p>Build a member absent from this registry’s own lookup tables.</p>
+<p>Reconstructs <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.message" title="pcapkit.const.http.status_code.StatusCode.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> the same way <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would,
+rather than leaving it unset – <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely
+(it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly), so <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.message" title="pcapkit.const.http.status_code.StatusCode.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> would
+otherwise be missing from the result and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code> would raise
+on it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Bare label for the unregistered member, per the ranged
+mint/unmint criterion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

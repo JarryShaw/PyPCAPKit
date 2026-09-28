@@ -460,7 +460,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -469,8 +471,21 @@
 
 <div class="viewcode-block" id="Method">
 <a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.method.Method">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""[Method] HTTP Method"""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Method</span><span class="p">(</span><span class="n">EnumRegistry</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""[Method] HTTP Method</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       Neither ``_missing_`` nor ``get()`` mints any more, per the owner's</span>
+<span class="sd">       ruling on GitHub issue #860: *"only IANA registered ones are legit</span>
+<span class="sd">       values and we need register to properly create new entries. get will</span>
+<span class="sd">       not have sufficient information to create new ones."* Concretely true</span>
+<span class="sd">       here -- a bare wire method verb carries no</span>
+<span class="sd">       :attr:`safe`/:attr:`idempotent`, so minting one used to register a</span>
+<span class="sd">       permanent member with both hollowed out to their defaults;</span>
+<span class="sd">       :meth:`register` is the path that can actually supply them.</span>
+
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Safe method.</span>
@@ -612,6 +627,59 @@
     <span class="c1">#: VERSION-CONTROL [:rfc:`3253#section-3.5`]</span>
     <span class="n">VERSION_CONTROL</span> <span class="o">=</span> <span class="s1">'VERSION-CONTROL'</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
 
+<div class="viewcode-block" id="Method._unregistered_member">
+<a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.method.Method._unregistered_member">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_unregistered_member</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Method'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a member absent from this registry's own lookup tables.</span>
+
+<span class="sd">        Leaves :attr:`safe` and :attr:`idempotent` at the same defaults</span>
+<span class="sd">        :meth:`__new__` itself would, rather than missing entirely --</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`</span>
+<span class="sd">        bypasses :meth:`__new__` (it calls :class:`str`'s directly), so</span>
+<span class="sd">        those two attributes would otherwise be absent. There is no more</span>
+<span class="sd">        specific value to reconstruct them from -- a bare wire method verb</span>
+<span class="sd">        carries neither, which is exactly the owner's reasoning for why</span>
+<span class="sd">        ``get()``/``_missing_`` must not mint one: :meth:`register` is the</span>
+<span class="sd">        path that can actually supply them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item -- the convention here, shared with</span>
+<span class="sd">                :class:`~pcapkit.const.ftp.command.FEATCode` and</span>
+<span class="sd">                :class:`~pcapkit.const.ftp.command.Command`, is the caller's</span>
+<span class="sd">                own casing, unchanged: an unregistered member's *value* is</span>
+<span class="sd">                exactly what was observed on the wire, matching how a</span>
+<span class="sd">                *registered* member's own value is exactly what was</span>
+<span class="sd">                declared, never reformatted. Only :attr:`name` -- the</span>
+<span class="sd">                identifier, not the value -- is canonicalised.</span>
+
+<span class="sd">                This is deliberately *not* the same as what a *registered*</span>
+<span class="sd">                member of this class carries, though, and that asymmetry is</span>
+<span class="sd">                left as-is here rather than fixed: :meth:`__new__` itself is</span>
+<span class="sd">                untouched, and it calls ``str.__new__(cls)`` with no</span>
+<span class="sd">                argument at all, so every one of the 40 declared members'</span>
+<span class="sd">                underlying :class:`str` payload is permanently empty</span>
+<span class="sd">                regardless of ``value`` (``str(Method.GET) == ''``, and</span>
+<span class="sd">                ``Method.GET == 'GET'`` is :obj:`False`) -- true on ``main``</span>
+<span class="sd">                as well as here. An *unregistered* member built through this</span>
+<span class="sd">                method, by contrast, now carries real content</span>
+<span class="sd">                (``str(Method('frob')) == 'frob'``). Tracked as GitHub issue</span>
+<span class="sd">                #870 rather than fixed in this PR: changing :meth:`__new__`</span>
+<span class="sd">                changes what all 40 public members compare equal to, which</span>
+<span class="sd">                is its own review.</span>
+<span class="sd">            name: Bare label for the unregistered member -- here, the</span>
+<span class="sd">                canonical upper-case form of ``value``, matching the name</span>
+<span class="sd">                every *registered* member of this class is looked up by,</span>
+<span class="sd">                since #860's open-vocabulary registries have no manufactured</span>
+<span class="sd">                placeholder label to fall back to.</span>
+
+<span class="sd">        """</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">safe</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">idempotent</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Optional[str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Method'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
@@ -624,8 +692,20 @@
 <span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Method</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">Method</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Method</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># type: ignore[misc]  # pylint: disable=no-member</span>
+            <span class="c1"># NOTE: the value is ``default`` if the caller supplied one, or</span>
+            <span class="c1"># else ``key`` exactly as given -- never ``name`` -- so an</span>
+            <span class="c1"># unregistered member's value is the caller's own casing, the</span>
+            <span class="c1"># same convention :meth:`_unregistered_member` documents and</span>
+            <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
+            <span class="c1"># unchanged. Two calls naming the same method in different</span>
+            <span class="c1"># case, e.g. ``get('frob')`` and ``get('FROB')``, therefore build</span>
+            <span class="c1"># results that are *not* equal -- each is exactly what its own</span>
+            <span class="c1"># caller passed, which minting's ``_member_map_`` cache used to</span>
+            <span class="c1"># paper over by returning the *first* casing seen for every</span>
+            <span class="c1"># later call regardless of case. Losing that is the one</span>
+            <span class="c1"># observable behaviour change in GitHub issue #860's conversion.</span>
+            <span class="k">return</span> <span class="n">Method</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Method</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="Method._missing_">
@@ -644,7 +724,7 @@
         <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[return-value]</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

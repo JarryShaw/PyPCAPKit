@@ -489,7 +489,9 @@
 <span class="s1">from collections import defaultdict</span>
 <span class="s1">from typing import TYPE_CHECKING</span>
 
-<span class="s1">from aenum import StrEnum, extend_enum</span>
+<span class="s1">from aenum import StrEnum</span>
+
+<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
 
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -497,7 +499,7 @@
 <span class="s1">    from typing import Any, DefaultDict, Optional, Type</span>
 
 
-<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, StrEnum):</span>
 <span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
@@ -555,6 +557,41 @@
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _unregistered_member(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Build a member absent from this registry's own lookup tables.</span>
+
+<span class="s1">        Cannot reuse the base's generic construction --</span>
+<span class="s1">        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` calls</span>
+<span class="s1">        :class:`str`'s ``__new__`` directly on the raw ``value``, but</span>
+<span class="s1">        </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1"> stores a *formatted* string (``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``) as</span>
+<span class="s1">        its own :attr:`~aenum.Enum._value_`, not ``value`` itself, so that</span>
+<span class="s1">        approach would build a member whose value looks nothing like this</span>
+<span class="s1">        registry's real members.</span>
+
+<span class="s1">        Deliberately does **not** add to :attr:`__members_ns__` either --</span>
+<span class="s1">        that dict is this registry's own second lookup table, alongside</span>
+<span class="s1">        :attr:`~aenum.Enum._value2member_map_`, and growing it would defeat</span>
+<span class="s1">        the whole point of an *unregistered* member exactly as growing</span>
+<span class="s1">        ``_value2member_map_`` would.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item.</span>
+<span class="s1">            name: Bare label for the unregistered member, per the ranged</span>
+<span class="s1">                mint/unmint criterion.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        temp = '%s [%d]' % (name, value)</span>
+
+<span class="s1">        obj = str.__new__(cls, temp)</span>
+<span class="s1">        obj._name_ = name  # pylint: disable=attribute-defined-outside-init</span>
+<span class="s1">        obj._value_ = temp</span>
+
+<span class="s1">        obj.opt_name = name</span>
+<span class="s1">        obj.opt_value = value</span>
+
+<span class="s1">        return obj</span>
+
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>
@@ -571,10 +608,25 @@
 <span class="s1">            temp_ns.update(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members_ns__.get(namespace, </span><span class="se">{{}}</span><span class="s1">))</span>
 <span class="s1">            if key in temp_ns:</span>
 <span class="s1">                return temp_ns[key]</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, '%s_unknown_%d' % (namespace, key), key, '%s_unknown' % namespace)</span>
+<span class="s1">            # NOTE: GitHub issue #860. This used to extend_enum(...) a</span>
+<span class="s1">            # permanent member as a side effect of a mere lookup -- exactly</span>
+<span class="s1">            # the ``get``/``_missing_`` minting the owner's ruling forbids,</span>
+<span class="s1">            # here on the wire-facing path</span>
+<span class="s1">            # (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`</span>
+<span class="s1">            # calls this with raw option-code bytes off the wire).</span>
+<span class="s1">            # ``_unregistered_member`` never touches ``__members_ns__``</span>
+<span class="s1">            # either, so a genuinely unknown option code no longer grows</span>
+<span class="s1">            # either lookup table.</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(key, '%s_unknown' % namespace)</span>
 <span class="s1">        if key in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members__:</span>
 <span class="s1">            return getattr(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key)</span>
-<span class="s1">        return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default, key)</span>
+<span class="s1">        # NOTE: same ruling, the str-keyed path: this used to mint ``key``</span>
+<span class="s1">        # itself as the member's name with ``default`` as its value. Neither</span>
+<span class="s1">        # ``get`` nor ``_missing_`` has enough information to register one</span>
+<span class="s1">        # properly -- there is no namespace, description or anything else</span>
+<span class="s1">        # IANA would attach to it -- so this now returns an unregistered</span>
+<span class="s1">        # pseudo-member with the same attributes the old mint would have set.</span>
+<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(default, key)</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
@@ -646,7 +698,7 @@
 <span class="sd">        """</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">"return extend_enum(cls, 'opt_unknown_</span><span class="si">%d</span><span class="s2">' % value, value, 'opt_unknown')"</span><span class="p">,</span>
+            <span class="s2">"return cls._unregistered_member(value, 'opt_unknown')"</span><span class="p">,</span>
         <span class="p">]</span>  <span class="c1"># type: list[str]</span>
 
         <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">'table-1'</span><span class="p">]:</span>

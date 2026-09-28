@@ -486,7 +486,9 @@
 
 <span class="s1">from typing import TYPE_CHECKING</span>
 
-<span class="s1">from aenum import IntEnum, extend_enum</span>
+<span class="s1">from aenum import IntEnum</span>
+
+<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Type</span>
@@ -494,7 +496,7 @@
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
 
-<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(IntEnum):</span>
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(EnumRegistry, IntEnum):</span>
 <span class="s1">    """[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">"""</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
@@ -517,28 +519,26 @@
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
-<span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: 'int | str', default: 'int' = -1) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Backport support for original codes.</span>
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _unregistered_member(cls, value: 'int', name: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">        """Build a member absent from this registry's own lookup tables.</span>
+
+<span class="s1">        Reconstructs :attr:`message` the same way :meth:`__new__` would,</span>
+<span class="s1">        rather than leaving it unset -- :meth:`~pcapkit.corekit.enum.</span>
+<span class="s1">        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely</span>
+<span class="s1">        (it calls :class:`int`'s directly), so :attr:`message` would</span>
+<span class="s1">        otherwise be missing from the result and :meth:`__str__` would raise</span>
+<span class="s1">        on it.</span>
 
 <span class="s1">        Args:</span>
-<span class="s1">            key: Key to get enum item.</span>
-<span class="s1">            default: Default value if not found. The placeholder ``-1`` stands</span>
-<span class="s1">                for *no default*, in which case an unresolvable key propagates</span>
-<span class="s1">                the lookup error instead of falling back.</span>
+<span class="s1">            value: Value to get enum item.</span>
+<span class="s1">            name: Bare label for the unregistered member, per the ranged</span>
+<span class="s1">                mint/unmint criterion.</span>
 
-<span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
-<span class="s1">        if isinstance(key, int):</span>
-<span class="s1">            try:</span>
-<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
-<span class="s1">            except ValueError:</span>
-<span class="s1">                if default == -1:</span>
-<span class="s1">                    raise</span>
-<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(default)</span>
-<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">        obj = super()._unregistered_member(value, name)</span>
+<span class="s1">        obj.message = name</span>
+<span class="s1">        return obj</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'int') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
@@ -617,7 +617,7 @@
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, 'CODE_%d' % value, value, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">)"</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
