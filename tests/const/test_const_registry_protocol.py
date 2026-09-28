@@ -705,19 +705,22 @@ GENERATED_SAMPLE = (
 #: the base ``get()``'s own str-key-never-tries-the-value-path limitation
 #: this comment used to cite -- measured on a synthetic registry in
 #: :class:`StrEnumValueFallbackTests` below -- and issue #860's step 2 has
-#: since actually converted five of these six (``FEATCode``, ``Command``,
-#: ``Method``, ``ReturnCode``/``ResponseKind``/``GroupingInformation``,
-#: ``StatusCode`` and ``OptionType``, each with its own
-#: ``_unregistered_member`` override where a custom ``__new__`` needed one --
-#: PR 1), leaving only ``AppType`` (PR 2). They stay excluded from *this*
-#: file's tier-3 sweep regardless, because the exclusion here is about their
+#: since actually converted all six (``FEATCode``, ``Command``, ``Method``,
+#: ``ReturnCode``/``ResponseKind``/``GroupingInformation``, ``StatusCode``
+#: and ``OptionType`` in PR 1; ``AppType`` and its four transport subclasses
+#: in PR 2), each with its own ``_unregistered_member`` override where a
+#: custom ``__new__`` needed one. They stay excluded from *this* file's
+#: tier-3 sweep regardless, because the exclusion here is about their
 #: bespoke ``process()``/``get()`` shape not sharing the generated template,
-#: which conversion onto the base does not change. The remaining four
-#: (``reg/apptype``'s transport subclasses) plus ``AppType``/
-#: ``TransportProtocol`` themselves are excluded for the separate reason
-#: :mod:`pcapkit.corekit.enum`'s own module docstring gives: they are tier 2
-#: of GitHub issue #842's three-tier hierarchy, not tier 3, and stay as they
-#: are until tier 2 lands.
+#: which conversion onto the base does not change -- unlike the 105
+#: :data:`GENERATED_SAMPLE` registries below, none of these five classes'
+#: (nine files') own ``get``/``get_all``/``register``/``register_alias``
+#: became the base's generic implementation; each kept or gained its own,
+#: matching its own contract. ``TransportProtocol`` alone is excluded for
+#: the separate reason it always was: it never mixes in
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` at all, by the owner's own
+#: ruling against extending it (GitHub PR #836) -- there is no registry
+#: protocol here to inherit or shadow.
 EXCLUDED_STILL_BESPOKE = frozenset({
     'pcapkit/const/ftp/command.py',
     'pcapkit/const/ftp/return_code.py',
@@ -1109,8 +1112,9 @@ class StrEnumValueFallbackTests(unittest.TestCase):
     which still holds them out of *this* file's tier-3 sweep for a different
     reason -- their bespoke ``__new__``/``get()`` shapes, not their base) --
     that conversion was #860's separate step 2, landed by PR 1 for three of
-    the four (``FEATCode``, ``Command``, ``Method``) and still open for the
-    fourth (``AppType``, PR 2).
+    the four (``FEATCode``, ``Command``, ``Method``) and by PR 2 for the
+    fourth (``AppType``, along with its four transport subclasses, which
+    were not themselves among the original four but inherit the same fix).
 
     Fixed here by falling back to a plain ``_value2member_map_`` lookup, not
     ``cls(key)``: at the time this was written, :class:`~pcapkit.const.ftp.

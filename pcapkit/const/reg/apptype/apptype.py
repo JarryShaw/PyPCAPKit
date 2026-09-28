@@ -13,7 +13,9 @@ import keyword
 import re
 from typing import TYPE_CHECKING, cast
 
-from aenum import IntEnum, StrEnum, extend_enum
+from aenum import IntEnum, StrEnum, auto, extend_enum
+
+from pcapkit.corekit.enum import EnumRegistry
 
 __all__ = ['TransportProtocol', 'AppType']
 
@@ -27,38 +29,63 @@ class TransportProtocol(IntEnum):
     """Transport layer protocol."""
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
-    # member below is a literal int rather than an auto()-valued one -- GitHub
-    # issue #808 dropped the IntFlag base, so auto() would number sequentially
-    # instead of by the power-of-two spacing the values must keep -- and a
-    # literal infers as int while the TransportProtocol annotations that use
-    # each member (__transport__, and the proto default on __new__, get and
-    # get_all) expect TransportProtocol. cast is the identity function at run
-    # time, so this changes nothing that runs -- see GitHub issue #770, which
-    # cast only this member while the rest still inferred Any from auto().
-    # mypy.ini sets warn_redundant_casts, so if aenum ever ships type stubs
-    # letting it infer TransportProtocol on its own, these casts start
-    # erroring instead of lingering as dead scaffolding.
+    # member below is cast rather than left as a bare auto()-valued one --
+    # a bare auto() infers as Any, while the TransportProtocol annotations
+    # that use each member (__transport__, and the proto default on
+    # __new__, get and get_all) expect TransportProtocol. cast is the
+    # identity function at run time, so this changes nothing that runs --
+    # see GitHub issue #770. mypy.ini sets warn_redundant_casts, so if aenum
+    # ever ships type stubs letting it infer TransportProtocol on its own,
+    # these casts start erroring instead of lingering as dead scaffolding.
+    #
+    # Values are sequential from 0 rather than the power-of-two spacing
+    # this class carried while it still mixed in ``IntFlag`` --
+    # ``undefined`` is declared explicitly as ``0`` and every other member
+    # is ``auto()``, which continues from the preceding explicit value
+    # rather than needing its own ``_start_ = 0`` to begin there; the
+    # owner's own ruling on this issue (#860) is explicit that
+    # ``undefined`` stays a direct ``0`` for that reason: "undefined
+    # direct uses 0. then other real transport use auto. so we don't have
+    # to define a _start_ and the undefined declaration is explicit."
+    # GitHub issue #808 already dropped the ``IntFlag`` base once
+    # nothing built a composite, and GitHub PR #836's ruling later
+    # retired ``|``-composite decoding entirely: "since it's no longer a
+    # Flag, `|` joined values are no longer parsed and accepted, we will
+    # treat it as a whole, instead of splitting." With no decoding left to
+    # protect, the owner's own further ruling on GitHub issue #860 retired
+    # the power-of-two spacing itself too: "2-power on TransportProtocol is
+    # mainly for the consideration of previously `tcp | udp`-alike code.
+    # But we dont accept this kind of piping anymore in the new logic so I
+    # think `auto()` is the expected behaviour." :meth:`AppType._dispatch`
+    # never decodes an ``int`` -- composed by hand with ``|`` or passed
+    # bare -- into anything narrower than the whole value it already is, on
+    # either numbering; a plain ``dict.get`` lookup cannot tell a composed
+    # ``int`` from any other one that happens to equal it. Treating every
+    # int as a whole is exactly what #836's ruling above asks for, and it
+    # is also why this renumbering changes what specific ints mean, not
+    # only what composed ones do:
+    # ``tcp | udp`` (``3``) used to name no registry and now resolves as
+    # ``sctp``'s own value, and a bare, uncomposed ``4`` -- previously
+    # ``sctp``'s value -- now resolves as ``dccp``'s, silently, with no
+    # exception, since a real member sits at ``4`` either way. A caller
+    # holding an integer under the old spacing (composed or not) can
+    # therefore land on a different real transport's registry after this
+    # change, not merely be refused where it previously resolved.
+
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
     #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what
     #: the base registry's ``_missing_`` extends unassigned/reserved rows from.
     undefined = cast('TransportProtocol', 0)
 
-    #: Transmission Control Protocol. Value fixed at ``1`` rather than
-    #: renumbered sequentially -- GitHub issue #808 dropped the ``IntFlag``
-    #: base once nothing built a composite, but did not revisit the four
-    #: values themselves, which predate this class and are not its call to
-    #: renumber.
-    tcp = cast('TransportProtocol', 1)
-    #: User Datagram Protocol. See ``tcp`` above for why the value stays ``2``
-    #: rather than becoming sequential.
-    udp = cast('TransportProtocol', 2)
-    #: Stream Control Transmission Protocol. See ``tcp`` above for why the
-    #: value stays ``4`` rather than becoming sequential.
-    sctp = cast('TransportProtocol', 4)
-    #: Datagram Congestion Control Protocol. See ``tcp`` above for why the
-    #: value stays ``8`` rather than becoming sequential.
-    dccp = cast('TransportProtocol', 8)
+    #: Transmission Control Protocol.
+    tcp = cast('TransportProtocol', auto())
+    #: User Datagram Protocol.
+    udp = cast('TransportProtocol', auto())
+    #: Stream Control Transmission Protocol.
+    sctp = cast('TransportProtocol', auto())
+    #: Datagram Congestion Control Protocol.
+    dccp = cast('TransportProtocol', auto())
 
     @staticmethod
     def get(key: 'int | str') -> 'TransportProtocol':
@@ -104,7 +131,7 @@ class TransportProtocol(IntEnum):
     # reproducing what the base class already does.
 
 
-class AppType(StrEnum):
+class AppType(EnumRegistry, StrEnum):
     """[AppType] Application Layer Protocol Numbers
 
     This is the transport-agnostic base of the per-transport registries in
@@ -2421,8 +2448,13 @@ class AppType(StrEnum):
                 -- falls through to ``int.__or__`` and returns a bare
                 :class:`int` rather than a member. Never split back into the
                 transports its bits would each name -- owner ruling on this PR
-                (#836) -- so it is refused as a whole exactly like any other
-                value naming no registry.
+                (#836) -- so it is looked up as the one whole value it
+                already is, exactly like any other bare int: refused when
+                that whole value names no registry, resolved when it
+                happens to equal one instead. Since GitHub issue #860 moved
+                this class off power-of-two spacing, a hand-built composite
+                is no longer guaranteed to be the former -- see
+                :meth:`_dispatch`'s own body for a value that resolves.
 
         Returns:
             The registry class to search.
@@ -2460,37 +2492,43 @@ class AppType(StrEnum):
         if subclass is not None:
             return subclass
 
-        # NOTE: everything that reaches here names no registry, and nothing
-        # below decodes ``proto``'s bits looking for a partial answer. A
-        # genuine member reaching this point is ``undefined`` -- the four
-        # real transports would already have resolved above, and
-        # :meth:`TransportProtocol.get` cannot mint anything else, per this
-        # PR's own maintainer ruling against extending TransportProtocol at
-        # all -- and a bare :class:`int` is refused exactly the same way
-        # whether it is a single stray bit, e.g. ``17``, or a composite of
-        # several real transports, e.g. ``3`` (``tcp | udp``). That composite
-        # case used to get its own
-        # :exc:`~pcapkit.utilities.exceptions.ProtocolError`, decoded through
-        # :func:`~pcapkit.utilities.compat.show_flag_values` and naming every
-        # transport whose bit was set -- the fix for GitHub issue #759, where
-        # resolving a composite by picking its lowest set bit dispatched
-        # every one containing ``tcp`` into the TCP registry regardless of
-        # what else it named. The owner's further ruling on this PR (#836)
-        # retired that decoding along with the rest of the composite
-        # handling: "since it's no longer a Flag, `|` joined values are no
-        # longer parsed and accepted, we will treat it as a whole, instead of
-        # splitting." So ``AppType.get(80, proto=3)`` now says "3 names no
-        # transport protocol registry" rather than naming ``tcp`` and ``udp``
-        # individually -- the same answer a caller resolving a parsed port
-        # already gets right, since it knows which single transport carried
-        # it and passes that one bit, and the same answer a caller wanting
-        # every service on a port already has to ask each registry for in
-        # turn regardless.
+        # NOTE: everything that reaches here has already failed to match a
+        # real member's value at the dict lookup above, and nothing below
+        # decodes ``proto``'s bits looking for a partial answer either -- on
+        # either numbering. A genuine member reaching this point is
+        # ``undefined`` -- the four real transports would already have
+        # resolved above, and :meth:`TransportProtocol.get` cannot mint
+        # anything else, per this PR's own maintainer ruling against
+        # extending TransportProtocol at all -- and a bare :class:`int`
+        # reaches here whenever it matches no real member's value, e.g. a
+        # stray bit like ``17``. A composite built by hand used to reach
+        # here just as reliably, since no combination of the old power-of-
+        # two bits ever equalled a single real member's value; that is no
+        # longer true under this class's current sequential numbering --
+        # ``TransportProtocol.tcp | TransportProtocol.udp`` (``3``) is
+        # ``sctp``'s own value now, so it resolves at the dict lookup above
+        # instead of reaching this point at all. A composite used to get
+        # its own :exc:`~pcapkit.utilities.exceptions.ProtocolError`,
+        # decoded through :func:`~pcapkit.utilities.compat.show_flag_values`
+        # and naming every transport whose bit was set -- the fix for
+        # GitHub issue #759, where resolving a composite by picking its
+        # lowest set bit dispatched every one containing ``tcp`` into the
+        # TCP registry regardless of what else it named. The owner's
+        # further ruling on this PR (#836) retired that decoding along with
+        # the rest of the composite handling: "since it's no longer a Flag,
+        # `|` joined values are no longer parsed and accepted, we will
+        # treat it as a whole, instead of splitting." So a composite's bits
+        # are never decoded looking for a partial answer any more, on
+        # either numbering -- it is looked up as the one whole value it
+        # already is, exactly like any int a caller might have written
+        # directly, and whether that whole value resolves or reaches this
+        # point depends only on whether some real member happens to equal
+        # it, never on whether a caller built it with ``|`` by hand.
         raise ValueError(f'{proto!r} names no transport protocol registry of '
                          f'{cls.__name__}')
 
     @classmethod
-    def get(cls, key: 'int', *,
+    def get(cls, key: 'int', *,  # type: ignore[override] # pylint: disable=arguments-differ
             proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> 'AppType':
         """Backport support for original codes.
 
@@ -2503,7 +2541,10 @@ class AppType(StrEnum):
                 when it does select, since one registry is what a port lookup can
                 answer from -- a member's own ``proto`` names exactly one, so
                 passing it straight back in always resolves, while a composite
-                built by hand is refused rather than resolved to a guess.
+                built by hand is looked up as the whole value it is rather
+                than decoded into a guess -- refused if that whole value
+                names no registry, resolved to whichever real member it
+                happens to equal otherwise (see :meth:`_dispatch`).
 
         Returns:
             The **canonical** service for ``key``. IANA assigns several services
@@ -2520,9 +2561,11 @@ class AppType(StrEnum):
                 one outside ``0..65535``, whose rejection by :meth:`_missing_` this
                 method propagates rather than minting over, so that ``get`` is
                 never more permissive than ``AppType(...)``. Also covers a
-                ``proto`` naming more than one transport protocol -- a
-                composite built by hand is refused as a whole rather than
-                answered from any one of the registries it names -- see
+                ``proto`` int that matches no registry at all, composite or
+                not -- looked up as the whole value it is rather than
+                decoded into the registries its bits would each name, so it
+                is refused only when that whole value itself names none of
+                them, not simply for being composite -- see
                 :meth:`_dispatch`.
 
         :meta private:
@@ -2543,16 +2586,20 @@ class AppType(StrEnum):
             return matched[0]
 
         # NOTE: :meth:`_missing_` answers :obj:`None` for a port it holds no row
-        # for, which is what minting is for, and *raises* for a value that is not a
-        # port at all. Catching that rejection was GitHub issue #758's defect: it
-        # minted ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
-        # attribute access can reach, and left ``get`` more permissive than
-        # ``AppType(...)``, which has always raised here. The rejection now
-        # propagates, so both entry points answer an out-of-range port identically.
+        # for -- GitHub issue #860 stopped that from minting, on the owner's
+        # ruling: *"we should not mint on get still actually... get will not
+        # have sufficient information to create new ones."* A port outside
+        # ``0..65535`` still *raises* rather than reaching here at all. Before
+        # #860, catching the ``None`` answer minted ``PORT_{key}_{transport}``
+        # here directly -- GitHub issue #758's defect (it also minted for
+        # ``PORT_999999_tcp`` and ``PORT_-1_tcp``, the latter a name no
+        # attribute access could reach) -- and this was the second, independent
+        # mint site on this method, distinct from the one inside
+        # :meth:`_missing_` itself: neither is a value anyone asked to be named,
+        # so both build an unregistered member instead of registering one.
         ret = owner._missing_(key)
         if ret is None:
-            ret = extend_enum(owner, f'PORT_{key}_{owner.__transport__.name}',
-                              key, 'unknown', owner.__transport__)
+            ret = owner._unregistered_member(key, 'unknown', owner.__transport__)
         return ret
 
     @classmethod
@@ -2586,7 +2633,106 @@ class AppType(StrEnum):
         return (canonical, *(member for member in matched if member is not canonical))
 
     @classmethod
-    def register_alias(cls, port: 'int', name: 'str') -> 'AppType':
+    def _sanitize_identifier(cls, name: 'str') -> 'str':
+        """Derive a valid Python attribute name from a raw service name.
+
+        Shared by :meth:`register` and :meth:`register_alias`, both of which
+        mint a name-carrying member at runtime and need the same sanitising
+        steps :meth:`~pcapkit.vendor.default.Vendor.safe_name` applies to
+        every statically declared member's name at generation time (minus its
+        fallback; each caller raises instead -- see their own ``Raises``).
+        Reproduced here rather than imported, since this module is generated
+        *from* :mod:`pcapkit.vendor` and importing back would run a crawler
+        built for one pass over IANA's CSV for what is otherwise a plain
+        string transform.
+
+        Args:
+            name: Raw label, exactly as a caller would want it to read on
+                :attr:`svc`.
+
+        Returns:
+            The sanitised identifier -- not guaranteed to be a valid Python
+            identifier at all (empty, or leading with a digit); callers check
+            :meth:`str.isidentifier` themselves and raise with the context
+            appropriate to their own call.
+
+        """
+        stripped = re.sub(r'\(.*\)', '', name)
+        collapsed = '_'.join(stripped.split())
+        replaced = re.sub(r'\W', '_', collapsed)
+        identifier = '_'.join(filter(None, replaced.split('_')))
+        # NOTE: matches process()'s own keyword guard below -- a name that
+        # sanitises to a reserved word is not usable as an attribute as is,
+        # and a trailing underscore is the same fix the generator already
+        # applies to a statically declared member with the same problem.
+        if keyword.iskeyword(identifier):
+            identifier = f'{identifier}_'
+        return identifier
+
+    @classmethod
+    def register(cls, port: 'int', name: 'str') -> 'AppType':  # pylint: disable=arguments-renamed
+        """Mint the first, canonical member at ``port``, in this registry alone.
+
+        The counterpart of :meth:`register_alias`: that method requires
+        ``port`` to already carry a member and adds a further name for it;
+        this requires the opposite -- ``port`` unclaimed in this registry --
+        and mints the first. :meth:`get` can no longer do this itself as of
+        GitHub issue #860 (the owner's ruling: *"only IANA registered ones
+        are legit values and we need register to properly create new
+        entries. get will not have sufficient information to create new
+        ones."*), so this is now the only way to add a service this registry
+        does not already carry.
+
+        Deliberately scoped like :meth:`register_alias` to **this**
+        per-transport registry rather than dispatched through
+        :meth:`_dispatch`: minting on one transport must never leak onto a
+        transport IANA never assigned the service to, and a write is exactly
+        the operation where guessing the right transport for the caller is
+        the wrong default.
+
+        Args:
+            port: Port number to register under. Must not already carry a
+                member of this registry -- see :meth:`register_alias` for
+                that case.
+            name: The service name, i.e. what :attr:`svc` reads on the new
+                member.
+
+        Returns:
+            The newly minted member.
+
+        Raises:
+            ValueError: If called on a class that holds no members, i.e. on
+                :class:`AppType` itself, which is not one of the four
+                per-transport registries; if ``port`` already carries a
+                member of this registry; if ``name`` sanitises to text that
+                is not a valid Python identifier at all; or if the identifier
+                it does sanitise to already names an unrelated member of this
+                registry.
+
+        """
+        if cls.__registry__ is None:
+            raise ValueError(f'{cls.__name__} holds no members; register on one of its '
+                             'per-transport subclasses instead')
+
+        existing = cls.__registry__.getlist(port)
+        if existing:
+            raise ValueError(f'{port!r} already has a member registered on {cls.__name__} '
+                             f'({", ".join(member.svc for member in existing)}); use '
+                             f'{cls.__name__}.register_alias() to add a further service name '
+                             'for it')
+
+        identifier = cls._sanitize_identifier(name)
+        if not identifier.isidentifier():
+            raise ValueError(f'{name!r} has no valid Python identifier to register '
+                             f'{cls.__name__} with (sanitises to {identifier!r})')
+        if identifier in cls.__members__:
+            raise ValueError(f'{identifier!r} already names a member of {cls.__name__}; '
+                             'choose a name whose identifier does not collide')
+
+        return extend_enum(cls, identifier, port, name, cls.__transport__)
+
+    @classmethod
+    def register_alias(cls, port: 'int', name: 'str') -> 'AppType':  # pylint: disable=arguments-renamed
         """Register ``name`` as a new alias on ``port``, in this registry alone.
 
         GitHub issue #807's third ask, deliberately scoped to **this**
@@ -2598,21 +2744,15 @@ class AppType(StrEnum):
         IANA itself never registered it there.
 
         No new storage: the new member simply joins :data:`__registry__` at
-        ``port``, through the same :func:`~aenum.extend_enum` call :meth:`get`
-        already uses to mint an unknown one below. It is then reachable
+        ``port``, through the same :func:`~aenum.extend_enum` call
+        :meth:`register` uses to mint the first one. It is then reachable
         through :attr:`aliases` on every other member already on ``port``, and
         vice versa, with nothing further to keep in sync.
 
-        The Python attribute name is derived from ``name`` through the same
-        sanitising steps the generator uses for every statically declared
-        member's -- ``www-http`` becomes ``www_http`` at
-        :meth:`~pcapkit.vendor.default.Vendor.safe_name`, reproduced below
-        (minus its fallback; see Raises below) rather than imported, since
-        this module is generated *from* :mod:`pcapkit.vendor` and importing
-        back would run a crawler built for one pass over IANA's CSV for what
-        is otherwise a plain attribute lookup. It has to be ``name``, not
-        ``port`` and a counter: an alias whose own name does not resolve
-        through subscription is most of the point of registering one, and
+        The Python attribute name is derived from ``name`` through
+        :meth:`_sanitize_identifier`. It has to be ``name``, not ``port`` and
+        a counter: an alias whose own name does not resolve through
+        subscription is most of the point of registering one, and
         ``TCP['www_http']`` resolving is exactly what lets a caller reach an
         alias the same way every statically declared member already is.
 
@@ -2620,9 +2760,8 @@ class AppType(StrEnum):
             port: Port number to register the alias under. Must already carry
                 at least one member of this registry -- aliasing names a
                 second service on a port that already has one, rather than
-                declaring a fresh port out of nothing, which stays the
-                generator's job (or, for an unassigned port, :meth:`get`'s own
-                mint-on-miss).
+                declaring a fresh port out of nothing, which is :meth:`register`'s
+                job.
             name: The alias's service name, i.e. what :attr:`svc` reads on the
                 new member -- kept exactly as given, unlike the identifier
                 sanitised from it below. Checked against every member already
@@ -2653,31 +2792,19 @@ class AppType(StrEnum):
         if any(member.svc == name for member in existing):
             raise ValueError(f'{name!r} is already registered on port {port} of {cls.__name__}')
 
-        # NOTE: mirrors Vendor.safe_name (pcapkit/vendor/default.py)'s
-        # sanitising steps -- strip a parenthetical aside, collapse whitespace
-        # to single underscores, replace every remaining non-word character
-        # with ``_``, then collapse and trim the underscores that step leaves
-        # behind. ``rename``'s further dedup -- appending ``_{port}`` when a
-        # name already recurs elsewhere in the registry -- is deliberately
-        # not reproduced: that decision is curated from a full CSV pass at
-        # generation time, and synthesising a different fallback name here
-        # would be exactly the silent rename the collision check below
-        # refuses to do instead. ``safe_name``'s own fallback -- minting
-        # ``{cls.__name__}_{residue}`` when the sanitised residue is not a
-        # valid identifier -- is not reproduced either: this method raises
-        # instead (see Raises above), so the 58 members the generator mints
-        # that way in the shipped const (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) are
-        # names this runtime path refuses rather than accepts.
-        stripped = re.sub(r'\(.*\)', '', name)
-        collapsed = '_'.join(stripped.split())
-        replaced = re.sub(r'\W', '_', collapsed)
-        identifier = '_'.join(filter(None, replaced.split('_')))
-        # NOTE: matches process()'s own keyword guard below -- a name that
-        # sanitises to a reserved word is not usable as an attribute as is,
-        # and a trailing underscore is the same fix the generator already
-        # applies to a statically declared member with the same problem.
-        if keyword.iskeyword(identifier):
-            identifier = f'{identifier}_'
+        # NOTE: the 58 members the generator mints via safe_name's own
+        # fallback -- ``{cls.__name__}_{residue}``, when the sanitised
+        # residue is not a valid identifier (28 TCP, 29 UDP, 1 SCTP, 0 DCCP) --
+        # are names this runtime path refuses rather than accepts: that
+        # fallback is deliberately not reproduced in
+        # :meth:`_sanitize_identifier`, which raises here instead (see Raises
+        # above). ``rename``'s further dedup -- appending ``_{port}`` when a
+        # name already recurs elsewhere in the registry -- is not reproduced
+        # either: that decision is curated from a full CSV pass at generation
+        # time, and synthesising a different fallback name here would be
+        # exactly the silent rename the collision check above refuses to do
+        # instead.
+        identifier = cls._sanitize_identifier(name)
 
         if not identifier.isidentifier():
             raise ValueError(f'{name!r} has no valid Python identifier to register '
@@ -2687,6 +2814,46 @@ class AppType(StrEnum):
                              'choose a name whose identifier does not collide')
 
         return extend_enum(cls, identifier, port, name, cls.__transport__)
+
+    @classmethod
+    def _unregistered_member(cls, value: 'int', name: 'str',
+                              proto: 'TransportProtocol' = TransportProtocol.undefined) -> 'AppType':
+        """Build a member absent from this registry's own lookup tables and
+        its :data:`__registry__` side table alike.
+
+        Used by :meth:`_missing_` and :meth:`get` for a port neither resolves
+        to a real, IANA-registered service, so that such a lookup no longer
+        grows either table -- contrast :meth:`register`, the explicit,
+        caller-named path that still does.
+
+        Reconstructs :attr:`svc`, :attr:`port` and :attr:`proto` the same way
+        :meth:`__new__` would: :meth:`~pcapkit.corekit.enum.
+        EnumRegistry._unregistered_member` bypasses :meth:`__new__` entirely
+        (it builds through ``cls._member_type_.__new__`` directly), so this
+        class's own three attributes would otherwise be missing and every
+        method reading them (:meth:`__repr__`, :meth:`__str__`, :meth:`__int__`,
+        the comparison operators, :attr:`aliases`) would raise on the result.
+        Deliberately *not* added to :data:`__registry__` -- unlike
+        :meth:`__new__`, which always does -- since an unregistered member is
+        exactly the one this registry must not remember past the call that
+        built it.
+
+        Args:
+            value: Port number.
+            name: Bare label for the unregistered member -- what
+                :meth:`__new__` calls ``name`` and stores as :attr:`svc`.
+            proto: Transport protocol the label names, if any.
+
+        """
+        if cls.__registry__ is None:
+            raise ValueError(f'{cls.__name__} holds no members; they belong to its '
+                             'per-transport subclasses')
+        temp = f'{name} [{value} - {proto.name}]'
+        obj = super()._unregistered_member(temp, name)
+        obj.svc = name
+        obj.port = value
+        obj.proto = proto
+        return obj
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Optional[AppType]':
@@ -2709,2303 +2876,2307 @@ class AppType(StrEnum):
         # one tests ``cls.__transport__`` and answers that registry alone --
         # GitHub issue #760, where source order decided instead and a UDP lookup in
         # 6000-6063 came back carrying ``tcp``. A registry a named span excludes
-        # falls through to a mint, which is what IANA assigning it nothing means.
+        # falls through to :meth:`_unregistered_member`, which is what IANA
+        # assigning it nothing means -- GitHub issue #860 stopped this from
+        # growing either lookup table or :data:`__registry__`, on the owner's
+        # ruling for the whole family: *"only IANA registered ones are legit
+        # values and we need register to properly create new entries."*
         if 225 <= value <= 241:
             #: [N/A] Reserved [:rfc:`1060`]
-            return extend_enum(cls, f'reserved_{value}', value, 'reserved', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 249 <= value <= 255:
             #: [N/A] Reserved [:rfc:`1060`]
-            return extend_enum(cls, f'reserved_{value}', value, 'reserved', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 272 <= value <= 279:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 288 <= value <= 299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 301 <= value <= 307:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 325 <= value <= 332:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 334 <= value <= 343:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 717 <= value <= 728:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 732 <= value <= 740:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 745 <= value <= 746:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 755 <= value <= 757:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 778 <= value <= 779:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 781 <= value <= 785:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 788 <= value <= 799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 803 <= value <= 809:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 811 <= value <= 827:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 834 <= value <= 846:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 849 <= value <= 852:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 855 <= value <= 859:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 863 <= value <= 872:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 874 <= value <= 885:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 889 <= value <= 899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 904 <= value <= 909:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 916 <= value <= 952:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 954 <= value <= 988:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 1002 <= value <= 1007:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 1011 <= value <= 1020:
             #: [N/A] Reserved
-            return extend_enum(cls, f'reserved_{value}', value, 'reserved', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 2194 <= value <= 2196:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 3322 <= value <= 3325:
             #: [N/A] Active Networks
-            return extend_enum(cls, f'active_net_{value}', value, 'active-net', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'active-net', TransportProtocol.undefined)
         if 3367 <= value <= 3371:
             #: [N/A] Satellite Video Data Link
-            return extend_enum(cls, f'satvid_datalnk_{value}', value, 'satvid-datalnk', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'satvid-datalnk', TransportProtocol.undefined)
         if 4200 <= value <= 4299:
             #: [N/A] VRML Multi User Systems
-            return extend_enum(cls, f'vrml_multi_use_{value}', value, 'vrml-multi-use', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'vrml-multi-use', TransportProtocol.undefined)
         if 4337 <= value <= 4339:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4363 <= value <= 4365:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4380 <= value <= 4388:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4397 <= value <= 4399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4434 <= value <= 4440:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4461 <= value <= 4479:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4481 <= value <= 4483:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4489 <= value <= 4499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4504 <= value <= 4533:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4539 <= value <= 4544:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4560 <= value <= 4562:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4564 <= value <= 4565:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4571 <= value <= 4572:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4574 <= value <= 4589:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4607 <= value <= 4620:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4622 <= value <= 4645:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4647 <= value <= 4657:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4693 <= value <= 4699:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4705 <= value <= 4710:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4712 <= value <= 4724:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4734 <= value <= 4736:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4748 <= value <= 4748:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4757 <= value <= 4773:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4775 <= value <= 4783:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4795 <= value <= 4799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4805 <= value <= 4826:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4828 <= value <= 4836:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4852 <= value <= 4866:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4872 <= value <= 4875:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4886 <= value <= 4887:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4890 <= value <= 4893:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4895 <= value <= 4898:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4903 <= value <= 4911:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4916 <= value <= 4935:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4938 <= value <= 4939:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4943 <= value <= 4948:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4954 <= value <= 4968:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4972 <= value <= 4979:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4981 <= value <= 4982:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 4992 <= value <= 4998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5016 <= value <= 5019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5035 <= value <= 5041:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5076 <= value <= 5077:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5088 <= value <= 5089:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5095 <= value <= 5098:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5108 <= value <= 5110:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5118 <= value <= 5119:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5121 <= value <= 5132:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5138 <= value <= 5144:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5147 <= value <= 5149:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5158 <= value <= 5160:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5169 <= value <= 5171:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5173 <= value <= 5189:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5198 <= value <= 5199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5204 <= value <= 5208:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5210 <= value <= 5214:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5216 <= value <= 5220:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5238 <= value <= 5241:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5255 <= value <= 5263:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5266 <= value <= 5268:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5273 <= value <= 5279:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5283 <= value <= 5297:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5322 <= value <= 5342:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5345 <= value <= 5348:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5365 <= value <= 5396:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5438 <= value <= 5442:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5446 <= value <= 5449:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5451 <= value <= 5452:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5457 <= value <= 5460:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5466 <= value <= 5469:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5476 <= value <= 5499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5508 <= value <= 5539:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5541 <= value <= 5542:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5544 <= value <= 5549:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5551 <= value <= 5552:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5558 <= value <= 5564:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5570 <= value <= 5572:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5576 <= value <= 5578:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5587 <= value <= 5596:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5606 <= value <= 5617:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5619 <= value <= 5626:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5640 <= value <= 5645:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5647 <= value <= 5665:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5667 <= value <= 5669:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5685 <= value <= 5686:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5690 <= value <= 5692:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5694 <= value <= 5695:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5697 <= value <= 5699:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5701 <= value <= 5704:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5706 <= value <= 5712:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5731 <= value <= 5740:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5751 <= value <= 5754:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5758 <= value <= 5765:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5772 <= value <= 5776:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5778 <= value <= 5779:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5788 <= value <= 5792:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5795 <= value <= 5797:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5799 <= value <= 5812:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5815 <= value <= 5819:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5821 <= value <= 5840:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5843 <= value <= 5858:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5860 <= value <= 5862:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5864 <= value <= 5867:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5869 <= value <= 5882:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5884 <= value <= 5899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5901 <= value <= 5902:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5915 <= value <= 5962:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5964 <= value <= 5967:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5970 <= value <= 5983:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 5995 <= value <= 5998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6000 <= value <= 6063 and cls.__transport__ is TransportProtocol.tcp:
             #: [TCP] X Window System
-            return extend_enum(cls, f'x11_{value}', value, 'x11', TransportProtocol.tcp)
+            return cls._unregistered_member(value, 'x11', TransportProtocol.tcp)
         if 6000 <= value <= 6063 and cls.__transport__ is TransportProtocol.udp:
             #: [UDP] X Window System
-            return extend_enum(cls, f'x11_{value}', value, 'x11', TransportProtocol.udp)
+            return cls._unregistered_member(value, 'x11', TransportProtocol.udp)
         if 6078 <= value <= 6079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6089 <= value <= 6098:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6119 <= value <= 6120:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6125 <= value <= 6129:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6131 <= value <= 6132:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6134 <= value <= 6139:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6150 <= value <= 6158:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6164 <= value <= 6199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6202 <= value <= 6208:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6210 <= value <= 6221:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6223 <= value <= 6240:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6245 <= value <= 6250:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6254 <= value <= 6266:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6270 <= value <= 6299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6302 <= value <= 6305:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6307 <= value <= 6314:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6327 <= value <= 6342:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6345 <= value <= 6345:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6348 <= value <= 6349:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6351 <= value <= 6354:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6356 <= value <= 6359:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6361 <= value <= 6362:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6364 <= value <= 6369:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6371 <= value <= 6378:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6380 <= value <= 6381:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6383 <= value <= 6388:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6391 <= value <= 6399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6411 <= value <= 6416:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6422 <= value <= 6431:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6433 <= value <= 6439:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6447 <= value <= 6454:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6457 <= value <= 6463:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6465 <= value <= 6470:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6472 <= value <= 6479:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6490 <= value <= 6499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6512 <= value <= 6512:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6516 <= value <= 6542:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6545 <= value <= 6546:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6552 <= value <= 6555:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6559 <= value <= 6565:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6569 <= value <= 6578:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6584 <= value <= 6587:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6589 <= value <= 6599:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6603 <= value <= 6609:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6611 <= value <= 6618:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6637 <= value <= 6639:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6641 <= value <= 6652:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6658 <= value <= 6664:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6665 <= value <= 6669 and cls.__transport__ is TransportProtocol.tcp:
             #: [TCP] IRCU
-            return extend_enum(cls, f'ircu_{value}', value, 'ircu', TransportProtocol.tcp)
+            return cls._unregistered_member(value, 'ircu', TransportProtocol.tcp)
         if 6665 <= value <= 6669 and cls.__transport__ is TransportProtocol.udp:
             #: [UDP] Reserved
-            return extend_enum(cls, f'reserved_{value}', value, 'reserved', TransportProtocol.udp)
+            return cls._unregistered_member(value, 'reserved', TransportProtocol.udp)
         if 6674 <= value <= 6677:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6680 <= value <= 6686:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6691 <= value <= 6695:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6707 <= value <= 6713:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6717 <= value <= 6766:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6772 <= value <= 6776:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6779 <= value <= 6783:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6792 <= value <= 6800:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6802 <= value <= 6816:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6818 <= value <= 6830:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6832 <= value <= 6840:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6843 <= value <= 6849:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6851 <= value <= 6867:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6869 <= value <= 6887:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6889 <= value <= 6899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6902 <= value <= 6923:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6925 <= value <= 6934:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6937 <= value <= 6945:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6947 <= value <= 6950:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6952 <= value <= 6960:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6967 <= value <= 6968:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6971 <= value <= 6979:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 6981 <= value <= 6996:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7027 <= value <= 7029:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7032 <= value <= 7039:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7041 <= value <= 7069:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7074 <= value <= 7079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7081 <= value <= 7087:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7089 <= value <= 7094:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7096 <= value <= 7098:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7102 <= value <= 7106:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7108 <= value <= 7116:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7118 <= value <= 7120:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7124 <= value <= 7127:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7130 <= value <= 7160:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7175 <= value <= 7180:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7182 <= value <= 7199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7203 <= value <= 7214:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7217 <= value <= 7226:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7230 <= value <= 7233:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7238 <= value <= 7243:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7245 <= value <= 7261:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7263 <= value <= 7271:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7284 <= value <= 7299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7300 <= value <= 7359:
             #: [N/A] The Swiss Exchange
-            return extend_enum(cls, f'swx_{value}', value, 'swx', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'swx', TransportProtocol.undefined)
         if 7360 <= value <= 7364:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7366 <= value <= 7390:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7398 <= value <= 7399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7403 <= value <= 7409:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7412 <= value <= 7419:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7422 <= value <= 7425:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7432 <= value <= 7436:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7438 <= value <= 7442:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7444 <= value <= 7470:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7475 <= value <= 7477:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7479 <= value <= 7490:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7492 <= value <= 7499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7502 <= value <= 7507:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7512 <= value <= 7541:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7552 <= value <= 7559:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7561 <= value <= 7562:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7564 <= value <= 7565:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7567 <= value <= 7568:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7571 <= value <= 7573:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7576 <= value <= 7587:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7589 <= value <= 7605:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7607 <= value <= 7623:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7634 <= value <= 7647:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7649 <= value <= 7662:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7664 <= value <= 7667:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7669 <= value <= 7671:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7678 <= value <= 7679:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7681 <= value <= 7682:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7684 <= value <= 7686:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7691 <= value <= 7696:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7698 <= value <= 7699:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7702 <= value <= 7706:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7709 <= value <= 7719:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7721 <= value <= 7723:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7729 <= value <= 7733:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7735 <= value <= 7737:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7739 <= value <= 7740:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7745 <= value <= 7746:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7748 <= value <= 7776:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7782 <= value <= 7783:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7790 <= value <= 7793:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7795 <= value <= 7796:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7803 <= value <= 7809:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7811 <= value <= 7844:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7848 <= value <= 7868:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7873 <= value <= 7877:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7881 <= value <= 7886:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7888 <= value <= 7899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7904 <= value <= 7912:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7914 <= value <= 7931:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7934 <= value <= 7961:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7963 <= value <= 7966:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7968 <= value <= 7978:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 7983 <= value <= 7997:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8011 <= value <= 8014:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8028 <= value <= 8031:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8035 <= value <= 8039:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8045 <= value <= 8050:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8062 <= value <= 8065:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8068 <= value <= 8069:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8071 <= value <= 8073:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8075 <= value <= 8076:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8078 <= value <= 8079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8092 <= value <= 8096:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8098 <= value <= 8099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8103 <= value <= 8110:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8112 <= value <= 8114:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8119 <= value <= 8120:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8123 <= value <= 8127:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8133 <= value <= 8139:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8141 <= value <= 8147:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8150 <= value <= 8152:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8154 <= value <= 8159:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8163 <= value <= 8180:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8185 <= value <= 8189:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8196 <= value <= 8198:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8203 <= value <= 8203:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8209 <= value <= 8210:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8212 <= value <= 8229:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8233 <= value <= 8242:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8244 <= value <= 8265:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8267 <= value <= 8269:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8271 <= value <= 8275:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8277 <= value <= 8279:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8283 <= value <= 8291:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8295 <= value <= 8299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8302 <= value <= 8312:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8314 <= value <= 8319:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8323 <= value <= 8350:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8352 <= value <= 8375:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8381 <= value <= 8382:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8385 <= value <= 8399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8406 <= value <= 8414:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8418 <= value <= 8422:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8424 <= value <= 8431:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8434 <= value <= 8441:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8446 <= value <= 8447:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8451 <= value <= 8456:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8458 <= value <= 8469:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8475 <= value <= 8499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8504 <= value <= 8553:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8556 <= value <= 8566:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8568 <= value <= 8599:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8601 <= value <= 8608:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8616 <= value <= 8664:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8669 <= value <= 8674:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8676 <= value <= 8685:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8689 <= value <= 8698:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8700 <= value <= 8709:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8712 <= value <= 8731:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8734 <= value <= 8749:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8751 <= value <= 8762:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8771 <= value <= 8777:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8779 <= value <= 8785:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8788 <= value <= 8792:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8794 <= value <= 8799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8801 <= value <= 8803:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8810 <= value <= 8872:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8874 <= value <= 8879:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8884 <= value <= 8887:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8895 <= value <= 8898:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8902 <= value <= 8907:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8914 <= value <= 8936:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8938 <= value <= 8952:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8955 <= value <= 8979:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8982 <= value <= 8988:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8992 <= value <= 8996:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9003 <= value <= 9004:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9012 <= value <= 9019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9027 <= value <= 9049:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9052 <= value <= 9059:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9061 <= value <= 9079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9094 <= value <= 9099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9108 <= value <= 9110:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9112 <= value <= 9118:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9120 <= value <= 9121:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9124 <= value <= 9130:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9132 <= value <= 9159:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9165 <= value <= 9182:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9184 <= value <= 9190:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9192 <= value <= 9199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9218 <= value <= 9221:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9223 <= value <= 9254:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9256 <= value <= 9276:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9288 <= value <= 9291:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9296 <= value <= 9299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9301 <= value <= 9305:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9307 <= value <= 9309:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9313 <= value <= 9317:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9319 <= value <= 9320:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9322 <= value <= 9338:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9341 <= value <= 9342:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9347 <= value <= 9373:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9375 <= value <= 9379:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9381 <= value <= 9386:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9391 <= value <= 9395:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9398 <= value <= 9399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9403 <= value <= 9417:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9419 <= value <= 9442:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9446 <= value <= 9449:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9451 <= value <= 9499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9501 <= value <= 9521:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9523 <= value <= 9534:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9537 <= value <= 9554:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9556 <= value <= 9558:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9560 <= value <= 9591:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9601 <= value <= 9611:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9619 <= value <= 9627:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9633 <= value <= 9639:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9641 <= value <= 9665:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9669 <= value <= 9693:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9696 <= value <= 9699:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9701 <= value <= 9746:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9748 <= value <= 9749:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9751 <= value <= 9752:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9754 <= value <= 9761:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9763 <= value <= 9799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9803 <= value <= 9874:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9879 <= value <= 9887:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9890 <= value <= 9897:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9904 <= value <= 9908:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9912 <= value <= 9924:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9926 <= value <= 9949:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9957 <= value <= 9965:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9967 <= value <= 9977:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9982 <= value <= 9985:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 9989 <= value <= 9989:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10011 <= value <= 10019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10021 <= value <= 10022:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10024 <= value <= 10049:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10052 <= value <= 10054:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10056 <= value <= 10079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10082 <= value <= 10099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10105 <= value <= 10106:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10108 <= value <= 10109:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10118 <= value <= 10124:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10126 <= value <= 10127:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10130 <= value <= 10159:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10163 <= value <= 10199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10202 <= value <= 10251:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10254 <= value <= 10259:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10262 <= value <= 10287:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10289 <= value <= 10320:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10322 <= value <= 10438:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10440 <= value <= 10442:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10444 <= value <= 10499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10501 <= value <= 10539:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10545 <= value <= 10547:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10549 <= value <= 10630:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10632 <= value <= 10799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10801 <= value <= 10804:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10806 <= value <= 10808:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10811 <= value <= 10859:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10861 <= value <= 10879:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10881 <= value <= 10932:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10934 <= value <= 10989:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 10991 <= value <= 10999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11002 <= value <= 11094:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11096 <= value <= 11102:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11113 <= value <= 11160:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11166 <= value <= 11170:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11176 <= value <= 11200:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11203 <= value <= 11207:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11209 <= value <= 11210:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11212 <= value <= 11234:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11236 <= value <= 11318:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11322 <= value <= 11366:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11368 <= value <= 11370:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11372 <= value <= 11429:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11431 <= value <= 11433:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11435 <= value <= 11488:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11490 <= value <= 11599:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11601 <= value <= 11622:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11624 <= value <= 11719:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11721 <= value <= 11722:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11724 <= value <= 11750:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11752 <= value <= 11795:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11797 <= value <= 11875:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11878 <= value <= 11966:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11968 <= value <= 11970:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 11972 <= value <= 11996:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12014 <= value <= 12108:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12110 <= value <= 12120:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12122 <= value <= 12167:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12169 <= value <= 12171:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12173 <= value <= 12299:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12303 <= value <= 12320:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12323 <= value <= 12344:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12346 <= value <= 12545:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12547 <= value <= 12752:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12754 <= value <= 12864:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 12866 <= value <= 13159:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13161 <= value <= 13215:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13219 <= value <= 13222:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13225 <= value <= 13399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13401 <= value <= 13719:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13725 <= value <= 13781:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13787 <= value <= 13817:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13824 <= value <= 13831:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13833 <= value <= 13893:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13895 <= value <= 13928:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 13931 <= value <= 13999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14003 <= value <= 14032:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14035 <= value <= 14140:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14146 <= value <= 14148:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14151 <= value <= 14153:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14155 <= value <= 14249:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14251 <= value <= 14413:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14415 <= value <= 14499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14501 <= value <= 14935:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 14938 <= value <= 14999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15003 <= value <= 15117:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15119 <= value <= 15344:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15346 <= value <= 15362:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15364 <= value <= 15554:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15556 <= value <= 15659:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15661 <= value <= 15739:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 15741 <= value <= 15997:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16004 <= value <= 16019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16022 <= value <= 16160:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16163 <= value <= 16308:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16312 <= value <= 16359:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16362 <= value <= 16366:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16369 <= value <= 16383:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16386 <= value <= 16618:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16620 <= value <= 16664:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16667 <= value <= 16788:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16790 <= value <= 16899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16901 <= value <= 16949:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16951 <= value <= 16990:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 16996 <= value <= 17006:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17008 <= value <= 17009:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17011 <= value <= 17183:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17186 <= value <= 17218:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17226 <= value <= 17233:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17236 <= value <= 17499:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17501 <= value <= 17554:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17556 <= value <= 17728:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17730 <= value <= 17753:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17757 <= value <= 17776:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 17778 <= value <= 17999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18001 <= value <= 18103:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18105 <= value <= 18135:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18137 <= value <= 18180:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18188 <= value <= 18240:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18244 <= value <= 18258:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18260 <= value <= 18261:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18263 <= value <= 18462:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18464 <= value <= 18515:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18517 <= value <= 18633:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18636 <= value <= 18667:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18669 <= value <= 18768:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18770 <= value <= 18880:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18882 <= value <= 18887:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 18889 <= value <= 18999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19001 <= value <= 19006:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19008 <= value <= 19019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19021 <= value <= 19190:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19192 <= value <= 19193:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19195 <= value <= 19219:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19221 <= value <= 19282:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19284 <= value <= 19314:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19316 <= value <= 19397:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19399 <= value <= 19409:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19413 <= value <= 19538:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19542 <= value <= 19787:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 19791 <= value <= 19997:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20006 <= value <= 20011:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20015 <= value <= 20033:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20035 <= value <= 20045:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20047 <= value <= 20047:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20050 <= value <= 20056:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20058 <= value <= 20166:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20168 <= value <= 20201:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20203 <= value <= 20221:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20223 <= value <= 20479:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20481 <= value <= 20669:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20671 <= value <= 20809:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 20811 <= value <= 20998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21001 <= value <= 21009:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21011 <= value <= 21211:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21214 <= value <= 21220:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21222 <= value <= 21336:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21338 <= value <= 21552:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21555 <= value <= 21589:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21591 <= value <= 21799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21802 <= value <= 21844:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 21850 <= value <= 21999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22006 <= value <= 22124:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22126 <= value <= 22127:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22129 <= value <= 22221:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22223 <= value <= 22272:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22274 <= value <= 22304:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22306 <= value <= 22332:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22336 <= value <= 22342:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22344 <= value <= 22346:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22348 <= value <= 22349:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22352 <= value <= 22536:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22538 <= value <= 22554:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22556 <= value <= 22762:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22764 <= value <= 22799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22801 <= value <= 22950:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 22952 <= value <= 22999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23006 <= value <= 23052:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23054 <= value <= 23271:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23273 <= value <= 23293:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23295 <= value <= 23332:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23334 <= value <= 23399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23403 <= value <= 23455:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23458 <= value <= 23545:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 23547 <= value <= 23999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24007 <= value <= 24241:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24243 <= value <= 24248:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24250 <= value <= 24320:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24324 <= value <= 24385:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24387 <= value <= 24464:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24466 <= value <= 24553:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24555 <= value <= 24576:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24578 <= value <= 24600:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24602 <= value <= 24665:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24667 <= value <= 24675:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24681 <= value <= 24726:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24728 <= value <= 24753:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24755 <= value <= 24849:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24851 <= value <= 24921:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 24923 <= value <= 24999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25010 <= value <= 25099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25101 <= value <= 25470:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25472 <= value <= 25575:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25577 <= value <= 25603:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25605 <= value <= 25792:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25794 <= value <= 25899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25904 <= value <= 25953:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 25956 <= value <= 25999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26001 <= value <= 26132:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26134 <= value <= 26207:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26209 <= value <= 26256:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26258 <= value <= 26259:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26265 <= value <= 26485:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 26490 <= value <= 26999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27000 <= value <= 27009:
             #: [N/A] FLEX LM (1-10)
-            return extend_enum(cls, f'flex_lm_{value}', value, 'flex-lm', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'flex-lm', TransportProtocol.undefined)
         if 27011 <= value <= 27015:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27018 <= value <= 27344:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27346 <= value <= 27441:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27443 <= value <= 27503:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27505 <= value <= 27781:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27783 <= value <= 27875:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 27877 <= value <= 27998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28002 <= value <= 28009:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28011 <= value <= 28079:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28081 <= value <= 28118:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28120 <= value <= 28199:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28201 <= value <= 28239:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28241 <= value <= 28588:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 28590 <= value <= 28999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 29001 <= value <= 29117:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 29119 <= value <= 29166:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 29170 <= value <= 29998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30005 <= value <= 30099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30101 <= value <= 30259:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30261 <= value <= 30399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30401 <= value <= 30831:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30833 <= value <= 30938:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 30940 <= value <= 30998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31000 <= value <= 31015:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31017 <= value <= 31019:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31021 <= value <= 31028:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31030 <= value <= 31336:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31338 <= value <= 31399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31401 <= value <= 31415:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31417 <= value <= 31456:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31458 <= value <= 31619:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31621 <= value <= 31684:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31686 <= value <= 31764:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31766 <= value <= 31947:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 31950 <= value <= 32033:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32035 <= value <= 32248:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32250 <= value <= 32399:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32401 <= value <= 32482:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32484 <= value <= 32634:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32637 <= value <= 32766:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32778 <= value <= 32800:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32802 <= value <= 32810:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32812 <= value <= 32895:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 32897 <= value <= 32999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33001 <= value <= 33059:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33061 <= value <= 33122:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33124 <= value <= 33330:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33335 <= value <= 33433:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33436 <= value <= 33655:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33657 <= value <= 33889:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 33891 <= value <= 34248:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 34250 <= value <= 34377:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 34380 <= value <= 34566:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 34568 <= value <= 34961:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 34967 <= value <= 34979:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 34981 <= value <= 34999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 35007 <= value <= 35099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 35101 <= value <= 35353:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 35358 <= value <= 36000:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36002 <= value <= 36410:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36413 <= value <= 36421:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36425 <= value <= 36442:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36445 <= value <= 36461:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36463 <= value <= 36523:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36525 <= value <= 36601:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36603 <= value <= 36699:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36701 <= value <= 36864:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 36866 <= value <= 37471:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 37473 <= value <= 37474:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 37476 <= value <= 37482:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 37484 <= value <= 37600:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 37602 <= value <= 37653:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 37655 <= value <= 37999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38003 <= value <= 38200:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38204 <= value <= 38411:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38413 <= value <= 38421:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38423 <= value <= 38461:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38463 <= value <= 38471:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38473 <= value <= 38637:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38639 <= value <= 38799:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38801 <= value <= 38864:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 38866 <= value <= 39062:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 39064 <= value <= 39680:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 39682 <= value <= 39999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 40001 <= value <= 40022:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 40024 <= value <= 40403:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 40405 <= value <= 40840:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 40844 <= value <= 40852:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 40854 <= value <= 41110:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 41112 <= value <= 41120:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 41122 <= value <= 41229:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 41231 <= value <= 41793:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 41798 <= value <= 42507:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 42511 <= value <= 42998:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 43001 <= value <= 43187:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 43192 <= value <= 43209:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 43211 <= value <= 43437:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 43442 <= value <= 44122:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44124 <= value <= 44320:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44324 <= value <= 44443:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44446 <= value <= 44543:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44545 <= value <= 44552:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44554 <= value <= 44599:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44601 <= value <= 44817:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44819 <= value <= 44899:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 44901 <= value <= 44999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45003 <= value <= 45044:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45046 <= value <= 45053:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45055 <= value <= 45184:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45186 <= value <= 45513:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45515 <= value <= 45677:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45679 <= value <= 45823:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45826 <= value <= 45965:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 45967 <= value <= 46335:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 46337 <= value <= 46997:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 47002 <= value <= 47099:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 47101 <= value <= 47556:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 47558 <= value <= 47623:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 47625 <= value <= 47805:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 47810 <= value <= 47999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48006 <= value <= 48047:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48051 <= value <= 48127:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48130 <= value <= 48555:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48557 <= value <= 48618:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48620 <= value <= 48652:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 48654 <= value <= 48999:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 49002 <= value <= 49149:
             #: [N/A] Unassigned
-            return extend_enum(cls, f'unassigned_{value}', value, 'unassigned', TransportProtocol.undefined)
+            return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         return super()._missing_(value)

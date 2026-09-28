@@ -635,15 +635,18 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     In the owner's words, the const enums used to mirror the built-in "with
     one exception: they contain the missing then register fallback (mutable
     enums)". :class:`~pcapkit.const.http.method.Method`,
-    :class:`~pcapkit.const.ftp.command.Command` and
-    :class:`~pcapkit.const.ftp.command.FEATCode` were, until GitHub issue
-    #860 step 2, the last three registries still living that divergence for
-    an *unrecognised* value (every numeric registry had already lost it
-    under #775/#847's ruling). The owner's #860 ruling retired it for these
-    three too, verbatim: *"I think we should not mint on get still
-    actually. For all three, only IANA registered ones are legit values and
-    we need register to properly create new entries. get will not have
-    sufficient information to create new ones."* Concretely,
+    :class:`~pcapkit.const.ftp.command.Command`,
+    :class:`~pcapkit.const.ftp.command.FEATCode` and
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType` (with its four
+    transport subclasses) were, until GitHub issue #860 step 2, the last
+    registries still living that divergence for an *unrecognised* value
+    (every numeric registry had already lost it under #775/#847's ruling).
+    The owner's #860 ruling retired it for all of them, verbatim: *"I think
+    we should not mint on get still actually. For all three, only IANA
+    registered ones are legit values and we need register to properly
+    create new entries. get will not have sufficient information to create
+    new ones."* Stated for the three PR 1 converted, but the reasoning is
+    unconditional and PR 2 applies it to ``AppType`` identically. Concretely,
     :class:`Command` needs :attr:`~pcapkit.const.ftp.command.Command.feat`/
     :attr:`~pcapkit.const.ftp.command.Command.desc`/
     :attr:`~pcapkit.const.ftp.command.Command.type`/
@@ -793,13 +796,28 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ProtectionAuthority(-1)
 
-    def test_apptype_still_registers_an_unassigned_port(self) -> None:
-        """GitHub issue #584's machinery, which runs through ``_missing_``."""
+    def test_apptype_no_longer_registers_an_unassigned_port(self) -> None:
+        """GitHub issue #584's machinery, which used to run through
+        ``_missing_``'s fallthrough and :meth:`AppType.get`'s own second
+        mint site -- both retired by GitHub issue #860 step 2 PR 2, on the
+        same ruling this class's docstring quotes. Renamed from
+        ``test_apptype_still_registers_an_unassigned_port``: 65000 is not in
+        any declared range, so this used to mint a permanent
+        ``PORT_65000_tcp`` member every process keeps forever; it now
+        resolves to an equal-but-not-identical unregistered one instead,
+        the same shape as :meth:`test_a_string_registry_no_longer_
+        registers_an_unknown_name` above."""
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
 
-        registered = AppType.get(65000, proto=TransportProtocol.tcp)
-        self.assertEqual(int(registered), 65000)
-        self.assertIs(AppType.get(65000, proto=TransportProtocol.tcp), registered)
+        before = len(AppType.__registries__[TransportProtocol.tcp].__members__)
+        first = AppType.get(65000, proto=TransportProtocol.tcp)
+        after = len(AppType.__registries__[TransportProtocol.tcp].__members__)
+        second = AppType.get(65000, proto=TransportProtocol.tcp)
+
+        self.assertEqual(before, after, 'AppType.get(65000, ...) registered; see GitHub issue #860')
+        self.assertEqual(int(first), 65000)
+        self.assertEqual(first, second)
+        self.assertIsNot(first, second)
 
     def test_transport_protocol_can_no_longer_be_extended_at_runtime(self) -> None:
         """Maintainer ruling on PR #836: extension refused, not renumbered.
