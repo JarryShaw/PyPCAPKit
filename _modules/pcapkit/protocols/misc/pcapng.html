@@ -727,8 +727,12 @@
 <div class="viewcode-block" id="TLSKeyLabel">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.TLSKeyLabel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TLSKeyLabel</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""TLS key log label."""</span>
+<span class="w">    </span><span class="sd">"""TLS key log label, c.f., :rfc:`9850`."""</span>
 
+    <span class="c1">#: NSS-historical: not a registered label of :rfc:`9850#section-4.2`'s "TLS</span>
+    <span class="c1">#: SSLKEYLOGFILE Labels" registry. Defined by the Mozilla NSS</span>
+    <span class="c1">#: ``SSLKEYLOGFILE`` convention and removed in NSS 3.34; kept here only so</span>
+    <span class="c1">#: that key logs predating :rfc:`9850` still read.</span>
     <span class="n">RSA</span> <span class="o">=</span> <span class="s1">'RSA'</span>
     <span class="n">CLIENT_RANDOM</span> <span class="o">=</span> <span class="s1">'CLIENT_RANDOM'</span>
     <span class="n">CLIENT_EARLY_TRAFFIC_SECRET</span> <span class="o">=</span> <span class="s1">'CLIENT_EARLY_TRAFFIC_SECRET'</span>  <span class="c1"># nosec B105</span>
@@ -737,7 +741,11 @@
     <span class="n">CLIENT_TRAFFIC_SECRET_0</span> <span class="o">=</span> <span class="s1">'CLIENT_TRAFFIC_SECRET_0'</span>  <span class="c1"># nosec B105</span>
     <span class="n">SERVER_TRAFFIC_SECRET_0</span> <span class="o">=</span> <span class="s1">'SERVER_TRAFFIC_SECRET_0'</span>  <span class="c1"># nosec B105</span>
     <span class="n">EARLY_EXPORTER_SECRET</span> <span class="o">=</span> <span class="s1">'EARLY_EXPORTER_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">EXPORTER_SECRET</span> <span class="o">=</span> <span class="s1">'EXPORTER_SECRET'</span>  <span class="c1"># nosec B105</span></div>
+    <span class="n">EXPORTER_SECRET</span> <span class="o">=</span> <span class="s1">'EXPORTER_SECRET'</span>  <span class="c1"># nosec B105</span>
+    <span class="c1">#: HPKE KEM shared secret used in the ECH, c.f., :rfc:`9850#section-4.2`.</span>
+    <span class="n">ECH_SECRET</span> <span class="o">=</span> <span class="s1">'ECH_SECRET'</span>  <span class="c1"># nosec B105</span>
+    <span class="c1">#: ECHConfig used for construction of the ECH, c.f., :rfc:`9850#section-4.2`.</span>
+    <span class="n">ECH_CONFIG</span> <span class="o">=</span> <span class="s1">'ECH_CONFIG'</span></div>
 
 
 
