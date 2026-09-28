@@ -22,7 +22,7 @@ from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
-from pcapkit.utilities.compat import StrEnum
+from pcapkit.utilities.compat import StrEnum, auto
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -41,9 +41,9 @@ class Type(StrEnum):
     """FTP packet type."""
 
     #: Request packet.
-    REQUEST = 'request'
+    REQUEST = auto()
     #: Response packet.
-    RESPONSE = 'response'
+    RESPONSE = auto()
 
 
 class FTP(Application[Data_FTP, Schema_FTP],

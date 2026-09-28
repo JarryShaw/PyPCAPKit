@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.utilities.compat import StrEnum
+from pcapkit.utilities.compat import StrEnum, auto
 
 __all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
@@ -57,13 +57,13 @@ class Completion(StrEnum):
     """
 
     #: Reassembled in whole: every octet of the datagram was received.
-    COMPLETE = 'complete'
+    COMPLETE = auto()
 
     #: Fragments were still outstanding when the buffer was flushed -- at the end
     #: of the capture, or when the session was torn down (a TCP FIN/RST, or an
     #: IPv4 datagram whose identifier was reused by an unfragmented packet).
     #: The missing octets may simply not have been captured.
-    PARTIAL = 'partial'
+    PARTIAL = auto()
 
     #: Reassembly was **abandoned** under the reassembly timeout, i.e. the
     #: capture clock advanced past the deadline of
@@ -71,7 +71,7 @@ class Completion(StrEnum):
     #: seconds after the first-arriving fragment while the datagram was still
     #: incomplete. :rfc:`8200#section-4.5` requires the held fragments be
     #: discarded, so no further fragment will ever be added to this datagram.
-    TIMEOUT = 'timeout'
+    TIMEOUT = auto()
 
     def __bool__(self) -> 'bool':
         """Whether the datagram was reassembled in whole.
