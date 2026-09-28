@@ -3125,6 +3125,27 @@ since -- reaching #805 by the entries below.
   Widens rather than breaks -- a call that raised ``KeyError`` before now
   resolves, and no caller that got a correct result before gets a different one
   now (#863).
+* **Fixed** -- **a breaking change to** ``EtherType``'s ``_missing_`` ordering:
+  values ``0x0101``-``0x01FF`` now resolve to their Old Xerox Experimental name
+  instead of an ``IEEE802_3_Length_Field_0x0101``-style one. The generated
+  method tested ``0x0000 <= value <= 0x05DC`` (IEEE802.3 Length Field) before
+  ``0x0101 <= value <= 0x01FF`` (Old Xerox Experimental); the second range sits
+  wholly inside the first, and the method returns on its first matching ``if``,
+  so the Old Xerox branch was unreachable for every value it covers. Unlike
+  #841's IPX ``Socket`` fix, these bounds come from the live IANA CSV rather
+  than a literal table, so the fix is general rather than a manual swap:
+  ``pcapkit/vendor/reg/ethertype.py``'s ``process()`` now collects each range
+  row, and a new ``EtherType._insert_range`` places each range ahead of the
+  first already-placed range that fully contains it, leaving every
+  non-overlapping pair in the CSV's own row order.
+  ``pcapkit/const/reg/ethertype.py`` is regenerated; the diff is exactly the
+  two branches swapping places. Swept all 56 range tests in the generated
+  ``_missing_``: this pair is the only containment among them, so no other
+  subsumed range exists today. ``tests/const/test_const_ethertype_862_unit.py``
+  pins both the symptom against the committed const file and the root cause
+  against ``process()`` fed a reproduction of IANA's own CSV rows, plus the
+  general ordering rule against synthetic nested ranges -- each verified to
+  fail against the pre-fix generator and const file. Closes #862 (#865).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
