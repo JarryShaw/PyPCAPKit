@@ -83,5 +83,5 @@ __all__ = [
     # PCAPNG
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
-    'PCAPNG_FilterType',
+    'PCAPNG_FilterType', 'PCAPNG_TLSKeyLabel',
 ]

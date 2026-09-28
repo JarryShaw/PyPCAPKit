@@ -25,6 +25,8 @@ enumerations include:
      - Secrets Types [*]_
    * - :class:`PCAPNG_FilterType <pcapkit.const.pcapng.filter_type.FilterType>`
      - Filter Types [*]_
+   * - :class:`PCAPNG_TLSKeyLabel <pcapkit.const.pcapng.tls_key_label.TLSKeyLabel>`
+     - TLS Key Log Labels [*]_
 
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-standardized-block-type-cod
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-options
@@ -33,6 +35,7 @@ enumerations include:
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, c.f., :rfc:`9850#section-4.2`
 
 """
 
@@ -42,10 +45,11 @@ from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgo
 from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
+from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as PCAPNG_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
 
 __all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
-    'PCAPNG_FilterType',
+    'PCAPNG_FilterType', 'PCAPNG_TLSKeyLabel',
 ]

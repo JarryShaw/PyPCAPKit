@@ -721,12 +721,32 @@ GENERATED_SAMPLE = (
 #: :class:`~pcapkit.corekit.enum.EnumRegistry` at all, by the owner's own
 #: ruling against extending it (GitHub PR #836) -- there is no registry
 #: protocol here to inherit or shadow.
+#:
+#: ``pcapkit/const/pcapng/tls_key_label.py`` (GitHub issue #886) is excluded
+#: for a different reason than the ten above, worth spelling out since it is
+#: not "carries a bespoke get()/register()" -- it does not; its own
+#: ``get``/``get_all``/``register``/``register_alias`` are exactly the
+#: base's generic implementation, same as every one of the 105
+#: :data:`GENERATED_SAMPLE`-shaped registries below. What excludes it is
+#: narrower: this whole census, and its ``class \w+(EnumRegistry, IntEnum):``
+#: regex a few lines down, is scoped to the :class:`~aenum.IntEnum` batch
+#: tier 3 of #775 converted. ``TLSKeyLabel`` is :class:`~aenum.StrEnum`-valued
+#: -- RFC 9850's labels are strings, matched by value -- and it was generated
+#: after that batch closed, so it was never a candidate for it either way.
+#: Excluding it here is not a judgement about its own inherited-protocol
+#: cleanliness; :mod:`tests.const.test_const_enum_get`,
+#: :mod:`tests.const.test_const_enum_lookup` and
+#: :mod:`tests.const.test_const_enum_builtin_parity`'s dynamic
+#: ``pkgutil.walk_packages`` sweeps already discover and cover it generically
+#: -- it is simply outside what this file's historical, IntEnum-only census
+#: counts.
 EXCLUDED_STILL_BESPOKE = frozenset({
     'pcapkit/const/ftp/command.py',
     'pcapkit/const/ftp/return_code.py',
     'pcapkit/const/http/method.py',
     'pcapkit/const/http/status_code.py',
     'pcapkit/const/pcapng/option_type.py',
+    'pcapkit/const/pcapng/tls_key_label.py',
     'pcapkit/const/reg/apptype/apptype.py',
     'pcapkit/const/reg/apptype/dccp.py',
     'pcapkit/const/reg/apptype/sctp.py',
@@ -762,9 +782,9 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
                 self.assertIn("def _missing_(cls, value: 'int')", source)
 
     def test_every_generated_const_module_is_accounted_for(self) -> None:
-        """The full census, measured on this batch rather than assumed: 121
+        """The full census, measured on this batch rather than assumed: 122
         modules under :mod:`pcapkit.const`, splitting exactly three ways --
-        the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 10
+        the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 11
         :data:`EXCLUDED_STILL_BESPOKE` deliberately left alone, and the
         remaining 105 this tier converts. Measured by me on the prior head
         (commit ``05468a06b``, this batch's own base): of those 121, 6 carried
@@ -773,6 +793,13 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         the 6 bespoke StrEnum/AppType files, since a hand-copied docstring is
         not proof of a shared template) -- 105 is what is left once the 6
         converted and the 10 excluded are both taken out.
+
+        121 became 122 with GitHub issue #886's
+        ``pcapkit/const/pcapng/tls_key_label.py``, and the 10 excluded became
+        11 to hold it -- see the comment directly above
+        :data:`EXCLUDED_STILL_BESPOKE` for why it lands there rather than
+        among the 105. 105 itself does not move: the new file is absorbed by
+        the excluded side of the split, not the generated side.
         """
         const_root = REPO_ROOT / 'pcapkit' / 'const'
         all_files = sorted(
@@ -784,7 +811,7 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         generated = [path for path in all_files
                      if path not in converted_relpaths and path not in EXCLUDED_STILL_BESPOKE]
 
-        self.assertEqual(len(all_files), 121)
+        self.assertEqual(len(all_files), 122)
         self.assertEqual(len(generated), 105)
 
         for relpath in generated:
