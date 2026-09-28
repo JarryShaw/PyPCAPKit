@@ -39,4 +39,3 @@ class SecretsType(EnumRegistry, IntEnum):
         if not (isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         return cls._unregistered_member(value, 'Unassigned')
-        return cls(value)

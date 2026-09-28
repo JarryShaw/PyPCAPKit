@@ -40,4 +40,3 @@ class RecordType(EnumRegistry, IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         return cls._unregistered_member(value, 'Unassigned')
-        return cls(value)

@@ -68,8 +68,7 @@ class SecretsType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "cls._unregistered_member(value, 'Unassigned')",
-            'return cls(value)'
+            "return cls._unregistered_member(value, 'Unassigned')",
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code)  # type: ignore[arg-type]

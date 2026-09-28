@@ -26,7 +26,7 @@ import pathlib
 import unittest
 from typing import TYPE_CHECKING
 
-from aenum import IntEnum, IntFlag, StrEnum
+from aenum import IntEnum, IntFlag, StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
 from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
@@ -698,10 +698,15 @@ GENERATED_SAMPLE = (
 #: their crawler's own ``process()``/``context()`` with a bespoke,
 #: mint-on-lookup ``get()``/``_missing_`` pair that does not share
 #: :mod:`pcapkit.vendor.default`'s template at all -- converting any of them
-#: onto :class:`~pcapkit.corekit.enum.EnumRegistry` would silently change
-#: behaviour rather than just move it, per the base ``get()``'s own
-#: str-key-never-tries-the-value-path limitation measured in
-#: :class:`StrEnumValuePathLimitationTests` below. The remaining four
+#: onto :class:`~pcapkit.corekit.enum.EnumRegistry` would still silently
+#: change behaviour rather than just move it, since four of the six are
+#: :class:`~aenum.StrEnum` registries whose own ``__new__`` attaches further
+#: attributes ``_unregistered_member`` does not set. GitHub issue #860 fixed
+#: the base ``get()``'s own str-key-never-tries-the-value-path limitation
+#: this comment used to cite -- measured on a synthetic registry in
+#: :class:`StrEnumValueFallbackTests` below -- but that fix only reaches a
+#: registry that already mixes in the base; actually converting these six is
+#: issue #860's still-open step 2, not this tier. The remaining four
 #: (``reg/apptype``'s transport subclasses) plus ``AppType``/
 #: ``TransportProtocol`` themselves are excluded for the separate reason
 #: :mod:`pcapkit.corekit.enum`'s own module docstring gives: they are tier 2
@@ -1026,34 +1031,176 @@ class GetDispatchMatrixTests(unittest.TestCase):
                 self.assertIn('is not a valid TransType', str(caught.exception))
 
 
-class StrEnumValuePathLimitationTests(unittest.TestCase):
-    """Justifies excluding every :class:`~aenum.StrEnum` const module from
-    this tier (:data:`EXCLUDED_STILL_BESPOKE`'s ``ftp``/``http``/``pcapng``/
-    ``reg.apptype`` entries): the base ``get()``'s ``isinstance(key, str)``
-    branch only ever tries ``cls._member_map_[key]`` -- a *name* lookup -- and
-    never falls back to treating a ``str`` key as a *value*, unlike the
-    integer path. That is pre-existing behaviour of
+class GetDispatchMatrixIntFlagTests(unittest.TestCase):
+    """The same matrix as :class:`GetDispatchMatrixTests`, on an
+    :class:`~aenum.IntFlag` registry rather than a plain
+    :class:`~aenum.IntEnum` one -- GitHub issue #860's own instructions call
+    for measuring both member types the base serves, not just one. Every
+    probe here is unchanged by #860's ``str``-branch fix, since
+    ``HandoverACKFlag.get`` never takes that branch for an ``int`` key or a
+    key that is neither ``int`` nor ``str``; this class exists to pin that
+    the ``IntFlag`` path really is untouched, not to assume it."""
+
+    def setUp(self) -> None:
+        snapshot = snapshot_modules(ISOLATED_PREFIXES)
+        purge_modules(['pcapkit'])
+        self.addCleanup(restore_modules, snapshot, ISOLATED_PREFIXES)
+
+    def test_valid_int_value(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        self.assertIs(HandoverACKFlag.get(0x80), HandoverACKFlag.U)
+
+    def test_valid_name(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        self.assertIs(HandoverACKFlag.get('U'), HandoverACKFlag.U)
+
+    def test_missing_name_without_default_raises_key_error(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        with self.assertRaises(KeyError):
+            HandoverACKFlag.get('Definitely_Not_A_Member')
+
+    def test_missing_name_with_default_falls_back(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        self.assertIs(HandoverACKFlag.get('Definitely_Not_A_Member', 0x40), HandoverACKFlag.P)
+
+    def test_missing_int_without_default_raises_value_error(self) -> None:
+        """``9999`` is outside the ``0..0xFF`` range ``HandoverACKFlag``'s own
+        ``_missing_`` bounds, so this is a genuine miss."""
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        with self.assertRaises(ValueError):
+            HandoverACKFlag.get(9999)
+
+    def test_missing_int_with_default_falls_back(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        self.assertIs(HandoverACKFlag.get(9999, 0x40), HandoverACKFlag.P)
+
+    def test_a_key_that_is_neither_int_nor_str_raises_value_error(self) -> None:
+        from pcapkit.const.mh.handover_ack_flag import HandoverACKFlag
+
+        for key in (3.5, None, b'x'):
+            with self.subTest(key=key):
+                with self.assertRaises(ValueError) as caught:
+                    HandoverACKFlag.get(key)
+                self.assertIn('is not a valid HandoverACKFlag', str(caught.exception))
+
+
+class StrEnumValueFallbackTests(unittest.TestCase):
+    """GitHub issue #860, step 1: the base ``get()``'s ``isinstance(key, str)``
+    branch used to try only ``cls._member_map_[key]`` -- a *name* lookup --
+    and never fall back to treating a ``str`` key as a *value*, unlike the
+    integer path. That was pre-existing behaviour of
     :class:`~pcapkit.corekit.enum.EnumRegistry` itself (added by tier 1,
     #855, which never converted a :class:`~aenum.StrEnum` registry either),
-    not something this tier introduces -- reproduced here on a synthetic
-    registry so the exclusion decision is measured rather than assumed, and
-    so a future tier that does take on the ``StrEnum`` registries knows
-    exactly what it would need to fix first.
+    found during #858's review on a synthetic registry rather than a real
+    one, since none of the four bespoke ``StrEnum`` const registries mix in
+    this base yet (:data:`EXCLUDED_STILL_BESPOKE` above) -- that conversion
+    is #860's separate, still-open step 2.
+
+    Fixed here by falling back to a plain ``_value2member_map_`` lookup, not
+    ``cls(key)``: :class:`~pcapkit.const.ftp.command.FEATCode`'s own
+    ``_missing_`` mints directly via :func:`~aenum.extend_enum` for any
+    unrecognised value (that minting call reproduced verbatim in
+    :meth:`test_get_never_mints_on_a_registry_whose_missing_mints_directly`
+    below), so routing the value fallback through the constructor would let
+    a failed *name* lookup mint a permanent member the moment #860's step 2
+    converts a registry like it onto this base -- exactly the "never mints"
+    defect :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own docstring
+    rules out. A raw dict lookup can never reach ``_missing_``, so it cannot
+    mint regardless of what a subclass's own ``_missing_`` does.
     """
 
-    def test_a_str_key_that_is_a_value_but_not_a_name_is_not_resolved(self) -> None:
+    def test_a_str_key_that_is_a_value_but_not_a_name_now_resolves(self) -> None:
+        """The defect itself. Fails on ``main`` (raises ``KeyError``, see the
+        module docstring's reproduction), passes here."""
         class _Str(EnumRegistry, StrEnum):
             KNOWN = 'known-value'
 
         # The name resolves, as it always would.
         self.assertIs(_Str.get('KNOWN'), _Str.KNOWN)
 
-        # The *value* -- a different string from the name -- does not, even
-        # though ``_Str('known-value')`` (the constructor) resolves it fine.
-        # This is the gap: get() never reaches the constructor for a str key.
+        # The *value* -- a different string from the name -- now resolves
+        # too, matching what the constructor already did directly.
         self.assertIs(_Str('known-value'), _Str.KNOWN)
+        self.assertIs(_Str.get('known-value'), _Str.KNOWN)
+
+    def test_name_wins_over_a_different_members_value(self) -> None:
+        """Ordering decision: a name match wins over a value match, so a
+        string that is *both* a member's name and a different member's
+        value resolves to the name's member. This already held for a name
+        that resolves before this fix (the name branch is untouched), so it
+        passes on both trees -- it is the ordering this fix's fall-through
+        had to preserve, not new behaviour, and is pinned here so the
+        ordering stays a decision rather than an accident."""
+        class _Str(EnumRegistry, StrEnum):
+            ALPHA = 'BETA'
+            BETA = 'gamma'
+
+        self.assertIs(_Str.get('BETA'), _Str.BETA)
+        self.assertIsNot(_Str.get('BETA'), _Str.ALPHA)
+
+    def test_a_str_value_match_wins_over_a_supplied_default(self) -> None:
+        """A second, compounding half of the same defect: on ``main``, the
+        ``str`` branch's ``except KeyError`` fires for *any* non-name key,
+        so a supplied ``default`` was returned even when the key itself was
+        a perfectly good value -- the default silently overrode a match that
+        should have won. Fails on ``main`` (returns ``_Str('elsewhere')``
+        instead of ``_Str.KNOWN``), passes here."""
+        class _Str(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+            ELSEWHERE = 'elsewhere'
+
+        self.assertIs(_Str.get('known-value', 'elsewhere'), _Str.KNOWN)
+
+    def test_missing_value_with_no_match_and_no_default_still_raises_key_error(self) -> None:
+        """A ``str`` key that resolves neither as a name nor as a value, with
+        no default, still raises :exc:`KeyError` -- not :exc:`ValueError` --
+        matching :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own
+        documented contract for a name miss. Unchanged by this fix: passes
+        on both trees."""
+        class _Str(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+
         with self.assertRaises(KeyError):
-            _Str.get('known-value')
+            _Str.get('totally-unknown')
+
+    def test_get_never_mints_on_a_registry_whose_missing_mints_directly(self) -> None:
+        """The crux this fix has to get right: the minting half of this
+        fixture's ``_missing_`` is verbatim
+        :meth:`~pcapkit.const.ftp.command.FEATCode._missing_`
+        (``pcapkit/const/ftp/command.py:52``) -- ``extend_enum(cls,
+        value.upper(), value)`` for any unrecognised string. Its non-``str``
+        branch differs (delegates to ``super()._missing_`` rather than
+        ``FEATCode``'s own explicit ``ValueError``), which is immaterial to
+        what this test proves. A naive ``return cls(key)`` fallback would
+        mint a permanent member from a mere failed lookup; the
+        ``_value2member_map_`` lookup this fix uses instead never reaches
+        ``_missing_`` at all, so it cannot. Passes on both trees -- ``main``
+        never attempts the value path in the first place, so it cannot mint
+        either; this pins that the fix does not regress that guarantee while
+        closing the gap."""
+        class _MintingStr(EnumRegistry, StrEnum):
+            KNOWN = 'known-value'
+
+            @classmethod
+            def _missing_(cls, value: 'Any') -> 'Any':
+                if not isinstance(value, str):
+                    return super()._missing_(value)
+                return extend_enum(cls, value.upper(), value)
+
+        values_before = {member.value for member in _MintingStr}
+        members_before = set(_MintingStr.__members__)
+
+        with self.assertRaises(KeyError):
+            _MintingStr.get('never-seen-before')
+
+        self.assertEqual(values_before, {member.value for member in _MintingStr})
+        self.assertEqual(members_before, set(_MintingStr.__members__))
 
 
 class NoDefaultSentinelTests(unittest.TestCase):

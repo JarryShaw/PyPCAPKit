@@ -264,13 +264,43 @@ class EnumRegistry:
         returns the member the alias points at, not a separate object -- so
         two names for one assignment resolve to one enum.
 
-        It never mints. Registering a member is :meth:`register`'s job and
+        It never mints -- see #864 for the ``default`` path, which does and
+        should not. Registering a member is :meth:`register`'s job and
         nobody else's, which is the ruling #775 exists to carry out: *"so that
         we dont create registered enums out of unrecognised/unregistered
         values, unless user/caller explicitly created them"*. A value inside a
         registry's declared-but-unassigned range still resolves, through that
         registry's own ``_missing_`` and :meth:`_unregistered_member`, to a
-        member that is deliberately absent from the lookup tables.
+        member that is deliberately absent from the lookup tables -- for a
+        non-``str`` key; the ``str`` case is qualified below.
+
+        For a ``str`` key, a name match wins over a value match -- the two are
+        checked in that order, so a string that happens to be both a member's
+        name and a *different* member's value resolves to the name's member,
+        matching what already happened for a name that resolves today. The
+        value side of that check is a plain ``_value2member_map_`` lookup, not
+        ``cls(key)``: on a registry whose own ``_missing_`` mints for an
+        unrecognised value -- :class:`~pcapkit.const.ftp.command.FEATCode`'s
+        does, directly, via :func:`~aenum.extend_enum` -- routing a failed
+        *name* lookup through the constructor would let a mere ``get()`` call
+        mint a permanent member where it previously just raised. Restricting
+        the value side of ``key`` to an already-registered value keeps *that
+        side* non-minting on every ``str``-valued registry, not only the ones
+        without a minting ``_missing_`` -- it is a claim about the value side
+        alone, not about this method as a whole: an unregistered ``default``
+        still reaches ``cls(default)`` below, and can mint there just the same.
+
+        That restriction has a cost the paragraph above glosses over: a
+        *declared-but-unassigned* value -- the case resolved there through
+        ``_missing_`` and :meth:`_unregistered_member` without either lookup
+        table growing -- is for that exact reason invisible to the
+        ``_value2member_map_`` check above. Such a value resolves through
+        ``cls(value)`` but not through ``get(value)`` when ``value`` is a
+        ``str``; the non-``str`` path below has no such gap, since it always
+        calls ``cls(key)`` and so always reaches ``_missing_``. Closing that
+        gap here would mean calling ``cls(key)`` for a ``str`` value too,
+        which reopens the exact minting hazard the paragraph above exists to
+        avoid -- so the asymmetry is deliberate, not an oversight.
 
         Args:
             key: Name or value to look up.
@@ -292,6 +322,8 @@ class EnumRegistry:
             try:
                 return cls._member_map_[key]
             except KeyError:
+                if key in cls._value2member_map_:
+                    return cls._value2member_map_[key]
                 if default is NO_DEFAULT:
                     raise
                 return cls(default)  # type: ignore[call-arg]
