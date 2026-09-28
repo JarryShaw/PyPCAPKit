@@ -700,9 +700,13 @@
 
 <span class="c1">#: Range names from :data:`RANGES` above that name an allocation *policy* for</span>
 <span class="c1">#: the pool (who may claim a code, or that nobody has) rather than a specific</span>
-<span class="c1">#: assigned protocol -- the owner's ruling on #775/#847. ``Registered by</span>
-<span class="c1">#: Xerox`` stays a mint: it is a real ownership fact, not a placeholder, and</span>
-<span class="c1">#: kept notation for the reader is what only these four are.</span>
+<span class="c1">#: assigned protocol. The owner's original ruling on #775/#847 held</span>
+<span class="c1">#: ``Registered by Xerox`` out of this set as a real ownership fact rather</span>
+<span class="c1">#: than a placeholder. #775's final round converts it too, so this set no</span>
+<span class="c1">#: longer decides *whether* a range registers -- only *how its name is</span>
+<span class="c1">#: spelled*: these four keep the bare label with no hex suffix, since the</span>
+<span class="c1">#: label itself already says nothing was assigned, while ``Registered by</span>
+<span class="c1">#: Xerox`` keeps the hex-suffixed name it always rendered.</span>
 <span class="n">UNASSIGNED_RANGE_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
     <span class="s1">'Experimental'</span><span class="p">,</span>
     <span class="s1">'Dynamically Assigned Socket Numbers'</span><span class="p">,</span>
@@ -769,7 +773,7 @@
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">UNASSIGNED_RANGE_NAMES</span><span class="p">:</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">')"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4))"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

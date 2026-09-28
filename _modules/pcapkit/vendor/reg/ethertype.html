@@ -485,12 +485,16 @@
     <span class="c1">#: Row labels that the historical Neil Sembower list itself marks as</span>
     <span class="c1">#: carrying no real assignment -- a company holding the block but naming</span>
     <span class="c1">#: nothing (``DEC Unassigned``), or a range the list says is dead/invalid</span>
-    <span class="c1">#: outright -- rather than a proprietary protocol's real name. Per the</span>
-    <span class="c1">#: owner's ruling on #775/#847: a proprietary protocol's company name IS</span>
-    <span class="c1">#: the final concrete name (no public name will ever exist), so every</span>
-    <span class="c1">#: *other* row here still mints; only these read as notation for the</span>
-    <span class="c1">#: reader and get a throwaway :meth:`~pcapkit.corekit.enum.EnumRegistry.</span>
-    <span class="c1">#: _unregistered_member` instead.</span>
+    <span class="c1">#: outright -- rather than a proprietary protocol's real name. The owner's</span>
+    <span class="c1">#: original ruling on #775/#847 held these two out as the only rows to</span>
+    <span class="c1">#: convert to :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_</span>
+    <span class="c1">#: member`, on the theory that a proprietary protocol's company name IS</span>
+    <span class="c1">#: the final concrete name for every other row. #775's final round</span>
+    <span class="c1">#: converts every row alike, so this set no longer decides *whether* a</span>
+    <span class="c1">#: row registers -- only *how its name is spelled*: these two keep the</span>
+    <span class="c1">#: bare label with no hex suffix, since the label itself already says</span>
+    <span class="c1">#: nothing was assigned, while every other row keeps the hex-suffixed</span>
+    <span class="c1">#: name it always rendered.</span>
     <span class="n">UNASSIGNED_ROW_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
         <span class="s1">'DEC Unassigned'</span><span class="p">,</span>
         <span class="s1">'Old Xerox Experimental values. Invalid as an Ethertype since 1983.'</span><span class="p">,</span>
@@ -607,7 +611,7 @@
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNASSIGNED_ROW_NAMES</span><span class="p">:</span>
                     <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">')"</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4), value)"</span><span class="p">)</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                    <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return cls._unregistered_member(value, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_0x%s' % hex(value)[2:].upper().zfill(4))"</span><span class="p">)</span>  <span class="c1"># pylint: disable=line-too-long</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_insert_range</span><span class="p">(</span><span class="n">ranges</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span> <span class="n">block</span><span class="p">))</span>
 
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">ranges</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">block</span><span class="p">]</span>  <span class="c1"># type: list[str]</span>
