@@ -909,7 +909,8 @@
 
 <div class="viewcode-block" id="Vendor._dest_path">
 <a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor._dest_path">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_dest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dest_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve the ``const/`` file this crawler's module mirrors.</span>
 
 <span class="sd">        :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`</span>
@@ -949,11 +950,22 @@
 <span class="sd">        ``sys.exit(SomeCrawler())``, so running one from a second checkout, or</span>
 <span class="sd">        from a module that never sits under ``vendor/`` at all, resolves</span>
 <span class="sd">        :mod:`pcapkit.vendor` from wherever it is installed while</span>
-<span class="sd">        ``inspect.getfile(type(self))`` names a file elsewhere entirely --  and</span>
+<span class="sd">        ``inspect.getfile(cls)`` names a file elsewhere entirely --  and</span>
 <span class="sd">        ``Vendor.__init__`` then opens that path with ``'w'``, silently</span>
 <span class="sd">        truncating whatever :attr:`~Vendor.__module__` actually names instead of</span>
 <span class="sd">        raising. So the escape is rejected outright, rather than trusted to</span>
 <span class="sd">        produce a harmless-looking wrong path.</span>
+
+<span class="sd">        This is a classmethod, not an instance method, deliberately: nothing</span>
+<span class="sd">        in the body ever needed instance state -- it only ever consulted</span>
+<span class="sd">        ``type(self)``, so ``cls`` is exactly that, with no instance required</span>
+<span class="sd">        to obtain it. That lets a caller resolve a crawler's destination</span>
+<span class="sd">        *without* instantiating it, and so without triggering</span>
+<span class="sd">        :meth:`Vendor.__init__`'s network fetch, render and write --</span>
+<span class="sd">        :func:`pcapkit.vendor.__main__.run`'s pre-run snapshot (GitHub issue</span>
+<span class="sd">        #872) is exactly such a caller. Every crawler defined in this</span>
+<span class="sd">        codebase inherits this implementation unchanged; none overrides</span>
+<span class="sd">        ``_dest_path``, so the classmethod is authoritative for all of them.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Absolute path of the constant module this crawler should write.</span>
@@ -967,7 +979,7 @@
         <span class="kn">import</span><span class="w"> </span><span class="nn">pcapkit.vendor</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="n">vendor_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">pcapkit</span><span class="o">.</span><span class="n">vendor</span><span class="o">.</span><span class="vm">__file__</span><span class="p">))</span>
-        <span class="n">module_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">module_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
         <span class="n">rel_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">module_file</span><span class="p">,</span> <span class="n">vendor_root</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">:</span>

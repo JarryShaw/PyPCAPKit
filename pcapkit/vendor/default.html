@@ -678,7 +678,7 @@ rather than printing instructions nobody will read. See #522.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.vendor.default.Vendor._dest_path">
-<span class="sig-name descname"><span class="pre">_dest_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#Vendor._dest_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor._dest_path" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_dest_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/default.html#Vendor._dest_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor._dest_path" title="Link to this definition">¶</a></dt>
 <dd><p>Resolve the <code class="docutils literal notranslate"><span class="pre">const/</span></code> file this crawler’s module mirrors.</p>
 <p><code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> sits somewhere under the <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>
 package – today always exactly one level down, e.g.
@@ -713,11 +713,21 @@ out to <code class="docutils literal notranslate"><span class="pre">m</span></co
 <code class="docutils literal notranslate"><span class="pre">sys.exit(SomeCrawler())</span></code>, so running one from a second checkout, or
 from a module that never sits under <code class="docutils literal notranslate"><span class="pre">vendor/</span></code> at all, resolves
 <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> from wherever it is installed while
-<code class="docutils literal notranslate"><span class="pre">inspect.getfile(type(self))</span></code> names a file elsewhere entirely –  and
+<code class="docutils literal notranslate"><span class="pre">inspect.getfile(cls)</span></code> names a file elsewhere entirely –  and
 <code class="docutils literal notranslate"><span class="pre">Vendor.__init__</span></code> then opens that path with <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, silently
 truncating whatever <code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> actually names instead of
 raising. So the escape is rejected outright, rather than trusted to
 produce a harmless-looking wrong path.</p>
+<p>This is a classmethod, not an instance method, deliberately: nothing
+in the body ever needed instance state – it only ever consulted
+<code class="docutils literal notranslate"><span class="pre">type(self)</span></code>, so <code class="docutils literal notranslate"><span class="pre">cls</span></code> is exactly that, with no instance required
+to obtain it. That lets a caller resolve a crawler’s destination
+<em>without</em> instantiating it, and so without triggering
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Vendor.__init__()</span></code>’s network fetch, render and write –
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.vendor.__main__.run()</span></code>’s pre-run snapshot (GitHub issue
+#872) is exactly such a caller. Every crawler defined in this
+codebase inherits this implementation unchanged; none overrides
+<code class="docutils literal notranslate"><span class="pre">_dest_path</span></code>, so the classmethod is authoritative for all of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
