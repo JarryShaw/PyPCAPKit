@@ -85,24 +85,43 @@ restores it afterwards. It asserts on the *reported* error
 (:meth:`~unittest.TestCase.assertWarnsRegex` against the crawler's own
 ``RuntimeError`` text) rather than merely on ``run()`` returning falsy,
 deliberately: a mutant that deletes the ``raise`` from
-``_snapshot_and_restore``'s ``except BaseException:`` clause still returns a
-falsy ``run()`` -- the ``os.remove(backup)`` that then runs unguarded raises
-:exc:`FileNotFoundError` (the backup was just renamed away by
-``os.replace``), which ``run()`` dutifully reports *instead of* the
-crawler's own error -- so the return value alone cannot tell "failed for the
-right reason" from "failed for the wrong one", and a bare
-``assertFalse(run(...))`` passed on that mutant. It also asserts the
-destination's mode (``0o640`` in, ``0o640`` out) alongside its content,
-which is the measurement that actually justifies collapsing rounds 6-8's
-three separate mode-permutation tests into one: restore preserves mode as a
-side effect of :func:`shutil.copy2` plus a rename, for every case alike,
-rather than needing a case-by-case check. Run against both of
-:mod:`pcapkit.vendor.__main__` and :mod:`pcapkit.vendor.default` taken from
-``origin/main`` (swapping only one of the two leaves the other's fix in
-place and proves nothing -- see GitHub issue #872's own round 8), this
-fails on the content assertion with ``'' != 'GOOD CONTENT\\n'``: the
+``_snapshot_and_restore``'s ``except BaseException:`` clause does not
+merely misreport the failure, it makes it disappear. Because
+:func:`contextlib.contextmanager`'s generated ``__exit__`` suppresses an
+exception its generator catches and does not re-raise,
+:meth:`Vendor.__init__`'s ``RuntimeError`` never reaches ``run()``'s own
+``except Exception as error:`` at all under that mutant -- no warning, no
+stderr line, and ``run()`` returns :data:`True`. A bare
+``assertFalse(run(...))`` cannot catch a return value that flips to *true*;
+only asserting that the crawler's own error was actually reported can. It
+also asserts the destination's mode (``0o640`` in, ``0o640`` out) alongside
+its content, which is the measurement that actually justifies collapsing
+rounds 6-8's three separate mode-permutation tests into one: restore
+preserves mode as a side effect of :func:`shutil.copy2` plus a rename, for
+every case alike, rather than needing a case-by-case check. Run against
+both of :mod:`pcapkit.vendor.__main__` and :mod:`pcapkit.vendor.default`
+taken from ``origin/main`` (swapping only one of the two leaves the other's
+fix in place and proves nothing -- see GitHub issue #872's own round 8),
+this fails on the content assertion with ``'' != 'GOOD CONTENT\\n'``: the
 previous content is destroyed before ``run()`` (pre-#872) ever gets a
 chance to report anything.
+
+:meth:`SnapshotRestoreTests.test_a_keyboard_interrupt_still_restores_and_propagates`
+pins ``except BaseException:`` itself, rather than the narrower
+``except Exception:`` a reasonable-looking edit might reach for.
+:exc:`KeyboardInterrupt` is a :exc:`BaseException` but not an
+:exc:`Exception`, so it is what actually exercises the difference: under an
+``except Exception:`` mutant it falls straight through
+``_snapshot_and_restore``'s generator uncaught, skipping both the restore
+and the backup's cleanup -- the previous content stays truncated and a
+``.const.py.*.bak`` is left behind in the directory, measured directly as
+``['.const.py.<random>.bak', 'const.py']``. The interrupt itself still
+propagates out of ``run()`` either way, since ``run()``'s own
+``except Exception:`` never caught it either; what the mutant changes is
+only whether anything got restored on the way out. This is why the method
+asserts three things rather than two: the exception's propagation, the
+content, and the directory listing -- the first alone is silent about
+exactly the defect this pins.
 
 :meth:`SnapshotRestoreTests.test_a_read_only_destination_is_left_exactly_as_it_was`
 re-measures the ``0o444`` case under the new design rather than assuming it
@@ -283,6 +302,42 @@ class SnapshotRestoreTests(unittest.TestCase):
                          f'failed run, not {oct(mode)}')
         self.assertEqual(os.listdir(self._tempdir.name), ['const.py'],
                          'a failed run must not leave a backup file behind')
+
+    def test_a_keyboard_interrupt_still_restores_and_propagates(self) -> None:
+        const_file = os.path.join(self._tempdir.name, 'const.py')
+        with open(const_file, 'w', encoding='utf-8') as file:
+            file.write('GOOD CONTENT\n')
+
+        stub_crawler = self._make_crawler(const_file, 'NEW CONTENT')
+
+        real_print = print
+
+        def _interrupt_on_render(*args: object, **kwargs: object) -> None:
+            if args and args[0] == 'NEW CONTENT':
+                raise KeyboardInterrupt
+            real_print(*args, **kwargs)
+
+        # except BaseException:, not except Exception:, is what this pins.
+        # KeyboardInterrupt is a BaseException but not an Exception, so an
+        # `except Exception:` mutant would let it fall straight through
+        # _snapshot_and_restore's generator uncaught -- no os.replace(),
+        # no cleanup, the truncated file and the orphaned backup both left
+        # behind. run()'s own `except Exception as error:` does not catch
+        # KeyboardInterrupt either (deliberately -- a signal to stop is not
+        # a target failure to report and swallow), so it must still
+        # propagate all the way out of run() rather than being converted
+        # into a plain False return.
+        with mock.patch('builtins.print', side_effect=_interrupt_on_render):
+            with self.assertRaises(KeyboardInterrupt):
+                self.vendor_main.run(stub_crawler)
+
+        with open(const_file, encoding='utf-8') as file:
+            self.assertEqual(file.read(), 'GOOD CONTENT\n',
+                             'a KeyboardInterrupt mid-write must still leave the previous '
+                             'const file byte-for-byte untouched, not truncated or '
+                             'partially overwritten')
+        self.assertEqual(os.listdir(self._tempdir.name), ['const.py'],
+                         'a KeyboardInterrupt must not leave an orphaned backup file behind')
 
     def test_a_read_only_destination_is_left_exactly_as_it_was(self) -> None:
         const_file = os.path.join(self._tempdir.name, 'const.py')
