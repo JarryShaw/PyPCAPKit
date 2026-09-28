@@ -27,7 +27,7 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast, overload
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
 from pcapkit.const.mh.ack_status_code import ACKStatusCode as Enum_ACKStatusCode
@@ -487,7 +487,7 @@ from pcapkit.protocols.schema.internet.mh import \
     UpdateNotificationMessage as Schema_UpdateNotificationMessage
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -582,6 +582,25 @@ class FastBindingAcknowledgmentStatus(IntEnum):
         *incorrect interface identifier length* here but *home registration not
         supported* there.
 
+        The enumeration is **closed**: an in-range value :rfc:`5568` leaves
+        unassigned is not minted a placeholder member. Per the owner's ruling
+        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        instead of extending the class. That is not a capture-level failure
+        -- sibling frames are unaffected -- but the cost is bigger than one
+        message. Mobility Header is itself one of IPv6's own chained
+        extension headers, and IPv6's own extension-header walk then does
+        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
+        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
+        fallback's info carries no ``.next``. That :exc:`AttributeError`,
+        not this exception, is what a further-out ``@beholder`` actually
+        catches -- degrading the **whole IPv6 packet**, header fields
+        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
+        just this one MH message. The walk defect predates this change and
+        already fires on a malformed extension header; a well-formed packet
+        naming merely an unassigned byte is simply a more likely way to
+        reach it. See GitHub issue #880.
+
     """
 
     #: Fast Binding Update accepted [:rfc:`5568#section-6.2.3`]
@@ -604,32 +623,47 @@ class FastBindingAcknowledgmentStatus(IntEnum):
     Incorrect_interface_identifier_length = 131
 
     @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'FastBindingAcknowledgmentStatus':
+    def get(key: 'int | str') -> 'FastBindingAcknowledgmentStatus':
         """Backport support for original codes.
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+
+        Returns:
+            The matching member.
+
+        Raises:
+            EnumValueError: If ``key`` names no member -- raised for an
+                unknown name the same way :meth:`_missing_` raises for an
+                unknown value, so the two ways of getting this wrong do not
+                report differently. There is no ``default`` parameter: this
+                enumeration cannot grow, so a default that could only ever be
+                ignored would be worse than one that is absent.
 
         """
         if isinstance(key, int):
             return FastBindingAcknowledgmentStatus(key)
-        if key not in FastBindingAcknowledgmentStatus._member_map_:  # pylint: disable=no-member
-            extend_enum(FastBindingAcknowledgmentStatus, key, default)
-        return FastBindingAcknowledgmentStatus[key]  # type: ignore[misc]
+        try:
+            return FastBindingAcknowledgmentStatus[key]  # type: ignore[misc]
+        except KeyError:
+            raise EnumValueError('%r is not a valid %s' %
+                                 (key, FastBindingAcknowledgmentStatus.__name__)) from None
 
     @classmethod
-    def _missing_(cls, value: 'int') -> 'FastBindingAcknowledgmentStatus':
+    def _missing_(cls, value: 'int') -> 'NoReturn':
         """Lookup function used when value is not found.
 
         Args:
             value: Value to get enum item.
 
+        Raises:
+            EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value
+                set inline with no IANA registry behind it, and the owner's
+                ruling on GitHub issue #877 is that it stays immutable rather
+                than minting an ``Unassigned_N`` placeholder member.
+
         """
-        if not (isinstance(value, int) and 0 <= value <= 255):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
 class IPv6AddressPrefixCode(IntEnum):
@@ -645,6 +679,25 @@ class IPv6AddressPrefixCode(IntEnum):
         :mod:`pcapkit.const.mh`. The identical code space of the neighbor
         discovery IP address/prefix option of :rfc:`5568#section-6.4.1` is
         likewise unregistered.
+
+        The enumeration is **closed**: an in-range value :rfc:`5568` leaves
+        unassigned is not minted a placeholder member. Per the owner's ruling
+        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        instead of extending the class. That is not a capture-level failure
+        -- sibling frames are unaffected -- but the cost is bigger than one
+        message. Mobility Header is itself one of IPv6's own chained
+        extension headers, and IPv6's own extension-header walk then does
+        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
+        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
+        fallback's info carries no ``.next``. That :exc:`AttributeError`,
+        not this exception, is what a further-out ``@beholder`` actually
+        catches -- degrading the **whole IPv6 packet**, header fields
+        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
+        just this one MH message. The walk defect predates this change and
+        already fires on a malformed extension header; a well-formed packet
+        naming merely an unassigned byte is simply a more likely way to
+        reach it. See GitHub issue #880.
 
     """
 
@@ -662,32 +715,47 @@ class IPv6AddressPrefixCode(IntEnum):
     NAR_Prefix = 4
 
     @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'IPv6AddressPrefixCode':
+    def get(key: 'int | str') -> 'IPv6AddressPrefixCode':
         """Backport support for original codes.
 
         Args:
             key: Key to get enum item.
-            default: Default value if not found.
+
+        Returns:
+            The matching member.
+
+        Raises:
+            EnumValueError: If ``key`` names no member -- raised for an
+                unknown name the same way :meth:`_missing_` raises for an
+                unknown value, so the two ways of getting this wrong do not
+                report differently. There is no ``default`` parameter: this
+                enumeration cannot grow, so a default that could only ever be
+                ignored would be worse than one that is absent.
 
         """
         if isinstance(key, int):
             return IPv6AddressPrefixCode(key)
-        if key not in IPv6AddressPrefixCode._member_map_:  # pylint: disable=no-member
-            extend_enum(IPv6AddressPrefixCode, key, default)
-        return IPv6AddressPrefixCode[key]  # type: ignore[misc]
+        try:
+            return IPv6AddressPrefixCode[key]  # type: ignore[misc]
+        except KeyError:
+            raise EnumValueError('%r is not a valid %s' %
+                                 (key, IPv6AddressPrefixCode.__name__)) from None
 
     @classmethod
-    def _missing_(cls, value: 'int') -> 'IPv6AddressPrefixCode':
+    def _missing_(cls, value: 'int') -> 'NoReturn':
         """Lookup function used when value is not found.
 
         Args:
             value: Value to get enum item.
 
+        Raises:
+            EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value
+                set inline with no IANA registry behind it, and the owner's
+                ruling on GitHub issue #877 is that it stays immutable rather
+                than minting an ``Unassigned_N`` placeholder member.
+
         """
-        if not (isinstance(value, int) and 0 <= value <= 255):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
 class LocalizedRoutingStatus(IntEnum):
@@ -705,6 +773,31 @@ class LocalizedRoutingStatus(IntEnum):
         registered :class:`~pcapkit.const.mh.status_code.StatusCode`, whose
         ``128`` and ``129`` mean something else entirely.
 
+        The enumeration is **closed**: an in-range value :rfc:`6705` leaves
+        unassigned is not minted a placeholder member. Per the owner's ruling
+        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        instead of extending the class. That is not a capture-level failure
+        -- sibling frames are unaffected -- but the cost is bigger than one
+        message. Mobility Header is itself one of IPv6's own chained
+        extension headers, and IPv6's own extension-header walk then does
+        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
+        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
+        fallback's info carries no ``.next``. That :exc:`AttributeError`,
+        not this exception, is what a further-out ``@beholder`` actually
+        catches -- degrading the **whole IPv6 packet**, header fields
+        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
+        just this one MH message. The walk defect predates this change and
+        already fires on a malformed extension header; a well-formed packet
+        naming merely an unassigned byte is simply a more likely way to
+        reach it. See GitHub issue #880.
+
+        There is no ``get()`` backport here, unlike
+        :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests
+        included -- so GitHub issue #880 deleted it outright rather than
+        rebuilding it on the immutable contract.
+
     """
 
     #: Success [:rfc:`6705#section-10.2`]
@@ -716,33 +809,21 @@ class LocalizedRoutingStatus(IntEnum):
     #: MN Not Attached [:rfc:`6705#section-10.2`]
     MN_Not_Attached = 129
 
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'LocalizedRoutingStatus':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found.
-
-        """
-        if isinstance(key, int):
-            return LocalizedRoutingStatus(key)
-        if key not in LocalizedRoutingStatus._member_map_:  # pylint: disable=no-member
-            extend_enum(LocalizedRoutingStatus, key, default)
-        return LocalizedRoutingStatus[key]  # type: ignore[misc]
-
     @classmethod
-    def _missing_(cls, value: 'int') -> 'LocalizedRoutingStatus':
+    def _missing_(cls, value: 'int') -> 'NoReturn':
         """Lookup function used when value is not found.
 
         Args:
             value: Value to get enum item.
 
+        Raises:
+            EnumValueError: Always. :rfc:`6705#section-10.2` names this value
+                set inline with no IANA registry behind it, and the owner's
+                ruling on GitHub issue #877 is that it stays immutable rather
+                than minting an ``Unassigned_N`` placeholder member.
+
         """
-        if not (isinstance(value, int) and 0 <= value <= 255):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
 class LMAAddressCode(IntEnum):
@@ -756,6 +837,31 @@ class LMAAddressCode(IntEnum):
         registry of them, so the enumeration lives here rather than in
         :mod:`pcapkit.const.mh`.
 
+        The enumeration is **closed**: an in-range value :rfc:`5949` leaves
+        unassigned is not minted a placeholder member. Per the owner's ruling
+        on GitHub issue #877, this RFC-inline value set stays immutable, so
+        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        instead of extending the class. That is not a capture-level failure
+        -- sibling frames are unaffected -- but the cost is bigger than one
+        message. Mobility Header is itself one of IPv6's own chained
+        extension headers, and IPv6's own extension-header walk then does
+        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line
+        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``
+        fallback's info carries no ``.next``. That :exc:`AttributeError`,
+        not this exception, is what a further-out ``@beholder`` actually
+        catches -- degrading the **whole IPv6 packet**, header fields
+        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than
+        just this one MH message. The walk defect predates this change and
+        already fires on a malformed extension header; a well-formed packet
+        naming merely an unassigned byte is simply a more likely way to
+        reach it. See GitHub issue #880.
+
+        There is no ``get()`` backport here, unlike
+        :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests
+        included -- so GitHub issue #880 deleted it outright rather than
+        rebuilding it on the immutable contract.
+
     """
 
     #: Reserved [:rfc:`5949#section-6.2.2`]
@@ -767,33 +873,21 @@ class LMAAddressCode(IntEnum):
     #: IPv4 local mobility anchor address [:rfc:`5949#section-6.2.2`]
     IPv4_LMAA = 2
 
-    @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'LMAAddressCode':
-        """Backport support for original codes.
-
-        Args:
-            key: Key to get enum item.
-            default: Default value if not found.
-
-        """
-        if isinstance(key, int):
-            return LMAAddressCode(key)
-        if key not in LMAAddressCode._member_map_:  # pylint: disable=no-member
-            extend_enum(LMAAddressCode, key, default)
-        return LMAAddressCode[key]  # type: ignore[misc]
-
     @classmethod
-    def _missing_(cls, value: 'int') -> 'LMAAddressCode':
+    def _missing_(cls, value: 'int') -> 'NoReturn':
         """Lookup function used when value is not found.
 
         Args:
             value: Value to get enum item.
 
+        Raises:
+            EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value
+                set inline with no IANA registry behind it, and the owner's
+                ruling on GitHub issue #877 is that it stays immutable rather
+                than minting an ``Unassigned_N`` placeholder member.
+
         """
-        if not (isinstance(value, int) and 0 <= value <= 255):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        #: Unassigned
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
 class MH(Internet[Data_MH, Schema_MH],
