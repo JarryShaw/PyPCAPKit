@@ -3102,6 +3102,29 @@ since -- reaching #805 by the entries below.
   ``Registered by Xerox`` under Mint by the time this PR landed: two prior
   commits corrected them, ``dbae27548`` and ``6b333d7e4``, the second of which
   is this PR's own merge-commit parent (#861).
+* **Fixed** -- ``EnumRegistry.get()``'s ``str``-key branch tried only a name
+  lookup (``cls._member_map_[key]``) and, on a miss, either raised or returned
+  ``cls(default)`` -- it never tried the *value* path at all, so on a
+  ``StrEnum`` registry a key that resolved fine through the constructor
+  (``_Str('known-value')``) raised ``KeyError`` through ``get()``
+  (``_Str.get('known-value')``), and a supplied ``default`` compounded it by
+  overriding a good value match the code never attempted. Fixed by falling back
+  to a plain ``_value2member_map_`` lookup once the name lookup misses and
+  before consulting ``default``. Deliberately not ``cls(key)``:
+  ``FEATCode._missing_`` (``pcapkit/const/ftp/command.py``) mints directly via
+  ``extend_enum`` for any unrecognised string, so routing the fallback through
+  the constructor would let a failed name lookup mint a permanent member the
+  moment a registry like it converts onto this base -- a dict lookup never
+  reaches ``_missing_`` and so cannot mint, on any registry. A name still wins
+  when a string is both a name and a different member's value, matching the
+  existing behaviour for names that already resolve. Step 1 of #860 only; step
+  2, converting the bespoke registries themselves, follows separately (#869,
+  #874, below). Not touched: the ``IntEnum``/``IntFlag`` non-``str`` path,
+  measured identical before and after on both ``TransType`` and
+  ``HandoverACKFlag``; nothing under ``pcapkit/const/`` or ``pcapkit/vendor/``.
+  Widens rather than breaks -- a call that raised ``KeyError`` before now
+  resolves, and no caller that got a correct result before gets a different one
+  now (#863).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
