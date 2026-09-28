@@ -71,8 +71,17 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     ``_dest_path`` genuinely cannot be resolved without instance state --
     the snapshot is skipped and ``vendor()`` runs unprotected, exactly as it
     always did; not being able to *name* the file is not itself a reason to
-    fail the target, and this crawler goes on to fail loudly anyway once
-    :meth:`Vendor.__init__` calls the same ``_dest_path`` itself.
+    fail the target. The two triggers diverge from there. A crawler outside
+    the real tree fails loudly anyway: :meth:`Vendor.__init__` calls the
+    exact same ``_dest_path`` on itself and hits the exact same resolution
+    failure, so nothing is lost by skipping the snapshot. An instance-method
+    override that needs ``self`` does not fail the same way twice --
+    ``vendor._dest_path()`` raises :exc:`TypeError` on the *class* call this
+    function makes (no ``self`` to bind), but the *instance* call inside
+    ``__init__`` binds ``self`` correctly and resolves fine, so that crawler
+    runs to completion unprotected and **succeeds silently**: ``run()``
+    returns :data:`True`, the file is replaced, and nothing warns that no
+    snapshot was ever taken.
 
     That is one of two ways this function can decline to protect a target,
     and the two are not symmetric. The other is :func:`tempfile.mkstemp`
