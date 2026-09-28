@@ -120,7 +120,66 @@ jobs:
           export PCAPKIT_VENDOR_RETRY=10
           export PCAPKIT_CI_MODE=1
 
-          pcapkit-vendor
+          # `pcapkit-vendor` (#872) exits non-zero if any target raised, and
+          # the owner's ruling on that is: discard a failed sub-vendor's own
+          # changes, keep every zero-exited one's, and never fail the whole
+          # job over it -- the targets that DID succeed still need isort,
+          # diff, commit and push below. `set +e`/`set -e` around the one
+          # command (not a bare `pcapkit-vendor || true`) so $vendor_exit
+          # actually carries the exit code instead of it being thrown away.
+          set +e
+          pcapkit-vendor 2> "$RUNNER_TEMP/vendor-stderr.log"
+          vendor_exit=$?
+          set -e
+
+          # Always replayed into the step log, success or failure: this is
+          # each failing target's qualified name and exception repr (from
+          # __main__.py's run()) plus its VendorRuntimeWarning line, i.e.
+          # exactly what a live, uncaptured `pcapkit-vendor` would have
+          # written to stderr directly. `|| true` deliberately: this line
+          # runs after `set -e` is restored above, and if $RUNNER_TEMP were
+          # ever unset or unwritable the redirect on the previous command
+          # would already have failed to create the log file at all --
+          # `cat` on a missing file returns 1 under `-e` and would abort the
+          # whole step right here, exactly the "one dead crawler kills every
+          # good regeneration" failure mode this PR exists to remove.
+          cat "$RUNNER_TEMP/vendor-stderr.log" >&2 || true
+
+          if [ "$vendor_exit" -ne 0 ]; then
+            # Anchored at the start of the line: the unanchored `failed: `
+            # also matches inside the VendorRuntimeWarning line whenever the
+            # exception's own text happens to contain "failed: " (e.g.
+            # ConnectionError('request failed: 503')), since that line embeds
+            # the same {error!r} __main__.py's run() already put in the
+            # print() line above it -- double-counting one failure as two
+            # ::warning:: annotations. Only the print() line starts with the
+            # bare qualified name; the warning line starts with a file path.
+            failed_targets=$(grep -E '^[A-Za-z_][A-Za-z0-9_.]* failed: ' \
+                                  "$RUNNER_TEMP/vendor-stderr.log" || true)
+
+            {
+              echo "### :warning: \`pcapkit-vendor\` reported failing target(s) (exit $vendor_exit)"
+              echo
+              echo '```'
+              if [ -n "$failed_targets" ]; then
+                echo "$failed_targets"
+              else
+                echo '(no target name could be extracted from stderr; see the step log above)'
+              fi
+              echo '```'
+              echo
+              echo 'Const files from targets that exited zero are still isorted, diffed, committed and pushed below -- only the failing target(s) above were left as they were.'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if [ -n "$failed_targets" ]; then
+              while IFS= read -r line; do
+                echo "::warning title=pcapkit-vendor target failed::${line}"
+              done <<< "$failed_targets"
+            else
+              echo "::warning title=pcapkit-vendor exited $vendor_exit::see the step log above for which target(s) failed"
+            fi
+          fi
+
           # `find -mindepth 2`, not a `pcapkit/const/*/*.py` shell glob (#765):
           # this job runs on `macos-latest`, whose default `bash` on PATH is
           # the system's, unlike the Makefile's own `SHELL := $(shell command

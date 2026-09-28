@@ -430,7 +430,8 @@ class Vendor(metaclass=VendorMeta):
         with open(const_file, 'w') as file:  # pylint: disable=unspecified-encoding
             print(context, file=file)
 
-    def _dest_path(self) -> 'str':
+    @classmethod
+    def _dest_path(cls) -> 'str':
         """Resolve the ``const/`` file this crawler's module mirrors.
 
         :attr:`~Vendor.__module__` sits somewhere under the :mod:`pcapkit.vendor`
@@ -470,11 +471,22 @@ class Vendor(metaclass=VendorMeta):
         ``sys.exit(SomeCrawler())``, so running one from a second checkout, or
         from a module that never sits under ``vendor/`` at all, resolves
         :mod:`pcapkit.vendor` from wherever it is installed while
-        ``inspect.getfile(type(self))`` names a file elsewhere entirely --  and
+        ``inspect.getfile(cls)`` names a file elsewhere entirely --  and
         ``Vendor.__init__`` then opens that path with ``'w'``, silently
         truncating whatever :attr:`~Vendor.__module__` actually names instead of
         raising. So the escape is rejected outright, rather than trusted to
         produce a harmless-looking wrong path.
+
+        This is a classmethod, not an instance method, deliberately: nothing
+        in the body ever needed instance state -- it only ever consulted
+        ``type(self)``, so ``cls`` is exactly that, with no instance required
+        to obtain it. That lets a caller resolve a crawler's destination
+        *without* instantiating it, and so without triggering
+        :meth:`Vendor.__init__`'s network fetch, render and write --
+        :func:`pcapkit.vendor.__main__.run`'s pre-run snapshot (GitHub issue
+        #872) is exactly such a caller. Every crawler defined in this
+        codebase inherits this implementation unchanged; none overrides
+        ``_dest_path``, so the classmethod is authoritative for all of them.
 
         Returns:
             Absolute path of the constant module this crawler should write.
@@ -488,7 +500,7 @@ class Vendor(metaclass=VendorMeta):
         import pcapkit.vendor  # pylint: disable=import-outside-toplevel
 
         vendor_root = os.path.dirname(os.path.abspath(pcapkit.vendor.__file__))
-        module_file = os.path.abspath(inspect.getfile(type(self)))
+        module_file = os.path.abspath(inspect.getfile(cls))
 
         rel_path = os.path.relpath(module_file, vendor_root)
         if rel_path.split(os.sep, 1)[0] == os.pardir:
