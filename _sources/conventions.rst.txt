@@ -61,9 +61,15 @@ Worked examples
 occupies it; the real name arrives with the allocation.
 
 *Mint.* :mod:`pcapkit.const.reg.ethertype`'s company names -- ``Xyplex``,
-``Datability``, ``Qualcomm``, ``Motorola`` and some forty-five others -- and, in the
-same file's neighbour, :mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A
-company name is the assignment, for the reason in the next section.
+``Datability``, ``Qualcomm``, ``Motorola`` and forty-two others, 46 names across 50
+range blocks, since four of them hold two blocks each -- and, in the same file's
+neighbour, :mod:`pcapkit.const.ipx.socket`'s ``Registered by Xerox``. A company name
+is the assignment, for the reason in the next section.
+
+Two further ranges in that file mint without being company names at all:
+``IEEE802.3 Length Field``, which names a field in a standard, and
+``Berkeley Trailer encap/IP``, which names an encapsulation. Both are outside the 46,
+and neither mints for the reason the next section gives.
 
 .. note::
 
