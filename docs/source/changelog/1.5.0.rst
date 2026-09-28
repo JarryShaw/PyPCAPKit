@@ -3066,6 +3066,42 @@ since -- reaching #805 by the entries below.
   ``pcapkit/corekit/enums.py`` to **``enum.py``** (no ``-s``), the maintainer's
   ruling. Five of the 105 hand-edited files were independently regenerated live
   and came back byte-identical (#858).
+* **Fixed** -- **a breaking change to** 82 more const registries'
+  ``_missing_``: applies the owner's mint/unmint ruling (settled on #847,
+  confirmed on #775 -- *"a final concrete assigned name -> mint; a notation for
+  the readers -> unmint"*) across every one of the 89 ``_missing_`` files still
+  calling ``extend_enum`` on this tree. 80 registries convert wholly (164
+  branches) -- each mints a bare status word (``Unassigned``,
+  ``Reserved [...]``, ``Reserved for Private/Experimental Use``,
+  ``Unspecified in the IANA registry``, ``Deprecated`` and similar), which the
+  ruling treats as a notation for the reader rather than an assignment. Two are
+  mixed: ``EtherType``'s ``DEC Unassigned`` (3 branches) and its "Old Xerox
+  Experimental values. Invalid as an Ethertype since 1983." branch (1) convert,
+  while 46 attributed vendor-company names across 50 range blocks (Xyplex,
+  Motorola, Walker Richer & Quinn and 43 more) keep minting, since a
+  proprietary protocol has no public name beyond the company's -- two more of
+  the surviving branches, ``IEEE802_3_Length_Field`` and
+  ``Berkeley_Trailer_encap_IP``, keep minting too but are not company names and
+  so are not part of that count; ``Socket`` (ipx)'s ``Experimental``,
+  ``Dynamically Assigned Socket Numbers``,
+  ``Statically Assigned Socket Numbers`` and ``Dynamically Assigned`` convert
+  -- each names an allocation policy, not a specific assignment -- while
+  ``Registered by Xerox`` keeps minting, a real ownership fact. 7 of the 89 are
+  left alone: ``CGAType``'s ``Tag_<hex>`` mint is not an IANA-style range at
+  all, and the other 6 files sit on 9 classes not yet on ``EnumRegistry``
+  (``AppType``, ``StatusCode``, ``ftp.return_code``, ``ftp.command``,
+  ``Method``, ``OptionType``), blocked on #859/#860. Each conversion touches
+  both the vendor crawler and the generated ``const`` file, per #838's and
+  #858's precedent; verified byte-identical regeneration on a 5-file sample
+  spanning both crawler shapes and both mixed registries (``ipv4/tos_del.py``,
+  ``ipx/socket.py``, ``reg/ethertype.py``, ``mh/access_type.py``,
+  ``mh/status_code.py``). Fixed collateral breakage this caused in three
+  sibling test files that had pinned the pre-ruling mint behaviour for
+  ``ProtectionAuthority``, ``TransType`` and four of ``Socket``'s ranges.
+  ``docs/source/conventions.rst``'s worked examples already agreed with keeping
+  ``Registered by Xerox`` under Mint by the time this PR landed: two prior
+  commits corrected them, ``dbae27548`` and ``6b333d7e4``, the second of which
+  is this PR's own merge-commit parent (#861).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
