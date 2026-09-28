@@ -3387,6 +3387,39 @@ since -- reaching #805 by the entries below.
   (harmless, since the path still exists and ``copy2`` reopens it) and the
   semantically-identical unindented-statement form of the same ``else:``, which
   no test can distinguish from the current one. Closes #875 (#876).
+* **Fixed** -- closes the remaining scope of #775: ``EtherType`` (52 branches)
+  and ``Socket`` (1) were the last two registries whose ``_missing_`` still
+  minted a permanent member for an unrecognised value; both now return a
+  non-registering ``cls._unregistered_member(value, name)``. The same AST walk
+  the issue originally used, counting ``extend_enum`` inside
+  ``_missing_``/``get`` across every class in ``pcapkit/const/``, goes from 54
+  sites (52 in ``reg/ethertype.py``, 1 each in ``ipx/socket.py`` and
+  ``mh/cga_type.py``) to the single ``CGAType`` carve-out that remains a
+  deliberate exception (its mint is not an IANA-style range at all) -- taking
+  the issue from its original 1,169 sites to that one. Measured both
+  directions: before, ``EtherType(0x0888)`` grew ``__members__`` from 160 to
+  161 and a repeat lookup returned the identical object; after, it returns
+  ``<EtherType.Xyplex_0x0888: 2184>`` with ``__members__`` unchanged, absent
+  from ``_value2member_map_``, and equal-but-not-identical across lookups --
+  the same shape for ``Socket(0x0010)``. Two asymmetries worth knowing:
+  ``pcapkit/vendor/ipx/socket.py``'s regeneration was verified byte-identical
+  offline, since ``Socket.LINK is None`` means that crawler never touches the
+  network, but ``pcapkit/vendor/reg/ethertype.py``'s live-IANA-CSV fetch is
+  off-limits here, so its correctness rests on a mechanical substitution
+  checked to match exactly 52 lines plus the generator run against the
+  already-committed CSV fixture -- weaker than byte-identity, and disclosed as
+  such. Preserving each branch's existing hex-suffixed name reintroduces the
+  value-derived name shape ``test_const_enum_no_mint.py``'s
+  ``is_manufactured()`` sweep forbids; rather than weakening that predicate, a
+  narrow ``HEX_SUFFIXED_NAME_EXEMPT_PATHS`` covers exactly these two files, on
+  the grounds that the naming collision the check guards against cannot occur
+  once ``_unregistered_member`` never registers. ``pcapkit/corekit/enum.py``'s
+  docstring is corrected from naming three still-minting registries
+  (``EtherType``, ``Socket``, ``CGAType``) to naming ``CGAType`` alone.
+  ``tests/vendor/test_ipx_socket_unit.py`` is not among the tests this
+  falsifies -- its code tokens are unchanged and its ``EXPECTED_MISSING_NAMES``
+  still carries ``0x0010: 'Registered by Xerox_0x0010'`` and still passes,
+  since the name itself is preserved (#878).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
