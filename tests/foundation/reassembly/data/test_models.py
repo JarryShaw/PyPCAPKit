@@ -84,6 +84,27 @@ class ReassemblyDataModelTests(unittest.TestCase):
         # and identity still works, which is what the assertions elsewhere use
         self.assertIs(Completion('complete'), Completion.COMPLETE)
 
+    def test_completion_values_are_pinned(self) -> None:
+        """GitHub issue #884: pin every member's exact value and the member set.
+
+        :class:`~pcapkit.foundation.reassembly.data.data.Completion` was
+        converted from spelled-out literals to ``auto()`` -- which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns
+        ``name.lower()`` and so is value-preserving here -- but a future
+        change to ``_generate_next_value_`` could silently alter these
+        wire-visible strings without this test noticing unless every member
+        and every value is asserted explicitly.
+
+        """
+        from pcapkit.foundation.reassembly.data.data import Completion
+
+        self.assertEqual([member.name for member in Completion],
+                        ['COMPLETE', 'PARTIAL', 'TIMEOUT'])
+
+        self.assertEqual(Completion.COMPLETE, 'complete')
+        self.assertEqual(Completion.PARTIAL, 'partial')
+        self.assertEqual(Completion.TIMEOUT, 'timeout')
+
     def test_tcp_data_models_and_package_aliases(self) -> None:
         from pcapkit.foundation.reassembly.data import (Completion, TCP_Buffer, TCP_Datagram,
                                                         TCP_DatagramID, TCP_Fragment,

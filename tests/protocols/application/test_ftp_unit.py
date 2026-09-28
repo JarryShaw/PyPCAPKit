@@ -63,6 +63,25 @@ class FTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             ftp.read(length=4)
 
+    def test_ftp_type_values_are_pinned(self) -> None:
+        """GitHub issue #884: pin every member's exact value and the member set.
+
+        :class:`~pcapkit.protocols.application.ftp.Type` was converted from
+        spelled-out literals to ``auto()`` -- which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``
+        and so is value-preserving here -- but a future change to
+        ``_generate_next_value_`` could silently alter these wire-visible
+        strings without this test noticing unless every member and every
+        value is asserted explicitly.
+
+        """
+        from pcapkit.protocols.application.ftp import Type
+
+        self.assertEqual([member.name for member in Type], ['REQUEST', 'RESPONSE'])
+
+        self.assertEqual(Type.REQUEST, 'request')
+        self.assertEqual(Type.RESPONSE, 'response')
+
     def test_command_get_is_case_insensitive(self) -> None:
         """``Command.get`` normalised the key it registered but not the key it
         looked up, so the first lowercase command raised ``TypeError`` instead

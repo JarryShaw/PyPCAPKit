@@ -2571,6 +2571,25 @@ class HTTPUnitTests(unittest.TestCase):
         with self.assertRaises(UnsupportedCall):
             DemoApplication._import_next_layer(app, 80)
 
+    def test_httpv1_type_values_are_pinned(self) -> None:
+        """GitHub issue #884: pin every member's exact value and the member set.
+
+        :class:`~pcapkit.protocols.application.httpv1.Type` was converted
+        from spelled-out literals to ``auto()`` -- which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``
+        and so is value-preserving here -- but a future change to
+        ``_generate_next_value_`` could silently alter these wire-visible
+        strings without this test noticing unless every member and every
+        value is asserted explicitly.
+
+        """
+        from pcapkit.protocols.application.httpv1 import Type
+
+        self.assertEqual([member.name for member in Type], ['REQUEST', 'RESPONSE'])
+
+        self.assertEqual(Type.REQUEST, 'request')
+        self.assertEqual(Type.RESPONSE, 'response')
+
 
 if __name__ == '__main__':
     unittest.main()
