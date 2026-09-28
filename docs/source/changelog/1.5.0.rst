@@ -3313,6 +3313,48 @@ since -- reaching #805 by the entries below.
   replaces the previous content, a failure leaves the previous file
   byte-for-byte intact, and a read-only destination is left exactly as it was)
   -- no network calls. Closes #872 (#873).
+* **Fixed** -- **a breaking change to** ``TransportProtocol`` and ``AppType``:
+  step 2 of #860, PR 2 of 2 (the 8 non-``AppType`` bespoke registries were
+  #869, above). Brings ``AppType`` and its four transport subclasses onto
+  ``EnumRegistry`` and stops both of its mint sites -- ``_missing_``'s 766
+  range branches, and ``get()``'s own second, independent mint
+  (``PORT_{port}_{transport}`` -> ``'unknown'``) -- both now building through a
+  new ``_unregistered_member`` override that reconstructs the
+  ``svc``/``port``/``proto`` attributes the base's generic helper does not know
+  about, per the owner's ruling that *"only IANA registered ones are legit
+  values... get will not have sufficient information to create new ones"*. All
+  766+1 branches convert uniformly, including the 8 that name a real service
+  assigned to a whole port span rather than declared individually (7 distinct
+  names, ``x11`` appearing twice: ``x11``, ``active-net``, ``satvid-datalnk``,
+  ``vrml-multi-use``, ``ircu``, ``swx``, ``flex-lm``); unlike ``FEATCode``'s
+  fix (#869, above) there is no import-time self-mutation defect to address by
+  declaring members statically, so these stay deliberately unregistered
+  lookups. ``AppType`` also gains a working ``register()``, previously absent
+  -- the base's generic one would have built a member with ``svc='<null>'`` the
+  moment this class mixed in ``EnumRegistry`` unoverridden, since it calls
+  ``__new__`` with only one positional argument. **The breaking part**:
+  ``TransportProtocol`` moves from power-of-two values
+  (``undefined=0, tcp=1, udp=2, sctp=4, dccp=8``) to sequential ``auto()``
+  (``undefined=0, tcp=1, udp=2, sctp=3, dccp=4``), per the owner's follow-up
+  ruling once ``|``-joined composite values stopped being parsed at all.
+  ``AppType.get``'s ``proto`` parameter treats whatever ``int`` it is given as
+  a whole rather than decoding it, on either numbering, so the renumbering
+  changes what specific integers *mean*, not only what hand-composed ones do --
+  measured on ``AppType.get(80, proto=...)``: a bare ``4`` resolved to
+  ``SCTP.http`` on ``main`` and now **silently** resolves to ``DCCP.unknown``,
+  no exception, because a real member sits at ``4`` under the new numbering
+  too, just a different one; a bare ``8`` used to mint ``DCCP.PORT_80_dccp``
+  and now raises ``ValueError``. The silent-reroute case is the one that
+  matters and is disclosed here rather than only in a code comment, though
+  deliberately left untested for the composed-value case specifically, per the
+  owner's own ruling that it is "an obsoleted path from a breaking change". All
+  five crawlers (``apptype``, ``tcp``, ``udp``, ``sctp``, ``dccp``) regenerate
+  byte-identically on a second run. Fixed 9 existing tests whose bodies pinned
+  the old minting or power-of-two behaviour and added 18 new tests to
+  ``test_const_enum_no_mint.py`` against 1 removed (net +17); 403 test methods
+  pass across ``tests/const/`` and ``tests/protocols/transport/``, plus a
+  further 142 across ``tests/vendor/`` and the other
+  ``TransportProtocol``-consuming suites (#874).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
