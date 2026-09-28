@@ -1436,12 +1436,14 @@ class GetDefaultNoMintTests(unittest.TestCase):
 
         ``0x1234`` (4660) falls in no ``_missing_`` range, so the lookup
         falls to ``default``; ``0x0888`` (2184) falls inside the ``Xyplex``
-        range #775's ruling deliberately kept minting -- but only when
-        reached as a ``key``. Fails on the pre-#864 tree for that reason;
-        passes here because ``default`` no longer reaches ``cls(default)``
-        at all, so ``0x0888`` not being an *already-registered* value
-        propagates the ``0x1234`` lookup's own failure instead of minting
-        anything."""
+        range #775's *original* ruling deliberately kept minting at the
+        time -- but only when reached as a ``key``. (#775's final round has
+        since converted that range too; see
+        :meth:`GetDefaultNoMintTests.test_key_path_minting_is_preserved`.)
+        Fails on the pre-#864 tree for that reason; passes here because
+        ``default`` no longer reaches ``cls(default)`` at all, so ``0x0888``
+        not being an *already-registered* value propagates the ``0x1234``
+        lookup's own failure instead of minting anything."""
         from pcapkit.const.reg.ethertype import EtherType
 
         before = len(EtherType.__members__)
@@ -1457,23 +1459,37 @@ class GetDefaultNoMintTests(unittest.TestCase):
         self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
 
     def test_key_path_minting_is_preserved(self) -> None:
-        """No-change guard: ``EtherType.get(0x0888)`` -- no ``default`` at
-        all -- still mints ``Xyplex_0x0888`` through its own ``_missing_``,
-        exactly as before. Ruling one permits this explicitly (*"get should
-        not mint unless it falls through the _missing_'s minted ranges"*),
-        and #864 closes only the ``default`` path, so this passes on both
-        the pre- and post-#864 tree -- ``key`` resolution is untouched."""
+        """Originally a no-change guard: ``EtherType.get(0x0888)`` -- no
+        ``default`` at all -- used to mint ``Xyplex_0x0888`` through its own
+        ``_missing_``, back when ruling one's mint/unmint criterion
+        (*"get should not mint unless it falls through the _missing_'s
+        minted ranges"*) still classed ``Xyplex`` as a kept-minting,
+        real-attributed-name range. GitHub issue #775's final round converts
+        that range (and every other one still minting on ``EtherType``/
+        :class:`~pcapkit.const.ipx.socket.Socket`) to :meth:`~pcapkit.corekit.
+        enum.EnumRegistry._unregistered_member`, preserving the hex-suffixed
+        name unchanged -- so ``key`` resolution through ``get()`` now goes
+        through the same non-minting path ``_missing_`` always did for this
+        value, and the guard flips to prove that rather than the opposite.
+        #864's own point -- that ``default`` never reaches ``_missing_`` at
+        all -- is unaffected either way."""
         from pcapkit.const.reg.ethertype import EtherType
 
         before = len(EtherType.__members__)
         self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
+        self.assertNotIn(0x0888, EtherType._value2member_map_)  # type: ignore[attr-defined]
 
         result = EtherType.get(0x0888)
 
         self.assertEqual(result.name, 'Xyplex_0x0888')
         self.assertEqual(result.value, 0x0888)
-        self.assertIn('Xyplex_0x0888', EtherType.__members__)
-        self.assertEqual(before + 1, len(EtherType.__members__))
+        self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
+        self.assertNotIn(0x0888, EtherType._value2member_map_)  # type: ignore[attr-defined]
+        self.assertEqual(before, len(EtherType.__members__))
+
+        second = EtherType.get(0x0888)
+        self.assertEqual(result, second)
+        self.assertIsNot(result, second)
 
     def test_default_still_resolves_when_registered_int(self) -> None:
         """The ruling's other half: a ``default`` that *is* already a member

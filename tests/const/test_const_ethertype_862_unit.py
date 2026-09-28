@@ -166,6 +166,16 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
 
     def test_both_ranges_still_render_with_their_own_body(self) -> None:
         # Reordering must not lose either range or swap their bodies.
+        #
+        # NOTE: the second assertion used to check for the ``extend_enum``
+        # form ("IEEE802.3 Length Field" was one of the ranges GitHub issue
+        # #775's original ruling left minting). #775's final round converts
+        # every remaining range branch on this crawler -- see
+        # tests/const/test_const_enum_no_mint.py's own docstring -- so this
+        # now checks for the ``_unregistered_member`` form instead, keeping
+        # the hex-suffixed name exactly as before; only the registration
+        # mechanism changed, per the owner's ruling that this is "not about
+        # renaming anything".
         _enum, miss = self._process_fixture()
         text = '\n'.join(miss)
 
@@ -175,10 +185,11 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
             text,
         )
         self.assertIn(
-            "return extend_enum(cls, 'IEEE802_3_Length_Field_0x%s' "
-            "% hex(value)[2:].upper().zfill(4), value)",
+            "return cls._unregistered_member(value, 'IEEE802_3_Length_Field_0x%s' "
+            "% hex(value)[2:].upper().zfill(4))",
             text,
         )
+        self.assertNotIn('extend_enum', text)
 
 
 class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):

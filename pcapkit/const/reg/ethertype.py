@@ -10,7 +10,7 @@ which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.Ether
 
 """
 
-from aenum import IntEnum, extend_enum
+from aenum import IntEnum
 
 from pcapkit.corekit.enum import EnumRegistry
 
@@ -534,22 +534,22 @@ class EtherType(EnumRegistry, IntEnum):
             return cls._unregistered_member(value, 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983')
         if 0x0000 <= value <= 0x05DC:
             #: IEEE802.3 Length Field [IEEE Std 802.3]
-            return extend_enum(cls, 'IEEE802_3_Length_Field_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'IEEE802_3_Length_Field_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x0888 <= value <= 0x088A:
             #: Xyplex [Neil Sembower]
-            return extend_enum(cls, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x1001 <= value <= 0x100F:
             #: Berkeley Trailer encap/IP [Neil Sembower]
-            return extend_enum(cls, 'Berkeley_Trailer_encap_IP_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Berkeley_Trailer_encap_IP_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x6008 <= value <= 0x6009:
             #: DEC Unassigned [Neil Sembower]
             return cls._unregistered_member(value, 'DEC_Unassigned')
         if 0x6010 <= value <= 0x6014:
             #: 3Com Corporation [Neil Sembower]
-            return extend_enum(cls, 'EtherType_3Com_Corporation_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'EtherType_3Com_Corporation_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x7020 <= value <= 0x7029:
             #: LRT [Neil Sembower]
-            return extend_enum(cls, 'LRT_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'LRT_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8039 <= value <= 0x803C:
             #: DEC Unassigned [Neil Sembower]
             return cls._unregistered_member(value, 'DEC_Unassigned')
@@ -558,143 +558,143 @@ class EtherType(EnumRegistry, IntEnum):
             return cls._unregistered_member(value, 'DEC_Unassigned')
         if 0x806E <= value <= 0x8077:
             #: Landmark Graphics Corp. [Neil Sembower]
-            return extend_enum(cls, 'Landmark_Graphics_Corp_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Landmark_Graphics_Corp_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x807D <= value <= 0x807F:
             #: Vitalink Communications [Neil Sembower]
-            return extend_enum(cls, 'Vitalink_Communications_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Vitalink_Communications_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8081 <= value <= 0x8083:
             #: Counterpoint Computers [Neil Sembower]
-            return extend_enum(cls, 'Counterpoint_Computers_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Counterpoint_Computers_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x809C <= value <= 0x809E:
             #: Datability [Neil Sembower]
-            return extend_enum(cls, 'Datability_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Datability_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80A4 <= value <= 0x80B3:
             #: Siemens Gammasonics Inc. [Neil Sembower]
-            return extend_enum(cls, 'Siemens_Gammasonics_Inc_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Siemens_Gammasonics_Inc_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80C0 <= value <= 0x80C3:
             #: DCA Data Exchange Cluster [Neil Sembower]
-            return extend_enum(cls, 'DCA_Data_Exchange_Cluster_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'DCA_Data_Exchange_Cluster_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80C8 <= value <= 0x80CC:
             #: Intergraph Corporation [Neil Sembower]
-            return extend_enum(cls, 'Intergraph_Corporation_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Intergraph_Corporation_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80CD <= value <= 0x80CE:
             #: Harris Corporation [Neil Sembower]
-            return extend_enum(cls, 'Harris_Corporation_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Harris_Corporation_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80CF <= value <= 0x80D2:
             #: Taylor Instrument [Neil Sembower]
-            return extend_enum(cls, 'Taylor_Instrument_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Taylor_Instrument_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80D3 <= value <= 0x80D4:
             #: Rosemount Corporation [Neil Sembower]
-            return extend_enum(cls, 'Rosemount_Corporation_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Rosemount_Corporation_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80DE <= value <= 0x80DF:
             #: Integrated Solutions TRFS [Neil Sembower]
-            return extend_enum(cls, 'Integrated_Solutions_TRFS_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Integrated_Solutions_TRFS_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80E0 <= value <= 0x80E3:
             #: Allen-Bradley [Neil Sembower]
-            return extend_enum(cls, 'Allen_Bradley_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Allen_Bradley_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80E4 <= value <= 0x80F0:
             #: Datability [Neil Sembower]
-            return extend_enum(cls, 'Datability_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Datability_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x80F4 <= value <= 0x80F5:
             #: Kinetics [Neil Sembower]
-            return extend_enum(cls, 'Kinetics_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Kinetics_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8101 <= value <= 0x8103:
             #: Wellfleet Communications [Neil Sembower]
-            return extend_enum(cls, 'Wellfleet_Communications_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Wellfleet_Communications_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8107 <= value <= 0x8109:
             #: Symbolics Private [Neil Sembower]
-            return extend_enum(cls, 'Symbolics_Private_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Symbolics_Private_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8132 <= value <= 0x8136:
             #: Bridge Communications [Neil Sembower]
-            return extend_enum(cls, 'Bridge_Communications_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Bridge_Communications_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8137 <= value <= 0x8138:
             #: Novell, Inc. [Neil Sembower]
-            return extend_enum(cls, 'Novell_Inc_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Novell_Inc_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8139 <= value <= 0x813D:
             #: KTI [Neil Sembower]
-            return extend_enum(cls, 'KTI_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'KTI_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8151 <= value <= 0x8153:
             #: Qualcomm [Neil Sembower]
-            return extend_enum(cls, 'Qualcomm_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Qualcomm_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x815C <= value <= 0x815E:
             #: Computer Protocol Pty Ltd [Neil Sembower]
-            return extend_enum(cls, 'Computer_Protocol_Pty_Ltd_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Computer_Protocol_Pty_Ltd_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8164 <= value <= 0x8166:
             #: Charles River Data System [Neil Sembower]
-            return extend_enum(cls, 'Charles_River_Data_System_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Charles_River_Data_System_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8184 <= value <= 0x818C:
             #: Silicon Graphics prop. [Neil Sembower]
-            return extend_enum(cls, 'Silicon_Graphics_prop_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Silicon_Graphics_prop_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x819A <= value <= 0x81A3:
             #: Qualcomm [Neil Sembower]
-            return extend_enum(cls, 'Qualcomm_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Qualcomm_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81A5 <= value <= 0x81AE:
             #: RAD Network Devices [Neil Sembower]
-            return extend_enum(cls, 'RAD_Network_Devices_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'RAD_Network_Devices_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81B7 <= value <= 0x81B9:
             #: Xyplex [Neil Sembower]
-            return extend_enum(cls, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Xyplex_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81CC <= value <= 0x81D5:
             #: Apricot Computers [Neil Sembower]
-            return extend_enum(cls, 'Apricot_Computers_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Apricot_Computers_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81D6 <= value <= 0x81DD:
             #: Artisoft [Neil Sembower]
-            return extend_enum(cls, 'Artisoft_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Artisoft_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81E6 <= value <= 0x81EF:
             #: Polygon [Neil Sembower]
-            return extend_enum(cls, 'Polygon_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Polygon_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81F0 <= value <= 0x81F2:
             #: Comsat Labs [Neil Sembower]
-            return extend_enum(cls, 'Comsat_Labs_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Comsat_Labs_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81F3 <= value <= 0x81F5:
             #: SAIC [Neil Sembower]
-            return extend_enum(cls, 'SAIC_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'SAIC_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x81F6 <= value <= 0x81F8:
             #: VG Analytical [Neil Sembower]
-            return extend_enum(cls, 'VG_Analytical_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'VG_Analytical_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8203 <= value <= 0x8205:
             #: Quantum Software [Neil Sembower]
-            return extend_enum(cls, 'Quantum_Software_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Quantum_Software_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8221 <= value <= 0x8222:
             #: Ascom Banking Systems [Neil Sembower]
-            return extend_enum(cls, 'Ascom_Banking_Systems_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Ascom_Banking_Systems_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x823E <= value <= 0x8240:
             #: Advanced Encryption Syste [Neil Sembower]
-            return extend_enum(cls, 'Advanced_Encryption_Syste_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Advanced_Encryption_Syste_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x827F <= value <= 0x8282:
             #: Athena Programming [Neil Sembower]
-            return extend_enum(cls, 'Athena_Programming_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Athena_Programming_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8263 <= value <= 0x826A:
             #: Charles River Data System [Neil Sembower]
-            return extend_enum(cls, 'Charles_River_Data_System_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Charles_River_Data_System_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x829A <= value <= 0x829B:
             #: Inst Ind Info Tech [Neil Sembower]
-            return extend_enum(cls, 'Inst_Ind_Info_Tech_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Inst_Ind_Info_Tech_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x829C <= value <= 0x82AB:
             #: Taurus Controls [Neil Sembower]
-            return extend_enum(cls, 'Taurus_Controls_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Taurus_Controls_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x82AC <= value <= 0x8693:
             #: Walker Richer & Quinn [Neil Sembower]
-            return extend_enum(cls, 'Walker_Richer_Quinn_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Walker_Richer_Quinn_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8694 <= value <= 0x869D:
             #: Idea Courier [Neil Sembower]
-            return extend_enum(cls, 'Idea_Courier_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Idea_Courier_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x869E <= value <= 0x86A1:
             #: Computer Network Tech [Neil Sembower]
-            return extend_enum(cls, 'Computer_Network_Tech_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Computer_Network_Tech_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x86A3 <= value <= 0x86AC:
             #: Gateway Communications [Neil Sembower]
-            return extend_enum(cls, 'Gateway_Communications_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Gateway_Communications_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x86E0 <= value <= 0x86EF:
             #: Landis & Gyr Powers [Neil Sembower]
-            return extend_enum(cls, 'Landis_Gyr_Powers_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Landis_Gyr_Powers_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8700 <= value <= 0x8710:
             #: Motorola [Neil Sembower]
-            return extend_enum(cls, 'Motorola_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Motorola_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0x8A96 <= value <= 0x8A97:
             #: Invisible Software [Neil Sembower]
-            return extend_enum(cls, 'Invisible_Software_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'Invisible_Software_0x%s' % hex(value)[2:].upper().zfill(4))
         if 0xFF00 <= value <= 0xFF0F:
             #: ISC Bunker Ramo private protocol. [Neil Sembower]
-            return extend_enum(cls, 'ISC_Bunker_Ramo_private_protocol_0x%s' % hex(value)[2:].upper().zfill(4), value)
+            return cls._unregistered_member(value, 'ISC_Bunker_Ramo_private_protocol_0x%s' % hex(value)[2:].upper().zfill(4))
         return super()._missing_(value)

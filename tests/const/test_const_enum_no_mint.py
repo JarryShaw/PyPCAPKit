@@ -136,6 +136,26 @@ now silently resolves as ``sctp``'s own value through
 :meth:`AppType._dispatch`, where it used to name no registry at all and
 raise. None of the tests below pin that, per the same instruction.
 
+GitHub issue #775's final round closes the two mixed registries themselves:
+every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s 52 still-
+minting range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s one
+(``Registered by Xerox``), now convert to :meth:`~pcapkit.corekit.enum.
+EnumRegistry._unregistered_member` too -- the owner's ruling, verbatim:
+*"Preserve each branch's existing name argument exactly as the current code
+produces it -- this change is about not registering, not about renaming
+anything."* So each keeps the hex-suffixed name it always rendered
+(``Xyplex_0x0888``, not a bare ``Xyplex``) even though it no longer
+registers -- neither is "mixed" any more, both are wholly converted like the
+82 in :data:`RULING_CONVERTED_REGISTRIES`, and :class:`EtherTypeMixedMintTests`
+/:class:`IPXSocketMixedMintTests` below are retitled in place to prove the
+formerly-kept probe no longer mints rather than that it still does. The one
+consequence worth naming: this reintroduces the exact "manufactured,
+value-suffixed name" shape :func:`is_manufactured` exists to flag, on calls
+that are still safe because :meth:`_unregistered_member` never registers
+regardless of what its ``name`` argument looks like -- see
+:data:`HEX_SUFFIXED_NAME_EXEMPT_PATHS` in :class:`UnregisteredMemberNameIsBareTests`
+for the scoped, file-level exemption this required.
+
 """
 from __future__ import annotations
 
@@ -452,11 +472,12 @@ RULING_CONVERTED_REGISTRIES = (
 #: (fixed by #865) reordered :meth:`pcapkit.vendor.reg.ethertype.EtherType.
 #: process` so the narrower range is tested first, which makes that branch
 #: directly probeable like any other reachable-gap registry -- the same shape
-#: :class:`~pcapkit.const.ipx.socket.Socket` (also mixed) already demonstrates
-#: in this list below. EtherType has therefore joined this set; see
-#: :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment for the probe itself, still
-#: covered explicitly by :class:`EtherTypeMixedMintTests` as well since it
-#: remains a mixed registry.
+#: :class:`~pcapkit.const.ipx.socket.Socket` (mixed at the time) already
+#: demonstrates in this list below. EtherType has therefore joined this set;
+#: see :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment for the probe itself,
+#: still covered explicitly by :class:`EtherTypeMixedMintTests` as well.
+#: Neither registry is actually mixed any more as of #775's final round --
+#: see that class's own updated docstring.
 #:
 #: Derived the same way as :data:`RULING_CONVERTED_REGISTRIES`: computed once
 #: by walking each candidate's own bounds for a gap, not hand-picked.
@@ -533,12 +554,13 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
 )
 
 #: :class:`~pcapkit.const.reg.ethertype.EtherType` probes for the owner's
-#: ruling: ``DEC Unassigned`` and the historical list's own "Old Xerox
-#: Experimental values. Invalid as an Ethertype since 1983." both convert,
-#: because the label itself says nothing was assigned. Every *other* named
-#: block -- companies the historical list attributes a real code range to --
-#: stays a mint; :data:`ETHERTYPE_KEPT_PROBE` pins one (``Xyplex``) as a
-#: regression guard.
+#: original #775/#847 ruling: ``DEC Unassigned`` and the historical list's own
+#: "Old Xerox Experimental values. Invalid as an Ethertype since 1983." both
+#: convert, because the label itself says nothing was assigned. Every *other*
+#: named block -- companies the historical list attributes a real code range
+#: to -- used to stay a mint; :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins one
+#: (``Xyplex``) as a regression guard, now flipped to prove it no longer
+#: mints either, since #775's final round converts every remaining branch.
 #:
 #: "Old Xerox Experimental" (0x0101-0x01FF) used to not be behaviourally
 #: probeable: it was a strict subset of the earlier, wider "IEEE802.3 Length
@@ -560,19 +582,33 @@ ETHERTYPE_UNASSIGNED_PROBES = {
     0x8039: 'DEC_Unassigned',
     0x0101: ETHERTYPE_OLD_XEROX_LABEL,
 }
-ETHERTYPE_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
+#: The one probe the original ruling held out as "a real ownership fact, keep
+#: minting" -- Xyplex, 0x0888. #775's final round converts it too, preserving
+#: the hex-suffixed name exactly as the crawler always rendered it (the
+#: owner's ruling, verbatim: *"Preserve each branch's existing name argument
+#: exactly as the current code produces it -- this change is about not
+#: registering, not about renaming anything."*), so this now pins the
+#: opposite of what its name suggests: that the formerly-kept probe no
+#: longer mints either. Kept as its own constant, distinct from
+#: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because :class:`EtherTypeMixedMintTests`
+#: below still wants it named individually in its own regression test.
+ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
-#: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's ruling:
-#: ``Experimental`` and the three "who may claim this pool" policy labels
-#: convert; ``Registered by Xerox`` -- a real ownership fact, not a status
-#: word -- keeps minting, pinned by :data:`IPX_SOCKET_KEPT_PROBE`.
+#: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's original
+#: #775/#847 ruling: ``Experimental`` and the three "who may claim this pool"
+#: policy labels convert; ``Registered by Xerox`` -- a real ownership fact,
+#: not a status word -- used to keep minting, pinned by
+#: :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
 IPX_SOCKET_UNASSIGNED_PROBES = {
     0x0025: 'Experimental',
     0x4001: 'Dynamically Assigned Socket Numbers',
     0x8001: 'Statically Assigned Socket Numbers',
     0x0BBA: 'Dynamically Assigned',
 }
-IPX_SOCKET_KEPT_PROBE = (0x0010, 'Registered by Xerox_0x0010')
+#: The mirror of :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` for
+#: :class:`~pcapkit.const.ipx.socket.Socket`: ``Registered by Xerox`` also
+#: converts in #775's final round, keeping its hex-suffixed name.
+IPX_SOCKET_FORMERLY_KEPT_PROBE = (0x0010, 'Registered by Xerox_0x0010')
 
 
 def _first_unregistered_value(cls: 'type') -> 'Optional[int]':
@@ -1112,6 +1148,21 @@ class IsManufacturedSelfCheckTests(unittest.TestCase):
                                  f'{label}: {source!r}')
 
 
+#: Generated files whose ``_unregistered_member`` calls are exempted from
+#: :meth:`UnregisteredMemberNameIsBareTests.
+#: test_every_unregistered_member_call_passes_a_non_manufactured_name`'s
+#: manufactured-name sweep, because both deliberately keep a per-value
+#: hex-suffixed name (``Xyplex_0x0888``, ``Registered by Xerox_0x0010``)
+#: rather than the bare placeholder every other converted registry uses --
+#: see that test's own docstring, and the module docstring's closing
+#: paragraph, for why this is safe despite being exactly the shape
+#: :func:`is_manufactured` exists to flag elsewhere.
+HEX_SUFFIXED_NAME_EXEMPT_PATHS = frozenset({
+    'pcapkit/const/reg/ethertype.py',
+    'pcapkit/const/ipx/socket.py',
+})
+
+
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     """#775's Q1 follow-up, the maintainer's ruling verbatim: *"Q1 - bare it
     is."* Asked whether the non-minting path should honour the registry's
@@ -1178,21 +1229,37 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     collision if these were ever minted instead of built unregistered.
 
     A call site still using ``extend_enum(...)`` instead of
-    ``_unregistered_member(...)`` at all -- the handful of still-minting
-    branches on :class:`~pcapkit.const.reg.ethertype.EtherType` and
-    :class:`~pcapkit.const.ipx.socket.Socket` that the ruling kept, plus
-    :class:`~pcapkit.const.mh.cga_type.CGAType`, plus ``register``/
-    ``register_alias`` on every registry (including
-    :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own, added by PR 2)
-    -- is out of scope and untouched by this sweep entirely, since it never
-    calls ``_unregistered_member`` in the first place; minting there is the
-    explicit, caller-named path the sweep is not about.
+    ``_unregistered_member(...)`` at all -- :class:`~pcapkit.const.mh.
+    cga_type.CGAType`, plus ``register``/``register_alias`` on every registry
+    (including :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own,
+    added by PR 2) -- is out of scope and untouched by this sweep entirely,
+    since it never calls ``_unregistered_member`` in the first place; minting
+    there is the explicit, caller-named path the sweep is not about.
 
     (Corrected from an earlier draft of this docstring, which estimated
     "~92 registries still mint" and named ``pcapkit.const.mh`` and
     ``BlockType`` as examples -- both were converted by tier 2 and no longer
     apply; the AST walk in the module docstring above measured the real
     figure at 89.)
+
+    GitHub issue #775's final round converts the last 53 minting branches --
+    all 52 of :class:`~pcapkit.const.reg.ethertype.EtherType`'s and
+    :class:`~pcapkit.const.ipx.socket.Socket`'s one -- and deliberately keeps
+    each one's hex-suffixed name unchanged (the owner's ruling, verbatim:
+    *"Preserve each branch's existing name argument exactly as the current
+    code produces it -- this change is about not registering, not about
+    renaming anything."*). That is the exact manufactured, value-suffixed
+    shape :func:`is_manufactured` exists to flag -- unlike ``'%s_unknown' %
+    namespace`` above, the substituted operand here really is ``value``, via
+    ``hex(value)[2:].upper().zfill(4)``. Flagging it anyway would be a false
+    positive in the sense that matters: the collision this check protects
+    against is two *minted* members sharing a name at different values, and
+    neither of these 53 calls ever mints, so nothing can collide regardless
+    of what the ``name`` argument looks like. :data:`HEX_SUFFIXED_NAME_
+    EXEMPT_PATHS` below is the scoped fix -- a file-level exemption from the
+    sweep, not a change to :func:`is_manufactured` itself, which stays exactly
+    as tested against :data:`IS_MANUFACTURED_FIXTURES` and keeps flagging this
+    shape everywhere else it might appear.
 
     """
 
@@ -1203,10 +1270,12 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
 
         offenders = []  # type: list[str]
         call_count = 0
+        exempt_hits = 0
 
         for path in sorted(const_root.rglob('*.py')):
             source = path.read_text()
             tree = ast.parse(source, filename=str(path))
+            rel_path = str(path.relative_to(repo_root)).replace('\\', '/')
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
                     continue
@@ -1218,6 +1287,9 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
                 args = node.args
                 name_arg = args[1] if len(args) > 1 else None
                 if is_manufactured(name_arg):
+                    if rel_path in HEX_SUFFIXED_NAME_EXEMPT_PATHS:
+                        exempt_hits += 1
+                        continue
                     segment = ast.get_source_segment(source, node)
                     offenders.append(f'{path.relative_to(repo_root)}:{node.lineno}: {segment}')
 
@@ -1230,10 +1302,16 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         # for 244 total. #860 step 2's PR 2 then added the 766 ``_missing_``
         # branches on AppType itself, the one more inside its own ``get()``,
         # and the one ``super()._unregistered_member(...)`` forward its own
-        # override makes -- 768 more, in one file, for 1012 total measured
-        # on this tree.
-        self.assertGreaterEqual(call_count, 1012,
-                                 f'expected at least 1012 _unregistered_member call sites, found {call_count}')
+        # override makes -- 768 more, in one file, for 1012 total. #775's
+        # final round then added the 52 on EtherType and the 1 on Socket --
+        # 53 more, for 1065 total measured on this tree.
+        self.assertGreaterEqual(call_count, 1065,
+                                 f'expected at least 1065 _unregistered_member call sites, found {call_count}')
+        # And that the exemption is actually earning its keep, rather than a
+        # dead carve-out nothing reaches any more: exactly 53, matching the
+        # 52 EtherType range branches plus Socket's one.
+        self.assertEqual(exempt_hits, 53,
+                          f'expected exactly 53 hex-suffixed-name exemptions to fire, found {exempt_hits}')
         self.assertEqual(offenders, [],
                           'found _unregistered_member call(s) with a manufactured name:\n'
                           + '\n'.join(offenders))
@@ -1296,12 +1374,19 @@ class RulingConversionDoesNotMintTests(unittest.TestCase):
 
 
 #: :class:`~pcapkit.const.reg.ethertype.EtherType` and :class:`~pcapkit.const.
-#: ipx.socket.Socket` are the two *mixed* registries: most of their
-#: ``_missing_`` legitimately keeps minting (real attributed names), so the
-#: blanket "no extend_enum left" sweep below does not apply to them --
-#: :class:`EtherTypeMixedMintTests` and :class:`IPXSocketMixedMintTests` cover
-#: their converted rows specifically instead.
-_MIXED_REGISTRIES = frozenset({('pcapkit.const.reg.ethertype', 'EtherType'), ('pcapkit.const.ipx.socket', 'Socket')})
+#: ipx.socket.Socket` used to be the two *mixed* registries: most of their
+#: ``_missing_`` legitimately kept minting (real attributed names), so the
+#: blanket "no extend_enum left" sweep below did not apply to them.
+#: GitHub issue #775's final round converts every remaining branch on both,
+#: so neither is mixed any more -- kept as an empty-by-construction frozenset
+#: (rather than deleted outright) so the two subtractions below stay
+#: self-documenting about *why* nothing is excluded now, and so a future
+#: registry that goes back to being genuinely mixed has a named place to be
+#: added again. :class:`EtherTypeMixedMintTests` and
+#: :class:`IPXSocketMixedMintTests` (retitled in place, not renamed) now prove
+#: their formerly-kept probe no longer mints either, alongside the rows that
+#: already didn't.
+_MIXED_REGISTRIES = frozenset()  # type: frozenset[tuple[str, str]]
 
 
 class RulingConversionSourceTests(unittest.TestCase):
@@ -1310,8 +1395,8 @@ class RulingConversionSourceTests(unittest.TestCase):
     so no lookup can exercise the branch either before or after this change)
     -- and, as a completeness check, for the 80 wholly-converted registries:
     none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`
-    any more. Excludes the two mixed registries -- see :data:`_MIXED_
-    REGISTRIES` -- which keep some ``extend_enum`` calls by design."""
+    any more. :data:`_MIXED_REGISTRIES` is empty as of #775's final round, so
+    nothing is excluded here any more -- see its own docstring."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
         # EtherType now belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
@@ -1342,12 +1427,34 @@ class RulingConversionSourceTests(unittest.TestCase):
                 source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
                 self.assertNotIn('extend_enum', source)
 
+    def test_ethertype_and_socket_no_longer_call_extend_enum_either(self) -> None:
+        """The two former mixed registries, now that nothing excludes them:
+        GitHub issue #775's final round leaves no ``extend_enum`` call on
+        either, the same invariant :meth:`test_every_wholly_converted_
+        registry_no_longer_calls_extend_enum` already proves for the other
+        80 -- named separately because neither is actually a member of
+        :data:`RULING_CONVERTED_REGISTRIES` in Socket's case, so the loop
+        above alone would never reach it."""
+        from pcapkit.const.ipx.socket import Socket
+        from pcapkit.const.reg.ethertype import EtherType
+
+        for cls in (EtherType, Socket):
+            with self.subTest(registry=cls.__qualname__):
+                source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
+                self.assertNotIn('extend_enum', source)
+                self.assertIn('_unregistered_member', source)
+
 
 class EtherTypeMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.reg.ethertype.EtherType` is the ruling's mixed
-    case: ``DEC Unassigned`` and the "Old Xerox Experimental..." row convert,
-    every other attributed vendor block (a real company's own name for its
-    own code) keeps minting."""
+    """:class:`~pcapkit.const.reg.ethertype.EtherType` was the ruling's mixed
+    case: ``DEC Unassigned`` and the "Old Xerox Experimental..." row converted
+    first, while every other attributed vendor block (a real company's own
+    name for its own code) kept minting. GitHub issue #775's final round
+    converts the rest too -- :meth:`test_formerly_attributed_vendor_block_
+    no_longer_mints` below proves the one named probe (``Xyplex``) that used
+    to be this class's own regression guard for "still mints" now proves the
+    opposite, and the class is no longer actually mixed (retitled in place
+    rather than renamed, so history stays easy to follow)."""
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -1383,10 +1490,20 @@ class EtherTypeMixedMintTests(unittest.TestCase):
     # regressed and 0x0101 started minting again). Nothing this test checked
     # is left unchecked; it is subsumed rather than replaced by a weaker test.
 
-    def test_attributed_vendor_block_still_mints(self) -> None:
+    def test_formerly_attributed_vendor_block_no_longer_mints(self) -> None:
+        """The regression guard this class used to carry the other way: this
+        exact probe (``Xyplex``, 0x0888) used to prove the ruling *kept*
+        minting a real attributed name; GitHub issue #775's final round
+        converts it, preserving the hex-suffixed name exactly as the crawler
+        always rendered it -- the owner's ruling, verbatim: *"Preserve each
+        branch's existing name argument exactly as the current code
+        produces it -- this change is about not registering, not about
+        renaming anything."* Same shape as
+        :meth:`test_unassigned_rows_do_not_mint` above, just for the one
+        probe that used to be the exception."""
         from pcapkit.const.reg.ethertype import EtherType
 
-        value, name = ETHERTYPE_KEPT_PROBE
+        value, name = ETHERTYPE_FORMERLY_KEPT_PROBE
         self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
         before = len(EtherType.__members__)
 
@@ -1394,16 +1511,20 @@ class EtherTypeMixedMintTests(unittest.TestCase):
 
         self.assertEqual(member.value, value)
         self.assertEqual(member.name, name)
-        self.assertEqual(before + 1, len(EtherType.__members__))
-        self.assertIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
-        self.assertIs(EtherType(value), member)
+        self.assertEqual(before, len(EtherType.__members__))
+        self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
+
+        second = EtherType(value)
+        self.assertEqual(member, second)
+        self.assertIsNot(member, second)
 
 
 class IPXSocketMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.ipx.socket.Socket` is the ruling's other mixed
+    """:class:`~pcapkit.const.ipx.socket.Socket` was the ruling's other mixed
     case: ``Experimental`` and the three "who may claim this pool" allocation-
-    policy labels convert; ``Registered by Xerox`` -- a real ownership fact --
-    keeps minting."""
+    policy labels converted first, while ``Registered by Xerox`` -- a real
+    ownership fact -- kept minting. GitHub issue #775's final round converts
+    it too; see :meth:`test_registered_by_xerox_no_longer_mints` below."""
 
     def setUp(self) -> None:
         snapshot = snapshot_modules(ISOLATED_PREFIXES)
@@ -1425,10 +1546,17 @@ class IPXSocketMixedMintTests(unittest.TestCase):
                 self.assertEqual(before, len(Socket.__members__))
                 self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
 
-    def test_registered_by_xerox_still_mints(self) -> None:
+    def test_registered_by_xerox_no_longer_mints(self) -> None:
+        """The regression guard this class used to carry the other way: this
+        exact probe (``Registered by Xerox``, 0x0010) used to prove the
+        ruling *kept* minting a real ownership fact; GitHub issue #775's
+        final round converts it, preserving the hex-suffixed name exactly as
+        the crawler always rendered it -- same ruling, same reasoning as
+        :meth:`EtherTypeMixedMintTests.
+        test_formerly_attributed_vendor_block_no_longer_mints`."""
         from pcapkit.const.ipx.socket import Socket
 
-        value, name = IPX_SOCKET_KEPT_PROBE
+        value, name = IPX_SOCKET_FORMERLY_KEPT_PROBE
         self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
         before = len(Socket.__members__)
 
@@ -1436,9 +1564,12 @@ class IPXSocketMixedMintTests(unittest.TestCase):
 
         self.assertEqual(member.value, value)
         self.assertEqual(member.name, name)
-        self.assertEqual(before + 1, len(Socket.__members__))
-        self.assertIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
-        self.assertIs(Socket(value), member)
+        self.assertEqual(before, len(Socket.__members__))
+        self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
+
+        second = Socket(value)
+        self.assertEqual(member, second)
+        self.assertIsNot(member, second)
 
 
 #: The 5 (of #860's original 9 bespoke) classes step 2's PR 1 brought onto
