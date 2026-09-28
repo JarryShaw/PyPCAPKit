@@ -153,8 +153,10 @@ consequence worth naming: this reintroduces the exact "manufactured,
 value-suffixed name" shape :func:`is_manufactured` exists to flag, on calls
 that are still safe because :meth:`_unregistered_member` never registers
 regardless of what its ``name`` argument looks like -- see
-:data:`HEX_SUFFIXED_NAME_EXEMPT_PATHS` in :class:`UnregisteredMemberNameIsBareTests`
-for the scoped, file-level exemption this required.
+:func:`_is_hex_suffixed_unregistered_name` in
+:class:`UnregisteredMemberNameIsBareTests` for the scoped exemption this
+required, keyed on the ``name`` argument's own shape rather than on the two
+files it happens to live in today.
 
 """
 from __future__ import annotations
@@ -1148,19 +1150,54 @@ class IsManufacturedSelfCheckTests(unittest.TestCase):
                                  f'{label}: {source!r}')
 
 
-#: Generated files whose ``_unregistered_member`` calls are exempted from
-#: :meth:`UnregisteredMemberNameIsBareTests.
-#: test_every_unregistered_member_call_passes_a_non_manufactured_name`'s
-#: manufactured-name sweep, because both deliberately keep a per-value
-#: hex-suffixed name (``Xyplex_0x0888``, ``Registered by Xerox_0x0010``)
-#: rather than the bare placeholder every other converted registry uses --
-#: see that test's own docstring, and the module docstring's closing
-#: paragraph, for why this is safe despite being exactly the shape
-#: :func:`is_manufactured` exists to flag elsewhere.
-HEX_SUFFIXED_NAME_EXEMPT_PATHS = frozenset({
-    'pcapkit/const/reg/ethertype.py',
-    'pcapkit/const/ipx/socket.py',
-})
+#: The one call-chain every hex-suffixed manufactured name shares, on all 53
+#: branches #775's final round deliberately kept unrenamed rather than
+#: converting to the bare placeholder every other converted registry uses
+#: (``Xyplex_0x0888``, ``Registered by Xerox_0x0010``, ...; see that
+#: sweep's own docstring, and the module docstring's closing paragraph, for
+#: why keeping the hex suffix is safe despite being exactly the shape
+#: :func:`is_manufactured` exists to flag elsewhere): ``hex(value)[2:]
+#: .upper().zfill(4)``, the exact expression substituted into the ``%s`` of
+#: each literal's own ``'..._0x%s'`` left operand. Parsed once, here, so a
+#: real call site's own right operand can be compared against it
+#: structurally (:func:`ast.dump`) rather than restated as a string or
+#: source-text match, which would have to be re-derived per literal prefix
+#: and would drift the moment whitespace in the generated source changes.
+_HEX_SUFFIX_SHAPE = ast.parse('hex(value)[2:].upper().zfill(4)', mode='eval').body
+
+
+def _is_hex_suffixed_unregistered_name(name_arg: 'Optional[ast.expr]') -> bool:
+    """Whether ``name_arg`` is *exactly* the one shape #775's final round
+    preserved unrenamed on :class:`~pcapkit.const.reg.ethertype.EtherType`'s
+    52 range branches and :class:`~pcapkit.const.ipx.socket.Socket`'s one --
+    a ``%``-format :class:`~ast.BinOp` whose left operand is a string
+    constant ending in the literal ``'_0x%s'``, and whose right operand is
+    structurally identical (by :func:`ast.dump`, so source-text formatting
+    such as whitespace or quote style never matters) to
+    :data:`_HEX_SUFFIX_SHAPE`.
+
+    Deliberately narrower than :func:`is_manufactured`'s own
+    combining-operand check: it exists only to pick these 53 already-
+    manufactured calls -- the ones #775's ruling explicitly asked to keep
+    exactly as rendered -- out from every *other* manufactured call
+    :func:`is_manufactured` still (correctly) flags, not to re-decide what
+    counts as manufactured in the first place. Matching on the ``name``
+    argument's own shape, rather than on which file the call happens to
+    live in, means this predicate by itself rejects a differently-shaped
+    manufactured name wherever it appears. It does *not*, by itself,
+    reject a correctly hex-suffixed name planted in some other,
+    unintended file -- that half of the safety comes from the sweep's own
+    ``assertEqual(exempt_hits, 53)`` below, not from this function, so the
+    two are a pair and neither is trustworthy alone.
+
+    """
+    if not (isinstance(name_arg, ast.BinOp) and isinstance(name_arg.op, ast.Mod)):
+        return False
+    left, right = name_arg.left, name_arg.right
+    if not (isinstance(left, ast.Constant) and isinstance(left.value, str)
+            and left.value.endswith('_0x%s')):
+        return False
+    return ast.dump(right) == ast.dump(_HEX_SUFFIX_SHAPE)
 
 
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
@@ -1255,11 +1292,12 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     positive in the sense that matters: the collision this check protects
     against is two *minted* members sharing a name at different values, and
     neither of these 53 calls ever mints, so nothing can collide regardless
-    of what the ``name`` argument looks like. :data:`HEX_SUFFIXED_NAME_
-    EXEMPT_PATHS` below is the scoped fix -- a file-level exemption from the
-    sweep, not a change to :func:`is_manufactured` itself, which stays exactly
-    as tested against :data:`IS_MANUFACTURED_FIXTURES` and keeps flagging this
-    shape everywhere else it might appear.
+    of what the ``name`` argument looks like. :func:`_is_hex_suffixed_
+    unregistered_name` below is the scoped fix -- an exemption keyed on the
+    ``name`` argument's own AST shape, not on which file the call lives in,
+    from the sweep only -- not a change to :func:`is_manufactured` itself,
+    which stays exactly as tested against :data:`IS_MANUFACTURED_FIXTURES`
+    and keeps flagging this shape everywhere else it might appear.
 
     """
 
@@ -1275,7 +1313,6 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         for path in sorted(const_root.rglob('*.py')):
             source = path.read_text()
             tree = ast.parse(source, filename=str(path))
-            rel_path = str(path.relative_to(repo_root)).replace('\\', '/')
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
                     continue
@@ -1287,7 +1324,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
                 args = node.args
                 name_arg = args[1] if len(args) > 1 else None
                 if is_manufactured(name_arg):
-                    if rel_path in HEX_SUFFIXED_NAME_EXEMPT_PATHS:
+                    if _is_hex_suffixed_unregistered_name(name_arg):
                         exempt_hits += 1
                         continue
                     segment = ast.get_source_segment(source, node)
