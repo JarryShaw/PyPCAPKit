@@ -3146,6 +3146,40 @@ since -- reaching #805 by the entries below.
   against ``process()`` fed a reproduction of IANA's own CSV rows, plus the
   general ordering rule against synthetic nested ranges -- each verified to
   fail against the pre-fix generator and const file. Closes #862 (#865).
+* **Fixed** -- ``main`` was red: 12 tests across three files, all
+  ``RecursionError`` (``tests/const/test_const_enum_lookup.py``; two
+  ``test_const_enum_no_mint.py`` methods, two registries each; 7 of the 12 in
+  ``tests/protocols/misc/test_pcapng_unit.py``).
+  ``pcapkit/vendor/pcapng/record_type.py`` and ``secrets_type.py`` rendered a
+  two-line ``_missing_`` body whose first line did not return --
+  ``cls._unregistered_member(value, 'Unassigned')`` followed unconditionally by
+  ``return cls(value)``. Harmless while that first line was
+  ``extend_enum(...)``, which registers the member so the following
+  ``cls(value)`` found it; #861 (above) replaced it with
+  ``_unregistered_member``, which deliberately does not register, so
+  ``cls(value)`` missed again and re-entered ``_missing_``. #861 only
+  half-corrected the two files: it fixed the *generated* modules and never
+  touched the two *crawlers*, and even in the generated files left the old
+  ``return cls(value)`` in place as unreachable dead code after the new return
+  -- which is why #861's own CI stayed green until a live regeneration from the
+  stale crawlers reintroduced the defect for real; #861's cross-review had
+  verified byte-identical regeneration on a 5-of-82 sample that did not happen
+  to include these two. Both crawlers now collapse to the single returning line
+  the other 101 registries use, and the two const files are regenerated from
+  them -- ``record_type.py`` fetches the network for its own ``LINK`` constant,
+  so that regeneration is not reproducible without connectivity, though it came
+  back byte-identical; ``secrets_type.py`` is offline. The new guard sits at
+  the crawler-emission layer rather than the behavioural one
+  ``test_const_enum_lookup.py`` already swept and that is what caught this: a
+  hard-coded ``_missing_`` body must end in a return, and no emitted line may
+  re-enter ``_missing_`` for the same value -- deliberately narrower than
+  "every emitted line must return", since 53 crawlers legitimately emit 109
+  non-returning lines in the shape ``Vendor.process`` itself uses. The guard
+  sees only 35 of 96 crawlers; the other 61 (53 ``append``-built, 8 returning
+  no ``(enum, miss)`` pair) stay invisible to it and are covered behaviourally
+  instead. Verified against the four reverted source files: 4 of 6 new tests
+  fail as methods; the other two pass either way, by design, since #866's own
+  body still ended on a return. Closes #866 (#867).
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` and ``1.5.0b2`` (both
 2026-09-18) and ``1.5.0b3`` (2026-09-19), all published as prereleases and so
