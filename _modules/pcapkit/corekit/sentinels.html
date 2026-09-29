@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.utilities.decorators - PyPCAPKit</title>
+        <title>pcapkit.corekit.sentinels - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -453,334 +453,485 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.utilities.decorators</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.corekit.sentinels</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="c1"># pylint: disable=protected-access</span>
-<span class="sd">"""Decorator Functions</span>
-<span class="sd">=========================</span>
+<span class="sd">"""Sentinel Objects</span>
+<span class="sd">=====================</span>
 
-<span class="sd">.. module:: pcapkit.utilities.decorators</span>
+<span class="sd">.. module:: pcapkit.corekit.sentinels</span>
 
-<span class="sd">:mod:`pcapkit.utilities.decorators` contains several useful</span>
-<span class="sd">decorators, including :func:`~pcapkit.utilities.decorators.seekset`,</span>
-<span class="sd">:func:`~pcapkit.utilities.decorators.beholder` and</span>
-<span class="sd">:func:`~pcapkit.utilities.decorators.prepare`.</span>
+<span class="sd">:mod:`pcapkit.corekit.sentinels` is the single, shared home for every</span>
+<span class="sd">module-level singleton sentinel this package defines for itself -- a value</span>
+<span class="sd">whose only job is to be recognised by identity (``value is SENTINEL``), so</span>
+<span class="sd">that it can never be confused with a value a caller might legitimately pass.</span>
+<span class="sd">See the "Naming a sentinel" section of</span>
+<span class="sd">:file:`docs/source/contributing/conventions.rst` for the house rule the four</span>
+<span class="sd">below follow.</span>
+
+<span class="sd">Before this module existed, each of the four lived beside the one class that</span>
+<span class="sd">used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,</span>
+<span class="sd">:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,</span>
+<span class="sd">:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and</span>
+<span class="sd">:class:`_AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
+<span class="sd">on GitHub issue #911, verbatim -- *"Okay one module for all four it is."* --</span>
+<span class="sd">moves the four *definitions* here; each original module keeps a three-line</span>
+<span class="sd">re-export so that no existing ``from &lt;module&gt; import &lt;name&gt;`` breaks,</span>
+<span class="sd">including the ``if TYPE_CHECKING:``-only imports of the *types* that</span>
+<span class="sd">:mod:`pcapkit.foundation.registry.foundation`,</span>
+<span class="sd">:mod:`pcapkit.foundation.registry.protocols` and</span>
+<span class="sd">:mod:`pcapkit.corekit.fields.ipaddress`, :mod:`~pcapkit.corekit.fields.misc`,</span>
+<span class="sd">:mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`</span>
+<span class="sd">already carry.</span>
+
+<span class="sd">``NoValue`` and ``_Absent`` differ in how far the ruling reaches. ``NoValue``</span>
+<span class="sd">is documented as the value of</span>
+<span class="sd">:attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`,</span>
+<span class="sd">so it is a published contract and the re-export at</span>
+<span class="sd">:mod:`pcapkit.corekit.fields.field` is load-bearing for callers outside this</span>
+<span class="sd">package. ``_Absent`` is private to :mod:`pcapkit.protocols.protocol` --</span>
+<span class="sd">nothing outside that module ever imports it, from here or from there -- so</span>
+<span class="sd">its re-export exists only so that module's own code keeps reading</span>
+<span class="sd">``_Absent`` rather than a fully-qualified name; see :class:`_AbsentType`'s</span>
+<span class="sd">own docstring below for why it stays private after the move.</span>
 
 <span class="sd">"""</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">VERBOSE</span><span class="p">,</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'NoValue'</span><span class="p">,</span> <span class="s1">'NO_DEFAULT'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ParamSpec</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
-
-    <span class="n">P</span> <span class="o">=</span> <span class="n">ParamSpec</span><span class="p">(</span><span class="s1">'P'</span><span class="p">)</span>
-    <span class="n">R_seekset</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'R_seekset'</span><span class="p">)</span>
-    <span class="n">R_beholder</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">ProtocolBase</span><span class="p">)</span>
-    <span class="n">R_prepare</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'R_prepare'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Schema</span><span class="p">)</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'seekset'</span><span class="p">,</span> <span class="s1">'beholder'</span><span class="p">,</span> <span class="s1">'prepare'</span><span class="p">]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
 
-<span class="c1">#: logging.Logger: Module-level logger, a child of the package-wide</span>
-<span class="c1">#: :data:`pcapkit.utilities.logging.logger`.</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<div class="viewcode-block" id="NullType">
+<a class="viewcode-back" href="../../../pcapkit/corekit/module.html#pcapkit.corekit.enum.NullType">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NullType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.</span>
 
+<span class="sd">    A distinct class rather than a plain :class:`str` -- which is what the</span>
+<span class="sd">    registry helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
+<span class="sd">    :mod:`pcapkit.foundation.registry.foundation` used to define,</span>
+<span class="sd">    independently of each other -- so that ``is`` comparisons against it mean</span>
+<span class="sd">    what they say: no :class:`str` a caller passes, including one that</span>
+<span class="sd">    happens to spell ``'(null)'`` itself, can compare equal to this sentinel</span>
+<span class="sd">    by identity. See GitHub issue #833.</span>
 
-<div class="viewcode-block" id="seekset">
-<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.seekset">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">seekset</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">'Callable[Concatenate[ProtocolBase, P], R_seekset]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[P, R_seekset]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Read file from start then set back to original.</span>
+<span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
+<span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance</span>
+<span class="sd">    that already exists, rather than building a new one, so no caller --</span>
+<span class="sd">    direct, or :mod:`copy`/:mod:`pickle` reconstructing an instance behind</span>
+<span class="sd">    the scenes -- can end up holding a second object that fails an ``is</span>
+<span class="sd">    NULL`` check downstream. :meth:`ModuleDescriptor.klass</span>
+<span class="sd">    &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` makes exactly that</span>
+<span class="sd">    check, and a stricter guard that raises on a second call would be truer</span>
+<span class="sd">    to "singleton" in the abstract, but it would also mean the module's own</span>
+<span class="sd">    ``NULL = NullType()`` below is the only call that is ever allowed to</span>
+<span class="sd">    succeed -- fragile for no real benefit, since nothing here needs</span>
+<span class="sd">    *rejecting* a second construction, only preventing it from producing a</span>
+<span class="sd">    distinct object.</span>
 
-<span class="sd">    Important:</span>
-<span class="sd">        This decorator function is designed for decorating *class methods*.</span>
+<span class="sd">    That still leaves :func:`copy.deepcopy`, :func:`copy.copy` and</span>
+<span class="sd">    :mod:`pickle` unhandled: none of them constructs a new instance by</span>
+<span class="sd">    calling ``NullType()`` themselves, so the guard above never runs for</span>
+<span class="sd">    them. Each is therefore given its own override below, rather than left</span>
+<span class="sd">    to fall back to the default behaviour for a plain object:</span>
 
-<span class="sd">    The decorator will keep the current offset of :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`,</span>
-<span class="sd">    then call the decorated function. Afterwards, it will rewind the  offset of</span>
-<span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;` to the original and returns the return value from</span>
-<span class="sd">    the decorated function.</span>
+<span class="sd">    * :func:`copy.copy` and :func:`copy.deepcopy` check for</span>
+<span class="sd">      :meth:`__copy__`/:meth:`__deepcopy__` before ever falling back to</span>
+<span class="sd">      reduction, so :meth:`__deepcopy__` in particular has to be defined --</span>
+<span class="sd">      its absence is the actual defect this class used to have: deepcopying</span>
+<span class="sd">      a :class:`~pcapkit.corekit.module.ModuleDescriptor` recursed into this</span>
+<span class="sd">      sentinel, reduced it, and rebuilt a second, non-identical</span>
+<span class="sd">      :class:`NullType` that then read as an ordinary attribute name to</span>
+<span class="sd">      :func:`getattr`, downgrading a clean</span>
+<span class="sd">      :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare</span>
+<span class="sd">      :exc:`TypeError` (``attribute name must be string, not 'NullType'``).</span>
+<span class="sd">    * :mod:`pickle` protocols 2 and up reconstruct through</span>
+<span class="sd">      ``cls.__new__(cls)``, which the guarded :meth:`__new__` already keeps</span>
+<span class="sd">      to one instance -- but protocols 0 and 1 reconstruct through</span>
+<span class="sd">      :func:`copyreg._reconstructor`, which calls :func:`object.__new__`</span>
+<span class="sd">      *directly*, bypassing :meth:`__new__` entirely. :meth:`__reduce__` is</span>
+<span class="sd">      defined so that every protocol, not only the ones that happen to go</span>
+<span class="sd">      through this class's own :meth:`__new__`, is routed through the same</span>
+<span class="sd">      module-level getter instead of through reconstruction at all.</span>
 
-<span class="sd">    Note:</span>
-<span class="sd">        The decorated function should have following signature::</span>
+<span class="sd">    A caveat rather than a defect: :func:`importlib.reload` on this module</span>
+<span class="sd">    re-executes ``NULL = NullType()`` below, producing a *second* singleton</span>
+<span class="sd">    that the reloaded code compares against correctly but that every module</span>
+<span class="sd">    which already imported the pre-reload :data:`NULL` still holds -- so a</span>
+<span class="sd">    comparison spanning the reload sees two "singletons" that are not each</span>
+<span class="sd">    other. :meth:`ModuleDescriptor.klass</span>
+<span class="sd">    &lt;pcapkit.corekit.module.ModuleDescriptor.klass&gt;` faces exactly this class</span>
+<span class="sd">    of problem for the *class* it resolves, which is why it re-reads</span>
+<span class="sd">    :data:`sys.modules` on every call rather than memoising; nothing</span>
+<span class="sd">    equivalent is possible here, because unlike a resolved class there is no</span>
+<span class="sd">    live registry this sentinel could be re-read from. The pre-#833 ``str``</span>
+<span class="sd">    sentinel had the same fragility for the same reason -- it is a property</span>
+<span class="sd">    of sharing one module-level binding across a reload, not something this</span>
+<span class="sd">    class's singleton guarantees claim to solve -- and nothing in this</span>
+<span class="sd">    package reloads :mod:`pcapkit.corekit.sentinels` after import.</span>
 
-<span class="sd">            func(self: 'pcapkit.protocols.protocol.ProtocolBase',</span>
-<span class="sd">                 *args: 'typing.Any', **kwargs: 'typing.Any') -&gt; 'typing.Any'</span>
+<span class="sd">    A second caveat, specific to this class now living apart from its one</span>
+<span class="sd">    caller-visible re-export: reloading :mod:`pcapkit.corekit.module`</span>
+<span class="sd">    itself -- rather than this module -- no longer has any effect on the</span>
+<span class="sd">    singleton at all. That module now only re-imports :data:`NULL` and</span>
+<span class="sd">    :class:`NullType` from here, and re-running an already-satisfied</span>
+<span class="sd">    ``from ... import`` reads the current binding in :mod:`sys.modules`</span>
+<span class="sd">    rather than re-executing anything, so it neither mints a new instance</span>
+<span class="sd">    nor loses the old one. The reload hazard this docstring describes moved</span>
+<span class="sd">    with the class definition; it did not double.</span>
 
-<span class="sd">    See Also:</span>
-<span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._read_packet`</span>
-
-<span class="sd">    :param func: decorated function</span>
-<span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">seekcur</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'P.args'</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="s1">'P.kwargs'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'R_seekset'</span><span class="p">:</span>
-        <span class="c1"># extract self object</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="c1"># move file pointer</span>
-        <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+    <span class="c1">#: 'NullType | None': The one instance :meth:`__new__` ever returns,</span>
+    <span class="c1">#: including for the module-level ``NULL = NullType()`` below that</span>
+    <span class="c1">#: creates it in the first place. Kept on the class rather than as a</span>
+    <span class="c1">#: module global so :meth:`__new__` can read and write it without a</span>
+    <span class="c1">#: ``global`` statement.</span>
+    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'NullType | None'</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># call method</span>
-        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be."""</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
 
-        <span class="c1"># reset file pointer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">return_</span>
-    <span class="k">return</span> <span class="n">seekcur</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
+        <span class="k">return</span> <span class="s1">'&lt;NULL&gt;'</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return ``self`` -- there is, and only ever will be, one of these."""</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'dict[int, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return ``self``, for the same reason as :meth:`__copy__`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            memo: The :func:`copy.deepcopy` memo table. Unused: returning</span>
+<span class="sd">                ``self`` needs no entry, since nothing about this object is</span>
+<span class="sd">                ever copied.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[Callable[[], NullType], tuple[()]]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reduce to the module-level singleton getter, for every :mod:`pickle` protocol.</span>
+
+<span class="sd">        A class that defines :meth:`__reduce__` has it honoured by</span>
+<span class="sd">        :meth:`object.__reduce_ex__` for every protocol uniformly, rather</span>
+<span class="sd">        than only for the ones that would otherwise call</span>
+<span class="sd">        :func:`copyreg._reconstructor` -- so naming :func:`_get_null` here</span>
+<span class="sd">        sidesteps reconstruction, and therefore :meth:`__new__`, altogether.</span>
+<span class="sd">        That makes this correct independent of whatever :meth:`__new__` does,</span>
+<span class="sd">        which is what actually covers protocols 0 and 1; see the class</span>
+<span class="sd">        docstring.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_get_null</span><span class="p">,</span> <span class="p">())</span></div>
 
 
 
-<div class="viewcode-block" id="beholder">
-<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.beholder">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">beholder</span><span class="p">(</span>
-    <span class="n">func</span><span class="p">:</span> <span class="s1">'Callable[Concatenate[ProtocolBase, int, Optional[int], P], R_beholder]'</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[P, R_beholder]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Behold extraction procedure.</span>
+<span class="c1">#: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``</span>
+<span class="c1">#: helpers in :mod:`pcapkit.foundation.registry.protocols` and</span>
+<span class="c1">#: :mod:`pcapkit.foundation.registry.foundation`. Housed here, alongside the</span>
+<span class="c1">#: package's other sentinels, rather than in :mod:`pcapkit.corekit.module`</span>
+<span class="c1">#: where it used to live -- per the owner's ruling on GitHub issue #911, see</span>
+<span class="c1">#: the module docstring above. :mod:`pcapkit.corekit.module` keeps a</span>
+<span class="c1">#: re-export so every existing ``from pcapkit.corekit.module import NULL``</span>
+<span class="c1">#: keeps working.</span>
+<span class="n">NULL</span> <span class="o">=</span> <span class="n">NullType</span><span class="p">()</span>
 
-<span class="sd">    Important:</span>
-<span class="sd">        This decorator function is designed for decorating *class methods*.</span>
 
-<span class="sd">    This decorator first keep the current offset of</span>
-<span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`, then</span>
-<span class="sd">    try to call the decorated function. Should any exception raised, it will</span>
-<span class="sd">    re-parse the :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`</span>
-<span class="sd">    as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_null</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'NullType'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return :data:`NULL`, for :meth:`NullType.__reduce__`.</span>
 
-<span class="sd">    Note:</span>
-<span class="sd">        The decorated function should have following signature::</span>
+<span class="sd">    A module-level function rather than a lambda or a bound method, so every</span>
+<span class="sd">    :mod:`pickle` protocol -- including 0 and 1, which cannot reference</span>
+<span class="sd">    anything nested inside a class -- can name it.</span>
 
-<span class="sd">            func(self: 'pcapkit.protocols.protocol.ProtocolBase',</span>
-<span class="sd">                 proto: 'int', length: 'typing.Optional[int]',</span>
-<span class="sd">                 *args: 'typing.Any', **kwargs: 'typing.Any') -&gt; 'pcapkit.protocols.protocol.ProtocolBase'</span>
-
-<span class="sd">    See Also:</span>
-<span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`</span>
-
-<span class="sd">    :param func: decorated function</span>
-<span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">behold</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'P.args'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'P.kwargs'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'R_beholder'</span><span class="p">:</span>
-        <span class="c1"># extract self object &amp; args</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># record file pointer</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># call method</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">StructError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.null</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
-            <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
-
-            <span class="c1"># log error</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-
-            <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">'The following error occurred while parsing the packet:'</span><span class="p">)</span>
-                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
-
-            <span class="c1"># NOTE: ``self._get_payload()`` rather than</span>
-            <span class="c1"># ``self.__header__.get_payload()``, which it wraps. The two agree</span>
-            <span class="c1"># for every protocol whose payload is a schema field, and differ for</span>
-            <span class="c1"># the two that override it: SCTP carries user data inside a DATA</span>
-            <span class="c1"># chunk and PCAP-NG inside a block, so neither header schema has a</span>
-            <span class="c1"># ``payload`` field at all. Going through the schema there raises</span>
-            <span class="c1"># ProtocolUnbound('unknown field: payload') *from the recovery path*,</span>
-            <span class="c1"># turning a next-layer parse failure that should have degraded to</span>
-            <span class="c1"># Raw into a crash. Unreachable until something was registered on an</span>
-            <span class="c1"># SCTP payload protocol identifier, which NGAP now is.</span>
-            <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>
-
-            <span class="c1"># NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so</span>
-            <span class="c1"># a payload that failed to parse still reports the code it arrived</span>
-            <span class="c1"># with, which is what ``Data_Raw.protocol`` means. A plain integer has</span>
-            <span class="c1"># no ``name`` and still renders as ``Raw`` in the protochain, c.f.</span>
-            <span class="c1"># ``Raw.__post_init__``, so this only adds a name where the registry</span>
-            <span class="c1"># key is an enumeration.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Measured, because the layers differ and it is easy to state this too</span>
-            <span class="c1"># broadly: SCTP's unregistered path keeps its enumeration -- an unknown</span>
-            <span class="c1"># PPID gives ``SCTP:Unassigned`` and ``protocol=4243`` -- so</span>
-            <span class="c1"># without this line, *registering* NGAP on PPID 60 would have made a</span>
-            <span class="c1"># failed parse report a bare ``SCTP:Raw`` and ``protocol=None``, less</span>
-            <span class="c1"># than the same bytes gave while unregistered. TCP's unregistered</span>
-            <span class="c1"># path keeps its code too, but as a plain integer: an unknown port</span>
-            <span class="c1"># yields ``TCP:Raw`` with ``protocol=49998``, because</span>
-            <span class="c1"># ``Transport._decode_next_layer`` resolves ports through</span>
-            <span class="c1"># ``__proto__`` and never reaches here, and forwards the port</span>
-            <span class="c1"># whether or not it is registered. So both *unknown* paths preserve</span>
-            <span class="c1"># the code that arrived; what differs is only that SCTP's is an</span>
-            <span class="c1"># enumeration the protochain can name, while TCP's is an ``int`` and</span>
-            <span class="c1"># renders as ``Raw``. That was #418, closed by #426; this line is</span>
-            <span class="c1"># about the *failure* path, which it makes uniform.</span>
-            <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_beholder'</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">behold</span></div>
+    <span class="k">return</span> <span class="n">NULL</span>
 
 
+<div class="viewcode-block" id="NoValueType">
+<a class="viewcode-back" href="../../../pcapkit/corekit/fields/field.html#pcapkit.corekit.enum.NoValueType">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`NoValue`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
-<div class="viewcode-block" id="prepare">
-<a class="viewcode-back" href="../../../pcapkit/utilities/functools.html#pcapkit.utilities.decorators.prepare">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Optional[int], Optional[dict[str, Any]], P], R_prepare]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[P, R_prepare]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Prepare schema packet data before unpacking.</span>
+<span class="sd">    Housed here per GitHub issue #911 rather than in</span>
+<span class="sd">    :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where</span>
+<span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
+<span class="sd">    still documents it as the field-default sentinel.</span>
 
-<span class="sd">    Important:</span>
-<span class="sd">        This decorate function is designed for decorating the</span>
-<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`</span>
-<span class="sd">        *class method*.</span>
-
-<span class="sd">    This decorator will revise the parameter list provided to the original</span>
-<span class="sd">    :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` method</span>
-<span class="sd">    and extract necessary information based on the given parameters, then provide</span>
-<span class="sd">    the revised version of parameter list to the original method.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The decorated function should have following signature::</span>
-
-<span class="sd">            func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',</span>
-<span class="sd">                 data: 'bytes | typing.IO[bytes]',</span>
-<span class="sd">                 length: 'Optional[int]',</span>
-<span class="sd">                 packet: 'Optional[dict[str, Any]]') -&gt; 'pcapkit.protocols.schema.schema.Schema'</span>
-
-<span class="sd">        No further positional or keyword arguments are read from -- or</span>
-<span class="sd">        forwarded to -- the decorated function. :func:`prepare` is applied to</span>
-<span class="sd">        exactly one function in this tree,</span>
-<span class="sd">        :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`,</span>
-<span class="sd">        whose real signature has never had more than these four parameters,</span>
-<span class="sd">        and nothing calls it with more; an earlier revision of this note</span>
-<span class="sd">        nonetheless promised implementors a trailing ``*args, **kwargs``, which</span>
-<span class="sd">        the wrapper below never populated. A caller relying on that promise</span>
-<span class="sd">        got extras silently discarded instead of forwarded -- see `#454</span>
-<span class="sd">        &lt;https://github.com/JarryShaw/PyPCAPKit/issues/454&gt;`__ -- so the</span>
-<span class="sd">        wrapper now raises :exc:`TypeError` for a fifth positional argument or</span>
-<span class="sd">        an unconsumed keyword, the same as an ordinary call with too many</span>
-<span class="sd">        arguments would.</span>
-
-<span class="sd">    See Also:</span>
-<span class="sd">        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`</span>
-
-<span class="sd">    :param func: decorated function</span>
-<span class="sd">    :meta decorator:</span>
 <span class="sd">    """</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'P.args'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'P.kwargs'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'R_prepare'</span><span class="p">:</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Type[R_prepare]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'bytes | IO[bytes]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="c1"># ``length`` and ``packet`` are optional, both in the decorated</span>
-        <span class="c1"># signature and here: a caller may omit them, pass them positionally,</span>
-        <span class="c1"># or pass them by keyword. ``args`` only has an ``[2]``/``[3]`` to</span>
-        <span class="c1"># subscript when the caller supplied that many positionals, so fall</span>
-        <span class="c1"># back to ``kwargs`` -- and to the documented default of ``None`` --</span>
-        <span class="c1"># rather than assuming the position is always filled.</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[dict[str, Any]]'</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'packet'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="c1"># NOTE: The decorated function's real signature is exactly the four</span>
-        <span class="c1"># parameters above -- see #454. Anything left over here is therefore</span>
-        <span class="c1"># unwanted rather than something to forward: a fifth positional</span>
-        <span class="c1"># argument, or a keyword that ``kwargs.pop`` above never touched</span>
-        <span class="c1"># because ``length``/``packet`` arrived positionally instead. The</span>
-        <span class="c1"># latter is also what catches ``length`` (or ``packet``) supplied</span>
-        <span class="c1"># *both* positionally and by keyword -- the positional value wins</span>
-        <span class="c1"># above and the keyword is left in ``kwargs`` unconsumed, so it</span>
-        <span class="c1"># surfaces here rather than silently losing the keyword's value.</span>
-        <span class="n">extra_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
-        <span class="k">if</span> <span class="n">extra_args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">culprits</span> <span class="o">=</span> <span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">extra_args</span><span class="p">]</span>
-                                  <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s1">() got unexpected argument(s): </span><span class="si">{</span><span class="n">culprits</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
-        <span class="c1"># Whether the caller told us exactly how much there is to read, even</span>
-        <span class="c1"># if that is zero -- e.g. a nested schema sized by a ``length`` field</span>
-        <span class="c1"># that evaluates to zero, or an otherwise genuinely empty schema -- as</span>
-        <span class="c1"># opposed to leaving ``length`` to be derived from what is actually</span>
-        <span class="c1"># left in ``data``. Only a *derived* zero means the underlying stream</span>
-        <span class="c1"># itself is exhausted; a *declared* zero means this schema legitimately</span>
-        <span class="c1"># has nothing to read. See #458.</span>
-        <span class="n">declared_length</span> <span class="o">=</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">length</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">current</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-                <span class="n">length</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span> <span class="o">-</span> <span class="n">current</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">declared_length</span><span class="p">:</span>
-            <span class="c1"># Quiet: this is the frame reader's ordinary "no more packets"</span>
-            <span class="c1"># signal, caught as such by</span>
-            <span class="c1"># ``pcapkit.foundation.extraction.Extractor`` and friends -- c.f.</span>
-            <span class="c1"># ``pcapkit.protocols.protocol.ProtocolBase._read_unpack``'s</span>
-            <span class="c1"># ``StructError(..., quiet=True, eof=True)`` for the same pattern.</span>
-            <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="s1">'prepare: end of stream'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1">#: NoValueType: Default value for</span>
+<span class="c1">#: :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`.</span>
+<span class="c1">#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that</span>
+<span class="c1">#: attribute's own documentation is a published contract naming this object.</span>
+<span class="n">NoValue</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
 
-        <span class="c1"># call the user customised preparation method</span>
-        <span class="c1"># then proceed with the unpacking process</span>
-        <span class="c1"># and eventually revise the schema data</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+<div class="viewcode-block" id="NoDefaultType">
+<a class="viewcode-back" href="../../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.NoDefaultType">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoDefaultType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`.</span>
 
-        <span class="c1"># NOTE: ``Schema.unpack`` clears ``__updated__`` before returning, but</span>
-        <span class="c1"># ``post_process`` runs after it and assigns fields -- and every field</span>
-        <span class="c1"># assignment sets the flag again (``Schema.__setattr__``). The schema is</span>
-        <span class="c1"># then left marked as needing a re-pack even though its ``__buffer__``</span>
-        <span class="c1"># already holds the octets just read off the wire, so the next</span>
-        <span class="c1"># ``bytes(schema)`` or ``len(schema)`` silently re-packs it.</span>
-        <span class="c1">#</span>
-        <span class="c1"># That re-pack is not merely wasted work: ``Schema.pack`` calls</span>
-        <span class="c1"># ``post_process`` a *second* time, with a packet context rebuilt from</span>
-        <span class="c1"># the schema's own fields and therefore holding none of the enclosing</span>
-        <span class="c1"># layer's, so it overwrites exactly the values ``post_process`` derived</span>
-        <span class="c1"># from that context. It is what discarded the IPv6 source address that</span>
-        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process``</span>
-        <span class="c1"># had just resolved: ``OptionField.unpack`` measures each parsed option</span>
-        <span class="c1"># with ``len(data)``, which triggered the re-pack one option later.</span>
-        <span class="c1">#</span>
-        <span class="c1"># ``Schema.pack`` already orders the two the other way round -- clear the</span>
-        <span class="c1"># flag *after* ``post_process``, not before -- so match it here and the</span>
-        <span class="c1"># revision made while unpacking survives.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Guarded rather than assigned outright because ``post_process`` may hand</span>
-        <span class="c1"># back something other than a schema: an implementation is free to return</span>
-        <span class="c1"># a nested one instead of ``self``, as</span>
-        <span class="c1"># ``pcapkit.protocols.schema.internet.hopopt._SMFDPDOption`` does, and the</span>
-        <span class="c1"># decorator is also applied to stand-ins in the test suite that return</span>
-        <span class="c1"># the packet mapping. Only a real schema carries the flag.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s1">'__updated__'</span><span class="p">):</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="sd">    A dedicated class rather than a bare :class:`object`, per the owner's ruling</span>
+<span class="sd">    on #859: *"use dedicated class rather than bare object. Follow the house</span>
+<span class="sd">    convention."* A bare :class:`object` compares under ``is`` exactly as</span>
+<span class="sd">    safely as a dedicated class with no ``__eq__`` of its own does -- identity</span>
+<span class="sd">    comparison was never the problem an earlier revision's docstring here</span>
+<span class="sd">    overstated it to be. What a bare :class:`object` actually lacks is a</span>
+<span class="sd">    readable representation: it prints as ``&lt;object object at 0x...&gt;`` in a</span>
+<span class="sd">    signature, in :func:`help`, and in a traceback, where ``NoDefaultType()``</span>
+<span class="sd">    -- via :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``.</span>
 
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'R_prepare'</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">unpack</span></div>
+<span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
+<span class="sd">    convention is settled: both :class:`NullType` and :class:`NoValueType`</span>
+<span class="sd">    use ``&lt;Name&gt;Type``. The *instance*'s own name is not similarly settled --</span>
+<span class="sd">    the owner's follow-up on #859 is explicit that ``NULL`` (``SCREAMING_CASE``)</span>
+<span class="sd">    and ``NoValue`` (``CapWords``) disagree, and "mainly depends on how we need</span>
+<span class="sd">    it." The need here is continuity: ``NO_DEFAULT`` is already the name on</span>
+<span class="sd">    ``main`` -- referenced in :meth:`EnumLookup.get</span>
+<span class="sd">    &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature, its docstring, and both</span>
+<span class="sd">    comparison sites -- and this change is to *what the sentinel is*, not to</span>
+<span class="sd">    *what it is called*, so it keeps that name rather than being renamed to</span>
+<span class="sd">    match either precedent's instance casing for its own sake. ``NULL``'s</span>
+<span class="sd">    ``SCREAMING_CASE`` is the closer match regardless, since :data:`NO_DEFAULT`</span>
+<span class="sd">    was already spelled that way.</span>
 
+<span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
+<span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
+<span class="sd">    already exists, rather than building a new one. That guards against a</span>
+<span class="sd">    caller writing ``registry.get(key, default=NoDefaultType())`` -- perhaps</span>
+<span class="sd">    not realising :data:`NO_DEFAULT` already exists -- and getting back a</span>
+<span class="sd">    *second*, non-identical sentinel that silently fails ``is NO_DEFAULT``</span>
+<span class="sd">    inside :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`, so</span>
+<span class="sd">    their call is treated as supplying a real (if useless) default instead of</span>
+<span class="sd">    the *no default* they meant. With the guard, :class:`NoDefaultType() &lt;NoDefaultType&gt;`</span>
+<span class="sd">    always returns the one canonical :data:`NO_DEFAULT`, so that mistake</span>
+<span class="sd">    self-corrects.</span>
+
+<span class="sd">    Unlike :class:`NullType`, this does *not* also define ``__copy__``,</span>
+<span class="sd">    ``__deepcopy__`` or ``__reduce__`` -- but not because :func:`copy.deepcopy`</span>
+<span class="sd">    or :mod:`pickle` "bypass" :meth:`__new__`; they do not, for protocol 2 and</span>
+<span class="sd">    above. :meth:`object.__reduce_ex__` at protocol 2 reduces through</span>
+<span class="sd">    :func:`copyreg.__newobj__`, which reconstructs by calling</span>
+<span class="sd">    ``cls.__new__(cls)`` -- exactly the guarded path above -- so</span>
+<span class="sd">    ``copy.copy``, ``copy.deepcopy`` and every pickle protocol from 2 on</span>
+<span class="sd">    already come back as the one canonical instance with no extra code.</span>
+<span class="sd">    Measured::</span>
+
+<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(2)</span>
+<span class="sd">        (&lt;function __newobj__ at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;,), None, None, None)</span>
+<span class="sd">        &gt;&gt;&gt; copy.deepcopy(NO_DEFAULT) is NO_DEFAULT</span>
+<span class="sd">        True</span>
+
+<span class="sd">    The one path :meth:`__new__` cannot see is pickle protocol 0 (and 1),</span>
+<span class="sd">    which reduces through :func:`copyreg._reconstructor` instead, and *that*</span>
+<span class="sd">    calls :func:`object.__new__` directly::</span>
+
+<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(0)</span>
+<span class="sd">        (&lt;function _reconstructor at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;, &lt;class 'object'&gt;, None))</span>
+<span class="sd">        &gt;&gt;&gt; pickle.loads(pickle.dumps(NO_DEFAULT, protocol=0)) is NO_DEFAULT</span>
+<span class="sd">        False</span>
+
+<span class="sd">    That gap is exactly what :class:`NullType`'s own</span>
+<span class="sd">    :meth:`~NullType.__reduce__` exists to close, because :data:`NULL` is</span>
+<span class="sd">    stored as a :class:`~pcapkit.corekit.module.ModuleDescriptor` field that a</span>
+<span class="sd">    caller's own :func:`copy.deepcopy` or :mod:`pickle` call can walk into and</span>
+<span class="sd">    reconstruct. :data:`NO_DEFAULT` is left unhandled here not because the gap</span>
+<span class="sd">    cannot occur in principle, but because nothing in this package ever</span>
+<span class="sd">    pickles it at protocol 0: it is reachable -- from :meth:`EnumLookup.get</span>
+<span class="sd">    &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s own bound parameter default</span>
+<span class="sd">    (``EnumLookup.get.__defaults__[0]``, or any subclass's, e.g.</span>
+<span class="sd">    ``Hardware.get.__func__.__defaults__[0]``) and from</span>
+<span class="sd">    ``inspect.signature(Hardware.get).parameters['default'].default`` -- but</span>
+<span class="sd">    neither is a field any object here gets pickled *as*, and both still</span>
+<span class="sd">    survive :func:`copy.deepcopy` with identity intact regardless, because</span>
+<span class="sd">    deep-copying either still reduces the sentinel itself through the same,</span>
+<span class="sd">    guarded protocol-2 path measured above.</span>
+
+<span class="sd">    A caveat that turns out to be dormant rather than live, on the current</span>
+<span class="sd">    tree -- worth stating precisely rather than either repeating the older,</span>
+<span class="sd">    inaccurate claim or dropping the topic. :func:`importlib.reload` on this</span>
+<span class="sd">    module re-executes both ``class NoDefaultType:`` and ``NO_DEFAULT =</span>
+<span class="sd">    NoDefaultType()`` below, producing a fresh, distinct object; any consumer</span>
+<span class="sd">    that had already captured the pre-reload one -- as a bound parameter</span>
+<span class="sd">    default, say -- goes on holding the stale one, and a bare</span>
+<span class="sd">    ``held_default is NO_DEFAULT`` comparison against the post-reload global</span>
+<span class="sd">    then reads :data:`False` where it once read :data:`True`.</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` looked</span>
+<span class="sd">    exactly like such a consumer before GitHub issue #864: an unrecognised,</span>
+<span class="sd">    non-``NO_DEFAULT`` value used to fall through to ``cls(default)``, so a</span>
+<span class="sd">    stale sentinel handed to that call could raise a :exc:`ValueError` a</span>
+<span class="sd">    caller had no reason to expect from an *omitted* argument. #864 closed a</span>
+<span class="sd">    different hole -- ``default`` could mint a new member -- by replacing</span>
+<span class="sd">    that call with a ``default not in cls._value2member_map_`` guard, and the</span>
+<span class="sd">    guard happens to close this one too: a :class:`NoDefaultType` instance,</span>
+<span class="sd">    stale or fresh, is never a registered enum value, so the guard's ``not</span>
+<span class="sd">    in`` half reads :data:`True` for it either way and ``get`` re-raises the</span>
+<span class="sd">    original lookup error correctly regardless of which :data:`NO_DEFAULT`</span>
+<span class="sd">    a caller's stale default is stale *against*. Measured on the current</span>
+<span class="sd">    tree, guard included::</span>
+
+<span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')              # before reload</span>
+<span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
+<span class="sd">        &gt;&gt;&gt; importlib.reload(pcapkit.corekit.sentinels)</span>
+<span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')               # after reload</span>
+<span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
+
+<span class="sd">    So the docstring this class carried before GitHub issue #911's move --</span>
+<span class="sd">    which claimed the second call above raises :exc:`ValueError` -- was</span>
+<span class="sd">    already wrong on ``main`` at ``d31c0aaf6``, independently of the move:</span>
+<span class="sd">    it described the pre-#864 ``cls(default)`` call, and nobody had</span>
+<span class="sd">    re-verified it against the guard #864 added afterwards. Fixed here as a</span>
+<span class="sd">    drive-by correction, not a consequence of the housing change itself.</span>
+
+<span class="sd">    None of that makes the underlying hazard theoretical elsewhere in this</span>
+<span class="sd">    package: ``-1`` never had this failure mode at all, since ``-1 == -1``</span>
+<span class="sd">    compares by value rather than identity, and reload staleness is a</span>
+<span class="sd">    *tracked* defect class here for other constructs -- see</span>
+<span class="sd">    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own</span>
+<span class="sd">    docstring note citing GitHub issues #425, #428 and #560, and</span>
+<span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
+<span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
+<span class="sd">    deliberately to pin the fix for exactly that class of bug elsewhere. A</span>
+<span class="sd">    *future* comparison site written the vulnerable way -- a bare ``is</span>
+<span class="sd">    NO_DEFAULT`` with no independent guard behind it, the way #864's fix</span>
+<span class="sd">    itself was not -- would still reproduce it. "Nothing in this package</span>
+<span class="sd">    reloads :mod:`pcapkit.corekit.sentinels` after import" remains true</span>
+<span class="sd">    today, but it is a caveat to keep honest rather than a guarantee this</span>
+<span class="sd">    class enforces.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       GitHub issue #911 also changes *which* reload is the one that</span>
+<span class="sd">       matters, independently of the #864 finding above.</span>
+<span class="sd">       :mod:`pcapkit.corekit.enum` no longer defines ``NoDefaultType``</span>
+<span class="sd">       itself; it only reads :data:`NO_DEFAULT` off this module once, at its</span>
+<span class="sd">       own import time, into its own module global. Reloading</span>
+<span class="sd">       :mod:`pcapkit.corekit.enum` alone therefore now just re-runs that</span>
+<span class="sd">       read, which -- so long as this module has not *also* been reloaded --</span>
+<span class="sd">       fetches back the identical object and changes nothing. Producing a</span>
+<span class="sd">       fresh :data:`NO_DEFAULT` at all now takes reloading *this* module,</span>
+<span class="sd">       where the class statement lives; reloading only</span>
+<span class="sd">       :mod:`pcapkit.corekit.enum` is not enough on its own, because ``from</span>
+<span class="sd">       ... import`` binds a copy rather than a live alias, and that module's</span>
+<span class="sd">       own global stays pointed at whatever it read until something re-runs</span>
+<span class="sd">       that import.</span>
+
+<span class="sd">    Also unlike both :class:`NullType` and :class:`NoValueType`, this</span>
+<span class="sd">    deliberately does *not* define ``__bool__``. Both of those model an</span>
+<span class="sd">    *absent* value, so reading falsy in a boolean context is the point.</span>
+<span class="sd">    :data:`NO_DEFAULT` models something different: a marker meaning *no</span>
+<span class="sd">    default was supplied*, checked exclusively by ``is`` at</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s two</span>
+<span class="sd">    comparison sites -- nothing here ever evaluates it for truthiness. Giving</span>
+<span class="sd">    it ``__bool__ -&gt; False`` for symmetry with the other two would invite</span>
+<span class="sd">    exactly the conflation this sentinel exists to rule out: code that writes</span>
+<span class="sd">    ``if not default:`` instead of ``if default is NO_DEFAULT:`` would then</span>
+<span class="sd">    read :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy</span>
+<span class="sd">    default -- ``0``, ``''``, ``None`` or ``False`` -- which is the exact</span>
+<span class="sd">    collision ``-1`` used to cause under ``==`` and the reason #857 exists.</span>
+<span class="sd">    Leaving ``__bool__`` undefined makes ``NoDefaultType()`` truthy (the</span>
+<span class="sd">    default for any object defining neither ``__bool__`` nor ``__len__``),</span>
+<span class="sd">    which at least does not *look* like one of the falsy values it must never</span>
+<span class="sd">    be mistaken for.</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: 'NoDefaultType | None': The one instance :meth:`__new__` ever returns,</span>
+    <span class="c1">#: including for the module-level ``NO_DEFAULT = NoDefaultType()`` below</span>
+    <span class="c1">#: that creates it in the first place. Kept on the class rather than as a</span>
+    <span class="c1">#: module global so :meth:`__new__` can read and write it without a</span>
+    <span class="c1">#: ``global`` statement.</span>
+    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'NoDefaultType | None'</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoDefaultType'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be."""</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
+        <span class="k">return</span> <span class="s1">'&lt;NO_DEFAULT&gt;'</span></div>
+
+
+
+<span class="c1">#: NoDefaultType: The ``default`` argument value that means *no default*, i.e.</span>
+<span class="c1">#: let an unresolvable key propagate its lookup error rather than falling</span>
+<span class="c1">#: back. See :class:`NoDefaultType` for why this is a dedicated class rather</span>
+<span class="c1">#: than a bare :class:`object`, why it is a guarded singleton, and why it</span>
+<span class="c1">#: defines neither the copy/pickle hooks nor the ``__bool__`` that its</span>
+<span class="c1">#: :mod:`pcapkit.corekit` siblings do. :mod:`pcapkit.corekit.enum` keeps a</span>
+<span class="c1">#: re-export, since :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`</span>
+<span class="c1">#: names this object in its signature and docstring.</span>
+<span class="n">NO_DEFAULT</span> <span class="o">=</span> <span class="n">NoDefaultType</span><span class="p">()</span>
+
+
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_AbsentType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`_Absent`, the absent-key sentinel.</span>
+
+<span class="sd">    A distinct class rather than a bare :obj:`object` so that the sentinel has a</span>
+<span class="sd">    name of its own in a traceback or a debugger, and so that a type checker has</span>
+<span class="sd">    something to name where ``object()`` would give it nothing. It</span>
+<span class="sd">    follows :class:`NoValueType`, which does the same job for an unset field</span>
+<span class="sd">    default; this is a sibling of it rather than a reuse, since that one is</span>
+<span class="sd">    documented as the default value of</span>
+<span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
+<span class="sd">    and means "no value was given", not "this key is not here".</span>
+
+<span class="sd">    Defined here, alongside the package's other sentinels, per the owner's</span>
+<span class="sd">    ruling on GitHub issue #911 -- but it stays exactly as private as it was</span>
+<span class="sd">    in :mod:`pcapkit.protocols.protocol`: nothing outside that module reads</span>
+<span class="sd">    :data:`_Absent`, from here or from there, and this module's own</span>
+<span class="sd">    :attr:`__all__` does not name it. The move relocates the *definition*,</span>
+<span class="sd">    not the visibility.</span>
+
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
+        <span class="k">return</span> <span class="s1">'&lt;absent&gt;'</span>
+
+
+<span class="c1">#: _AbsentType: Absent-versus-:obj:`None` sentinel for</span>
+<span class="c1">#: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's</span>
+<span class="c1">#: own ``__keywords__`` out of its :attr:`~object.__dict__`, where</span>
+<span class="c1">#: :obj:`None` is itself a meaningful value -- the opt-out that says the</span>
+<span class="c1">#: class cannot enumerate its keywords, c.f.</span>
+<span class="c1">#: :attr:`ProtocolBase.__keywords__</span>
+<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
+<span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
+<span class="c1">#: for exactly that one read.</span>
+<span class="n">_Absent</span> <span class="o">=</span> <span class="n">_AbsentType</span><span class="p">()</span>
 </pre></div>
         </article>
       </div>

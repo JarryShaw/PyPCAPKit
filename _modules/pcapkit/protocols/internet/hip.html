@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -576,6 +576,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnassignedParameter</span> <span class="k">as</span> <span class="n">Data_UnassignedParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">ViaRVSParameter</span> <span class="k">as</span> <span class="n">Data_ViaRVSParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">HIP</span> <span class="k">as</span> <span class="n">Schema_HIP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">AckDataParameter</span> <span class="k">as</span> <span class="n">Schema_AckDataParameter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.hip</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACKParameter</span> <span class="k">as</span> <span class="n">Schema_ACKParameter</span>
@@ -715,9 +716,37 @@
 
 <div class="viewcode-block" id="HIP">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HIP</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_HIP</span><span class="p">,</span> <span class="n">Schema_HIP</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HIP</span><span class="p">(</span><span class="n">IPv6_Ext</span><span class="p">[</span><span class="n">Data_HIP</span><span class="p">,</span> <span class="n">Schema_HIP</span><span class="p">],</span> <span class="n">Internet</span><span class="p">[</span><span class="n">Data_HIP</span><span class="p">,</span> <span class="n">Schema_HIP</span><span class="p">],</span>
           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_HIP</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_HIP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Host Identity Protocol.</span>
+
+<span class="sd">    Double-inherited, per the maintainer's convention on GitHub pull request</span>
+<span class="sd">    #924: a header that is *only* usable as an extension header inherits</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one</span>
+<span class="sd">    that is also usable as a standalone protocol names</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is</span>
+<span class="sd">    both, on two independent grounds:</span>
+
+<span class="sd">    * :rfc:`7401#section-5.1` states that "the HIP header is logically an</span>
+<span class="sd">      IPv6 extension header", and IANA lists protocol 139 in its *IPv6</span>
+<span class="sd">      Extension Header Types* registry -- 11 entries, HIP among them.</span>
+<span class="sd">    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a</span>
+<span class="sd">      checksum for an **IPv4** header carrying ``Next Header: 139`` with</span>
+<span class="sd">      ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4</span>
+<span class="sd">      payload, exactly as :class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">      :class:`~pcapkit.protocols.internet.esp.ESP` do.</span>
+
+<span class="sd">    The second ground is what separates HIP from</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.mh.MH` and Shim6, which are protocols</span>
+<span class="sd">    in their own right but cannot appear under IPv4:</span>
+<span class="sd">    :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a</span>
+<span class="sd">    pseudo-header of IPv6 header fields with no IPv4 variant, and Mobile IPv4</span>
+<span class="sd">    carries its equivalent messages over UDP port 434 (:rfc:`5944`) rather</span>
+<span class="sd">    than as protocol 135.</span>
+
+<span class="sd">    ``Internet`` is already reached transitively through ``IPv6_Ext``; naming</span>
+<span class="sd">    it is what records the classification, so a future reader can tell a</span>
+<span class="sd">    deliberate standalone protocol from a header that merely inherits one.</span>
 
 <span class="sd">    This class currently supports parsing of the following HIP parameters,</span>
 <span class="sd">    which are registered in the :attr:`self.__parameter__ &lt;pcapkit.protocols.internet.hip.HIP.__parameter__&gt;`</span>

@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -488,6 +488,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Absent</span><span class="p">,</span> <span class="n">_AbsentType</span>  <span class="c1"># pylint: disable=unused-import</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">schema_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
@@ -496,7 +497,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span> <span class="k">as</span> <span class="n">Schema_Raw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.chardet</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span><span class="p">,</span> <span class="n">final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">RegistryError</span><span class="p">,</span>
                                           <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">)</span>
@@ -546,38 +547,6 @@
 <span class="n">OUT_OF_BAND_KEYWORDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'_layer'</span><span class="p">,</span> <span class="s1">'_protocol'</span><span class="p">,</span> <span class="s1">'__context__'</span><span class="p">,</span>
                                   <span class="s1">'__packet__'</span><span class="p">,</span> <span class="s1">'packet'</span><span class="p">})</span>
 
-
-<span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">_AbsentType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Type of :data:`_Absent`, the absent-key sentinel.</span>
-
-<span class="sd">    A distinct class rather than a bare :obj:`object` so that the sentinel has a</span>
-<span class="sd">    name of its own in a traceback or a debugger, and so that a type checker has</span>
-<span class="sd">    something to name where ``object()`` would give it nothing. It</span>
-<span class="sd">    follows :class:`~pcapkit.corekit.fields.field.NoValueType`, which does the</span>
-<span class="sd">    same job for an unset field default; this is a sibling of it rather than a</span>
-<span class="sd">    reuse, since that one is documented as the default value of</span>
-<span class="sd">    :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`</span>
-<span class="sd">    and means "no value was given", not "this key is not here".</span>
-
-<span class="sd">    """</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[False]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`False`."""</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;absent&gt;'</span>
-
-
-<span class="c1">#: _AbsentType: Absent-versus-:obj:`None` sentinel for reading ``__keywords__``</span>
-<span class="c1">#: out of a class :attr:`~object.__dict__`, where :obj:`None` is a meaningful</span>
-<span class="c1">#: value -- it is the opt-out that says the class cannot enumerate its keywords,</span>
-<span class="c1">#: c.f. :attr:`ProtocolBase.__keywords__</span>
-<span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves this</span>
-<span class="c1">#: module: it is read in :func:`_declared_keywords` and discarded there.</span>
-<span class="n">_Absent</span> <span class="o">=</span> <span class="n">_AbsentType</span><span class="p">()</span>
 
 <span class="c1">#: Cache for :func:`_declared_keywords`, keyed by protocol class. A protocol's</span>
 <span class="c1">#: signatures do not change after the class is created, and the walk below is</span>

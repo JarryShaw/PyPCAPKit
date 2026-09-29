@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.internet.ipv6_generic_ext - PyPCAPKit</title>
+        <title>pcapkit.protocols.internet.ipv6_ext - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -453,18 +453,21 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.internet.ipv6_generic_ext</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.protocols.internet.ipv6_ext</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""IPv6_GenericExt - Generic IPv6 Extension Header</span>
-<span class="sd">======================================================</span>
+<span class="sd">"""IPv6_Ext - IPv6 Extension Header</span>
+<span class="sd">====================================</span>
 
-<span class="sd">.. module:: pcapkit.protocols.internet.ipv6_generic_ext</span>
+<span class="sd">.. module:: pcapkit.protocols.internet.ipv6_ext</span>
 
-<span class="sd">:mod:`pcapkit.protocols.internet.ipv6_generic_ext` contains</span>
-<span class="sd">:class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`</span>
-<span class="sd">only, which implements a **generic** extractor for IPv6 extension</span>
-<span class="sd">headers, standing in for one whenever the header's own dedicated</span>
-<span class="sd">parser is unavailable or has failed.</span>
+<span class="sd">:mod:`pcapkit.protocols.internet.ipv6_ext` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
+<span class="sd">only, which serves two roles at once (GitHub issue #917): it is the</span>
+<span class="sd">shared **base class** of every IPv6 extension header in this package,</span>
+<span class="sd">and it implements a **generic** extractor for IPv6 extension headers,</span>
+<span class="sd">standing in for one whenever the header's own dedicated parser is</span>
+<span class="sd">unavailable or has failed. See the class docstring for the division</span>
+<span class="sd">between the two.</span>
 
 <span class="sd">Why this is safe in general</span>
 <span class="sd">----------------------------</span>
@@ -514,14 +517,25 @@
 <span class="sd">                                                          next header field is ever read at all, either</span>
 <span class="sd">======================================================= ===========================================</span>
 
-<span class="sd">This table classifies all twelve IANA-registered codes by *wire format*</span>
-<span class="sd">alone. ``Shim6`` conforms to it (:rfc:`5533`), but this package has never</span>
+<span class="sd">This table classifies by *wire format* alone, over the twelve codes</span>
+<span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates.</span>
+<span class="sd">Note that IANA's own *IPv6 Extension Header Types* registry has **eleven**:</span>
+<span class="sd">the twelfth, ``BIT_EMU`` (147), comes from this package generating that</span>
+<span class="sd">enumeration out of the *Protocol Numbers* registry's extension-header</span>
+<span class="sd">column instead, where 147 is flagged ``Y`` while the extension-header</span>
+<span class="sd">registry omits it. That discrepancy is GitHub issue #925 and is not this</span>
+<span class="sd">class's to resolve; the classification below holds either way, since 147</span>
+<span class="sd">is not reachable through here.</span>
+
+<span class="sd">``Shim6`` conforms to it (:rfc:`5533`), but this package has never</span>
 <span class="sd">had a dedicated parser class for it to begin with -- see "Two entry paths"</span>
 <span class="sd">below for how it reaches this class regardless, by direct dispatch rather</span>
 <span class="sd">than by a parser of its own failing.</span>
 
-<span class="sd">:rfc:`8200#section-4.5` says outright that Encapsulating Security</span>
-<span class="sd">Payload *"is not considered an extension header"*; :rfc:`4303` puts its</span>
+<span class="sd">:rfc:`8200#section-4.5` sets Encapsulating Security Payload aside --</span>
+<span class="sd">*"For this purpose,"* it writes, ESP *"is not considered an extension</span>
+<span class="sd">header"*, and the sentence after it lists ESP among *"examples of</span>
+<span class="sd">upper-layer headers"*; :rfc:`4303` puts its</span>
 <span class="sd">Next Header inside the encrypted trailer, with no length field anywhere</span>
 <span class="sd">in the cleartext part; and 253/254 are reserved for private</span>
 <span class="sd">experimentation (:rfc:`3692`) with no wire format at all. None of the</span>
@@ -604,37 +618,94 @@
 <span class="sd">ends on honestly, at the bad header, instead of inventing what follows it.</span>
 
 <span class="sd">"""</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_generic_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_GenericExt</span> <span class="k">as</span> <span class="n">Data_IPv6_GenericExt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Data_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_generic_ext</span><span class="w"> </span><span class="kn">import</span> \
-    <span class="n">IPv6_GenericExt</span> <span class="k">as</span> <span class="n">Schema_IPv6_GenericExt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span> <span class="k">as</span> <span class="n">Schema_IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_GenericExt'</span><span class="p">]</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">_NextHeaderData</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The one field every IPv6 extension header's data model carries.</span>
+
+<span class="sd">        :rfc:`8200#section-4.1` puts a Next Header octet first in every</span>
+<span class="sd">        extension header, and all eight implemented ones record it under this</span>
+<span class="sd">        name -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member</span>
+<span class="sd">        rather than a fallback-role-only one. Narrower than</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext` on</span>
+<span class="sd">        purpose: ``length`` is deliberately absent, because</span>
+<span class="sd">        :class:`~pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag` has no</span>
+<span class="sd">        such field (its length is the constant 8, and its own</span>
+<span class="sd">        :attr:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.length`</span>
+<span class="sd">        property supplies it).</span>
+
+<span class="sd">        """</span>
+
+        <span class="nb">next</span><span class="p">:</span> <span class="s1">'Optional[Enum_TransType]'</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_Ext'</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="IPv6_GenericExt">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_GenericExt</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_IPv6_GenericExt</span><span class="p">,</span> <span class="n">Schema_IPv6_GenericExt</span><span class="p">],</span>
-                      <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_GenericExt</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_GenericExt</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""This class implements a generic IPv6 extension header parser.</span>
+<div class="viewcode-block" id="IPv6_Ext">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Ext</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_PT</span><span class="p">,</span> <span class="n">_ST</span><span class="p">],</span>
+               <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_Ext</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_Ext</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""This class implements a generic IPv6 extension header parser, and is</span>
+<span class="sd">    the shared base of every IPv6 extension header in this package.</span>
 
 <span class="sd">    See the module docstring for the RFC citations backing the length</span>
 <span class="sd">    rules below, the two ways this class gets dispatched to, and the</span>
 <span class="sd">    reasoning for stopping rather than clipping on an overrun.</span>
+
+<span class="sd">    The two roles</span>
+<span class="sd">    --------------</span>
+
+<span class="sd">    This one class plays both, on the owner's ruling for GitHub issue #917:</span>
+
+<span class="sd">    1. **The concrete fallback parser** for an :rfc:`6564`-conforming header</span>
+<span class="sd">       this package has no dedicated class for, or whose dedicated class</span>
+<span class="sd">       raised -- which is what :meth:`read`, :meth:`make`, :attr:`name`,</span>
+<span class="sd">       :attr:`alias` and the ``schema=``/``data=`` above implement.</span>
+<span class="sd">    2. **The base class** of the eight implemented extension headers</span>
+<span class="sd">       (:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.hip.HIP`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.mh.MH`,</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">       :class:`~pcapkit.protocols.internet.esp.ESP`), which is what the</span>
+<span class="sd">       ``_extf`` guards on :attr:`payload`, :attr:`protocol` and</span>
+<span class="sd">       :attr:`protochain` are for.</span>
+
+<span class="sd">    It is generic in its data and schema types -- exactly like</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipsec.IPsec`, the other base in this</span>
+<span class="sd">    package -- so that a subclass keeps its *own* ``_PT``/``_ST`` instead of</span>
+<span class="sd">    inheriting this class's. ``AH`` and ``ESP`` therefore double-inherit two</span>
+<span class="sd">    identically-parameterised generic bases, ``IPsec[…]`` and ``IPv6_Ext[…]``.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        A subclass **must** define :attr:`name`, :attr:`alias`,</span>
+<span class="sd">        :attr:`protocol`, :attr:`length` and :meth:`__index__` itself. All five</span>
+<span class="sd">        carry this class's *fallback-role* answers, which are wrong for a</span>
+<span class="sd">        header that has an identity of its own: it would report itself as</span>
+<span class="sd">        ``IPv6 Extension Header`` / ``IPv6-Ext``, read its length off a data</span>
+<span class="sd">        model that is not its own, and :meth:`__index__` would raise rather</span>
+<span class="sd">        than return its IANA number. Nothing in the language enforces the</span>
+<span class="sd">        override, so ``tests/protocols/internet/test_ipv6_ext_unit.py``</span>
+<span class="sd">        enforces it instead, over every subclass discovered at runtime.</span>
 
 <span class="sd">    """</span>
 
@@ -643,13 +714,24 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["Generic IPv6 Extension Header"]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Name of current protocol."""</span>
-        <span class="k">return</span> <span class="s1">'Generic IPv6 Extension Header'</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Name of current protocol.</span>
+
+<span class="sd">        Annotated ``str`` rather than as the ``Literal`` every *leaf* protocol</span>
+<span class="sd">        in this package uses, because this one is also a base: a ``Literal``</span>
+<span class="sd">        here makes each subclass's own ``Literal`` an incompatible override</span>
+<span class="sd">        (measured: eight ``[override]`` errors from mypy, one per subclass).</span>
+<span class="sd">        The value returned is still the single fallback-role constant.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="s1">'IPv6 Extension Header'</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal["IPv6-GenericExt"]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Acronym of corresponding protocol.</span>
+
+<span class="sd">        Annotated ``str`` rather than ``Literal``, for the reason given on</span>
+<span class="sd">        :attr:`name`.</span>
 
 <span class="sd">        Hyphenated, like :attr:`IPv6_Frag.alias</span>
 <span class="sd">        &lt;pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.alias&gt;` and</span>
@@ -658,51 +740,91 @@
 <span class="sd">        &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;` builds the</span>
 <span class="sd">        packet-dict key by ``self.alias.lstrip('IPv6-').lower()`` --</span>
 <span class="sd">        :meth:`str.lstrip` strips a character *set*, not a prefix, so the</span>
-<span class="sd">        default (class-name) alias ``'IPv6_GenericExt'`` would strip to</span>
-<span class="sd">        ``'_GenericExt'`` and key the dict as ``_genericext``. The hyphen</span>
-<span class="sd">        makes every leading character (``I``, ``P``, ``v``, ``6``, ``-``) a</span>
-<span class="sd">        member of the set being stripped, same as the siblings, giving</span>
-<span class="sd">        ``genericext``.</span>
+<span class="sd">        default (class-name) alias ``'IPv6_Ext'`` would strip to ``'_Ext'``</span>
+<span class="sd">        and key the dict as ``_ext``. The hyphen makes every leading</span>
+<span class="sd">        character (``I``, ``P``, ``v``, ``6``, ``-``) a member of the set</span>
+<span class="sd">        being stripped, same as the siblings, giving ``ext``.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="s1">'IPv6-GenericExt'</span>
+        <span class="k">return</span> <span class="s1">'IPv6-Ext'</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Header length of current protocol."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
+<span class="w">        </span><span class="sd">"""Header length of current protocol.</span>
+
+<span class="sd">        Fallback-role member: it reads this module's *own* data model, so a</span>
+<span class="sd">        subclass whose data model records its length elsewhere -- or not at</span>
+<span class="sd">        all, as :class:`~pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag`</span>
+<span class="sd">        does not -- must override it. All eight implemented headers do, and</span>
+<span class="sd">        ``tests/protocols/internet/test_ipv6_ext_unit.py`` holds them to it.</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_IPv6_Ext'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span><span class="o">.</span><span class="n">length</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Enum_ExtensionHeader]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Enum_ExtensionHeader] | Optional[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""The extension header this instance stands in for.</span>
 
-<span class="sd">        This is **not** the base :attr:`Protocol.protocol</span>
-<span class="sd">        &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;` meaning ("name</span>
-<span class="sd">        of next layer protocol"); it is deliberately repointed, on the</span>
-<span class="sd">        owner's ruling for GitHub issue #891, at this instance's *own*</span>
-<span class="sd">        identity -- which header's format it parsed, e.g.</span>
+<span class="sd">        In the *fallback* role -- i.e. when this instance parsed this</span>
+<span class="sd">        module's own schema -- this is **not** the base</span>
+<span class="sd">        :attr:`Protocol.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`</span>
+<span class="sd">        meaning ("name of next layer protocol"); it is deliberately</span>
+<span class="sd">        repointed, on the owner's ruling for GitHub issue #891, at this</span>
+<span class="sd">        instance's *own* identity -- which header's format it parsed, e.g.</span>
 <span class="sd">        :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`</span>
 <span class="sd">        or :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`.</span>
 <span class="sd">        That identity is resolved per instance from the numeric code handed</span>
 <span class="sd">        to the constructor (``alias``), which</span>
 <span class="sd">        :meth:`pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer`</span>
-<span class="sd">        already holds before it dispatches (``ipv6.py:327``). See</span>
+<span class="sd">        already holds before it dispatches (``ipv6.py:388``). See</span>
 <span class="sd">        :meth:`__index__` for why the *class-level* identity cannot be</span>
-<span class="sd">        made to work the same way.</span>
+<span class="sd">        made to work the same way. It is deliberately *not* ``_extf``-guarded</span>
+<span class="sd">        in this role: that same call passes ``extension=True`` for every</span>
+<span class="sd">        extension header in a chain, so guarding it would make the identity</span>
+<span class="sd">        unreadable in precisely the case it exists for.</span>
+
+<span class="sd">        In the *base* role it falls through to ``super()``, restoring the</span>
+<span class="sd">        ordinary :class:`~pcapkit.protocols.protocol.ProtocolBase` meaning.</span>
+<span class="sd">        That fall-through is load-bearing rather than tidy: all eight</span>
+<span class="sd">        subclasses implement their own ``_extf``-guarded ``protocol`` as</span>
+<span class="sd">        ``return super().protocol``, and this class sits between them and</span>
+<span class="sd">        :class:`~pcapkit.protocols.protocol.ProtocolBase` in the MRO -- so</span>
+<span class="sd">        without the discriminator below, every one of those eight would end</span>
+<span class="sd">        up reading ``self._info.protocol`` off a data model that has no such</span>
+<span class="sd">        field. Measured: ``AttributeError`` on all eight.</span>
+
+<span class="sd">        The discriminator is the *class-level*</span>
+<span class="sd">        :attr:`~pcapkit.protocols.protocol.ProtocolBase.__data__` rather than</span>
+<span class="sd">        an :func:`isinstance` test on ``self._info``, because a ``make``-only</span>
+<span class="sd">        instance has no ``_info`` at all -- reading it here to decide which</span>
+<span class="sd">        role we are in turns</span>
+<span class="sd">        :attr:`ProtocolBase.protocol &lt;pcapkit.protocols.protocol.ProtocolBase.protocol&gt;`,</span>
+<span class="sd">        which only ever needed ``self._protos``, into an ``AttributeError``</span>
+<span class="sd">        (measured: ``tests/protocols/internet/test_ipv6_extension_unit.py``</span>
+<span class="sd">        constructs exactly that instance).</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">protocol</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="ow">is</span> <span class="n">Data_IPv6_Ext</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Data_IPv6_Ext'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span><span class="o">.</span><span class="n">protocol</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">protocol</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Enum_TransType]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Next header, as parsed off the wire.</span>
+
+<span class="sd">        Shared by every subclass rather than fallback-role-only -- see</span>
+<span class="sd">        :class:`_NextHeaderData` for why that is sound. Note this is an</span>
+<span class="sd">        *addition* for the eight implemented headers: none of them declared a</span>
+<span class="sd">        ``next`` property of its own before GitHub issue #917, so reading one</span>
+<span class="sd">        raised :exc:`AttributeError`, and nothing could have depended on a</span>
+<span class="sd">        value it never returned.</span>
 
 <span class="sd">        :data:`None` when the declared length would have overrun what</span>
 <span class="sd">        remained of the chain and the walk stopped instead of trusting it</span>
 <span class="sd">        -- see the module docstring's "overrun guard" section.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">next</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_NextHeaderData'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span><span class="o">.</span><span class="n">next</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase | NoReturn'</span><span class="p">:</span>
@@ -714,7 +836,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">' object has no attribute 'payload'"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">payload</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtoChain | NoReturn'</span><span class="p">:</span>
@@ -732,30 +854,50 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPv6_GenericExt.read">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[Exception]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">alias</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4, 6]'</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
-             <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_IPv6_GenericExt'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="IPv6_Ext.read">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+             <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read a generically-parsed IPv6 extension header.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            error: Parsing error, if reached as a</span>
-<span class="sd">                :func:`~pcapkit.utilities.decorators.beholder` fallback.</span>
-<span class="sd">            alias: Numeric extension header code this instance stands in</span>
-<span class="sd">                for, e.g. ``0`` for ``HOPOPT`` or ``140`` for ``Shim6``.</span>
-<span class="sd">            version: IP protocol version.</span>
 <span class="sd">            extension: If the protocol is used as an IPv6 extension header.</span>
-<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments, two of which are this</span>
+<span class="sd">                class's own and are supplied by :meth:`IPv6._import_next_layer</span>
+<span class="sd">                &lt;pcapkit.protocols.internet.ipv6.IPv6._import_next_layer&gt;`</span>
+<span class="sd">                (``ipv6.py:540,550``) rather than typed by a caller:</span>
+
+<span class="sd">                * ``alias`` -- the numeric extension header code this instance</span>
+<span class="sd">                  stands in for, e.g. ``0`` for ``HOPOPT`` or ``140`` for</span>
+<span class="sd">                  ``Shim6``.</span>
+<span class="sd">                * ``error`` -- the parsing error, when this instance was</span>
+<span class="sd">                  reached as a :func:`~pcapkit.utilities.decorators.beholder`</span>
+<span class="sd">                  fallback rather than by direct dispatch.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            Those two are read out of ``**kwargs`` rather than declared as</span>
+<span class="sd">            parameters, and ``version`` is not declared either, because this</span>
+<span class="sd">            class is *also* the base of eight subclasses whose own ``read``</span>
+<span class="sd">            accepts none of the three. Declaring them here asserts of the whole</span>
+<span class="sd">            family an interface only the fallback has, and both linters say so:</span>
+<span class="sd">            mypy reports eight ``Signature of "read" incompatible with</span>
+<span class="sd">            supertype`` ``[override]`` errors, pylint ``arguments-differ``.</span>
+<span class="sd">            ``version`` costs nothing to drop in any case -- this method never</span>
+<span class="sd">            read it (it carried ``# pylint: disable=unused-argument`` for</span>
+<span class="sd">            exactly that reason); the version gate lives in</span>
+<span class="sd">            :meth:`__post_init__`, which still takes it explicitly.</span>
+
 <span class="sd">        """</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'alias'</span><span class="p">)</span>  <span class="c1"># type: Optional[int]</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'error'</span><span class="p">)</span>  <span class="c1"># type: Optional[Exception]</span>
+
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_IPv6_Ext'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span>
 
         <span class="n">ext_code</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Enum_ExtensionHeader]</span>
         <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -795,7 +937,7 @@
             <span class="n">ext_len</span> <span class="o">=</span> <span class="n">nominal</span>
             <span class="n">next_header</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span>
 
-        <span class="n">generic_ext</span> <span class="o">=</span> <span class="n">Data_IPv6_GenericExt</span><span class="p">(</span>
+        <span class="n">generic_ext</span> <span class="o">=</span> <span class="n">Data_IPv6_Ext</span><span class="p">(</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">ext_code</span><span class="p">,</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_header</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">ext_len</span><span class="p">,</span>
@@ -803,17 +945,17 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">generic_ext</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">generic_ext</span><span class="p">,</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'_PT'</span><span class="p">,</span> <span class="n">generic_ext</span><span class="p">),</span> <span class="n">next_header</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ext_len</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="IPv6_GenericExt.make">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.make">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="IPv6_Ext.make">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
              <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType | int'</span> <span class="o">=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
              <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Any'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span><span class="p">,</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6_GenericExt'</span><span class="p">:</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
@@ -828,12 +970,43 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed packet data.</span>
 
+<span class="sd">        Note:</span>
+<span class="sd">            **Keyword-only**, and that matters in two directions at once.</span>
+
+<span class="sd">            The three stay *declared*, unlike :meth:`read`'s own keywords,</span>
+<span class="sd">            because :func:`~pcapkit.protocols.protocol._check_construction_keywords`</span>
+<span class="sd">            builds its allowlist from :func:`inspect.signature` of ``make``.</span>
+<span class="sd">            Hiding them in ``**kwargs`` was tried and **breaks construction**:</span>
+<span class="sd">            measured as ``UnsupportedCall: IPv6_Ext: unexpected keyword(s):</span>
+<span class="sd">            'len' (did you mean 'length'?), 'next', 'payload'`` on a plain</span>
+<span class="sd">            ``IPv6_Ext(next=..., len=..., payload=...)``. The ``__keywords__``</span>
+<span class="sd">            escape hatch would cover that, but it is unioned down the MRO, so</span>
+<span class="sd">            it would widen the allowlist -- and weaken that misspelling check --</span>
+<span class="sd">            for all eight subclasses too.</span>
+
+<span class="sd">            They are keyword-*only* because this class is also a base, and each</span>
+<span class="sd">            subclass's ``make`` puts different names in the same positions. As</span>
+<span class="sd">            positional parameters they drew 18 pylint ``arguments-renamed``</span>
+<span class="sd">            warnings (``ESP.make``: ``next`` -&gt; ``spi``, ``len`` -&gt; ``seq``,</span>
+<span class="sd">            ``payload`` -&gt; ``next``; ``IPv6_Route.make``: ``next`` -&gt; ``dst``,</span>
+<span class="sd">            ``len`` -&gt; ``next``, ``payload`` -&gt; ``next_default``; and two each</span>
+<span class="sd">            for the other six) and eight mypy ``[override]`` errors. With no</span>
+<span class="sd">            positional parameters there is no position to disagree about:</span>
+<span class="sd">            both counts drop to zero, and the allowlist is unaffected because</span>
+<span class="sd">            ``_declared_keywords`` collects ``KEYWORD_ONLY`` parameters too.</span>
+<span class="sd">            Nothing calls a protocol's ``make`` positionally -- ``__init__``</span>
+<span class="sd">            spreads ``**kwargs`` into it (``protocol.py:607``).</span>
+
+<span class="sd">            ``read`` needs none of this: its ``alias``/``error`` only ever</span>
+<span class="sd">            arrive on the *parse* path, which ``__init__`` exempts from the</span>
+<span class="sd">            construction check outright.</span>
+
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">Schema_IPv6_GenericExt</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="n">Schema_IPv6_Ext</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="nb">next</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">))</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -847,8 +1020,8 @@
     <span class="nd">@overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
-<div class="viewcode-block" id="IPv6_GenericExt.__post_init__">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.__post_init__">[docs]</a>
+<div class="viewcode-block" id="IPv6_Ext.__post_init__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__post_init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">'Optional[IO[bytes] | bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">'Literal[4, 6]'</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -862,13 +1035,25 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ProtocolError: If ``version`` is not ``6``.</span>
+<span class="sd">            ProtocolError: If this is the *fallback* parser (see the class</span>
+<span class="sd">                docstring's "two roles") and ``version`` is not ``6``.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction argument, please refer to :meth:`make`.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This class is registered into :attr:`Internet.__proto__</span>
+<span class="sd">            The version gate below is scoped to the fallback role, by the same</span>
+<span class="sd">            ``__data__`` discriminator :attr:`protocol` uses. Applying it to</span>
+<span class="sd">            subclasses would break the two that are *not* IPv6-only:</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP` both default to</span>
+<span class="sd">            ``version=4`` and are perfectly valid under IPv4, so an</span>
+<span class="sd">            unconditional gate here rejects them outright (measured:</span>
+<span class="sd">            ``ProtocolError: ESP: only valid for IPv6, got version=4`` from</span>
+<span class="sd">            ``tests/protocols/internet/test_esp_unit.py``).</span>
+
+<span class="sd">            The gate itself is unchanged in effect for the fallback, and is</span>
+<span class="sd">            there because this class is registered into :attr:`Internet.__proto__</span>
 <span class="sd">            &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;` --</span>
 <span class="sd">            shared by *every* :class:`~pcapkit.protocols.internet.internet.Internet`</span>
 <span class="sd">            subclass, :class:`~pcapkit.protocols.internet.ipv4.IPv4` included --</span>
@@ -878,7 +1063,7 @@
 <span class="sd">            IPv4 packet whose protocol byte happens to be 140 would reach</span>
 <span class="sd">            this class too and walk an IPv6-style extension-header chain out</span>
 <span class="sd">            of an IPv4 payload -- verified: it would read</span>
-<span class="sd">            ``IPv4:IPv6-GenericExt:...`` instead of the ``IPv4:Shim6`` a</span>
+<span class="sd">            ``IPv4:IPv6-Ext:...`` instead of the ``IPv4:Shim6`` a</span>
 <span class="sd">            plain, non-continuing ``Raw`` gives today. Rejecting here sends</span>
 <span class="sd">            construction back through :func:`~pcapkit.utilities.decorators.beholder`</span>
 <span class="sd">            at the *caller's* layer, which substitutes that same ``Raw`` --</span>
@@ -887,7 +1072,7 @@
 <span class="sd">            IPv4-specific code of its own.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="ow">is</span> <span class="n">Data_IPv6_Ext</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: only valid for IPv6, got version=</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
 
@@ -898,12 +1083,18 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[2]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object.</span>
+
+<span class="sd">        Two octets -- all :rfc:`6564#section-4` guarantees. Annotated ``int``</span>
+<span class="sd">        rather than ``Literal[2]``, for the reason given on :attr:`name`: every</span>
+<span class="sd">        subclass has a longer fixed header and its own ``Literal``.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="mi">2</span>
 
-<div class="viewcode-block" id="IPv6_GenericExt.__index__">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.__index__">[docs]</a>
+<div class="viewcode-block" id="IPv6_Ext.__index__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Numeral registry index of the protocol.</span>
@@ -915,7 +1106,7 @@
 <span class="sd">                because :class:`~pcapkit.protocols.misc.raw.Raw` has no</span>
 <span class="sd">                identity to report at all, this class *does* have one --</span>
 <span class="sd">                see :attr:`protocol` -- but it is resolved per instance,</span>
-<span class="sd">                not per class: one :class:`IPv6_GenericExt` stands in for</span>
+<span class="sd">                not per class: one :class:`IPv6_Ext` stands in for</span>
 <span class="sd">                :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT`,</span>
 <span class="sd">                :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
 <span class="sd">                and any other RFC 6564-conforming code alike, while</span>
@@ -930,10 +1121,10 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPv6_GenericExt._make_data">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt._make_data">[docs]</a>
+<div class="viewcode-block" id="IPv6_Ext._make_data">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext._make_data">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6_GenericExt'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data_IPv6_Ext'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Create key-value pairs from ``data`` for protocol construction.</span>
 
 <span class="sd">        Inverts whichever per-protocol length rule :meth:`read` applied,</span>
@@ -980,7 +1171,7 @@
 <span class="c1"># import name 'Extractor' from partially initialized module</span>
 <span class="c1"># 'pcapkit.foundation.extraction'`` on a bare ``import pcapkit``. Plain</span>
 <span class="c1"># dict assignment carries no import of its own, so it cannot re-trigger that.</span>
-<span class="n">Internet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Shim6</span><span class="p">]</span> <span class="o">=</span> <span class="n">IPv6_GenericExt</span>
+<span class="n">Internet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Shim6</span><span class="p">]</span> <span class="o">=</span> <span class="n">IPv6_Ext</span>
 </pre></div>
         </article>
       </div>

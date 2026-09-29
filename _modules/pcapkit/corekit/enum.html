@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -546,7 +546,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">extend_enum</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">NoDefaultType</span>  <span class="c1"># pylint: disable=unused-import</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -554,174 +554,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NO_DEFAULT'</span><span class="p">,</span> <span class="s1">'EnumLookup'</span><span class="p">,</span> <span class="s1">'EnumRegistry'</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="NoDefaultType">
-<a class="viewcode-back" href="../../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.NoDefaultType">[docs]</a>
-<span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">NoDefaultType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for :meth:`EnumLookup.get`.</span>
-
-<span class="sd">    A dedicated class rather than a bare :class:`object`, per the owner's ruling</span>
-<span class="sd">    on #859: *"use dedicated class rather than bare object. Follow the house</span>
-<span class="sd">    convention."* A bare :class:`object` compares under ``is`` exactly as</span>
-<span class="sd">    safely as a dedicated class with no ``__eq__`` of its own does -- identity</span>
-<span class="sd">    comparison was never the problem an earlier revision's docstring here</span>
-<span class="sd">    overstated it to be. What a bare :class:`object` actually lacks is a</span>
-<span class="sd">    readable representation: it prints as ``&lt;object object at 0x...&gt;`` in a</span>
-<span class="sd">    signature, in :func:`help`, and in a traceback, where ``NoDefaultType()``</span>
-<span class="sd">    -- via :meth:`__repr__` below -- prints as ``&lt;NO_DEFAULT&gt;``.</span>
-
-<span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
-<span class="sd">    convention is settled: both :class:`~pcapkit.corekit.module.NullType` and</span>
-<span class="sd">    :class:`~pcapkit.corekit.fields.field.NoValueType` use ``&lt;Name&gt;Type``. The</span>
-<span class="sd">    *instance*'s own name is not similarly settled -- the owner's follow-up</span>
-<span class="sd">    on #859 is explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``</span>
-<span class="sd">    (``CapWords``) disagree, and "mainly depends on how we need it." The need</span>
-<span class="sd">    here is continuity: ``NO_DEFAULT`` is already the name on ``main`` --</span>
-<span class="sd">    referenced in :meth:`EnumLookup.get`'s signature, its docstring, and</span>
-<span class="sd">    both comparison sites -- and this change is to *what the sentinel is*,</span>
-<span class="sd">    not to *what it is called*, so it keeps that name rather than being</span>
-<span class="sd">    renamed to match either precedent's instance casing for its own sake.</span>
-<span class="sd">    ``NULL``'s ``SCREAMING_CASE`` is the closer match regardless, since</span>
-<span class="sd">    :data:`NO_DEFAULT` was already spelled that way.</span>
-
-<span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
-<span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
-<span class="sd">    already exists, rather than building a new one. That guards against a</span>
-<span class="sd">    caller writing ``registry.get(key, default=NoDefaultType())`` -- perhaps</span>
-<span class="sd">    not realising :data:`NO_DEFAULT` already exists -- and getting back a</span>
-<span class="sd">    *second*, non-identical sentinel that silently fails ``is NO_DEFAULT``</span>
-<span class="sd">    inside :meth:`EnumLookup.get`, so their call is treated as supplying a</span>
-<span class="sd">    real (if useless) default instead of the *no default* they meant. With the</span>
-<span class="sd">    guard, :class:`NoDefaultType() &lt;NoDefaultType&gt;` always returns the one</span>
-<span class="sd">    canonical :data:`NO_DEFAULT`, so that mistake self-corrects.</span>
-
-<span class="sd">    Unlike :class:`~pcapkit.corekit.module.NullType`, this does *not* also</span>
-<span class="sd">    define ``__copy__``, ``__deepcopy__`` or ``__reduce__`` -- but not because</span>
-<span class="sd">    :func:`copy.deepcopy` or :mod:`pickle` "bypass" :meth:`__new__`; they do</span>
-<span class="sd">    not, for protocol 2 and above. :meth:`object.__reduce_ex__` at protocol 2</span>
-<span class="sd">    reduces through :func:`copyreg.__newobj__`, which reconstructs by calling</span>
-<span class="sd">    ``cls.__new__(cls)`` -- exactly the guarded path above -- so</span>
-<span class="sd">    ``copy.copy``, ``copy.deepcopy`` and every pickle protocol from 2 on</span>
-<span class="sd">    already come back as the one canonical instance with no extra code.</span>
-<span class="sd">    Measured::</span>
-
-<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(2)</span>
-<span class="sd">        (&lt;function __newobj__ at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;,), None, None, None)</span>
-<span class="sd">        &gt;&gt;&gt; copy.deepcopy(NO_DEFAULT) is NO_DEFAULT</span>
-<span class="sd">        True</span>
-
-<span class="sd">    The one path :meth:`__new__` cannot see is pickle protocol 0 (and 1),</span>
-<span class="sd">    which reduces through :func:`copyreg._reconstructor` instead, and *that*</span>
-<span class="sd">    calls :func:`object.__new__` directly::</span>
-
-<span class="sd">        &gt;&gt;&gt; NO_DEFAULT.__reduce_ex__(0)</span>
-<span class="sd">        (&lt;function _reconstructor at 0x...&gt;, (&lt;class '...NoDefaultType'&gt;, &lt;class 'object'&gt;, None))</span>
-<span class="sd">        &gt;&gt;&gt; pickle.loads(pickle.dumps(NO_DEFAULT, protocol=0)) is NO_DEFAULT</span>
-<span class="sd">        False</span>
-
-<span class="sd">    That gap is exactly what :class:`~pcapkit.corekit.module.NullType`'s own</span>
-<span class="sd">    :meth:`~pcapkit.corekit.module.NullType.__reduce__` exists to close, because</span>
-<span class="sd">    :data:`~pcapkit.corekit.module.NULL` is stored as a</span>
-<span class="sd">    :class:`~pcapkit.corekit.module.ModuleDescriptor` field that a caller's own</span>
-<span class="sd">    :func:`copy.deepcopy` or :mod:`pickle` call can walk into and reconstruct.</span>
-<span class="sd">    :data:`NO_DEFAULT` is left unhandled here not because the gap cannot occur</span>
-<span class="sd">    in principle, but because nothing in this package ever pickles it at</span>
-<span class="sd">    protocol 0: it is reachable -- from :meth:`EnumLookup.get`'s own bound</span>
-<span class="sd">    parameter default (``EnumLookup.get.__defaults__[0]``, or any</span>
-<span class="sd">    subclass's, e.g. ``Hardware.get.__func__.__defaults__[0]``) and from</span>
-<span class="sd">    ``inspect.signature(Hardware.get).parameters['default'].default`` -- but</span>
-<span class="sd">    neither is a field any object here gets pickled *as*, and both still</span>
-<span class="sd">    survive :func:`copy.deepcopy` with identity intact regardless, because</span>
-<span class="sd">    deep-copying either still reduces the sentinel itself through the same,</span>
-<span class="sd">    guarded protocol-2 path measured above.</span>
-
-<span class="sd">    A caveat, not a defect, but a real and *worse* one than the marker it</span>
-<span class="sd">    replaces: :func:`importlib.reload` on this module does not merely leave</span>
-<span class="sd">    the class stale, it breaks :meth:`EnumLookup.get`'s own no-default</span>
-<span class="sd">    contract for every subclass whose ``get`` was already resolved before the</span>
-<span class="sd">    reload. Reload re-executes both ``class NoDefaultType:`` and</span>
-<span class="sd">    ``NO_DEFAULT = NoDefaultType()`` below, so the *module global*</span>
-<span class="sd">    :meth:`EnumLookup.get`'s body compares against becomes a fresh, distinct</span>
-<span class="sd">    object. But each subclass's own ``get`` inherited its **bound parameter</span>
-<span class="sd">    default** -- ``default: 'Any' = NO_DEFAULT`` -- at function-definition</span>
-<span class="sd">    time, before the reload, and a bound default is frozen then, not looked</span>
-<span class="sd">    up again per call. So after the reload, calling ``get`` with ``default``</span>
-<span class="sd">    *omitted* no longer compares the pre-reload default against ``NO_DEFAULT``</span>
-<span class="sd">    truthfully: it is comparing the stale pre-reload sentinel against the</span>
-<span class="sd">    fresh post-reload one, ``is`` reads *False*, and ``get`` falls through to</span>
-<span class="sd">    attempting ``cls(default)`` on the stale sentinel instead of re-raising</span>
-<span class="sd">    the original lookup error. Measured::</span>
-
-<span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')              # before reload</span>
-<span class="sd">        KeyError: 'Definitely-Not-A-Member'</span>
-<span class="sd">        &gt;&gt;&gt; importlib.reload(pcapkit.corekit.enum)</span>
-<span class="sd">        &gt;&gt;&gt; Hardware.get('Definitely-Not-A-Member')               # after reload</span>
-<span class="sd">        ValueError: &lt;NO_DEFAULT&gt; is not a valid Hardware</span>
-
-<span class="sd">    ``-1`` never had this failure mode: ``-1 == -1`` holds no matter which</span>
-<span class="sd">    module execution produced either side, since it compares by value, not by</span>
-<span class="sd">    identity, so a reload could not disturb it. Trading that immunity away is</span>
-<span class="sd">    the real cost of moving to an identity-compared sentinel, and it is not</span>
-<span class="sd">    hypothetical to this tree specifically: reload staleness is a *tracked*</span>
-<span class="sd">    defect class here, not a theoretical one -- see</span>
-<span class="sd">    :meth:`pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer`'s own</span>
-<span class="sd">    docstring note citing GitHub issues #425, #428 and #560, and</span>
-<span class="sd">    :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own</span>
-<span class="sd">    ``test_no_stale_class_survives_a_module_reload``, which reloads a module</span>
-<span class="sd">    deliberately to pin the fix for exactly that class of bug elsewhere. So</span>
-<span class="sd">    "nothing in this package reloads :mod:`pcapkit.corekit.enum` after</span>
-<span class="sd">    import" is the only thing standing between this sentinel and that same</span>
-<span class="sd">    defect class -- true today, but a caveat to keep honest rather than a</span>
-<span class="sd">    guarantee this class enforces.</span>
-
-<span class="sd">    Also unlike both :class:`~pcapkit.corekit.module.NullType` and</span>
-<span class="sd">    :class:`~pcapkit.corekit.fields.field.NoValueType`, this deliberately does</span>
-<span class="sd">    *not* define ``__bool__``. Both of those model an *absent* value, so</span>
-<span class="sd">    reading falsy in a boolean context is the point. :data:`NO_DEFAULT` models</span>
-<span class="sd">    something different: a marker meaning *no default was supplied*, checked</span>
-<span class="sd">    exclusively by ``is`` at :meth:`EnumLookup.get`'s two comparison sites --</span>
-<span class="sd">    nothing here ever evaluates it for truthiness. Giving it ``__bool__ -&gt;</span>
-<span class="sd">    False`` for symmetry with the other two would invite exactly the</span>
-<span class="sd">    conflation this sentinel exists to rule out: code that writes ``if not</span>
-<span class="sd">    default:`` instead of ``if default is NO_DEFAULT:`` would then read</span>
-<span class="sd">    :data:`NO_DEFAULT` the same way it reads a caller's genuine falsy default</span>
-<span class="sd">    -- ``0``, ``''``, ``None`` or ``False`` -- which is the exact collision</span>
-<span class="sd">    ``-1`` used to cause under ``==`` and the reason #857 exists. Leaving</span>
-<span class="sd">    ``__bool__`` undefined makes ``NoDefaultType()`` truthy (the default for</span>
-<span class="sd">    any object defining neither ``__bool__`` nor ``__len__``), which at least</span>
-<span class="sd">    does not *look* like one of the falsy values it must never be mistaken</span>
-<span class="sd">    for.</span>
-
-<span class="sd">    """</span>
-
-    <span class="c1">#: 'NoDefaultType | None': The one instance :meth:`__new__` ever returns,</span>
-    <span class="c1">#: including for the module-level ``NO_DEFAULT = NoDefaultType()`` below</span>
-    <span class="c1">#: that creates it in the first place. Kept on the class rather than as a</span>
-    <span class="c1">#: module global so :meth:`__new__` can read and write it without a</span>
-    <span class="c1">#: ``global`` statement.</span>
-    <span class="n">_instance</span><span class="p">:</span> <span class="s1">'NoDefaultType | None'</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoDefaultType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return the one instance of this class there will ever be."""</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;NO_DEFAULT&gt;'</span></div>
-
-
-
-<span class="c1">#: NoDefaultType: The ``default`` argument value that means *no default*, i.e.</span>
-<span class="c1">#: let an unresolvable key propagate its lookup error rather than falling</span>
-<span class="c1">#: back. See :class:`NoDefaultType` for why this is a dedicated class rather</span>
-<span class="c1">#: than a bare :class:`object`, why it is a guarded singleton, and why it</span>
-<span class="c1">#: defines neither the copy/pickle hooks nor the ``__bool__`` that its two</span>
-<span class="c1">#: :mod:`pcapkit.corekit` precedents do.</span>
-<span class="n">NO_DEFAULT</span> <span class="o">=</span> <span class="n">NoDefaultType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="EnumLookup">

@@ -257,8 +257,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -612,39 +612,47 @@ four in the tree follow it:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NULL</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NullType</span></code></p></td>
-<td><p><a class="reference internal" href="../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NoValue</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NoValueType</span></code></p></td>
-<td><p><a class="reference internal" href="../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code></p></td>
-<td><p><a class="reference internal" href="../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">_Absent</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code></p></td>
-<td><p><a class="reference internal" href="../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a></p></td>
+<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>All four used to live beside the one class that used them –
+<a class="reference internal" href="../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="../pcapkit/corekit/fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>,
+<a class="reference internal" href="../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> and <a class="reference internal" href="../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> respectively.
+GitHub issue #911’s housing ruling, verbatim – <em>“Okay one module for all four it
+is.”</em> – moved the four definitions into the single shared module the table now
+names; each original module keeps a re-export so every existing
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span> <span class="pre">&lt;name&gt;</span></code> keeps working, including the
+<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING:</span></code>-only imports of the types.</p>
 <p>Note what the rule does <strong>not</strong> fix: the <strong>instance</strong> name’s casing is deliberately
 free, which is why <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> disagree and both are correct. Pick
 whichever reads better at the call site, and where a name already exists, keep it –
 renaming a published sentinel costs every caller for no gain.</p>
 <p>Nor does it fix the <strong>leading underscore</strong>. <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> is private – it is read in
 <code class="docutils literal notranslate"><span class="pre">_declared_keywords</span></code> and discarded there, never leaving
-<a class="reference internal" href="../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> – and it is still held to the convention, which is
-why its type is <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code> and not <code class="docutils literal notranslate"><span class="pre">_Absent_t</span></code> or <code class="docutils literal notranslate"><span class="pre">Absent</span></code>. It is a
-deliberate fourth rather than an accident, and its own docstring
-(<code class="file docutils literal notranslate"><span class="pre">pcapkit/protocols/protocol.py</span></code>, line 95) says so:</p>
+<a class="reference internal" href="../pcapkit/protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> even though its <em>definition</em> now does – and it is
+still held to the convention, which is why its type is <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code> and not
+<code class="docutils literal notranslate"><span class="pre">_Absent_t</span></code> or <code class="docutils literal notranslate"><span class="pre">Absent</span></code>. It is a deliberate fourth rather than an accident, and
+its own docstring (<code class="file docutils literal notranslate"><span class="pre">pcapkit/corekit/sentinels.py</span></code>, line 430) says so:</p>
 <blockquote>
 <div><p>A distinct class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a> so that the sentinel has a name
 of its own in a traceback or a debugger, and so that a type checker has something
 to name where <code class="docutils literal notranslate"><span class="pre">object()</span></code> would give it nothing. It follows
-<a class="reference internal" href="../pcapkit/corekit/fields/field.html#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>, which does the same job for an
-unset field default; this is a sibling of it rather than a reuse […]</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>, which does the same job for an unset field default;
+this is a sibling of it rather than a reuse […]</p>
 </div></blockquote>
 <p>The private name is also why this table listed three for as long as it did: a sweep
 filtered on capitalised names does not see it. When adding a sentinel, add it here
@@ -657,7 +665,7 @@ is <code class="docutils literal notranslate"><span class="pre">import</span> <s
 neither, which is what private means here.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Of the four, only <a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> is a full worked
+<p>Of the four, only <a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> is a full worked
 example. <code class="docutils literal notranslate"><span class="pre">NoValueType</span></code> follows the naming rule but is <strong>not</strong> a singleton
 (<code class="docutils literal notranslate"><span class="pre">NoValueType()</span> <span class="pre">is</span> <span class="pre">NoValue</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) and has no <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> of its own,
 so it demonstrates the name and nothing else; <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code> has a <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>
@@ -701,9 +709,12 @@ inconsistencies</strong>:</p>
 fails every <code class="docutils literal notranslate"><span class="pre">is</span></code> check. Worth having wherever the type is reachable by a caller at
 all – which, since the type is kept out of <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, means wherever it is
 importable by its dotted path rather than wherever it is star-exported.
-<a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> documents the limit honestly: a module
+<a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> documents the limit honestly: a module
 <strong>reload</strong> re-executes the class statement, so the guard does not survive one, and
-code holding the pre-reload instance will fail <code class="docutils literal notranslate"><span class="pre">is</span></code>.</p>
+code holding the pre-reload instance will fail <code class="docutils literal notranslate"><span class="pre">is</span></code>. Since GitHub issue #911,
+that means reloading <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code> itself – reloading
+<a class="reference internal" href="../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, which now only re-exports the sentinel, no longer
+has any effect on it.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">__bool__</span></code> returning <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> have it, because each stands for an <em>absent
 value</em> and reads naturally in a boolean test. <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> deliberately does
@@ -713,7 +724,7 @@ then treat a caller’s genuine falsy default (<code class="docutils literal not
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) the same as the sentinel, the very confusion the sentinel exists to
 prevent.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">__copy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code></dt><dd><p><a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.module.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> has them because <code class="docutils literal notranslate"><span class="pre">NULL</span></code> is stored in a
+<dt><code class="docutils literal notranslate"><span class="pre">__copy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code></dt><dd><p><a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> has them because <code class="docutils literal notranslate"><span class="pre">NULL</span></code> is stored in a
 <a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> field, so a caller’s
 <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> can walk into it and would otherwise
 reconstruct a second instance. <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> have none, because

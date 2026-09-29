@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.protocols.data.internet.ipv6_generic_ext - PyPCAPKit</title>
+        <title>pcapkit.protocols.schema.internet.ipv6_ext - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -453,54 +453,51 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.protocols.data.internet.ipv6_generic_ext</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.protocols.schema.internet.ipv6_ext</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""data model for generically-parsed IPv6 extension headers"""</span>
+<span class="c1"># mypy: disable-error-code=assignment</span>
+<span class="sd">"""header schema for generically-parsed IPv6 extension headers"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">info_final</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">PayloadField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_Ext'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
-
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.extension_header</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtensionHeader</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'IPv6_GenericExt'</span><span class="p">]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
 
-<div class="viewcode-block" id="IPv6_GenericExt">
-<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_generic_ext.html#pcapkit.protocols.data.internet.ipv6_generic_ext.IPv6_GenericExt">[docs]</a>
-<span class="nd">@info_final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_GenericExt</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for a generically-parsed IPv6 extension header.</span>
+<div class="viewcode-block" id="IPv6_Ext">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.schema.internet.ipv6_ext.IPv6_Ext">[docs]</a>
+<span class="nd">@schema_final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Ext</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Header schema for a generically-parsed IPv6 extension header.</span>
 
-<span class="sd">    See :class:`pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`</span>
-<span class="sd">    for how each field below is derived.</span>
+<span class="sd">    Only the two octets :rfc:`6564#section-4` guarantees are parsed at this</span>
+<span class="sd">    layer -- ``next`` and the raw ``Hdr Ext Len`` octet. Combining them into</span>
+<span class="sd">    an actual skip distance is per protocol (a constant for ``IPv6-Frag``,</span>
+<span class="sd">    4-octet units for ``AH``, 8-octet units for the rest), so that part is</span>
+<span class="sd">    done in :meth:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read`,</span>
+<span class="sd">    which knows which protocol this instance stands in for; this schema does</span>
+<span class="sd">    not.</span>
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: The extension header this instance stands in for -- the numeric code</span>
-    <span class="c1">#: the caller dispatched on, resolved to its</span>
-    <span class="c1">#: :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member.</span>
-    <span class="c1">#: :data:`None` when ``alias`` named no such member (:meth:`read</span>
-    <span class="c1">#: &lt;pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.read&gt;`</span>
-    <span class="c1">#: sets it so on a lookup miss, and the class property at</span>
-    <span class="c1">#: :attr:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.protocol`</span>
-    <span class="c1">#: is typed to match).</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[ExtensionHeader]'</span>
-    <span class="c1">#: Next header, parsed off the wire. :data:`None` when the declared</span>
-    <span class="c1">#: length would have overrun what remained and the walk stopped instead</span>
-    <span class="c1">#: of trusting it.</span>
-    <span class="nb">next</span><span class="p">:</span> <span class="s1">'Optional[TransType]'</span>
-    <span class="c1">#: Length of this extension header, in octets, actually consumed.</span>
-    <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span>
-    <span class="c1">#: Original parsing error, if this instance was reached as a</span>
-    <span class="c1">#: :func:`~pcapkit.utilities.decorators.beholder` fallback rather than by</span>
-    <span class="c1">#: direct dispatch.</span>
-    <span class="n">error</span><span class="p">:</span> <span class="s1">'Optional[Exception]'</span></div>
+    <span class="c1">#: Next header.</span>
+    <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_TransType</span><span class="p">)</span>
+    <span class="c1">#: Raw ``Hdr Ext Len`` octet -- see the class docstring for why its</span>
+    <span class="c1">#: interpretation is not fixed here.</span>
+    <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Everything after the two fixed octets; opaque at this layer.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">'Enum_TransType | int'</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytes | ProtocolBase | Schema'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 </pre></div>
         </article>

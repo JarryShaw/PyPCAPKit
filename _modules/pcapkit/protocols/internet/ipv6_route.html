@@ -250,8 +250,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -491,7 +491,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Data_SourceRoute</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Data_Type2</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Data_UnknownType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Ext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Schema_RPL</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Schema_IPv6_Route</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.ipv6_route</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Schema_SourceRoute</span>
@@ -525,7 +525,7 @@
 
 <div class="viewcode-block" id="IPv6_Route">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">,</span> <span class="n">Schema_IPv6_Route</span><span class="p">],</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">IPv6_Ext</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">,</span> <span class="n">Schema_IPv6_Route</span><span class="p">],</span>
                  <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6_Route</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6_Route</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Routing Header for IPv6.</span>
 
