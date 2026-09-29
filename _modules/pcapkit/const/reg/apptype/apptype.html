@@ -985,7 +985,7 @@
 <span class="sd">         - [N/A] Unassigned</span>
 <span class="sd">       * - ``reserved``</span>
 <span class="sd">         - 49151</span>
-<span class="sd">         - [N/A] Reserved [:rfc:`6335`]</span>
+<span class="sd">         - [N/A] Reserved [RFC 6335]</span>
 <span class="sd">       * - ``argus``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] ARGUS Protocol</span>
@@ -1144,13 +1144,13 @@
 <span class="sd">         - [N/A] Management Information Base</span>
 <span class="sd">       * - ``mihcs``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] MIH Command Services [:rfc:`5679`]</span>
+<span class="sd">         - [N/A] MIH Command Services [RFC 5679]</span>
 <span class="sd">       * - ``mihes``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] MIH Event Services [:rfc:`5679`]</span>
+<span class="sd">         - [N/A] MIH Event Services [RFC 5679]</span>
 <span class="sd">       * - ``mihis``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] MIH Information Services [:rfc:`5679`]</span>
+<span class="sd">         - [N/A] MIH Information Services [RFC 5679]</span>
 <span class="sd">       * - ``mfe-nsp``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] MFE Network Services Protocol</span>
@@ -1171,13 +1171,13 @@
 <span class="sd">         - [N/A] Remote Job Service</span>
 <span class="sd">       * - ``netconf-beep``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] NETCONF over BEEP [:rfc:`4744`][:rfc:`9900`]</span>
+<span class="sd">         - [N/A] NETCONF over BEEP [RFC 4744][RFC 9900]</span>
 <span class="sd">       * - ``netconfsoapbeep``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][:rfc:`9900`]</span>
+<span class="sd">         - [N/A] NETCONF for SOAP over BEEP [RFC 4743][RFC 9900]</span>
 <span class="sd">       * - ``netconfsoaphttp``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][:rfc:`9900`]</span>
+<span class="sd">         - [N/A] NETCONF for SOAP over HTTPS [RFC 4743][RFC 9900]</span>
 <span class="sd">       * - ``nfile``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] A File Access Protocol</span>
@@ -1705,7 +1705,7 @@
 <span class="sd">           protocol</span>
 <span class="sd">       * - ``help``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] HELP command [:rfc:`1078`]</span>
+<span class="sd">         - [N/A] HELP command [RFC 1078]</span>
 <span class="sd">       * - ``hg``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] Mercurial web-based repository access</span>
@@ -2156,8 +2156,8 @@
 <span class="sd">         - [N/A] Pedestal Interface Unit by RPM-PSI</span>
 <span class="sd">       * - ``pkixrep``</span>
 <span class="sd">         - N/A</span>
-<span class="sd">         - [N/A] Public Key Infrastructure Repository Locator Service</span>
-<span class="sd">           [:rfc:`4386`]</span>
+<span class="sd">         - [N/A] Public Key Infrastructure Repository Locator Service [RFC</span>
+<span class="sd">           4386]</span>
 <span class="sd">       * - ``poch``</span>
 <span class="sd">         - N/A</span>
 <span class="sd">         - [N/A] Parallel OperatiOn and Control Heuristic (Pooch)</span>
@@ -3356,10 +3356,10 @@
         <span class="c1"># ruling for the whole family: *"only IANA registered ones are legit</span>
         <span class="c1"># values and we need register to properly create new entries."*</span>
         <span class="k">if</span> <span class="mi">225</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">241</span><span class="p">:</span>
-            <span class="c1">#: [N/A] Reserved [:rfc:`1060`]</span>
+            <span class="c1">#: [N/A] Reserved [RFC 1060]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">249</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
-            <span class="c1">#: [N/A] Reserved [:rfc:`1060`]</span>
+            <span class="c1">#: [N/A] Reserved [RFC 1060]</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">272</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">279</span><span class="p">:</span>
             <span class="c1">#: [N/A] Unassigned</span>
@@ -5688,7 +5688,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=e7158c1c"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=c7a416f7"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>

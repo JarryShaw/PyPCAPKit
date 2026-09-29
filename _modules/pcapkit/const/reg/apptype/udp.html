@@ -535,7 +535,7 @@
 <span class="sd">         - [TCP] Axis Network Video Recorders; [UDP] Axis Network Video</span>
 <span class="sd">           Recorders</span>
 <span class="sd">       * - ``autotunnel``</span>
-<span class="sd">         - [UDP] IPSEC VPN tunnel over UDP [:rfc:`6281`]</span>
+<span class="sd">         - [UDP] IPSEC VPN tunnel over UDP [RFC 6281]</span>
 <span class="sd">       * - ``bhipc``</span>
 <span class="sd">         - [TCP] Becker &amp; Hickl Inter Process Communication; [UDP] Becker &amp;</span>
 <span class="sd">           Hickl Inter Process Communication</span>
@@ -564,10 +564,10 @@
 <span class="sd">       * - ``conecube``</span>
 <span class="sd">         - [UDP] DNS SRV service for smarthome server</span>
 <span class="sd">       * - ``core-rd``</span>
-<span class="sd">         - [TCP] Resource Directory accessed using CoAP over TCP [:rfc:`9176`];</span>
-<span class="sd">           [UDP] Resource Directory accessed using CoAP [:rfc:`9176`]</span>
+<span class="sd">         - [TCP] Resource Directory accessed using CoAP over TCP [RFC 9176];</span>
+<span class="sd">           [UDP] Resource Directory accessed using CoAP [RFC 9176]</span>
 <span class="sd">       * - ``core-rd-dtls``</span>
-<span class="sd">         - [UDP] Resource Directory accessed using CoAP over DTLS [:rfc:`9176`]</span>
+<span class="sd">         - [UDP] Resource Directory accessed using CoAP over DTLS [RFC 9176]</span>
 <span class="sd">       * - ``coviot``</span>
 <span class="sd">         - [TCP] Service for coviot branded devices; [UDP] Service for coviot</span>
 <span class="sd">           branded devices</span>
@@ -591,11 +591,11 @@
 <span class="sd">         - [TCP] DOTS Signal Channel Call Home Protocol. The service name is</span>
 <span class="sd">           used to construct the SRV service names "_dots-call-home._udp" and</span>
 <span class="sd">           "_dots-call-home._tcp" for discovering Call Home DOTS clients used</span>
-<span class="sd">           to establish DOTS signal channel call home. [:rfc:`8973`]; [UDP]</span>
-<span class="sd">           DOTS Signal Channel Call Home Protocol. The service name is used to</span>
+<span class="sd">           to establish DOTS signal channel call home. [RFC 8973]; [UDP] DOTS</span>
+<span class="sd">           Signal Channel Call Home Protocol. The service name is used to</span>
 <span class="sd">           construct the SRV service names "_dots-call-home._udp" and "_dots-</span>
 <span class="sd">           call-home._tcp" for discovering Call Home DOTS clients used to</span>
-<span class="sd">           establish DOTS signal channel call home. [:rfc:`8973`]</span>
+<span class="sd">           establish DOTS signal channel call home. [RFC 8973]</span>
 <span class="sd">       * - ``eb-sync``</span>
 <span class="sd">         - [TCP] Easy Books App data sync helper for Mac OS X and iOS; [UDP]</span>
 <span class="sd">           Easy Books App data sync helper for Mac OS X and iOS</span>
@@ -630,9 +630,11 @@
 <span class="sd">         - [UDP] Honeywell Video Systems</span>
 <span class="sd">       * - ``htvncconf``</span>
 <span class="sd">         - [UDP] HomeTouch Vnc Configuration</span>
+<span class="sd">       * - ``iip``</span>
+<span class="sd">         - [UDP] Tool to get infos about a host</span>
 <span class="sd">       * - ``im``</span>
-<span class="sd">         - [TCP] Instant Messaging [:rfc:`3861`]; [UDP] Instant Messaging</span>
-<span class="sd">           [:rfc:`3861`]</span>
+<span class="sd">         - [TCP] Instant Messaging [RFC 3861]; [UDP] Instant Messaging [RFC</span>
+<span class="sd">           3861]</span>
 <span class="sd">       * - ``iperfd``</span>
 <span class="sd">         - [TCP] Network socket performance test; [UDP] Network socket</span>
 <span class="sd">           performance test</span>
@@ -727,7 +729,7 @@
 <span class="sd">         - [TCP] Local and remote file transfers; [UDP] Local and remote file</span>
 <span class="sd">           transfers</span>
 <span class="sd">       * - ``pres``</span>
-<span class="sd">         - [TCP] Presence [:rfc:`3861`]; [UDP] Presence [:rfc:`3861`]</span>
+<span class="sd">         - [TCP] Presence [RFC 3861]; [UDP] Presence [RFC 3861]</span>
 <span class="sd">       * - ``psap``</span>
 <span class="sd">         - [UDP] Progal Service Advertising Protocol</span>
 <span class="sd">       * - ``radioport``</span>
@@ -736,7 +738,7 @@
 <span class="sd">         - [UDP] Authentication, Accounting, and Dynamic Authorization via the</span>
 <span class="sd">           RADIUS protocol. This service name is used to construct the SRV</span>
 <span class="sd">           service label "_radiusdtls" for discovery of RADIUS/DTLS servers.</span>
-<span class="sd">           [:rfc:`7585`]</span>
+<span class="sd">           [RFC 7585]</span>
 <span class="sd">       * - ``recolive-cc``</span>
 <span class="sd">         - [TCP] Remote Camera Control; [UDP] Remote Camera Control</span>
 <span class="sd">       * - ``scoop-sftp``</span>
@@ -757,9 +759,8 @@
 <span class="sd">       * - ``sleep-proxy``</span>
 <span class="sd">         - [UDP] Sleep Proxy Server</span>
 <span class="sd">       * - ``slpda``</span>
-<span class="sd">         - [TCP] Remote Service Discovery in the Service Location</span>
-<span class="sd">           [:rfc:`3832`]; [UDP] Remote Service Discovery in the Service</span>
-<span class="sd">           Location [:rfc:`3832`]</span>
+<span class="sd">         - [TCP] Remote Service Discovery in the Service Location [RFC 3832];</span>
+<span class="sd">           [UDP] Remote Service Discovery in the Service Location [RFC 3832]</span>
 <span class="sd">       * - ``ss-sign-disc``</span>
 <span class="sd">         - [UDP] Samsung Smart Interaction for Group Network Discovery</span>
 <span class="sd">       * - ``sugarlock-rcp``</span>
@@ -852,8 +853,8 @@
         <span class="mi">9100</span><span class="p">:</span> <span class="s1">'hp-pdl-datastr'</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="c1">#: - [TCP] Reserved [:rfc:`6335`]</span>
-    <span class="c1">#: - [UDP] Reserved [:rfc:`6335`]</span>
+    <span class="c1">#: - [TCP] Reserved [RFC 6335]</span>
+    <span class="c1">#: - [UDP] Reserved [RFC 6335]</span>
     <span class="n">reserved_0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] TCP Port Service Multiplexer</span>
@@ -890,8 +891,8 @@
 
     <span class="c1">#: - [TCP] Discard</span>
     <span class="c1">#: - [UDP] Discard</span>
-    <span class="c1">#: - [SCTP] Discard [:rfc:`9260`]</span>
-    <span class="c1">#: - [DCCP] Discard [:rfc:`4340`]</span>
+    <span class="c1">#: - [SCTP] Discard [RFC 9260]</span>
+    <span class="c1">#: - [DCCP] Discard [RFC 4340]</span>
     <span class="n">discard</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">'discard'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Unassigned</span>
@@ -906,8 +907,8 @@
     <span class="c1">#: - [UDP] Unassigned</span>
     <span class="n">unassigned_12</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">'unassigned'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Daytime [:rfc:`867`]</span>
-    <span class="c1">#: - [UDP] Daytime [:rfc:`867`]</span>
+    <span class="c1">#: - [TCP] Daytime [RFC 867]</span>
+    <span class="c1">#: - [UDP] Daytime [RFC 867]</span>
     <span class="n">daytime</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">'daytime'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Unassigned</span>
@@ -931,16 +932,16 @@
 
     <span class="c1">#: - [TCP] File Transfer [Default Data]</span>
     <span class="c1">#: - [UDP] File Transfer [Default Data]</span>
-    <span class="c1">#: - [SCTP] FTP [:rfc:`9260`]</span>
+    <span class="c1">#: - [SCTP] FTP [RFC 9260]</span>
     <span class="n">ftp_data</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'ftp-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]</span>
-    <span class="c1">#: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]</span>
-    <span class="c1">#: - [SCTP] FTP [:rfc:`9260`]</span>
+    <span class="c1">#: - [TCP] File Transfer Protocol [Control] [RFC 959]</span>
+    <span class="c1">#: - [UDP] File Transfer Protocol [Control] [RFC 959]</span>
+    <span class="c1">#: - [SCTP] FTP [RFC 9260]</span>
     <span class="n">ftp</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="s1">'ftp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Telnet [:rfc:`854`]</span>
-    <span class="c1">#: - [UDP] Telnet [:rfc:`854`]</span>
+    <span class="c1">#: - [TCP] Telnet [RFC 854]</span>
+    <span class="c1">#: - [UDP] Telnet [RFC 854]</span>
     <span class="n">telnet</span> <span class="o">=</span> <span class="mi">23</span><span class="p">,</span> <span class="s1">'telnet'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] any private mail system</span>
@@ -1113,7 +1114,7 @@
     <span class="c1">#: - [UDP] TACACS-Database Service</span>
     <span class="n">tacacs_ds</span> <span class="o">=</span> <span class="mi">65</span><span class="p">,</span> <span class="s1">'tacacs-ds'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Bootstrap Protocol Server [:rfc:`951`]</span>
+    <span class="c1">#: - [TCP] Bootstrap Protocol Server [RFC 951]</span>
     <span class="c1">#: - [UDP] Bootstrap Protocol Server</span>
     <span class="n">bootps</span> <span class="o">=</span> <span class="mi">67</span><span class="p">,</span> <span class="s1">'bootps'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
@@ -1165,13 +1166,13 @@
     <span class="c1">#: - [UDP] Finger</span>
     <span class="n">finger</span> <span class="o">=</span> <span class="mi">79</span><span class="p">,</span> <span class="s1">'finger'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] World Wide Web HTTP [:rfc:`9110`]</span>
-    <span class="c1">#: - [UDP] World Wide Web HTTP [:rfc:`9110`]</span>
-    <span class="c1">#: - [SCTP] HTTP [:rfc:`9260`]</span>
+    <span class="c1">#: - [TCP] World Wide Web HTTP [RFC 9110]</span>
+    <span class="c1">#: - [UDP] World Wide Web HTTP [RFC 9110]</span>
+    <span class="c1">#: - [SCTP] HTTP [RFC 9260]</span>
     <span class="n">http</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">'http'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] World Wide Web HTTP [:rfc:`9110`]</span>
-    <span class="c1">#: - [UDP] World Wide Web HTTP [:rfc:`9110`]</span>
+    <span class="c1">#: - [TCP] World Wide Web HTTP [RFC 9110]</span>
+    <span class="c1">#: - [UDP] World Wide Web HTTP [RFC 9110]</span>
     <span class="n">www</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">'www'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] World Wide Web HTTP</span>
@@ -1202,8 +1203,8 @@
     <span class="c1">#: - [UDP] any private terminal link</span>
     <span class="n">any_private_terminal_link</span> <span class="o">=</span> <span class="mi">87</span><span class="p">,</span> <span class="s1">'any_private_terminal_link'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Kerberos [:rfc:`4120`]</span>
-    <span class="c1">#: - [UDP] Kerberos [:rfc:`4120`]</span>
+    <span class="c1">#: - [TCP] Kerberos [RFC 4120]</span>
+    <span class="c1">#: - [UDP] Kerberos [RFC 4120]</span>
     <span class="n">kerberos</span> <span class="o">=</span> <span class="mi">88</span><span class="p">,</span> <span class="s1">'kerberos'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] SU/MIT Telnet Gateway</span>
@@ -1318,8 +1319,8 @@
     <span class="c1">#: - [UDP] SQL Services</span>
     <span class="n">sqlserv</span> <span class="o">=</span> <span class="mi">118</span><span class="p">,</span> <span class="s1">'sqlserv'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Network News Transfer Protocol [:rfc:`3977`]</span>
-    <span class="c1">#: - [UDP] Network News Transfer Protocol [:rfc:`3977`]</span>
+    <span class="c1">#: - [TCP] Network News Transfer Protocol [RFC 3977]</span>
+    <span class="c1">#: - [UDP] Network News Transfer Protocol [RFC 3977]</span>
     <span class="n">nntp</span> <span class="o">=</span> <span class="mi">119</span><span class="p">,</span> <span class="s1">'nntp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] CFDPTKT</span>
@@ -1334,8 +1335,8 @@
     <span class="c1">#: - [UDP] SMAKYNET</span>
     <span class="n">smakynet</span> <span class="o">=</span> <span class="mi">122</span><span class="p">,</span> <span class="s1">'smakynet'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Network Time Protocol [:rfc:`5905`]</span>
-    <span class="c1">#: - [UDP] Network Time Protocol [:rfc:`5905`]</span>
+    <span class="c1">#: - [TCP] Network Time Protocol [RFC 5905]</span>
+    <span class="c1">#: - [UDP] Network Time Protocol [RFC 5905]</span>
     <span class="n">ntp</span> <span class="o">=</span> <span class="mi">123</span><span class="p">,</span> <span class="s1">'ntp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] ANSA REX Trader</span>
@@ -1414,7 +1415,7 @@
     <span class="c1">#: - [UDP] Britton-Lee IDM</span>
     <span class="n">bl_idm</span> <span class="o">=</span> <span class="mi">142</span><span class="p">,</span> <span class="s1">'bl-idm'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Reserved [:rfc:`9051`]</span>
+    <span class="c1">#: [UDP] Reserved [RFC 9051]</span>
     <span class="n">reserved_143</span> <span class="o">=</span> <span class="mi">143</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] UAAC Protocol</span>
@@ -1567,7 +1568,7 @@
 
     <span class="c1">#: - [TCP] Border Gateway Protocol</span>
     <span class="c1">#: - [UDP] Border Gateway Protocol</span>
-    <span class="c1">#: - [SCTP] BGP [:rfc:`9260`]</span>
+    <span class="c1">#: - [SCTP] BGP [RFC 9260]</span>
     <span class="n">bgp</span> <span class="o">=</span> <span class="mi">179</span><span class="p">,</span> <span class="s1">'bgp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Intergraph</span>
@@ -1838,11 +1839,11 @@
     <span class="c1">#: - [UDP] Tobit David Replica</span>
     <span class="n">td_replica</span> <span class="o">=</span> <span class="mi">268</span><span class="p">,</span> <span class="s1">'td-replica'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MANET Protocols [:rfc:`5498`]</span>
-    <span class="c1">#: - [UDP] MANET Protocols [:rfc:`5498`]</span>
+    <span class="c1">#: - [TCP] MANET Protocols [RFC 5498]</span>
+    <span class="c1">#: - [UDP] MANET Protocols [RFC 5498]</span>
     <span class="n">manet</span> <span class="o">=</span> <span class="mi">269</span><span class="p">,</span> <span class="s1">'manet'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Q-mode encapsulation for GIST messages [:rfc:`5971`]</span>
+    <span class="c1">#: [UDP] Q-mode encapsulation for GIST messages [RFC 5971]</span>
     <span class="n">gist</span> <span class="o">=</span> <span class="mi">270</span><span class="p">,</span> <span class="s1">'gist'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -1961,12 +1962,12 @@
     <span class="c1">#: - [UDP] Cabletron Management Protocol</span>
     <span class="n">csi_sgwp</span> <span class="o">=</span> <span class="mi">348</span><span class="p">,</span> <span class="s1">'csi-sgwp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MATIP Type A [:rfc:`2351`]</span>
-    <span class="c1">#: - [UDP] MATIP Type A [:rfc:`2351`]</span>
+    <span class="c1">#: - [TCP] MATIP Type A [RFC 2351]</span>
+    <span class="c1">#: - [UDP] MATIP Type A [RFC 2351]</span>
     <span class="n">matip_type_a</span> <span class="o">=</span> <span class="mi">350</span><span class="p">,</span> <span class="s1">'matip-type-a'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MATIP Type B [:rfc:`2351`]</span>
-    <span class="c1">#: - [UDP] MATIP Type B [:rfc:`2351`]</span>
+    <span class="c1">#: - [TCP] MATIP Type B [RFC 2351]</span>
+    <span class="c1">#: - [UDP] MATIP Type B [RFC 2351]</span>
     <span class="n">matip_type_b</span> <span class="o">=</span> <span class="mi">351</span><span class="p">,</span> <span class="s1">'matip-type-b'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] bhoetty</span>
@@ -2313,8 +2314,8 @@
     <span class="c1">#: - [UDP] IASD</span>
     <span class="n">iasd</span> <span class="o">=</span> <span class="mi">432</span><span class="p">,</span> <span class="s1">'iasd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] NNTP for transit servers (NNSP) [:rfc:`3977`]</span>
-    <span class="c1">#: - [UDP] NNTP for transit servers (NNSP) [:rfc:`3977`]</span>
+    <span class="c1">#: - [TCP] NNTP for transit servers (NNSP) [RFC 3977]</span>
+    <span class="c1">#: - [UDP] NNTP for transit servers (NNSP) [RFC 3977]</span>
     <span class="n">nnsp</span> <span class="o">=</span> <span class="mi">433</span><span class="p">,</span> <span class="s1">'nnsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] MobileIP-Agent</span>
@@ -2357,8 +2358,8 @@
     <span class="c1">#: - [UDP] cvc_hostd</span>
     <span class="n">cvc_hostd</span> <span class="o">=</span> <span class="mi">442</span><span class="p">,</span> <span class="s1">'cvc-hostd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Simple Network Paging Protocol [:rfc:`1568`]</span>
-    <span class="c1">#: - [UDP] Simple Network Paging Protocol [:rfc:`1568`]</span>
+    <span class="c1">#: - [TCP] Simple Network Paging Protocol [RFC 1568]</span>
+    <span class="c1">#: - [UDP] Simple Network Paging Protocol [RFC 1568]</span>
     <span class="n">snpp</span> <span class="o">=</span> <span class="mi">444</span><span class="p">,</span> <span class="s1">'snpp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Microsoft-DS</span>
@@ -2621,7 +2622,7 @@
     <span class="c1">#: net and the load average of the machine</span>
     <span class="n">who</span> <span class="o">=</span> <span class="mi">513</span><span class="p">,</span> <span class="s1">'who'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] [:rfc:`5426`]</span>
+    <span class="c1">#: [UDP] [RFC 5426]</span>
     <span class="n">syslog</span> <span class="o">=</span> <span class="mi">514</span><span class="p">,</span> <span class="s1">'syslog'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] spooler</span>
@@ -2749,11 +2750,11 @@
     <span class="n">appleqtcsrvr</span> <span class="o">=</span> <span class="mi">545</span><span class="p">,</span> <span class="s1">'appleqtcsrvr'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] DHCPv6 Client</span>
-    <span class="c1">#: - [UDP] DHCPv6 Client [:rfc:`9915`]</span>
+    <span class="c1">#: - [UDP] DHCPv6 Client [RFC 9915]</span>
     <span class="n">dhcpv6_client</span> <span class="o">=</span> <span class="mi">546</span><span class="p">,</span> <span class="s1">'dhcpv6-client'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] DHCPv6 Server [:rfc:`5460`]</span>
-    <span class="c1">#: - [UDP] DHCPv6 Server [:rfc:`9915`]</span>
+    <span class="c1">#: - [TCP] DHCPv6 Server [RFC 5460]</span>
+    <span class="c1">#: - [UDP] DHCPv6 Server [RFC 9915]</span>
     <span class="n">dhcpv6_server</span> <span class="o">=</span> <span class="mi">547</span><span class="p">,</span> <span class="s1">'dhcpv6-server'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] AFP over TCP</span>
@@ -2768,8 +2769,8 @@
     <span class="c1">#: - [UDP] new-who [n/a]</span>
     <span class="n">new_rwho</span> <span class="o">=</span> <span class="mi">550</span><span class="p">,</span> <span class="s1">'new-rwho'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] cybercash [:rfc:`1898`]</span>
-    <span class="c1">#: - [UDP] cybercash [:rfc:`1898`]</span>
+    <span class="c1">#: - [TCP] cybercash [RFC 1898]</span>
+    <span class="c1">#: - [UDP] cybercash [RFC 1898]</span>
     <span class="n">cybercash</span> <span class="o">=</span> <span class="mi">551</span><span class="p">,</span> <span class="s1">'cybercash'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] DeviceShare</span>
@@ -2816,8 +2817,8 @@
     <span class="c1">#: - [UDP] chcmd</span>
     <span class="n">chshell</span> <span class="o">=</span> <span class="mi">562</span><span class="p">,</span> <span class="s1">'chshell'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]</span>
-    <span class="c1">#: - [UDP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]</span>
+    <span class="c1">#: - [TCP] nntp protocol over TLS/SSL (was snntp) [RFC 4642]</span>
+    <span class="c1">#: - [UDP] nntp protocol over TLS/SSL (was snntp) [RFC 4642]</span>
     <span class="n">nntps</span> <span class="o">=</span> <span class="mi">563</span><span class="p">,</span> <span class="s1">'nntps'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] plan 9 file service</span>
@@ -2908,8 +2909,8 @@
     <span class="c1">#: - [UDP] Password Change</span>
     <span class="n">password_chg</span> <span class="o">=</span> <span class="mi">586</span><span class="p">,</span> <span class="s1">'password-chg'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Message Submission [:rfc:`6409`]</span>
-    <span class="c1">#: - [UDP] Message Submission [:rfc:`6409`]</span>
+    <span class="c1">#: - [TCP] Message Submission [RFC 6409]</span>
+    <span class="c1">#: - [UDP] Message Submission [RFC 6409]</span>
     <span class="n">submission</span> <span class="o">=</span> <span class="mi">587</span><span class="p">,</span> <span class="s1">'submission'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] CAL</span>
@@ -2960,24 +2961,24 @@
     <span class="c1">#: - [UDP] Sun IPC server</span>
     <span class="n">ipcserver</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span> <span class="s1">'ipcserver'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Reliable Syslog Service [:rfc:`3195`]</span>
-    <span class="c1">#: - [UDP] Reliable Syslog Service [:rfc:`3195`]</span>
+    <span class="c1">#: - [TCP] Reliable Syslog Service [RFC 3195]</span>
+    <span class="c1">#: - [UDP] Reliable Syslog Service [RFC 3195]</span>
     <span class="n">syslog_conn</span> <span class="o">=</span> <span class="mi">601</span><span class="p">,</span> <span class="s1">'syslog-conn'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] XML-RPC over BEEP [:rfc:`3529`]</span>
-    <span class="c1">#: - [UDP] XML-RPC over BEEP [:rfc:`3529`]</span>
+    <span class="c1">#: - [TCP] XML-RPC over BEEP [RFC 3529]</span>
+    <span class="c1">#: - [UDP] XML-RPC over BEEP [RFC 3529]</span>
     <span class="n">xmlrpc_beep</span> <span class="o">=</span> <span class="mi">602</span><span class="p">,</span> <span class="s1">'xmlrpc-beep'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IDXP [:rfc:`4767`]</span>
-    <span class="c1">#: - [UDP] IDXP [:rfc:`4767`]</span>
+    <span class="c1">#: - [TCP] IDXP [RFC 4767]</span>
+    <span class="c1">#: - [UDP] IDXP [RFC 4767]</span>
     <span class="n">idxp</span> <span class="o">=</span> <span class="mi">603</span><span class="p">,</span> <span class="s1">'idxp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] TUNNEL [:rfc:`3620`]</span>
-    <span class="c1">#: - [UDP] TUNNEL [:rfc:`3620`]</span>
+    <span class="c1">#: - [TCP] TUNNEL [RFC 3620]</span>
+    <span class="c1">#: - [UDP] TUNNEL [RFC 3620]</span>
     <span class="n">tunnel</span> <span class="o">=</span> <span class="mi">604</span><span class="p">,</span> <span class="s1">'tunnel'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] SOAP over BEEP [:rfc:`4227`]</span>
-    <span class="c1">#: - [UDP] SOAP over BEEP [:rfc:`4227`]</span>
+    <span class="c1">#: - [TCP] SOAP over BEEP [RFC 4227]</span>
+    <span class="c1">#: - [UDP] SOAP over BEEP [RFC 4227]</span>
     <span class="n">soap_beep</span> <span class="o">=</span> <span class="mi">605</span><span class="p">,</span> <span class="s1">'soap-beep'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Cray Unified Resource Manager</span>
@@ -3079,8 +3080,8 @@
     <span class="c1">#: - [UDP] 3Com AMP3</span>
     <span class="n">UDP_3com_amp3</span> <span class="o">=</span> <span class="mi">629</span><span class="p">,</span> <span class="s1">'3com-amp3'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IPP (Internet Printing Protocol) [:rfc:`8011`]</span>
-    <span class="c1">#: - [UDP] IPP (Internet Printing Protocol) [:rfc:`8011`]</span>
+    <span class="c1">#: - [TCP] IPP (Internet Printing Protocol) [RFC 8011]</span>
+    <span class="c1">#: - [UDP] IPP (Internet Printing Protocol) [RFC 8011]</span>
     <span class="n">ipp</span> <span class="o">=</span> <span class="mi">631</span><span class="p">,</span> <span class="s1">'ipp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] bmpp</span>
@@ -3143,7 +3144,7 @@
     <span class="c1">#: - [UDP] LDP</span>
     <span class="n">ldp</span> <span class="o">=</span> <span class="mi">646</span><span class="p">,</span> <span class="s1">'ldp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] DHCP Failover [:rfc:`8156`]</span>
+    <span class="c1">#: - [TCP] DHCP Failover [RFC 8156]</span>
     <span class="c1">#: - [UDP] DHCP Failover</span>
     <span class="n">dhcp_failover</span> <span class="o">=</span> <span class="mi">647</span><span class="p">,</span> <span class="s1">'dhcp-failover'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
@@ -3354,12 +3355,12 @@
     <span class="c1">#: - [UDP] Access Network</span>
     <span class="n">accessnetwork</span> <span class="o">=</span> <span class="mi">699</span><span class="p">,</span> <span class="s1">'accessnetwork'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Link Management Protocol (LMP) [:rfc:`4204`]</span>
-    <span class="c1">#: - [UDP] Link Management Protocol (LMP) [:rfc:`4204`]</span>
+    <span class="c1">#: - [TCP] Link Management Protocol (LMP) [RFC 4204]</span>
+    <span class="c1">#: - [UDP] Link Management Protocol (LMP) [RFC 4204]</span>
     <span class="n">lmp</span> <span class="o">=</span> <span class="mi">701</span><span class="p">,</span> <span class="s1">'lmp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IRIS over BEEP [:rfc:`3983`]</span>
-    <span class="c1">#: - [UDP] IRIS over BEEP [:rfc:`3983`]</span>
+    <span class="c1">#: - [TCP] IRIS over BEEP [RFC 3983]</span>
+    <span class="c1">#: - [UDP] IRIS over BEEP [RFC 3983]</span>
     <span class="n">iris_beep</span> <span class="o">=</span> <span class="mi">702</span><span class="p">,</span> <span class="s1">'iris-beep'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] errlog copy/server daemon</span>
@@ -3390,23 +3391,23 @@
     <span class="c1">#: - [UDP] Cisco TDP</span>
     <span class="n">cisco_tdp</span> <span class="o">=</span> <span class="mi">711</span><span class="p">,</span> <span class="s1">'cisco-tdp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] TBRPF [:rfc:`3684`]</span>
-    <span class="c1">#: - [UDP] TBRPF [:rfc:`3684`]</span>
+    <span class="c1">#: - [TCP] TBRPF [RFC 3684]</span>
+    <span class="c1">#: - [UDP] TBRPF [RFC 3684]</span>
     <span class="n">tbrpf</span> <span class="o">=</span> <span class="mi">712</span><span class="p">,</span> <span class="s1">'tbrpf'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] IRIS over XPC</span>
     <span class="c1">#: - [UDP] IRIS over XPC</span>
     <span class="n">iris_xpc</span> <span class="o">=</span> <span class="mi">713</span><span class="p">,</span> <span class="s1">'iris-xpc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IRIS over XPCS [:rfc:`4992`]</span>
-    <span class="c1">#: - [UDP] IRIS over XPCS [:rfc:`4992`]</span>
+    <span class="c1">#: - [TCP] IRIS over XPCS [RFC 4992]</span>
+    <span class="c1">#: - [UDP] IRIS over XPCS [RFC 4992]</span>
     <span class="n">iris_xpcs</span> <span class="o">=</span> <span class="mi">714</span><span class="p">,</span> <span class="s1">'iris-xpcs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IRIS-LWZ [:rfc:`4993`]</span>
-    <span class="c1">#: - [UDP] IRIS-LWZ [:rfc:`4993`]</span>
+    <span class="c1">#: - [TCP] IRIS-LWZ [RFC 4993]</span>
+    <span class="c1">#: - [UDP] IRIS-LWZ [RFC 4993]</span>
     <span class="n">iris_lwz</span> <span class="o">=</span> <span class="mi">715</span><span class="p">,</span> <span class="s1">'iris-lwz'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] PANA Messages [:rfc:`5191`]</span>
+    <span class="c1">#: [UDP] PANA Messages [RFC 5191]</span>
     <span class="n">pana</span> <span class="o">=</span> <span class="mi">716</span><span class="p">,</span> <span class="s1">'pana'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] IBM NetView DM/6000 Server/Client</span>
@@ -3572,8 +3573,8 @@
     <span class="c1">#: - [UDP] PKIX-3 CA/RA</span>
     <span class="n">pkix_3_ca_ra</span> <span class="o">=</span> <span class="mi">829</span><span class="p">,</span> <span class="s1">'pkix-3-ca-ra'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] NETCONF over SSH [:rfc:`6242`]</span>
-    <span class="c1">#: - [UDP] NETCONF over SSH [:rfc:`6242`]</span>
+    <span class="c1">#: - [TCP] NETCONF over SSH [RFC 6242]</span>
+    <span class="c1">#: - [UDP] NETCONF over SSH [RFC 6242]</span>
     <span class="n">netconf_ssh</span> <span class="o">=</span> <span class="mi">830</span><span class="p">,</span> <span class="s1">'netconf-ssh'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Reserved</span>
@@ -3592,27 +3593,27 @@
     <span class="c1">#: - [UDP] dhcp-failover 2</span>
     <span class="n">dhcp_failover2</span> <span class="o">=</span> <span class="mi">847</span><span class="p">,</span> <span class="s1">'dhcp-failover2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] GDOI [:rfc:`3547`]</span>
-    <span class="c1">#: - [UDP] GDOI [:rfc:`3547`]</span>
+    <span class="c1">#: - [TCP] GDOI [RFC 3547]</span>
+    <span class="c1">#: - [UDP] GDOI [RFC 3547]</span>
     <span class="n">gdoi</span> <span class="o">=</span> <span class="mi">848</span><span class="p">,</span> <span class="s1">'gdoi'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] DNS query-response protocol run over TLS [:rfc:`7858`]</span>
-    <span class="c1">#: - [UDP] DNS query-response protocol run over DTLS or QUIC</span>
-    <span class="c1">#:   [:rfc:`7858`][:rfc:`8094`][:rfc:`9250`]</span>
+    <span class="c1">#: - [TCP] DNS query-response protocol run over TLS [RFC 7858]</span>
+    <span class="c1">#: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][RFC</span>
+    <span class="c1">#:   8094][RFC 9250]</span>
     <span class="n">domain_s</span> <span class="o">=</span> <span class="mi">853</span><span class="p">,</span> <span class="s1">'domain-s'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]</span>
-    <span class="c1">#: - [UDP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]</span>
+    <span class="c1">#: - [TCP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]</span>
+    <span class="c1">#: - [UDP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]</span>
     <span class="n">dlep</span> <span class="o">=</span> <span class="mi">854</span><span class="p">,</span> <span class="s1">'dlep'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] iSCSI [:rfc:`7143`]</span>
-    <span class="c1">#: - [UDP] iSCSI [:rfc:`7143`]</span>
+    <span class="c1">#: - [TCP] iSCSI [RFC 7143]</span>
+    <span class="c1">#: - [UDP] iSCSI [RFC 7143]</span>
     <span class="n">iscsi</span> <span class="o">=</span> <span class="mi">860</span><span class="p">,</span> <span class="s1">'iscsi'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] OWAMP-Test [:rfc:`8545`]</span>
+    <span class="c1">#: [UDP] OWAMP-Test [RFC 8545]</span>
     <span class="n">owamp_test</span> <span class="o">=</span> <span class="mi">861</span><span class="p">,</span> <span class="s1">'owamp-test'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] TWAMP-Test Receiver Port [:rfc:`8545`]</span>
+    <span class="c1">#: [UDP] TWAMP-Test Receiver Port [RFC 8545]</span>
     <span class="n">twamp_test</span> <span class="o">=</span> <span class="mi">862</span><span class="p">,</span> <span class="s1">'twamp-test'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] rsync</span>
@@ -3651,8 +3652,8 @@
     <span class="c1">#: - [UDP] self documenting Panic Door: send 0x00 for info</span>
     <span class="n">ideafarm_panic</span> <span class="o">=</span> <span class="mi">903</span><span class="p">,</span> <span class="s1">'ideafarm-panic'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]</span>
-    <span class="c1">#: - [UDP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]</span>
+    <span class="c1">#: - [TCP] Kerberized Internet Negotiation of Keys (KINK) [RFC 4430]</span>
+    <span class="c1">#: - [UDP] Kerberized Internet Negotiation of Keys (KINK) [RFC 4430]</span>
     <span class="n">kink</span> <span class="o">=</span> <span class="mi">910</span><span class="p">,</span> <span class="s1">'kink'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] xact-backup</span>
@@ -3663,14 +3664,14 @@
     <span class="c1">#: - [UDP] APEX relay-relay service</span>
     <span class="n">apex_mesh</span> <span class="o">=</span> <span class="mi">912</span><span class="p">,</span> <span class="s1">'apex-mesh'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] APEX endpoint-relay service [:rfc:`3340`]</span>
-    <span class="c1">#: - [UDP] APEX endpoint-relay service [:rfc:`3340`]</span>
+    <span class="c1">#: - [TCP] APEX endpoint-relay service [RFC 3340]</span>
+    <span class="c1">#: - [UDP] APEX endpoint-relay service [RFC 3340]</span>
     <span class="n">apex_edge</span> <span class="o">=</span> <span class="mi">913</span><span class="p">,</span> <span class="s1">'apex-edge'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Routing in Fat Trees Link Information Element [:rfc:`9692`]</span>
+    <span class="c1">#: [UDP] Routing in Fat Trees Link Information Element [RFC 9692]</span>
     <span class="n">rift_lies</span> <span class="o">=</span> <span class="mi">914</span><span class="p">,</span> <span class="s1">'rift-lies'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Routing in Fat Trees Topology Information Element [:rfc:`9692`]</span>
+    <span class="c1">#: [UDP] Routing in Fat Trees Topology Information Element [RFC 9692]</span>
     <span class="n">rift_ties</span> <span class="o">=</span> <span class="mi">915</span><span class="p">,</span> <span class="s1">'rift-ties'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -3684,22 +3685,22 @@
     <span class="c1">#: - [UDP] ftp protocol, control, over TLS/SSL</span>
     <span class="n">ftps</span> <span class="o">=</span> <span class="mi">990</span><span class="p">,</span> <span class="s1">'ftps'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Netnews Administration System [:rfc:`4707`]</span>
-    <span class="c1">#: - [UDP] Netnews Administration System [:rfc:`4707`]</span>
+    <span class="c1">#: - [TCP] Netnews Administration System [RFC 4707]</span>
+    <span class="c1">#: - [UDP] Netnews Administration System [RFC 4707]</span>
     <span class="n">nas</span> <span class="o">=</span> <span class="mi">991</span><span class="p">,</span> <span class="s1">'nas'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] telnet protocol over TLS/SSL</span>
     <span class="c1">#: - [UDP] telnet protocol over TLS/SSL</span>
     <span class="n">telnets</span> <span class="o">=</span> <span class="mi">992</span><span class="p">,</span> <span class="s1">'telnets'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Reserved [:rfc:`9051`]</span>
+    <span class="c1">#: [UDP] Reserved [RFC 9051]</span>
     <span class="n">reserved_993</span> <span class="o">=</span> <span class="mi">993</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Reserved</span>
     <span class="c1">#: - [UDP] Reserved</span>
     <span class="n">reserved_994</span> <span class="o">=</span> <span class="mi">994</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] POP3 over TLS protocol [:rfc:`8314`]</span>
+    <span class="c1">#: - [TCP] POP3 over TLS protocol [RFC 8314]</span>
     <span class="c1">#: - [UDP] pop3 protocol over TLS/SSL (was spop3)</span>
     <span class="n">pop3s</span> <span class="o">=</span> <span class="mi">995</span><span class="p">,</span> <span class="s1">'pop3s'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
@@ -3735,24 +3736,24 @@
     <span class="c1">#: - [UDP] surf</span>
     <span class="n">surf</span> <span class="o">=</span> <span class="mi">1010</span><span class="p">,</span> <span class="s1">'surf'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]</span>
+    <span class="c1">#: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]</span>
     <span class="n">exp1</span> <span class="o">=</span> <span class="mi">1021</span><span class="p">,</span> <span class="s1">'exp1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
-    <span class="c1">#: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]</span>
+    <span class="c1">#: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]</span>
+    <span class="c1">#: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]</span>
     <span class="n">exp2</span> <span class="o">=</span> <span class="mi">1022</span><span class="p">,</span> <span class="s1">'exp2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Reserved [:rfc:`6335`]</span>
-    <span class="c1">#: - [UDP] Reserved [:rfc:`6335`]</span>
+    <span class="c1">#: - [TCP] Reserved [RFC 6335]</span>
+    <span class="c1">#: - [UDP] Reserved [RFC 6335]</span>
     <span class="n">reserved_1023</span> <span class="o">=</span> <span class="mi">1023</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Reserved [:rfc:`6335`]</span>
-    <span class="c1">#: - [UDP] Reserved [:rfc:`6335`]</span>
+    <span class="c1">#: - [TCP] Reserved [RFC 6335]</span>
+    <span class="c1">#: - [UDP] Reserved [RFC 6335]</span>
     <span class="n">reserved_1024</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] network blackjack</span>
@@ -3763,7 +3764,7 @@
     <span class="c1">#: - [UDP] Calendar Access Protocol</span>
     <span class="n">cap</span> <span class="o">=</span> <span class="mi">1026</span><span class="p">,</span> <span class="s1">'cap'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] IPv6 Behind NAT44 CPEs [:rfc:`6751`]</span>
+    <span class="c1">#: [UDP] IPv6 Behind NAT44 CPEs [RFC 6751]</span>
     <span class="n">UDP_6a44</span> <span class="o">=</span> <span class="mi">1027</span><span class="p">,</span> <span class="s1">'6a44'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Solid Mux Server</span>
@@ -3790,8 +3791,8 @@
     <span class="c1">#: - [UDP] AMS</span>
     <span class="n">ams</span> <span class="o">=</span> <span class="mi">1037</span><span class="p">,</span> <span class="s1">'ams'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Message Tracking Query Protocol [:rfc:`3887`]</span>
-    <span class="c1">#: - [UDP] Message Tracking Query Protocol [:rfc:`3887`]</span>
+    <span class="c1">#: - [TCP] Message Tracking Query Protocol [RFC 3887]</span>
+    <span class="c1">#: - [UDP] Message Tracking Query Protocol [RFC 3887]</span>
     <span class="n">mtqp</span> <span class="o">=</span> <span class="mi">1038</span><span class="p">,</span> <span class="s1">'mtqp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Streamlined Blackhole</span>
@@ -4093,9 +4094,9 @@
     <span class="c1">#: - [UDP] Intelligent Communication Protocol</span>
     <span class="n">icp</span> <span class="o">=</span> <span class="mi">1112</span><span class="p">,</span> <span class="s1">'icp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Licklider Transmission Protocol [:rfc:`5326`]</span>
-    <span class="c1">#: - [UDP] Licklider Transmission Protocol [:rfc:`5326`][:rfc:`7122`]</span>
-    <span class="c1">#: - [DCCP] Licklider Transmission Protocol [:rfc:`7122`]</span>
+    <span class="c1">#: - [TCP] Licklider Transmission Protocol [RFC 5326]</span>
+    <span class="c1">#: - [UDP] Licklider Transmission Protocol [RFC 5326][RFC 7122]</span>
+    <span class="c1">#: - [DCCP] Licklider Transmission Protocol [RFC 7122]</span>
     <span class="n">ltp_deepspace</span> <span class="o">=</span> <span class="mi">1113</span><span class="p">,</span> <span class="s1">'ltp-deepspace'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Mini SQL</span>
@@ -4114,8 +4115,8 @@
     <span class="c1">#: - [UDP] ARDUS Multicast Transfer</span>
     <span class="n">ardus_mtrns</span> <span class="o">=</span> <span class="mi">1117</span><span class="p">,</span> <span class="s1">'ardus-mtrns'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] SACRED [:rfc:`3767`]</span>
-    <span class="c1">#: - [UDP] SACRED [:rfc:`3767`]</span>
+    <span class="c1">#: - [TCP] SACRED [RFC 3767]</span>
+    <span class="c1">#: - [UDP] SACRED [RFC 3767]</span>
     <span class="n">sacred</span> <span class="o">=</span> <span class="mi">1118</span><span class="p">,</span> <span class="s1">'sacred'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Battle.net Chat/Game Protocol</span>
@@ -4258,8 +4259,8 @@
     <span class="c1">#: - [UDP] Winpopup LAN Messenger</span>
     <span class="n">winpoplanmess</span> <span class="o">=</span> <span class="mi">1152</span><span class="p">,</span> <span class="s1">'winpoplanmess'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] ANSI C12.22 Port [:rfc:`6142`]</span>
-    <span class="c1">#: - [UDP] ANSI C12.22 Port [:rfc:`6142`]</span>
+    <span class="c1">#: - [TCP] ANSI C12.22 Port [RFC 6142]</span>
+    <span class="c1">#: - [UDP] ANSI C12.22 Port [RFC 6142]</span>
     <span class="n">c1222_acse</span> <span class="o">=</span> <span class="mi">1153</span><span class="p">,</span> <span class="s1">'c1222-acse'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Community Service</span>
@@ -6579,8 +6580,8 @@
     <span class="c1">#: - [UDP] HKS License Manager</span>
     <span class="n">hks_lm</span> <span class="o">=</span> <span class="mi">1722</span><span class="p">,</span> <span class="s1">'hks-lm'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] pptp [:rfc:`2637`]</span>
-    <span class="c1">#: - [UDP] pptp [:rfc:`2637`]</span>
+    <span class="c1">#: - [TCP] pptp [RFC 2637]</span>
+    <span class="c1">#: - [UDP] pptp [RFC 2637]</span>
     <span class="n">pptp</span> <span class="o">=</span> <span class="mi">1723</span><span class="p">,</span> <span class="s1">'pptp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] csbphonemaster</span>
@@ -6937,12 +6938,12 @@
     <span class="c1">#: - [UDP] Scientia-SDB</span>
     <span class="n">scientia_sdb</span> <span class="o">=</span> <span class="mi">1811</span><span class="p">,</span> <span class="s1">'scientia-sdb'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RADIUS [:rfc:`2865`]</span>
-    <span class="c1">#: - [UDP] RADIUS [:rfc:`2865`]</span>
+    <span class="c1">#: - [TCP] RADIUS [RFC 2865]</span>
+    <span class="c1">#: - [UDP] RADIUS [RFC 2865]</span>
     <span class="n">radius</span> <span class="o">=</span> <span class="mi">1812</span><span class="p">,</span> <span class="s1">'radius'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RADIUS Accounting [:rfc:`2866`]</span>
-    <span class="c1">#: - [UDP] RADIUS Accounting [:rfc:`2866`]</span>
+    <span class="c1">#: - [TCP] RADIUS Accounting [RFC 2866]</span>
+    <span class="c1">#: - [UDP] RADIUS Accounting [RFC 2866]</span>
     <span class="n">radius_acct</span> <span class="o">=</span> <span class="mi">1813</span><span class="p">,</span> <span class="s1">'radius-acct'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] TDP Suite</span>
@@ -7077,8 +7078,8 @@
     <span class="c1">#: - [UDP] Tunstall PNC</span>
     <span class="n">tunstall_pnc</span> <span class="o">=</span> <span class="mi">1846</span><span class="p">,</span> <span class="s1">'tunstall-pnc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] SLP Notification [:rfc:`3082`]</span>
-    <span class="c1">#: - [UDP] SLP Notification [:rfc:`3082`]</span>
+    <span class="c1">#: - [TCP] SLP Notification [RFC 3082]</span>
+    <span class="c1">#: - [UDP] SLP Notification [RFC 3082]</span>
     <span class="n">slp_notify</span> <span class="o">=</span> <span class="mi">1847</span><span class="p">,</span> <span class="s1">'slp-notify'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] fjdocdist</span>
@@ -7625,8 +7626,8 @@
     <span class="c1">#: - [UDP] BB</span>
     <span class="n">bb</span> <span class="o">=</span> <span class="mi">1984</span><span class="p">,</span> <span class="s1">'bb'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Hot Standby Router Protocol [:rfc:`2281`]</span>
-    <span class="c1">#: - [UDP] Hot Standby Router Protocol [:rfc:`2281`]</span>
+    <span class="c1">#: - [TCP] Hot Standby Router Protocol [RFC 2281]</span>
+    <span class="c1">#: - [UDP] Hot Standby Router Protocol [RFC 2281]</span>
     <span class="n">hsrp</span> <span class="o">=</span> <span class="mi">1985</span><span class="p">,</span> <span class="s1">'hsrp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] cisco license management</span>
@@ -7882,7 +7883,7 @@
 
     <span class="c1">#: - [TCP] Network File System - Sun Microsystems</span>
     <span class="c1">#: - [UDP] Network File System - Sun Microsystems</span>
-    <span class="c1">#: - [SCTP] Network File System [:rfc:`5665`]</span>
+    <span class="c1">#: - [SCTP] Network File System [RFC 5665]</span>
     <span class="n">nfs</span> <span class="o">=</span> <span class="mi">2049</span><span class="p">,</span> <span class="s1">'nfs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Avaya EMB Config Port</span>
@@ -8017,8 +8018,8 @@
     <span class="c1">#: - [UDP] Infowave Mobility Server</span>
     <span class="n">infowave</span> <span class="o">=</span> <span class="mi">2082</span><span class="p">,</span> <span class="s1">'infowave'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Secure Radius Service [:rfc:`6614`]</span>
-    <span class="c1">#: - [UDP] Secure Radius Service [:rfc:`7360`]</span>
+    <span class="c1">#: - [TCP] Secure Radius Service [RFC 6614]</span>
+    <span class="c1">#: - [UDP] Secure Radius Service [RFC 7360]</span>
     <span class="n">radsec</span> <span class="o">=</span> <span class="mi">2083</span><span class="p">,</span> <span class="s1">'radsec'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] SunCluster Geographic</span>
@@ -8253,8 +8254,8 @@
     <span class="c1">#: - [UDP] IAS-ADMIND</span>
     <span class="n">ias_admind</span> <span class="o">=</span> <span class="mi">2141</span><span class="p">,</span> <span class="s1">'ias-admind'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] TDM OVER IP [:rfc:`5087`]</span>
-    <span class="c1">#: - [UDP] TDM OVER IP [:rfc:`5087`]</span>
+    <span class="c1">#: - [TCP] TDM OVER IP [RFC 5087]</span>
+    <span class="c1">#: - [UDP] TDM OVER IP [RFC 5087]</span>
     <span class="n">tdmoip</span> <span class="o">=</span> <span class="mi">2142</span><span class="p">,</span> <span class="s1">'tdmoip'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Live Vault Job Control</span>
@@ -8741,8 +8742,8 @@
     <span class="c1">#: - [UDP] OntoBroker</span>
     <span class="n">ontobroker</span> <span class="o">=</span> <span class="mi">2267</span><span class="p">,</span> <span class="s1">'ontobroker'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] AMT [:rfc:`7450`]</span>
-    <span class="c1">#: - [UDP] AMT [:rfc:`7450`]</span>
+    <span class="c1">#: - [TCP] AMT [RFC 7450]</span>
+    <span class="c1">#: - [UDP] AMT [RFC 7450]</span>
     <span class="n">amt</span> <span class="o">=</span> <span class="mi">2268</span><span class="p">,</span> <span class="s1">'amt'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] MIKEY</span>
@@ -11915,8 +11916,8 @@
     <span class="c1">#: - [UDP] Broadcast Routing Protocol</span>
     <span class="n">brp</span> <span class="o">=</span> <span class="mi">3043</span><span class="p">,</span> <span class="s1">'brp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]</span>
-    <span class="c1">#: - [UDP] EPP running over QUIC [:rfc:`5734`][RFC-ietf-regext-epp-quic-12]</span>
+    <span class="c1">#: - [TCP] Extensible Provisioning Protocol [RFC 5734]</span>
+    <span class="c1">#: - [UDP] EPP running over QUIC [RFC 5734][RFC-ietf-regext-epp-quic-12]</span>
     <span class="n">epp_700</span> <span class="o">=</span> <span class="mi">700</span><span class="p">,</span> <span class="s1">'epp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] EndPoint Protocol</span>
@@ -12560,8 +12561,8 @@
     <span class="c1">#: - [UDP] Network Watcher DB Access</span>
     <span class="n">netwatcher_db</span> <span class="o">=</span> <span class="mi">3204</span><span class="p">,</span> <span class="s1">'netwatcher-db'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] iSNS Server Port [:rfc:`4171`]</span>
-    <span class="c1">#: - [UDP] iSNS Server Port [:rfc:`4171`]</span>
+    <span class="c1">#: - [TCP] iSNS Server Port [RFC 4171]</span>
+    <span class="c1">#: - [UDP] iSNS Server Port [RFC 4171]</span>
     <span class="n">isns</span> <span class="o">=</span> <span class="mi">3205</span><span class="p">,</span> <span class="s1">'isns'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] IronMail POP Proxy</span>
@@ -12640,8 +12641,8 @@
     <span class="c1">#: - [UDP] AES Discovery Port</span>
     <span class="n">aes_discovery</span> <span class="o">=</span> <span class="mi">3224</span><span class="p">,</span> <span class="s1">'aes-discovery'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] FCIP [:rfc:`3821`]</span>
-    <span class="c1">#: - [UDP] FCIP [:rfc:`3821`]</span>
+    <span class="c1">#: - [TCP] FCIP [RFC 3821]</span>
+    <span class="c1">#: - [UDP] FCIP [RFC 3821]</span>
     <span class="n">fcip_port</span> <span class="o">=</span> <span class="mi">3225</span><span class="p">,</span> <span class="s1">'fcip-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] ISI Industry Software IRP</span>
@@ -12668,8 +12669,8 @@
     <span class="c1">#: - [UDP] VidiGo communication (previous was: Delta Solutions Direct)</span>
     <span class="n">vidigo</span> <span class="o">=</span> <span class="mi">3231</span><span class="p">,</span> <span class="s1">'vidigo'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MDT port [:rfc:`6513`]</span>
-    <span class="c1">#: - [UDP] MDT port [:rfc:`6513`]</span>
+    <span class="c1">#: - [TCP] MDT port [RFC 6513]</span>
+    <span class="c1">#: - [UDP] MDT port [RFC 6513]</span>
     <span class="n">mdtp</span> <span class="o">=</span> <span class="mi">3232</span><span class="p">,</span> <span class="s1">'mdtp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] WhiskerControl main port</span>
@@ -12780,8 +12781,8 @@
     <span class="c1">#: - [UDP] Epson Network Common Devi</span>
     <span class="n">epncdp2</span> <span class="o">=</span> <span class="mi">3259</span><span class="p">,</span> <span class="s1">'epncdp2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] iSCSI port [:rfc:`7143`]</span>
-    <span class="c1">#: - [UDP] iSCSI port [:rfc:`7143`]</span>
+    <span class="c1">#: - [TCP] iSCSI port [RFC 7143]</span>
+    <span class="c1">#: - [UDP] iSCSI port [RFC 7143]</span>
     <span class="n">iscsi_target</span> <span class="o">=</span> <span class="mi">3260</span><span class="p">,</span> <span class="s1">'iscsi-target'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] winShadow</span>
@@ -12955,8 +12956,8 @@
     <span class="c1">#: - [UDP] OP Session Server</span>
     <span class="n">opsession_srvr</span> <span class="o">=</span> <span class="mi">3304</span><span class="p">,</span> <span class="s1">'opsession-srvr'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] ODETTE-FTP [:rfc:`5024`]</span>
-    <span class="c1">#: - [UDP] ODETTE-FTP [:rfc:`5024`]</span>
+    <span class="c1">#: - [TCP] ODETTE-FTP [RFC 5024]</span>
+    <span class="c1">#: - [UDP] ODETTE-FTP [RFC 5024]</span>
     <span class="n">odette_ftp</span> <span class="o">=</span> <span class="mi">3305</span><span class="p">,</span> <span class="s1">'odette-ftp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] MySQL</span>
@@ -13386,8 +13387,8 @@
     <span class="c1">#: - [UDP] ISogon SoftAudit</span>
     <span class="n">softaudit</span> <span class="o">=</span> <span class="mi">3419</span><span class="p">,</span> <span class="s1">'softaudit'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] iFCP User Port [:rfc:`4172`]</span>
-    <span class="c1">#: - [UDP] iFCP User Port [:rfc:`4172`]</span>
+    <span class="c1">#: - [TCP] iFCP User Port [RFC 4172]</span>
+    <span class="c1">#: - [UDP] iFCP User Port [RFC 4172]</span>
     <span class="n">ifcp_port</span> <span class="o">=</span> <span class="mi">3420</span><span class="p">,</span> <span class="s1">'ifcp-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Bull Apprise portmapper</span>
@@ -13618,16 +13619,16 @@
     <span class="c1">#: - [UDP] eComm link port</span>
     <span class="n">ecomm</span> <span class="o">=</span> <span class="mi">3477</span><span class="p">,</span> <span class="s1">'ecomm'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]</span>
-    <span class="c1">#: - [UDP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]</span>
+    <span class="c1">#: - [TCP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]</span>
+    <span class="c1">#: - [UDP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]</span>
     <span class="n">stun</span> <span class="o">=</span> <span class="mi">3478</span><span class="p">,</span> <span class="s1">'stun'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] TURN over TCP [:rfc:`8656`]</span>
-    <span class="c1">#: - [UDP] TURN over UDP [:rfc:`8656`]</span>
+    <span class="c1">#: - [TCP] TURN over TCP [RFC 8656]</span>
+    <span class="c1">#: - [UDP] TURN over UDP [RFC 8656]</span>
     <span class="n">turn</span> <span class="o">=</span> <span class="mi">3478</span><span class="p">,</span> <span class="s1">'turn'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] STUN Behavior Discovery over TCP [:rfc:`5780`]</span>
-    <span class="c1">#: - [UDP] STUN Behavior Discovery over UDP [:rfc:`5780`]</span>
+    <span class="c1">#: - [TCP] STUN Behavior Discovery over TCP [RFC 5780]</span>
+    <span class="c1">#: - [UDP] STUN Behavior Discovery over UDP [RFC 5780]</span>
     <span class="n">stun_behavior</span> <span class="o">=</span> <span class="mi">3478</span><span class="p">,</span> <span class="s1">'stun-behavior'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] 2Wire RPC</span>
@@ -13685,7 +13686,7 @@
     <span class="c1">#: - [UDP] TVDUM Tray Port</span>
     <span class="n">tvdumtray_port</span> <span class="o">=</span> <span class="mi">3492</span><span class="p">,</span> <span class="s1">'tvdumtray-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Network UPS Tools [:rfc:`9271`]</span>
+    <span class="c1">#: - [TCP] Network UPS Tools [RFC 9271]</span>
     <span class="c1">#: - [UDP] Network UPS Tools</span>
     <span class="n">nut</span> <span class="o">=</span> <span class="mi">3493</span><span class="p">,</span> <span class="s1">'nut'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
@@ -13725,8 +13726,8 @@
     <span class="c1">#: - [UDP] Avocent Install Discovery</span>
     <span class="n">avinstalldisc</span> <span class="o">=</span> <span class="mi">3502</span><span class="p">,</span> <span class="s1">'avinstalldisc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MPLS LSP-echo Port [:rfc:`8029`]</span>
-    <span class="c1">#: - [UDP] MPLS LSP-echo Port [:rfc:`8029`]</span>
+    <span class="c1">#: - [TCP] MPLS LSP-echo Port [RFC 8029]</span>
+    <span class="c1">#: - [UDP] MPLS LSP-echo Port [RFC 8029]</span>
     <span class="n">lsp_ping</span> <span class="o">=</span> <span class="mi">3503</span><span class="p">,</span> <span class="s1">'lsp-ping'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] IronStorm game server</span>
@@ -13888,8 +13889,8 @@
     <span class="c1">#: - [UDP] qftest Lookup Port</span>
     <span class="n">qftest_lookup</span> <span class="o">=</span> <span class="mi">3543</span><span class="p">,</span> <span class="s1">'qftest-lookup'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Teredo Port [:rfc:`4380`]</span>
-    <span class="c1">#: - [UDP] Teredo Port [:rfc:`4380`]</span>
+    <span class="c1">#: - [TCP] Teredo Port [RFC 4380]</span>
+    <span class="c1">#: - [UDP] Teredo Port [RFC 4380]</span>
     <span class="n">teredo</span> <span class="o">=</span> <span class="mi">3544</span><span class="p">,</span> <span class="s1">'teredo'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] CAMAC equipment</span>
@@ -14317,8 +14318,8 @@
     <span class="c1">#: - [UDP] VxCR NBU Default Port</span>
     <span class="n">vxcrnbuport</span> <span class="o">=</span> <span class="mi">3652</span><span class="p">,</span> <span class="s1">'vxcrnbuport'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Tunnel Setup Protocol [:rfc:`5572`]</span>
-    <span class="c1">#: - [UDP] Tunnel Setup Protocol [:rfc:`5572`]</span>
+    <span class="c1">#: - [TCP] Tunnel Setup Protocol [RFC 5572]</span>
+    <span class="c1">#: - [UDP] Tunnel Setup Protocol [RFC 5572]</span>
     <span class="n">tsp</span> <span class="o">=</span> <span class="mi">3653</span><span class="p">,</span> <span class="s1">'tsp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] VAP RealTime Messenger</span>
@@ -14739,8 +14740,8 @@
     <span class="c1">#: - [UDP] adTEmpus Client</span>
     <span class="n">adtempusclient</span> <span class="o">=</span> <span class="mi">3760</span><span class="p">,</span> <span class="s1">'adtempusclient'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] gsakmp port [:rfc:`4535`]</span>
-    <span class="c1">#: - [UDP] gsakmp port [:rfc:`4535`]</span>
+    <span class="c1">#: - [TCP] gsakmp port [RFC 4535]</span>
+    <span class="c1">#: - [UDP] gsakmp port [RFC 4535]</span>
     <span class="n">gsakmp</span> <span class="o">=</span> <span class="mi">3761</span><span class="p">,</span> <span class="s1">'gsakmp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] GBS SnapMail Protocol</span>
@@ -14830,12 +14831,12 @@
     <span class="c1">#: - [UDP] Impact Mgr./PEM Gateway</span>
     <span class="n">bim_pem</span> <span class="o">=</span> <span class="mi">3783</span><span class="p">,</span> <span class="s1">'bim-pem'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] BFD Control Protocol [:rfc:`5881`]</span>
-    <span class="c1">#: - [UDP] BFD Control Protocol [:rfc:`5881`]</span>
+    <span class="c1">#: - [TCP] BFD Control Protocol [RFC 5881]</span>
+    <span class="c1">#: - [UDP] BFD Control Protocol [RFC 5881]</span>
     <span class="n">bfd_control</span> <span class="o">=</span> <span class="mi">3784</span><span class="p">,</span> <span class="s1">'bfd-control'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] BFD Echo Protocol [:rfc:`5881`]</span>
-    <span class="c1">#: - [UDP] BFD Echo Protocol [:rfc:`5881`]</span>
+    <span class="c1">#: - [TCP] BFD Echo Protocol [RFC 5881]</span>
+    <span class="c1">#: - [UDP] BFD Echo Protocol [RFC 5881]</span>
     <span class="n">bfd_echo</span> <span class="o">=</span> <span class="mi">3785</span><span class="p">,</span> <span class="s1">'bfd-echo'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] VSW Upstrigger port</span>
@@ -14890,8 +14891,8 @@
     <span class="c1">#: - [UDP] Minilock</span>
     <span class="n">minilock</span> <span class="o">=</span> <span class="mi">3798</span><span class="p">,</span> <span class="s1">'minilock'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RADIUS Dynamic Authorization [:rfc:`3576`]</span>
-    <span class="c1">#: - [UDP] RADIUS Dynamic Authorization [:rfc:`3576`]</span>
+    <span class="c1">#: - [TCP] RADIUS Dynamic Authorization [RFC 3576]</span>
+    <span class="c1">#: - [UDP] RADIUS Dynamic Authorization [RFC 3576]</span>
     <span class="n">radius_dynauth</span> <span class="o">=</span> <span class="mi">3799</span><span class="p">,</span> <span class="s1">'radius-dynauth'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Print Services Interface</span>
@@ -15145,7 +15146,7 @@
     <span class="c1">#: - [UDP] GIGA-POCKET</span>
     <span class="n">giga_pocket</span> <span class="o">=</span> <span class="mi">3862</span><span class="p">,</span> <span class="s1">'giga-pocket'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] asap udp port [:rfc:`5352`]</span>
+    <span class="c1">#: [UDP] asap udp port [RFC 5352]</span>
     <span class="n">asap_udp</span> <span class="o">=</span> <span class="mi">3863</span><span class="p">,</span> <span class="s1">'asap-udp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -15326,8 +15327,8 @@
     <span class="c1">#: - [UDP] Arnet Omnilink Port</span>
     <span class="n">omnilink_port</span> <span class="o">=</span> <span class="mi">3904</span><span class="p">,</span> <span class="s1">'omnilink-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]</span>
-    <span class="c1">#: - [UDP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]</span>
+    <span class="c1">#: - [TCP] Mailbox Update (MUPDATE) protocol [RFC 3656]</span>
+    <span class="c1">#: - [UDP] Mailbox Update (MUPDATE) protocol [RFC 3656]</span>
     <span class="n">mupdate</span> <span class="o">=</span> <span class="mi">3905</span><span class="p">,</span> <span class="s1">'mupdate'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] TopoVista elevation data</span>
@@ -16475,13 +16476,13 @@
     <span class="c1">#: - [UDP] Vatata Peer to Peer Protocol</span>
     <span class="n">vatata</span> <span class="o">=</span> <span class="mi">4188</span><span class="p">,</span> <span class="s1">'vatata'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Reserved [:rfc:`5440`]</span>
+    <span class="c1">#: [UDP] Reserved [RFC 5440]</span>
     <span class="n">reserved_4189</span> <span class="o">=</span> <span class="mi">4189</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Reserved [:rfc:`5804`]</span>
+    <span class="c1">#: [UDP] Reserved [RFC 5804]</span>
     <span class="n">reserved_4190</span> <span class="o">=</span> <span class="mi">4190</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Dual Stack MIPv6 NAT Traversal [:rfc:`5555`]</span>
+    <span class="c1">#: [UDP] Dual Stack MIPv6 NAT Traversal [RFC 5555]</span>
     <span class="n">dsmipv6</span> <span class="o">=</span> <span class="mi">4191</span><span class="p">,</span> <span class="s1">'dsmipv6'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] azeti blinddate</span>
@@ -16577,8 +16578,8 @@
     <span class="c1">#: - [UDP] FDT Remote Categorization Protocol</span>
     <span class="n">fdt_rcatp</span> <span class="o">=</span> <span class="mi">4320</span><span class="p">,</span> <span class="s1">'fdt-rcatp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Remote Who Is [:rfc:`2167`]</span>
-    <span class="c1">#: - [UDP] Remote Who Is [:rfc:`2167`]</span>
+    <span class="c1">#: - [TCP] Remote Who Is [RFC 2167]</span>
+    <span class="c1">#: - [UDP] Remote Who Is [RFC 2167]</span>
     <span class="n">rwhois</span> <span class="o">=</span> <span class="mi">4321</span><span class="p">,</span> <span class="s1">'rwhois'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] TRIM Event Service</span>
@@ -16634,10 +16635,10 @@
     <span class="c1">#: - [UDP] Gaia Connector Protocol</span>
     <span class="n">gaia</span> <span class="o">=</span> <span class="mi">4340</span><span class="p">,</span> <span class="s1">'gaia'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] LISP Data Packets [:rfc:`9300`]</span>
+    <span class="c1">#: [UDP] LISP Data Packets [RFC 9300]</span>
     <span class="n">lisp_data</span> <span class="o">=</span> <span class="mi">4341</span><span class="p">,</span> <span class="s1">'lisp-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] LISP Control Packets [:rfc:`9301`]</span>
+    <span class="c1">#: [UDP] LISP Control Packets [RFC 9301]</span>
     <span class="n">lisp_control</span> <span class="o">=</span> <span class="mi">4342</span><span class="p">,</span> <span class="s1">'lisp-control'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] UNICALL</span>
@@ -17007,8 +17008,8 @@
     <span class="c1">#: - [UDP] Apple Wide Area Connectivity Service ICE Bootstrap</span>
     <span class="n">awacs_ice</span> <span class="o">=</span> <span class="mi">4488</span><span class="p">,</span> <span class="s1">'awacs-ice'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] IPsec NAT-Traversal [:rfc:`9329`]</span>
-    <span class="c1">#: - [UDP] IPsec NAT-Traversal [:rfc:`3948`][:rfc:`7296`]</span>
+    <span class="c1">#: - [TCP] IPsec NAT-Traversal [RFC 9329]</span>
+    <span class="c1">#: - [UDP] IPsec NAT-Traversal [RFC 3948][RFC 7296]</span>
     <span class="n">ipsec_nat_t</span> <span class="o">=</span> <span class="mi">4500</span><span class="p">,</span> <span class="s1">'ipsec-nat-t'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] M-Bus-OMS over UDP</span>
@@ -17057,8 +17058,8 @@
     <span class="c1">#: - [UDP] Perman I Interbase Server</span>
     <span class="n">gds_adppiw_db</span> <span class="o">=</span> <span class="mi">4550</span><span class="p">,</span> <span class="s1">'gds-adppiw-db'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] MIH Services [:rfc:`5677`]</span>
-    <span class="c1">#: - [UDP] MIH Services [:rfc:`5677`]</span>
+    <span class="c1">#: - [TCP] MIH Services [RFC 5677]</span>
+    <span class="c1">#: - [UDP] MIH Services [RFC 5677]</span>
     <span class="n">ieee_mih</span> <span class="o">=</span> <span class="mi">4551</span><span class="p">,</span> <span class="s1">'ieee-mih'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Men and Mice Monitoring</span>
@@ -17072,13 +17073,13 @@
     <span class="c1">#: - [UDP] MS FRS Replication</span>
     <span class="n">msfrs</span> <span class="o">=</span> <span class="mi">4554</span><span class="p">,</span> <span class="s1">'msfrs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RSIP Port [:rfc:`3103`]</span>
-    <span class="c1">#: - [UDP] RSIP Port [:rfc:`3103`]</span>
+    <span class="c1">#: - [TCP] RSIP Port [RFC 3103]</span>
+    <span class="c1">#: - [UDP] RSIP Port [RFC 3103]</span>
     <span class="n">rsip</span> <span class="o">=</span> <span class="mi">4555</span><span class="p">,</span> <span class="s1">'rsip'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] DTN Bundle TCP CL Protocol [:rfc:`9174`]</span>
-    <span class="c1">#: - [UDP] DTN Bundle UDP CL Protocol [:rfc:`7122`]</span>
-    <span class="c1">#: - [DCCP] DTN Bundle DCCP CL Protocol [:rfc:`7122`]</span>
+    <span class="c1">#: - [TCP] DTN Bundle TCP CL Protocol [RFC 9174]</span>
+    <span class="c1">#: - [UDP] DTN Bundle UDP CL Protocol [RFC 7122]</span>
+    <span class="c1">#: - [DCCP] DTN Bundle DCCP CL Protocol [RFC 7122]</span>
     <span class="n">dtn_bundle</span> <span class="o">=</span> <span class="mi">4556</span><span class="p">,</span> <span class="s1">'dtn-bundle'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Marathon everRun Quorum Service Server</span>
@@ -17106,8 +17107,8 @@
     <span class="c1">#: - [UDP] BMC Reporting</span>
     <span class="n">bmc_reporting</span> <span class="o">=</span> <span class="mi">4568</span><span class="p">,</span> <span class="s1">'bmc-reporting'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Inter-Asterisk eXchange [:rfc:`5456`]</span>
-    <span class="c1">#: - [UDP] Inter-Asterisk eXchange [:rfc:`5456`]</span>
+    <span class="c1">#: - [TCP] Inter-Asterisk eXchange [RFC 5456]</span>
+    <span class="c1">#: - [UDP] Inter-Asterisk eXchange [RFC 5456]</span>
     <span class="n">iax</span> <span class="o">=</span> <span class="mi">4569</span><span class="p">,</span> <span class="s1">'iax'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -17183,11 +17184,11 @@
     <span class="c1">#: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal</span>
     <span class="c1">#:   Channel Protocol. The service name is used to construct the SRV service</span>
     <span class="c1">#:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS</span>
-    <span class="c1">#:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]</span>
+    <span class="c1">#:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]</span>
     <span class="c1">#: - [UDP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal</span>
     <span class="c1">#:   Channel Protocol. The service name is used to construct the SRV service</span>
     <span class="c1">#:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS</span>
-    <span class="c1">#:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]</span>
+    <span class="c1">#:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]</span>
     <span class="n">dots_signal</span> <span class="o">=</span> <span class="mi">4646</span><span class="p">,</span> <span class="s1">'dots-signal'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] PlayStation2 App Port</span>
@@ -17441,10 +17442,10 @@
     <span class="c1">#: [UDP] Simple Invocation of Methods Over Network (SIMON) Discovery</span>
     <span class="n">simon_disc</span> <span class="o">=</span> <span class="mi">4753</span><span class="p">,</span> <span class="s1">'simon-disc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] GRE-in-UDP Encapsulation [:rfc:`8086`]</span>
+    <span class="c1">#: [UDP] GRE-in-UDP Encapsulation [RFC 8086]</span>
     <span class="n">gre_in_udp</span> <span class="o">=</span> <span class="mi">4754</span><span class="p">,</span> <span class="s1">'gre-in-udp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] GRE-in-UDP Encapsulation with DTLS [:rfc:`8086`]</span>
+    <span class="c1">#: [UDP] GRE-in-UDP Encapsulation with DTLS [RFC 8086]</span>
     <span class="n">gre_udp_dtls</span> <span class="o">=</span> <span class="mi">4755</span><span class="p">,</span> <span class="s1">'gre-udp-dtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -17469,7 +17470,7 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_4788</span> <span class="o">=</span> <span class="mi">4788</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Virtual eXtensible Local Area Network (VXLAN) [:rfc:`7348`]</span>
+    <span class="c1">#: [UDP] Virtual eXtensible Local Area Network (VXLAN) [RFC 7348]</span>
     <span class="n">vxlan</span> <span class="o">=</span> <span class="mi">4789</span><span class="p">,</span> <span class="s1">'vxlan'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Generic Protocol Extension for Virtual eXtensible Local Area Network</span>
@@ -17763,14 +17764,14 @@
     <span class="c1">#: - [UDP] FileMaker, Inc. - Proprietary name binding</span>
     <span class="n">fmpro_internal</span> <span class="o">=</span> <span class="mi">5003</span><span class="p">,</span> <span class="s1">'fmpro-internal'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RTP media data [:rfc:`3551`][:rfc:`4571`]</span>
-    <span class="c1">#: - [UDP] RTP media data [:rfc:`3551`]</span>
-    <span class="c1">#: - [DCCP] RTP media data [:rfc:`3551`][:rfc:`5762`]</span>
+    <span class="c1">#: - [TCP] RTP media data [RFC 3551][RFC 4571]</span>
+    <span class="c1">#: - [UDP] RTP media data [RFC 3551]</span>
+    <span class="c1">#: - [DCCP] RTP media data [RFC 3551][RFC 5762]</span>
     <span class="n">avt_profile_1</span> <span class="o">=</span> <span class="mi">5004</span><span class="p">,</span> <span class="s1">'avt-profile-1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RTP control protocol [:rfc:`3551`][:rfc:`4571`]</span>
-    <span class="c1">#: - [UDP] RTP control protocol [:rfc:`3551`]</span>
-    <span class="c1">#: - [DCCP] RTP control protocol [:rfc:`3551`][:rfc:`5762`]</span>
+    <span class="c1">#: - [TCP] RTP control protocol [RFC 3551][RFC 4571]</span>
+    <span class="c1">#: - [UDP] RTP control protocol [RFC 3551]</span>
+    <span class="c1">#: - [DCCP] RTP control protocol [RFC 3551][RFC 5762]</span>
     <span class="n">avt_profile_2</span> <span class="o">=</span> <span class="mi">5005</span><span class="p">,</span> <span class="s1">'avt-profile-2'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] wsm server</span>
@@ -17923,14 +17924,14 @@
     <span class="c1">#: - [UDP] SIP Directory Services</span>
     <span class="n">sds</span> <span class="o">=</span> <span class="mi">5059</span><span class="p">,</span> <span class="s1">'sds'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] SIP [:rfc:`3263`]</span>
-    <span class="c1">#: - [UDP] SIP [:rfc:`3263`]</span>
-    <span class="c1">#: - [SCTP] SIP [:rfc:`4168`]</span>
+    <span class="c1">#: - [TCP] SIP [RFC 3263]</span>
+    <span class="c1">#: - [UDP] SIP [RFC 3263]</span>
+    <span class="c1">#: - [SCTP] SIP [RFC 4168]</span>
     <span class="n">sip</span> <span class="o">=</span> <span class="mi">5060</span><span class="p">,</span> <span class="s1">'sip'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] SIP-TLS [:rfc:`3263`]</span>
-    <span class="c1">#: - [UDP] SIP-TLS [:rfc:`3263`]</span>
-    <span class="c1">#: - [SCTP] SIP-TLS [:rfc:`4168`]</span>
+    <span class="c1">#: - [TCP] SIP-TLS [RFC 3263]</span>
+    <span class="c1">#: - [UDP] SIP-TLS [RFC 3263]</span>
+    <span class="c1">#: - [SCTP] SIP-TLS [RFC 4168]</span>
     <span class="n">sips</span> <span class="o">=</span> <span class="mi">5061</span><span class="p">,</span> <span class="s1">'sips'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Localisation access</span>
@@ -18303,10 +18304,10 @@
     <span class="c1">#: [UDP] DownTools Discovery Protocol</span>
     <span class="n">downtools_disc</span> <span class="o">=</span> <span class="mi">5245</span><span class="p">,</span> <span class="s1">'downtools-disc'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] CAPWAP Control Protocol [:rfc:`5415`]</span>
+    <span class="c1">#: [UDP] CAPWAP Control Protocol [RFC 5415]</span>
     <span class="n">capwap_control</span> <span class="o">=</span> <span class="mi">5246</span><span class="p">,</span> <span class="s1">'capwap-control'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] CAPWAP Data Protocol [:rfc:`5415`]</span>
+    <span class="c1">#: [UDP] CAPWAP Data Protocol [RFC 5415]</span>
     <span class="n">capwap_data</span> <span class="o">=</span> <span class="mi">5247</span><span class="p">,</span> <span class="s1">'capwap-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] CA Access Control Web Service</span>
@@ -18458,30 +18459,30 @@
     <span class="c1">#: - [UDP] xkoto DRCP</span>
     <span class="n">xkotodrcp</span> <span class="o">=</span> <span class="mi">5344</span><span class="p">,</span> <span class="s1">'xkotodrcp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]</span>
-    <span class="c1">#: - [UDP] STUN over DTLS [:rfc:`7350`]</span>
+    <span class="c1">#: - [TCP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]</span>
+    <span class="c1">#: - [UDP] STUN over DTLS [RFC 7350]</span>
     <span class="n">stuns</span> <span class="o">=</span> <span class="mi">5349</span><span class="p">,</span> <span class="s1">'stuns'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] TURN over TLS [:rfc:`8656`]</span>
-    <span class="c1">#: - [UDP] TURN over DTLS [:rfc:`7350`]</span>
+    <span class="c1">#: - [TCP] TURN over TLS [RFC 8656]</span>
+    <span class="c1">#: - [UDP] TURN over DTLS [RFC 7350]</span>
     <span class="n">turns</span> <span class="o">=</span> <span class="mi">5349</span><span class="p">,</span> <span class="s1">'turns'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] STUN Behavior Discovery over TLS [:rfc:`5780`]</span>
-    <span class="c1">#: - [UDP] Reserved for a future enhancement of STUN-BEHAVIOR [:rfc:`5780`]</span>
+    <span class="c1">#: - [TCP] STUN Behavior Discovery over TLS [RFC 5780]</span>
+    <span class="c1">#: - [UDP] Reserved for a future enhancement of STUN-BEHAVIOR [RFC 5780]</span>
     <span class="n">stun_behaviors</span> <span class="o">=</span> <span class="mi">5349</span><span class="p">,</span> <span class="s1">'stun-behaviors'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Port Control Protocol Multicast [:rfc:`6887`]</span>
+    <span class="c1">#: [UDP] Port Control Protocol Multicast [RFC 6887]</span>
     <span class="n">pcp_multicast</span> <span class="o">=</span> <span class="mi">5350</span><span class="p">,</span> <span class="s1">'pcp-multicast'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Port Control Protocol [:rfc:`6887`]</span>
+    <span class="c1">#: [UDP] Port Control Protocol [RFC 6887]</span>
     <span class="n">pcp</span> <span class="o">=</span> <span class="mi">5351</span><span class="p">,</span> <span class="s1">'pcp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] DNS Long-Lived Queries [:rfc:`8764`]</span>
-    <span class="c1">#: - [UDP] DNS Long-Lived Queries [:rfc:`8764`]</span>
+    <span class="c1">#: - [TCP] DNS Long-Lived Queries [RFC 8764]</span>
+    <span class="c1">#: - [UDP] DNS Long-Lived Queries [RFC 8764]</span>
     <span class="n">dns_llq</span> <span class="o">=</span> <span class="mi">5352</span><span class="p">,</span> <span class="s1">'dns-llq'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Multicast DNS [:rfc:`6762`]</span>
-    <span class="c1">#: - [UDP] Multicast DNS [:rfc:`6762`]</span>
+    <span class="c1">#: - [TCP] Multicast DNS [RFC 6762]</span>
+    <span class="c1">#: - [UDP] Multicast DNS [RFC 6762]</span>
     <span class="n">mdns</span> <span class="o">=</span> <span class="mi">5353</span><span class="p">,</span> <span class="s1">'mdns'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Multicast DNS Responder IPC</span>
@@ -18687,10 +18688,10 @@
     <span class="c1">#: - [UDP] SCEANICS situation and action notification</span>
     <span class="n">sceanics</span> <span class="o">=</span> <span class="mi">5435</span><span class="p">,</span> <span class="s1">'sceanics'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] pmip6-cntl [:rfc:`5844`]</span>
+    <span class="c1">#: [UDP] pmip6-cntl [RFC 5844]</span>
     <span class="n">pmip6_cntl</span> <span class="o">=</span> <span class="mi">5436</span><span class="p">,</span> <span class="s1">'pmip6-cntl'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] pmip6-data [:rfc:`5844`]</span>
+    <span class="c1">#: [UDP] pmip6-data [RFC 5844]</span>
     <span class="n">pmip6_data</span> <span class="o">=</span> <span class="mi">5437</span><span class="p">,</span> <span class="s1">'pmip6-data'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Pearson HTTPS</span>
@@ -18986,9 +18987,9 @@
     <span class="c1">#: - [UDP] HyperSCSI Port</span>
     <span class="n">hyperscsi_port</span> <span class="o">=</span> <span class="mi">5674</span><span class="p">,</span> <span class="s1">'hyperscsi-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] V5UA application port [:rfc:`3807`]</span>
-    <span class="c1">#: - [UDP] V5UA application port [:rfc:`3807`]</span>
-    <span class="c1">#: - [SCTP] V5UA application port [:rfc:`3807`]</span>
+    <span class="c1">#: - [TCP] V5UA application port [RFC 3807]</span>
+    <span class="c1">#: - [UDP] V5UA application port [RFC 3807]</span>
+    <span class="c1">#: - [SCTP] V5UA application port [RFC 3807]</span>
     <span class="n">v5ua</span> <span class="o">=</span> <span class="mi">5675</span><span class="p">,</span> <span class="s1">'v5ua'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] RA Administration</span>
@@ -19018,12 +19019,12 @@
     <span class="c1">#: [UDP] BrightCore control &amp; data transfer exchange</span>
     <span class="n">brightcore</span> <span class="o">=</span> <span class="mi">5682</span><span class="p">,</span> <span class="s1">'brightcore'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`8323`]</span>
-    <span class="c1">#: - [UDP] Constrained Application Protocol [:rfc:`7252`]</span>
+    <span class="c1">#: - [TCP] Constrained Application Protocol (CoAP) [RFC 8323]</span>
+    <span class="c1">#: - [UDP] Constrained Application Protocol [RFC 7252]</span>
     <span class="n">coap</span> <span class="o">=</span> <span class="mi">5683</span><span class="p">,</span> <span class="s1">'coap'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`7301`][:rfc:`8323`]</span>
-    <span class="c1">#: - [UDP] DTLS-secured CoAP [:rfc:`7252`]</span>
+    <span class="c1">#: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][RFC 8323]</span>
+    <span class="c1">#: - [UDP] DTLS-secured CoAP [RFC 7252]</span>
     <span class="n">coaps</span> <span class="o">=</span> <span class="mi">5684</span><span class="p">,</span> <span class="s1">'coaps'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] GOG multiplayer game protocol</span>
@@ -19255,8 +19256,8 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_5868</span> <span class="o">=</span> <span class="mi">5868</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Remote Framebuffer [:rfc:`6143`]</span>
-    <span class="c1">#: - [UDP] Remote Framebuffer [:rfc:`6143`]</span>
+    <span class="c1">#: - [TCP] Remote Framebuffer [RFC 6143]</span>
+    <span class="c1">#: - [UDP] Remote Framebuffer [RFC 6143]</span>
     <span class="n">rfb</span> <span class="o">=</span> <span class="mi">5900</span><span class="p">,</span> <span class="s1">'rfb'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Flight &amp; Flow Info for Collaborative Env</span>
@@ -19426,7 +19427,7 @@
     <span class="c1">#: [UDP] Generic UDP Encapsulation [draft-herbert-gue-02]</span>
     <span class="n">gue</span> <span class="o">=</span> <span class="mi">6080</span><span class="p">,</span> <span class="s1">'gue'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Generic Network Virtualization Encapsulation (Geneve) [:rfc:`8926`]</span>
+    <span class="c1">#: [UDP] Generic Network Virtualization Encapsulation (Geneve) [RFC 8926]</span>
     <span class="n">geneve</span> <span class="o">=</span> <span class="mi">6081</span><span class="p">,</span> <span class="s1">'geneve'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] APCO Project 25 Common Air Interface - UDP encapsulation</span>
@@ -19930,15 +19931,15 @@
     <span class="n">mcer_port</span> <span class="o">=</span> <span class="mi">6510</span><span class="p">,</span> <span class="s1">'mcer-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Datagram Congestion Control Protocol Encapsulation for NAT Traversal</span>
-    <span class="c1">#: [:rfc:`6773`]</span>
+    <span class="c1">#: [RFC 6773]</span>
     <span class="n">dccp_udp</span> <span class="o">=</span> <span class="mi">6511</span><span class="p">,</span> <span class="s1">'dccp-udp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_6513</span> <span class="o">=</span> <span class="mi">6513</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Syslog over TLS [:rfc:`5425`]</span>
-    <span class="c1">#: - [UDP] syslog over DTLS [:rfc:`6012`]</span>
-    <span class="c1">#: - [DCCP] syslog over DTLS [:rfc:`6012`]</span>
+    <span class="c1">#: - [TCP] Syslog over TLS [RFC 5425]</span>
+    <span class="c1">#: - [UDP] syslog over DTLS [RFC 6012]</span>
+    <span class="c1">#: - [DCCP] syslog over DTLS [RFC 6012]</span>
     <span class="n">syslog_tls</span> <span class="o">=</span> <span class="mi">6514</span><span class="p">,</span> <span class="s1">'syslog-tls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Elipse RPC Protocol</span>
@@ -20020,8 +20021,8 @@
     <span class="c1">#: - [UDP] Bencher API</span>
     <span class="n">bencher</span> <span class="o">=</span> <span class="mi">6610</span><span class="p">,</span> <span class="s1">'bencher'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]</span>
-    <span class="c1">#: - [UDP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]</span>
+    <span class="c1">#: - [TCP] ODETTE-FTP over TLS/SSL [RFC 5024]</span>
+    <span class="c1">#: - [UDP] ODETTE-FTP over TLS/SSL [RFC 5024]</span>
     <span class="n">odette_ftps</span> <span class="o">=</span> <span class="mi">6619</span><span class="p">,</span> <span class="s1">'odette-ftps'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Kerberos V5 FTP Data</span>
@@ -20073,10 +20074,10 @@
     <span class="c1">#: [UDP] MPLS Performance Measurement out-of-band response</span>
     <span class="n">mpls_pm</span> <span class="o">=</span> <span class="mi">6634</span><span class="p">,</span> <span class="s1">'mpls-pm'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Encapsulate MPLS packets in UDP tunnels. [:rfc:`7510`]</span>
+    <span class="c1">#: [UDP] Encapsulate MPLS packets in UDP tunnels. [RFC 7510]</span>
     <span class="n">mpls_udp</span> <span class="o">=</span> <span class="mi">6635</span><span class="p">,</span> <span class="s1">'mpls-udp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Encapsulate MPLS packets in UDP tunnels with DTLS. [:rfc:`7510`]</span>
+    <span class="c1">#: [UDP] Encapsulate MPLS packets in UDP tunnels with DTLS. [RFC 7510]</span>
     <span class="n">mpls_udp_dtls</span> <span class="o">=</span> <span class="mi">6636</span><span class="p">,</span> <span class="s1">'mpls-udp-dtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -20139,13 +20140,13 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_6690</span> <span class="o">=</span> <span class="mi">6690</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Babel Routing Protocol [:rfc:`8966`]</span>
+    <span class="c1">#: [UDP] Babel Routing Protocol [RFC 8966]</span>
     <span class="n">babel</span> <span class="o">=</span> <span class="mi">6696</span><span class="p">,</span> <span class="s1">'babel'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_6697</span> <span class="o">=</span> <span class="mi">6697</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Babel Routing Protocol over DTLS [:rfc:`8968`]</span>
+    <span class="c1">#: [UDP] Babel Routing Protocol over DTLS [RFC 8968]</span>
     <span class="n">babel_dtls</span> <span class="o">=</span> <span class="mi">6699</span><span class="p">,</span> <span class="s1">'babel-dtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] KTI/ICAD Nameserver</span>
@@ -20210,7 +20211,7 @@
     <span class="n">reserved_6778</span> <span class="o">=</span> <span class="mi">6778</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Bidirectional Forwarding Detection (BFD) on Link Aggregation Group</span>
-    <span class="c1">#: (LAG) Interfaces [:rfc:`7130`]</span>
+    <span class="c1">#: (LAG) Interfaces [RFC 7130]</span>
     <span class="n">bfd_lag</span> <span class="o">=</span> <span class="mi">6784</span><span class="p">,</span> <span class="s1">'bfd-lag'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] DGPF Individual Exchange</span>
@@ -20410,8 +20411,8 @@
     <span class="c1">#: - [UDP] SPG Controls Carrier</span>
     <span class="n">spg</span> <span class="o">=</span> <span class="mi">7016</span><span class="p">,</span> <span class="s1">'spg'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]</span>
-    <span class="c1">#: - [UDP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]</span>
+    <span class="c1">#: - [TCP] GeneRic Autonomic Signaling Protocol [RFC 8990]</span>
+    <span class="c1">#: - [UDP] GeneRic Autonomic Signaling Protocol [RFC 8990]</span>
     <span class="n">grasp</span> <span class="o">=</span> <span class="mi">7017</span><span class="p">,</span> <span class="s1">'grasp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -21001,8 +21002,8 @@
     <span class="c1">#: - [UDP] Sakura Script Transfer Protocol</span>
     <span class="n">sstp_1</span> <span class="o">=</span> <span class="mi">7743</span><span class="p">,</span> <span class="s1">'sstp-1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] RAQMON PDU [:rfc:`4712`]</span>
-    <span class="c1">#: - [UDP] RAQMON PDU [:rfc:`4712`]</span>
+    <span class="c1">#: - [TCP] RAQMON PDU [RFC 4712]</span>
+    <span class="c1">#: - [UDP] RAQMON PDU [RFC 4712]</span>
     <span class="n">raqmon_pdu</span> <span class="o">=</span> <span class="mi">7744</span><span class="p">,</span> <span class="s1">'raqmon-pdu'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Put/Run/Get Protocol</span>
@@ -21028,7 +21029,7 @@
     <span class="c1">#: - [UDP] accu-lmgr</span>
     <span class="n">accu_lmgr</span> <span class="o">=</span> <span class="mi">7781</span><span class="p">,</span> <span class="s1">'accu-lmgr'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Seamless Bidirectional Forwarding Detection (S-BFD) [:rfc:`7881`]</span>
+    <span class="c1">#: [UDP] Seamless Bidirectional Forwarding Detection (S-BFD) [RFC 7881]</span>
     <span class="n">s_bfd</span> <span class="o">=</span> <span class="mi">7784</span><span class="p">,</span> <span class="s1">'s-bfd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] MINIVEND</span>
@@ -21094,7 +21095,7 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_7871</span> <span class="o">=</span> <span class="mi">7871</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] TLS-based Mobile IPv6 Security [:rfc:`6618`]</span>
+    <span class="c1">#: [UDP] TLS-based Mobile IPv6 Security [RFC 6618]</span>
     <span class="n">mipv6tls</span> <span class="o">=</span> <span class="mi">7872</span><span class="p">,</span> <span class="s1">'mipv6tls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -21314,7 +21315,7 @@
     <span class="c1">#: - [UDP] Senomix Timesheets Client [1 year assignment]</span>
     <span class="n">senomix08</span> <span class="o">=</span> <span class="mi">8059</span><span class="p">,</span> <span class="s1">'senomix08'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Asymmetric Extended Route Optimization (AERO) [:rfc:`6706`]</span>
+    <span class="c1">#: [UDP] Asymmetric Extended Route Optimization (AERO) [RFC 6706]</span>
     <span class="n">aero</span> <span class="o">=</span> <span class="mi">8060</span><span class="p">,</span> <span class="s1">'aero'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -21532,10 +21533,10 @@
     <span class="c1">#: - [UDP] RexecJ Server</span>
     <span class="n">rexecj</span> <span class="o">=</span> <span class="mi">8230</span><span class="p">,</span> <span class="s1">'rexecj'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] HNCP [:rfc:`7788`]</span>
+    <span class="c1">#: [UDP] HNCP [RFC 7788]</span>
     <span class="n">hncp_udp_port</span> <span class="o">=</span> <span class="mi">8231</span><span class="p">,</span> <span class="s1">'hncp-udp-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] HNCP over DTLS [:rfc:`7788`]</span>
+    <span class="c1">#: [UDP] HNCP over DTLS [RFC 7788]</span>
     <span class="n">hncp_dtls_port</span> <span class="o">=</span> <span class="mi">8232</span><span class="p">,</span> <span class="s1">'hncp-dtls-port'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Synapse Non Blocking HTTPS</span>
@@ -21723,7 +21724,7 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_8502</span> <span class="o">=</span> <span class="mi">8502</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] MPLS LSP Self-Ping [:rfc:`7746`]</span>
+    <span class="c1">#: [UDP] MPLS LSP Self-Ping [RFC 7746]</span>
     <span class="n">lsp_self_ping</span> <span class="o">=</span> <span class="mi">8503</span><span class="p">,</span> <span class="s1">'lsp-self-ping'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] RTSP Alternate (see port 554)</span>
@@ -22566,15 +22567,15 @@
     <span class="c1">#: - [UDP] WebDAV Source TLS/SSL</span>
     <span class="n">davsrcs</span> <span class="o">=</span> <span class="mi">9802</span><span class="p">,</span> <span class="s1">'davsrcs'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Session Announcement v1 [:rfc:`2974`]</span>
-    <span class="c1">#: - [UDP] Session Announcement v1 [:rfc:`2974`]</span>
+    <span class="c1">#: - [TCP] Session Announcement v1 [RFC 2974]</span>
+    <span class="c1">#: - [UDP] Session Announcement v1 [RFC 2974]</span>
     <span class="n">sapv1</span> <span class="o">=</span> <span class="mi">9875</span><span class="p">,</span> <span class="s1">'sapv1'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_9877</span> <span class="o">=</span> <span class="mi">9877</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012</span>
-    <span class="c1">#: [:rfc:`6717`]</span>
+    <span class="c1">#: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012 [RFC</span>
+    <span class="c1">#: 6717]</span>
     <span class="n">kca_service</span> <span class="o">=</span> <span class="mi">9878</span><span class="p">,</span> <span class="s1">'kca-service'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] CYBORG Systems</span>
@@ -22589,7 +22590,7 @@
     <span class="c1">#: - [UDP] MonkeyCom</span>
     <span class="n">monkeycom</span> <span class="o">=</span> <span class="mi">9898</span><span class="p">,</span> <span class="s1">'monkeycom'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] SCTP TUNNELING [:rfc:`6951`]</span>
+    <span class="c1">#: [UDP] SCTP TUNNELING [RFC 6951]</span>
     <span class="n">sctp_tunneling</span> <span class="o">=</span> <span class="mi">9899</span><span class="p">,</span> <span class="s1">'sctp-tunneling'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] IUA</span>
@@ -22600,7 +22601,7 @@
     <span class="c1">#: [UDP] enrp server channel</span>
     <span class="n">enrp</span> <span class="o">=</span> <span class="mi">9901</span><span class="p">,</span> <span class="s1">'enrp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] Multicast Ping Protocol [:rfc:`6450`]</span>
+    <span class="c1">#: [UDP] Multicast Ping Protocol [RFC 6450]</span>
     <span class="n">multicast_ping</span> <span class="o">=</span> <span class="mi">9903</span><span class="p">,</span> <span class="s1">'multicast-ping'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] domaintime</span>
@@ -22836,10 +22837,10 @@
     <span class="c1">#: - [UDP] QB Database Server</span>
     <span class="n">qb_db_server</span> <span class="o">=</span> <span class="mi">10160</span><span class="p">,</span> <span class="s1">'qb-db-server'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] SNMP-DTLS [:rfc:`6353`]</span>
+    <span class="c1">#: [UDP] SNMP-DTLS [RFC 6353]</span>
     <span class="n">snmpdtls</span> <span class="o">=</span> <span class="mi">10161</span><span class="p">,</span> <span class="s1">'snmpdtls'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] SNMP-Trap-DTLS [:rfc:`6353`]</span>
+    <span class="c1">#: [UDP] SNMP-Trap-DTLS [RFC 6353]</span>
     <span class="n">snmpdtls_trap</span> <span class="o">=</span> <span class="mi">10162</span><span class="p">,</span> <span class="s1">'snmpdtls-trap'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Trigence AE Soap Service</span>
@@ -22877,7 +22878,7 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_10443</span> <span class="o">=</span> <span class="mi">10443</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] HIP NAT-Traversal [:rfc:`5770`][:rfc:`9028`]</span>
+    <span class="c1">#: [UDP] HIP NAT-Traversal [RFC 5770][RFC 9028]</span>
     <span class="n">hip_nat_t</span> <span class="o">=</span> <span class="mi">10500</span><span class="p">,</span> <span class="s1">'hip-nat-t'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] MOS Media Object Metadata Port</span>
@@ -23761,9 +23762,9 @@
     <span class="c1">#: - [UDP] NFS mount protocol</span>
     <span class="n">mountd</span> <span class="o">=</span> <span class="mi">20048</span><span class="p">,</span> <span class="s1">'mountd'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
-    <span class="c1">#: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
-    <span class="c1">#: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]</span>
+    <span class="c1">#: - [TCP] Network File System (NFS) over RDMA [RFC 8267]</span>
+    <span class="c1">#: - [UDP] Network File System (NFS) over RDMA [RFC 8267]</span>
+    <span class="c1">#: - [SCTP] Network File System (NFS) over RDMA [RFC 8267]</span>
     <span class="n">nfsrdma</span> <span class="o">=</span> <span class="mi">20049</span><span class="p">,</span> <span class="s1">'nfsrdma'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -24054,8 +24055,8 @@
     <span class="c1">#: [UDP] bilobit Service Update</span>
     <span class="n">bilobit_update</span> <span class="o">=</span> <span class="mi">24577</span><span class="p">,</span> <span class="s1">'bilobit-update'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] UDP-based IP-Layer Capacity and Performance Measurement protocol</span>
-    <span class="c1">#: [:rfc:`9946`]</span>
+    <span class="c1">#: [UDP] UDP-based IP-Layer Capacity and Performance Measurement protocol [RFC</span>
+    <span class="c1">#: 9946]</span>
     <span class="n">udpstp</span> <span class="o">=</span> <span class="mi">24601</span><span class="p">,</span> <span class="s1">'udpstp'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: [UDP] Reserved</span>
@@ -24474,7 +24475,7 @@
     <span class="c1">#: - [UDP] traceroute use</span>
     <span class="n">traceroute</span> <span class="o">=</span> <span class="mi">33434</span><span class="p">,</span> <span class="s1">'traceroute'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: [UDP] IP Multicast Traceroute [:rfc:`8487`]</span>
+    <span class="c1">#: [UDP] IP Multicast Traceroute [RFC 8487]</span>
     <span class="n">mtrace</span> <span class="o">=</span> <span class="mi">33435</span><span class="p">,</span> <span class="s1">'mtrace'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] SNIP Slave</span>
@@ -24942,9 +24943,9 @@
     <span class="c1">#: [UDP] Reserved</span>
     <span class="n">reserved_49150</span> <span class="o">=</span> <span class="mi">49150</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]</span>
-    <span class="c1">#: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]</span>
-    <span class="c1">#: - [SCTP] HTTPS [:rfc:`9260`]</span>
+    <span class="c1">#: - [TCP] http protocol over TLS/SSL [RFC 9110]</span>
+    <span class="c1">#: - [UDP] http protocol over TLS/SSL [RFC 9110]</span>
+    <span class="c1">#: - [SCTP] HTTPS [RFC 9260]</span>
     <span class="n">https_443</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span> <span class="s1">'https'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] LonWorks</span>
@@ -24983,9 +24984,9 @@
     <span class="c1">#: - [UDP] Grid Engine Qmaster Service</span>
     <span class="n">sge_qmaster_6444</span> <span class="o">=</span> <span class="mi">6444</span><span class="p">,</span> <span class="s1">'sge-qmaster'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
-    <span class="c1">#: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]</span>
-    <span class="c1">#: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]</span>
-    <span class="c1">#: - [SCTP] SSH [:rfc:`9260`]</span>
+    <span class="c1">#: - [TCP] The Secure Shell (SSH) Protocol [RFC 4251]</span>
+    <span class="c1">#: - [UDP] The Secure Shell (SSH) Protocol [RFC 4251]</span>
+    <span class="c1">#: - [SCTP] SSH [RFC 9260]</span>
     <span class="n">ssh_22</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">'ssh'</span><span class="p">,</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">udp</span>
 
     <span class="c1">#: - [TCP] Subversion</span>
@@ -25028,7 +25029,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../../_static/documentation_options.js?v=e7158c1c"></script>
+</div><script src="../../../../../_static/documentation_options.js?v=c7a416f7"></script>
     <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../../_static/scripts/furo.js?v=46bd48cc"></script>
