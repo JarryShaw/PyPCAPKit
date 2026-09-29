@@ -92,8 +92,11 @@ create new ones."* That reasoning reaches ``get()`` as well as
 and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
 wire string carries -- so both classes' own ``get()`` (a second, independent
 mint site bypassing ``_missing_`` entirely) converts too, alongside
-``_missing_``; :class:`FEATCode` has no custom ``__new__`` and no ``get()``
-of its own, so only its one ``_missing_`` branch was in play.
+``_missing_``; :class:`FEATCode` has no custom ``__new__``, and had no
+``get()`` of its own at the time either, so only its one ``_missing_`` branch
+was in play. (It has one now -- GitHub issue #903's audit gave it a
+case-insensitive ``get`` per :rfc:`5797#section-2` -- but that override never
+calls ``cls(key)``, so it added no mint site to this file's concern.)
 
 GitHub issue #860 step 2's PR 2 has now converted the last of the 9:
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four per-transport

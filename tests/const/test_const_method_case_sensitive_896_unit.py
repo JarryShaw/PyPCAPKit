@@ -28,8 +28,11 @@ directly against the base before doing that: for a ``str`` key that matches
 neither a member name nor an already-registered value, and with no
 ``default`` supplied, ``EnumRegistry.get`` raises :exc:`KeyError` -- it never
 builds an unregistered member the way ``Method._missing_`` does for the
-*constructor* path. Confirmed on :class:`~pcapkit.const.ftp.command.FEATCode`
-(no bespoke ``get`` of its own, so it already runs the base unmodified):
+*constructor* path. Confirmed on :class:`~pcapkit.const.ftp.command.FEATCode`,
+which ran the base unmodified when this was measured -- GitHub issue #903's
+audit has since given it a case-insensitive ``get`` of its own per
+:rfc:`5797#section-2`, and the measurement still stands, because that override
+delegates to the base for any key it cannot match even after folding:
 ``FEATCode.get('totally-unknown-thing')`` raises ``KeyError``, while
 ``FEATCode('totally-unknown-thing')`` -- the constructor, reaching
 ``_missing_`` -- resolves to an unregistered member. Deleting ``Method.get``

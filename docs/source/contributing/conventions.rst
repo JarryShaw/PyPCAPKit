@@ -337,19 +337,196 @@ to make a lookup work -- which is what keeps
 ``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
 resolvable.
 
-.. note::
+The Lenient Criterion, in Two Limbs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   Auditing every registry's existing case behaviour against the specification its
-   values come from is `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__,
-   not something this page records per class. The owner's scope for it, verbatim:
-   *"we should audit all registries and then decide if case (in)sensitive."* Two
-   findings already have their own issues --
-   :class:`~pcapkit.const.ftp.command.Command`'s ``value.upper()`` is backed by
-   :rfc:`959#section-4.1` (*"Upper and lower case alphabetic characters are to be
-   treated identically"*), while
-   :class:`~pcapkit.const.http.method.Method`'s ``key.upper()`` contradicts
-   :rfc:`9110#section-9.1`, which makes the method token case-sensitive, and is tracked
-   as `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__.
+The ruling above leaves one question open, and
+`#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__ settled it: does a
+specification have to state a **comparison rule** for a registry to be treated
+case-insensitively, or does it also count when the authorities merely **disagree
+about spelling**? The owner's answer, verbatim:
+
+   I say lenient. TransportProtocol for example should be case-insensitive. Upper or
+   lower cases are being used everywhere in RFC and IANA themselves so that's an
+   indication of case insensitivity.
+
+So the test a new registry has to pass has **two limbs**, and satisfying either one
+justifies case-insensitivity:
+
+1. **A comparison rule in the governing document.** :rfc:`959#section-4.1` for FTP
+   command codes, :rfc:`5797#section-2` for FTP FEAT codes, :rfc:`6335#section-5.1`
+   for IANA service names.
+2. **A documented spelling disagreement between the specification and the registry.**
+   If the RFC writes a field one way throughout and the live IANA data writes it
+   another, then neither authority is treating case as significant, and a lookup that
+   does would reject a caller holding the spec's own spelling.
+
+Limb 2 has to be **measured, not assumed** -- count the casings in the registry the
+crawler actually reads, and say how many rows carried each. A guess about which way
+IANA spells a column is not evidence.
+
+Where neither limb holds, the lookup is case-sensitive and inherits
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged.
+
+The Audit, per Class
+~~~~~~~~~~~~~~~~~~~~
+
+`#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__'s sweep, so that a
+registry added later has something to check itself against. The owner's scope for it,
+verbatim: *"we should audit all registries and then decide if case (in)sensitive."*
+
+The population it covers, with the counting convention spelled out because the
+figures move: **127** :class:`~pcapkit.corekit.enum.EnumRegistry` subclasses, every
+one of them under :mod:`pcapkit.const`, across 124 files -- 117 :class:`int`-valued
+(of which 5 are flag registries) and 10 :class:`~aenum.StrEnum`-valued. Plus **24**
+non-registry enumerations counted by a runtime walk over both the :mod:`enum` and
+:mod:`aenum` flavours and including nested classes: 17 top level (3 of them under
+:mod:`pcapkit.const` itself) and 7 nested, the nested ones being
+``FrameType.Flags`` in :mod:`pcapkit.protocols.schema.application.httpv2` plus its
+6 concrete per-frame subclasses. 151 enumerations in total.
+
+**The** :class:`int`\ **-valued tier, all 117, is case-sensitive, and the criterion is
+vacuous on it rather than merely unmet.** A registry whose values are numbers has
+nothing for case to apply to; the only way a string reaches
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` on one is as a member *name*, and a name
+is the Python identifier :meth:`pcapkit.vendor.default.Vendor.safe_name` derives from
+the registry's own name column -- it preserves the registrar's casing exactly, but it
+is not itself a value any specification states a comparison rule for. Measured across
+all 151 enumerations: exactly **one** would collide if names were folded --
+:class:`~pcapkit.const.hip.parameter.Parameter`, on ``R1_Counter`` against
+``R1_COUNTER`` -- and **no** enumeration anywhere has two ``str`` *values* that
+collide when folded. So folding names is not merely unjustified, it is unsafe in a
+measured case; folding values is safe but unjustified except where the table below
+says otherwise.
+
+That leaves the classes with something to decide:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 20 40 18
+
+   * - Class
+     - Governing source
+     - What it says
+     - Verdict
+   * - :class:`~pcapkit.const.ftp.command.Command`
+     - :rfc:`959#section-4.1`
+     - *"Upper and lower case alphabetic characters are to be treated
+       identically."* Limb 1.
+     - **case-insensitive** -- ``get``/``_missing_`` fold, correctly
+   * - :class:`~pcapkit.const.ftp.command.FEATCode`
+     - :rfc:`5797#section-2`, :rfc:`2389#section-3.2`
+     - *"IANA maintains uniqueness of feature names (FEAT codes) based on
+       case-insensitive comparison."* Limb 1. Limb 2 holds too: RFC 2389 recommends
+       upper case on the wire while the registry spells 5 of its 15 codes lower case
+       (measured: of 64 rows, 11 upper-case / 10 distinct, 52 lower-case / 5
+       distinct, 1 blank, 0 mixed). Read §3.2 to the end before concluding it
+       disagrees: it *opens* by calling the feature-label *"nominally case
+       sensitive"*, then defers to *"the definitions of specific labels"*, which
+       RFC 5797 §2 above is. Note also that the §2 sentence is wrapped across a
+       line break in the RFC's text file, at ``case-`` / ``insensitive``, so a
+       line-oriented grep for the phrase finds nothing.
+     - **case-insensitive** -- was a defect; ``get`` now folds
+   * - :class:`~pcapkit.const.http.method.Method`
+     - :rfc:`9110#section-9.1`
+     - *"The method token is case-sensitive."* Explicitly the opposite of limb 1.
+     - **case-sensitive** -- was a defect, fixed by
+       `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__
+   * - :class:`~pcapkit.const.pcapng.option_type.OptionType`
+     - ``draft-tuexen-opsawg-pcapng``
+     - Nothing states a rule; the draft never discusses option-name case.
+     - **case-sensitive** -- already exact-matches, conforms
+   * - :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`
+     - :rfc:`9850#section-4.2`
+     - Nothing states a rule. Limb 2 fails on measurement: all 10 rows of the RFC's
+       table and all 10 of the live IANA CSV are upper case, so the authorities
+       agree. (RFC 9850 notes the labels *"correspond to lowercase labels in the TLS
+       key schedule"*, but those are a different document's secret names, not a
+       second spelling of the log label.)
+     - **case-sensitive** -- no override, conforms
+   * - ``TransportProtocol``
+     - :rfc:`6335#section-8.1.1`
+     - Nothing states a rule for the ``Transport Protocol`` field -- only *"limited
+       to one or more of TCP, UDP, SCTP, and DCCP"*. Limb 2 carries it: the RFC and
+       its §10.2 templates write the field upper case, the live CSV is lower case in
+       all 14,536 rows (``tcp`` 6608, ``udp`` 6357, blank 1467, ``sctp`` 93,
+       ``dccp`` 11, zero upper-case).
+     - **case-insensitive** -- ``get`` folds, and this is the owner's own example
+   * - :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+     - --
+     - Moot: its ``get`` takes a port number and refuses a non-:class:`int` outright,
+       so there is no string to fold. It does inherit the row above through
+       ``_dispatch``, which resolves a ``proto`` string via ``TransportProtocol.get``.
+     - **n/a** -- int-keyed
+   * - ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
+     - :rfc:`6335#section-5.1`
+     - *"case is ignored for comparison purposes, so both "http" and "HTTP" denote
+       the same service."* Limb 1, emphatically -- and these registries' **values
+       are** service names.
+     - **unimplemented** -- no service-name lookup exists to fold; see below
+   * - ``CommandType``, ``ConformanceRequirement``
+     - :rfc:`959#section-4.1`, :rfc:`5797#section-2`
+     - Limb 2 holds on measurement: the RFC and registry pages present the kind and
+       conformance letters upper case (``A``/``P``/``S``, ``M``/``O``/``H``) while
+       the CSV columns the crawler reads are lower case in every row (``s`` 26,
+       ``a`` 18, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7, ``m [1]`` 2).
+     - **open** -- see below
+   * - The 5 :mod:`~pcapkit.protocols.internet.mh` and
+       :mod:`~pcapkit.protocols.application.ngap` helper enumerations
+     - IANA Mobility Header registries, 3GPP TS 38.413
+     - Their values are numeric codes, so the criterion is vacuous exactly as for the
+       :class:`int` tier above. Three of them -- ``Criticality``,
+       ``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode`` -- do override
+       ``get``, but for signature reasons (no ``default``, and an
+       :class:`int`/:class:`str` dispatch) rather than for case: each does an exact
+       ``Cls[key]``. ``LMAAddressCode`` and ``LocalizedRoutingStatus`` carry no
+       ``get`` at all, so they have no string lookup to fold. Verified by reading all
+       five.
+     - **case-sensitive** -- conforms
+   * - ``WireGuardKeyLabel``
+     - ``draft-tuexen-opsawg-pcapng``
+     - The draft names the four labels outright (*"The key type is one of
+       LOCAL_STATIC_PRIVATE_KEY, ..."*) and, as for ``OptionType`` above, never
+       discusses their case. Both authorities write them upper case.
+     - **case-sensitive** -- no override, conforms
+   * - Every other non-registry enumeration
+     - --
+     - pcapkit's own discriminators and bit labels, with no registrar behind them
+       at all -- ``Completion``, ``ftp.Type``, ``httpv1.Type``, ``FinalisedState``,
+       ``ESPStatus``, ``PacketDirection``, ``PacketReception``, and the 7 httpv2
+       ``Flags``. ``PDUKind`` is the one with an external source and it points the
+       same way: its values are ASN.1 identifiers from 3GPP TS 38.413, and ASN.1
+       identifiers are case-significant by construction.
+     - **case-sensitive** -- nothing to cite, nothing to change
+
+Two rows the audit deliberately left open rather than acting on, because each is
+wider than a case fix:
+
+* **A service-name lookup on the** ``AppType`` **transport registries.** This is the
+  inverse of every other row: :rfc:`6335#section-5.1` *does* make service names
+  case-insensitive, and ``TCP``/``UDP``/``SCTP``/``DCCP`` hold service names as their
+  values -- but ``AppType.get`` refuses a non-:class:`int` key, so no service-name
+  lookup exists for the rule to apply to. Implementing one is new public API on a
+  6,000-member registry where one name maps to many ports, which is a ``get_all``
+  design question rather than a case fold.
+* ``CommandType`` **and** ``ConformanceRequirement``. By parity with
+  ``TransportProtocol`` -- an :class:`int`-valued enumeration whose *names* are the
+  specification's own tokens -- the measured spelling disagreement above would make
+  these two case-insensitive. Nothing looks them up by string today, though: the
+  crawler translates the CSV's lower-case letters to the upper-case member names at
+  generation time, and neither class inherits
+  :class:`~pcapkit.corekit.enum.EnumLookup` yet. Re-parenting them is phase 2 of
+  `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, which is where the
+  question belongs.
+
+One case fold also lives **outside** any ``get``, and so escapes this convention
+entirely: ``_resolve`` in :mod:`pcapkit.protocols.internet.esp` upper-cases its
+``value`` before matching it against :class:`~pcapkit.const.esp.cipher.Cipher` and
+:class:`~pcapkit.const.esp.integrity.Integrity` member names. :rfc:`7296` states no
+comparison rule for IKEv2 transform names -- checked, it does not discuss case at all
+-- so that fold is a convenience with no citation behind it. It is a protocol-level
+resolver rather than a registry override, which is why the audit records it here
+rather than changing it.
 
 .. note::
 
@@ -368,12 +545,22 @@ resolvable.
       >>> FEATCode.get('<base>')
       <FEATCode [base]>
 
-   Measure it on a registry that does **not** override ``get``. Four do --
+   The example above is :class:`~pcapkit.const.ftp.command.FEATCode`'s shape, and it
+   still resolves exactly as shown -- but since
+   `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__ that class overrides
+   ``get`` too, so the output is only the base's because its override delegates an
+   exact name-or-value hit straight through. Measure the base on a registry that does
+   **not** override ``get`` at all. **Five** do --
    :class:`~pcapkit.const.ftp.command.Command`,
+   :class:`~pcapkit.const.ftp.command.FEATCode`,
    :class:`~pcapkit.const.http.method.Method`,
    :class:`~pcapkit.const.pcapng.option_type.OptionType` and
    :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- and probing one of those
-   measures the override rather than the base. ``Command.get`` upper-cases its key
+   measures the override rather than the base. The unconditionally clean witness is
+   ``tests/corekit/test_enum_lookup_base_unit.py``'s own ``_Str``, a purpose-built
+   closed set carrying ``angled = '<angled>'`` precisely so that the value
+   fall-through can be measured on a class that defines no ``get``.
+   ``Command.get`` upper-cases its key
    before matching, which makes it look as though the base were case-insensitive --
    deliberately, since :rfc:`959#section-4.1` treats FTP command codes identically
    regardless of case. ``Method.get`` used to fold case the same way, but
