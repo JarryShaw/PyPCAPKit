@@ -94,7 +94,7 @@ reference for everything below. The pages worth knowing by name:
 | [Engine comparison](https://jarryshaw.github.io/PyPCAPKit/#engine-comparison) | Which engines exist, which Python versions they run on, and measured speed per packet |
 | [Engine support](https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html) | What each engine does *not* support, and how the gap is surfaced |
 | [Installation](https://jarryshaw.github.io/PyPCAPKit/#installation) | Extras, engine prerequisites and the local development setup |
-| [Testing](https://jarryshaw.github.io/PyPCAPKit/testing.html) | Running the suite, and the sample captures it needs |
+| [Testing](https://jarryshaw.github.io/PyPCAPKit/contributing/testing.html) | Running the suite, and the sample captures it needs |
 | [How to ...](https://jarryshaw.github.io/PyPCAPKit/demo.html) | Worked examples, library and CLI |
 | [Extensions](https://jarryshaw.github.io/PyPCAPKit/ext.html) | Registering your own protocols, engines and dumpers |
 

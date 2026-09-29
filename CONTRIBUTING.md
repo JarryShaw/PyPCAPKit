@@ -9,14 +9,14 @@ happens after that.
 
 - Fork the repository on GitHub.
 - Read the README for installation and build instructions, and the *Testing* page it links from its
-  *Documentation* table — `docs/source/testing.rst` — for the test commands.
+  *Documentation* table — `docs/source/contributing/testing.rst` — for the test commands.
 - Set up a development environment. `make setup` runs `pipenv install --skip-lock --dev`, and the
   `Makefile` exports `PIPENV_VENV_IN_PROJECT=1`, so the environment lands in `.venv/` inside the
   checkout. **Only that environment has the dependencies** — the `make` targets below all run
   through `pipenv run`, and invoking `pytest` or `sphinx` from a system interpreter will fail on
   missing imports rather than on anything you changed.
-- Looking for something to pick up? `docs/source/pep.rst` — rendered as the *Help Wanted* page — is
-  the maintained list of open proposals, kept in step with the code.
+- Looking for something to pick up? `docs/source/contributing/pep.rst` — rendered as the *Help
+  Wanted* page — is the maintained list of open proposals, kept in step with the code.
 - Play with the project, submit bugs, submit patches!
 
 ## Contribution flow

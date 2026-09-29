@@ -29,12 +29,16 @@ construction and analysis library.
 
    ext
    demo
-   testing
-   conventions
-   releasing
-   workflows
-   pep
    changelog
+
+.. toctree::
+   :maxdepth: 1
+
+   contributing/testing
+   contributing/conventions
+   contributing/releasing
+   contributing/workflows
+   contributing/pep
 
 About
 =====
