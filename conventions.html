@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="PyPCAPKit" />
 <meta property="og:description" content="When an unrecognised value may mint a member: Every registry under pcapkit.const defines_missing_, which decides what happens when a value has no member. There are two possible behaviours, and whic..." />
 <meta name="description" content="When an unrecognised value may mint a member: Every registry under pcapkit.const defines_missing_, which decides what happens when a value has no member. There are two possible behaviours, and whic..." />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Help Wanted" href="pep.html"><link rel="prev" title="Testing" href="testing.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Release Process" href="releasing.html"><link rel="prev" title="Testing" href="testing.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Registry Conventions - PyPCAPKit</title>
@@ -379,6 +379,7 @@
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Registry Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -695,10 +696,38 @@ copyable.</p>
 </div>
 <p>A handful of registries define their own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> to carry extra attributes and so
 do not share the generated template; bringing them onto the base is tracked in
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>, which also records why
-it cannot simply be done – the base’s string-key path does not fall through to a
-value lookup, so a <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code> registry would stop resolving a valid
-value that is not also a name.</p>
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The obstacle this page used to record – that the base’s string-key path does not
+fall through to a value lookup, so a <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code> registry would stop
+resolving a valid value that is not also a name – <strong>no longer applies.</strong>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> now checks <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>
+when the name lookup misses, so such a value resolves:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">FEATCode</span><span class="p">[</span><span class="s1">'base'</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+<span class="go">'&lt;base&gt;'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'&lt;base&gt;'</span> <span class="ow">in</span> <span class="n">FEATCode</span><span class="o">.</span><span class="n">_member_map_</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FEATCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'&lt;base&gt;'</span><span class="p">)</span>
+<span class="go">&lt;FEATCode [base]&gt;</span>
+</pre></div>
+</div>
+<p>Measure it on a registry that does <strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code>. Four do –
+<a class="reference internal" href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
+<a class="reference internal" href="pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
+<a class="reference internal" href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
+<a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
+measures the override rather than the base. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> upper-cases its key,
+which makes it look as though the base were case-insensitive.</p>
+</div>
+<p>What does survive is narrower and deliberate: a <strong>declared-but-unassigned</strong> <code class="docutils literal notranslate"><span class="pre">str</span></code>
+value resolves through <code class="docutils literal notranslate"><span class="pre">cls(value)</span></code> but not through <code class="docutils literal notranslate"><span class="pre">get(value)</span></code>, because
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> returns it without
+growing either lookup table. <code class="docutils literal notranslate"><span class="pre">FEATCode.get('ZZ-NOT-REAL')</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>
+while <code class="docutils literal notranslate"><span class="pre">FEATCode('ZZ-NOT-REAL')</span></code> yields an unregistered member. Closing that gap would
+mean calling <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code> for a <code class="docutils literal notranslate"><span class="pre">str</span></code> value too, which reopens the minting hazard
+above – so the asymmetry is intended, and <code class="docutils literal notranslate"><span class="pre">get</span></code>’s own docstring carries the full
+reasoning.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="pcapkit/vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> generates these modules. A change to the shape of a
@@ -714,12 +743,12 @@ the next regeneration would discard it.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="pep.html">
+          <a class="next-page" href="releasing.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Help Wanted</div>
+                <div class="title">Release Process</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

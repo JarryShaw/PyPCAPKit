@@ -31,6 +31,7 @@ construction and analysis library.
    demo
    testing
    conventions
+   releasing
    pep
    changelog
 
