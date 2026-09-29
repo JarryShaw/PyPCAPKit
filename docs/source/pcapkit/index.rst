@@ -33,6 +33,16 @@ schema definitions as well as various customisable interfaces.
    const/index
    vendor/index
 
+Package Metadata
+================
+
+.. autodata:: pcapkit.__version__
+
+   .. seealso::
+
+      :doc:`../contributing/releasing` for how this value is bumped and
+      consumed by the release pipeline.
+
 Library Index
 =============
 
