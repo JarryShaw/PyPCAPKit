@@ -1183,6 +1183,16 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             padding=padding,
             plaintext=inner,
         )
+
+        # NOTE: The short-circuit every other extension header has, added for
+        # GitHub issue #895 on the maintainer's ruling -- "i say the
+        # short-circuit must be done in ``ESP`` cause it's part of the IPv6
+        # extension headers." Its seven siblings all stop here when parsed as
+        # part of a chain, because ``IPv6._decode_next_layer`` walks the chain
+        # itself and will dispatch ``next_type`` on its own; decoding it again
+        # from inside the header is work whose result is discarded.
+        if extension:
+            return esp
         return self._decode_next_layer(esp, next_type, len(inner), packet=packet,
                                        version=version, payload=inner)
 
@@ -1480,6 +1490,16 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             padding=None,
             plaintext=None,
         )
+
+        # NOTE: The same short-circuit as the decrypted path in :meth:`read`,
+        # for GitHub issue #895. This helper is the *undecrypted* return, reached
+        # from several places in :meth:`read` -- so guarding only ``read``'s tail
+        # would leave every no-keys capture still decoding a payload nobody
+        # reads, which is the common case rather than the rare one. There is no
+        # ``extension`` parameter here, so this consults :attr:`self._extf`,
+        # which :meth:`__post_init__` sets before it hands off to ``read``.
+        if self._extf:
+            return esp
         return self._decode_next_layer(esp, None, len(payload_data) + len(icv),
                                        packet=packet or None, version=version,
                                        payload=payload_data + icv)
