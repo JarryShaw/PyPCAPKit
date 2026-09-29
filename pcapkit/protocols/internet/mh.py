@@ -275,7 +275,7 @@ from pcapkit.protocols.data.internet.mh import \
 from pcapkit.protocols.data.internet.mh import \
     UpdateNotificationMessage as Data_UpdateNotificationMessage
 from pcapkit.protocols.data.internet.mh import VendorSpecificOption as Data_VendorSpecificOption
-from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
 from pcapkit.protocols.schema.internet.mh import \
     AccessNetworkIdentifierOption as Schema_AccessNetworkIdentifierOption
@@ -890,7 +890,7 @@ class LMAAddressCode(IntEnum):
         raise EnumValueError('%r is not a valid %s' % (value, cls.__name__))
 
 
-class MH(Internet[Data_MH, Schema_MH],
+class MH(IPv6_Ext[Data_MH, Schema_MH],
          schema=Schema_MH, data=Data_MH):
     """This class implements Mobility Header.
 
@@ -1370,6 +1370,25 @@ class MH(Internet[Data_MH, Schema_MH],
     def name(self) -> 'Literal["Mobility Header"]':
         """Name of current protocol."""
         return 'Mobility Header'
+
+    @property
+    def alias(self) -> 'Literal["MH"]':
+        """Acronym of corresponding protocol.
+
+        Spelled out rather than left to
+        :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
+        class-name default, because
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        between this class and that default in the MRO and carries a concrete
+        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        rename this header in every
+        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
+        :meth:`IPv6._decode_next_layer
+        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
+        dict key. The value is exactly what the default produced before.
+
+        """
+        return 'MH'
 
     @property
     def length(self) -> 'int':

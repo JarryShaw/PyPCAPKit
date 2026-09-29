@@ -176,9 +176,10 @@ from pcapkit.corekit.context import ProtocolContext
 from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.protocols.data.internet.esp import ESP as Data_ESP
 from pcapkit.protocols.internet.ipsec import IPsec
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.esp import ESP as Schema_ESP
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import ProtocolError, ProtocolUnbound
+from pcapkit.utilities.exceptions import ProtocolError, ProtocolUnbound, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = ['ESP', 'ESPStatus', 'Cipher', 'Integrity', 'CipherSuite', 'IntegritySuite',
@@ -187,7 +188,7 @@ __all__ = ['ESP', 'ESPStatus', 'Cipher', 'Integrity', 'CipherSuite', 'IntegrityS
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Optional, Type
+    from typing import IO, Any, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -962,9 +963,26 @@ class ESPContext(ProtocolContext):
 ##############################################################################
 
 
-class ESP(IPsec[Data_ESP, Schema_ESP],
+class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
           schema=Schema_ESP, data=Data_ESP):
-    """This class implements Encapsulating Security Payload."""
+    """This class implements Encapsulating Security Payload.
+
+    Double-inherited (GitHub issue #917), mirroring
+    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's
+    ``protocol-numbers-1.csv`` marks ``ESP`` ``Y`` in the *IPv6 Extension
+    Header* column (:rfc:`4303`), and this package's own
+    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry
+    agrees (``ESP = 50``), so it must honour the same extension-mode contract
+    as its siblings. :attr:`payload` and :attr:`protochain` come from
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`
+    is spelled out below for the reason given there.
+
+    Note:
+        :rfc:`8200#section-4.5` says outright that ESP "is not considered an
+        extension header". The library follows IANA's registry rather than
+        that sentence, on the owner's ruling for GitHub issue #895.
+
+    """
 
     ##########################################################################
     # Properties.
@@ -974,6 +992,36 @@ class ESP(IPsec[Data_ESP, Schema_ESP],
     def name(self) -> 'Literal["Encapsulating Security Payload"]':
         """Name of corresponding protocol."""
         return 'Encapsulating Security Payload'
+
+    @property
+    def alias(self) -> 'Literal["ESP"]':
+        """Acronym of corresponding protocol.
+
+        Spelled out rather than left to
+        :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
+        class-name default, because
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        between this class and that default in the MRO and carries a concrete
+        ``'IPv6-Ext'`` of its own. Inheriting it would rename this header in
+        every :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
+        :meth:`IPv6._decode_next_layer
+        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
+        dict key. The value is exactly what the default produced before.
+
+        """
+        return 'ESP'
+
+    @property
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
 
     @property
     def length(self) -> 'int':

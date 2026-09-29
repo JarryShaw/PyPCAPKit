@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as Data_IPv6_Frag
-from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6_Frag
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
+class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
                 schema=Schema_IPv6_Frag, data=Data_IPv6_Frag):
     """This class implements Fragment Header for IPv6."""
 

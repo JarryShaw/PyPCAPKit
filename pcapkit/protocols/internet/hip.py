@@ -120,6 +120,7 @@ from pcapkit.protocols.data.internet.hip import \
 from pcapkit.protocols.data.internet.hip import UnassignedParameter as Data_UnassignedParameter
 from pcapkit.protocols.data.internet.hip import ViaRVSParameter as Data_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
 from pcapkit.protocols.schema.internet.hip import AckDataParameter as Schema_AckDataParameter
 from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKParameter
@@ -254,9 +255,37 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         spi: 'NotRequired[int]'
 
 
-class HIP(Internet[Data_HIP, Schema_HIP],
+class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
           schema=Schema_HIP, data=Data_HIP):
     """This class implements Host Identity Protocol.
+
+    Double-inherited, per the maintainer's convention on GitHub pull request
+    #924: a header that is *only* usable as an extension header inherits
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone, while one
+    that is also usable as a standalone protocol names
+    :class:`~pcapkit.protocols.internet.internet.Internet` as well. HIP is
+    both, on two independent grounds:
+
+    * :rfc:`7401#section-5.1` states that "the HIP header is logically an
+      IPv6 extension header", and IANA lists protocol 139 in its *IPv6
+      Extension Header Types* registry -- 11 entries, HIP among them.
+    * :rfc:`7401#appendix-C.2`, "IPv4 HIP Packet (I1 Packet)", works a
+      checksum for an **IPv4** header carrying ``Next Header: 139`` with
+      ``Payload Protocol: 59``. HIP therefore travels directly as an IPv4
+      payload, exactly as :class:`~pcapkit.protocols.internet.ah.AH` and
+      :class:`~pcapkit.protocols.internet.esp.ESP` do.
+
+    The second ground is what separates HIP from
+    :class:`~pcapkit.protocols.internet.mh.MH` and Shim6, which are protocols
+    in their own right but cannot appear under IPv4:
+    :rfc:`6275#section-6.1.1` defines the Mobility Header checksum over a
+    pseudo-header of IPv6 header fields with no IPv4 variant, and Mobile IPv4
+    carries its equivalent messages over UDP port 434 (:rfc:`5944`) rather
+    than as protocol 135.
+
+    ``Internet`` is already reached transitively through ``IPv6_Ext``; naming
+    it is what records the classification, so a future reader can tell a
+    deliberate standalone protocol from a header that merely inherits one.
 
     This class currently supports parsing of the following HIP parameters,
     which are registered in the :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`

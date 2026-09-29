@@ -393,7 +393,7 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.protocols.link.ospf import OSPF
         return bytes(OSPF())
     if code == TransType.Shim6:
-        # #904: no dedicated dissector exists for Shim6 -- IPv6_GenericExt
+        # #904: no dedicated dissector exists for Shim6 -- IPv6_Ext
         # parses only the two octets RFC 6564 §4 guarantees (next header,
         # Hdr Ext Len), so this is hand-built rather than constructed
         # through a class: next=TCP(6), Hdr Ext Len=0 -> an 8-octet header,
@@ -630,10 +630,10 @@ PINNED_TARGETS = {
     'internet/OSPFIGP': ('pcapkit.protocols.link.ospf', 'OSPF'),
     # #904: Shim6 (140) previously had no entry at all, and the default
     # factory made it resolve to Raw. It is now registered directly at
-    # IPv6_GenericExt, which parses the RFC 6564 §4 generic layout it has
+    # IPv6_Ext, which parses the RFC 6564 §4 generic layout it has
     # never had a dedicated dissector for -- a deliberate addition, not a
     # regression.
-    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_generic_ext', 'IPv6_GenericExt'),
+    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext', 'IPv6_Ext'),
 
     # -- TCP.__proto__ (port) --------------------------------------------------
     'tcp/20': ('pcapkit.protocols.application.ftp', 'FTP_DATA'),

@@ -9,21 +9,21 @@ from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
-__all__ = ['IPv6_GenericExt']
+__all__ = ['IPv6_Ext']
 
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
 
 @schema_final
-class IPv6_GenericExt(Schema):
+class IPv6_Ext(Schema):
     """Header schema for a generically-parsed IPv6 extension header.
 
     Only the two octets :rfc:`6564#section-4` guarantees are parsed at this
     layer -- ``next`` and the raw ``Hdr Ext Len`` octet. Combining them into
     an actual skip distance is per protocol (a constant for ``IPv6-Frag``,
     4-octet units for ``AH``, 8-octet units for the rest), so that part is
-    done in :meth:`pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.read`,
+    done in :meth:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read`,
     which knows which protocol this instance stands in for; this schema does
     not.
 

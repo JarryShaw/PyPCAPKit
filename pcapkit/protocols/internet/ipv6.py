@@ -63,10 +63,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: Extension header codes that have a *dedicated* parser class in this
     #: package whose own layout follows :rfc:`6564#section-4`'s generic
     #: ``next`` + ``Hdr Ext Len`` format (see the module docstring of
-    #: :mod:`pcapkit.protocols.internet.ipv6_generic_ext` for the exception
+    #: :mod:`pcapkit.protocols.internet.ipv6_ext` for the exception
     #: table in full). When that dedicated parser raises,
     #: :meth:`_import_next_layer` substitutes
-    #: :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+    #: :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     #: instead of letting the generic
     #: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
@@ -79,8 +79,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: (``pcapkit/protocols/internet/NotImplemented/shim6.py`` is a 0-byte
     #: placeholder, excluded from the wheel by ``MANIFEST.in``), so there is
     #: no "own parser" here for it to raise from -- ``Shim6`` reaches
-    #: :class:`IPv6_GenericExt` by *direct* registration instead (see the
-    #: bottom of :mod:`pcapkit.protocols.internet.ipv6_generic_ext`), which
+    #: :class:`IPv6_Ext` by *direct* registration instead (see the
+    #: bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which
     #: already produces exactly this class without needing this set to name
     #: it. ``ESP``, ``BIT-EMU``, ``253`` and ``254`` are absent, but not for
     #: the same reason as each other, and not because a generic fallback
@@ -417,7 +417,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # IPv6-Opts, MH, HIP, IPv6-Frag and AH all have dedicated
             # parsers whose data carries ``next``, and Shim6 and any
             # recognised header whose own parser raised are both handled by
-            # :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`,
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`,
             # which also carries ``next`` (possibly :data:`None`, on an
             # overrun -- see its module docstring). Every IANA extension
             # header code this package has not implemented a dedicated
@@ -489,7 +489,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Notes:
             If the dedicated parser for a code in :attr:`__generic_ext_codes__`
             raises, this substitutes
-            :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+            :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
             for it rather than letting the exception reach the
             :func:`~pcapkit.utilities.decorators.beholder` decorating this
             method, which would otherwise substitute plain
@@ -497,7 +497,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             ``next`` field, which is what used to crash the whole packet at
             :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue
             #891). Every other exception -- including one raised by
-            ``IPv6_GenericExt`` itself, or by ``ESP``'s own dedicated
+            ``IPv6_Ext`` itself, or by ``ESP``'s own dedicated
             parser -- still reaches ``beholder`` unchanged, so *this
             method's own* behaviour for anything outside that closed set is
             exactly what it was before this method learned the
@@ -540,14 +540,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                              alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
                              __context__=self._exctx)
         except Exception as exc:
-            from pcapkit.protocols.internet.ipv6_generic_ext import \
-                IPv6_GenericExt  # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.internet.ipv6_ext import \
+                IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
 
-            if not (extension and protocol is not IPv6_GenericExt
+            if not (extension and protocol is not IPv6_Ext
                     and proto in self.__generic_ext_codes__):
                 raise
 
-            next_ = IPv6_GenericExt(file_, length, version=version, extension=extension,
-                                    alias=proto, error=exc, packet=packet, layer=self._exlayer,
-                                    protocol=self._exproto, __context__=self._exctx)
+            next_ = IPv6_Ext(file_, length, version=version, extension=extension,
+                             alias=proto, error=exc, packet=packet, layer=self._exlayer,
+                             protocol=self._exproto, __context__=self._exctx)
         return next_

@@ -1,11 +1,18 @@
-IPv6_GenericExt - Generic IPv6 Extension Header
-================================================
+IPv6_Ext - IPv6 Extension Header
+================================
 
-.. module:: pcapkit.protocols.internet.ipv6_generic_ext
+.. module:: pcapkit.protocols.internet.ipv6_ext
 
-:mod:`pcapkit.protocols.internet.ipv6_generic_ext` contains
-:class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
-only, which implements a **generic** extractor for IPv6 extension
+:mod:`pcapkit.protocols.internet.ipv6_ext` contains
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+only, which serves two roles at once (GitHub issue #917): it is the
+shared **base class** of all eight IPv6 extension headers this package
+implements -- supplying them the ``extension``-mode contract, i.e. the
+guards that make :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload`,
+:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol` and
+:attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain`
+unavailable on a header parsed as part of an IPv6 chain -- and it
+implements a **generic** extractor for IPv6 extension
 headers [*]_, standing in for one whenever the header's own dedicated
 parser is unavailable or has failed. :rfc:`6564#section-4` guarantees,
 with an RFC 2119 **MUST**, that any IPv6 extension header defined
@@ -29,7 +36,7 @@ parser at all -- none of the four ever reaches this class), the two ways
 this class is dispatched to, and why an overrun stops the walk instead of
 clipping it.
 
-.. autoclass:: pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt
+.. autoclass:: pcapkit.protocols.internet.ipv6_ext.IPv6_Ext
    :no-members:
    :show-inheritance:
 
@@ -52,18 +59,18 @@ clipping it.
 Header Schemas
 --------------
 
-.. module:: pcapkit.protocols.schema.internet.ipv6_generic_ext
+.. module:: pcapkit.protocols.schema.internet.ipv6_ext
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_generic_ext.IPv6_GenericExt
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_ext.IPv6_Ext
    :members:
    :show-inheritance:
 
 Data Models
 -----------
 
-.. module:: pcapkit.protocols.data.internet.ipv6_generic_ext
+.. module:: pcapkit.protocols.data.internet.ipv6_ext
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_generic_ext.IPv6_GenericExt
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext
    :members:
    :show-inheritance:
 
