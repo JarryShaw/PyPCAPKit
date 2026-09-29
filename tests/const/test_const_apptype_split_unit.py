@@ -1448,11 +1448,14 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertNotIn('unit_test_836_bogus', TransportProtocol.__members__)
         before = len(TransportProtocol.__members__)
 
-        with self.assertRaises(ValueError) as caught:
+        # KeyError-shaped since GitHub issue #923 retired this override's
+        # ``KeyError`` -> ``ValueError`` conversion; the message is unchanged,
+        # and so is what this test is about -- refused, not minted.
+        with self.assertRaises(KeyError) as caught:
             TransportProtocol.get('unit_test_836_bogus')
-        # Plain ValueError -- not the ProtocolError the old
-        # show_flag_values-based decoding briefly answered with for a
-        # minted 9, back before this ruling retired minting entirely.
+        # Not the ProtocolError the old show_flag_values-based decoding
+        # briefly answered with for a minted 9, back before this ruling
+        # retired minting entirely.
         self.assertNotIsInstance(caught.exception, ProtocolError)
         self.assertIn('unit_test_836_bogus', str(caught.exception))
         self.assertIn('is not a valid', str(caught.exception))
@@ -1462,7 +1465,7 @@ class AppTypeSplitTests(unittest.TestCase):
         # than taking the next integer after a member that was never created.
         self.assertEqual(len(TransportProtocol.__members__), before)
         self.assertNotIn('unit_test_836_bogus', TransportProtocol.__members__)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             TransportProtocol.get('unit_test_836_bogus_two')
         self.assertEqual(len(TransportProtocol.__members__), before)
 
@@ -1490,7 +1493,9 @@ class AppTypeSplitTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import TransportProtocol
 
         self.assertNotIn('tcp|udp', TransportProtocol.__members__)
-        with self.assertRaises(ValueError) as caught:
+        # KeyError-shaped since GitHub issue #923; see
+        # ``test_get_refuses_an_unrecognised_name_rather_than_minting_it``.
+        with self.assertRaises(KeyError) as caught:
             TransportProtocol.get('tcp|udp')
         self.assertIn('tcp|udp', str(caught.exception))
         self.assertIn('is not a valid', str(caught.exception))

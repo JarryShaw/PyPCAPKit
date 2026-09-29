@@ -2682,10 +2682,14 @@ class TransportProtocolAutoTests(unittest.TestCase):
         """GitHub PR #836's ruling against extending ``TransportProtocol``
         at all is untouched by the ``auto()`` change -- :meth:`~pcapkit.const.
         reg.apptype.apptype.TransportProtocol.get` still has no ``_missing_``
-        of its own and still refuses outright rather than minting."""
+        of its own and still refuses outright rather than minting.
+
+        :exc:`KeyError`-shaped since GitHub issue #923, which retired the
+        override's ``KeyError`` -> ``ValueError`` conversion; the refusal itself
+        is what this test is about and that is unchanged."""
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             TransportProtocol.get('not-a-real-transport')
 
     def test_stale_power_of_two_comment_is_gone(self) -> None:

@@ -185,22 +185,33 @@ class TransportProtocol(EnumLookup, IntEnum):
         """Backport support for original codes.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
-        issue #877's re-parenting, but keeps this override rather than
-        dropping it -- two behaviours the base does not reproduce on its own:
+        issue #877's re-parenting, but keeps this override rather than dropping
+        it, for one behaviour the base does not reproduce on its own: **case
+        folding**. This class has always matched a name case-insensitively
+        (``key.lower()``); the base's own ``str`` branch is case-sensitive.
+        Lowering ``key`` before delegating reproduces that: every member name
+        here is already lower-case, so a lowered ``key`` still hits the base's
+        exact ``_member_map_`` lookup.
 
-        * **Case folding.** This class has always matched a name
-          case-insensitively (``key.lower()``); the base's own ``str``
-          branch is case-sensitive. Lowering ``key`` before delegating
-          reproduces that: every member name here is already lower-case, so
-          a lowered ``key`` still hits the base's exact ``_member_map_``
-          lookup.
-        * **The refusal.** Maintainer ruling on GitHub PR #836: "Do not
-          allow extension of TransportProtocol at all." The base's own miss
-          on a ``str`` key raises a bare :exc:`KeyError`; this class has
-          always raised :exc:`ValueError` naming the rejected key, which is
-          what every caller and test here already depends on, so a name
-          miss is caught and re-raised in that shape rather than left as the
-          base's own exception.
+        Case folding is now the *only* thing this override adds. It used to
+        convert the base's name-miss exception as well -- this class raised
+        :exc:`ValueError` where the base raised :exc:`KeyError` -- and GitHub
+        issue #923's ruling retired that conversion: *"Either ``ValueError``
+        or ``KeyError``, that's depending on how stdlib's ``Enum`` would raise
+        on these circumstances."* A stdlib ``E['nosuch']`` raises
+        :exc:`KeyError`, and #923's census of the 127 concrete
+        :class:`~pcapkit.corekit.enum.EnumLookup` subclasses -- taken before
+        #921 re-parented this class, so this class is not among them -- found
+        119 already answering a name miss that way against 5 answering with
+        :exc:`ValueError`. Those 5 are :class:`AppType` and its four transport
+        registries, and they land there only because their own ``get()`` takes
+        an :class:`int` port and never accepts a name at all, rather than from
+        any name-miss policy. So there was no policy here to preserve, and a
+        name miss now reaches the caller as
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
+        Maintainer ruling on GitHub PR #836 -- "Do not allow extension of
+        TransportProtocol at all" -- is untouched by that: the refusal is still
+        a refusal and still mints nothing, only its exception class moved.
 
         The base is a :class:`classmethod`
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
@@ -234,16 +245,17 @@ class TransportProtocol(EnumLookup, IntEnum):
                 :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
 
         Raises:
-            ValueError: If ``key`` names no member, by name or by value, and
-                there is no usable ``default``.
+            EnumKeyError: If ``key`` names no member and there is no usable
+                ``default``. A :exc:`KeyError`, from the base, since GitHub
+                issue #923 -- it used to be a plain :exc:`ValueError` raised
+                here.
+            EnumValueError: If ``key`` is a value no member carries and there
+                is no usable ``default``. A :exc:`ValueError`, from the base.
 
         :meta private:
         """
         if isinstance(key, str):
-            try:
-                return super().get(key.lower(), default)
-            except KeyError:
-                raise ValueError(f'{{key!r}} is not a valid {{cls.__name__}}') from None
+            return super().get(key.lower(), default)
         # NOTE: maintainer ruling on this PR (#836): "Do not allow extension
         # of TransportProtocol at all." A name that is not a declared member
         # used to mint a brand-new one here, at ``max_val + 1`` (before that,
@@ -264,7 +276,9 @@ class TransportProtocol(EnumLookup, IntEnum):
         #
         # NOTE: the delegation below is exception-compatible for the keys this
         # signature admits -- an unrecognised :class:`int` still reaches the
-        # caller as the same plain :exc:`ValueError`. It is not compatible for
+        # caller as a :exc:`ValueError`, now the base's own
+        # :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue
+        # #923 rather than :mod:`aenum`'s bare one. It is not compatible for
         # keys outside it: ``None``, a :class:`float` and an unhashable key
         # used to raise :exc:`AttributeError` from the ``key.lower()`` this
         # branch no longer reaches, and now raise :exc:`ValueError` (or, for a
