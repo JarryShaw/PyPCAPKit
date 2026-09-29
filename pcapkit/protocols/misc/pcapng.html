@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Data Models: Footnotes*, ht..." />
-<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Data Models: Footnotes*, ht..." />
+<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel moved to pcapkit.const.pcapng.tls_key_label(GitHub issue #886), ..." />
+<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: TLSKeyLabel moved to pcapkit.const.pcapng.tls_key_label(GitHub issue #886), ..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Raw Packet Data" href="raw.html"><link rel="prev" title="PCAP File Headers" href="pcap.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -3951,7 +3951,7 @@ protocol chain of the current packet (frame).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></span>) – Secrets type.</p></li>
 <li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog" title="pcapkit.protocols.data.misc.pcapng.TLSKeyLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLog</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Secrets data model.</p></li>
-<li><p><strong>entries</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel" title="pcapkit.protocols.misc.pcapng.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>, <a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – TLS Key Log entries.</p></li>
+<li><p><strong>entries</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>, <a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – TLS Key Log entries.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -4229,85 +4229,12 @@ itself; else raises <code class="xref py py-exc docutils literal notranslate"><s
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">TLSKeyLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#TLSKeyLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
-<p>TLS key log label, c.f., <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a>.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.RSA">
-<span class="sig-name descname"><span class="pre">RSA</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RSA'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.RSA" title="Link to this definition">¶</a></dt>
-<dd><p>not a registered label of <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a>’s “TLS
-SSLKEYLOGFILE Labels” registry. Defined by the Mozilla NSS
-<code class="docutils literal notranslate"><span class="pre">SSLKEYLOGFILE</span></code> convention and removed in NSS 3.34; kept here only so
-that key logs predating <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html"><strong>RFC 9850</strong></a> still read.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>NSS-historical</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_RANDOM">
-<span class="sig-name descname"><span class="pre">CLIENT_RANDOM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLIENT_RANDOM'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_RANDOM" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_EARLY_TRAFFIC_SECRET">
-<span class="sig-name descname"><span class="pre">CLIENT_EARLY_TRAFFIC_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLIENT_EARLY_TRAFFIC_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_EARLY_TRAFFIC_SECRET" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_HANDSHAKE_TRAFFIC_SECRET">
-<span class="sig-name descname"><span class="pre">CLIENT_HANDSHAKE_TRAFFIC_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLIENT_HANDSHAKE_TRAFFIC_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_HANDSHAKE_TRAFFIC_SECRET" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.SERVER_HANDSHAKE_TRAFFIC_SECRET">
-<span class="sig-name descname"><span class="pre">SERVER_HANDSHAKE_TRAFFIC_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SERVER_HANDSHAKE_TRAFFIC_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.SERVER_HANDSHAKE_TRAFFIC_SECRET" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_TRAFFIC_SECRET_0">
-<span class="sig-name descname"><span class="pre">CLIENT_TRAFFIC_SECRET_0</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CLIENT_TRAFFIC_SECRET_0'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.CLIENT_TRAFFIC_SECRET_0" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.SERVER_TRAFFIC_SECRET_0">
-<span class="sig-name descname"><span class="pre">SERVER_TRAFFIC_SECRET_0</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SERVER_TRAFFIC_SECRET_0'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.SERVER_TRAFFIC_SECRET_0" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.EARLY_EXPORTER_SECRET">
-<span class="sig-name descname"><span class="pre">EARLY_EXPORTER_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EARLY_EXPORTER_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.EARLY_EXPORTER_SECRET" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.EXPORTER_SECRET">
-<span class="sig-name descname"><span class="pre">EXPORTER_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EXPORTER_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.EXPORTER_SECRET" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.ECH_SECRET">
-<span class="sig-name descname"><span class="pre">ECH_SECRET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ECH_SECRET'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.ECH_SECRET" title="Link to this definition">¶</a></dt>
-<dd><p>HPKE KEM shared secret used in the ECH, c.f., <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a>.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel.ECH_CONFIG">
-<span class="sig-name descname"><span class="pre">ECH_CONFIG</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ECH_CONFIG'</span></span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel.ECH_CONFIG" title="Link to this definition">¶</a></dt>
-<dd><p>ECHConfig used for construction of the ECH, c.f., <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a>.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.TLSKeyLabel._generate_next_value_">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_generate_next_value_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel._generate_next_value_" title="Link to this definition">¶</a></dt>
-<dd><p>Return the lower-cased version of the member name.</p>
-</dd></dl>
-
-</dd></dl>
-
+<p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a> moved to
+<a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng.tls_key_label" title="pcapkit.const.pcapng.tls_key_label"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.tls_key_label</span></code></a> (GitHub issue #886), generated the
+same way as its <a class="reference internal" href="../../const/pcapng.html#module-pcapkit.const.pcapng" title="pcapkit.const.pcapng"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.pcapng</span></code></a> siblings since <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a>
+makes it an IANA registry rather than a hand-picked helper enum. This module
+still re-exports it under its own name, so
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pcapkit.protocols.misc.pcapng</span> <span class="pre">import</span> <span class="pre">TLSKeyLabel</span></code> keeps working.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcapng.WireGuardKeyLabel">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">WireGuardKeyLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcapng.html#WireGuardKeyLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel" title="Link to this definition">¶</a></dt>
@@ -6274,7 +6201,7 @@ only the outer one is the miss-safe
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.entries">
-<span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dict" title="pcapkit.const.reg.apptype.tcp.TCP.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel" title="pcapkit.protocols.misc.pcapng.TLSKeyLabel"><span class="pre">TLSKeyLabel</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.entries" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dict" title="pcapkit.const.reg.apptype.tcp.TCP.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><span class="pre">TLSKeyLabel</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.entries" title="Link to this definition">¶</a></dt>
 <dd><p>TLS Key Log entries.</p>
 </dd></dl>
 
@@ -7875,7 +7802,7 @@ subclass instance.</p></li>
 <p>Data model for TLS key log DSB secrets.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.TLSKeyLog.entries">
-<span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dict" title="pcapkit.const.reg.apptype.tcp.TCP.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.misc.pcapng.TLSKeyLabel" title="pcapkit.protocols.misc.pcapng.TLSKeyLabel"><span class="pre">TLSKeyLabel</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.entries" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">entries</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.dict" title="pcapkit.const.reg.apptype.tcp.TCP.dict"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><span class="pre">TLSKeyLabel</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.TLSKeyLog.entries" title="Link to this definition">¶</a></dt>
 <dd><p>TLS key log entries.</p>
 </dd></dl>
 

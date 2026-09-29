@@ -486,13 +486,23 @@
 <span class="sd">    against a member instead.</span>
 
 <span class="sd">    It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as</span>
-<span class="sd">    :class:`~pcapkit.protocols.application.httpv1.Type` and</span>
-<span class="sd">    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` do, which buys two things</span>
-<span class="sd">    a plain :class:`enum.Enum` does not: the value survives</span>
+<span class="sd">    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys two</span>
+<span class="sd">    things a plain :class:`enum.Enum` does not: the value survives</span>
 <span class="sd">    :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and</span>
 <span class="sd">    :meth:`Datagram.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` hands this</span>
 <span class="sd">    field straight out -- and ``datagram.completed == 'timeout'`` works, so the</span>
 <span class="sd">    new state can be tested for without importing this class.</span>
+<span class="sd">    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` used to be a third</span>
+<span class="sd">    precedent for the same :class:`~pcapkit.utilities.compat.StrEnum` base, but</span>
+<span class="sd">    GitHub issue #886 moved its canonical definition to</span>
+<span class="sd">    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated like its</span>
+<span class="sd">    :mod:`pcapkit.const.pcapng` siblings: it now derives from :class:`aenum`'s</span>
+<span class="sd">    own ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`) rather than</span>
+<span class="sd">    from :mod:`pcapkit.utilities.compat`'s version-branched one. Both</span>
+<span class="sd">    properties above still hold for it either way -- ``aenum.StrEnum`` is a</span>
+<span class="sd">    :class:`str` subclass same as the stdlib one -- but ``isinstance``/</span>
+<span class="sd">    ``issubclass`` against :class:`pcapkit.utilities.compat.StrEnum` no longer</span>
+<span class="sd">    does, which is why it is called out here rather than left silently stale.</span>
 
 <span class="sd">    Warning:</span>
 <span class="sd">        Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are</span>

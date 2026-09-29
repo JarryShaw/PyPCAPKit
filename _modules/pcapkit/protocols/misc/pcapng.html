@@ -483,6 +483,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.option_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionType</span> <span class="k">as</span> <span class="n">Enum_OptionType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.record_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordType</span> <span class="k">as</span> <span class="n">Enum_RecordType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.secrets_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">SecretsType</span> <span class="k">as</span> <span class="n">Enum_SecretsType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.verdict_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerdictType</span> <span class="k">as</span> <span class="n">Enum_VerdictType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
@@ -724,29 +725,27 @@
 
 
 
-<div class="viewcode-block" id="TLSKeyLabel">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.TLSKeyLabel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TLSKeyLabel</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""TLS key log label, c.f., :rfc:`9850`."""</span>
-
-    <span class="c1">#: NSS-historical: not a registered label of :rfc:`9850#section-4.2`'s "TLS</span>
-    <span class="c1">#: SSLKEYLOGFILE Labels" registry. Defined by the Mozilla NSS</span>
-    <span class="c1">#: ``SSLKEYLOGFILE`` convention and removed in NSS 3.34; kept here only so</span>
-    <span class="c1">#: that key logs predating :rfc:`9850` still read.</span>
-    <span class="n">RSA</span> <span class="o">=</span> <span class="s1">'RSA'</span>
-    <span class="n">CLIENT_RANDOM</span> <span class="o">=</span> <span class="s1">'CLIENT_RANDOM'</span>
-    <span class="n">CLIENT_EARLY_TRAFFIC_SECRET</span> <span class="o">=</span> <span class="s1">'CLIENT_EARLY_TRAFFIC_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">CLIENT_HANDSHAKE_TRAFFIC_SECRET</span> <span class="o">=</span> <span class="s1">'CLIENT_HANDSHAKE_TRAFFIC_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">SERVER_HANDSHAKE_TRAFFIC_SECRET</span> <span class="o">=</span> <span class="s1">'SERVER_HANDSHAKE_TRAFFIC_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">CLIENT_TRAFFIC_SECRET_0</span> <span class="o">=</span> <span class="s1">'CLIENT_TRAFFIC_SECRET_0'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">SERVER_TRAFFIC_SECRET_0</span> <span class="o">=</span> <span class="s1">'SERVER_TRAFFIC_SECRET_0'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">EARLY_EXPORTER_SECRET</span> <span class="o">=</span> <span class="s1">'EARLY_EXPORTER_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="n">EXPORTER_SECRET</span> <span class="o">=</span> <span class="s1">'EXPORTER_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="c1">#: HPKE KEM shared secret used in the ECH, c.f., :rfc:`9850#section-4.2`.</span>
-    <span class="n">ECH_SECRET</span> <span class="o">=</span> <span class="s1">'ECH_SECRET'</span>  <span class="c1"># nosec B105</span>
-    <span class="c1">#: ECHConfig used for construction of the ECH, c.f., :rfc:`9850#section-4.2`.</span>
-    <span class="n">ECH_CONFIG</span> <span class="o">=</span> <span class="s1">'ECH_CONFIG'</span></div>
-
+<span class="c1"># NOTE: TLSKeyLabel used to be hand-written here. GitHub issue #886: RFC 9850</span>
+<span class="c1"># :rfc:`9850#section-4.2` makes its values an IANA registry ("TLS</span>
+<span class="c1"># SSLKEYLOGFILE Labels", Specification Required) rather than a closed,</span>
+<span class="c1"># hand-picked helper enum, so it moved to</span>
+<span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated the same</span>
+<span class="c1"># way as its :mod:`pcapkit.const.pcapng` siblings -- imported above as</span>
+<span class="c1"># ``Enum_TLSKeyLabel``, matching the ``Enum_*`` alias every one of its seven</span>
+<span class="c1"># :mod:`pcapkit.const.pcapng` siblings already carries in this file (the</span>
+<span class="c1"># owner's review on #890: this import was the only one of the eight lacking</span>
+<span class="c1"># it, because the class used to be *defined* here rather than imported, so</span>
+<span class="c1"># nothing applied the convention until this move made it an import). The</span>
+<span class="c1"># assignment below re-exports the same object under the module's own,</span>
+<span class="c1"># unaliased name, so ``from pcapkit.protocols.misc.pcapng import</span>
+<span class="c1"># TLSKeyLabel`` keeps working and still resolves to the identical class --</span>
+<span class="c1"># not a copy -- that every internal ``Enum_TLSKeyLabel`` reference below uses.</span>
+<span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written -- it is verified closed</span>
+<span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names) and not a</span>
+<span class="c1"># registry, so filing it under :mod:`pcapkit.const` would misrepresent it as</span>
+<span class="c1"># one; the ``Enum_*`` alias convention is about imports of const enums, and</span>
+<span class="c1"># this is a local definition, so it does not apply here.</span>
+<span class="n">TLSKeyLabel</span> <span class="o">=</span> <span class="n">Enum_TLSKeyLabel</span>
 
 
 <div class="viewcode-block" id="WireGuardKeyLabel">
@@ -6610,7 +6609,7 @@
 <div class="viewcode-block" id="PCAPNG._make_secrets_tls">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_tls">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_secrets_tls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span> <span class="n">secrets</span><span class="p">:</span> <span class="s1">'Optional[Data_TLSKeyLog]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">entries</span><span class="p">:</span> <span class="s1">'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_TLSKeyLog'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG TLS Key Log secrets.</span>
 
