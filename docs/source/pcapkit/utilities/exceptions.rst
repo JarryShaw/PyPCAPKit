@@ -260,6 +260,10 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
    :no-members:
    :show-inheritance:
 
+.. autoexception:: pcapkit.utilities.exceptions.EnumKeyError
+   :no-members:
+   :show-inheritance:
+
 :exc:`ModuleNotFoundError` Category
 -----------------------------------
 

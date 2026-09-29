@@ -91,6 +91,7 @@ from typing import TYPE_CHECKING
 from aenum import extend_enum
 
 from pcapkit.corekit.sentinels import NO_DEFAULT, NoDefaultType  # pylint: disable=unused-import
+from pcapkit.utilities.exceptions import BaseError, EnumKeyError, EnumValueError
 
 if TYPE_CHECKING:
     from typing import Any
@@ -190,7 +191,12 @@ class EnumLookup:
         :meth:`get`'s own ``except ValueError`` and falls back to ``default``
         just as any other unresolvable value does. An override raising something
         outside that hierarchy would instead propagate past ``default``, which is
-        a real difference in behaviour rather than a stylistic preference.
+        a real difference in behaviour rather than a stylistic preference. With
+        no usable ``default``, a rejection from this hook reaches the caller
+        exactly as the override raised it -- :meth:`get` re-raises an in-library
+        ``ValueError`` unchanged rather than re-wrapping it, so the override's own
+        message and the single log record it already emitted are what the caller
+        sees.
 
         Called from exactly two places, and the omissions are deliberate:
 
@@ -330,6 +336,46 @@ class EnumLookup:
         on the same terms; the ``str`` path does not call the hook, for the reason
         given on :meth:`_validate_value` itself.
 
+        Both failure paths raise from :mod:`pcapkit.utilities.exceptions` rather
+        than a builtin, per the owner's ruling on GitHub issue #923: *"Either
+        ``ValueError`` or ``KeyError``, that's depending on how stdlib's
+        ``Enum`` would raise on these circumstances. And we should raise one
+        from ``pcapkit.utilities.exceptions`` rather builtin exceptions."* The
+        *shape* is unchanged by that ruling and deliberately so -- a name miss
+        stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
+        matching ``E['nosuch']`` and ``E(999)`` on a stdlib
+        :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete
+        subclasses that already answered a name miss that way. Only the
+        provenance changed, so every ``except KeyError`` and ``except
+        ValueError`` around a call to this method keeps catching.
+
+        Two details of that conversion are worth stating, since neither is
+        visible from the exception type alone:
+
+        * **The name miss is raised quietly** --
+          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with ``quiet=True``,
+          so nothing is logged and :data:`sys.tracebacklimit` is left alone.
+          That is not a cosmetic choice: this method's name miss is in-library
+          control flow at six call sites, and at
+          :meth:`~pcapkit.const.http.method.Method.get` it is part of a
+          *successful* call -- that override catches it in order to mint. A loud
+          error there would put a :data:`logging.CRITICAL` record on every such
+          call and set :data:`sys.tracebacklimit` to ``0`` process-wide, which
+          is exactly the GitHub issue #362 defect
+          :class:`~pcapkit.utilities.exceptions.BaseError` documents ``quiet``
+          for. The value miss takes no such fallback anywhere in this tree, so
+          it stays loud.
+        * **An in-library rejection propagates unchanged.** A ``ValueError``
+          that is already a :exc:`~pcapkit.utilities.exceptions.BaseError` --
+          typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a
+          subclass's :meth:`_validate_value` -- is re-raised as it stands rather
+          than wrapped, so the subclass's own message survives and the error is
+          logged once instead of twice. Only :mod:`aenum`'s and :mod:`enum`'s
+          own "no member carries this value" is converted. This is the same
+          discrimination :meth:`EnumField.post_process
+          <pcapkit.corekit.fields.numbers.EnumField.post_process>` already
+          makes for the same reason.
+
         Args:
             key: Name or value to look up.
             default: An already-registered value to fall back to when
@@ -344,13 +390,15 @@ class EnumLookup:
             The canonical member for ``key``, or for ``default``.
 
         Raises:
-            ValueError: If a value does not resolve and there is no usable
-                default -- including a value a subclass's
-                :meth:`_validate_value` rejects, since
-                :exc:`~pcapkit.utilities.exceptions.EnumValueError` is a
-                :exc:`ValueError`.
-            KeyError: If a name does not resolve and there is no usable
-                default.
+            EnumValueError: If a value does not resolve and there is no usable
+                default. Also what a subclass's :meth:`_validate_value`
+                rejection reaches the caller as, since that hook is documented
+                to raise this very class and it is passed through rather than
+                re-wrapped. A :exc:`ValueError`, so an
+                ``except ValueError`` caller is unaffected.
+            EnumKeyError: If a name does not resolve and there is no usable
+                default. A :exc:`KeyError`, so an ``except KeyError`` caller is
+                unaffected.
 
         """
         if isinstance(key, str):
@@ -360,14 +408,17 @@ class EnumLookup:
                 if key in cls._value2member_map_:
                     return cls._value2member_map_[key]
                 if default is NO_DEFAULT or default not in cls._value2member_map_:
-                    raise
+                    raise EnumKeyError(f'{key!r} is not a valid {cls.__name__}',
+                                       quiet=True) from None
                 return cls._value2member_map_[default]
         try:
             cls._validate_value(key)
             return cls(key)  # type: ignore[call-arg]
-        except ValueError:
+        except ValueError as error:
             if default is NO_DEFAULT or default not in cls._value2member_map_:
-                raise
+                if isinstance(error, BaseError):
+                    raise
+                raise EnumValueError(str(error)) from error
             return cls._value2member_map_[default]
 
     @classmethod
@@ -391,8 +442,8 @@ class EnumLookup:
             carrying the same value.
 
         Raises:
-            ValueError: As :meth:`get` with no default, for a value.
-            KeyError: As :meth:`get` with no default, for a name.
+            EnumValueError: As :meth:`get` with no default, for a value.
+            EnumKeyError: As :meth:`get` with no default, for a name.
 
         """
         canonical = cls.get(key)

@@ -487,7 +487,8 @@ from pcapkit.protocols.schema.internet.mh import \
     UpdateNotificationMessage as Schema_UpdateNotificationMessage
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import (EnumKeyError, EnumValueError, ProtocolError,
+                                          UnsupportedCall)
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -633,12 +634,21 @@ class FastBindingAcknowledgmentStatus(IntEnum):
             The matching member.
 
         Raises:
-            EnumValueError: If ``key`` names no member -- raised for an
-                unknown name the same way :meth:`_missing_` raises for an
-                unknown value, so the two ways of getting this wrong do not
-                report differently. There is no ``default`` parameter: this
-                enumeration cannot grow, so a default that could only ever be
-                ignored would be worse than one that is absent.
+            EnumKeyError: If ``key`` names no member. A :exc:`KeyError`, per the
+                owner's ruling on GitHub issue #923 -- *"Either ``ValueError``
+                or ``KeyError``, that's depending on how stdlib's ``Enum`` would
+                raise on these circumstances"* -- since a stdlib
+                ``E['nosuch']`` raises :exc:`KeyError` and only the *value*
+                miss :meth:`_missing_` reports is :exc:`ValueError`-shaped. This
+                used to raise :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+                so that the two ways of getting it wrong reported identically;
+                that is exactly the conversion #923 rejects, and 119 of this
+                tree's 127 concrete
+                :class:`~pcapkit.corekit.enum.EnumLookup` subclasses already
+                answered a name miss with a :exc:`KeyError`. There is no
+                ``default`` parameter: this enumeration cannot grow, so a
+                default that could only ever be ignored would be worse than one
+                that is absent.
 
         """
         if isinstance(key, int):
@@ -646,8 +656,8 @@ class FastBindingAcknowledgmentStatus(IntEnum):
         try:
             return FastBindingAcknowledgmentStatus[key]  # type: ignore[misc]
         except KeyError:
-            raise EnumValueError('%r is not a valid %s' %
-                                 (key, FastBindingAcknowledgmentStatus.__name__)) from None
+            raise EnumKeyError('%r is not a valid %s' %
+                               (key, FastBindingAcknowledgmentStatus.__name__)) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':
@@ -725,12 +735,21 @@ class IPv6AddressPrefixCode(IntEnum):
             The matching member.
 
         Raises:
-            EnumValueError: If ``key`` names no member -- raised for an
-                unknown name the same way :meth:`_missing_` raises for an
-                unknown value, so the two ways of getting this wrong do not
-                report differently. There is no ``default`` parameter: this
-                enumeration cannot grow, so a default that could only ever be
-                ignored would be worse than one that is absent.
+            EnumKeyError: If ``key`` names no member. A :exc:`KeyError`, per the
+                owner's ruling on GitHub issue #923 -- *"Either ``ValueError``
+                or ``KeyError``, that's depending on how stdlib's ``Enum`` would
+                raise on these circumstances"* -- since a stdlib
+                ``E['nosuch']`` raises :exc:`KeyError` and only the *value*
+                miss :meth:`_missing_` reports is :exc:`ValueError`-shaped. This
+                used to raise :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+                so that the two ways of getting it wrong reported identically;
+                that is exactly the conversion #923 rejects, and 119 of this
+                tree's 127 concrete
+                :class:`~pcapkit.corekit.enum.EnumLookup` subclasses already
+                answered a name miss with a :exc:`KeyError`. There is no
+                ``default`` parameter: this enumeration cannot grow, so a
+                default that could only ever be ignored would be worse than one
+                that is absent.
 
         """
         if isinstance(key, int):
@@ -738,8 +757,8 @@ class IPv6AddressPrefixCode(IntEnum):
         try:
             return IPv6AddressPrefixCode[key]  # type: ignore[misc]
         except KeyError:
-            raise EnumValueError('%r is not a valid %s' %
-                                 (key, IPv6AddressPrefixCode.__name__)) from None
+            raise EnumKeyError('%r is not a valid %s' %
+                               (key, IPv6AddressPrefixCode.__name__)) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':

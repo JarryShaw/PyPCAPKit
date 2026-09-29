@@ -104,7 +104,7 @@ from aenum import IntEnum
 
 from pcapkit.const.ngap.procedure_code import ProcedureCode as Enum_ProcedureCode
 from pcapkit.const.ngap.protocol_ie import ProtocolIE as Enum_ProtocolIE
-from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ngap import IE as Data_IE
@@ -219,9 +219,30 @@ class Criticality(EnumLookup, IntEnum):
     """[Criticality] What a receiver must do with an IE it does not understand.
 
     Members are named for the ASN.1 identifiers rather than upper-cased, so
-    that :meth:`Criticality.get` resolves a name decoded by |pycrate|_ through
-    the standard member map. The values are the ``ENUMERATED`` indices, which
-    is what goes on the wire.
+    that :meth:`~pcapkit.corekit.enum.EnumLookup.get` resolves a name decoded
+    by |pycrate|_ through the standard member map. The values are the
+    ``ENUMERATED`` indices, which is what goes on the wire.
+
+    Carries no ``get`` of its own. GitHub issue #877 re-parented this class onto
+    :class:`~pcapkit.corekit.enum.EnumLookup` and kept a delegating override for
+    one reason only: it converted the base's name-miss :exc:`KeyError` into a
+    :exc:`ValueError`, so that an unknown *name* and an unknown *value* reported
+    identically. GitHub issue #923's ruling retired that conversion -- a name
+    miss is :exc:`KeyError`-shaped, exactly as ``E['nosuch']`` is on a stdlib
+    :class:`~enum.Enum` -- which left the override a pure pass-through, so it
+    went with it.
+
+    The one thing that could have made the deletion unsafe is ``default``
+    handling, and there the inherited base is identical to what the override
+    forwarded: ``get('nosuch', Criticality.reject)`` answers ``reject`` on both,
+    and ``get('nosuch', 99)`` raises on both, since a ``default`` naming no
+    registered value is not honoured. That is also what keeps the deletion safe
+    on a closed ASN.1 ``ENUMERATED`` with no extension marker -- a member-valued
+    ``default`` resolves through ``_value2member_map_`` and never through the
+    constructor, so no path here can mint a fourth value; see :meth:`_missing_`,
+    which refuses one outright. The only loss is the narrower
+    ``int | str | Criticality`` key annotation, a typing nicety rather than
+    behaviour.
 
     """
 
@@ -232,99 +253,6 @@ class Criticality(EnumLookup, IntEnum):
     #: Ignore the IE, carry on, and report it.
     notify = 2
 
-    @classmethod
-    def get(cls, key: 'int | str | Criticality', default: 'Any' = NO_DEFAULT) -> 'Criticality':
-        """Backport support for original codes.
-
-        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
-        issue #877's re-parenting. For every key the signature admits, the
-        base reproduces the branch this override used to hand-roll: a
-        ``Criticality`` key is also an :class:`int` (this is an
-        :class:`~aenum.IntEnum`) and resolves through the base's non-``str``
-        path, ``cls(key)``, which -- exactly like the removed
-        ``isinstance(key, Criticality): return key`` branch -- hands back the
-        identical, canonical member rather than a new one; a plain
-        :class:`str` resolves through the base's name lookup, the same
-        ``Criticality[key]`` this override used to spell directly.
-
-        Outside that signature the two do differ, which is worth stating
-        rather than leaving for someone to discover. ``cls(key)`` accepts
-        anything :class:`int` equality accepts, so ``get(1.0)`` now returns
-        ``Criticality.ignore`` where the removed code raised
-        :exc:`ValueError`, and an unhashable key raises :exc:`ValueError`
-        rather than the :exc:`TypeError` the old ``Criticality[key]`` lookup
-        produced. Both are out of contract, no caller in this tree can reach
-        them -- the three live call sites pass pycrate-decoded :class:`str`
-        or :class:`int` -- and the new shape is what every other
-        :class:`~pcapkit.corekit.enum.EnumLookup` subclass already does, so
-        this is alignment rather than a regression.
-
-        The one behaviour the base does not reproduce is the exception this
-        class has always raised for an unresolved name: a bare
-        :exc:`KeyError` there, versus this class's own :exc:`ValueError`
-        naming the rejected key -- so a name miss is still caught and
-        re-raised in that shape. An unresolved *value* is unaffected either
-        way: it already reaches the caller as :exc:`ValueError`, raised by
-        :meth:`_missing_` below, on both the removed code path and the
-        base's.
-
-        The base is a :class:`classmethod`
-        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
-        moves from :class:`staticmethod` to :class:`classmethod` to
-        delegate at all -- the same move GitHub issue #908 and #915 made for
-        :meth:`~pcapkit.const.http.method.Method.get`. Every call site in
-        this tree calls this method by name; none take it as a bare
-        callable or introspect ``__func__``, so the switch is not
-        caller-visible.
-
-        Unlike :meth:`ProcedureCode.get <pcapkit.corekit.enum.EnumRegistry.get>`
-        and :meth:`ProtocolIE.get <pcapkit.corekit.enum.EnumRegistry.get>`,
-        this still never manufactures a member for an in-range value it has
-        not seen -- ``Criticality`` cannot grow, unlike those two, which
-        answer with a throwaway, non-registering member (see
-        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`) for
-        a registry 3GPP keeps assigning new codes to. It is an ASN.1
-        ``ENUMERATED`` with no extension marker, so a fourth value is
-        unencodable and a lookup for one is a bug rather than a version skew
-        -- see :meth:`_missing_`.
-
-        ``default`` did not exist on this override before this change --
-        the original had no such parameter at all, which is a genuine LSP
-        violation once this class' ``get`` is a :class:`classmethod`
-        override of one that has it (mypy's ``[override]`` check catches
-        exactly this shape). Forwarded verbatim to
-        :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than
-        reimplemented, so it behaves exactly as the base's own ``default``
-        does: a fallback to an *already-registered* member, resolved
-        through ``_value2member_map_`` and never through the constructor,
-        so passing one still cannot mint a fourth. Every call site in this
-        tree omits it, so this is purely an added, backward-compatible
-        capability -- not the "declared, documented and ignored" shape an
-        earlier revision of this docstring rejected, since it is now
-        genuinely honoured rather than a parameter that would have to be
-        silently dropped.
-
-        Args:
-            key: Key to get enum item.
-            default: An already-registered value to fall back to when
-                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.
-                NO_DEFAULT`, the default, means *no default*.
-
-        Returns:
-            The matching member.
-
-        Raises:
-            ValueError: If ``key`` names no member and there is no usable
-                ``default``. Raised for an unknown name as well as an
-                unknown value, so that the two ways of getting this wrong
-                do not report differently.
-
-        :meta private:
-        """
-        try:
-            return super().get(key, default)
-        except KeyError:
-            raise ValueError('%r is not a valid %s' % (key, cls.__name__)) from None
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NoReturn':

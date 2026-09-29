@@ -872,7 +872,10 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             TransportProtocol(9)
 
         before = len(TransportProtocol.__members__)
-        with self.assertRaises(ValueError):
+        # KeyError, not ValueError, since GitHub issue #923 retired this
+        # override's ``KeyError`` -> ``ValueError`` conversion. What this test
+        # is about -- refused rather than registered -- is unchanged.
+        with self.assertRaises(KeyError):
             TransportProtocol.get('quic')
         self.assertNotIn('quic', TransportProtocol.__members__)
         self.assertEqual(len(TransportProtocol.__members__), before)
@@ -880,7 +883,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         # A second unrecognised name is refused identically -- there is no
         # ``max + 1`` left to walk to, since nothing registers in the first
         # place.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             TransportProtocol.get('quic2')
         self.assertEqual(len(TransportProtocol.__members__), before)
 

@@ -26,11 +26,18 @@ Two of those eleven, :class:`TransportProtocol` and :class:`Criticality`,
 already defined their own ``get`` -- both as a :class:`staticmethod`, while
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` is a :class:`classmethod`, the
 exact trap GitHub issue #908 hit and #915 fixed for
-:meth:`~pcapkit.const.http.method.Method.get`. Both are now classmethods
-that delegate, each keeping only the behaviour the base does not reproduce
-on its own -- :class:`TransportProtocolGetTests` and
-:class:`CriticalityGetTests` pin that each of those kept behaviours is
-unchanged, not merely that the delegation compiles.
+:meth:`~pcapkit.const.http.method.Method.get`. Both became classmethods that
+delegate, each keeping only the behaviour the base does not reproduce on its
+own -- :class:`TransportProtocolGetTests` and :class:`CriticalityGetTests` pin
+that each of those kept behaviours is unchanged, not merely that the
+delegation compiles.
+
+GitHub issue #923 then reduced that pair to one. Both overrides converted the
+base's name-miss :exc:`KeyError` into a :exc:`ValueError`, and #923's ruling
+retired the conversion -- so ``Criticality.get``, whose *only* remaining job
+that was, is gone entirely and :class:`CriticalityGetTests` now exercises the
+inherited base; ``TransportProtocol.get`` survives, reduced to its
+``key.lower()`` call, because case folding has no equivalent on the base.
 
 The other nine are pure re-parenting -- no ``get`` or ``_missing_`` of their
 own to reconcile -- so :class:`PureReparentGetTests` pins the one thing that
@@ -272,17 +279,28 @@ class TransportProtocolGetTests(unittest.TestCase):
 
         self.assertIs(TransportProtocol.get(1), TransportProtocol.tcp)
 
-    def test_unrecognised_name_still_raises_value_error_naming_the_key(self) -> None:
-        """Maintainer ruling on PR #836: refuse, never mint. The base's own
-        miss on a ``str`` key raises a bare ``KeyError``; this override still
-        converts it to the ``ValueError`` every caller and test here already
-        depends on."""
+    def test_unrecognised_name_still_raises_naming_the_key(self) -> None:
+        """Maintainer ruling on PR #836: refuse, never mint. Still refused, and
+        still nothing minted -- but GitHub issue #923 retired the
+        ``KeyError`` -> ``ValueError`` conversion this override used to do, so
+        the refusal now reaches the caller as the base's own
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError`. Updated from the
+        pre-#923 tree, which asserted ``assertNotIsInstance(..., KeyError)``:
+        that assertion described the minority shape -- #923's census found 119
+        of the 127 concrete subclasses answering a name miss with a
+        :exc:`KeyError` -- and #923's ruling is that a name miss follows stdlib
+        ``E['nosuch']`` and stays :exc:`KeyError`-derived. The message is
+        unchanged, so the two ``assertIn``\\ s below are the same ones that
+        passed before."""
+        from pcapkit.utilities.exceptions import EnumKeyError
+
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
         before = len(TransportProtocol.__members__)
-        with self.assertRaises(ValueError) as caught:
+        with self.assertRaises(EnumKeyError) as caught:
             TransportProtocol.get('quic')
-        self.assertNotIsInstance(caught.exception, KeyError)
+        self.assertIsInstance(caught.exception, KeyError)
+        self.assertNotIsInstance(caught.exception, ValueError)
         self.assertIn('quic', str(caught.exception))
         self.assertIn('is not a valid', str(caught.exception))
         self.assertEqual(len(TransportProtocol.__members__), before)
@@ -298,22 +316,35 @@ class TransportProtocolGetTests(unittest.TestCase):
 
         self.assertIs(TransportProtocol.get('bogus', default=TransportProtocol.udp),
                       TransportProtocol.udp)
-        # Omitted, as every call site in this tree omits it: raises exactly
-        # as before this change.
-        with self.assertRaises(ValueError):
+        # Omitted, as every call site in this tree omits it: still raises, as
+        # a KeyError since GitHub issue #923 rather than a ValueError.
+        with self.assertRaises(KeyError):
             TransportProtocol.get('bogus')
 
 
 class CriticalityGetTests(unittest.TestCase):
     """:class:`~pcapkit.protocols.application.ngap.Criticality` kept its own
-    ``get`` too, now delegating -- case-**sensitive**, unlike
-    ``TransportProtocol``, which is the one designed divergence between the
-    two overrides this issue re-parented."""
+    ``get`` for this issue, then lost it to GitHub issue #923: the only thing
+    the override still did that the base does not was convert the base's
+    name-miss :exc:`KeyError` into a :exc:`ValueError`, and #923's ruling
+    retired that conversion, leaving a pure pass-through. Every behaviour
+    below is therefore now the *inherited* base's, which is exactly what
+    makes the deletion worth pinning -- case-**sensitive**, unlike
+    ``TransportProtocol``, which keeps its override for the case folding the
+    base has no equivalent of."""
 
-    def test_get_is_now_a_classmethod(self) -> None:
+    def test_get_is_inherited_rather_than_overridden(self) -> None:
+        """GitHub issue #923 deleted the override. ``get`` is still a
+        :class:`classmethod` reached through the class -- it is now
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` itself, which is what
+        the rest of this class exercises."""
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.application.ngap import Criticality
 
+        self.assertNotIn('get', Criticality.__dict__)
         self.assertIsInstance(inspect.getattr_static(Criticality, 'get'), classmethod)
+        self.assertIs(inspect.getattr_static(Criticality, 'get'),
+                      inspect.getattr_static(EnumLookup, 'get'))
 
     def test_name_lookup(self) -> None:
         from pcapkit.protocols.application.ngap import Criticality
@@ -337,40 +368,61 @@ class CriticalityGetTests(unittest.TestCase):
         self.assertIs(Criticality.get(Criticality.reject), Criticality.reject)
 
     def test_case_sensitivity_is_unlike_transport_protocol(self) -> None:
-        """Deliberately the opposite of ``TransportProtocol.get`` -- this
-        override never lower-cases, so an upper-cased spelling must be
-        refused rather than folded."""
+        """Deliberately the opposite of ``TransportProtocol.get`` -- nothing
+        here lower-cases, so an upper-cased spelling must be refused rather
+        than folded. Now :exc:`KeyError`-shaped, per GitHub issue #923."""
         from pcapkit.protocols.application.ngap import Criticality
 
-        with self.assertRaises(ValueError) as caught:
+        with self.assertRaises(KeyError) as caught:
             Criticality.get('REJECT')
         self.assertIn('REJECT', str(caught.exception))
 
-    def test_unresolved_name_raises_value_error_not_key_error(self) -> None:
-        """The base's own miss on a ``str`` key raises a bare ``KeyError``;
-        this override still converts it to the ``ValueError`` its own
-        ``_missing_`` already uses for an unresolved value, so the two ways
-        of getting this wrong report identically -- exactly as before this
-        change."""
+    def test_unresolved_name_raises_key_error_not_value_error(self) -> None:
+        """The inverse of what this test asserted before GitHub issue #923.
+
+        The deleted override converted the base's name-miss :exc:`KeyError`
+        into a :exc:`ValueError` so that an unknown name and an unknown value
+        reported identically. #923's ruling is that they must *not*: a stdlib
+        ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises
+        :exc:`ValueError`, so the two ways of getting this wrong are
+        deliberately distinguishable, and only the provenance of each moved
+        into :mod:`pcapkit.utilities.exceptions`."""
+        from pcapkit.utilities.exceptions import EnumKeyError
+
         from pcapkit.protocols.application.ngap import Criticality
 
-        with self.assertRaises(ValueError) as caught:
+        with self.assertRaises(EnumKeyError) as caught:
             Criticality.get('NoSuchMember')
-        self.assertNotIsInstance(caught.exception, KeyError)
+        self.assertIsInstance(caught.exception, KeyError)
+        self.assertNotIsInstance(caught.exception, ValueError)
         self.assertIn('NoSuchMember', str(caught.exception))
 
     def test_unresolved_value_still_raises_via_missing(self) -> None:
+        """Still a :exc:`ValueError`, and now this class's own
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError`: ``_missing_``
+        raises a bare :exc:`ValueError` and the base converts it, per GitHub
+        issue #923's "no builtin exceptions" half."""
+        from pcapkit.utilities.exceptions import EnumValueError
+
         from pcapkit.protocols.application.ngap import Criticality
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(EnumValueError) as caught:
             Criticality.get(3)
+        self.assertIsInstance(caught.exception, ValueError)
+        self.assertIn('3', str(caught.exception))
 
-    def test_default_is_a_new_capability_not_exercised_before(self) -> None:
+    def test_default_is_honoured_by_the_inherited_base(self) -> None:
+        """The one thing that could have made GitHub issue #923's deletion of
+        this override unsafe. The override forwarded ``default`` verbatim, so
+        the inherited base has to answer identically: a member-valued default
+        resolves, and one naming no registered value is not honoured."""
         from pcapkit.protocols.application.ngap import Criticality
 
         self.assertIs(Criticality.get('NoSuchMember', default=Criticality.ignore),
                       Criticality.ignore)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
+            Criticality.get('NoSuchMember', default=99)
+        with self.assertRaises(KeyError):
             Criticality.get('NoSuchMember')
 
 

@@ -1544,17 +1544,30 @@ class MHUnitTests(unittest.TestCase):
                         enum_cls(value)
 
         with self.subTest('get() backports string and integer lookups, and no longer mints'):
+            # An unknown *name* is ``EnumKeyError`` since GitHub issue #923 --
+            # both ``get`` overrides used to raise ``EnumValueError`` for it, so
+            # that a name miss and a value miss reported identically, and that
+            # is the conversion #923's ruling rejects: stdlib ``E['nosuch']``
+            # raises ``KeyError``, so the name half is ``KeyError``-derived and
+            # only ``_missing_``'s value half stays ``ValueError``-derived.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
             self.assertIs(FastBindingAcknowledgmentStatus.get(130),
                           FastBindingAcknowledgmentStatus.Insufficient_resources)
             self.assertIs(FastBindingAcknowledgmentStatus.get('Reason_unspecified'),
                           FastBindingAcknowledgmentStatus.Reason_unspecified)
-            with self.assertRaises(EnumValueError):
+            with self.assertRaises(EnumKeyError) as caught:
                 FastBindingAcknowledgmentStatus.get('Vendor_specific')
+            self.assertIsInstance(caught.exception, KeyError)
+            self.assertNotIsInstance(caught.exception, ValueError)
+            self.assertIn('Vendor_specific', str(caught.exception))
             self.assertIs(IPv6AddressPrefixCode.get(4), IPv6AddressPrefixCode.NAR_Prefix)
             self.assertIs(IPv6AddressPrefixCode.get('New_Care_of_Address'),
                           IPv6AddressPrefixCode.New_Care_of_Address)
-            with self.assertRaises(EnumValueError):
+            with self.assertRaises(EnumKeyError) as caught:
                 IPv6AddressPrefixCode.get('Vendor_specific')
+            self.assertIsInstance(caught.exception, KeyError)
+            self.assertNotIsInstance(caught.exception, ValueError)
 
         with self.subTest('make round trips both enums byte-identically'):
             for status, code in [
@@ -1635,12 +1648,18 @@ class MHUnitTests(unittest.TestCase):
             # that same member -- a name that lies about itself. Both calls
             # must now raise independently, and neither may touch the
             # class's own lookup tables while doing so.
+            #
+            # ``EnumKeyError`` rather than ``EnumValueError`` since GitHub
+            # issue #923: these are *name* misses, and #923's ruling keeps a
+            # name miss ``KeyError``-shaped after stdlib ``E['nosuch']``.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
             for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
                 before_members = dict(enum_cls._member_map_)  # pylint: disable=no-member
                 before_values = dict(enum_cls._value2member_map_)  # pylint: disable=no-member
-                with self.assertRaises(EnumValueError):
+                with self.assertRaises(EnumKeyError):
                     enum_cls.get('bogus_one')
-                with self.assertRaises(EnumValueError):
+                with self.assertRaises(EnumKeyError):
                     enum_cls.get('bogus_two')
                 self.assertEqual(enum_cls._member_map_, before_members)  # pylint: disable=no-member
                 self.assertEqual(enum_cls._value2member_map_, before_values)  # pylint: disable=no-member
