@@ -35,6 +35,7 @@ from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgori
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
+from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.module import ModuleDescriptor
@@ -270,26 +271,27 @@ class PacketReception(enum.IntEnum):
     PROMISCUOUS = 0b100
 
 
-class TLSKeyLabel(StrEnum):
-    """TLS key log label, c.f., :rfc:`9850`."""
-
-    #: NSS-historical: not a registered label of :rfc:`9850#section-4.2`'s "TLS
-    #: SSLKEYLOGFILE Labels" registry. Defined by the Mozilla NSS
-    #: ``SSLKEYLOGFILE`` convention and removed in NSS 3.34; kept here only so
-    #: that key logs predating :rfc:`9850` still read.
-    RSA = 'RSA'
-    CLIENT_RANDOM = 'CLIENT_RANDOM'
-    CLIENT_EARLY_TRAFFIC_SECRET = 'CLIENT_EARLY_TRAFFIC_SECRET'  # nosec B105
-    CLIENT_HANDSHAKE_TRAFFIC_SECRET = 'CLIENT_HANDSHAKE_TRAFFIC_SECRET'  # nosec B105
-    SERVER_HANDSHAKE_TRAFFIC_SECRET = 'SERVER_HANDSHAKE_TRAFFIC_SECRET'  # nosec B105
-    CLIENT_TRAFFIC_SECRET_0 = 'CLIENT_TRAFFIC_SECRET_0'  # nosec B105
-    SERVER_TRAFFIC_SECRET_0 = 'SERVER_TRAFFIC_SECRET_0'  # nosec B105
-    EARLY_EXPORTER_SECRET = 'EARLY_EXPORTER_SECRET'  # nosec B105
-    EXPORTER_SECRET = 'EXPORTER_SECRET'  # nosec B105
-    #: HPKE KEM shared secret used in the ECH, c.f., :rfc:`9850#section-4.2`.
-    ECH_SECRET = 'ECH_SECRET'  # nosec B105
-    #: ECHConfig used for construction of the ECH, c.f., :rfc:`9850#section-4.2`.
-    ECH_CONFIG = 'ECH_CONFIG'
+# NOTE: TLSKeyLabel used to be hand-written here. GitHub issue #886: RFC 9850
+# :rfc:`9850#section-4.2` makes its values an IANA registry ("TLS
+# SSLKEYLOGFILE Labels", Specification Required) rather than a closed,
+# hand-picked helper enum, so it moved to
+# :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated the same
+# way as its :mod:`pcapkit.const.pcapng` siblings -- imported above as
+# ``Enum_TLSKeyLabel``, matching the ``Enum_*`` alias every one of its seven
+# :mod:`pcapkit.const.pcapng` siblings already carries in this file (the
+# owner's review on #890: this import was the only one of the eight lacking
+# it, because the class used to be *defined* here rather than imported, so
+# nothing applied the convention until this move made it an import). The
+# assignment below re-exports the same object under the module's own,
+# unaliased name, so ``from pcapkit.protocols.misc.pcapng import
+# TLSKeyLabel`` keeps working and still resolves to the identical class --
+# not a copy -- that every internal ``Enum_TLSKeyLabel`` reference below uses.
+# :class:`WireGuardKeyLabel` below stays hand-written -- it is verified closed
+# (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names) and not a
+# registry, so filing it under :mod:`pcapkit.const` would misrepresent it as
+# one; the ``Enum_*`` alias convention is about imports of const enums, and
+# this is a local definition, so it does not apply here.
+TLSKeyLabel = Enum_TLSKeyLabel
 
 
 class WireGuardKeyLabel(StrEnum):
@@ -5753,7 +5755,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_secrets_tls(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_TLSKeyLog]' = None, *,
-                          entries: 'Optional[dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
+                          entries: 'Optional[dict[Enum_TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
                           **kwargs: 'Any') -> 'Schema_TLSKeyLog':
         """Make PCAP-NG TLS Key Log secrets.
 

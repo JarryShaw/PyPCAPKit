@@ -366,16 +366,23 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # dropping its ``IntFlag`` base, one for one, so the sum each of those
         # counts on stays the same even though the two addends moved.
         #
-        # Five of the nine string registries are the application layer one, which
+        # Five of the ten string registries are the application layer one, which
         # GitHub issue #732 split into a package: the memberless
         # pcapkit.const.reg.apptype.apptype.AppType base plus one registry per
         # transport protocol. It is discovered exactly like a member-bearing
         # registry, since this sweep is structural and never looks at members.
+        # The tenth is GitHub issue #886's
+        # pcapkit.const.pcapng.tls_key_label.TLSKeyLabel, moved here from a
+        # hand-written class under pcapkit.protocols.misc.pcapng -- it defines
+        # no ``_missing_`` of its own, so it is not among the three ``value.
+        # upper()`` outliers #647 fixed above, and it never reached
+        # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
+        # sweep, so that module's own pinned count does not move.
         self.assertEqual(len(ints), 112)
         self.assertEqual(len(flags), 6)
-        self.assertEqual(len(strs), 9)
-        self.assertEqual(len(self.enums), 127)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 121)
+        self.assertEqual(len(strs), 10)
+        self.assertEqual(len(self.enums), 128)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 122)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.
