@@ -97,7 +97,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-__all__ = ['NO_DEFAULT', 'NoDefaultType', 'EnumLookup', 'EnumRegistry']
+__all__ = ['NO_DEFAULT', 'EnumLookup', 'EnumRegistry']
 
 
 @final
