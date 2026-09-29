@@ -195,9 +195,12 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         # analysis in GitHub issue #492) needs a fresh look rather than a
         # silent pass. 112 rather than 111 since GitHub issue #808: dropping
         # ``TransportProtocol``'s ``IntFlag`` base moved it from
-        # ``_iter_const_int_flags`` into this sweep.
+        # ``_iter_const_int_flags`` into this sweep. 114 rather than 112 since
+        # GitHub issue #880's ngap.ProcedureCode and ngap.ProtocolIE joined
+        # this sweep, moved onto EnumRegistry from hand-rolled IntEnum classes
+        # in pcapkit.protocols.application.ngap.
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
-        self.assertEqual(len(self.enums), 112)
+        self.assertEqual(len(self.enums), 114)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
                         f'expected reject-list entries missing from the sweep: '
                         f'{EXPECTED_TO_REJECT_ZERO - names}')

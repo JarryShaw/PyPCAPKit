@@ -199,8 +199,16 @@ PCAP_CT = [
 # and then raises ``ModuleNotFoundError`` the moment the engine is used. Upstream
 # master has fixed it but has not released.
 PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
-# for developers
-vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
+# for developers -- installs pcapkit.vendor's crawlers, run via
+# `pcapkit-vendor` to regenerate pcapkit.const. Includes ``pycrate`` so
+# pcapkit.vendor.ngap's two crawlers (#880) can run: the owner's ruling on
+# this issue is that it belongs here even though it is excluded from
+# ``all`` below, for the same size and licence reasons the ``NGAP`` extra
+# above explains in full (~238 MB of ``pycrate_asn1dir``, LGPL-2.1+ against
+# this package's BSD-3-Clause) -- a developer opting into ``vendor`` has
+# already accepted a far heavier and more permissively-licensed dependency
+# set than an end user installing ``all`` ever would.
+vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
 # NB: ``pypcap`` is *not* included here. It is an sdist-only C extension, so
 # ``pip install pypcapkit[all]`` would require a compiler and the libpcap
 # development files on every platform, and fails where only the header is
