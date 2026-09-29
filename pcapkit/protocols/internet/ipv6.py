@@ -82,15 +82,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: :class:`IPv6_Ext` by *direct* registration instead (see the
     #: bottom of :mod:`pcapkit.protocols.internet.ipv6_ext`), which
     #: already produces exactly this class without needing this set to name
-    #: it. ``ESP``, ``BIT-EMU``, ``253`` and ``254`` are absent, but not for
-    #: the same reason as each other, and not because a generic fallback
-    #: would help them:
+    #: it. ``ESP``, ``253`` and ``254`` are absent, but not for the same
+    #: reason as each other, and not because a generic fallback would help
+    #: them:
     #:
     #: * ``ESP`` *does* have a dedicated, registered parser
     #:   (:class:`~pcapkit.protocols.internet.esp.ESP`) -- it is excluded
     #:   because :rfc:`4303` places the real Next Header byte inside the
     #:   encrypted trailer, so its own info always *carries* a ``next``
-    #:   attribute (unlike ``BIT-EMU``/``253``/``254`` below), just one that is
+    #:   attribute (unlike ``253``/``254`` below), just one that is
     #:   :data:`None` whenever the payload could not be decrypted -- which,
     #:   with no key material available to a generic parse, is always. The
     #:   :meth:`_decode_next_layer` walk below still ends there, one iteration
@@ -98,10 +98,16 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #:   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`'s
     #:   constructor at the top of the loop -- the *existing* end-of-chain
     #:   path, unrelated to the structural check this set exists for.
-    #: * ``BIT-EMU``, ``253`` and ``254`` have no dedicated parser at all, so
-    #:   they resolve to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose
-    #:   info has no ``next`` *attribute* -- this is what the structural check
-    #:   catches.
+    #: * ``253`` and ``254`` have no dedicated parser at all, so they resolve
+    #:   to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no
+    #:   ``next`` *attribute* -- this is what the structural check catches.
+    #:   (``BIT-EMU``/147 used to sit here too, until GitHub issue #925 found
+    #:   it was never in IANA's authoritative extension-header registry to
+    #:   begin with; :class:`~pcapkit.const.ipv6.extension_header
+    #:   .ExtensionHeader` no longer carries it, so a next-header byte of 147
+    #:   now fails that same constructor at the *top* of the loop instead --
+    #:   the ordinary end-of-chain path any unrecognised upper-layer protocol
+    #:   code already takes, one step earlier than it used to.)
     #:
     #: :meth:`_decode_next_layer`'s walk stops cleanly at whichever of these
     #: (or any other IANA code this package has not implemented) it meets,
@@ -421,8 +427,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # which also carries ``next`` (possibly :data:`None`, on an
             # overrun -- see its module docstring). Every IANA extension
             # header code this package has not implemented a dedicated
-            # parser for -- today that is ``BIT-EMU``, ``253`` and ``254``,
-            # and tomorrow it is whatever IANA assigns next -- has no
+            # parser for -- today that is ``253`` and ``254``, and tomorrow
+            # it is whatever IANA assigns next -- has no
             # generic fallback either (see :attr:`__generic_ext_codes__`'s
             # docstring for why), so :meth:`_import_next_layer` returns a
             # plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info
@@ -502,9 +508,9 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             method's own* behaviour for anything outside that closed set is
             exactly what it was before this method learned the
             substitution: a plain ``Raw`` for that one layer. What changed
-            for ``BIT-EMU``, ``253`` and ``254`` -- which have no dedicated
-            parser at all, so they were *already* reaching plain ``Raw``
-            with no exception involved -- is one level up:
+            for ``253`` and ``254`` -- which have no dedicated parser at
+            all, so they were *already* reaching plain ``Raw`` with no
+            exception involved -- is one level up:
             :meth:`_decode_next_layer` now stops its walk structurally on
             any layer whose info carries no ``next`` attribute, ``Raw``
             included, instead of reading ``info.next`` unconditionally and

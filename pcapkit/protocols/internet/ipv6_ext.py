@@ -57,19 +57,19 @@ Header(s)                                                Length rule
                                                           encrypted trailer (:rfc:`4303`), so its own
                                                           info's ``next`` is :data:`None` rather than a
                                                           value to continue on
-``BIT-EMU``, ``253``, ``254``                            terminal -- no dedicated parser exists, so no
+``253``, ``254``                                         terminal -- no dedicated parser exists, so no
                                                           next header field is ever read at all, either
 ======================================================= ===========================================
 
-This table classifies by *wire format* alone, over the twelve codes
-:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates.
-Note that IANA's own *IPv6 Extension Header Types* registry has **eleven**:
-the twelfth, ``BIT_EMU`` (147), comes from this package generating that
-enumeration out of the *Protocol Numbers* registry's extension-header
-column instead, where 147 is flagged ``Y`` while the extension-header
-registry omits it. That discrepancy is GitHub issue #925 and is not this
-class's to resolve; the classification below holds either way, since 147
-is not reachable through here.
+This table classifies by *wire format* alone, over the eleven codes
+:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates --
+matching IANA's own *IPv6 Extension Header Types* registry exactly, as of
+GitHub issue #925. Before that fix this package generated the enumeration
+out of the *Protocol Numbers* registry's extension-header column instead,
+which carried a twelfth code, ``BIT_EMU`` (147), that the authoritative
+registry does not; 147 was never reachable through this class either way
+(it had no dedicated parser and was never generic-dispatched here), so
+fixing the enumeration's source changed nothing this table classifies.
 
 ``Shim6`` conforms to it (:rfc:`5533`), but this package has never
 had a dedicated parser class for it to begin with -- see "Two entry paths"
@@ -83,18 +83,18 @@ upper-layer headers"*; :rfc:`4303` puts its
 Next Header inside the encrypted trailer, with no length field anywhere
 in the cleartext part; and 253/254 are reserved for private
 experimentation (:rfc:`3692`) with no wire format at all. None of the
-four is reachable through this class, by construction -- see
+three is reachable through this class, by construction -- see
 :meth:`pcapkit.protocols.internet.ipv6.IPv6._import_next_layer`. Each of
 them still enters :meth:`IPv6._decode_next_layer
 <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s walk (it is a
 real :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member),
-but the four part ways there: ``ESP`` resolves to its own dedicated parser,
+but the three part ways there: ``ESP`` resolves to its own dedicated parser,
 whose info carries a ``next`` that is simply :data:`None` -- so the walk
 ends the ordinary way, ``ExtensionHeader(None)`` failing at the top of the
-next iteration, exactly as it did before this class existed. ``BIT-EMU``,
-``253`` and ``254`` have no dedicated parser and resolve to plain
+next iteration, exactly as it did before this class existed. ``253`` and
+``254`` have no dedicated parser and resolve to plain
 :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no ``next``
-*attribute* at all; for these three (and any future IANA code nobody has
+*attribute* at all; for these two (and any future IANA code nobody has
 implemented yet) the walk stops on a *structural* check -- does the parsed
 layer carry a ``next`` at all? -- rather than on a list of codes.
 
