@@ -14,155 +14,23 @@ import importlib
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.utilities.compat import final
+# NOTE: ``_get_null`` is re-exported alongside the two public names for
+# backward compatibility, not for use here. Every pickle written before GitHub
+# issue #911 moved the definitions names ``pcapkit.corekit.module _get_null``
+# in its payload -- that is what :meth:`NullType.__reduce__` emitted -- so
+# dropping the name from this module would make those payloads unloadable with
+# ``AttributeError: module 'pcapkit.corekit.module' has no attribute
+# '_get_null'``. Newly written pickles name the new home; both resolve to the
+# same function and yield the same singleton.
+from pcapkit.corekit.sentinels import NULL, NullType, _get_null  # pylint: disable=unused-import
 from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['NULL', 'ModuleDescriptor']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Type
-
-    from typing_extensions import Literal
+    from typing import Type
 
 _T = TypeVar('_T')
-
-
-@final
-class NullType:
-    """Type of :data:`NULL`, the omitted-``class_``/``module`` sentinel.
-
-    A distinct class rather than a plain :class:`str` -- which is what the
-    registry helpers in :mod:`pcapkit.foundation.registry.protocols` and
-    :mod:`pcapkit.foundation.registry.foundation` used to define,
-    independently of each other -- so that ``is`` comparisons against it mean
-    what they say: no :class:`str` a caller passes, including one that
-    happens to spell ``'(null)'`` itself, can compare equal to this sentinel
-    by identity. See GitHub issue #833.
-
-    Genuinely a singleton, not merely a class this module happens to
-    instantiate once: :meth:`__new__` always hands back the one instance
-    that already exists, rather than building a new one, so no caller --
-    direct, or :mod:`copy`/:mod:`pickle` reconstructing an instance behind
-    the scenes -- can end up holding a second object that fails an ``is
-    NULL`` check downstream. :meth:`ModuleDescriptor.klass` makes exactly
-    that check, and a stricter guard that raises on a second call would be
-    truer to "singleton" in the abstract, but it would also mean the
-    module's own ``NULL = NullType()`` below is the only call that is ever
-    allowed to succeed -- fragile for no real benefit, since nothing here
-    needs *rejecting* a second construction, only preventing it from
-    producing a distinct object.
-
-    That still leaves :func:`copy.deepcopy`, :func:`copy.copy` and
-    :mod:`pickle` unhandled: none of them constructs a new instance by
-    calling ``NullType()`` themselves, so the guard above never runs for
-    them. Each is therefore given its own override below, rather than left
-    to fall back to the default behaviour for a plain object:
-
-    * :func:`copy.copy` and :func:`copy.deepcopy` check for
-      :meth:`__copy__`/:meth:`__deepcopy__` before ever falling back to
-      reduction, so :meth:`__deepcopy__` in particular has to be defined --
-      its absence is the actual defect this class used to have: deepcopying
-      a :class:`ModuleDescriptor` recursed into this sentinel, reduced it,
-      and rebuilt a second, non-identical :class:`NullType` that then read as
-      an ordinary attribute name to :func:`getattr`, downgrading a clean
-      :exc:`~pcapkit.utilities.exceptions.ProtocolError` into a bare
-      :exc:`TypeError` (``attribute name must be string, not 'NullType'``).
-    * :mod:`pickle` protocols 2 and up reconstruct through
-      ``cls.__new__(cls)``, which the guarded :meth:`__new__` already keeps
-      to one instance -- but protocols 0 and 1 reconstruct through
-      :func:`copyreg._reconstructor`, which calls :func:`object.__new__`
-      *directly*, bypassing :meth:`__new__` entirely. :meth:`__reduce__` is
-      defined so that every protocol, not only the ones that happen to go
-      through this class's own :meth:`__new__`, is routed through the same
-      module-level getter instead of through reconstruction at all.
-
-    A caveat rather than a defect: :func:`importlib.reload` on this module
-    re-executes ``NULL = NullType()`` below, producing a *second* singleton
-    that the reloaded code compares against correctly but that every module
-    which already imported the pre-reload :data:`NULL` still holds -- so a
-    comparison spanning the reload sees two "singletons" that are not each
-    other. :meth:`ModuleDescriptor.klass` faces exactly this class of
-    problem for the *class* it resolves, which is why it re-reads
-    :data:`sys.modules` on every call rather than memoising; nothing
-    equivalent is possible here, because unlike a resolved class there is no
-    live registry this sentinel could be re-read from. The pre-#833 ``str``
-    sentinel had the same fragility for the same reason -- it is a property
-    of sharing one module-level binding across a reload, not something this
-    class's singleton guarantees claim to solve -- and nothing in this
-    package reloads :mod:`pcapkit.corekit.module` after import.
-
-    """
-
-    #: 'NullType | None': The one instance :meth:`__new__` ever returns,
-    #: including for the module-level ``NULL = NullType()`` below that
-    #: creates it in the first place. Kept on the class rather than as a
-    #: module global so :meth:`__new__` can read and write it without a
-    #: ``global`` statement.
-    _instance: 'NullType | None' = None
-
-    def __new__(cls) -> 'NullType':
-        """Return the one instance of this class there will ever be."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __bool__(self) -> 'Literal[False]':
-        """Return :obj:`False`."""
-        return False
-
-    def __repr__(self) -> 'str':
-        """Return :obj:`str` representation of the sentinel."""
-        return '<NULL>'
-
-    def __copy__(self) -> 'NullType':
-        """Return ``self`` -- there is, and only ever will be, one of these."""
-        return self
-
-    def __deepcopy__(self, memo: 'dict[int, Any]') -> 'NullType':
-        """Return ``self``, for the same reason as :meth:`__copy__`.
-
-        Args:
-            memo: The :func:`copy.deepcopy` memo table. Unused: returning
-                ``self`` needs no entry, since nothing about this object is
-                ever copied.
-
-        """
-        return self
-
-    def __reduce__(self) -> 'tuple[Callable[[], NullType], tuple[()]]':
-        """Reduce to the module-level singleton getter, for every :mod:`pickle` protocol.
-
-        A class that defines :meth:`__reduce__` has it honoured by
-        :meth:`object.__reduce_ex__` for every protocol uniformly, rather
-        than only for the ones that would otherwise call
-        :func:`copyreg._reconstructor` -- so naming :func:`_get_null` here
-        sidesteps reconstruction, and therefore :meth:`__new__`, altogether.
-        That makes this correct independent of whatever :meth:`__new__` does,
-        which is what actually covers protocols 0 and 1; see the class
-        docstring.
-
-        """
-        return (_get_null, ())
-
-
-#: NullType: Sentinel for an omitted ``class_`` argument to the ``register_*``
-#: helpers in :mod:`pcapkit.foundation.registry.protocols` and
-#: :mod:`pcapkit.foundation.registry.foundation`. Defined once, here, rather
-#: than once per module: both already import :class:`ModuleDescriptor` from
-#: this module, so it is the shared home that needs no new module and creates
-#: no import cycle.
-NULL = NullType()
-
-
-def _get_null() -> 'NullType':
-    """Return :data:`NULL`, for :meth:`NullType.__reduce__`.
-
-    A module-level function rather than a lambda or a bound method, so every
-    :mod:`pickle` protocol -- including 0 and 1, which cannot reference
-    anything nested inside a class -- can name it.
-
-    """
-    return NULL
 
 
 class ModuleDescriptor(collections.namedtuple('ModuleDescriptor', ['module', 'name']), Generic[_T]):

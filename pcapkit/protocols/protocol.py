@@ -32,6 +32,7 @@ import aenum
 from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.sentinels import _Absent, _AbsentType  # pylint: disable=unused-import
 from pcapkit.protocols import data as data_module
 from pcapkit.protocols import schema as schema_module
 from pcapkit.protocols.data.data import Data
@@ -40,7 +41,7 @@ from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.chardet import detect
-from pcapkit.utilities.compat import cached_property, final
+from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
                                           StructError, UnsupportedCall)
@@ -90,38 +91,6 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
                                   '__packet__', 'packet'})
 
-
-@final
-class _AbsentType:
-    """Type of :data:`_Absent`, the absent-key sentinel.
-
-    A distinct class rather than a bare :obj:`object` so that the sentinel has a
-    name of its own in a traceback or a debugger, and so that a type checker has
-    something to name where ``object()`` would give it nothing. It
-    follows :class:`~pcapkit.corekit.fields.field.NoValueType`, which does the
-    same job for an unset field default; this is a sibling of it rather than a
-    reuse, since that one is documented as the default value of
-    :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
-    and means "no value was given", not "this key is not here".
-
-    """
-
-    def __bool__(self) -> 'Literal[False]':
-        """Return :obj:`False`."""
-        return False
-
-    def __repr__(self) -> 'str':
-        """Return :obj:`str` representation of the sentinel."""
-        return '<absent>'
-
-
-#: _AbsentType: Absent-versus-:obj:`None` sentinel for reading ``__keywords__``
-#: out of a class :attr:`~object.__dict__`, where :obj:`None` is a meaningful
-#: value -- it is the opt-out that says the class cannot enumerate its keywords,
-#: c.f. :attr:`ProtocolBase.__keywords__
-#: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves this
-#: module: it is read in :func:`_declared_keywords` and discarded there.
-_Absent = _AbsentType()
 
 #: Cache for :func:`_declared_keywords`, keyed by protocol class. A protocol's
 #: signatures do not change after the class is created, and the walk below is
