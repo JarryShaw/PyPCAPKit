@@ -23,7 +23,7 @@ Octets      Bits        Name                    Description
 
    The CGA Parameters option (type 12) is the one registered mobility option
    still on the generic handler. It is unreachable rather than unimplemented --
-   see the Mobility Header section of :doc:`/pep` for the two faults involved,
+   see the Mobility Header section of :doc:`/contributing/pep` for the two faults involved,
    both of which are in shared field machinery rather than here.
 
 .. autoclass:: pcapkit.protocols.internet.mh.MH

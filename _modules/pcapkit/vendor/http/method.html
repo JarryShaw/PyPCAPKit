@@ -372,11 +372,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../conventions.html">Registry Conventions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../releasing.html">Release Process</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../workflows.html">GitHub Actions Workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -417,6 +412,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/conventions.html">Registry Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/workflows.html">GitHub Actions Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contributing/pep.html">Help Wanted</a></li>
 </ul>
 
 </div>
@@ -585,9 +587,37 @@
 <span class="s1">        obj.idempotent = False</span>
 <span class="s1">        return obj</span>
 
-<span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
+<span class="s1">    @classmethod</span>
+<span class="s1">    def get(cls, key: 'str', default: 'Optional[str]' = None) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
 <span class="s1">        """Backport support for original codes.</span>
+
+<span class="s1">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the</span>
+<span class="s1">        lookup itself, per GitHub issue #908: the previous override checked</span>
+<span class="s1">        only ``_member_map_`` (names), never ``_value2member_map_``</span>
+<span class="s1">        (values), so the two IANA methods whose member *name* differs from</span>
+<span class="s1">        their *value* -- ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and</span>
+<span class="s1">        ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``, a hyphen being unusable</span>
+<span class="s1">        in a Python identifier -- failed to resolve through ``get`` even</span>
+<span class="s1">        though :meth:`_missing_` (and so the constructor) already found</span>
+<span class="s1">        them via that same value-side lookup.</span>
+
+<span class="s1">        The base is a :class:`classmethod`</span>
+<span class="s1">        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), and a zero-argument</span>
+<span class="s1">        ``super()`` needs a first argument to bind, so this override had to</span>
+<span class="s1">        move from :class:`staticmethod` to :class:`classmethod` to delegate</span>
+<span class="s1">        at all -- see GitHub issue #908's own correction of the fix it</span>
+<span class="s1">        originally proposed. Callers are unaffected by the switch itself:</span>
+<span class="s1">        ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.get('X')`` binds identically either way.</span>
+
+<span class="s1">        ``default`` keeps its existing meaning here rather than adopting</span>
+<span class="s1">        the base's ``NO_DEFAULT`` sentinel and its value-only fallback --</span>
+<span class="s1">        widening it would be caller-visible, since the base's ``default``</span>
+<span class="s1">        must already name a *registered* value (resolved through</span>
+<span class="s1">        ``_value2member_map_``), while this override's ``default`` instead</span>
+<span class="s1">        supplies the *value* of a freshly minted unregistered member.</span>
+<span class="s1">        Nothing in this tree calls ``get`` with a non-``None`` ``default``</span>
+<span class="s1">        to notice today, but widening the signature is a separate change</span>
+<span class="s1">        from this defect and stays out of scope.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Key to get enum item. Looked up case-**sensitively**,</span>
@@ -595,37 +625,47 @@
 <span class="s1">                case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.</span>
 <span class="s1">                Command.get`'s equivalent override, which stays</span>
 <span class="s1">                case-insensitive because :rfc:`959#section-4.1` says FTP</span>
-<span class="s1">                command codes are not.</span>
-<span class="s1">            default: Default value if not found.</span>
+<span class="s1">                command codes are not. Checked against both member names</span>
+<span class="s1">                and values, via the base's own precedence -- name before</span>
+<span class="s1">                value -- so a value-only match such as</span>
+<span class="s1">                ``'BASELINE-CONTROL'`` now resolves too, closing GitHub</span>
+<span class="s1">                issue #908.</span>
+<span class="s1">            default: Value for the unregistered member built when ``key``</span>
+<span class="s1">                matches neither a name nor a value. ``None``, the</span>
+<span class="s1">                default, uses ``key`` itself -- unchanged from before</span>
+<span class="s1">                GitHub issue #908.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If ``key`` is not a :class:`str`. This reaches the</span>
+<span class="s1">                caller from the base's non-``str`` branch, which calls</span>
+<span class="s1">                ``cls(key)`` and so ``_missing_``, and is **not** caught by</span>
+<span class="s1">                the ``except KeyError`` fallback below -- only a failed</span>
+<span class="s1">                *name* lookup is. The non-``str`` surface therefore moved</span>
+<span class="s1">                with GitHub issue #908: ``get(42)`` and ``get(None)`` used</span>
+<span class="s1">                to raise :exc:`AttributeError` from ``key.upper()``, and</span>
+<span class="s1">                ``get(b'GET')`` used to *return* a member whose name and</span>
+<span class="s1">                value were both the :class:`bytes` object. Raising is the</span>
+<span class="s1">                intended behaviour -- a ``bytes``-valued ``Method`` is not a</span>
+<span class="s1">                thing this registry should hand back -- but it is a change,</span>
+<span class="s1">                so it is stated rather than left to be discovered.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
-<span class="s1">        name = key.upper()</span>
-<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # type: ignore[misc]  # pylint: disable=no-member</span>
+<span class="s1">        try:</span>
+<span class="s1">            return super().get(key)</span>
+<span class="s1">        except KeyError:</span>
 <span class="s1">            # NOTE: the value is ``default`` if the caller supplied one, or</span>
-<span class="s1">            # else ``key`` exactly as given -- never ``name`` -- so an</span>
-<span class="s1">            # unregistered member's value is the caller's own casing, the</span>
-<span class="s1">            # same convention :meth:`_unregistered_member` documents and</span>
-<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
-<span class="s1">            # unchanged. Matching against ``</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_`` is on</span>
-<span class="s1">            # ``key`` itself now, not ``key.upper()`` -- GitHub issue #896:</span>
-<span class="s1">            # a token differing only in case from a registered member's</span>
-<span class="s1">            # name, e.g. ``get('get')`` against ``GET``, no longer resolves</span>
-<span class="s1">            # to it and instead builds an unregistered member of its own,</span>
-<span class="s1">            # since RFC 9110 makes that a distinct wire token rather than a</span>
-<span class="s1">            # differently-spelled name for the same one. ``name`` stays the</span>
-<span class="s1">            # canonical upper-case form -- only the identifier is</span>
-<span class="s1">            # canonicalised, matching :meth:`_missing_` and every registered</span>
-<span class="s1">            # member's own name. Two calls naming the same method in</span>
-<span class="s1">            # different case, e.g. ``get('frob')`` and ``get('FROB')``,</span>
-<span class="s1">            # therefore build results that are *not* equal -- each is</span>
-<span class="s1">            # exactly what its own caller passed, which minting's</span>
-<span class="s1">            # ``_member_map_`` cache used to paper over by returning the</span>
-<span class="s1">            # *first* casing seen for every later call regardless of case.</span>
-<span class="s1">            # Losing that was the one observable behaviour change in GitHub</span>
-<span class="s1">            # issue #860's conversion.</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._unregistered_member(default if default is not None else key, name)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">            # else ``key`` exactly as given -- never its upper-cased form --</span>
+<span class="s1">            # so an unregistered member's value is the caller's own casing,</span>
+<span class="s1">            # the same convention :meth:`_unregistered_member` documents and</span>
+<span class="s1">            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed.</span>
+<span class="s1">            # The name is always the canonical upper-case form, matching</span>
+<span class="s1">            # :meth:`_missing_` and every registered member's own name. Two</span>
+<span class="s1">            # calls naming the same method in different case, e.g.</span>
+<span class="s1">            # ``get('frob')`` and ``get('FROB')``, therefore build results</span>
+<span class="s1">            # that are *not* equal -- each is exactly what its own caller</span>
+<span class="s1">            # passed, per GitHub issue #860's conversion away from minting.</span>
+<span class="s1">            return cls._unregistered_member(default if default is not None else key, key.upper())</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'str') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
@@ -633,7 +673,12 @@
 
 <span class="s1">        Args:</span>
 <span class="s1">            value: Value to get enum item. Matched case-insensitively against</span>
-<span class="s1">                the canonical upper-case member names.</span>
+<span class="s1">                the canonical upper-case member names -- deliberately unlike</span>
+<span class="s1">                :meth:`get`, which is case-**sensitive** per</span>
+<span class="s1">                :rfc:`9110#section-9.1`. The split was ruled deliberate on</span>
+<span class="s1">                GitHub issue #896; GitHub issue #908 is the pointer between</span>
+<span class="s1">                the two, so a reader of this one file is not left with two</span>
+<span class="s1">                contradictory rationales and nothing tying them together.</span>
 
 <span class="s1">        """</span>
 <span class="s1">        if not isinstance(value, str):</span>
