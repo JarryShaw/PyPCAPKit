@@ -735,10 +735,18 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.const.tcp.flags import Flags
 
-        # String paths, which bypass ``_missing_``.
+        # String paths, which bypass ``_missing_``. ``Method.get`` is probed
+        # with the exact registered casing rather than ``'get'`` -- GitHub
+        # issue #896 made its matching case-sensitive, so a lower-cased probe
+        # would no longer resolve to ``Method.GET`` at all; that behaviour
+        # change is pinned on its own in
+        # :mod:`tests.const.test_const_enum_no_mint`
+        # (``BespokeGetUnchangedTests.test_method_get_is_now_case_sensitive``)
+        # rather than here, where the point is only that the string path
+        # still bypasses the guard this test is about.
         self.assertIs(Flags.get('SYN'), Flags.SYN)
         self.assertIs(Command.get('abor'), Command.ABOR)
-        self.assertIs(Method.get('get'), Method.GET)
+        self.assertIs(Method.get('GET'), Method.GET)
         self.assertIs(TransportProtocol.get('tcp'), TransportProtocol.tcp)
 
         # Integer paths, which do.

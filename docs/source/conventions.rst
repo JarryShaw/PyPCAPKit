@@ -373,8 +373,15 @@ resolvable.
    :class:`~pcapkit.const.http.method.Method`,
    :class:`~pcapkit.const.pcapng.option_type.OptionType` and
    :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- and probing one of those
-   measures the override rather than the base. ``Method.get`` upper-cases its key,
-   which makes it look as though the base were case-insensitive.
+   measures the override rather than the base. ``Command.get`` upper-cases its key
+   before matching, which makes it look as though the base were case-insensitive --
+   deliberately, since :rfc:`959#section-4.1` treats FTP command codes identically
+   regardless of case. ``Method.get`` used to fold case the same way, but
+   `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__ made it
+   case-sensitive instead: :rfc:`9110#section-9.1` says the HTTP method token is
+   case-sensitive, so ``Method.get('get')`` no longer resolves to
+   ``Method.GET`` -- it builds its own unregistered member, preserving the
+   caller's exact casing, the same way an unrecognised value always does.
 
 What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
 value resolves through ``cls(value)`` but not through ``get(value)``, because
