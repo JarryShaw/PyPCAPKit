@@ -2,7 +2,7 @@
 """Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
 Tier 1 (#838) removed the mint from the two sites in
-:data:`pcapkit.vendor.default.LINE` that the 105 default-template registries
+:data:`pcapkit.vendor.default.LINE` that the 107 default-template registries
 inherit. It could not reach the eleven crawlers that replace that template with
 their own, because each of those carries a hand-copied ``get()`` -- and none of
 them carries ``register``, ``register_alias`` or ``get_all`` at all.
@@ -674,7 +674,7 @@ class UnregisteredMemberTests(unittest.TestCase):
         self.assertNotIn('unit_test_absent', _Str.__members__)
 
 
-#: Sample of the 105 default-template registries GitHub issue #775's tier 3
+#: Sample of the 107 default-template registries GitHub issue #775's tier 3
 #: moved onto :class:`~pcapkit.corekit.enum.EnumRegistry`, chosen to cover
 #: the two shapes the census turned up in ``pcapkit/vendor/default.py``'s
 #: ``LINE`` template: a registry whose own ``_missing_`` mints directly via
@@ -712,7 +712,7 @@ GENERATED_SAMPLE = (
 #: custom ``__new__`` needed one. They stay excluded from *this* file's
 #: tier-3 sweep regardless, because the exclusion here is about their
 #: bespoke ``process()``/``get()`` shape not sharing the generated template,
-#: which conversion onto the base does not change -- unlike the 105
+#: which conversion onto the base does not change -- unlike the 107
 #: :data:`GENERATED_SAMPLE` registries below, each of these five classes'
 #: (nine files') own ``_missing_`` stays bespoke rather than sharing the
 #: generated template, and several also keep a bespoke
@@ -748,7 +748,7 @@ GENERATED_SAMPLE = (
 #: (a) too, but on narrower grounds worth spelling out, since -- unlike the
 #: rest of that group -- it does not carry a bespoke ``get()``/``register()``
 #: at all; its own ``get``/``get_all``/``register``/``register_alias`` are
-#: exactly the base's generic implementation, same as every one of the 105
+#: exactly the base's generic implementation, same as every one of the 107
 #: :data:`GENERATED_SAMPLE`-shaped registries below. What excludes it is
 #: simply that this whole census, and its
 #: ``class \w+(EnumRegistry, IntEnum):`` regex a few lines down, is scoped to
@@ -794,7 +794,7 @@ EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
 
 
 class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
-    """The 105 default-template registries must inherit the protocol too,
+    """The 107 default-template registries must inherit the protocol too,
     not just the six bespoke ones :class:`GeneratedSourceInheritsTests`
     above (tier 2) already covers."""
 
@@ -820,11 +820,11 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
                 self.assertIn("def _missing_(cls, value: 'int')", source)
 
     def test_every_generated_const_module_is_accounted_for(self) -> None:
-        """The full census, measured on this batch rather than assumed: 122
+        """The full census, measured on this batch rather than assumed: 124
         modules under :mod:`pcapkit.const`, splitting exactly three ways --
         the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 11
         :data:`EXCLUDED_FROM_INTENUM_CENSUS` deliberately left alone, and the
-        remaining 105 this tier converts. Measured by me on the prior head
+        remaining 107 this tier converts. Measured by me on the prior head
         (commit ``05468a06b``, this batch's own base): of those 121, 6 carried
         :class:`~pcapkit.corekit.enum.EnumRegistry` and 111 carried the
         literal "Backport support for original codes." docstring (including
@@ -836,8 +836,17 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         ``pcapkit/const/pcapng/tls_key_label.py``, and the 10 excluded became
         11 to hold it -- see the comment directly above
         :data:`EXCLUDED_FROM_INTENUM_CENSUS` for why it lands there rather
-        than among the 105. 105 itself does not move: the new file is
+        than among the 105. 105 itself does not move there: the new file is
         absorbed by the excluded side of the split, not the generated side.
+
+        122 became 124 with GitHub issue #880's
+        ``pcapkit/const/ngap/procedure_code.py`` and
+        ``pcapkit/const/ngap/protocol_ie.py``. Unlike #886's file, both are
+        the generated shape outright -- plain ``EnumRegistry`` + ``IntEnum``,
+        no bespoke ``get()``/``_missing_``-carrying ``__new__`` -- so neither
+        joins :data:`EXCLUDED_FROM_INTENUM_CENSUS`; they land on the
+        *generated* side instead. 6 and 11 hold; 105 becomes 107, and 122
+        becomes 124.
         """
         const_root = REPO_ROOT / 'pcapkit' / 'const'
         all_files = sorted(
@@ -849,8 +858,8 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         generated = [path for path in all_files
                      if path not in converted_relpaths and path not in EXCLUDED_FROM_INTENUM_CENSUS]
 
-        self.assertEqual(len(all_files), 122)
-        self.assertEqual(len(generated), 105)
+        self.assertEqual(len(all_files), 124)
+        self.assertEqual(len(generated), 107)
 
         for relpath in generated:
             with self.subTest(module=relpath):
@@ -967,7 +976,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
 class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestCase):
     """The residue #855 disclosed and this tier's own instructions name:
     ``register()`` on an already-registered value used to silently alias
-    rather than mint or raise, on every one of the 105 generated registries
+    rather than mint or raise, on every one of the 107 generated registries
     (they had no guard of their own -- only the six bespoke ones tier 2
     already fixed did). Measured directly, before and after, in the
     docstring below rather than only asserted.

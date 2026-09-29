@@ -307,15 +307,19 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_the_sweep_size_is_pinned(self) -> None:
         # If this drifts, a const enum was added, removed or renamed, and the
         # exception sets below need a fresh look rather than a silent pass.
+        # 118 became 120 with GitHub issue #880's ngap.ProcedureCode and
+        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
+        # classes in pcapkit.protocols.application.ngap; neither needs an
+        # exception-set entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
-        self.assertEqual(len(self.enums), 118)
+        self.assertEqual(len(self.enums), 120)
         for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
                           EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK):
             self.assertTrue(expected.issubset(names),
                             f'sweep is missing: {expected - names}')
 
     def test_every_integer_path_consults_the_default(self) -> None:
-        """The registry-wide form of #584, across all 118 integer registries."""
+        """The registry-wide form of #584, across all 120 integer registries."""
         covered = 0
         for obj in self.enums:
             qualname = _qualname(obj)
@@ -355,8 +359,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # issue #860 step 2, which gave ``GroupingInformation`` and
         # ``ResponseKind`` the base ``get(key, default)`` they never had
         # before, moving them out of ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT``
-        # and into this sweep.
-        self.assertEqual(covered, 112)
+        # and into this sweep; plus 2 for GitHub issue #880's
+        # ngap.ProcedureCode and ngap.ProtocolIE, which take the base
+        # ``get(key, default)`` from the moment they exist under
+        # pcapkit.const at all.
+        self.assertEqual(covered, 114)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

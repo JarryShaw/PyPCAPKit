@@ -378,11 +378,15 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # upper()`` outliers #647 fixed above, and it never reached
         # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
         # sweep, so that module's own pinned count does not move.
-        self.assertEqual(len(ints), 112)
+        # 112 became 114 with GitHub issue #880's ngap.ProcedureCode and
+        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
+        # classes in pcapkit.protocols.application.ngap -- two more IntEnum
+        # registries, two more modules, no change to the flag or str counts.
+        self.assertEqual(len(ints), 114)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)
-        self.assertEqual(len(self.enums), 128)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 122)
+        self.assertEqual(len(self.enums), 130)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 124)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.

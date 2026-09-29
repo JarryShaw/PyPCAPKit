@@ -118,21 +118,78 @@ class NGAPUnitTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Criticality(3)
 
-    def test_unknown_procedure_and_ie_extend_rather_than_raise(self) -> None:
+    def test_unknown_procedure_and_ie_resolve_without_raising_or_aliasing(self) -> None:
+        """GitHub issue #880: an in-range value neither enumeration names must
+        report rather than explode, but two *different* unrecognised values
+        must never alias onto the same member the way the old shared-``-1``
+        ``extend_enum`` mint used to. Since GitHub issue #880's fix,
+        :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
+        :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` answer such a
+        value with a throwaway, non-registering member (:meth:`pcapkit.
+        corekit.enum.EnumRegistry._unregistered_member`) named ``Unassigned``
+        -- bare, not value-suffixed, matching every other converted registry
+        under :mod:`pcapkit.const` (see :mod:`tests.const.
+        test_const_enum_no_mint`) -- rather than a permanent,
+        value-suffixed member sharing one mutable default with every other
+        unrecognised key.
+        """
         from pcapkit.protocols.application.ngap import ProcedureCode, ProtocolIE
 
-        # A pycrate carrying a newer NGAP than the pasted block decodes IEs
-        # this package does not name; they must report, not explode.
-        self.assertEqual(ProcedureCode(200).name, 'Unassigned_200')
-        self.assertEqual(int(ProcedureCode(200)), 200)
-        self.assertEqual(ProtocolIE(113).name, 'Unassigned_113')   # a real gap
-        self.assertEqual(ProtocolIE(9000).name, 'Unassigned_9000')
+        # A pycrate carrying a newer NGAP than this release names decodes IEs
+        # this package does not know; they must report, not explode.
+        before_proc = len(ProcedureCode.__members__)
+        member_200 = ProcedureCode(200)
+        self.assertEqual(member_200.name, 'Unassigned')
+        self.assertEqual(int(member_200), 200)
+        # Non-registering: __members__ does not grow, and a second lookup at
+        # the same value returns an equal but distinct object rather than the
+        # first call's own member.
+        self.assertEqual(len(ProcedureCode.__members__), before_proc)
+        self.assertNotIn(200, ProcedureCode._value2member_map_)  # type: ignore[attr-defined]
+        self.assertIsNot(ProcedureCode(200), member_200)
+        self.assertEqual(ProcedureCode(200), member_200)
+
+        before_ie = len(ProtocolIE.__members__)
+        member_113 = ProtocolIE(113)   # a real gap
+        member_9000 = ProtocolIE(9000)
+        self.assertEqual(member_113.name, 'Unassigned')
+        self.assertEqual(member_9000.name, 'Unassigned')
+        self.assertEqual(int(member_113), 113)
+        self.assertEqual(int(member_9000), 9000)
+        # The defect this pins: two distinct unrecognised values must resolve
+        # to two distinct members, never alias onto one shared sentinel.
+        self.assertNotEqual(member_113, member_9000)
+        self.assertEqual(len(ProtocolIE.__members__), before_ie)
 
         # ProcedureCode is INTEGER (0..255) and ProtocolIE-ID is (0..65535).
         with self.assertRaises(ValueError):
             ProcedureCode(256)
         with self.assertRaises(ValueError):
             ProtocolIE(65536)
+
+    def test_get_of_an_unresolvable_string_key_raises_rather_than_minting(self) -> None:
+        """GitHub issue #880's own repro, re-run against the fixed classes:
+        ``get()`` on an unrecognised name must raise rather than mint a
+        member at a shared default -- the defect that let a second unknown
+        name alias onto the first's member. Real callers in :meth:`NGAP.read`
+        and :meth:`NGAP.make` only ever pass an :class:`int` or an existing
+        member (see the module's own ``ProtocolIE.get``/``ProcedureCode.get``
+        call sites), so this exercises the public ``str`` path those callers
+        never take, which is exactly the path GitHub issue #880 measured the
+        aliasing defect on.
+        """
+        from pcapkit.protocols.application.ngap import ProcedureCode, ProtocolIE
+
+        for enum in (ProcedureCode, ProtocolIE):
+            with self.subTest(enum=enum.__name__):
+                before = len(enum.__members__)
+                with self.assertRaises(KeyError):
+                    enum.get('bogus_one')
+                with self.assertRaises(KeyError):
+                    enum.get('bogus_two')
+                self.assertEqual(len(enum.__members__), before)
+                self.assertNotIn('bogus_one', enum.__members__)
+                self.assertNotIn('bogus_two', enum.__members__)
 
     ##########################################################################
     # Registration and metadata. No pycrate needed.

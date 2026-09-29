@@ -1002,14 +1002,19 @@ class DependencyRequirementTests(unittest.TestCase):
     def test_a_bracket_inside_a_requirement_does_not_end_the_array(self) -> None:
         """``vendor`` is the case a "slice to the first ``]``" parse gets wrong.
 
-        ``vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]`` holds two
-        closing brackets before its own, so a naive scan stops inside the first
-        requirement and reports an extra with one malformed entry.
+        ``vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]``
+        holds two closing brackets before its own, so a naive scan stops inside
+        the first requirement and reports an extra with one malformed entry.
+        ``pycrate`` (added for GitHub issue #880's NGAP crawlers -- the owner's
+        ruling was to declare it in this extra rather than install it ad hoc in
+        a workflow) carries no brackets of its own; it is here so the third
+        entry does not silently vanish from the sweep the way a truncated parse
+        would drop it too.
 
         """
         declared = _dependency_gates.declared_requirements()
         self.assertEqual({requirement.name for requirement in declared['vendor']},
-                         {'requests', 'beautifulsoup4'})
+                         {'requests', 'beautifulsoup4', 'pycrate'})
 
     def test_the_core_dependencies_are_read_from_project_not_build_system(self) -> None:
         """``[build-system] requires`` also holds ``setuptools``; this is not it."""
