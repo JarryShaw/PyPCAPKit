@@ -173,17 +173,21 @@ jobs:
         with:
           python-version: '3.14'
 
-      # `.[all]` rather than a bare install: pylint and mypy resolve imports, so
-      # findings depend on what is importable. Note `pypcap` and `pypcapfile` are
-      # marked `python_version < '3.12'` in pyproject.toml and so are absent here
-      # by design -- that is the source of pylint's 8 `import-error` messages,
-      # and they will persist until those engines support a current Python.
+      # `.[all,dev]` rather than a bare install: pylint and mypy resolve imports,
+      # so findings depend on what is importable. #910 narrowed `all` to core
+      # addons only (`cli`, `crypto`, `NGAP`), so the `dev` extra it added is
+      # what puts `dpkt`/`scapy`/`pyshark`/`pypcapfile` back for this job --
+      # without it, narrowing `all` would have grown the count below rather
+      # than left it alone. Note `pypcap` and `pypcapfile` are marked
+      # `python_version < '3.12'` in pyproject.toml and so are absent here by
+      # design -- that is the source of pylint's 8 `import-error` messages, and
+      # they will persist until those engines support a current Python.
       - name: Install package and lint tools
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all]
+          python -m pip install -e .[all,dev]
           python -m pip install -U vermin pylint mypy bandit
 
       # Every step below runs the *Makefile* target rather than spelling the

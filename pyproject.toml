@@ -111,20 +111,26 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 cli = [ "emoji" ]
 # for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
 crypto = [ "cryptography>=3.4" ]
-# for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Deliberately kept
-# out of ``all``, for two reasons that are each sufficient on their own:
+# for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Counted among
+# ``all``'s *core addons* by the owner's ruling on #910 -- "everything that
+# makes the library itself work at full functionality" -- even though the
+# ``pycrate`` this needs is not a free addition:
 #
 #   * Size. ``pycrate`` ships every specification it has ever compiled in one
 #     distribution: installing it lands ~238 MB of ``pycrate_asn1dir`` (87 spec
-#     modules) to obtain the one 4.9 MB ``NGAP.py`` this needs. Paying that in
-#     ``all`` -- a 50x multiplier over the useful part -- to support one
-#     application protocol is not a trade to make on a user's behalf.
+#     modules) to obtain the one 4.9 MB ``NGAP.py`` this needs. That is a 50x
+#     multiplier over the useful part, to support one application protocol.
 #   * Licence. ``pycrate`` is LGPL-2.1+ where this package is BSD-3-Clause. That
-#     is fine as an optional import a user chooses, and it is not fine as
-#     something ``pip install pypcapkit[all]`` pulls in silently: LGPL carries
-#     obligations on redistribution that a BSD-licensed dependent may not want,
-#     and ``all`` reads as "the rest of the same thing" rather than as a licence
-#     decision.
+#     is fine as an optional import a user chooses, and it is a real thing for
+#     ``pip install pypcapkit[all]`` to pull in without being asked: LGPL
+#     carries obligations on redistribution that a BSD-licensed dependent may
+#     not want.
+#
+# #910's owner accepted that trade deliberately rather than leaving ``all``
+# contradict the reasoning that used to keep ``pycrate`` out of it -- see the
+# ``all`` extra's own comment below for the rest of that ruling. This extra
+# still exists on its own, for installing NGAP support without the ``cli`` and
+# ``crypto`` core addons ``all`` bundles it with.
 #
 # No version floor: NGAP has shipped precompiled in ``pycrate_asn1dir`` for many
 # releases and the two entry points used here (``NGAP_PDU.from_aper`` and
@@ -196,40 +202,65 @@ PCAP_CT = [
 ]
 # pypcapfile 0.12.0's ``linklayer`` module imports :mod:`imp`, removed in Python
 # 3.12, and ``savefile`` imports ``linklayer`` -- so the package installs cleanly
-# and then raises ``ModuleNotFoundError`` the moment the engine is used. Upstream
-# master has fixed it but has not released.
+# and is then unusable there. It does *not* raise when the engine is selected:
+# ``Extractor.run`` consults ``PyPCAPFile.unsupported_reason()`` before the import
+# test and degrades to the default engine with a warning. That guard exists
+# precisely because a bare ``import pcapfile`` succeeds on 3.12+, so an
+# import-only check would be satisfied and let the ``ModuleNotFoundError`` escape
+# from ``__init__`` instead. Upstream master has fixed it but has not released.
 PyPCAPFile = [ "pypcapfile; python_version < '3.12'" ]
 # for developers -- installs pcapkit.vendor's crawlers, run via
 # `pcapkit-vendor` to regenerate pcapkit.const. Includes ``pycrate`` so
-# pcapkit.vendor.ngap's two crawlers (#880) can run: the owner's ruling on
-# this issue is that it belongs here even though it is excluded from
-# ``all`` below, for the same size and licence reasons the ``NGAP`` extra
-# above explains in full (~238 MB of ``pycrate_asn1dir``, LGPL-2.1+ against
-# this package's BSD-3-Clause) -- a developer opting into ``vendor`` has
-# already accepted a far heavier and more permissively-licensed dependency
-# set than an end user installing ``all`` ever would.
+# pcapkit.vendor.ngap's two crawlers (#880) can run, and ``requests``/
+# ``beautifulsoup4`` for the seven crawlers that import them at module scope
+# (c.f. the ``test`` extra's own comment below for which, and #507). #910
+# narrowed ``all`` to core addons only, so this extra now names all three
+# itself rather than leaning on ``all`` to also carry them -- ``pycrate``
+# happens to be a core addon in its own right post-#910 (see the ``all``
+# extra's comment below), but ``requests``/``beautifulsoup4`` are not, having
+# moved to ``dev`` instead. Either way, this extra's own requirements are what
+# it is correct against, not whatever ``all`` happens to carry.
 vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
-# NB: ``pypcap`` is *not* included here. It is an sdist-only C extension, so
-# ``pip install pypcapkit[all]`` would require a compiler and the libpcap
-# development files on every platform, and fails where only the header is
-# present -- as on the macOS runners. Install it explicitly with
-# ``pip install pypcapkit[PyPCAP]`` once libpcap is available.
+# #910: narrowed to *core addons* only -- the owner's own words are "everything
+# that makes the library itself work at full functionality", not "everything an
+# end user might ever want". An earlier ruling on the same issue read the
+# latter and added ``pycrate`` on that basis; the ruling that stuck narrowed it
+# again, this time by kind: ``cli``, ``crypto`` and ``pycrate`` (NGAP) are core
+# addons and stay, and the four 3rd-party capture engines that used to be here
+# -- ``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile`` -- are "on demand for each
+# one" like ``PyPCAP`` and ``PCAP_CT`` always were, and move out to their own
+# extras below. Install one explicitly: ``pip install pypcapkit[DPKT]`` /
+# ``[Scapy]`` / ``[PyShark]`` / ``[PyPCAPFile]``.
 #
-# ``pcap-ct`` is left out too, for a different reason: it needs no toolchain at
-# all, but it and ``libpcap`` are published only as pre-releases, and ``all``
-# should not be the way somebody ends up with a beta they did not ask for. It is
-# ``pip install pypcapkit[PCAP_CT]``, which says what it is installing.
-#
-# ``pycrate`` is left out for the size and licence reasons set out on the
-# ``NGAP`` extra above; ``pip install pypcapkit[NGAP]`` is the way to it.
-all = [
-    "emoji",
-    "cryptography>=3.4",
+# ``pypcap`` and ``pcap-ct``/``libpcap`` stay out for the reason they always
+# have, which #910 leaves untouched: installability, not desirability.
+# ``pypcap`` is an sdist-only C extension that needs a compiler and the libpcap
+# development files, and fails where only the header is present -- as on the
+# macOS runners. ``pcap-ct`` and ``libpcap`` need no compiler, but are published
+# only as pre-releases, and ``all`` should not be how somebody ends up with a
+# beta they did not ask for. Install either explicitly: ``pip install
+# pypcapkit[PyPCAP]`` or ``pip install pypcapkit[PCAP_CT]``.
+all = [ "emoji", "cryptography>=3.4", "pycrate" ]
+# Not for an end user -- for CI, which has a different need entirely: pylint,
+# mypy and Sphinx's autodoc all resolve imports against whatever is installed,
+# so narrowing ``all`` above would otherwise have made every one of
+# ``dpkt``/``scapy``/``pyshark``/``pypcapfile`` newly unresolvable to those
+# tools. This extra is what a workflow installs *alongside* ``all`` --
+# ``.[all,dev]`` -- to see everything ``all`` used to carry, for that purpose
+# only. ``.github/workflows/lint.yml``'s own comment tracks exactly 8
+# ``import-error`` messages, from ``pypcap``/``pcap-ct`` (via ``PyPCAP`` and
+# ``PCAP_CT`` above, both absent on the Python it lints) and from
+# ``pypcapfile`` being excluded there by the same marker this extra repeats
+# below; this is the extra that keeps that count at 8 rather than growing it,
+# and it is not a place to add ``pypcap``/``pcap-ct`` just to silence a
+# finding CI has already decided to carry as advisory.
+dev = [
     "dpkt", "scapy", "pyshark",
-    # same marker as the PyPCAPFile extra: installed on 3.12+ this package is not
-    # merely useless but actively harmful, since `engine='pypcapfile'` then raises
-    # ModuleNotFoundError rather than warning and falling back to the default
-    # engine, which is what happens when it is simply absent
+    # same marker and reasoning as the PyPCAPFile extra above and the old
+    # ``all``: on 3.12+ the package installs cleanly and is then unusable, so
+    # the marker keeps the resolver from fetching something that could never
+    # run. It is not guarding against a hard error -- ``Extractor.run`` already
+    # degrades to the default engine with a warning, installed or not
     "pypcapfile; python_version < '3.12'",
     "requests[socks]", "beautifulsoup4[html5lib]",
 ]

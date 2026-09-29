@@ -313,10 +313,12 @@ plug-in functions, you may want to install the optional ones:
    pip install pypcapkit[PCAP_CT]
    # for ESP payload decryption
    pip install pypcapkit[crypto]
-   # and to install the optional packages -- note this excludes PyPCAP and pcap-ct
+   # and to install every core addon at once -- CLI display, ESP decryption
+   # and NGAP decoding; none of the engines above are included, install each
+   # on demand as shown
    pip install pypcapkit[all]
    # or to do this explicitly
-   pip install pypcapkit dpkt scapy pyshark pypcapfile
+   pip install pypcapkit emoji cryptography pycrate
 
 .. important::
 

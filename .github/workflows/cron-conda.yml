@@ -103,12 +103,20 @@ jobs:
         with:
           python-version: '3.14'
 
+      # `.[all,dev]`, not `.[all]` alone: `util/conda-dist.py` below only
+      # *refreshes* the version pin of every package already named in
+      # `conda/requirements.txt` -- via `importlib.metadata.version(name)`,
+      # which raises unless that distribution is installed here -- and that
+      # file names `dpkt`, `scapy`, `pyshark`, `requests` and `beautifulsoup4`
+      # with no marker. #910 narrowed `all` to core addons only, so those five
+      # now come from `dev` instead; without it this step would install
+      # cleanly and the next one would crash on the first missing name.
       - name: Install and Setup
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel packaging
-          python -m pip install -e .[all]
+          python -m pip install -e .[all,dev]
           #python -m pip install pathlib2 typing_extensions
 
       - name: Setup Conda Distribution

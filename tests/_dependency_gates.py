@@ -122,9 +122,11 @@ __all__ = [
 #: :file:`python-compatibility.yml` installs a bare ``.`` and only compiles and
 #: imports, and :file:`codeql-analysis.yml` installs nothing explicitly at all
 #: (CodeQL's own autobuild step). That is exactly why this module keys on *jobs that
-#: run pytest* rather than on install lines anywhere in the workflow tree:
-#: ``.[all]`` carries ``pypcapfile``, ``pyshark`` and ``scapy``, so a guard
-#: reading those lines would satisfy nearly every flag here vacuously.
+#: run pytest* rather than on install lines anywhere in the workflow tree: three
+#: of those five install ``.[all,dev]`` -- carrying ``pypcapfile``, ``pyshark``
+#: and ``scapy`` through the ``dev`` extra #910 added when it narrowed ``all``
+#: to core addons only -- so a guard reading those lines would satisfy nearly
+#: every flag here vacuously.
 WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'unit-tests.yml'
 #: Where the extras are declared.
 PYPROJECT = _tiers.ROOT / 'pyproject.toml'
@@ -1404,10 +1406,12 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
     """The jobs of ``workflow`` that run :program:`pytest`.
 
     Keyed on running the suite, not on holding an install line: seven other
-    workflows install ``.[all]`` -- which does carry ``pypcapfile`` -- and never
-    invoke :program:`pytest`, so a guard that looked at install lines anywhere
-    would pass vacuously. Within this workflow the ``changelog`` job is
-    excluded by the same rule; it installs nothing and runs a generator.
+    workflows install ``.[all]`` somewhere, three of them as ``.[all,dev]`` --
+    which does carry ``pypcapfile``, through the ``dev`` extra #910 added when
+    it narrowed ``all`` to core addons only -- and never invoke
+    :program:`pytest`, so a guard that looked at install lines anywhere would
+    pass vacuously. Within this workflow the ``changelog`` job is excluded by
+    the same rule; it installs nothing and runs a generator.
 
     The ``workflow`` argument exists so the guard can be pointed at a doctored
     copy and shown to fail; see
