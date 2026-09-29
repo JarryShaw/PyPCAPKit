@@ -38,12 +38,13 @@ The extraction engines and plug-ins are optional extras:
 pip install pypcapkit[DPKT]         # or Scapy, PyShark, PyPCAPFile, PyPCAP, PCAP_CT
 pip install pypcapkit[crypto]       # ESP payload decryption
 pip install pypcapkit[cli]          # command line interface
-pip install pypcapkit[all]          # every pure-Python extra
+pip install pypcapkit[all]          # core addons only: cli + crypto + NGAP (pycrate)
 ```
 
-Four of the engines need something beyond a `pip install` -- a `tshark` binary, a
-C compiler, `libpcap` headers, or an older interpreter -- and `all` deliberately
-excludes both `pypcap` and `pcap-ct`, which must never be installed together.
+Every engine above is on demand; `all` bundles only the core addons the library
+needs for full functionality. Four of the engines also need something beyond a
+`pip install` -- a `tshark` binary, a C compiler, `libpcap` headers, or an older
+interpreter -- and `pypcap`/`pcap-ct` must never be installed together.
 The [installation guide](https://jarryshaw.github.io/PyPCAPKit/#installation)
 covers every constraint and the reason for it, and `pcapkit` enforces each one in
 code: asking for an engine that cannot run in the current environment warns with
