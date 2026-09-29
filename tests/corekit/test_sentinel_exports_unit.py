@@ -146,18 +146,17 @@ def _sentinel_section() -> 'str':
     """The "Naming a sentinel" section of :file:`docs/source/contributing/conventions.rst`.
 
     Sliced by its own section markers rather than by line number, so an edit
-    elsewhere in the file -- or the move to
-    :file:`docs/source/contributing/conventions.rst` that GitHub pull request #912
-    is making -- does not silently make this read the wrong text.
+    elsewhere in the file does not silently make this read the wrong text. That
+    is what survived GitHub pull request #912 moving the file out of
+    :file:`docs/source/` into :file:`docs/source/contributing/`, which landed as
+    ``9806f16aa``; the two-element candidate tuple that straddled the move is
+    gone with it (GitHub issue #920), since its first entry could never match
+    again and read as though both locations were still live.
 
     """
-    for candidate in ('docs/source/conventions.rst',
-                      'docs/source/contributing/conventions.rst'):
-        path = ROOT / candidate
-        if path.is_file():
-            break
-    else:  # pragma: no cover
-        raise AssertionError('conventions.rst not found under docs/source')
+    path = ROOT / 'docs/source/contributing/conventions.rst'
+    if not path.is_file():  # pragma: no cover
+        raise AssertionError(f'conventions.rst not found at {path}')
 
     text = path.read_text(encoding='utf-8')
     start = text.index('.. _sentinel-convention:')
