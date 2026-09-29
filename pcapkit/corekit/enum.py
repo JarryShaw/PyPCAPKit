@@ -4,15 +4,55 @@
 
 .. module:: pcapkit.corekit.enum
 
-:mod:`pcapkit.corekit.enum` contains :class:`~pcapkit.corekit.enum.EnumRegistry`
-only, the base class every constant enumeration under :mod:`pcapkit.const` is to
-inherit the registry protocol from.
+:mod:`pcapkit.corekit.enum` contains the two bases every enumeration in this
+library is meant to inherit from, split by whether the enumeration may *grow*:
 
-The maintainer's ruling on GitHub issue #842, verbatim: *"to finalise the
-abstraction idea, get/get_all/register/register_alias should always exist on the
-const enums - so they're to be moved to the base class. And AppType's sub-base
-class will do its necessary overrides and dispatching logic; AppType subclasses
-will have their necessary overrides again pertaining their different contracts."*
+* :class:`EnumLookup` -- the bare **lookup** half: :meth:`~EnumLookup.get`,
+  :meth:`~EnumLookup.get_all` and the overridable
+  :meth:`~EnumLookup._validate_value` guard. Nothing here mutates the
+  enumeration, so it is what a *closed* set can inherit without being handed a
+  contract it must refuse.
+* :class:`EnumRegistry`, a subclass of the above -- adds the **mutating** half:
+  :meth:`~EnumRegistry.register`, :meth:`~EnumRegistry.register_alias`,
+  :meth:`~EnumRegistry.register_aliases`, :meth:`~EnumRegistry._extend` and
+  :meth:`~EnumRegistry._unregistered_member`. Every generated enumeration under
+  :mod:`pcapkit.const` inherits from here.
+
+That split is the owner's ruling on GitHub issue #877, verbatim: *"My initial
+thought was to make them immutable - unless RFC/IANA says otherwise. Therefore
+they may subclass a bare base enum from pcapkit.corekit.enum - where
+EnumRegistry subclasses it for using in the other mutable ones."*
+
+Which methods land on which tier was settled in the same thread. The owner's own
+second thought is what drew the line: *"if it carries ``register``, then why not
+``register_alias``. We might be creating a bad ruling."* Following that through,
+a base holding both would leave :class:`EnumRegistry` with only
+``register_aliases``, ``_extend`` and ``_unregistered_member`` -- too thin to
+justify a second class, collapsing the two tiers into one. So all five mutating
+methods stay put, and what the base carries instead is the owner's other requirement,
+verbatim: *"there must be some sort of range validation logic for the inherited
+classes to hook in"* -- which is :meth:`EnumLookup._validate_value`. Legality is
+every enumeration's concern; mutation is only the open registries'.
+
+Supporting measurement, taken on this tree at the time of the split: **0** of the
+26 non-registry enumerations define ``register``, ``register_alias``,
+``register_aliases`` or ``_unregistered_member``, and there are **0**
+:class:`EnumRegistry` subclasses outside :mod:`pcapkit.const`. The mutating half
+therefore had no users to serve among the classes being re-parented.
+
+.. note::
+
+   Re-parenting the remaining helper enumerations onto :class:`EnumLookup` is
+   **phase 2** of GitHub issue #877 and has not happened yet: introducing the
+   base is deliberately behaviour-preserving on its own, so that it could land
+   while other work was still in flight on the files the re-parent touches.
+
+The registry tier's own shape is the earlier ruling on GitHub issue #842,
+verbatim: *"to finalise the abstraction idea, get/get_all/register/register_alias
+should always exist on the const enums - so they're to be moved to the base
+class. And AppType's sub-base class will do its necessary overrides and
+dispatching logic; AppType subclasses will have their necessary overrides again
+pertaining their different contracts."*
 
 That is a three-tier hierarchy, of which this module is **tier one**:
 
@@ -57,12 +97,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-__all__ = ['NO_DEFAULT', 'NoDefaultType', 'EnumRegistry']
+__all__ = ['NO_DEFAULT', 'NoDefaultType', 'EnumLookup', 'EnumRegistry']
 
 
 @final
 class NoDefaultType:
-    """Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for :meth:`EnumRegistry.get`.
+    """Type of :data:`NO_DEFAULT`, the omitted-``default`` sentinel for :meth:`EnumLookup.get`.
 
     A dedicated class rather than a bare :class:`object`, per the owner's ruling
     on #859: *"use dedicated class rather than bare object. Follow the house
@@ -81,7 +121,7 @@ class NoDefaultType:
     on #859 is explicit that ``NULL`` (``SCREAMING_CASE``) and ``NoValue``
     (``CapWords``) disagree, and "mainly depends on how we need it." The need
     here is continuity: ``NO_DEFAULT`` is already the name on ``main`` --
-    referenced in :meth:`EnumRegistry.get`'s signature, its docstring, and
+    referenced in :meth:`EnumLookup.get`'s signature, its docstring, and
     both comparison sites -- and this change is to *what the sentinel is*,
     not to *what it is called*, so it keeps that name rather than being
     renamed to match either precedent's instance casing for its own sake.
@@ -94,7 +134,7 @@ class NoDefaultType:
     caller writing ``registry.get(key, default=NoDefaultType())`` -- perhaps
     not realising :data:`NO_DEFAULT` already exists -- and getting back a
     *second*, non-identical sentinel that silently fails ``is NO_DEFAULT``
-    inside :meth:`EnumRegistry.get`, so their call is treated as supplying a
+    inside :meth:`EnumLookup.get`, so their call is treated as supplying a
     real (if useless) default instead of the *no default* they meant. With the
     guard, :class:`NoDefaultType() <NoDefaultType>` always returns the one
     canonical :data:`NO_DEFAULT`, so that mistake self-corrects.
@@ -130,8 +170,8 @@ class NoDefaultType:
     :func:`copy.deepcopy` or :mod:`pickle` call can walk into and reconstruct.
     :data:`NO_DEFAULT` is left unhandled here not because the gap cannot occur
     in principle, but because nothing in this package ever pickles it at
-    protocol 0: it is reachable -- from :meth:`EnumRegistry.get`'s own bound
-    parameter default (``EnumRegistry.get.__defaults__[0]``, or any
+    protocol 0: it is reachable -- from :meth:`EnumLookup.get`'s own bound
+    parameter default (``EnumLookup.get.__defaults__[0]``, or any
     subclass's, e.g. ``Hardware.get.__func__.__defaults__[0]``) and from
     ``inspect.signature(Hardware.get).parameters['default'].default`` -- but
     neither is a field any object here gets pickled *as*, and both still
@@ -141,11 +181,11 @@ class NoDefaultType:
 
     A caveat, not a defect, but a real and *worse* one than the marker it
     replaces: :func:`importlib.reload` on this module does not merely leave
-    the class stale, it breaks :meth:`EnumRegistry.get`'s own no-default
+    the class stale, it breaks :meth:`EnumLookup.get`'s own no-default
     contract for every subclass whose ``get`` was already resolved before the
     reload. Reload re-executes both ``class NoDefaultType:`` and
     ``NO_DEFAULT = NoDefaultType()`` below, so the *module global*
-    :meth:`EnumRegistry.get`'s body compares against becomes a fresh, distinct
+    :meth:`EnumLookup.get`'s body compares against becomes a fresh, distinct
     object. But each subclass's own ``get`` inherited its **bound parameter
     default** -- ``default: 'Any' = NO_DEFAULT`` -- at function-definition
     time, before the reload, and a bound default is frozen then, not looked
@@ -183,7 +223,7 @@ class NoDefaultType:
     *not* define ``__bool__``. Both of those model an *absent* value, so
     reading falsy in a boolean context is the point. :data:`NO_DEFAULT` models
     something different: a marker meaning *no default was supplied*, checked
-    exclusively by ``is`` at :meth:`EnumRegistry.get`'s two comparison sites --
+    exclusively by ``is`` at :meth:`EnumLookup.get`'s two comparison sites --
     nothing here ever evaluates it for truthiness. Giving it ``__bool__ ->
     False`` for symmetry with the other two would invite exactly the
     conflation this sentinel exists to rule out: code that writes ``if not
@@ -225,23 +265,38 @@ class NoDefaultType:
 NO_DEFAULT = NoDefaultType()
 
 
-class EnumRegistry:
-    """Registry protocol shared by every constant enumeration under
-    :mod:`pcapkit.const`.
+class EnumLookup:
+    """Bare lookup protocol, shared by open registries and closed sets alike.
+
+    Carries :meth:`get`, :meth:`get_all` and the :meth:`_validate_value` guard --
+    everything an enumeration needs in order to be *read* by name or by value,
+    and nothing that could grow it. :class:`EnumRegistry` adds the mutating half
+    on top; a closed enumeration inherits this one directly and so is never
+    handed a ``register`` it would have to refuse.
 
     This is a plain mix-in rather than an :class:`~aenum.Enum` subclass, because
     an enumeration that already has members cannot be subclassed. Mixed in
-    *before* the member type -- ``class Foo(EnumRegistry, IntFlag)`` -- it
-    contributes methods only, so :mod:`aenum` still resolves the member data type
-    from the enumeration base: ``int`` for :class:`~aenum.IntEnum` and
-    :class:`~aenum.IntFlag`, ``str`` for :class:`~aenum.StrEnum`. That is what
-    lets one base serve all three, where a generated template fragment would
-    have needed a separate rendering per member type.
+    *before* the member type -- ``class Foo(EnumRegistry, IntFlag)``, or
+    ``class Bar(EnumLookup, IntEnum)`` -- it contributes methods only, so
+    :mod:`aenum` still resolves the member data type from the enumeration base:
+    ``int`` for :class:`~aenum.IntEnum` and :class:`~aenum.IntFlag`, ``str`` for
+    :class:`~aenum.StrEnum`. That is what lets one base serve all three, where a
+    generated template fragment would have needed a separate rendering per
+    member type.
+
+    Because both tiers are plain classes, inserting this one *above*
+    :class:`EnumRegistry` leaves the member data type exactly where it was:
+    ``class Foo(EnumRegistry, IntFlag)`` resolves as ``Foo -> EnumRegistry ->
+    EnumLookup -> IntFlag -> int -> ...``, so ``_member_type_`` still comes from
+    the enumeration base and not from anything in this module. Had this tier
+    subclassed :class:`~aenum.Enum` in order to "be an enum", it would have
+    become the member type itself and broken all three shapes at once.
 
     The methods deliberately touch only ``_member_map_``, ``_member_names_`` and
     ``_value2member_map_``, which both :mod:`enum` and :mod:`aenum` maintain, so
-    nothing here depends on :mod:`aenum` internals beyond
-    :func:`~aenum.extend_enum` itself.
+    nothing on this tier depends on :mod:`aenum` internals at all -- the one
+    :func:`~aenum.extend_enum` call in this module belongs to
+    :class:`EnumRegistry`, which is the tier that mutates.
 
     """
 
@@ -259,6 +314,82 @@ class EnumRegistry:
         # correct. Which concrete type it is depends on the Enum base each
         # subclass picks, so there is nothing more precise to say here anyway.
         _member_type_: 'Any'
+
+    @classmethod
+    def _validate_value(cls, value: 'Any') -> 'None':
+        """Hook: reject ``value`` if this enumeration's contract does not allow it.
+
+        The owner's requirement on GitHub issue #877, verbatim: *"there must be
+        some sort of range validation logic for the inherited classes to hook
+        in."* This is that hook, and it is what the bare tier carries **instead**
+        of ``register``: what values are *legal* is something every enumeration
+        has an opinion on, whereas who may *add* one is only an open registry's
+        concern.
+
+        The base implementation accepts everything, because a base cannot know
+        any subclass's range. Overriding it is how a subclass states one -- the
+        shape ``_missing_`` spells by hand across the generated registries
+        today::
+
+            @classmethod
+            def _validate_value(cls, value: 'Any') -> 'None':
+                if not (isinstance(value, int) and 0 <= value <= 0xFF):
+                    raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
+
+        An override **raises or returns**; it must never *normalise*. The return
+        type is :obj:`None` deliberately rather than the validated value, so that
+        this hook cannot become a converter: a subclass that returned a changed
+        value here would silently alter what a lookup resolves to, which is
+        exactly the case-folding the owner's ruling on GitHub issue #877 rules
+        out -- *"enum should honour and keep their original writings as in the
+        registrars."* Case handling belongs in a deliberate ``get`` override with
+        an RFC behind it, not in a validation hook.
+
+        Raise from :mod:`pcapkit.utilities.exceptions`, per the same issue's
+        ruling that in-library code raises in-library exceptions --
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError` is the fitting one
+        and is already what the closed enumerations in
+        :mod:`pcapkit.protocols.internet.mh` raise. Note what that buys on the
+        :meth:`get` path: :exc:`~pcapkit.utilities.exceptions.EnumValueError`
+        subclasses :exc:`ValueError`, so a rejection here is caught by
+        :meth:`get`'s own ``except ValueError`` and falls back to ``default``
+        just as any other unresolvable value does. An override raising something
+        outside that hierarchy would instead propagate past ``default``, which is
+        a real difference in behaviour rather than a stylistic preference.
+
+        Called from exactly two places, and the omissions are deliberate:
+
+        * :meth:`get`, immediately before ``cls(key)`` -- the one point at which
+          a lookup can reach a subclass's ``_missing_`` and mint. The ``str``-key
+          path does **not** call it, because that path never calls ``cls(key)``:
+          it resolves against the already-populated lookup tables only, where
+          every value present is legal by construction, so there is nothing left
+          to validate.
+        * :meth:`EnumRegistry.register`, before minting -- the one point at which
+          a caller can introduce a value no member carries yet.
+
+        :meth:`EnumRegistry.register_alias` does not call it, and does not need
+        to: it refuses any ``value`` that is not already registered, so the value
+        it aliases has necessarily passed validation already.
+        :meth:`EnumRegistry._unregistered_member` does not call it either,
+        because its callers are the subclasses' own ``_missing_`` bodies, which
+        already range-check before delegating here -- validating again would
+        double the check without being able to disagree with it.
+
+        Deliberately carries no ``Raises:`` clause, because this implementation
+        raises nothing at all -- an override is what raises, and documenting an
+        exception here that this body cannot produce is exactly the phantom
+        :class:`tests.test_docstring_contract.DocstringRaisesTests` rejects.
+        An override adds its own clause naming what *it* rejects.
+
+        Args:
+            value: Candidate value to check.
+
+        Returns:
+            Nothing. A value this enumeration allows is reported by returning
+            normally; a value it does not is reported by raising.
+
+        """
 
     @classmethod
     def get(cls, key: 'Any', default: 'Any' = NO_DEFAULT) -> 'Self':
@@ -301,16 +432,20 @@ class EnumRegistry:
         unrecognised value, routing a failed *name* lookup through the
         constructor would let a mere ``get()`` call mint a permanent member
         where it previously just raised. Defensive rather than observed: of
-        the 124 classes that mix in this base, the ``str``-valued ones
+        the 125 classes that reach this method, the ``str``-valued ones
         (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
         ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
-        :class:`~pcapkit.const.pcapng.option_type.OptionType`, and --
-        completing the count as of GitHub issue #860's own PR 2 --
+        :class:`~pcapkit.const.pcapng.option_type.OptionType`,
         :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
         transport subclasses :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
         :class:`~pcapkit.const.reg.apptype.udp.UDP`,
         :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
-        :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) no longer mint
+        :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- completing that set as
+        of GitHub issue #860's own PR 2 -- and, newest of them,
+        :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, which GitHub
+        issue #877's own thread reclassified from a hand-written helper to a
+        generated registry once RFC 9850 §4.2 turned its member list into a
+        live IANA registry) no longer mint
         on any path, so no live witness exists in this tree today. The one
         registry that still mints directly via :func:`~aenum.extend_enum`,
         :class:`~pcapkit.const.mh.cga_type.CGAType`, is
@@ -345,6 +480,18 @@ class EnumRegistry:
         which reopens the exact minting hazard the paragraph above exists to
         avoid -- so the asymmetry is deliberate, not an oversight.
 
+        The non-``str`` path calls :meth:`_validate_value` immediately before
+        ``cls(key)``, which is the only point at which this method can reach a
+        subclass's ``_missing_``, so a subclass that declares a range gets it
+        checked before the constructor rather than after. The base hook accepts
+        everything, so this changes nothing for a subclass that does not override
+        it. A rejection raised as
+        :exc:`~pcapkit.utilities.exceptions.EnumValueError` -- or any other
+        :exc:`ValueError` subclass -- is caught by the same ``except`` that
+        catches an ordinary failed construction, and so falls back to ``default``
+        on the same terms; the ``str`` path does not call the hook, for the reason
+        given on :meth:`_validate_value` itself.
+
         Args:
             key: Name or value to look up.
             default: An already-registered value to fall back to when
@@ -360,7 +507,10 @@ class EnumRegistry:
 
         Raises:
             ValueError: If a value does not resolve and there is no usable
-                default.
+                default -- including a value a subclass's
+                :meth:`_validate_value` rejects, since
+                :exc:`~pcapkit.utilities.exceptions.EnumValueError` is a
+                :exc:`ValueError`.
             KeyError: If a name does not resolve and there is no usable
                 default.
 
@@ -375,6 +525,7 @@ class EnumRegistry:
                     raise
                 return cls._value2member_map_[default]
         try:
+            cls._validate_value(key)
             return cls(key)  # type: ignore[call-arg]
         except ValueError:
             if default is NO_DEFAULT or default not in cls._value2member_map_:
@@ -412,6 +563,29 @@ class EnumRegistry:
             and member.value == canonical.value  # type: ignore[attr-defined]
         ))
 
+
+class EnumRegistry(EnumLookup):
+    """Registry protocol shared by every constant enumeration under
+    :mod:`pcapkit.const`.
+
+    :class:`EnumLookup` above carries the read half -- :meth:`~EnumLookup.get`,
+    :meth:`~EnumLookup.get_all` and :meth:`~EnumLookup._validate_value`, all
+    inherited here unchanged. What this tier adds is the half that makes a
+    registry *open*: :meth:`register`, :meth:`register_alias`,
+    :meth:`register_aliases`, :meth:`_extend` and :meth:`_unregistered_member`.
+
+    An enumeration inherits from *here* when it may grow at runtime, and from
+    :class:`EnumLookup` directly when it may not. The owner's ruling on GitHub
+    issue #877 is what draws that line, verbatim: *"My initial thought was to
+    make them immutable - unless RFC/IANA says otherwise."*
+
+    Mixed in ahead of the enum base exactly as before -- ``class
+    Foo(EnumRegistry, IntFlag)`` -- and gaining :class:`EnumLookup` as a parent
+    does not disturb that: both tiers are plain classes, so ``_member_type_``
+    still resolves past them to the enumeration base.
+
+    """
+
     @classmethod
     def register(cls, value: 'Any', name: 'str') -> 'Self':
         """Mint a new member on this registry at runtime, under ``name``.
@@ -436,6 +610,14 @@ class EnumRegistry:
         :meth:`_unregistered_member` absent from that table, so a successful
         call proves nothing about whether a member already exists.
 
+        Routes through :meth:`~EnumLookup._validate_value` before minting, so a
+        subclass that declares a range gets it enforced on the caller-named path
+        too and not only on the lookup one. The duplicate check runs *first*: a
+        ``value`` that already has a member is legal by construction, so the
+        actionable "use ``register_alias()`` instead" message is the better answer
+        for it than a range complaint would be, and validation is left to guard
+        only the genuinely new value that is about to be minted.
+
         Args:
             value: Value of the new member.
             name: Name of the new member. Required rather than derived, which
@@ -447,6 +629,10 @@ class EnumRegistry:
         Raises:
             ValueError: If ``value`` already has a member -- use
                 :meth:`register_alias` to add a further name for it instead.
+            EnumValueError: If a subclass's
+                :meth:`~EnumLookup._validate_value` rejects ``value``. The base
+                implementation of that hook accepts everything, so this cannot
+                arise on a registry that does not override it.
             ValueError: If ``name`` is already taken. :mod:`aenum` reports that
                 as :exc:`TypeError`; it is translated so that the ways one call
                 can fail are one exception type.
@@ -457,6 +643,7 @@ class EnumRegistry:
             raise ValueError(f'{value!r} is already registered on {cls.__name__} as '
                              f'{existing.name!r}; use {cls.__name__}.register_alias() '
                              f'to add a further name for it')
+        cls._validate_value(value)
         return cls._extend(value, name)
 
     @classmethod
