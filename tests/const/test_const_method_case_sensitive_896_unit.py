@@ -258,12 +258,20 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
 
         # And the fix itself is actually present in both -- a byte-identical
         # comparison above already implies this, but names the exact shape
-        # so a failure here is legible without a diff.
+        # so a failure here is legible without a diff. GitHub issue #908
+        # moved ``get`` from testing ``_member_map_`` by hand to delegating
+        # to the base's own ``get`` (which also checks
+        # ``_value2member_map_``), so the markers pinned here moved with it
+        # -- see tests.const.test_const_method_value_lookup_908_unit for
+        # that change's own dedicated coverage.
         for label, source in (('template render', rendered), ('generated module', committed)):
             with self.subTest(rendering=label):
-                self.assertIn("if key not in Method._member_map_", source)
-                self.assertNotIn("if name not in Method._member_map_", source)
-                self.assertIn('return Method[key]', source)
+                self.assertIn('return super().get(key)', source)
+                self.assertIn(
+                    'return cls._unregistered_member(default if default is not None '
+                    "else key, key.upper())", source)
+                self.assertNotIn('if key not in Method._member_map_', source)
+                self.assertNotIn('return Method[key]', source)
 
     def test_regenerating_twice_is_byte_reproducible(self) -> None:
         """The same fixture fed to the same template twice must render

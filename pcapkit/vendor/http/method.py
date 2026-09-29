@@ -133,9 +133,37 @@ class {NAME}(EnumRegistry, StrEnum):
         obj.idempotent = False
         return obj
 
-    @staticmethod
-    def get(key: 'str', default: 'Optional[str]' = None) -> '{NAME}':
+    @classmethod
+    def get(cls, key: 'str', default: 'Optional[str]' = None) -> '{NAME}':
         """Backport support for original codes.
+
+        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the
+        lookup itself, per GitHub issue #908: the previous override checked
+        only ``_member_map_`` (names), never ``_value2member_map_``
+        (values), so the two IANA methods whose member *name* differs from
+        their *value* -- ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and
+        ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``, a hyphen being unusable
+        in a Python identifier -- failed to resolve through ``get`` even
+        though :meth:`_missing_` (and so the constructor) already found
+        them via that same value-side lookup.
+
+        The base is a :class:`classmethod`
+        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), and a zero-argument
+        ``super()`` needs a first argument to bind, so this override had to
+        move from :class:`staticmethod` to :class:`classmethod` to delegate
+        at all -- see GitHub issue #908's own correction of the fix it
+        originally proposed. Callers are unaffected by the switch itself:
+        ``{NAME}.get('X')`` binds identically either way.
+
+        ``default`` keeps its existing meaning here rather than adopting
+        the base's ``NO_DEFAULT`` sentinel and its value-only fallback --
+        widening it would be caller-visible, since the base's ``default``
+        must already name a *registered* value (resolved through
+        ``_value2member_map_``), while this override's ``default`` instead
+        supplies the *value* of a freshly minted unregistered member.
+        Nothing in this tree calls ``get`` with a non-``None`` ``default``
+        to notice today, but widening the signature is a separate change
+        from this defect and stays out of scope.
 
         Args:
             key: Key to get enum item. Looked up case-**sensitively**,
@@ -143,37 +171,47 @@ class {NAME}(EnumRegistry, StrEnum):
                 case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.
                 Command.get`'s equivalent override, which stays
                 case-insensitive because :rfc:`959#section-4.1` says FTP
-                command codes are not.
-            default: Default value if not found.
+                command codes are not. Checked against both member names
+                and values, via the base's own precedence -- name before
+                value -- so a value-only match such as
+                ``'BASELINE-CONTROL'`` now resolves too, closing GitHub
+                issue #908.
+            default: Value for the unregistered member built when ``key``
+                matches neither a name nor a value. ``None``, the
+                default, uses ``key`` itself -- unchanged from before
+                GitHub issue #908.
+
+        Raises:
+            ValueError: If ``key`` is not a :class:`str`. This reaches the
+                caller from the base's non-``str`` branch, which calls
+                ``cls(key)`` and so ``_missing_``, and is **not** caught by
+                the ``except KeyError`` fallback below -- only a failed
+                *name* lookup is. The non-``str`` surface therefore moved
+                with GitHub issue #908: ``get(42)`` and ``get(None)`` used
+                to raise :exc:`AttributeError` from ``key.upper()``, and
+                ``get(b'GET')`` used to *return* a member whose name and
+                value were both the :class:`bytes` object. Raising is the
+                intended behaviour -- a ``bytes``-valued ``Method`` is not a
+                thing this registry should hand back -- but it is a change,
+                so it is stated rather than left to be discovered.
 
         :meta private:
         """
-        name = key.upper()
-        if key not in {NAME}._member_map_:  # type: ignore[misc]  # pylint: disable=no-member
+        try:
+            return super().get(key)
+        except KeyError:
             # NOTE: the value is ``default`` if the caller supplied one, or
-            # else ``key`` exactly as given -- never ``name`` -- so an
-            # unregistered member's value is the caller's own casing, the
-            # same convention :meth:`_unregistered_member` documents and
-            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed
-            # unchanged. Matching against ``{NAME}._member_map_`` is on
-            # ``key`` itself now, not ``key.upper()`` -- GitHub issue #896:
-            # a token differing only in case from a registered member's
-            # name, e.g. ``get('get')`` against ``GET``, no longer resolves
-            # to it and instead builds an unregistered member of its own,
-            # since RFC 9110 makes that a distinct wire token rather than a
-            # differently-spelled name for the same one. ``name`` stays the
-            # canonical upper-case form -- only the identifier is
-            # canonicalised, matching :meth:`_missing_` and every registered
-            # member's own name. Two calls naming the same method in
-            # different case, e.g. ``get('frob')`` and ``get('FROB')``,
-            # therefore build results that are *not* equal -- each is
-            # exactly what its own caller passed, which minting's
-            # ``_member_map_`` cache used to paper over by returning the
-            # *first* casing seen for every later call regardless of case.
-            # Losing that was the one observable behaviour change in GitHub
-            # issue #860's conversion.
-            return {NAME}._unregistered_member(default if default is not None else key, name)
-        return {NAME}[key]  # type: ignore[misc]
+            # else ``key`` exactly as given -- never its upper-cased form --
+            # so an unregistered member's value is the caller's own casing,
+            # the same convention :meth:`_unregistered_member` documents and
+            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed.
+            # The name is always the canonical upper-case form, matching
+            # :meth:`_missing_` and every registered member's own name. Two
+            # calls naming the same method in different case, e.g.
+            # ``get('frob')`` and ``get('FROB')``, therefore build results
+            # that are *not* equal -- each is exactly what its own caller
+            # passed, per GitHub issue #860's conversion away from minting.
+            return cls._unregistered_member(default if default is not None else key, key.upper())
 
     @classmethod
     def _missing_(cls, value: 'str') -> '{NAME}':
@@ -181,7 +219,12 @@ class {NAME}(EnumRegistry, StrEnum):
 
         Args:
             value: Value to get enum item. Matched case-insensitively against
-                the canonical upper-case member names.
+                the canonical upper-case member names -- deliberately unlike
+                :meth:`get`, which is case-**sensitive** per
+                :rfc:`9110#section-9.1`. The split was ruled deliberate on
+                GitHub issue #896; GitHub issue #908 is the pointer between
+                the two, so a reader of this one file is not left with two
+                contradictory rationales and nothing tying them together.
 
         """
         if not isinstance(value, str):
