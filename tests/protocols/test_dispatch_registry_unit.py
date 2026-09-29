@@ -222,7 +222,7 @@ class DispatchRegistryTests(unittest.TestCase):
         cases = self.dispatch.cases()
         # #904: 38 -> 39, and the internet count 16 -> 17 below with it -- one
         # new entry, Internet.__proto__[TransType.Shim6], registered at
-        # IPv6_GenericExt where it previously had none at all (defaulted to
+        # IPv6_Ext where it previously had none at all (defaulted to
         # Raw). Diffed against origin/main: no other table changed shape.
         self.assertEqual(len(cases), 39,
                          'expected exactly 39 entries across the seven __proto__ '

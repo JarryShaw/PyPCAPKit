@@ -64,7 +64,7 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as Data_UnassignedOption
-from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
 from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as Schema_CALIPSOOption
 from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as Schema_HomeAddressOption
@@ -120,7 +120,7 @@ if TYPE_CHECKING:
 __all__ = ['HOPOPT']
 
 
-class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
+class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
              schema=Schema_HOPOPT, data=Data_HOPOPT):
     """This class implements IPv6 Hop-by-Hop Options.
 
@@ -221,6 +221,25 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
     def name(self) -> 'Literal["IPv6 Hop-by-Hop Options"]':
         """Name of current protocol."""
         return 'IPv6 Hop-by-Hop Options'
+
+    @property
+    def alias(self) -> 'Literal["HOPOPT"]':
+        """Acronym of corresponding protocol.
+
+        Spelled out rather than left to
+        :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
+        class-name default, because
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        between this class and that default in the MRO and carries a concrete
+        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        rename this header in every
+        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
+        :meth:`IPv6._decode_next_layer
+        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
+        dict key. The value is exactly what the default produced before.
+
+        """
+        return 'HOPOPT'
 
     @property
     def length(self) -> 'int':

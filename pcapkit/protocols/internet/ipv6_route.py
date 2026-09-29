@@ -35,7 +35,7 @@ from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_R
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as Data_Type2
 from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_UnknownType
-from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as Schema_RPL
 from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route as Schema_IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as Schema_SourceRoute
@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Route']
 
 
-class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
+class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
                  schema=Schema_IPv6_Route, data=Data_IPv6_Route):
     """This class implements Routing Header for IPv6.
 

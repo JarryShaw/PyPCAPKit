@@ -1720,7 +1720,7 @@ class MHUnitTests(unittest.TestCase):
             # in from ``@beholder``: for an extension header whose wire
             # format RFC 6564 guarantees (Mobility Header among them), the MH
             # slot becomes
-            # :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
             # instead of ``Raw``. It parses the two guaranteed octets
             # generically -- next header ``UDP`` and a length that exactly
             # matches this ``fback_raw`` payload -- so ``IPv6.read`` returns
@@ -1736,14 +1736,14 @@ class MHUnitTests(unittest.TestCase):
                 return Ethernet(io.BytesIO(raw), len(raw))
 
             from pcapkit.protocols.internet.ipv6 import IPv6
-            from pcapkit.protocols.internet.ipv6_generic_ext import IPv6_GenericExt
+            from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 
             eth = wrap_in_ethernet_ipv6(bytes(fback_raw))
             self.assertIsInstance(eth.payload, IPv6)
-            self.assertEqual(str(eth.protochain), 'Ethernet:IPv6:IPv6-GenericExt')
+            self.assertEqual(str(eth.protochain), 'Ethernet:IPv6:IPv6-Ext')
 
             genext = next(iter(eth.payload.extension_headers.items(multi=True)))[1]
-            self.assertIsInstance(genext, IPv6_GenericExt)
+            self.assertIsInstance(genext, IPv6_Ext)
             self.assertEqual(genext.next, TransType.UDP)
             self.assertEqual(genext.length, len(fback_raw))
 

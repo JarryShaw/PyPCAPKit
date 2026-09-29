@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -46,9 +47,20 @@ if TYPE_CHECKING:
 __all__ = ['AH']
 
 
-class AH(IPsec[Data_AH, Schema_AH],
+class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
          schema=Schema_AH, data=Data_AH):
-    """This class implements Authentication Header."""
+    """This class implements Authentication Header.
+
+    Double-inherited (GitHub issue #917): ``AH`` is both a member of the
+    IPsec family and an IPv6 extension header -- IANA's
+    ``protocol-numbers-1.csv`` marks it ``Y`` in the *IPv6 Extension Header*
+    column (:rfc:`4302`), and this package's own
+    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry
+    agrees. :class:`~pcapkit.protocols.internet.ipsec.IPsec` is first in the
+    bases so that its :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id`
+    keeps precedence.
+
+    """
 
     ##########################################################################
     # Properties.
@@ -58,6 +70,25 @@ class AH(IPsec[Data_AH, Schema_AH],
     def name(self) -> 'Literal["Authentication Header"]':
         """Name of corresponding protocol."""
         return 'Authentication Header'
+
+    @property
+    def alias(self) -> 'Literal["AH"]':
+        """Acronym of corresponding protocol.
+
+        Spelled out rather than left to
+        :attr:`ProtocolBase.alias <pcapkit.protocols.protocol.ProtocolBase.alias>`'s
+        class-name default, because
+        :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` now sits
+        between this class and that default in the MRO and carries a concrete
+        ``'IPv6-Ext'`` of its own (GitHub issue #917). Inheriting it would
+        rename this header in every
+        :class:`~pcapkit.corekit.protochain.ProtoChain` string and in
+        :meth:`IPv6._decode_next_layer
+        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s packet
+        dict key. The value is exactly what the default produced before.
+
+        """
+        return 'AH'
 
     @property
     def length(self) -> 'int':

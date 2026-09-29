@@ -12,14 +12,14 @@ if TYPE_CHECKING:
     from pcapkit.const.ipv6.extension_header import ExtensionHeader
     from pcapkit.const.reg.transtype import TransType
 
-__all__ = ['IPv6_GenericExt']
+__all__ = ['IPv6_Ext']
 
 
 @info_final
-class IPv6_GenericExt(Protocol):
+class IPv6_Ext(Protocol):
     """Data model for a generically-parsed IPv6 extension header.
 
-    See :class:`pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+    See :class:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     for how each field below is derived.
 
     """
@@ -28,9 +28,9 @@ class IPv6_GenericExt(Protocol):
     #: the caller dispatched on, resolved to its
     #: :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member.
     #: :data:`None` when ``alias`` named no such member (:meth:`read
-    #: <pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.read>`
+    #: <pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read>`
     #: sets it so on a lookup miss, and the class property at
-    #: :attr:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt.protocol`
+    #: :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`
     #: is typed to match).
     protocol: 'Optional[ExtensionHeader]'
     #: Next header, parsed off the wire. :data:`None` when the declared
