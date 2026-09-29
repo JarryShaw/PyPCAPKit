@@ -8,7 +8,7 @@ import re
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.utilities.compat import final
+from pcapkit.corekit.sentinels import NoValue, NoValueType  # pylint: disable=unused-import
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
 __all__ = ['NoValue', 'Field']
@@ -16,24 +16,11 @@ __all__ = ['NoValue', 'Field']
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Iterator, Optional
 
-    from typing_extensions import Literal, Self
+    from typing_extensions import Self
 
     from pcapkit.protocols.schema.schema import Schema
 
 _T = TypeVar('_T')
-
-
-@final
-class NoValueType:
-    """Default value for fields."""
-
-    def __bool__(self) -> 'Literal[False]':
-        """Return :obj:`False`."""
-        return False
-
-
-#: NoValueType: Default value for :attr:`FieldBase.default`.
-NoValue = NoValueType()
 
 #: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform
 #: for a field whose declared length outruns its buffer.

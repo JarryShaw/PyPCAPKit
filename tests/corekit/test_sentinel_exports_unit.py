@@ -32,6 +32,15 @@ sentinel cannot be added to one without the other. ``_Absent`` is private and st
 out of :attr:`__all__` in both directions, which is what the ruling means by "to
 users".
 
+A follow-up to this same issue moved all four *definitions* into
+:mod:`pcapkit.corekit.sentinels`, per the owner's later ruling -- *"Okay one module
+for all four it is."* Every assertion above still holds unchanged, since it is about
+each original module's ``__all__``, which the re-export shims left untouched; what
+changed is only :attr:`type.__module__` for the four types, which
+:meth:`SentinelExportTests.test_every_sentinel_type_is_still_importable_by_name` now
+checks against :data:`CANONICAL_MODULE` rather than against a different module per
+sentinel.
+
 One sentinel is deliberately **not** held to any of this: ``_NOT_FOUND = object()``
 at :file:`pcapkit/utilities/compat.py`, line 73, inside the ``cached_property``
 backport for interpreters below 3.8. It is ported code and exempt, and
@@ -74,14 +83,24 @@ from pcapkit.protocols.protocol import _Absent, _AbsentType
 #: Repository root, for the two tests that read a file rather than import it.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
+#: Where all four sentinels are now *defined*, since GitHub issue #911's housing
+#: move -- *"Okay one module for all four it is."* Each entry in :data:`SENTINELS`
+#: below used to name a different module here (``pcapkit.corekit.module``,
+#: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
+#: ``pcapkit.protocols.protocol`` respectively); all four now report this one.
+CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
+
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
-#: as ``(instance name, instance, type, module)``. Four, not the three
+#: as ``(instance name, instance, type)``. Four, not the three
 #: :file:`docs/source/contributing/conventions.rst` used to document -- see the module docstring.
+#: All four now share :data:`CANONICAL_MODULE` as their defining module, which is
+#: why a per-entry module column is no longer part of this tuple -- see
+#: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
 SENTINELS = (
-    ('NULL', NULL, NullType, 'pcapkit.corekit.module'),
-    ('NoValue', NoValue, NoValueType, 'pcapkit.corekit.fields.field'),
-    ('NO_DEFAULT', NO_DEFAULT, NoDefaultType, 'pcapkit.corekit.enum'),
-    ('_Absent', _Absent, _AbsentType, 'pcapkit.protocols.protocol'),
+    ('NULL', NULL, NullType),
+    ('NoValue', NoValue, NoValueType),
+    ('NO_DEFAULT', NO_DEFAULT, NoDefaultType),
+    ('_Absent', _Absent, _AbsentType),
 )
 
 #: The public three of :data:`SENTINELS`, as ``(module, object name, type name)``.
@@ -210,8 +229,11 @@ class SentinelExportTests(unittest.TestCase):
         for module, obj, _ in PUBLIC_SENTINELS:
             namespace = _star_import(module)
             with self.subTest(module=module):
-                expected = next(instance for name, instance, _, where in SENTINELS
-                                if name == obj and where == module)
+                # Matched on the instance name alone: every entry in ``SENTINELS``
+                # now shares :data:`CANONICAL_MODULE`, so a ``where == module``
+                # filter against the *shim* location would no longer distinguish
+                # them -- the instance names themselves already do.
+                expected = next(instance for name, instance, _ in SENTINELS if name == obj)
                 self.assertIs(namespace[obj], expected)
 
     def test_every_sentinel_type_is_still_importable_by_name(self) -> 'None':
@@ -222,10 +244,10 @@ class SentinelExportTests(unittest.TestCase):
         relies on that -- this module's own imports are the demonstration.
 
         """
-        for name, instance, type_, module in SENTINELS:
+        for name, instance, type_ in SENTINELS:
             with self.subTest(sentinel=name):
                 self.assertIs(type(instance), type_)
-                self.assertEqual(type_.__module__, module)
+                self.assertEqual(type_.__module__, CANONICAL_MODULE)
 
     def test_the_private_sentinel_is_exported_neither_way(self) -> 'None':
         """``_Absent`` is private, so the export rule does not reach it.
@@ -248,7 +270,7 @@ class SentinelPopulationTests(unittest.TestCase):
 
     def test_every_sentinel_follows_the_naming_convention(self) -> 'None':
         """*"Keep the sentinel object's type class naming as* ``<SENTINEL>Type``*."*"""
-        for name, _, type_, _ in SENTINELS:
+        for name, _, type_ in SENTINELS:
             with self.subTest(sentinel=name):
                 self.assertEqual(type_.__name__, _expected_type_name(name))
 
@@ -257,16 +279,19 @@ class SentinelPopulationTests(unittest.TestCase):
 
         Asserting the names rather than only the count, because a count corrected
         without the row -- or a row added without the count -- is the same defect
-        in a different place.
+        in a different place. The "Defined in" column now names
+        :data:`CANONICAL_MODULE` for every row, since GitHub issue #911's housing
+        move gave all four the same defining module -- checked once, outside the
+        loop, rather than once per row against a value that no longer varies.
 
         """
         section = _sentinel_section()
 
-        for name, _, type_, module in SENTINELS:
+        for name, _, type_ in SENTINELS:
             with self.subTest(sentinel=name):
                 self.assertIn(f'``{name}``', section)
                 self.assertIn(f'``{type_.__name__}``', section)
-                self.assertIn(module, section)
+        self.assertIn(CANONICAL_MODULE, section)
 
         self.assertIn('four in the tree follow it', section)
         self.assertNotIn('three in the tree follow it', section)
@@ -305,7 +330,7 @@ class SentinelPopulationTests(unittest.TestCase):
         table = table[:table.index('\n\n', table.index('- Defined in'))]
 
         rows = re.findall(r'^   \* - (\S+)$', table, re.MULTILINE)
-        self.assertEqual(rows, ['Instance'] + [f'``{name}``' for name, _, _, _ in SENTINELS])
+        self.assertEqual(rows, ['Instance'] + [f'``{name}``' for name, _, _ in SENTINELS])
 
 
 class SentinelBehaviourTests(unittest.TestCase):

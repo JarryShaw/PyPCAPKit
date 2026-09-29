@@ -148,16 +148,25 @@ four in the tree follow it:
      - Defined in
    * - ``NULL``
      - ``NullType``
-     - :mod:`pcapkit.corekit.module`
+     - :mod:`pcapkit.corekit.sentinels`
    * - ``NoValue``
      - ``NoValueType``
-     - :mod:`pcapkit.corekit.fields.field`
+     - :mod:`pcapkit.corekit.sentinels`
    * - ``NO_DEFAULT``
      - ``NoDefaultType``
-     - :mod:`pcapkit.corekit.enum`
+     - :mod:`pcapkit.corekit.sentinels`
    * - ``_Absent``
      - ``_AbsentType``
-     - :mod:`pcapkit.protocols.protocol`
+     - :mod:`pcapkit.corekit.sentinels`
+
+All four used to live beside the one class that used them --
+:mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
+:mod:`pcapkit.corekit.enum` and :mod:`pcapkit.protocols.protocol` respectively.
+GitHub issue #911's housing ruling, verbatim -- *"Okay one module for all four it
+is."* -- moved the four definitions into the single shared module the table now
+names; each original module keeps a re-export so every existing
+``from <module> import <name>`` keeps working, including the
+``if TYPE_CHECKING:``-only imports of the types.
 
 Note what the rule does **not** fix: the **instance** name's casing is deliberately
 free, which is why ``NULL`` and ``NoValue`` disagree and both are correct. Pick
@@ -166,16 +175,16 @@ renaming a published sentinel costs every caller for no gain.
 
 Nor does it fix the **leading underscore**. ``_Absent`` is private -- it is read in
 ``_declared_keywords`` and discarded there, never leaving
-:mod:`pcapkit.protocols.protocol` -- and it is still held to the convention, which is
-why its type is ``_AbsentType`` and not ``_Absent_t`` or ``Absent``. It is a
-deliberate fourth rather than an accident, and its own docstring
-(:file:`pcapkit/protocols/protocol.py`, line 95) says so:
+:mod:`pcapkit.protocols.protocol` even though its *definition* now does -- and it is
+still held to the convention, which is why its type is ``_AbsentType`` and not
+``_Absent_t`` or ``Absent``. It is a deliberate fourth rather than an accident, and
+its own docstring (:file:`pcapkit/corekit/sentinels.py`, line 430) says so:
 
    A distinct class rather than a bare :obj:`object` so that the sentinel has a name
    of its own in a traceback or a debugger, and so that a type checker has something
    to name where ``object()`` would give it nothing. It follows
-   :class:`~pcapkit.corekit.fields.field.NoValueType`, which does the same job for an
-   unset field default; this is a sibling of it rather than a reuse [...]
+   :class:`NoValueType`, which does the same job for an unset field default;
+   this is a sibling of it rather than a reuse [...]
 
 The private name is also why this table listed three for as long as it did: a sweep
 filtered on capitalised names does not see it. When adding a sentinel, add it here
@@ -190,7 +199,7 @@ neither, which is what private means here.
 
 .. note::
 
-   Of the four, only :class:`~pcapkit.corekit.module.NullType` is a full worked
+   Of the four, only :class:`~pcapkit.corekit.sentinels.NullType` is a full worked
    example. ``NoValueType`` follows the naming rule but is **not** a singleton
    (``NoValueType() is NoValue`` is :obj:`False`) and has no ``__repr__`` of its own,
    so it demonstrates the name and nothing else; ``_AbsentType`` has a ``__repr__``
@@ -239,9 +248,12 @@ inconsistencies**:
    fails every ``is`` check. Worth having wherever the type is reachable by a caller at
    all -- which, since the type is kept out of ``__all__``, means wherever it is
    importable by its dotted path rather than wherever it is star-exported.
-   :class:`~pcapkit.corekit.module.NullType` documents the limit honestly: a module
+   :class:`~pcapkit.corekit.sentinels.NullType` documents the limit honestly: a module
    **reload** re-executes the class statement, so the guard does not survive one, and
-   code holding the pre-reload instance will fail ``is``.
+   code holding the pre-reload instance will fail ``is``. Since GitHub issue #911,
+   that means reloading :mod:`pcapkit.corekit.sentinels` itself -- reloading
+   :mod:`pcapkit.corekit.module`, which now only re-exports the sentinel, no longer
+   has any effect on it.
 
 ``__bool__`` returning :obj:`False`
    ``NULL``, ``NoValue`` and ``_Absent`` have it, because each stands for an *absent
@@ -253,7 +265,7 @@ inconsistencies**:
    prevent.
 
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
-   :class:`~pcapkit.corekit.module.NullType` has them because ``NULL`` is stored in a
+   :class:`~pcapkit.corekit.sentinels.NullType` has them because ``NULL`` is stored in a
    :class:`~pcapkit.corekit.module.ModuleDescriptor` field, so a caller's
    :func:`copy.deepcopy` or :mod:`pickle` can walk into it and would otherwise
    reconstruct a second instance. ``NO_DEFAULT`` and ``_Absent`` have none, because
