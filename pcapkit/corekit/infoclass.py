@@ -16,6 +16,7 @@ import enum
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.utilities.compat import Mapping, final
 from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
@@ -31,8 +32,15 @@ VT = TypeVar('VT')
 ST = TypeVar('ST', bound='Type[Info]')
 
 
-class FinalisedState(enum.IntEnum):
-    """Finalised state."""
+class FinalisedState(EnumLookup, enum.IntEnum):
+    """Finalised state.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+
+    """
 
     #: Not finalised.
     NONE = enum.auto()

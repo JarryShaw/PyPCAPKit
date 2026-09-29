@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.http.method import Method as Enum_Method
 from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
@@ -137,8 +138,15 @@ def _test_start_line(data: 'bytes') -> 'bool':
     )
 
 
-class Type(StrEnum):
-    """HTTP packet type."""
+class Type(EnumLookup, StrEnum):
+    """HTTP packet type.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+
+    """
 
     #: Request packet.
     REQUEST = auto()
