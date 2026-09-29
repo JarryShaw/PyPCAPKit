@@ -32,6 +32,7 @@ construction and analysis library.
    testing
    conventions
    releasing
+   workflows
    pep
    changelog
 
