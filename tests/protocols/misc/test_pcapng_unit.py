@@ -777,7 +777,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownOption)
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # Per the mint/unmint ruling for #775 (``docs/source/contributing/conventions.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
         # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label
@@ -1953,7 +1953,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownSecrets as SchemaUnknownSecrets)
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # Per the mint/unmint ruling for #775 (``docs/source/contributing/conventions.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
         # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label

@@ -47,7 +47,7 @@ concurrency:
 # ``tag`` and ``pypi`` both carry ``needs: [ github, ... ]``, and ``conda`` needs
 # ``tag`` and ``github`` too, so nothing downstream of ``github`` can start before
 # that approval lands, and rejecting it leaves nothing tagged and nothing
-# published. See :file:`docs/source/releasing.rst` for the full pipeline and the
+# published. See :file:`docs/source/contributing/releasing.rst` for the full pipeline and the
 # reasoning behind one approval being enough.
 #
 # The other three environments keep their names -- ``pypi``'s matters because
