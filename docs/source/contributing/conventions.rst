@@ -1,12 +1,26 @@
-Registry Conventions
-====================
+House Conventions
+=================
 
 .. important::
 
-   This page records **design rulings** for :mod:`pcapkit.const` -- decisions that
+   This page records **design rulings** for :mod:`pcapkit` -- decisions that
    are not derivable from the code, and that a future maintainer or an automated
    contributor would otherwise have to rediscover by reading a closed issue
    thread. Each ruling names where it was settled.
+
+   Most of them govern :mod:`pcapkit.const`, which is where the settled questions
+   have mostly arisen, and the page was titled *Registry Conventions* for that
+   reason until `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__
+   widened it. :ref:`extension-header-subclassing` is the first ruling here that
+   governs a protocol class hierarchy rather than a registry.
+
+   **A ruling that stays in its thread is a ruling that gets rediscovered.** So
+   when a question is answered in a way the code cannot express on its own -- a
+   classification, a naming rule, a deliberate asymmetry -- it is written onto
+   this page in the same change that implements it, rather than being left in the
+   issue for the next contributor to find. The owner's standing ask, on
+   `#918 <https://github.com/JarryShaw/PyPCAPKit/issues/918>`__: *"And any future
+   conventions to be settled - document them as well."*
 
 .. _mint-criterion:
 
@@ -353,6 +367,18 @@ Three things about it are easy to get wrong:
   it subclasses :exc:`ValueError` a rejection is caught by ``get``'s own ``except`` and
   falls back to ``default`` like any other unresolvable value. An override raising
   outside that hierarchy propagates past ``default`` instead.
+
+  With **no usable** ``default``, the rejection reaches the caller **unwrapped**.
+  ``get`` re-raises a :exc:`ValueError` that is already a
+  :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
+  and converts only :mod:`aenum`'s and :mod:`enum`'s own "no member carries this
+  value". Two things follow, and both are the point of the discrimination rather
+  than side effects: the override's **own message** survives to the caller instead
+  of being replaced by the base's, and the error is **logged once** rather than
+  twice, since :class:`~pcapkit.utilities.exceptions.BaseError` logs on
+  construction and re-wrapping would construct a second one. So an override should
+  say in its message what it rejected and why; that message is what the caller
+  sees.
 * **A** ``str`` **key never reaches it.** That path never calls ``cls(key)``, so it
   resolves only against already-populated lookup tables, where every value present is
   legal by construction. ``register`` does call it, after its duplicate check.
@@ -361,9 +387,70 @@ Three things about it are easy to get wrong:
 
    Re-parenting the remaining helper enumerations onto
    :class:`~pcapkit.corekit.enum.EnumLookup` is **phase 2** of
-   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ and has not happened
-   yet. Phase 1 is deliberately behaviour-preserving on its own, which is what let it
-   land while other work was still in flight on the files the re-parent touches.
+   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, and it is **partly
+   done** rather than pending: the phase landed for 17 of the 24 non-registry
+   enumerations. **Seven are still outside the hierarchy**, measured by a runtime
+   walk over both the :mod:`enum` and :mod:`aenum` flavours: ``CommandType`` and
+   ``ConformanceRequirement`` in :mod:`pcapkit.const.ftp.command`, ``ESPStatus`` in
+   :mod:`pcapkit.protocols.internet.esp`, and all four
+   :mod:`pcapkit.protocols.internet.mh` helpers
+   (``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``,
+   ``LMAAddressCode``, ``LocalizedRoutingStatus``). Each sat in a file another pull
+   request held open while phase 2 ran, which is the whole reason the phase was split
+   in two: phase 1 is behaviour-preserving on its own, so it could land while work
+   was still in flight on the files a re-parent touches. Do not read the seven as a
+   ruling against re-parenting them -- they are the remainder of a phase, not an
+   exception to it.
+
+What a Failed Lookup Raises
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Two rules govern it, and they pull in opposite directions on purpose. The owner's
+ruling, verbatim, on
+`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__:
+
+   Either ``ValueError`` or ``KeyError``, that's depending on how stdlib's ``Enum``
+   would raise on these circumstances. And we should raise one from
+   ``pcapkit.utilities.exceptions`` rather builtin exceptions.
+
+So the **provenance** is in-library and the **shape** is stdlib's:
+
+*  :meth:`~pcapkit.corekit.enum.EnumLookup.get` raises
+   :exc:`~pcapkit.utilities.exceptions.EnumKeyError` for a **name** miss and
+   :exc:`~pcapkit.utilities.exceptions.EnumValueError` for a **value** miss, both
+   from :mod:`pcapkit.utilities.exceptions` rather than from builtins.
+*  The split between the two is not taste. ``E['nosuch']`` raises :exc:`KeyError`
+   and ``E(999)`` raises :exc:`ValueError` on a stdlib :class:`~enum.Enum`, so a
+   miss by name is :exc:`KeyError`-derived here and a miss by value is
+   :exc:`ValueError`-derived, matching it.
+*  That is what keeps the ruling cheap to carry out:
+   :exc:`~pcapkit.utilities.exceptions.EnumKeyError` derives :exc:`KeyError` and
+   :exc:`~pcapkit.utilities.exceptions.EnumValueError` derives :exc:`ValueError`,
+   so **only the provenance changed** -- every ``except KeyError`` and
+   ``except ValueError`` around a lookup keeps catching, in this tree and in a
+   caller's.
+
+Do not "improve" on the shape by making both misses report identically. Converting
+one into the other is exactly what #923 retired, and it was retired in three places
+at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
+base's :exc:`KeyError` into a :exc:`ValueError`, and
+:meth:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get` raised
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss so that "the
+two ways of getting it wrong reported identically".
+
+One asymmetry between the two is deliberate and is **not** visible from the
+exception class: the **name** miss is raised quietly
+(:class:`~pcapkit.utilities.exceptions.BaseError`'s ``quiet=True``, so nothing is
+logged and :data:`sys.tracebacklimit` is left alone) while the **value** miss stays
+loud. A name miss is in-library control flow at several call sites, and at
+:meth:`~pcapkit.const.http.method.Method.get` it is part of a *successful* call --
+that override catches it in order to mint. A loud error there would put a
+:data:`logging.CRITICAL` record on every such call and set
+:data:`sys.tracebacklimit` to ``0`` process-wide, which is the
+`#362 <https://github.com/JarryShaw/PyPCAPKit/issues/362>`__ defect ``quiet``
+exists for. So a ``get`` override that catches a name miss as control flow is
+following the convention; one that catches a *value* miss that way is silencing a
+logged error, and needs a reason.
 
 Case Sensitivity Is RFC-Directed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -388,6 +475,22 @@ to make a lookup work -- which is what keeps
 :class:`~pcapkit.const.hip.parameter.Parameter`'s ``R1_Counter = 128`` and
 ``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
 resolvable.
+
+And a folding override carries **only** the fold. ``TransportProtocol.get`` is the
+worked example: since
+`#923 <https://github.com/JarryShaw/PyPCAPKit/issues/923>`__ it lowers ``key``,
+forwards ``default`` verbatim and delegates to ``super().get()``, and that is all it
+does. It used to convert the base's name-miss :exc:`KeyError` into a
+:exc:`ValueError` as well, and #923's ruling retired that; the
+`#836 <https://github.com/JarryShaw/PyPCAPKit/pull/836>`__ refusal to extend the
+class at all is untouched by the retirement, since only the exception class moved.
+``Criticality.get`` went further and no longer exists: conversion was the *only*
+thing it added over the base, so once that went there was nothing left for an
+override to hold, and the class inherits
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged. **An override that would
+now be empty is deleted, not kept as a pass-through** -- a ``get`` that only calls
+``super().get()`` reads as though it were doing something, and the next reader has
+to diff it against the base to find out that it is not.
 
 The Lenient Criterion, in Two Limbs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -503,7 +606,8 @@ That leaves the classes with something to decide:
        its §10.2 templates write the field upper case, the live CSV is lower case in
        all 14,536 rows (``tcp`` 6608, ``udp`` 6357, blank 1467, ``sctp`` 93,
        ``dccp`` 11, zero upper-case).
-     - **case-insensitive** -- ``get`` folds, and this is the owner's own example
+     - **case-insensitive** -- ``get`` folds, and this is the owner's own example.
+       Folding is now the *only* thing that override adds (#923)
    * - :class:`~pcapkit.const.reg.apptype.apptype.AppType`
      - --
      - Moot: its ``get`` takes a port number and refuses a non-:class:`int` outright,
@@ -527,13 +631,19 @@ That leaves the classes with something to decide:
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
      - Their values are numeric codes, so the criterion is vacuous exactly as for the
-       :class:`int` tier above. Three of them -- ``Criticality``,
-       ``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode`` -- do override
-       ``get``, but for signature reasons (no ``default``, and an
-       :class:`int`/:class:`str` dispatch) rather than for case: each does an exact
-       ``Cls[key]``. ``LMAAddressCode`` and ``LocalizedRoutingStatus`` carry no
-       ``get`` at all, so they have no string lookup to fold. Verified by reading all
-       five.
+       :class:`int` tier above. **Two** of them define a ``get`` of their own --
+       ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode`` -- for
+       signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
+       rather than for case: each does an exact ``Cls[key]``, and since #923 each
+       answers a name miss with
+       :exc:`~pcapkit.utilities.exceptions.EnumKeyError` rather than
+       :exc:`~pcapkit.utilities.exceptions.EnumValueError`. ``LMAAddressCode`` and
+       ``LocalizedRoutingStatus`` carry no ``get`` at all, so they have no string
+       lookup to fold. ``Criticality`` had one when this audit was taken and no
+       longer does: #921 re-parented it onto
+       :class:`~pcapkit.corekit.enum.EnumLookup` and #923 retired the exception
+       conversion that was the override's only remaining job, so it now inherits
+       ``get`` unchanged.
      - **case-sensitive** -- conforms
    * - ``WireGuardKeyLabel``
      - ``draft-tuexen-opsawg-pcapng``
@@ -567,7 +677,8 @@ wider than a case fix:
   these two case-insensitive. Nothing looks them up by string today, though: the
   crawler translates the CSV's lower-case letters to the upper-case member names at
   generation time, and neither class inherits
-  :class:`~pcapkit.corekit.enum.EnumLookup` yet. Re-parenting them is phase 2 of
+  :class:`~pcapkit.corekit.enum.EnumLookup` yet -- both are in the seven phase 2 has
+  not reached, per the note above. Re-parenting them is phase 2 of
   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__, which is where the
   question belongs.
 
@@ -625,8 +736,10 @@ rather than changing it.
 What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
 value resolves through ``cls(value)`` but not through ``get(value)``, because
 :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` returns it without
-growing either lookup table. ``FEATCode.get('ZZ-NOT-REAL')`` raises :exc:`KeyError`
-while ``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member. Closing that gap would
+growing either lookup table. ``FEATCode.get('ZZ-NOT-REAL')`` raises
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` -- which *is* a :exc:`KeyError`, so
+an ``except KeyError`` around it is unaffected -- while
+``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member. Closing that gap would
 mean calling ``cls(key)`` for a ``str`` value too, which reopens the minting hazard
 above -- so the asymmetry is intended, and ``get``'s own docstring carries the full
 reasoning.
@@ -637,3 +750,193 @@ reasoning.
    generated registry belongs in the crawler or in
    :mod:`pcapkit.vendor.default`'s template, never in the generated file alone --
    the next regeneration would discard it.
+
+.. _extension-header-subclassing:
+
+Which bases an IPv6 extension header names
+------------------------------------------
+
+Every IPv6 extension header in this package subclasses
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
+as well, and which ones do is a ruling rather than an accident. The owner's words,
+on `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__:
+
+   I think on subclassing, we might wanna keep this convention: if the IPv6
+   extension header is only usable as an extension header, then it only inherit
+   from ``IPv6_Ext``, like ``IPv6_Frag``; but if it is useable as a standalone
+   protocol itself, then it herit from both ``IPv6_Ext`` and ``Internet`` (or
+   ``IPsec``), like ``ESP``.
+
+The family as it stands:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 30 36
+
+   * - Header
+     - Bases
+     - Classification
+   * - :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
+       :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`,
+       :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`,
+       :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
+       :class:`~pcapkit.protocols.internet.mh.MH`
+     - ``IPv6_Ext``
+     - extension-header only
+   * - :class:`~pcapkit.protocols.internet.ah.AH`,
+       :class:`~pcapkit.protocols.internet.esp.ESP`
+     - ``IPsec``, ``IPv6_Ext``
+     - **also standalone**
+   * - :class:`~pcapkit.protocols.internet.hip.HIP`
+     - ``IPv6_Ext``, ``Internet``
+     - **also standalone**
+
+:class:`~pcapkit.protocols.internet.ipsec.IPsec` is itself an
+:class:`~pcapkit.protocols.internet.internet.Internet` subclass, which is the
+parenthetical *"(or* ``IPsec``\ *)"* in the ruling: naming it satisfies the
+convention, and it is the right second base for a header whose standalone form is an
+IPsec one.
+
+The code cannot be used as evidence
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**This is the part a future reader will get wrong, so it is stated before the
+criterion itself.** The obvious way to decide whether a header is "usable as a
+standalone protocol" is to ask what the library's own dispatch already allows. That
+answer is useless, and measurably so:
+
+.. code-block:: pycon
+
+   >>> from pcapkit.protocols.internet.ipv4 import IPv4
+   >>> from pcapkit.protocols.internet.internet import Internet
+   >>> IPv4.__proto__ is Internet.__proto__
+   True
+
+The protocol-number registry is **one shared object**, so *every* extension header
+is reachable as an IPv4 payload in this library --
+:class:`~pcapkit.protocols.internet.hopopt.HOPOPT` and
+:class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag` included. Registry
+membership therefore says nothing at all about standalone-ness, and a classification
+derived from it would make all eight headers standalone.
+
+Nor does IANA's *IPv6 Extension Header Types* registry discriminate: it lists all
+eight of the implemented headers, plus ``Shim6`` (140) and 253/254. Being *in* that
+registry is what makes something an extension header; it is not evidence about
+whether the same header is also a protocol in its own right.
+
+The operative test is what the RFCs say
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So the census is read out of the specifications, on the owner's instruction:
+
+   So my suggestion is to read through the RFCs to figure out any of the defined
+   IPv6 extension headers are extension header only or standalone protocol as well.
+   Then we can decide if they should inherit only ``IPv6_Ext`` or additional bases.
+
+And the limb that decides is **whether a primary source shows the header carried
+directly as an IPv4 payload**:
+
+*  :class:`~pcapkit.protocols.internet.ah.AH` -- :rfc:`4302#section-3.1.1`, *"In the
+   context of IPv4, this calls for placing AH after the IP header"*, with a
+   before-and-after IPv4 diagram.
+*  :class:`~pcapkit.protocols.internet.esp.ESP` -- :rfc:`4303#section-3.1.1`, the
+   same sentence and the same diagram for ESP.
+*  :class:`~pcapkit.protocols.internet.hip.HIP` -- :rfc:`7401#appendix-C.2`,
+   *"IPv4 HIP Packet (I1 Packet)"*, whose worked checksum is over an IPv4 header
+   carrying ``Next Header: 139``. :rfc:`7401#section-5.1` also calls the HIP header
+   *"logically an IPv6 extension header"*, so HIP is genuinely both.
+
+:class:`~pcapkit.protocols.internet.mh.MH` is the instructive failure, because it
+**is** a protocol in its own right and still does not qualify:
+:rfc:`6275#section-6.1.1` defines its checksum over a pseudo-header of *"IPv6 header
+fields"* whose addresses are *"the addresses that appear in the Source and
+Destination Address fields in the IPv6 packet carrying the Mobility Header"* -- there
+is no IPv4 variant of that computation -- and the IPv4 equivalent function is not
+protocol 135 at all, since :rfc:`5944` carries Mobile IPv4 over UDP port 434.
+``Shim6`` (140) has the same shape and the same verdict; this package has never had a
+parser class for it, so nothing implements the classification, but a future one
+inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone.
+
+.. important::
+
+   Own-protocolhood on its own is **not** sufficient, and MH is the case that
+   settles it: the alternative reading -- that a protocol in its own right qualifies
+   whether or not it can appear under IPv4 -- was put to the owner explicitly on
+   `#924 <https://github.com/JarryShaw/PyPCAPKit/pull/924>`__ and not taken, so MH
+   and ``Shim6`` stay extension-only. A header that is a protocol in its own right
+   but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
+
+The declaration is what carries the classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Name the second base **explicitly**, even though it is already in the MRO.
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
+:class:`~pcapkit.protocols.internet.internet.Internet`, so every one of the eight
+reaches ``Internet`` transitively and an ``__mro__`` check cannot tell the two groups
+apart. The declaration is the only place the classification exists, which is why
+``tests/protocols/internet/test_ipv6_ext_unit.py`` pins it against ``__bases__``:
+
+.. code-block:: python
+
+   STANDALONE_MEMBERS = frozenset({'AH', 'ESP', 'HIP'})
+
+Add a header to that set in the same change that adds its second base, and keep the
+RFC ground in the ``#:`` comment beside it. The test walks
+``IPv6_Ext.__subclasses__()`` rather than a hard-coded list, so a ninth header is
+held to the convention whether or not anyone remembers this page.
+
+The base is named ``IPv6_Ext``, and nothing else
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The class arrived as ``IPv6_GenericExt``, a fallback parser for an unrecognised
+extension header (`#891 <https://github.com/JarryShaw/PyPCAPKit/issues/891>`__), and
+`#917 <https://github.com/JarryShaw/PyPCAPKit/issues/917>`__ merged that role with
+the shared-base role into one class under the shorter name. No compatibility alias
+was left behind, and that was deliberate. The owner's ruling:
+
+   No more ``IPv6_GenericExt`` name. Its an intermediate state and never released.
+
+The reasoning is what makes it safe rather than merely decided: the old name existed
+on ``main`` from ``b3551cb63`` to ``93cf940b3`` -- under four hours on one day, and
+after the most recent release tag -- so it appears in **no** release, and the break
+has no callers to inconvenience. Do not reintroduce it as an alias, and do not cite
+it in prose as a former public name; it was never one.
+
+ESP is an extension header, and still cannot short-circuit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Two facts about :class:`~pcapkit.protocols.internet.esp.ESP` coexist, and each is
+routinely mistaken for a refutation of the other.
+
+**It is an extension header.** IANA's *IPv6 Extension Header Types* registry lists
+protocol number **50**, and this package's
+:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` agrees (``ESP = 50``).
+:rfc:`8200#section-4.5` appears to say otherwise -- *"the Encapsulating Security
+Payload (ESP) is not considered an extension header"* -- but that sentence opens
+*"For this purpose,"*, scoping it to the fragmentation discussion it sits in, and the
+sentence after it lists ESP among *"examples of upper-layer headers"*. The library
+follows the registry, on the owner's ruling for
+`#895 <https://github.com/JarryShaw/PyPCAPKit/issues/895>`__, which is why ESP
+carries the same extension-mode contract as its siblings.
+
+**And it terminates the chain walk.** :rfc:`4303` places ESP's Next Header byte
+inside the *encrypted* trailer, so with no key material there is nothing to continue
+on: ESP's own data model reports ``next`` as :obj:`None`, and
+:meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
+ends the ordinary way one iteration later. So ESP is absent from
+``IPv6.__generic_ext_codes__`` -- not because it lacks a parser, which it has, but
+because it cannot hand the walk a successor.
+
+The full reasoning, including how ESP's terminal case differs from 253/254's, is
+written where the code is and is deliberately not restated at length here: see the
+``#:`` comment on ``IPv6.__generic_ext_codes__``
+(:file:`pcapkit/protocols/internet/ipv6.py`) and the module docstring of
+:mod:`pcapkit.protocols.internet.ipv6_ext`.
+
+.. caution::
+
+   The two facts have to be kept apart when reading any of this. "ESP is not an
+   extension header" (wrong, and :rfc:`8200#section-4.5` quoted out of scope) is a
+   different claim from "ESP cannot be walked past" (right, and about
+   :rfc:`4303`'s wire format). Collapsing them is how ESP ends up either dropped
+   from the extension-header contract or wrongly added to the generic-dispatch set.

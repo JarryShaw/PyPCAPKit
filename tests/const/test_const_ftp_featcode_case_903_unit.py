@@ -61,7 +61,7 @@ entries before and after)::
 
 **What the fix deliberately does not do.** It does not fold the stored
 members, and it does not rename one. Every member keeps the registrar's own
-casing, per the ruling on the *Registry Conventions* page -- *"enum
+casing, per the ruling on the *House Conventions* page -- *"enum
 should honour and keep their original writings as in the registrars"* -- so
 ``FEATCode.get('BASE').name`` is still ``'base'`` and still says
 *placeholder*. Nor does it fold the *value* a lookup resolves to, which is
@@ -133,7 +133,7 @@ class FEATCodeCaseInsensitiveLookupTests(unittest.TestCase):
 
         ``FEATCode.base`` is the member whose value is ``'<base>'`` and whose
         name is ``'base'`` -- the shape
-        the *Registry Conventions* page uses to demonstrate the base's
+        the *House Conventions* page uses to demonstrate the base's
         name-misses-then-value-matches fall-through. Folding has to reach the
         value side as well, or a caller holding the registry's own value
         string in the RFC's recommended casing still fails.
@@ -208,7 +208,7 @@ class FEATCodeCaseFoldSafetyTests(unittest.TestCase):
                     self.assertIs(by_folded_name[folded_value], member)
 
     def test_an_unknown_code_still_raises_rather_than_minting(self) -> 'None':
-        """The asymmetry the *Registry Conventions* page records survives.
+        """The asymmetry the *House Conventions* page records survives.
 
         ``get`` never calls ``cls(key)`` for a ``str``, so a key matching no
         member -- in any casing -- raises instead of growing the registry,
