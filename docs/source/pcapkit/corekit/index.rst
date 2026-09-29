@@ -28,4 +28,5 @@ inherits from.
    module
    multidict
    protochain
+   sentinels
    version
