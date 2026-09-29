@@ -43,7 +43,7 @@ __all__ = [
     'FileNotFound',                                                 # FileNotFoundError
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
-    'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
+    'EndianError', 'KeyExists', 'NoDefaultValue', 'EnumValueError', # ValueError
     'FieldValueError', 'SchemaError', 'SeekError', 'TruncateError', # ValueError
     'VendorPathNotFound',                                           # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
@@ -369,6 +369,10 @@ class KeyExists(BaseError, ValueError):
 
 class NoDefaultValue(BaseError, ValueError):
     """No default value."""
+
+
+class EnumValueError(BaseError, ValueError):
+    """No member of a closed enumeration carries this value."""
 
 
 class FieldValueError(BaseError, ValueError):
