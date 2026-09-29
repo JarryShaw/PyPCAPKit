@@ -4,9 +4,10 @@
 The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. Three more extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
-and a defect programme run through the issue tracker that started across some 140
-issues and pull requests between #326 and #509, and has continued well past #509
-since -- reaching #805 by the entries below.
+and a defect programme run through the issue tracker spanning 254 issues and pull
+requests, from #121 to #883 as of this revision. The programme is still running,
+so those figures are a snapshot rather than a total -- they are re-derived from
+the entries below each time this file is regenerated.
 
 * **Added** -- three extraction engines: ``engine='pypcap'`` and
   ``engine='pcap_ct'``, two independent distributions of the same ``libpcap``
