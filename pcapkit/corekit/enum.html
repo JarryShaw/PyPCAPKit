@@ -424,7 +424,7 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing/conventions.html">Registry Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/conventions.html">House Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/pep.html">Help Wanted</a></li>
@@ -538,10 +538,10 @@ registrars.”</em> Case handling belongs in a deliberate <code class="docutils 
 an RFC behind it, not in a validation hook.</p>
 <p>Raise from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>, per the same issue’s
 ruling that in-library code raises in-library exceptions –
-<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code> is the fitting one
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> is the fitting one
 and is already what the closed enumerations in
 <a class="reference internal" href="../protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> raise. Note what that buys on the
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> path: <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> path: <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a rejection here is caught by
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s own <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> and falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code>
 just as any other unresolvable value does. An override raising something
@@ -616,10 +616,10 @@ registrars.”</em> Case handling belongs in a deliberate <code class="docutils 
 an RFC behind it, not in a validation hook.</p>
 <p>Raise from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>, per the same issue’s
 ruling that in-library code raises in-library exceptions –
-<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code> is the fitting one
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> is the fitting one
 and is already what the closed enumerations in
 <a class="reference internal" href="../protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> raise. Note what that buys on the
-<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> path: <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> path: <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a rejection here is caught by
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s own <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> and falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code>
 just as any other unresolvable value does. An override raising something
@@ -757,7 +757,7 @@ subclass’s <code class="docutils literal notranslate"><span class="pre">_missi
 checked before the constructor rather than after. The base hook accepts
 everything, so this changes nothing for a subclass that does not override
 it. A rejection raised as
-<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code> – or any other
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> – or any other
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> subclass – is caught by the same <code class="docutils literal notranslate"><span class="pre">except</span></code> that
 catches an ordinary failed construction, and so falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code>
 on the same terms; the <code class="docutils literal notranslate"><span class="pre">str</span></code> path does not call the hook, for the reason
@@ -792,7 +792,7 @@ for. The value miss takes no such fallback anywhere in this tree, so
 it stays loud.</p></li>
 <li><p><strong>An in-library rejection propagates unchanged.</strong> A <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
 that is already a <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BaseError</span></code></a> –
-typically <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code> from a
+typically <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> from a
 subclass’s <a class="reference internal" href="#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> – is re-raised as it stands rather
 than wrapped, so the subclass’s own message survives and the error is
 logged once instead of twice. Only <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s
@@ -821,7 +821,7 @@ the same lookup error <code class="docutils literal notranslate"><span class="pr
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>EnumValueError</strong> – If a value does not resolve and there is no usable
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If a value does not resolve and there is no usable
     default. Also what a subclass’s <a class="reference internal" href="#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
     rejection reaches the caller as, since that hook is documented
     to raise this very class and it is passed through rather than
@@ -860,7 +860,7 @@ carrying the same value.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>EnumValueError</strong> – As <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> with no default, for a value.</p></li>
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – As <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> with no default, for a value.</p></li>
 <li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><strong>EnumKeyError</strong></a> – As <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> with no default, for a name.</p></li>
 </ul>
 </dd>
@@ -997,7 +997,7 @@ is the whole point – a generated name is a guess.</p></li>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> already has a member – use
     <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> to add a further name for it instead.</p></li>
-<li><p><strong>EnumValueError</strong> – If a subclass’s
+<li><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – If a subclass’s
     <a class="reference internal" href="#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> rejects <code class="docutils literal notranslate"><span class="pre">value</span></code>. The base
     implementation of that hook accepts everything, so this cannot
     arise on a registry that does not override it.</p></li>

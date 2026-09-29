@@ -424,7 +424,7 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing/conventions.html">Registry Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/conventions.html">House Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing/pep.html">Help Wanted</a></li>
@@ -804,6 +804,17 @@ control flow.</p></li>
 </dd></dl>
 
 <dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.EnumValueError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">EnumValueError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#EnumValueError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.EnumValueError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+<p>No member of an enumeration carries this value.</p>
+<p>The value-miss half of the pair whose name-miss half is
+<a class="reference internal" href="#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a>; see that one for the
+stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> shape both follow, and for why the two halves
+derive from different builtins.</p>
+</dd></dl>
+
+<dl class="py exception">
 <dt class="sig sig-object py" id="pcapkit.utilities.exceptions.FieldValueError">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">FieldValueError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#FieldValueError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.FieldValueError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
@@ -923,7 +934,7 @@ same situation via its own <code class="docutils literal notranslate"><span clas
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyError</span></code></a></p>
 <p>No member of an enumeration carries this name.</p>
 <p>The name-miss half of the pair whose value-miss half is
-<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>, and the split between
+<a class="reference internal" href="#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>, and the split between
 them follows stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> rather than this package’s own
 taste: <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> raises
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a lookup that misses by <em>name</em> is

@@ -424,7 +424,7 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../contributing/conventions.html">Registry Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing/conventions.html">House Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/releasing.html">Release Process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing/pep.html">Help Wanted</a></li>
@@ -8006,7 +8006,7 @@ supported</em> there.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-210"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> leaves
 unassigned is not minted a placeholder member. Per the owner’s ruling
 on GitHub issue #877, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 instead of extending the class. That is not a capture-level failure
 – sibling frames are unaffected – but the cost is bigger than one
 message. Mobility Header is itself one of IPv6’s own chained
@@ -8080,7 +8080,7 @@ the “alternate” care-of address option [<span class="target" id="index-212">
     raise on these circumstances”</em> – since a stdlib
     <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and only the <em>value</em>
     miss <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> reports is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-shaped. This
-    used to raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+    used to raise <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
     so that the two ways of getting it wrong reported identically;
     that is exactly the conversion #923 rejects, and 119 of this
     tree’s 127 concrete
@@ -8102,7 +8102,7 @@ the “alternate” care-of address option [<span class="target" id="index-212">
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – Always. <span class="target" id="index-217"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> names this value
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-217"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.2.3"><strong>RFC 5568 Section 6.2.3</strong></a> names this value
     set inline with no IANA registry behind it, and the owner’s
     ruling on GitHub issue #877 is that it stays immutable rather
     than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
@@ -8133,7 +8133,7 @@ likewise unregistered.</p>
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-222"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a> leaves
 unassigned is not minted a placeholder member. Per the owner’s ruling
 on GitHub issue #877, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 instead of extending the class. That is not a capture-level failure
 – sibling frames are unaffected – but the cost is bigger than one
 message. Mobility Header is itself one of IPv6’s own chained
@@ -8195,7 +8195,7 @@ of valid leading bits in the prefix [<span class="target" id="index-226"></span>
     raise on these circumstances”</em> – since a stdlib
     <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and only the <em>value</em>
     miss <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> reports is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-shaped. This
-    used to raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+    used to raise <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
     so that the two ways of getting it wrong reported identically;
     that is exactly the conversion #923 rejects, and 119 of this
     tree’s 127 concrete
@@ -8217,7 +8217,7 @@ of valid leading bits in the prefix [<span class="target" id="index-226"></span>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – Always. <span class="target" id="index-227"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> names this value
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-227"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html#section-6.4.2"><strong>RFC 5568 Section 6.4.2</strong></a> names this value
     set inline with no IANA registry behind it, and the owner’s
     ruling on GitHub issue #877 is that it stays immutable rather
     than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
@@ -8263,7 +8263,7 @@ registered <a class="reference internal" href="../../const/mh.html#pcapkit.const
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-233"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html"><strong>RFC 6705</strong></a> leaves
 unassigned is not minted a placeholder member. Per the owner’s ruling
 on GitHub issue #877, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_" title="pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 instead of extending the class. That is not a capture-level failure
 – sibling frames are unaffected – but the cost is bigger than one
 message. Mobility Header is itself one of IPv6’s own chained
@@ -8311,7 +8311,7 @@ rebuilding it on the immutable contract.</p>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – Always. <span class="target" id="index-237"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a> names this value
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-237"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6705.html#section-10.2"><strong>RFC 6705 Section 10.2</strong></a> names this value
     set inline with no IANA registry behind it, and the owner’s
     ruling on GitHub issue #877 is that it stays immutable rather
     than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
@@ -8339,7 +8339,7 @@ registry of them, so the enumeration lives here rather than in
 <p>The enumeration is <strong>closed</strong>: an in-range value <span class="target" id="index-241"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html"><strong>RFC 5949</strong></a> leaves
 unassigned is not minted a placeholder member. Per the owner’s ruling
 on GitHub issue #877, this RFC-inline value set stays immutable, so
-<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode._missing_" title="pcapkit.protocols.internet.mh.LMAAddressCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.LMAAddressCode._missing_" title="pcapkit.protocols.internet.mh.LMAAddressCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>
 instead of extending the class. That is not a capture-level failure
 – sibling frames are unaffected – but the cost is bigger than one
 message. Mobility Header is itself one of IPv6’s own chained
@@ -8387,7 +8387,7 @@ rebuilding it on the immutable contract.</p>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Value to get enum item.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – Always. <span class="target" id="index-245"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a> names this value
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><strong>EnumValueError</strong></a> – Always. <span class="target" id="index-245"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5949.html#section-6.2.2"><strong>RFC 5949 Section 6.2.2</strong></a> names this value
     set inline with no IANA registry behind it, and the owner’s
     ruling on GitHub issue #877 is that it stays immutable rather
     than minting an <code class="docutils literal notranslate"><span class="pre">Unassigned_N</span></code> placeholder member.</p>
