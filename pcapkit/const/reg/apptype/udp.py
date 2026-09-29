@@ -84,7 +84,7 @@ class UDP(AppType):
          - [TCP] Axis Network Video Recorders; [UDP] Axis Network Video
            Recorders
        * - ``autotunnel``
-         - [UDP] IPSEC VPN tunnel over UDP [:rfc:`6281`]
+         - [UDP] IPSEC VPN tunnel over UDP [RFC 6281]
        * - ``bhipc``
          - [TCP] Becker & Hickl Inter Process Communication; [UDP] Becker &
            Hickl Inter Process Communication
@@ -113,10 +113,10 @@ class UDP(AppType):
        * - ``conecube``
          - [UDP] DNS SRV service for smarthome server
        * - ``core-rd``
-         - [TCP] Resource Directory accessed using CoAP over TCP [:rfc:`9176`];
-           [UDP] Resource Directory accessed using CoAP [:rfc:`9176`]
+         - [TCP] Resource Directory accessed using CoAP over TCP [RFC 9176];
+           [UDP] Resource Directory accessed using CoAP [RFC 9176]
        * - ``core-rd-dtls``
-         - [UDP] Resource Directory accessed using CoAP over DTLS [:rfc:`9176`]
+         - [UDP] Resource Directory accessed using CoAP over DTLS [RFC 9176]
        * - ``coviot``
          - [TCP] Service for coviot branded devices; [UDP] Service for coviot
            branded devices
@@ -140,11 +140,11 @@ class UDP(AppType):
          - [TCP] DOTS Signal Channel Call Home Protocol. The service name is
            used to construct the SRV service names "_dots-call-home._udp" and
            "_dots-call-home._tcp" for discovering Call Home DOTS clients used
-           to establish DOTS signal channel call home. [:rfc:`8973`]; [UDP]
-           DOTS Signal Channel Call Home Protocol. The service name is used to
+           to establish DOTS signal channel call home. [RFC 8973]; [UDP] DOTS
+           Signal Channel Call Home Protocol. The service name is used to
            construct the SRV service names "_dots-call-home._udp" and "_dots-
            call-home._tcp" for discovering Call Home DOTS clients used to
-           establish DOTS signal channel call home. [:rfc:`8973`]
+           establish DOTS signal channel call home. [RFC 8973]
        * - ``eb-sync``
          - [TCP] Easy Books App data sync helper for Mac OS X and iOS; [UDP]
            Easy Books App data sync helper for Mac OS X and iOS
@@ -179,9 +179,11 @@ class UDP(AppType):
          - [UDP] Honeywell Video Systems
        * - ``htvncconf``
          - [UDP] HomeTouch Vnc Configuration
+       * - ``iip``
+         - [UDP] Tool to get infos about a host
        * - ``im``
-         - [TCP] Instant Messaging [:rfc:`3861`]; [UDP] Instant Messaging
-           [:rfc:`3861`]
+         - [TCP] Instant Messaging [RFC 3861]; [UDP] Instant Messaging [RFC
+           3861]
        * - ``iperfd``
          - [TCP] Network socket performance test; [UDP] Network socket
            performance test
@@ -276,7 +278,7 @@ class UDP(AppType):
          - [TCP] Local and remote file transfers; [UDP] Local and remote file
            transfers
        * - ``pres``
-         - [TCP] Presence [:rfc:`3861`]; [UDP] Presence [:rfc:`3861`]
+         - [TCP] Presence [RFC 3861]; [UDP] Presence [RFC 3861]
        * - ``psap``
          - [UDP] Progal Service Advertising Protocol
        * - ``radioport``
@@ -285,7 +287,7 @@ class UDP(AppType):
          - [UDP] Authentication, Accounting, and Dynamic Authorization via the
            RADIUS protocol. This service name is used to construct the SRV
            service label "_radiusdtls" for discovery of RADIUS/DTLS servers.
-           [:rfc:`7585`]
+           [RFC 7585]
        * - ``recolive-cc``
          - [TCP] Remote Camera Control; [UDP] Remote Camera Control
        * - ``scoop-sftp``
@@ -306,9 +308,8 @@ class UDP(AppType):
        * - ``sleep-proxy``
          - [UDP] Sleep Proxy Server
        * - ``slpda``
-         - [TCP] Remote Service Discovery in the Service Location
-           [:rfc:`3832`]; [UDP] Remote Service Discovery in the Service
-           Location [:rfc:`3832`]
+         - [TCP] Remote Service Discovery in the Service Location [RFC 3832];
+           [UDP] Remote Service Discovery in the Service Location [RFC 3832]
        * - ``ss-sign-disc``
          - [UDP] Samsung Smart Interaction for Group Network Discovery
        * - ``sugarlock-rcp``
@@ -401,8 +402,8 @@ class UDP(AppType):
         9100: 'hp-pdl-datastr',
     }
 
-    #: - [TCP] Reserved [:rfc:`6335`]
-    #: - [UDP] Reserved [:rfc:`6335`]
+    #: - [TCP] Reserved [RFC 6335]
+    #: - [UDP] Reserved [RFC 6335]
     reserved_0 = 0, 'reserved', TransportProtocol.udp
 
     #: - [TCP] TCP Port Service Multiplexer
@@ -439,8 +440,8 @@ class UDP(AppType):
 
     #: - [TCP] Discard
     #: - [UDP] Discard
-    #: - [SCTP] Discard [:rfc:`9260`]
-    #: - [DCCP] Discard [:rfc:`4340`]
+    #: - [SCTP] Discard [RFC 9260]
+    #: - [DCCP] Discard [RFC 4340]
     discard = 9, 'discard', TransportProtocol.udp
 
     #: - [TCP] Unassigned
@@ -455,8 +456,8 @@ class UDP(AppType):
     #: - [UDP] Unassigned
     unassigned_12 = 12, 'unassigned', TransportProtocol.udp
 
-    #: - [TCP] Daytime [:rfc:`867`]
-    #: - [UDP] Daytime [:rfc:`867`]
+    #: - [TCP] Daytime [RFC 867]
+    #: - [UDP] Daytime [RFC 867]
     daytime = 13, 'daytime', TransportProtocol.udp
 
     #: - [TCP] Unassigned
@@ -480,16 +481,16 @@ class UDP(AppType):
 
     #: - [TCP] File Transfer [Default Data]
     #: - [UDP] File Transfer [Default Data]
-    #: - [SCTP] FTP [:rfc:`9260`]
+    #: - [SCTP] FTP [RFC 9260]
     ftp_data = 20, 'ftp-data', TransportProtocol.udp
 
-    #: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]
-    #: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]
-    #: - [SCTP] FTP [:rfc:`9260`]
+    #: - [TCP] File Transfer Protocol [Control] [RFC 959]
+    #: - [UDP] File Transfer Protocol [Control] [RFC 959]
+    #: - [SCTP] FTP [RFC 9260]
     ftp = 21, 'ftp', TransportProtocol.udp
 
-    #: - [TCP] Telnet [:rfc:`854`]
-    #: - [UDP] Telnet [:rfc:`854`]
+    #: - [TCP] Telnet [RFC 854]
+    #: - [UDP] Telnet [RFC 854]
     telnet = 23, 'telnet', TransportProtocol.udp
 
     #: - [TCP] any private mail system
@@ -662,7 +663,7 @@ class UDP(AppType):
     #: - [UDP] TACACS-Database Service
     tacacs_ds = 65, 'tacacs-ds', TransportProtocol.udp
 
-    #: - [TCP] Bootstrap Protocol Server [:rfc:`951`]
+    #: - [TCP] Bootstrap Protocol Server [RFC 951]
     #: - [UDP] Bootstrap Protocol Server
     bootps = 67, 'bootps', TransportProtocol.udp
 
@@ -714,13 +715,13 @@ class UDP(AppType):
     #: - [UDP] Finger
     finger = 79, 'finger', TransportProtocol.udp
 
-    #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
-    #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
-    #: - [SCTP] HTTP [:rfc:`9260`]
+    #: - [TCP] World Wide Web HTTP [RFC 9110]
+    #: - [UDP] World Wide Web HTTP [RFC 9110]
+    #: - [SCTP] HTTP [RFC 9260]
     http = 80, 'http', TransportProtocol.udp
 
-    #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
-    #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
+    #: - [TCP] World Wide Web HTTP [RFC 9110]
+    #: - [UDP] World Wide Web HTTP [RFC 9110]
     www = 80, 'www', TransportProtocol.udp
 
     #: - [TCP] World Wide Web HTTP
@@ -751,8 +752,8 @@ class UDP(AppType):
     #: - [UDP] any private terminal link
     any_private_terminal_link = 87, 'any_private_terminal_link', TransportProtocol.udp
 
-    #: - [TCP] Kerberos [:rfc:`4120`]
-    #: - [UDP] Kerberos [:rfc:`4120`]
+    #: - [TCP] Kerberos [RFC 4120]
+    #: - [UDP] Kerberos [RFC 4120]
     kerberos = 88, 'kerberos', TransportProtocol.udp
 
     #: - [TCP] SU/MIT Telnet Gateway
@@ -867,8 +868,8 @@ class UDP(AppType):
     #: - [UDP] SQL Services
     sqlserv = 118, 'sqlserv', TransportProtocol.udp
 
-    #: - [TCP] Network News Transfer Protocol [:rfc:`3977`]
-    #: - [UDP] Network News Transfer Protocol [:rfc:`3977`]
+    #: - [TCP] Network News Transfer Protocol [RFC 3977]
+    #: - [UDP] Network News Transfer Protocol [RFC 3977]
     nntp = 119, 'nntp', TransportProtocol.udp
 
     #: - [TCP] CFDPTKT
@@ -883,8 +884,8 @@ class UDP(AppType):
     #: - [UDP] SMAKYNET
     smakynet = 122, 'smakynet', TransportProtocol.udp
 
-    #: - [TCP] Network Time Protocol [:rfc:`5905`]
-    #: - [UDP] Network Time Protocol [:rfc:`5905`]
+    #: - [TCP] Network Time Protocol [RFC 5905]
+    #: - [UDP] Network Time Protocol [RFC 5905]
     ntp = 123, 'ntp', TransportProtocol.udp
 
     #: - [TCP] ANSA REX Trader
@@ -963,7 +964,7 @@ class UDP(AppType):
     #: - [UDP] Britton-Lee IDM
     bl_idm = 142, 'bl-idm', TransportProtocol.udp
 
-    #: [UDP] Reserved [:rfc:`9051`]
+    #: [UDP] Reserved [RFC 9051]
     reserved_143 = 143, 'reserved', TransportProtocol.udp
 
     #: - [TCP] UAAC Protocol
@@ -1116,7 +1117,7 @@ class UDP(AppType):
 
     #: - [TCP] Border Gateway Protocol
     #: - [UDP] Border Gateway Protocol
-    #: - [SCTP] BGP [:rfc:`9260`]
+    #: - [SCTP] BGP [RFC 9260]
     bgp = 179, 'bgp', TransportProtocol.udp
 
     #: - [TCP] Intergraph
@@ -1387,11 +1388,11 @@ class UDP(AppType):
     #: - [UDP] Tobit David Replica
     td_replica = 268, 'td-replica', TransportProtocol.udp
 
-    #: - [TCP] MANET Protocols [:rfc:`5498`]
-    #: - [UDP] MANET Protocols [:rfc:`5498`]
+    #: - [TCP] MANET Protocols [RFC 5498]
+    #: - [UDP] MANET Protocols [RFC 5498]
     manet = 269, 'manet', TransportProtocol.udp
 
-    #: [UDP] Q-mode encapsulation for GIST messages [:rfc:`5971`]
+    #: [UDP] Q-mode encapsulation for GIST messages [RFC 5971]
     gist = 270, 'gist', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -1510,12 +1511,12 @@ class UDP(AppType):
     #: - [UDP] Cabletron Management Protocol
     csi_sgwp = 348, 'csi-sgwp', TransportProtocol.udp
 
-    #: - [TCP] MATIP Type A [:rfc:`2351`]
-    #: - [UDP] MATIP Type A [:rfc:`2351`]
+    #: - [TCP] MATIP Type A [RFC 2351]
+    #: - [UDP] MATIP Type A [RFC 2351]
     matip_type_a = 350, 'matip-type-a', TransportProtocol.udp
 
-    #: - [TCP] MATIP Type B [:rfc:`2351`]
-    #: - [UDP] MATIP Type B [:rfc:`2351`]
+    #: - [TCP] MATIP Type B [RFC 2351]
+    #: - [UDP] MATIP Type B [RFC 2351]
     matip_type_b = 351, 'matip-type-b', TransportProtocol.udp
 
     #: - [TCP] bhoetty
@@ -1862,8 +1863,8 @@ class UDP(AppType):
     #: - [UDP] IASD
     iasd = 432, 'iasd', TransportProtocol.udp
 
-    #: - [TCP] NNTP for transit servers (NNSP) [:rfc:`3977`]
-    #: - [UDP] NNTP for transit servers (NNSP) [:rfc:`3977`]
+    #: - [TCP] NNTP for transit servers (NNSP) [RFC 3977]
+    #: - [UDP] NNTP for transit servers (NNSP) [RFC 3977]
     nnsp = 433, 'nnsp', TransportProtocol.udp
 
     #: - [TCP] MobileIP-Agent
@@ -1906,8 +1907,8 @@ class UDP(AppType):
     #: - [UDP] cvc_hostd
     cvc_hostd = 442, 'cvc-hostd', TransportProtocol.udp
 
-    #: - [TCP] Simple Network Paging Protocol [:rfc:`1568`]
-    #: - [UDP] Simple Network Paging Protocol [:rfc:`1568`]
+    #: - [TCP] Simple Network Paging Protocol [RFC 1568]
+    #: - [UDP] Simple Network Paging Protocol [RFC 1568]
     snpp = 444, 'snpp', TransportProtocol.udp
 
     #: - [TCP] Microsoft-DS
@@ -2170,7 +2171,7 @@ class UDP(AppType):
     #: net and the load average of the machine
     who = 513, 'who', TransportProtocol.udp
 
-    #: [UDP] [:rfc:`5426`]
+    #: [UDP] [RFC 5426]
     syslog = 514, 'syslog', TransportProtocol.udp
 
     #: - [TCP] spooler
@@ -2298,11 +2299,11 @@ class UDP(AppType):
     appleqtcsrvr = 545, 'appleqtcsrvr', TransportProtocol.udp
 
     #: - [TCP] DHCPv6 Client
-    #: - [UDP] DHCPv6 Client [:rfc:`9915`]
+    #: - [UDP] DHCPv6 Client [RFC 9915]
     dhcpv6_client = 546, 'dhcpv6-client', TransportProtocol.udp
 
-    #: - [TCP] DHCPv6 Server [:rfc:`5460`]
-    #: - [UDP] DHCPv6 Server [:rfc:`9915`]
+    #: - [TCP] DHCPv6 Server [RFC 5460]
+    #: - [UDP] DHCPv6 Server [RFC 9915]
     dhcpv6_server = 547, 'dhcpv6-server', TransportProtocol.udp
 
     #: - [TCP] AFP over TCP
@@ -2317,8 +2318,8 @@ class UDP(AppType):
     #: - [UDP] new-who [n/a]
     new_rwho = 550, 'new-rwho', TransportProtocol.udp
 
-    #: - [TCP] cybercash [:rfc:`1898`]
-    #: - [UDP] cybercash [:rfc:`1898`]
+    #: - [TCP] cybercash [RFC 1898]
+    #: - [UDP] cybercash [RFC 1898]
     cybercash = 551, 'cybercash', TransportProtocol.udp
 
     #: - [TCP] DeviceShare
@@ -2365,8 +2366,8 @@ class UDP(AppType):
     #: - [UDP] chcmd
     chshell = 562, 'chshell', TransportProtocol.udp
 
-    #: - [TCP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]
-    #: - [UDP] nntp protocol over TLS/SSL (was snntp) [:rfc:`4642`]
+    #: - [TCP] nntp protocol over TLS/SSL (was snntp) [RFC 4642]
+    #: - [UDP] nntp protocol over TLS/SSL (was snntp) [RFC 4642]
     nntps = 563, 'nntps', TransportProtocol.udp
 
     #: - [TCP] plan 9 file service
@@ -2457,8 +2458,8 @@ class UDP(AppType):
     #: - [UDP] Password Change
     password_chg = 586, 'password-chg', TransportProtocol.udp
 
-    #: - [TCP] Message Submission [:rfc:`6409`]
-    #: - [UDP] Message Submission [:rfc:`6409`]
+    #: - [TCP] Message Submission [RFC 6409]
+    #: - [UDP] Message Submission [RFC 6409]
     submission = 587, 'submission', TransportProtocol.udp
 
     #: - [TCP] CAL
@@ -2509,24 +2510,24 @@ class UDP(AppType):
     #: - [UDP] Sun IPC server
     ipcserver = 600, 'ipcserver', TransportProtocol.udp
 
-    #: - [TCP] Reliable Syslog Service [:rfc:`3195`]
-    #: - [UDP] Reliable Syslog Service [:rfc:`3195`]
+    #: - [TCP] Reliable Syslog Service [RFC 3195]
+    #: - [UDP] Reliable Syslog Service [RFC 3195]
     syslog_conn = 601, 'syslog-conn', TransportProtocol.udp
 
-    #: - [TCP] XML-RPC over BEEP [:rfc:`3529`]
-    #: - [UDP] XML-RPC over BEEP [:rfc:`3529`]
+    #: - [TCP] XML-RPC over BEEP [RFC 3529]
+    #: - [UDP] XML-RPC over BEEP [RFC 3529]
     xmlrpc_beep = 602, 'xmlrpc-beep', TransportProtocol.udp
 
-    #: - [TCP] IDXP [:rfc:`4767`]
-    #: - [UDP] IDXP [:rfc:`4767`]
+    #: - [TCP] IDXP [RFC 4767]
+    #: - [UDP] IDXP [RFC 4767]
     idxp = 603, 'idxp', TransportProtocol.udp
 
-    #: - [TCP] TUNNEL [:rfc:`3620`]
-    #: - [UDP] TUNNEL [:rfc:`3620`]
+    #: - [TCP] TUNNEL [RFC 3620]
+    #: - [UDP] TUNNEL [RFC 3620]
     tunnel = 604, 'tunnel', TransportProtocol.udp
 
-    #: - [TCP] SOAP over BEEP [:rfc:`4227`]
-    #: - [UDP] SOAP over BEEP [:rfc:`4227`]
+    #: - [TCP] SOAP over BEEP [RFC 4227]
+    #: - [UDP] SOAP over BEEP [RFC 4227]
     soap_beep = 605, 'soap-beep', TransportProtocol.udp
 
     #: - [TCP] Cray Unified Resource Manager
@@ -2628,8 +2629,8 @@ class UDP(AppType):
     #: - [UDP] 3Com AMP3
     UDP_3com_amp3 = 629, '3com-amp3', TransportProtocol.udp
 
-    #: - [TCP] IPP (Internet Printing Protocol) [:rfc:`8011`]
-    #: - [UDP] IPP (Internet Printing Protocol) [:rfc:`8011`]
+    #: - [TCP] IPP (Internet Printing Protocol) [RFC 8011]
+    #: - [UDP] IPP (Internet Printing Protocol) [RFC 8011]
     ipp = 631, 'ipp', TransportProtocol.udp
 
     #: - [TCP] bmpp
@@ -2692,7 +2693,7 @@ class UDP(AppType):
     #: - [UDP] LDP
     ldp = 646, 'ldp', TransportProtocol.udp
 
-    #: - [TCP] DHCP Failover [:rfc:`8156`]
+    #: - [TCP] DHCP Failover [RFC 8156]
     #: - [UDP] DHCP Failover
     dhcp_failover = 647, 'dhcp-failover', TransportProtocol.udp
 
@@ -2903,12 +2904,12 @@ class UDP(AppType):
     #: - [UDP] Access Network
     accessnetwork = 699, 'accessnetwork', TransportProtocol.udp
 
-    #: - [TCP] Link Management Protocol (LMP) [:rfc:`4204`]
-    #: - [UDP] Link Management Protocol (LMP) [:rfc:`4204`]
+    #: - [TCP] Link Management Protocol (LMP) [RFC 4204]
+    #: - [UDP] Link Management Protocol (LMP) [RFC 4204]
     lmp = 701, 'lmp', TransportProtocol.udp
 
-    #: - [TCP] IRIS over BEEP [:rfc:`3983`]
-    #: - [UDP] IRIS over BEEP [:rfc:`3983`]
+    #: - [TCP] IRIS over BEEP [RFC 3983]
+    #: - [UDP] IRIS over BEEP [RFC 3983]
     iris_beep = 702, 'iris-beep', TransportProtocol.udp
 
     #: - [TCP] errlog copy/server daemon
@@ -2939,23 +2940,23 @@ class UDP(AppType):
     #: - [UDP] Cisco TDP
     cisco_tdp = 711, 'cisco-tdp', TransportProtocol.udp
 
-    #: - [TCP] TBRPF [:rfc:`3684`]
-    #: - [UDP] TBRPF [:rfc:`3684`]
+    #: - [TCP] TBRPF [RFC 3684]
+    #: - [UDP] TBRPF [RFC 3684]
     tbrpf = 712, 'tbrpf', TransportProtocol.udp
 
     #: - [TCP] IRIS over XPC
     #: - [UDP] IRIS over XPC
     iris_xpc = 713, 'iris-xpc', TransportProtocol.udp
 
-    #: - [TCP] IRIS over XPCS [:rfc:`4992`]
-    #: - [UDP] IRIS over XPCS [:rfc:`4992`]
+    #: - [TCP] IRIS over XPCS [RFC 4992]
+    #: - [UDP] IRIS over XPCS [RFC 4992]
     iris_xpcs = 714, 'iris-xpcs', TransportProtocol.udp
 
-    #: - [TCP] IRIS-LWZ [:rfc:`4993`]
-    #: - [UDP] IRIS-LWZ [:rfc:`4993`]
+    #: - [TCP] IRIS-LWZ [RFC 4993]
+    #: - [UDP] IRIS-LWZ [RFC 4993]
     iris_lwz = 715, 'iris-lwz', TransportProtocol.udp
 
-    #: [UDP] PANA Messages [:rfc:`5191`]
+    #: [UDP] PANA Messages [RFC 5191]
     pana = 716, 'pana', TransportProtocol.udp
 
     #: - [TCP] IBM NetView DM/6000 Server/Client
@@ -3121,8 +3122,8 @@ class UDP(AppType):
     #: - [UDP] PKIX-3 CA/RA
     pkix_3_ca_ra = 829, 'pkix-3-ca-ra', TransportProtocol.udp
 
-    #: - [TCP] NETCONF over SSH [:rfc:`6242`]
-    #: - [UDP] NETCONF over SSH [:rfc:`6242`]
+    #: - [TCP] NETCONF over SSH [RFC 6242]
+    #: - [UDP] NETCONF over SSH [RFC 6242]
     netconf_ssh = 830, 'netconf-ssh', TransportProtocol.udp
 
     #: - [TCP] Reserved
@@ -3141,27 +3142,27 @@ class UDP(AppType):
     #: - [UDP] dhcp-failover 2
     dhcp_failover2 = 847, 'dhcp-failover2', TransportProtocol.udp
 
-    #: - [TCP] GDOI [:rfc:`3547`]
-    #: - [UDP] GDOI [:rfc:`3547`]
+    #: - [TCP] GDOI [RFC 3547]
+    #: - [UDP] GDOI [RFC 3547]
     gdoi = 848, 'gdoi', TransportProtocol.udp
 
-    #: - [TCP] DNS query-response protocol run over TLS [:rfc:`7858`]
-    #: - [UDP] DNS query-response protocol run over DTLS or QUIC
-    #:   [:rfc:`7858`][:rfc:`8094`][:rfc:`9250`]
+    #: - [TCP] DNS query-response protocol run over TLS [RFC 7858]
+    #: - [UDP] DNS query-response protocol run over DTLS or QUIC [RFC 7858][RFC
+    #:   8094][RFC 9250]
     domain_s = 853, 'domain-s', TransportProtocol.udp
 
-    #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]
-    #: - [UDP] Dynamic Link Exchange Protocol (DLEP) [:rfc:`8175`]
+    #: - [TCP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]
+    #: - [UDP] Dynamic Link Exchange Protocol (DLEP) [RFC 8175]
     dlep = 854, 'dlep', TransportProtocol.udp
 
-    #: - [TCP] iSCSI [:rfc:`7143`]
-    #: - [UDP] iSCSI [:rfc:`7143`]
+    #: - [TCP] iSCSI [RFC 7143]
+    #: - [UDP] iSCSI [RFC 7143]
     iscsi = 860, 'iscsi', TransportProtocol.udp
 
-    #: [UDP] OWAMP-Test [:rfc:`8545`]
+    #: [UDP] OWAMP-Test [RFC 8545]
     owamp_test = 861, 'owamp-test', TransportProtocol.udp
 
-    #: [UDP] TWAMP-Test Receiver Port [:rfc:`8545`]
+    #: [UDP] TWAMP-Test Receiver Port [RFC 8545]
     twamp_test = 862, 'twamp-test', TransportProtocol.udp
 
     #: - [TCP] rsync
@@ -3200,8 +3201,8 @@ class UDP(AppType):
     #: - [UDP] self documenting Panic Door: send 0x00 for info
     ideafarm_panic = 903, 'ideafarm-panic', TransportProtocol.udp
 
-    #: - [TCP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]
-    #: - [UDP] Kerberized Internet Negotiation of Keys (KINK) [:rfc:`4430`]
+    #: - [TCP] Kerberized Internet Negotiation of Keys (KINK) [RFC 4430]
+    #: - [UDP] Kerberized Internet Negotiation of Keys (KINK) [RFC 4430]
     kink = 910, 'kink', TransportProtocol.udp
 
     #: - [TCP] xact-backup
@@ -3212,14 +3213,14 @@ class UDP(AppType):
     #: - [UDP] APEX relay-relay service
     apex_mesh = 912, 'apex-mesh', TransportProtocol.udp
 
-    #: - [TCP] APEX endpoint-relay service [:rfc:`3340`]
-    #: - [UDP] APEX endpoint-relay service [:rfc:`3340`]
+    #: - [TCP] APEX endpoint-relay service [RFC 3340]
+    #: - [UDP] APEX endpoint-relay service [RFC 3340]
     apex_edge = 913, 'apex-edge', TransportProtocol.udp
 
-    #: [UDP] Routing in Fat Trees Link Information Element [:rfc:`9692`]
+    #: [UDP] Routing in Fat Trees Link Information Element [RFC 9692]
     rift_lies = 914, 'rift-lies', TransportProtocol.udp
 
-    #: [UDP] Routing in Fat Trees Topology Information Element [:rfc:`9692`]
+    #: [UDP] Routing in Fat Trees Topology Information Element [RFC 9692]
     rift_ties = 915, 'rift-ties', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -3233,22 +3234,22 @@ class UDP(AppType):
     #: - [UDP] ftp protocol, control, over TLS/SSL
     ftps = 990, 'ftps', TransportProtocol.udp
 
-    #: - [TCP] Netnews Administration System [:rfc:`4707`]
-    #: - [UDP] Netnews Administration System [:rfc:`4707`]
+    #: - [TCP] Netnews Administration System [RFC 4707]
+    #: - [UDP] Netnews Administration System [RFC 4707]
     nas = 991, 'nas', TransportProtocol.udp
 
     #: - [TCP] telnet protocol over TLS/SSL
     #: - [UDP] telnet protocol over TLS/SSL
     telnets = 992, 'telnets', TransportProtocol.udp
 
-    #: [UDP] Reserved [:rfc:`9051`]
+    #: [UDP] Reserved [RFC 9051]
     reserved_993 = 993, 'reserved', TransportProtocol.udp
 
     #: - [TCP] Reserved
     #: - [UDP] Reserved
     reserved_994 = 994, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] POP3 over TLS protocol [:rfc:`8314`]
+    #: - [TCP] POP3 over TLS protocol [RFC 8314]
     #: - [UDP] pop3 protocol over TLS/SSL (was spop3)
     pop3s = 995, 'pop3s', TransportProtocol.udp
 
@@ -3284,24 +3285,24 @@ class UDP(AppType):
     #: - [UDP] surf
     surf = 1010, 'surf', TransportProtocol.udp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.udp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.udp
 
-    #: - [TCP] Reserved [:rfc:`6335`]
-    #: - [UDP] Reserved [:rfc:`6335`]
+    #: - [TCP] Reserved [RFC 6335]
+    #: - [UDP] Reserved [RFC 6335]
     reserved_1023 = 1023, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] Reserved [:rfc:`6335`]
-    #: - [UDP] Reserved [:rfc:`6335`]
+    #: - [TCP] Reserved [RFC 6335]
+    #: - [UDP] Reserved [RFC 6335]
     reserved_1024 = 1024, 'reserved', TransportProtocol.udp
 
     #: - [TCP] network blackjack
@@ -3312,7 +3313,7 @@ class UDP(AppType):
     #: - [UDP] Calendar Access Protocol
     cap = 1026, 'cap', TransportProtocol.udp
 
-    #: [UDP] IPv6 Behind NAT44 CPEs [:rfc:`6751`]
+    #: [UDP] IPv6 Behind NAT44 CPEs [RFC 6751]
     UDP_6a44 = 1027, '6a44', TransportProtocol.udp
 
     #: - [TCP] Solid Mux Server
@@ -3339,8 +3340,8 @@ class UDP(AppType):
     #: - [UDP] AMS
     ams = 1037, 'ams', TransportProtocol.udp
 
-    #: - [TCP] Message Tracking Query Protocol [:rfc:`3887`]
-    #: - [UDP] Message Tracking Query Protocol [:rfc:`3887`]
+    #: - [TCP] Message Tracking Query Protocol [RFC 3887]
+    #: - [UDP] Message Tracking Query Protocol [RFC 3887]
     mtqp = 1038, 'mtqp', TransportProtocol.udp
 
     #: - [TCP] Streamlined Blackhole
@@ -3642,9 +3643,9 @@ class UDP(AppType):
     #: - [UDP] Intelligent Communication Protocol
     icp = 1112, 'icp', TransportProtocol.udp
 
-    #: - [TCP] Licklider Transmission Protocol [:rfc:`5326`]
-    #: - [UDP] Licklider Transmission Protocol [:rfc:`5326`][:rfc:`7122`]
-    #: - [DCCP] Licklider Transmission Protocol [:rfc:`7122`]
+    #: - [TCP] Licklider Transmission Protocol [RFC 5326]
+    #: - [UDP] Licklider Transmission Protocol [RFC 5326][RFC 7122]
+    #: - [DCCP] Licklider Transmission Protocol [RFC 7122]
     ltp_deepspace = 1113, 'ltp-deepspace', TransportProtocol.udp
 
     #: - [TCP] Mini SQL
@@ -3663,8 +3664,8 @@ class UDP(AppType):
     #: - [UDP] ARDUS Multicast Transfer
     ardus_mtrns = 1117, 'ardus-mtrns', TransportProtocol.udp
 
-    #: - [TCP] SACRED [:rfc:`3767`]
-    #: - [UDP] SACRED [:rfc:`3767`]
+    #: - [TCP] SACRED [RFC 3767]
+    #: - [UDP] SACRED [RFC 3767]
     sacred = 1118, 'sacred', TransportProtocol.udp
 
     #: - [TCP] Battle.net Chat/Game Protocol
@@ -3807,8 +3808,8 @@ class UDP(AppType):
     #: - [UDP] Winpopup LAN Messenger
     winpoplanmess = 1152, 'winpoplanmess', TransportProtocol.udp
 
-    #: - [TCP] ANSI C12.22 Port [:rfc:`6142`]
-    #: - [UDP] ANSI C12.22 Port [:rfc:`6142`]
+    #: - [TCP] ANSI C12.22 Port [RFC 6142]
+    #: - [UDP] ANSI C12.22 Port [RFC 6142]
     c1222_acse = 1153, 'c1222-acse', TransportProtocol.udp
 
     #: - [TCP] Community Service
@@ -6128,8 +6129,8 @@ class UDP(AppType):
     #: - [UDP] HKS License Manager
     hks_lm = 1722, 'hks-lm', TransportProtocol.udp
 
-    #: - [TCP] pptp [:rfc:`2637`]
-    #: - [UDP] pptp [:rfc:`2637`]
+    #: - [TCP] pptp [RFC 2637]
+    #: - [UDP] pptp [RFC 2637]
     pptp = 1723, 'pptp', TransportProtocol.udp
 
     #: - [TCP] csbphonemaster
@@ -6486,12 +6487,12 @@ class UDP(AppType):
     #: - [UDP] Scientia-SDB
     scientia_sdb = 1811, 'scientia-sdb', TransportProtocol.udp
 
-    #: - [TCP] RADIUS [:rfc:`2865`]
-    #: - [UDP] RADIUS [:rfc:`2865`]
+    #: - [TCP] RADIUS [RFC 2865]
+    #: - [UDP] RADIUS [RFC 2865]
     radius = 1812, 'radius', TransportProtocol.udp
 
-    #: - [TCP] RADIUS Accounting [:rfc:`2866`]
-    #: - [UDP] RADIUS Accounting [:rfc:`2866`]
+    #: - [TCP] RADIUS Accounting [RFC 2866]
+    #: - [UDP] RADIUS Accounting [RFC 2866]
     radius_acct = 1813, 'radius-acct', TransportProtocol.udp
 
     #: - [TCP] TDP Suite
@@ -6626,8 +6627,8 @@ class UDP(AppType):
     #: - [UDP] Tunstall PNC
     tunstall_pnc = 1846, 'tunstall-pnc', TransportProtocol.udp
 
-    #: - [TCP] SLP Notification [:rfc:`3082`]
-    #: - [UDP] SLP Notification [:rfc:`3082`]
+    #: - [TCP] SLP Notification [RFC 3082]
+    #: - [UDP] SLP Notification [RFC 3082]
     slp_notify = 1847, 'slp-notify', TransportProtocol.udp
 
     #: - [TCP] fjdocdist
@@ -7174,8 +7175,8 @@ class UDP(AppType):
     #: - [UDP] BB
     bb = 1984, 'bb', TransportProtocol.udp
 
-    #: - [TCP] Hot Standby Router Protocol [:rfc:`2281`]
-    #: - [UDP] Hot Standby Router Protocol [:rfc:`2281`]
+    #: - [TCP] Hot Standby Router Protocol [RFC 2281]
+    #: - [UDP] Hot Standby Router Protocol [RFC 2281]
     hsrp = 1985, 'hsrp', TransportProtocol.udp
 
     #: - [TCP] cisco license management
@@ -7431,7 +7432,7 @@ class UDP(AppType):
 
     #: - [TCP] Network File System - Sun Microsystems
     #: - [UDP] Network File System - Sun Microsystems
-    #: - [SCTP] Network File System [:rfc:`5665`]
+    #: - [SCTP] Network File System [RFC 5665]
     nfs = 2049, 'nfs', TransportProtocol.udp
 
     #: - [TCP] Avaya EMB Config Port
@@ -7566,8 +7567,8 @@ class UDP(AppType):
     #: - [UDP] Infowave Mobility Server
     infowave = 2082, 'infowave', TransportProtocol.udp
 
-    #: - [TCP] Secure Radius Service [:rfc:`6614`]
-    #: - [UDP] Secure Radius Service [:rfc:`7360`]
+    #: - [TCP] Secure Radius Service [RFC 6614]
+    #: - [UDP] Secure Radius Service [RFC 7360]
     radsec = 2083, 'radsec', TransportProtocol.udp
 
     #: - [TCP] SunCluster Geographic
@@ -7802,8 +7803,8 @@ class UDP(AppType):
     #: - [UDP] IAS-ADMIND
     ias_admind = 2141, 'ias-admind', TransportProtocol.udp
 
-    #: - [TCP] TDM OVER IP [:rfc:`5087`]
-    #: - [UDP] TDM OVER IP [:rfc:`5087`]
+    #: - [TCP] TDM OVER IP [RFC 5087]
+    #: - [UDP] TDM OVER IP [RFC 5087]
     tdmoip = 2142, 'tdmoip', TransportProtocol.udp
 
     #: - [TCP] Live Vault Job Control
@@ -8290,8 +8291,8 @@ class UDP(AppType):
     #: - [UDP] OntoBroker
     ontobroker = 2267, 'ontobroker', TransportProtocol.udp
 
-    #: - [TCP] AMT [:rfc:`7450`]
-    #: - [UDP] AMT [:rfc:`7450`]
+    #: - [TCP] AMT [RFC 7450]
+    #: - [UDP] AMT [RFC 7450]
     amt = 2268, 'amt', TransportProtocol.udp
 
     #: - [TCP] MIKEY
@@ -11464,8 +11465,8 @@ class UDP(AppType):
     #: - [UDP] Broadcast Routing Protocol
     brp = 3043, 'brp', TransportProtocol.udp
 
-    #: - [TCP] Extensible Provisioning Protocol [:rfc:`5734`]
-    #: - [UDP] EPP running over QUIC [:rfc:`5734`][RFC-ietf-regext-epp-quic-12]
+    #: - [TCP] Extensible Provisioning Protocol [RFC 5734]
+    #: - [UDP] EPP running over QUIC [RFC 5734][RFC-ietf-regext-epp-quic-12]
     epp_700 = 700, 'epp', TransportProtocol.udp
 
     #: - [TCP] EndPoint Protocol
@@ -12109,8 +12110,8 @@ class UDP(AppType):
     #: - [UDP] Network Watcher DB Access
     netwatcher_db = 3204, 'netwatcher-db', TransportProtocol.udp
 
-    #: - [TCP] iSNS Server Port [:rfc:`4171`]
-    #: - [UDP] iSNS Server Port [:rfc:`4171`]
+    #: - [TCP] iSNS Server Port [RFC 4171]
+    #: - [UDP] iSNS Server Port [RFC 4171]
     isns = 3205, 'isns', TransportProtocol.udp
 
     #: - [TCP] IronMail POP Proxy
@@ -12189,8 +12190,8 @@ class UDP(AppType):
     #: - [UDP] AES Discovery Port
     aes_discovery = 3224, 'aes-discovery', TransportProtocol.udp
 
-    #: - [TCP] FCIP [:rfc:`3821`]
-    #: - [UDP] FCIP [:rfc:`3821`]
+    #: - [TCP] FCIP [RFC 3821]
+    #: - [UDP] FCIP [RFC 3821]
     fcip_port = 3225, 'fcip-port', TransportProtocol.udp
 
     #: - [TCP] ISI Industry Software IRP
@@ -12217,8 +12218,8 @@ class UDP(AppType):
     #: - [UDP] VidiGo communication (previous was: Delta Solutions Direct)
     vidigo = 3231, 'vidigo', TransportProtocol.udp
 
-    #: - [TCP] MDT port [:rfc:`6513`]
-    #: - [UDP] MDT port [:rfc:`6513`]
+    #: - [TCP] MDT port [RFC 6513]
+    #: - [UDP] MDT port [RFC 6513]
     mdtp = 3232, 'mdtp', TransportProtocol.udp
 
     #: - [TCP] WhiskerControl main port
@@ -12329,8 +12330,8 @@ class UDP(AppType):
     #: - [UDP] Epson Network Common Devi
     epncdp2 = 3259, 'epncdp2', TransportProtocol.udp
 
-    #: - [TCP] iSCSI port [:rfc:`7143`]
-    #: - [UDP] iSCSI port [:rfc:`7143`]
+    #: - [TCP] iSCSI port [RFC 7143]
+    #: - [UDP] iSCSI port [RFC 7143]
     iscsi_target = 3260, 'iscsi-target', TransportProtocol.udp
 
     #: - [TCP] winShadow
@@ -12504,8 +12505,8 @@ class UDP(AppType):
     #: - [UDP] OP Session Server
     opsession_srvr = 3304, 'opsession-srvr', TransportProtocol.udp
 
-    #: - [TCP] ODETTE-FTP [:rfc:`5024`]
-    #: - [UDP] ODETTE-FTP [:rfc:`5024`]
+    #: - [TCP] ODETTE-FTP [RFC 5024]
+    #: - [UDP] ODETTE-FTP [RFC 5024]
     odette_ftp = 3305, 'odette-ftp', TransportProtocol.udp
 
     #: - [TCP] MySQL
@@ -12935,8 +12936,8 @@ class UDP(AppType):
     #: - [UDP] ISogon SoftAudit
     softaudit = 3419, 'softaudit', TransportProtocol.udp
 
-    #: - [TCP] iFCP User Port [:rfc:`4172`]
-    #: - [UDP] iFCP User Port [:rfc:`4172`]
+    #: - [TCP] iFCP User Port [RFC 4172]
+    #: - [UDP] iFCP User Port [RFC 4172]
     ifcp_port = 3420, 'ifcp-port', TransportProtocol.udp
 
     #: - [TCP] Bull Apprise portmapper
@@ -13167,16 +13168,16 @@ class UDP(AppType):
     #: - [UDP] eComm link port
     ecomm = 3477, 'ecomm', TransportProtocol.udp
 
-    #: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
-    #: - [UDP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
+    #: - [TCP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]
+    #: - [UDP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]
     stun = 3478, 'stun', TransportProtocol.udp
 
-    #: - [TCP] TURN over TCP [:rfc:`8656`]
-    #: - [UDP] TURN over UDP [:rfc:`8656`]
+    #: - [TCP] TURN over TCP [RFC 8656]
+    #: - [UDP] TURN over UDP [RFC 8656]
     turn = 3478, 'turn', TransportProtocol.udp
 
-    #: - [TCP] STUN Behavior Discovery over TCP [:rfc:`5780`]
-    #: - [UDP] STUN Behavior Discovery over UDP [:rfc:`5780`]
+    #: - [TCP] STUN Behavior Discovery over TCP [RFC 5780]
+    #: - [UDP] STUN Behavior Discovery over UDP [RFC 5780]
     stun_behavior = 3478, 'stun-behavior', TransportProtocol.udp
 
     #: - [TCP] 2Wire RPC
@@ -13234,7 +13235,7 @@ class UDP(AppType):
     #: - [UDP] TVDUM Tray Port
     tvdumtray_port = 3492, 'tvdumtray-port', TransportProtocol.udp
 
-    #: - [TCP] Network UPS Tools [:rfc:`9271`]
+    #: - [TCP] Network UPS Tools [RFC 9271]
     #: - [UDP] Network UPS Tools
     nut = 3493, 'nut', TransportProtocol.udp
 
@@ -13274,8 +13275,8 @@ class UDP(AppType):
     #: - [UDP] Avocent Install Discovery
     avinstalldisc = 3502, 'avinstalldisc', TransportProtocol.udp
 
-    #: - [TCP] MPLS LSP-echo Port [:rfc:`8029`]
-    #: - [UDP] MPLS LSP-echo Port [:rfc:`8029`]
+    #: - [TCP] MPLS LSP-echo Port [RFC 8029]
+    #: - [UDP] MPLS LSP-echo Port [RFC 8029]
     lsp_ping = 3503, 'lsp-ping', TransportProtocol.udp
 
     #: - [TCP] IronStorm game server
@@ -13437,8 +13438,8 @@ class UDP(AppType):
     #: - [UDP] qftest Lookup Port
     qftest_lookup = 3543, 'qftest-lookup', TransportProtocol.udp
 
-    #: - [TCP] Teredo Port [:rfc:`4380`]
-    #: - [UDP] Teredo Port [:rfc:`4380`]
+    #: - [TCP] Teredo Port [RFC 4380]
+    #: - [UDP] Teredo Port [RFC 4380]
     teredo = 3544, 'teredo', TransportProtocol.udp
 
     #: - [TCP] CAMAC equipment
@@ -13866,8 +13867,8 @@ class UDP(AppType):
     #: - [UDP] VxCR NBU Default Port
     vxcrnbuport = 3652, 'vxcrnbuport', TransportProtocol.udp
 
-    #: - [TCP] Tunnel Setup Protocol [:rfc:`5572`]
-    #: - [UDP] Tunnel Setup Protocol [:rfc:`5572`]
+    #: - [TCP] Tunnel Setup Protocol [RFC 5572]
+    #: - [UDP] Tunnel Setup Protocol [RFC 5572]
     tsp = 3653, 'tsp', TransportProtocol.udp
 
     #: - [TCP] VAP RealTime Messenger
@@ -14288,8 +14289,8 @@ class UDP(AppType):
     #: - [UDP] adTEmpus Client
     adtempusclient = 3760, 'adtempusclient', TransportProtocol.udp
 
-    #: - [TCP] gsakmp port [:rfc:`4535`]
-    #: - [UDP] gsakmp port [:rfc:`4535`]
+    #: - [TCP] gsakmp port [RFC 4535]
+    #: - [UDP] gsakmp port [RFC 4535]
     gsakmp = 3761, 'gsakmp', TransportProtocol.udp
 
     #: - [TCP] GBS SnapMail Protocol
@@ -14379,12 +14380,12 @@ class UDP(AppType):
     #: - [UDP] Impact Mgr./PEM Gateway
     bim_pem = 3783, 'bim-pem', TransportProtocol.udp
 
-    #: - [TCP] BFD Control Protocol [:rfc:`5881`]
-    #: - [UDP] BFD Control Protocol [:rfc:`5881`]
+    #: - [TCP] BFD Control Protocol [RFC 5881]
+    #: - [UDP] BFD Control Protocol [RFC 5881]
     bfd_control = 3784, 'bfd-control', TransportProtocol.udp
 
-    #: - [TCP] BFD Echo Protocol [:rfc:`5881`]
-    #: - [UDP] BFD Echo Protocol [:rfc:`5881`]
+    #: - [TCP] BFD Echo Protocol [RFC 5881]
+    #: - [UDP] BFD Echo Protocol [RFC 5881]
     bfd_echo = 3785, 'bfd-echo', TransportProtocol.udp
 
     #: - [TCP] VSW Upstrigger port
@@ -14439,8 +14440,8 @@ class UDP(AppType):
     #: - [UDP] Minilock
     minilock = 3798, 'minilock', TransportProtocol.udp
 
-    #: - [TCP] RADIUS Dynamic Authorization [:rfc:`3576`]
-    #: - [UDP] RADIUS Dynamic Authorization [:rfc:`3576`]
+    #: - [TCP] RADIUS Dynamic Authorization [RFC 3576]
+    #: - [UDP] RADIUS Dynamic Authorization [RFC 3576]
     radius_dynauth = 3799, 'radius-dynauth', TransportProtocol.udp
 
     #: - [TCP] Print Services Interface
@@ -14694,7 +14695,7 @@ class UDP(AppType):
     #: - [UDP] GIGA-POCKET
     giga_pocket = 3862, 'giga-pocket', TransportProtocol.udp
 
-    #: [UDP] asap udp port [:rfc:`5352`]
+    #: [UDP] asap udp port [RFC 5352]
     asap_udp = 3863, 'asap-udp', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -14875,8 +14876,8 @@ class UDP(AppType):
     #: - [UDP] Arnet Omnilink Port
     omnilink_port = 3904, 'omnilink-port', TransportProtocol.udp
 
-    #: - [TCP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]
-    #: - [UDP] Mailbox Update (MUPDATE) protocol [:rfc:`3656`]
+    #: - [TCP] Mailbox Update (MUPDATE) protocol [RFC 3656]
+    #: - [UDP] Mailbox Update (MUPDATE) protocol [RFC 3656]
     mupdate = 3905, 'mupdate', TransportProtocol.udp
 
     #: - [TCP] TopoVista elevation data
@@ -16024,13 +16025,13 @@ class UDP(AppType):
     #: - [UDP] Vatata Peer to Peer Protocol
     vatata = 4188, 'vatata', TransportProtocol.udp
 
-    #: [UDP] Reserved [:rfc:`5440`]
+    #: [UDP] Reserved [RFC 5440]
     reserved_4189 = 4189, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Reserved [:rfc:`5804`]
+    #: [UDP] Reserved [RFC 5804]
     reserved_4190 = 4190, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Dual Stack MIPv6 NAT Traversal [:rfc:`5555`]
+    #: [UDP] Dual Stack MIPv6 NAT Traversal [RFC 5555]
     dsmipv6 = 4191, 'dsmipv6', TransportProtocol.udp
 
     #: [UDP] azeti blinddate
@@ -16126,8 +16127,8 @@ class UDP(AppType):
     #: - [UDP] FDT Remote Categorization Protocol
     fdt_rcatp = 4320, 'fdt-rcatp', TransportProtocol.udp
 
-    #: - [TCP] Remote Who Is [:rfc:`2167`]
-    #: - [UDP] Remote Who Is [:rfc:`2167`]
+    #: - [TCP] Remote Who Is [RFC 2167]
+    #: - [UDP] Remote Who Is [RFC 2167]
     rwhois = 4321, 'rwhois', TransportProtocol.udp
 
     #: - [TCP] TRIM Event Service
@@ -16183,10 +16184,10 @@ class UDP(AppType):
     #: - [UDP] Gaia Connector Protocol
     gaia = 4340, 'gaia', TransportProtocol.udp
 
-    #: [UDP] LISP Data Packets [:rfc:`9300`]
+    #: [UDP] LISP Data Packets [RFC 9300]
     lisp_data = 4341, 'lisp-data', TransportProtocol.udp
 
-    #: [UDP] LISP Control Packets [:rfc:`9301`]
+    #: [UDP] LISP Control Packets [RFC 9301]
     lisp_control = 4342, 'lisp-control', TransportProtocol.udp
 
     #: - [TCP] UNICALL
@@ -16556,8 +16557,8 @@ class UDP(AppType):
     #: - [UDP] Apple Wide Area Connectivity Service ICE Bootstrap
     awacs_ice = 4488, 'awacs-ice', TransportProtocol.udp
 
-    #: - [TCP] IPsec NAT-Traversal [:rfc:`9329`]
-    #: - [UDP] IPsec NAT-Traversal [:rfc:`3948`][:rfc:`7296`]
+    #: - [TCP] IPsec NAT-Traversal [RFC 9329]
+    #: - [UDP] IPsec NAT-Traversal [RFC 3948][RFC 7296]
     ipsec_nat_t = 4500, 'ipsec-nat-t', TransportProtocol.udp
 
     #: [UDP] M-Bus-OMS over UDP
@@ -16606,8 +16607,8 @@ class UDP(AppType):
     #: - [UDP] Perman I Interbase Server
     gds_adppiw_db = 4550, 'gds-adppiw-db', TransportProtocol.udp
 
-    #: - [TCP] MIH Services [:rfc:`5677`]
-    #: - [UDP] MIH Services [:rfc:`5677`]
+    #: - [TCP] MIH Services [RFC 5677]
+    #: - [UDP] MIH Services [RFC 5677]
     ieee_mih = 4551, 'ieee-mih', TransportProtocol.udp
 
     #: - [TCP] Men and Mice Monitoring
@@ -16621,13 +16622,13 @@ class UDP(AppType):
     #: - [UDP] MS FRS Replication
     msfrs = 4554, 'msfrs', TransportProtocol.udp
 
-    #: - [TCP] RSIP Port [:rfc:`3103`]
-    #: - [UDP] RSIP Port [:rfc:`3103`]
+    #: - [TCP] RSIP Port [RFC 3103]
+    #: - [UDP] RSIP Port [RFC 3103]
     rsip = 4555, 'rsip', TransportProtocol.udp
 
-    #: - [TCP] DTN Bundle TCP CL Protocol [:rfc:`9174`]
-    #: - [UDP] DTN Bundle UDP CL Protocol [:rfc:`7122`]
-    #: - [DCCP] DTN Bundle DCCP CL Protocol [:rfc:`7122`]
+    #: - [TCP] DTN Bundle TCP CL Protocol [RFC 9174]
+    #: - [UDP] DTN Bundle UDP CL Protocol [RFC 7122]
+    #: - [DCCP] DTN Bundle DCCP CL Protocol [RFC 7122]
     dtn_bundle = 4556, 'dtn-bundle', TransportProtocol.udp
 
     #: [UDP] Marathon everRun Quorum Service Server
@@ -16655,8 +16656,8 @@ class UDP(AppType):
     #: - [UDP] BMC Reporting
     bmc_reporting = 4568, 'bmc-reporting', TransportProtocol.udp
 
-    #: - [TCP] Inter-Asterisk eXchange [:rfc:`5456`]
-    #: - [UDP] Inter-Asterisk eXchange [:rfc:`5456`]
+    #: - [TCP] Inter-Asterisk eXchange [RFC 5456]
+    #: - [UDP] Inter-Asterisk eXchange [RFC 5456]
     iax = 4569, 'iax', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -16732,11 +16733,11 @@ class UDP(AppType):
     #: - [TCP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
     #: - [UDP] Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal
     #:   Channel Protocol. The service name is used to construct the SRV service
     #:   names "_dots-signal._udp" and "_dots-signal._tcp" for discovering DOTS
-    #:   servers used to establish DOTS signal channel. [:rfc:`8973`][:rfc:`9132`]
+    #:   servers used to establish DOTS signal channel. [RFC 8973][RFC 9132]
     dots_signal = 4646, 'dots-signal', TransportProtocol.udp
 
     #: - [TCP] PlayStation2 App Port
@@ -16990,10 +16991,10 @@ class UDP(AppType):
     #: [UDP] Simple Invocation of Methods Over Network (SIMON) Discovery
     simon_disc = 4753, 'simon-disc', TransportProtocol.udp
 
-    #: [UDP] GRE-in-UDP Encapsulation [:rfc:`8086`]
+    #: [UDP] GRE-in-UDP Encapsulation [RFC 8086]
     gre_in_udp = 4754, 'gre-in-udp', TransportProtocol.udp
 
-    #: [UDP] GRE-in-UDP Encapsulation with DTLS [:rfc:`8086`]
+    #: [UDP] GRE-in-UDP Encapsulation with DTLS [RFC 8086]
     gre_udp_dtls = 4755, 'gre-udp-dtls', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -17018,7 +17019,7 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_4788 = 4788, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Virtual eXtensible Local Area Network (VXLAN) [:rfc:`7348`]
+    #: [UDP] Virtual eXtensible Local Area Network (VXLAN) [RFC 7348]
     vxlan = 4789, 'vxlan', TransportProtocol.udp
 
     #: [UDP] Generic Protocol Extension for Virtual eXtensible Local Area Network
@@ -17312,14 +17313,14 @@ class UDP(AppType):
     #: - [UDP] FileMaker, Inc. - Proprietary name binding
     fmpro_internal = 5003, 'fmpro-internal', TransportProtocol.udp
 
-    #: - [TCP] RTP media data [:rfc:`3551`][:rfc:`4571`]
-    #: - [UDP] RTP media data [:rfc:`3551`]
-    #: - [DCCP] RTP media data [:rfc:`3551`][:rfc:`5762`]
+    #: - [TCP] RTP media data [RFC 3551][RFC 4571]
+    #: - [UDP] RTP media data [RFC 3551]
+    #: - [DCCP] RTP media data [RFC 3551][RFC 5762]
     avt_profile_1 = 5004, 'avt-profile-1', TransportProtocol.udp
 
-    #: - [TCP] RTP control protocol [:rfc:`3551`][:rfc:`4571`]
-    #: - [UDP] RTP control protocol [:rfc:`3551`]
-    #: - [DCCP] RTP control protocol [:rfc:`3551`][:rfc:`5762`]
+    #: - [TCP] RTP control protocol [RFC 3551][RFC 4571]
+    #: - [UDP] RTP control protocol [RFC 3551]
+    #: - [DCCP] RTP control protocol [RFC 3551][RFC 5762]
     avt_profile_2 = 5005, 'avt-profile-2', TransportProtocol.udp
 
     #: - [TCP] wsm server
@@ -17472,14 +17473,14 @@ class UDP(AppType):
     #: - [UDP] SIP Directory Services
     sds = 5059, 'sds', TransportProtocol.udp
 
-    #: - [TCP] SIP [:rfc:`3263`]
-    #: - [UDP] SIP [:rfc:`3263`]
-    #: - [SCTP] SIP [:rfc:`4168`]
+    #: - [TCP] SIP [RFC 3263]
+    #: - [UDP] SIP [RFC 3263]
+    #: - [SCTP] SIP [RFC 4168]
     sip = 5060, 'sip', TransportProtocol.udp
 
-    #: - [TCP] SIP-TLS [:rfc:`3263`]
-    #: - [UDP] SIP-TLS [:rfc:`3263`]
-    #: - [SCTP] SIP-TLS [:rfc:`4168`]
+    #: - [TCP] SIP-TLS [RFC 3263]
+    #: - [UDP] SIP-TLS [RFC 3263]
+    #: - [SCTP] SIP-TLS [RFC 4168]
     sips = 5061, 'sips', TransportProtocol.udp
 
     #: - [TCP] Localisation access
@@ -17852,10 +17853,10 @@ class UDP(AppType):
     #: [UDP] DownTools Discovery Protocol
     downtools_disc = 5245, 'downtools-disc', TransportProtocol.udp
 
-    #: [UDP] CAPWAP Control Protocol [:rfc:`5415`]
+    #: [UDP] CAPWAP Control Protocol [RFC 5415]
     capwap_control = 5246, 'capwap-control', TransportProtocol.udp
 
-    #: [UDP] CAPWAP Data Protocol [:rfc:`5415`]
+    #: [UDP] CAPWAP Data Protocol [RFC 5415]
     capwap_data = 5247, 'capwap-data', TransportProtocol.udp
 
     #: - [TCP] CA Access Control Web Service
@@ -18007,30 +18008,30 @@ class UDP(AppType):
     #: - [UDP] xkoto DRCP
     xkotodrcp = 5344, 'xkotodrcp', TransportProtocol.udp
 
-    #: - [TCP] Session Traversal Utilities for NAT (STUN) port [:rfc:`8489`]
-    #: - [UDP] STUN over DTLS [:rfc:`7350`]
+    #: - [TCP] Session Traversal Utilities for NAT (STUN) port [RFC 8489]
+    #: - [UDP] STUN over DTLS [RFC 7350]
     stuns = 5349, 'stuns', TransportProtocol.udp
 
-    #: - [TCP] TURN over TLS [:rfc:`8656`]
-    #: - [UDP] TURN over DTLS [:rfc:`7350`]
+    #: - [TCP] TURN over TLS [RFC 8656]
+    #: - [UDP] TURN over DTLS [RFC 7350]
     turns = 5349, 'turns', TransportProtocol.udp
 
-    #: - [TCP] STUN Behavior Discovery over TLS [:rfc:`5780`]
-    #: - [UDP] Reserved for a future enhancement of STUN-BEHAVIOR [:rfc:`5780`]
+    #: - [TCP] STUN Behavior Discovery over TLS [RFC 5780]
+    #: - [UDP] Reserved for a future enhancement of STUN-BEHAVIOR [RFC 5780]
     stun_behaviors = 5349, 'stun-behaviors', TransportProtocol.udp
 
-    #: [UDP] Port Control Protocol Multicast [:rfc:`6887`]
+    #: [UDP] Port Control Protocol Multicast [RFC 6887]
     pcp_multicast = 5350, 'pcp-multicast', TransportProtocol.udp
 
-    #: [UDP] Port Control Protocol [:rfc:`6887`]
+    #: [UDP] Port Control Protocol [RFC 6887]
     pcp = 5351, 'pcp', TransportProtocol.udp
 
-    #: - [TCP] DNS Long-Lived Queries [:rfc:`8764`]
-    #: - [UDP] DNS Long-Lived Queries [:rfc:`8764`]
+    #: - [TCP] DNS Long-Lived Queries [RFC 8764]
+    #: - [UDP] DNS Long-Lived Queries [RFC 8764]
     dns_llq = 5352, 'dns-llq', TransportProtocol.udp
 
-    #: - [TCP] Multicast DNS [:rfc:`6762`]
-    #: - [UDP] Multicast DNS [:rfc:`6762`]
+    #: - [TCP] Multicast DNS [RFC 6762]
+    #: - [UDP] Multicast DNS [RFC 6762]
     mdns = 5353, 'mdns', TransportProtocol.udp
 
     #: - [TCP] Multicast DNS Responder IPC
@@ -18236,10 +18237,10 @@ class UDP(AppType):
     #: - [UDP] SCEANICS situation and action notification
     sceanics = 5435, 'sceanics', TransportProtocol.udp
 
-    #: [UDP] pmip6-cntl [:rfc:`5844`]
+    #: [UDP] pmip6-cntl [RFC 5844]
     pmip6_cntl = 5436, 'pmip6-cntl', TransportProtocol.udp
 
-    #: [UDP] pmip6-data [:rfc:`5844`]
+    #: [UDP] pmip6-data [RFC 5844]
     pmip6_data = 5437, 'pmip6-data', TransportProtocol.udp
 
     #: - [TCP] Pearson HTTPS
@@ -18535,9 +18536,9 @@ class UDP(AppType):
     #: - [UDP] HyperSCSI Port
     hyperscsi_port = 5674, 'hyperscsi-port', TransportProtocol.udp
 
-    #: - [TCP] V5UA application port [:rfc:`3807`]
-    #: - [UDP] V5UA application port [:rfc:`3807`]
-    #: - [SCTP] V5UA application port [:rfc:`3807`]
+    #: - [TCP] V5UA application port [RFC 3807]
+    #: - [UDP] V5UA application port [RFC 3807]
+    #: - [SCTP] V5UA application port [RFC 3807]
     v5ua = 5675, 'v5ua', TransportProtocol.udp
 
     #: - [TCP] RA Administration
@@ -18567,12 +18568,12 @@ class UDP(AppType):
     #: [UDP] BrightCore control & data transfer exchange
     brightcore = 5682, 'brightcore', TransportProtocol.udp
 
-    #: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`8323`]
-    #: - [UDP] Constrained Application Protocol [:rfc:`7252`]
+    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 8323]
+    #: - [UDP] Constrained Application Protocol [RFC 7252]
     coap = 5683, 'coap', TransportProtocol.udp
 
-    #: - [TCP] Constrained Application Protocol (CoAP) [:rfc:`7301`][:rfc:`8323`]
-    #: - [UDP] DTLS-secured CoAP [:rfc:`7252`]
+    #: - [TCP] Constrained Application Protocol (CoAP) [RFC 7301][RFC 8323]
+    #: - [UDP] DTLS-secured CoAP [RFC 7252]
     coaps = 5684, 'coaps', TransportProtocol.udp
 
     #: [UDP] GOG multiplayer game protocol
@@ -18804,8 +18805,8 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_5868 = 5868, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] Remote Framebuffer [:rfc:`6143`]
-    #: - [UDP] Remote Framebuffer [:rfc:`6143`]
+    #: - [TCP] Remote Framebuffer [RFC 6143]
+    #: - [UDP] Remote Framebuffer [RFC 6143]
     rfb = 5900, 'rfb', TransportProtocol.udp
 
     #: - [TCP] Flight & Flow Info for Collaborative Env
@@ -18975,7 +18976,7 @@ class UDP(AppType):
     #: [UDP] Generic UDP Encapsulation [draft-herbert-gue-02]
     gue = 6080, 'gue', TransportProtocol.udp
 
-    #: [UDP] Generic Network Virtualization Encapsulation (Geneve) [:rfc:`8926`]
+    #: [UDP] Generic Network Virtualization Encapsulation (Geneve) [RFC 8926]
     geneve = 6081, 'geneve', TransportProtocol.udp
 
     #: [UDP] APCO Project 25 Common Air Interface - UDP encapsulation
@@ -19479,15 +19480,15 @@ class UDP(AppType):
     mcer_port = 6510, 'mcer-port', TransportProtocol.udp
 
     #: [UDP] Datagram Congestion Control Protocol Encapsulation for NAT Traversal
-    #: [:rfc:`6773`]
+    #: [RFC 6773]
     dccp_udp = 6511, 'dccp-udp', TransportProtocol.udp
 
     #: [UDP] Reserved
     reserved_6513 = 6513, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] Syslog over TLS [:rfc:`5425`]
-    #: - [UDP] syslog over DTLS [:rfc:`6012`]
-    #: - [DCCP] syslog over DTLS [:rfc:`6012`]
+    #: - [TCP] Syslog over TLS [RFC 5425]
+    #: - [UDP] syslog over DTLS [RFC 6012]
+    #: - [DCCP] syslog over DTLS [RFC 6012]
     syslog_tls = 6514, 'syslog-tls', TransportProtocol.udp
 
     #: - [TCP] Elipse RPC Protocol
@@ -19569,8 +19570,8 @@ class UDP(AppType):
     #: - [UDP] Bencher API
     bencher = 6610, 'bencher', TransportProtocol.udp
 
-    #: - [TCP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
-    #: - [UDP] ODETTE-FTP over TLS/SSL [:rfc:`5024`]
+    #: - [TCP] ODETTE-FTP over TLS/SSL [RFC 5024]
+    #: - [UDP] ODETTE-FTP over TLS/SSL [RFC 5024]
     odette_ftps = 6619, 'odette-ftps', TransportProtocol.udp
 
     #: - [TCP] Kerberos V5 FTP Data
@@ -19622,10 +19623,10 @@ class UDP(AppType):
     #: [UDP] MPLS Performance Measurement out-of-band response
     mpls_pm = 6634, 'mpls-pm', TransportProtocol.udp
 
-    #: [UDP] Encapsulate MPLS packets in UDP tunnels. [:rfc:`7510`]
+    #: [UDP] Encapsulate MPLS packets in UDP tunnels. [RFC 7510]
     mpls_udp = 6635, 'mpls-udp', TransportProtocol.udp
 
-    #: [UDP] Encapsulate MPLS packets in UDP tunnels with DTLS. [:rfc:`7510`]
+    #: [UDP] Encapsulate MPLS packets in UDP tunnels with DTLS. [RFC 7510]
     mpls_udp_dtls = 6636, 'mpls-udp-dtls', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -19688,13 +19689,13 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_6690 = 6690, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Babel Routing Protocol [:rfc:`8966`]
+    #: [UDP] Babel Routing Protocol [RFC 8966]
     babel = 6696, 'babel', TransportProtocol.udp
 
     #: [UDP] Reserved
     reserved_6697 = 6697, 'reserved', TransportProtocol.udp
 
-    #: [UDP] Babel Routing Protocol over DTLS [:rfc:`8968`]
+    #: [UDP] Babel Routing Protocol over DTLS [RFC 8968]
     babel_dtls = 6699, 'babel-dtls', TransportProtocol.udp
 
     #: - [TCP] KTI/ICAD Nameserver
@@ -19759,7 +19760,7 @@ class UDP(AppType):
     reserved_6778 = 6778, 'reserved', TransportProtocol.udp
 
     #: [UDP] Bidirectional Forwarding Detection (BFD) on Link Aggregation Group
-    #: (LAG) Interfaces [:rfc:`7130`]
+    #: (LAG) Interfaces [RFC 7130]
     bfd_lag = 6784, 'bfd-lag', TransportProtocol.udp
 
     #: - [TCP] DGPF Individual Exchange
@@ -19959,8 +19960,8 @@ class UDP(AppType):
     #: - [UDP] SPG Controls Carrier
     spg = 7016, 'spg', TransportProtocol.udp
 
-    #: - [TCP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]
-    #: - [UDP] GeneRic Autonomic Signaling Protocol [:rfc:`8990`]
+    #: - [TCP] GeneRic Autonomic Signaling Protocol [RFC 8990]
+    #: - [UDP] GeneRic Autonomic Signaling Protocol [RFC 8990]
     grasp = 7017, 'grasp', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -20550,8 +20551,8 @@ class UDP(AppType):
     #: - [UDP] Sakura Script Transfer Protocol
     sstp_1 = 7743, 'sstp-1', TransportProtocol.udp
 
-    #: - [TCP] RAQMON PDU [:rfc:`4712`]
-    #: - [UDP] RAQMON PDU [:rfc:`4712`]
+    #: - [TCP] RAQMON PDU [RFC 4712]
+    #: - [UDP] RAQMON PDU [RFC 4712]
     raqmon_pdu = 7744, 'raqmon-pdu', TransportProtocol.udp
 
     #: - [TCP] Put/Run/Get Protocol
@@ -20577,7 +20578,7 @@ class UDP(AppType):
     #: - [UDP] accu-lmgr
     accu_lmgr = 7781, 'accu-lmgr', TransportProtocol.udp
 
-    #: [UDP] Seamless Bidirectional Forwarding Detection (S-BFD) [:rfc:`7881`]
+    #: [UDP] Seamless Bidirectional Forwarding Detection (S-BFD) [RFC 7881]
     s_bfd = 7784, 's-bfd', TransportProtocol.udp
 
     #: - [TCP] MINIVEND
@@ -20643,7 +20644,7 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_7871 = 7871, 'reserved', TransportProtocol.udp
 
-    #: [UDP] TLS-based Mobile IPv6 Security [:rfc:`6618`]
+    #: [UDP] TLS-based Mobile IPv6 Security [RFC 6618]
     mipv6tls = 7872, 'mipv6tls', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -20863,7 +20864,7 @@ class UDP(AppType):
     #: - [UDP] Senomix Timesheets Client [1 year assignment]
     senomix08 = 8059, 'senomix08', TransportProtocol.udp
 
-    #: [UDP] Asymmetric Extended Route Optimization (AERO) [:rfc:`6706`]
+    #: [UDP] Asymmetric Extended Route Optimization (AERO) [RFC 6706]
     aero = 8060, 'aero', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -21081,10 +21082,10 @@ class UDP(AppType):
     #: - [UDP] RexecJ Server
     rexecj = 8230, 'rexecj', TransportProtocol.udp
 
-    #: [UDP] HNCP [:rfc:`7788`]
+    #: [UDP] HNCP [RFC 7788]
     hncp_udp_port = 8231, 'hncp-udp-port', TransportProtocol.udp
 
-    #: [UDP] HNCP over DTLS [:rfc:`7788`]
+    #: [UDP] HNCP over DTLS [RFC 7788]
     hncp_dtls_port = 8232, 'hncp-dtls-port', TransportProtocol.udp
 
     #: - [TCP] Synapse Non Blocking HTTPS
@@ -21272,7 +21273,7 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_8502 = 8502, 'reserved', TransportProtocol.udp
 
-    #: [UDP] MPLS LSP Self-Ping [:rfc:`7746`]
+    #: [UDP] MPLS LSP Self-Ping [RFC 7746]
     lsp_self_ping = 8503, 'lsp-self-ping', TransportProtocol.udp
 
     #: - [TCP] RTSP Alternate (see port 554)
@@ -22115,15 +22116,15 @@ class UDP(AppType):
     #: - [UDP] WebDAV Source TLS/SSL
     davsrcs = 9802, 'davsrcs', TransportProtocol.udp
 
-    #: - [TCP] Session Announcement v1 [:rfc:`2974`]
-    #: - [UDP] Session Announcement v1 [:rfc:`2974`]
+    #: - [TCP] Session Announcement v1 [RFC 2974]
+    #: - [UDP] Session Announcement v1 [RFC 2974]
     sapv1 = 9875, 'sapv1', TransportProtocol.udp
 
     #: [UDP] Reserved
     reserved_9877 = 9877, 'reserved', TransportProtocol.udp
 
-    #: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012
-    #: [:rfc:`6717`]
+    #: [UDP] The KX509 Kerberized Certificate Issuance Protocol in Use in 2012 [RFC
+    #: 6717]
     kca_service = 9878, 'kca-service', TransportProtocol.udp
 
     #: - [TCP] CYBORG Systems
@@ -22138,7 +22139,7 @@ class UDP(AppType):
     #: - [UDP] MonkeyCom
     monkeycom = 9898, 'monkeycom', TransportProtocol.udp
 
-    #: [UDP] SCTP TUNNELING [:rfc:`6951`]
+    #: [UDP] SCTP TUNNELING [RFC 6951]
     sctp_tunneling = 9899, 'sctp-tunneling', TransportProtocol.udp
 
     #: - [TCP] IUA
@@ -22149,7 +22150,7 @@ class UDP(AppType):
     #: [UDP] enrp server channel
     enrp = 9901, 'enrp', TransportProtocol.udp
 
-    #: [UDP] Multicast Ping Protocol [:rfc:`6450`]
+    #: [UDP] Multicast Ping Protocol [RFC 6450]
     multicast_ping = 9903, 'multicast-ping', TransportProtocol.udp
 
     #: - [TCP] domaintime
@@ -22385,10 +22386,10 @@ class UDP(AppType):
     #: - [UDP] QB Database Server
     qb_db_server = 10160, 'qb-db-server', TransportProtocol.udp
 
-    #: [UDP] SNMP-DTLS [:rfc:`6353`]
+    #: [UDP] SNMP-DTLS [RFC 6353]
     snmpdtls = 10161, 'snmpdtls', TransportProtocol.udp
 
-    #: [UDP] SNMP-Trap-DTLS [:rfc:`6353`]
+    #: [UDP] SNMP-Trap-DTLS [RFC 6353]
     snmpdtls_trap = 10162, 'snmpdtls-trap', TransportProtocol.udp
 
     #: - [TCP] Trigence AE Soap Service
@@ -22426,7 +22427,7 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_10443 = 10443, 'reserved', TransportProtocol.udp
 
-    #: [UDP] HIP NAT-Traversal [:rfc:`5770`][:rfc:`9028`]
+    #: [UDP] HIP NAT-Traversal [RFC 5770][RFC 9028]
     hip_nat_t = 10500, 'hip-nat-t', TransportProtocol.udp
 
     #: - [TCP] MOS Media Object Metadata Port
@@ -23310,9 +23311,9 @@ class UDP(AppType):
     #: - [UDP] NFS mount protocol
     mountd = 20048, 'mountd', TransportProtocol.udp
 
-    #: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    #: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    #: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]
+    #: - [TCP] Network File System (NFS) over RDMA [RFC 8267]
+    #: - [UDP] Network File System (NFS) over RDMA [RFC 8267]
+    #: - [SCTP] Network File System (NFS) over RDMA [RFC 8267]
     nfsrdma = 20049, 'nfsrdma', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -23603,8 +23604,8 @@ class UDP(AppType):
     #: [UDP] bilobit Service Update
     bilobit_update = 24577, 'bilobit-update', TransportProtocol.udp
 
-    #: [UDP] UDP-based IP-Layer Capacity and Performance Measurement protocol
-    #: [:rfc:`9946`]
+    #: [UDP] UDP-based IP-Layer Capacity and Performance Measurement protocol [RFC
+    #: 9946]
     udpstp = 24601, 'udpstp', TransportProtocol.udp
 
     #: [UDP] Reserved
@@ -24023,7 +24024,7 @@ class UDP(AppType):
     #: - [UDP] traceroute use
     traceroute = 33434, 'traceroute', TransportProtocol.udp
 
-    #: [UDP] IP Multicast Traceroute [:rfc:`8487`]
+    #: [UDP] IP Multicast Traceroute [RFC 8487]
     mtrace = 33435, 'mtrace', TransportProtocol.udp
 
     #: - [TCP] SNIP Slave
@@ -24491,9 +24492,9 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_49150 = 49150, 'reserved', TransportProtocol.udp
 
-    #: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]
-    #: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]
-    #: - [SCTP] HTTPS [:rfc:`9260`]
+    #: - [TCP] http protocol over TLS/SSL [RFC 9110]
+    #: - [UDP] http protocol over TLS/SSL [RFC 9110]
+    #: - [SCTP] HTTPS [RFC 9260]
     https_443 = 443, 'https', TransportProtocol.udp
 
     #: - [TCP] LonWorks
@@ -24532,9 +24533,9 @@ class UDP(AppType):
     #: - [UDP] Grid Engine Qmaster Service
     sge_qmaster_6444 = 6444, 'sge-qmaster', TransportProtocol.udp
 
-    #: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
-    #: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
-    #: - [SCTP] SSH [:rfc:`9260`]
+    #: - [TCP] The Secure Shell (SSH) Protocol [RFC 4251]
+    #: - [UDP] The Secure Shell (SSH) Protocol [RFC 4251]
+    #: - [SCTP] SSH [RFC 9260]
     ssh_22 = 22, 'ssh', TransportProtocol.udp
 
     #: - [TCP] Subversion

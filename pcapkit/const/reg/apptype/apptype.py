@@ -531,7 +531,7 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Unassigned
        * - ``reserved``
          - 49151
-         - [N/A] Reserved [:rfc:`6335`]
+         - [N/A] Reserved [RFC 6335]
        * - ``argus``
          - N/A
          - [N/A] ARGUS Protocol
@@ -690,13 +690,13 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Management Information Base
        * - ``mihcs``
          - N/A
-         - [N/A] MIH Command Services [:rfc:`5679`]
+         - [N/A] MIH Command Services [RFC 5679]
        * - ``mihes``
          - N/A
-         - [N/A] MIH Event Services [:rfc:`5679`]
+         - [N/A] MIH Event Services [RFC 5679]
        * - ``mihis``
          - N/A
-         - [N/A] MIH Information Services [:rfc:`5679`]
+         - [N/A] MIH Information Services [RFC 5679]
        * - ``mfe-nsp``
          - N/A
          - [N/A] MFE Network Services Protocol
@@ -717,13 +717,13 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Remote Job Service
        * - ``netconf-beep``
          - N/A
-         - [N/A] NETCONF over BEEP [:rfc:`4744`][:rfc:`9900`]
+         - [N/A] NETCONF over BEEP [RFC 4744][RFC 9900]
        * - ``netconfsoapbeep``
          - N/A
-         - [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][:rfc:`9900`]
+         - [N/A] NETCONF for SOAP over BEEP [RFC 4743][RFC 9900]
        * - ``netconfsoaphttp``
          - N/A
-         - [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][:rfc:`9900`]
+         - [N/A] NETCONF for SOAP over HTTPS [RFC 4743][RFC 9900]
        * - ``nfile``
          - N/A
          - [N/A] A File Access Protocol
@@ -1251,7 +1251,7 @@ class AppType(EnumRegistry, StrEnum):
            protocol
        * - ``help``
          - N/A
-         - [N/A] HELP command [:rfc:`1078`]
+         - [N/A] HELP command [RFC 1078]
        * - ``hg``
          - N/A
          - [N/A] Mercurial web-based repository access
@@ -1702,8 +1702,8 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Pedestal Interface Unit by RPM-PSI
        * - ``pkixrep``
          - N/A
-         - [N/A] Public Key Infrastructure Repository Locator Service
-           [:rfc:`4386`]
+         - [N/A] Public Key Infrastructure Repository Locator Service [RFC
+           4386]
        * - ``poch``
          - N/A
          - [N/A] Parallel OperatiOn and Control Heuristic (Pooch)
@@ -2882,10 +2882,10 @@ class AppType(EnumRegistry, StrEnum):
         # ruling for the whole family: *"only IANA registered ones are legit
         # values and we need register to properly create new entries."*
         if 225 <= value <= 241:
-            #: [N/A] Reserved [:rfc:`1060`]
+            #: [N/A] Reserved [RFC 1060]
             return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 249 <= value <= 255:
-            #: [N/A] Reserved [:rfc:`1060`]
+            #: [N/A] Reserved [RFC 1060]
             return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 272 <= value <= 279:
             #: [N/A] Unassigned
