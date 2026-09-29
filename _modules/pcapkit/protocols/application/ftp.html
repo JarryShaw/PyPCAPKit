@@ -472,6 +472,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ftp.command</span><span class="w"> </span><span class="kn">import</span> <span class="n">Command</span> <span class="k">as</span> <span class="n">Enum_Command</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ftp.return_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReturnCode</span> <span class="k">as</span> <span class="n">Enum_ReturnCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Data_FTP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ftp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">Data_Request</span>
@@ -495,8 +496,15 @@
 
 <div class="viewcode-block" id="Type">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.Type">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""FTP packet type."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""FTP packet type.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
+<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Request packet.</span>
     <span class="n">REQUEST</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>

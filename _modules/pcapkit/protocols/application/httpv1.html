@@ -488,6 +488,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.method</span><span class="w"> </span><span class="kn">import</span> <span class="n">Method</span> <span class="k">as</span> <span class="n">Enum_Method</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.http.status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.httpv1</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
@@ -598,8 +599,15 @@
 
 <div class="viewcode-block" id="Type">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.Type">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""HTTP packet type."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Type</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""HTTP packet type.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
+<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Request packet.</span>
     <span class="n">REQUEST</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>

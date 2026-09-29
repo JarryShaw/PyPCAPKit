@@ -494,6 +494,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.verdict_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerdictType</span> <span class="k">as</span> <span class="n">Enum_VerdictType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
@@ -703,8 +704,15 @@
 
 <div class="viewcode-block" id="PacketDirection">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PacketDirection">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PacketDirection</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Packet direction for ``epb_flags`` options."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PacketDirection</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Packet direction for ``epb_flags`` options.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
+<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Information not available.</span>
     <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mb">0b00</span>
@@ -717,8 +725,15 @@
 
 <div class="viewcode-block" id="PacketReception">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PacketReception">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PacketReception</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Reception type for ``epb_flags`` options."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PacketReception</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Reception type for ``epb_flags`` options.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
+<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: Not specified.</span>
     <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mb">0b000</span>
@@ -758,8 +773,15 @@
 
 <div class="viewcode-block" id="WireGuardKeyLabel">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.WireGuardKeyLabel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">WireGuardKeyLabel</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""WireGuard key log label."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WireGuardKeyLabel</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""WireGuard key log label.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #877's ruling that every non-registry enumeration shares that</span>
+<span class="sd">    lookup contract -- pure re-parenting, since this class defines neither</span>
+<span class="sd">    ``get`` nor ``_missing_`` of its own to reconcile with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="n">LOCAL_STATIC_PRIVATE_KEY</span> <span class="o">=</span> <span class="s1">'LOCAL_STATIC_PRIVATE_KEY'</span>
     <span class="n">REMOTE_STATIC_PUBLIC_KEY</span> <span class="o">=</span> <span class="s1">'REMOTE_STATIC_PUBLIC_KEY'</span>

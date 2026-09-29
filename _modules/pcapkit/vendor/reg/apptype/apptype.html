@@ -564,7 +564,7 @@
 
 <span class="s1">from aenum import IntEnum, StrEnum, auto, extend_enum</span>
 
-<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
+<span class="s1">from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry</span>
 
 <span class="s1">__all__ = ['TransportProtocol', '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -574,7 +574,7 @@
 <span class="s1">    from pcapkit.corekit.multidict import MultiDict</span>
 
 
-<span class="s1">class TransportProtocol(IntEnum):</span>
+<span class="s1">class TransportProtocol(EnumLookup, IntEnum):</span>
 <span class="s1">    """Transport layer protocol."""</span>
 
 <span class="s1">    # mypy has no aenum plugin, so this class is a plain class to it: every</span>
@@ -636,19 +636,70 @@
 <span class="s1">    #: Datagram Congestion Control Protocol.</span>
 <span class="s1">    dccp = cast('TransportProtocol', auto())</span>
 
-<span class="s1">    @staticmethod</span>
-<span class="s1">    def get(key: 'int | str') -&gt; 'TransportProtocol':</span>
+<span class="s1">    @classmethod</span>
+<span class="s1">    def get(cls, key: 'int | str', default: 'Any' = NO_DEFAULT) -&gt; 'TransportProtocol':</span>
 <span class="s1">        """Backport support for original codes.</span>
+
+<span class="s1">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub</span>
+<span class="s1">        issue #877's re-parenting, but keeps this override rather than</span>
+<span class="s1">        dropping it -- two behaviours the base does not reproduce on its own:</span>
+
+<span class="s1">        * **Case folding.** This class has always matched a name</span>
+<span class="s1">          case-insensitively (``key.lower()``); the base's own ``str``</span>
+<span class="s1">          branch is case-sensitive. Lowering ``key`` before delegating</span>
+<span class="s1">          reproduces that: every member name here is already lower-case, so</span>
+<span class="s1">          a lowered ``key`` still hits the base's exact ``_member_map_``</span>
+<span class="s1">          lookup.</span>
+<span class="s1">        * **The refusal.** Maintainer ruling on GitHub PR #836: "Do not</span>
+<span class="s1">          allow extension of TransportProtocol at all." The base's own miss</span>
+<span class="s1">          on a ``str`` key raises a bare :exc:`KeyError`; this class has</span>
+<span class="s1">          always raised :exc:`ValueError` naming the rejected key, which is</span>
+<span class="s1">          what every caller and test here already depends on, so a name</span>
+<span class="s1">          miss is caught and re-raised in that shape rather than left as the</span>
+<span class="s1">          base's own exception.</span>
+
+<span class="s1">        The base is a :class:`classmethod`</span>
+<span class="s1">        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override</span>
+<span class="s1">        moves from :class:`staticmethod` to :class:`classmethod` to</span>
+<span class="s1">        delegate at all -- the same move GitHub issue #908 and #915 made for</span>
+<span class="s1">        :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call</span>
+<span class="s1">        site in this tree for GitHub issue #877: all call this method by</span>
+<span class="s1">        name, none take it as a bare callable or introspect ``__func__``,</span>
+<span class="s1">        so the switch is not caller-visible.</span>
+
+<span class="s1">        ``default`` did not exist on this override before this change --</span>
+<span class="s1">        the original had no such parameter at all, which is a genuine LSP</span>
+<span class="s1">        violation once this class' ``get`` is a :class:`classmethod`</span>
+<span class="s1">        override of one that has it: a caller holding a</span>
+<span class="s1">        :class:`~pcapkit.corekit.enum.EnumLookup`-typed reference could pass</span>
+<span class="s1">        ``default=`` and, before this, would have hit a</span>
+<span class="s1">        :exc:`TypeError` at this subclass. Forwarded verbatim to</span>
+<span class="s1">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than</span>
+<span class="s1">        reimplemented, so it behaves exactly as the base's own ``default``</span>
+<span class="s1">        does: a fallback to an *already-registered* value, resolved through</span>
+<span class="s1">        ``_value2member_map_`` and never through the constructor, so</span>
+<span class="s1">        passing one still cannot mint. Every call site in this tree omits</span>
+<span class="s1">        it, so this is purely an added, backward-compatible capability, not</span>
+<span class="s1">        a change to anything this tree exercises today.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Key to get enum item.</span>
+<span class="s1">            default: An already-registered value to fall back to when</span>
+<span class="s1">                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.</span>
+<span class="s1">                NO_DEFAULT`, the default, means *no default* -- see</span>
+<span class="s1">                :meth:`~pcapkit.corekit.enum.EnumLookup.get`.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If ``key`` names no member, by name or by value, and</span>
+<span class="s1">                there is no usable ``default``.</span>
 
 <span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
-<span class="s1">        if isinstance(key, int):</span>
-<span class="s1">            return TransportProtocol(key)</span>
-<span class="s1">        if key.lower() in TransportProtocol.__members__:</span>
-<span class="s1">            return TransportProtocol[key.lower()]  # type: ignore[misc]</span>
+<span class="s1">        if isinstance(key, str):</span>
+<span class="s1">            try:</span>
+<span class="s1">                return super().get(key.lower(), default)</span>
+<span class="s1">            except KeyError:</span>
+<span class="s1">                raise ValueError(f'</span><span class="se">{{</span><span class="s1">key!r</span><span class="se">}}</span><span class="s1"> is not a valid </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">') from None</span>
 <span class="s1">        # NOTE: maintainer ruling on this PR (#836): "Do not allow extension</span>
 <span class="s1">        # of TransportProtocol at all." A name that is not a declared member</span>
 <span class="s1">        # used to mint a brand-new one here, at ``max_val + 1`` (before that,</span>
@@ -666,7 +717,19 @@
 <span class="s1">        # splitting." A ``'|'``-joined name is therefore not special any</span>
 <span class="s1">        # more -- it is simply not the name of a declared member, and gets</span>
 <span class="s1">        # the same message as any other one that is not.</span>
-<span class="s1">        raise ValueError(f'</span><span class="se">{{</span><span class="s1">key!r</span><span class="se">}}</span><span class="s1"> is not a valid </span><span class="se">{{</span><span class="s1">TransportProtocol.__name__</span><span class="se">}}</span><span class="s1">')</span>
+<span class="s1">        #</span>
+<span class="s1">        # NOTE: the delegation below is exception-compatible for the keys this</span>
+<span class="s1">        # signature admits -- an unrecognised :class:`int` still reaches the</span>
+<span class="s1">        # caller as the same plain :exc:`ValueError`. It is not compatible for</span>
+<span class="s1">        # keys outside it: ``None``, a :class:`float` and an unhashable key</span>
+<span class="s1">        # used to raise :exc:`AttributeError` from the ``key.lower()`` this</span>
+<span class="s1">        # branch no longer reaches, and now raise :exc:`ValueError` (or, for a</span>
+<span class="s1">        # :class:`float`, resolve -- ``get(1.0)`` answers ``tcp``, since</span>
+<span class="s1">        # ``cls(key)`` accepts whatever :class:`int` equality accepts). No</span>
+<span class="s1">        # caller in this tree can reach any of those: the only live call site</span>
+<span class="s1">        # passes ``proto.lower()``, always a :class:`str`. The new shape is</span>
+<span class="s1">        # what every other ``EnumLookup`` subclass already does.</span>
+<span class="s1">        return super().get(key, default)</span>
 
 <span class="s1">    # NOTE: ``_missing_`` used to range-check ``value`` and then defer to</span>
 <span class="s1">    # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an</span>
