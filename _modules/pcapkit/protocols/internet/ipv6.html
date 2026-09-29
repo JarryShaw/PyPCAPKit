@@ -251,6 +251,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_generic_ext.html">IPv6_GenericExt - Generic IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
@@ -511,6 +512,67 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">IPv6</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">Data_IPv6</span><span class="p">,</span> <span class="n">Schema_IPv6</span><span class="p">],</span>
            <span class="n">schema</span><span class="o">=</span><span class="n">Schema_IPv6</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_IPv6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""This class implements Internet Protocol version 6."""</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: Extension header codes that have a *dedicated* parser class in this</span>
+    <span class="c1">#: package whose own layout follows :rfc:`6564#section-4`'s generic</span>
+    <span class="c1">#: ``next`` + ``Hdr Ext Len`` format (see the module docstring of</span>
+    <span class="c1">#: :mod:`pcapkit.protocols.internet.ipv6_generic_ext` for the exception</span>
+    <span class="c1">#: table in full). When that dedicated parser raises,</span>
+    <span class="c1">#: :meth:`_import_next_layer` substitutes</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`</span>
+    <span class="c1">#: instead of letting the generic</span>
+    <span class="c1">#: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field</span>
+    <span class="c1">#: and used to crash the whole packet at :meth:`_decode_next_layer`'s</span>
+    <span class="c1">#: ``proto = info.next`` (GitHub issue #891).</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
+    <span class="c1">#: is deliberately absent, even though its wire format also conforms:</span>
+    <span class="c1">#: this package has never had a dedicated parser for it to begin with</span>
+    <span class="c1">#: (``pcapkit/protocols/internet/NotImplemented/shim6.py`` is a 0-byte</span>
+    <span class="c1">#: placeholder, excluded from the wheel by ``MANIFEST.in``), so there is</span>
+    <span class="c1">#: no "own parser" here for it to raise from -- ``Shim6`` reaches</span>
+    <span class="c1">#: :class:`IPv6_GenericExt` by *direct* registration instead (see the</span>
+    <span class="c1">#: bottom of :mod:`pcapkit.protocols.internet.ipv6_generic_ext`), which</span>
+    <span class="c1">#: already produces exactly this class without needing this set to name</span>
+    <span class="c1">#: it. ``ESP``, ``BIT-EMU``, ``253`` and ``254`` are absent, but not for</span>
+    <span class="c1">#: the same reason as each other, and not because a generic fallback</span>
+    <span class="c1">#: would help them:</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: * ``ESP`` *does* have a dedicated, registered parser</span>
+    <span class="c1">#:   (:class:`~pcapkit.protocols.internet.esp.ESP`) -- it is excluded</span>
+    <span class="c1">#:   because :rfc:`4303` places the real Next Header byte inside the</span>
+    <span class="c1">#:   encrypted trailer, so its own info always *carries* a ``next``</span>
+    <span class="c1">#:   attribute (unlike ``BIT-EMU``/``253``/``254`` below), just one that is</span>
+    <span class="c1">#:   :data:`None` whenever the payload could not be decrypted -- which,</span>
+    <span class="c1">#:   with no key material available to a generic parse, is always. The</span>
+    <span class="c1">#:   :meth:`_decode_next_layer` walk below still ends there, one iteration</span>
+    <span class="c1">#:   later, because :data:`None` fails</span>
+    <span class="c1">#:   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`'s</span>
+    <span class="c1">#:   constructor at the top of the loop -- the *existing* end-of-chain</span>
+    <span class="c1">#:   path, unrelated to the structural check this set exists for.</span>
+    <span class="c1">#: * ``BIT-EMU``, ``253`` and ``254`` have no dedicated parser at all, so</span>
+    <span class="c1">#:   they resolve to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose</span>
+    <span class="c1">#:   info has no ``next`` *attribute* -- this is what the structural check</span>
+    <span class="c1">#:   catches.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: :meth:`_decode_next_layer`'s walk stops cleanly at whichever of these</span>
+    <span class="c1">#: (or any other IANA code this package has not implemented) it meets,</span>
+    <span class="c1">#: and keeps this layer's own header intact instead of losing the whole</span>
+    <span class="c1">#: packet as it used to.</span>
+    <span class="n">__generic_ext_codes__</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">HOPOPT</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Route</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Opts</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">Mobility_Header</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">HIP</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">,</span>
+        <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">AH</span><span class="p">,</span>
+    <span class="p">})</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -808,7 +870,6 @@
             <span class="c1"># record protocol name</span>
             <span class="c1"># self._protos = ProtoChain(name, chain, alias)</span>
             <span class="n">_protos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_</span><span class="p">)</span>
-            <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">next</span>
 
             <span class="c1"># update header &amp; payload length</span>
             <span class="n">hdr_len</span> <span class="o">+=</span> <span class="n">next_</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -822,6 +883,45 @@
             <span class="c1"># this must happen before any exit from the loop, since the payload</span>
             <span class="c1"># is what gets handed to ``super()._decode_next_layer`` below</span>
             <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">next_</span><span class="o">.</span><span class="n">length</span><span class="p">:]</span>
+
+            <span class="c1"># GitHub issue #891: a layer with no ``next`` field cannot</span>
+            <span class="c1"># safely continue the walk. This is a *structural* check --</span>
+            <span class="c1"># does the parsed info even carry a ``next`` attribute? -- not</span>
+            <span class="c1"># a fixed set of codes, and deliberately so: HOPOPT, IPv6-Route,</span>
+            <span class="c1"># IPv6-Opts, MH, HIP, IPv6-Frag and AH all have dedicated</span>
+            <span class="c1"># parsers whose data carries ``next``, and Shim6 and any</span>
+            <span class="c1"># recognised header whose own parser raised are both handled by</span>
+            <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`,</span>
+            <span class="c1"># which also carries ``next`` (possibly :data:`None`, on an</span>
+            <span class="c1"># overrun -- see its module docstring). Every IANA extension</span>
+            <span class="c1"># header code this package has not implemented a dedicated</span>
+            <span class="c1"># parser for -- today that is ``BIT-EMU``, ``253`` and ``254``,</span>
+            <span class="c1"># and tomorrow it is whatever IANA assigns next -- has no</span>
+            <span class="c1"># generic fallback either (see :attr:`__generic_ext_codes__`'s</span>
+            <span class="c1"># docstring for why), so :meth:`_import_next_layer` returns a</span>
+            <span class="c1"># plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info</span>
+            <span class="c1"># carries no ``next`` at all. Reading ``info.next`` on that</span>
+            <span class="c1"># unconditionally is what used to raise ``AttributeError``</span>
+            <span class="c1"># here and let a further-out :func:`~pcapkit.utilities.decorators.beholder`</span>
+            <span class="c1"># catch it and degrade the *whole* packet -- the actual #891</span>
+            <span class="c1"># defect, for every code nobody has implemented. Stopping here</span>
+            <span class="c1"># instead keeps this layer's own fields (still recorded above,</span>
+            <span class="c1"># in ``self._exthdr`` and in the packet dict) and reports no</span>
+            <span class="c1"># further next header, exactly like the overrun case.</span>
+            <span class="c1">#</span>
+            <span class="c1"># This has to run -- and, on a hit, has to set ``proto`` --</span>
+            <span class="c1"># *before* the fragment-header special case below: IPv6-Frag</span>
+            <span class="c1"># always carries a real ``next`` (the ``hasattr`` check above</span>
+            <span class="c1"># never actually fires for it), and that ``next`` is the real</span>
+            <span class="c1"># transport layer's code, which the fragment branch's own</span>
+            <span class="c1"># ``break`` must leave in ``proto`` for the final</span>
+            <span class="c1"># ``super()._decode_next_layer`` call below the loop to dispatch</span>
+            <span class="c1"># to correctly.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">):</span>
+                <span class="n">proto</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">break</span>
+
+            <span class="n">proto</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">next</span>
 
             <span class="c1"># keep original data after fragment header</span>
             <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
@@ -861,6 +961,35 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Instance of next layer.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            If the dedicated parser for a code in :attr:`__generic_ext_codes__`</span>
+<span class="sd">            raises, this substitutes</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`</span>
+<span class="sd">            for it rather than letting the exception reach the</span>
+<span class="sd">            :func:`~pcapkit.utilities.decorators.beholder` decorating this</span>
+<span class="sd">            method, which would otherwise substitute plain</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no</span>
+<span class="sd">            ``next`` field, which is what used to crash the whole packet at</span>
+<span class="sd">            :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue</span>
+<span class="sd">            #891). Every other exception -- including one raised by</span>
+<span class="sd">            ``IPv6_GenericExt`` itself, or by ``ESP``'s own dedicated</span>
+<span class="sd">            parser -- still reaches ``beholder`` unchanged, so *this</span>
+<span class="sd">            method's own* behaviour for anything outside that closed set is</span>
+<span class="sd">            exactly what it was before this method learned the</span>
+<span class="sd">            substitution: a plain ``Raw`` for that one layer. What changed</span>
+<span class="sd">            for ``BIT-EMU``, ``253`` and ``254`` -- which have no dedicated</span>
+<span class="sd">            parser at all, so they were *already* reaching plain ``Raw``</span>
+<span class="sd">            with no exception involved -- is one level up:</span>
+<span class="sd">            :meth:`_decode_next_layer` now stops its walk structurally on</span>
+<span class="sd">            any layer whose info carries no ``next`` attribute, ``Raw``</span>
+<span class="sd">            included, instead of reading ``info.next`` unconditionally and</span>
+<span class="sd">            crashing the whole packet. ``ESP`` is unaffected either way: its</span>
+<span class="sd">            info always carries a ``next`` (:data:`None`, since :rfc:`4303`</span>
+<span class="sd">            encrypts the real value), so neither this substitution nor that</span>
+<span class="sd">            structural check ever engages for it, and the walk ends after it</span>
+<span class="sd">            exactly as it always has -- see :attr:`__generic_ext_codes__`'s</span>
+<span class="sd">            docstring for the full distinction.</span>
+
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
@@ -881,9 +1010,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
 
-        <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>  <span class="c1"># type: ignore[abstract]</span>
-                         <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
-                         <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>  <span class="c1"># type: ignore[abstract]</span>
+                             <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span>
+                             <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipv6_generic_ext</span><span class="w"> </span><span class="kn">import</span> \
+                <span class="n">IPv6_GenericExt</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">extension</span> <span class="ow">and</span> <span class="n">protocol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IPv6_GenericExt</span>
+                    <span class="ow">and</span> <span class="n">proto</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__generic_ext_codes__</span><span class="p">):</span>
+                <span class="k">raise</span>
+
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">IPv6_GenericExt</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
+                                    <span class="n">alias</span><span class="o">=</span><span class="n">proto</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span>
+                                    <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">,</span> <span class="n">__context__</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exctx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_</span></div>
 
 </pre></div>
