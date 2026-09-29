@@ -697,6 +697,36 @@ class RepositoryStateTests(unittest.TestCase):
             'CHANGELOG.md is stale; regenerate it with util/changelog_md.py',
         )
 
+    def test_index_summary_bullets_track_each_pages_own_heading(self) -> None:
+        # #909's summary list duplicates each page's version and release date
+        # by hand -- nothing else would catch 1.5.0's bullet still reading
+        # "(unreleased)" once its own page picks up a real date, or a new
+        # page landing with no bullet at all.
+        if not changelog_md.INDEX.is_file():
+            self.skipTest(f'{changelog_md.INDEX} is absent')
+
+        toctree = changelog_md.read_toctree(changelog_md.INDEX)
+        versions = [entry.rsplit('/', 1)[-1] for entry in toctree]
+
+        index_text = changelog_md.INDEX.read_text(encoding='utf-8')
+        bullets = re.findall(r'(?m)^\* \*\*([^*]+)\*\* \(([^)]+)\)', index_text)
+
+        self.assertEqual(
+            versions, [version for version, _ in bullets],
+            'the index summary bullets are missing an entry, carry an extra '
+            'one, or are not in the toctree order',
+        )
+
+        for entry, (version, stated) in zip(toctree, bullets):
+            page = changelog_md.INDEX.parent / f'{entry}.rst'
+            heading = page.read_text(encoding='utf-8').split('\n', 1)[0]
+            _, _, released = heading.partition(' -- ')
+            self.assertEqual(
+                stated, released,
+                f'the index bullet for {version} says {stated!r}, but {page} '
+                f'itself says {released!r}',
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
