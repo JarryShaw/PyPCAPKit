@@ -1634,13 +1634,28 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.utilities.exceptions import EnumValueError
 
-        with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and have no get()'):
+        with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and now have get()'):
             # Both had zero callers repo-wide (tests included), so GitHub issue
-            # #880 deleted ``get()`` outright rather than rebuilding it.
+            # #880 deleted the hand-rolled ``get()`` outright rather than
+            # rebuilding it on the immutable contract -- true on the tree #880
+            # left behind, where neither class carried ``get`` at all. GitHub
+            # issue #930 re-parented both onto
+            # :class:`~pcapkit.corekit.enum.EnumLookup`, which is what gives
+            # every non-registry enumeration ``get``/``get_all`` for free, so
+            # ``hasattr`` now reads the other way -- the immutable contract
+            # itself is what this subtest still pins: the base's own ``get``
+            # still cannot mint, so an unassigned value raises there exactly
+            # as it does through the bare constructor.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
             for enum_cls, unassigned in ((LocalizedRoutingStatus, 50), (LMAAddressCode, 50)):
                 with self.assertRaises(EnumValueError):
                     enum_cls(unassigned)
-                self.assertFalse(hasattr(enum_cls, 'get'))
+                self.assertTrue(hasattr(enum_cls, 'get'))
+                with self.assertRaises(EnumValueError):
+                    enum_cls.get(unassigned)
+                with self.assertRaises(EnumKeyError):
+                    enum_cls.get('NOT_A_REAL_MEMBER')
 
         with self.subTest('the shared -1 aliasing defect is gone'):
             # Before the fix, ``get('bogus_one')`` minted a member at the
