@@ -38,6 +38,7 @@ from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
@@ -245,8 +246,15 @@ def _option_key(code: 'Enum_OptionType') -> 'Union[Enum_OptionType, Tuple[str, i
     return code
 
 
-class PacketDirection(enum.IntEnum):
-    """Packet direction for ``epb_flags`` options."""
+class PacketDirection(EnumLookup, enum.IntEnum):
+    """Packet direction for ``epb_flags`` options.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+
+    """
 
     #: Information not available.
     UNKNOWN = 0b00
@@ -256,8 +264,15 @@ class PacketDirection(enum.IntEnum):
     OUTBOUND = 0b10
 
 
-class PacketReception(enum.IntEnum):
-    """Reception type for ``epb_flags`` options."""
+class PacketReception(EnumLookup, enum.IntEnum):
+    """Reception type for ``epb_flags`` options.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+
+    """
 
     #: Not specified.
     UNKNOWN = 0b000
@@ -294,8 +309,15 @@ class PacketReception(enum.IntEnum):
 TLSKeyLabel = Enum_TLSKeyLabel
 
 
-class WireGuardKeyLabel(StrEnum):
-    """WireGuard key log label."""
+class WireGuardKeyLabel(EnumLookup, StrEnum):
+    """WireGuard key log label.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
+
+    """
 
     LOCAL_STATIC_PRIVATE_KEY = 'LOCAL_STATIC_PRIVATE_KEY'
     REMOTE_STATIC_PUBLIC_KEY = 'REMOTE_STATIC_PUBLIC_KEY'

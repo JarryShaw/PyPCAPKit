@@ -109,21 +109,26 @@ EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
 })
 
 #: Enums carrying no ``get(key, default)``, so there is no ``default`` to drop.
-#: The first two are helper enums describing a registry's columns rather than
-#: registries themselves and have no ``get`` at all;
-#: :class:`~pcapkit.const.reg.apptype.TransportProtocol` has a ``get`` whose
-#: signature takes no ``default`` -- which is why the rewrite had to check the
-#: signature rather than pattern-match the body.
+#: These two are helper enums describing a registry's columns rather than
+#: registries themselves and have no ``get`` at all -- held here rather than
+#: moved by GitHub issue #877, since :mod:`pcapkit.const.ftp.command` is held
+#: by #913 pending its merge.
 #:
 #: :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
 #: :class:`~pcapkit.const.ftp.return_code.ResponseKind` were here too until
 #: GitHub issue #860 step 2 brought them onto
 #: :class:`~pcapkit.corekit.enum.EnumRegistry` -- they inherit the base
 #: ``get(key, default)`` now, so they moved into the main sweep below instead.
+#: :class:`~pcapkit.const.reg.apptype.TransportProtocol` was here too until
+#: GitHub issue #877's re-parenting onto
+#: :class:`~pcapkit.corekit.enum.EnumLookup` gave its own ``get`` override a
+#: ``default`` parameter for the first time -- forwarded verbatim to the
+#: base, purely to keep the override's signature a valid ``classmethod``
+#: override of one that already had it -- so it moved into the main sweep
+#: below as well.
 EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
     'pcapkit.const.ftp.command.CommandType',
     'pcapkit.const.ftp.command.ConformanceRequirement',
-    'pcapkit.const.reg.apptype.apptype.TransportProtocol',
 })
 
 #: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
@@ -362,8 +367,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # and into this sweep; plus 2 for GitHub issue #880's
         # ngap.ProcedureCode and ngap.ProtocolIE, which take the base
         # ``get(key, default)`` from the moment they exist under
-        # pcapkit.const at all.
-        self.assertEqual(covered, 114)
+        # pcapkit.const at all; plus 1 for GitHub issue #877's re-parenting of
+        # ``TransportProtocol`` onto ``EnumLookup``, which gave its own ``get``
+        # override a forwarding ``default`` parameter and moved it out of
+        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` the same way.
+        self.assertEqual(covered, 115)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

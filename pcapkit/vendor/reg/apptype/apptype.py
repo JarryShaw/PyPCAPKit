@@ -108,7 +108,7 @@ from typing import TYPE_CHECKING, cast
 
 from aenum import IntEnum, StrEnum, auto, extend_enum
 
-from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry
 
 __all__ = ['TransportProtocol', '{NAME}']
 
@@ -118,7 +118,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import MultiDict
 
 
-class TransportProtocol(IntEnum):
+class TransportProtocol(EnumLookup, IntEnum):
     """Transport layer protocol."""
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
@@ -180,19 +180,70 @@ class TransportProtocol(IntEnum):
     #: Datagram Congestion Control Protocol.
     dccp = cast('TransportProtocol', auto())
 
-    @staticmethod
-    def get(key: 'int | str') -> 'TransportProtocol':
+    @classmethod
+    def get(cls, key: 'int | str', default: 'Any' = NO_DEFAULT) -> 'TransportProtocol':
         """Backport support for original codes.
+
+        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
+        issue #877's re-parenting, but keeps this override rather than
+        dropping it -- two behaviours the base does not reproduce on its own:
+
+        * **Case folding.** This class has always matched a name
+          case-insensitively (``key.lower()``); the base's own ``str``
+          branch is case-sensitive. Lowering ``key`` before delegating
+          reproduces that: every member name here is already lower-case, so
+          a lowered ``key`` still hits the base's exact ``_member_map_``
+          lookup.
+        * **The refusal.** Maintainer ruling on GitHub PR #836: "Do not
+          allow extension of TransportProtocol at all." The base's own miss
+          on a ``str`` key raises a bare :exc:`KeyError`; this class has
+          always raised :exc:`ValueError` naming the rejected key, which is
+          what every caller and test here already depends on, so a name
+          miss is caught and re-raised in that shape rather than left as the
+          base's own exception.
+
+        The base is a :class:`classmethod`
+        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
+        moves from :class:`staticmethod` to :class:`classmethod` to
+        delegate at all -- the same move GitHub issue #908 and #915 made for
+        :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call
+        site in this tree for GitHub issue #877: all call this method by
+        name, none take it as a bare callable or introspect ``__func__``,
+        so the switch is not caller-visible.
+
+        ``default`` did not exist on this override before this change --
+        the original had no such parameter at all, which is a genuine LSP
+        violation once this class' ``get`` is a :class:`classmethod`
+        override of one that has it: a caller holding a
+        :class:`~pcapkit.corekit.enum.EnumLookup`-typed reference could pass
+        ``default=`` and, before this, would have hit a
+        :exc:`TypeError` at this subclass. Forwarded verbatim to
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than
+        reimplemented, so it behaves exactly as the base's own ``default``
+        does: a fallback to an *already-registered* value, resolved through
+        ``_value2member_map_`` and never through the constructor, so
+        passing one still cannot mint. Every call site in this tree omits
+        it, so this is purely an added, backward-compatible capability, not
+        a change to anything this tree exercises today.
 
         Args:
             key: Key to get enum item.
+            default: An already-registered value to fall back to when
+                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.
+                NO_DEFAULT`, the default, means *no default* -- see
+                :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
+
+        Raises:
+            ValueError: If ``key`` names no member, by name or by value, and
+                there is no usable ``default``.
 
         :meta private:
         """
-        if isinstance(key, int):
-            return TransportProtocol(key)
-        if key.lower() in TransportProtocol.__members__:
-            return TransportProtocol[key.lower()]  # type: ignore[misc]
+        if isinstance(key, str):
+            try:
+                return super().get(key.lower(), default)
+            except KeyError:
+                raise ValueError(f'{{key!r}} is not a valid {{cls.__name__}}') from None
         # NOTE: maintainer ruling on this PR (#836): "Do not allow extension
         # of TransportProtocol at all." A name that is not a declared member
         # used to mint a brand-new one here, at ``max_val + 1`` (before that,
@@ -210,7 +261,19 @@ class TransportProtocol(IntEnum):
         # splitting." A ``'|'``-joined name is therefore not special any
         # more -- it is simply not the name of a declared member, and gets
         # the same message as any other one that is not.
-        raise ValueError(f'{{key!r}} is not a valid {{TransportProtocol.__name__}}')
+        #
+        # NOTE: the delegation below is exception-compatible for the keys this
+        # signature admits -- an unrecognised :class:`int` still reaches the
+        # caller as the same plain :exc:`ValueError`. It is not compatible for
+        # keys outside it: ``None``, a :class:`float` and an unhashable key
+        # used to raise :exc:`AttributeError` from the ``key.lower()`` this
+        # branch no longer reaches, and now raise :exc:`ValueError` (or, for a
+        # :class:`float`, resolve -- ``get(1.0)`` answers ``tcp``, since
+        # ``cls(key)`` accepts whatever :class:`int` equality accepts). No
+        # caller in this tree can reach any of those: the only live call site
+        # passes ``proto.lower()``, always a :class:`str`. The new shape is
+        # what every other ``EnumLookup`` subclass already does.
+        return super().get(key, default)
 
     # NOTE: ``_missing_`` used to range-check ``value`` and then defer to
     # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an
