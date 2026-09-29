@@ -23,13 +23,13 @@ class ExtensionHeader(EnumRegistry, IntEnum):
     #: HOPOPT, IPv6 Hop-by-Hop Option [:rfc:`8200`]
     HOPOPT = 0
 
-    #: IPv6-Route, Routing Header for IPv6 [Steve Deering]
+    #: IPv6-Route, Routing Header for IPv6 [:rfc:`8200`][:rfc:`5095`]
     IPv6_Route = 43
 
-    #: IPv6-Frag, Fragment Header for IPv6 [Steve Deering]
+    #: IPv6-Frag, Fragment Header for IPv6 [:rfc:`8200`]
     IPv6_Frag = 44
 
-    #: ESP, Encap Security Payload [:rfc:`4303`]
+    #: ESP, Encapsulating Security Payload [:rfc:`4303`]
     ESP = 50
 
     #: AH, Authentication Header [:rfc:`4302`]
@@ -47,11 +47,8 @@ class ExtensionHeader(EnumRegistry, IntEnum):
     #: Shim6, Shim6 Protocol [:rfc:`5533`]
     Shim6 = 140
 
-    #: BIT-EMU, Bit-stream Emulation [:rfc:`9801`]
-    BIT_EMU = 147
-
-    #: Use for experimentation and testing [:rfc:`3692`]
+    #: Use for experimentation and testing [:rfc:`3692`][:rfc:`4727`]
     Use_for_experimentation_and_testing_253 = 253
 
-    #: Use for experimentation and testing [:rfc:`3692`]
+    #: Use for experimentation and testing [:rfc:`3692`][:rfc:`4727`]
     Use_for_experimentation_and_testing_254 = 254

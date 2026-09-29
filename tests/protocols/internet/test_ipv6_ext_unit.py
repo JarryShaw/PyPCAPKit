@@ -333,24 +333,36 @@ class IPv6ExtUnitTests(unittest.TestCase):
     # -- collapse the whole packet -------------------------------------------
 
     def test_unimplemented_terminal_code_stops_the_walk_not_the_packet(self) -> None:
-        """``BIT-EMU`` (147) has no dedicated parser and is not one of the
-        RFC 6564 conformers, so it resolves to plain :class:`Raw`, whose
-        info carries no ``next`` -- the exact #891 signature if the walk
-        read ``info.next`` on it unconditionally. The structural check in
+        """``253`` (``Use for experimentation and testing``, :rfc:`3692`) has
+        no dedicated parser in this package and is not one of the RFC 6564
+        conformers, so it resolves to plain :class:`Raw`, whose info carries
+        no ``next`` -- the exact #891 signature if the walk read
+        ``info.next`` on it unconditionally. The structural check in
         :meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` must stop
         there instead, keeping this packet's own header (source, destination,
         hop limit) intact rather than losing it to a further-out
-        ``@beholder``. ``253``/``254`` are the same code path (also
-        unregistered, also resolve to ``Raw``); this file covers one to keep
-        the test proportionate, per the review's own framing.
+        ``@beholder``. ``254`` is the same code path (also has no dedicated
+        parser, also resolves to ``Raw``); this file covers one to keep the
+        test proportionate, per the review's own framing.
+
+        GitHub issue #925: this used to pick ``BIT-EMU`` (147) for the
+        example. Unlike 253/254, 147 turned out not to be in IANA's
+        authoritative *IPv6 Extension Header Types* registry at all -- it
+        leaked in from a stale cross-reference in the *Protocol Numbers*
+        registry -- and :class:`~pcapkit.const.ipv6.extension_header.
+        ExtensionHeader` no longer carries it. 253 exercises the identical
+        code path (an extension-header code this package has not
+        implemented a dedicated parser for) while remaining a code IANA
+        actually recognises as one, which 147 no longer is.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.misc.raw import Raw
 
-        raw = _ipv6_bytes(int(TransType.BIT_EMU), b'\x11\x01' + b'\x00' * 14)
+        code_253 = TransType.Use_for_experimentation_and_testing_253
+        raw = _ipv6_bytes(int(code_253), b'\x11\x01' + b'\x00' * 14)
         ipv6 = IPv6(io.BytesIO(raw), len(raw))
 
         # the header this class exists to protect -- lost entirely under the
@@ -361,7 +373,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         exthdrs = list(ipv6.extension_headers.items(multi=True))
         self.assertEqual(len(exthdrs), 1)
         code, terminal = exthdrs[0]
-        self.assertEqual(code, ExtensionHeader.BIT_EMU)
+        self.assertEqual(code, ExtensionHeader.Use_for_experimentation_and_testing_253)
         self.assertIsInstance(terminal, Raw)
 
         self.assertIsInstance(ipv6.payload, Raw)
