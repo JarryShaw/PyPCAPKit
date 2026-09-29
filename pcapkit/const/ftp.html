@@ -306,6 +306,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
@@ -493,7 +494,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.command.</span></span><span class="sig-name descname"><span class="pre">Command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/command.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.command.Command" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[Command] FTP Command</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -962,7 +963,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.return_code.</span></span><span class="sig-name descname"><span class="pre">ReturnCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ftp/return_code.html#ReturnCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[ReturnCode] FTP Server Return Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.description">
@@ -1325,7 +1326,7 @@ directory or dataset).</p>
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
 <p>Reconstructs <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.description" title="pcapkit.const.ftp.return_code.ReturnCode.description"><code class="xref py py-attr docutils literal notranslate"><span class="pre">description</span></code></a>, <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.kind" title="pcapkit.const.ftp.return_code.ReturnCode.kind"><code class="xref py py-attr docutils literal notranslate"><span class="pre">kind</span></code></a> and <a class="reference internal" href="#pcapkit.const.ftp.return_code.ReturnCode.group" title="pcapkit.const.ftp.return_code.ReturnCode.group"><code class="xref py py-attr docutils literal notranslate"><span class="pre">group</span></code></a> the
 same way <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would, rather than leaving them unset –
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>
+<a class="reference internal" href="../corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
 bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely (it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly),
 so those three attributes would otherwise be missing from the result
 and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code>/<code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> would raise on it.</p>

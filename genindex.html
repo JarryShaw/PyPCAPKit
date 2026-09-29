@@ -298,6 +298,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/corekit/module.html">Module Descriptor</a></li>
@@ -892,6 +893,8 @@
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__traceflow__">__traceflow__ (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
+        <li><a href="pcapkit/index.html#pcapkit.__version__">__version__ (in module pcapkit)</a>
+</li>
         <li><a href="pcapkit/foundation/traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow._analyse">_analyse (pcapkit.foundation.traceflow.traceflow.TraceFlow attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT._backend">_backend (pcapkit.foundation.engines.pcap_ct.PCAP_CT attribute)</a>
@@ -1011,6 +1014,8 @@
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._exproto">_exproto (pcapkit.protocols.protocol.Protocol attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._exptl">_exptl (pcapkit.foundation.extraction.Extractor attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/enum.html#id1">_extend() (pcapkit.corekit.enum.EnumRegistry class method)</a>, <a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._extend">[1]</a>
 </li>
         <li><a href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT._extmp">_extmp (pcapkit.foundation.engines.dpkt.DPKT attribute)</a>
 
@@ -3089,9 +3094,13 @@
 </li>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType._unregistered_member">(pcapkit.const.reg.apptype.apptype.AppType class method)</a>
 </li>
+          <li><a href="pcapkit/corekit/enum.html#id2">(pcapkit.corekit.enum.EnumRegistry class method)</a>, <a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member">[1]</a>
+</li>
           <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField._unregistered_member">(pcapkit.corekit.fields.numbers.EnumField static method)</a>
 </li>
         </ul></li>
+        <li><a href="pcapkit/corekit/enum.html#id0">_validate_value() (pcapkit.corekit.enum.EnumLookup class method)</a>, <a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value">[1]</a>
+</li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._vfunc">_vfunc (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
         <li><a href="pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcap.PCAP._vinfo">_vinfo (pcapkit.foundation.engines.pcap.PCAP attribute)</a>
@@ -16146,7 +16155,11 @@
 </li>
         <li><a href="pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField">EnumField (class in pcapkit.corekit.fields.numbers)</a>
 </li>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup">EnumLookup (class in pcapkit.corekit.enum)</a>
+</li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">EnumMeta (class in pcapkit.protocols.schema.schema)</a>
+</li>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry">EnumRegistry (class in pcapkit.corekit.enum)</a>
 </li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">EnumSchema (class in pcapkit.protocols.schema.schema)</a>
 </li>
@@ -19455,9 +19468,11 @@
 </li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.method.Method.GET">GET (pcapkit.const.http.method.Method attribute)</a>
 </li>
-        <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get">get() (pcapkit.corekit.multidict.MultiDict method)</a>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get">get() (pcapkit.corekit.enum.EnumLookup class method)</a>
 
         <ul>
+          <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.get">(pcapkit.corekit.multidict.MultiDict method)</a>
+</li>
           <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.CipherSuite.get">(pcapkit.protocols.internet.esp.CipherSuite class method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.IntegritySuite.get">(pcapkit.protocols.internet.esp.IntegritySuite class method)</a>
@@ -19468,7 +19483,11 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get_all">get_all() (pcapkit.const.reg.apptype.apptype.AppType class method)</a>
+
+        <ul>
+          <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get_all">(pcapkit.corekit.enum.EnumLookup class method)</a>
 </li>
+        </ul></li>
         <li><a href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.get_logger">get_logger() (in module pcapkit.utilities.logging)</a>
 </li>
         <li><a href="pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.get_payload">get_payload() (pcapkit.protocols.schema.schema.Schema method)</a>
@@ -19583,10 +19602,10 @@
 </li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.GlobalTNGF_ID">GlobalTNGF_ID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
-        <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.GlobalTWIF_ID">GlobalTWIF_ID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.GlobalTWIF_ID">GlobalTWIF_ID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
+</li>
         <li><a href="pcapkit/const/ngap.html#pcapkit.const.ngap.protocol_ie.ProtocolIE.GlobalW_AGF_ID">GlobalW_AGF_ID (pcapkit.const.ngap.protocol_ie.ProtocolIE attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.globe">globe (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
@@ -29977,6 +29996,8 @@
 </li>
           <li><a href="pcapkit/corekit/context.html#module-pcapkit.corekit.context">pcapkit.corekit.context</a>
 </li>
+          <li><a href="pcapkit/corekit/enum.html#module-pcapkit.corekit.enum">pcapkit.corekit.enum</a>
+</li>
           <li><a href="pcapkit/corekit/fields/index.html#module-pcapkit.corekit.fields">pcapkit.corekit.fields</a>
 </li>
           <li><a href="pcapkit/corekit/fields/collections.html#module-pcapkit.corekit.fields.collections">pcapkit.corekit.fields.collections</a>
@@ -33360,14 +33381,14 @@
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.netxms_mgmt">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.netxms_sync">netxms_sync (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
           <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.netxms_sync">(pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.neveroffline">neveroffline (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
 
         <ul>
@@ -33948,6 +33969,8 @@
 </li>
         <li><a href="pcapkit/const/sctp.html#pcapkit.const.sctp.cause_code.CauseCode.No_Common_DTLS_Key_Management_Method">No_Common_DTLS_Key_Management_Method (pcapkit.const.sctp.cause_code.CauseCode attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.NO_DEFAULT">NO_DEFAULT (in module pcapkit.corekit.enum)</a>
+</li>
         <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.NO_DH_PROPOSAL_CHOSEN">NO_DH_PROPOSAL_CHOSEN (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
         <li><a href="pcapkit/const/http.html#pcapkit.const.http.error_code.ErrorCode.NO_ERROR">NO_ERROR (pcapkit.const.http.error_code.ErrorCode attribute)</a>
@@ -33997,6 +34020,8 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.data.internet.ipx.Address.node">node (pcapkit.protocols.data.internet.ipx.Address attribute)</a>
+</li>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.NoDefaultType">NoDefaultType (class in pcapkit.corekit.enum)</a>
 </li>
         <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.NoDefaultValue">NoDefaultValue</a>
 </li>
@@ -38599,6 +38624,13 @@
         <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.pcapkit.corekit.context._CT">pcapkit.corekit.context._CT (in module pcapkit.corekit.context)</a>
 </li>
         <li>
+    pcapkit.corekit.enum
+
+        <ul>
+          <li><a href="pcapkit/corekit/enum.html#module-pcapkit.corekit.enum">module</a>
+</li>
+        </ul></li>
+        <li>
     pcapkit.corekit.fields
 
         <ul>
@@ -40138,6 +40170,8 @@
           <li><a href="pcapkit/vendor/hip.html#module-pcapkit.vendor.hip.ecdsa_curve">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.hip.ecdsa_low_curve
 
@@ -40145,8 +40179,6 @@
           <li><a href="pcapkit/vendor/hip.html#module-pcapkit.vendor.hip.ecdsa_low_curve">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.vendor.hip.eddsa_curve
 
@@ -45308,6 +45340,8 @@
         <ul>
           <li><a href="pcapkit/corekit/context.html#pcapkit.corekit.context.ContextRegistry.register">(pcapkit.corekit.context.ContextRegistry method)</a>
 </li>
+          <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register">(pcapkit.corekit.enum.EnumRegistry class method)</a>
+</li>
           <li><a href="pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.register">(pcapkit.foundation.reassembly.reassembly.Reassembly class method)</a>
 </li>
           <li><a href="pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESPContext.register">(pcapkit.protocols.internet.esp.ESPContext method)</a>
@@ -45332,6 +45366,12 @@
 </li>
         </ul></li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.register_alias">register_alias() (pcapkit.const.reg.apptype.apptype.AppType class method)</a>
+
+        <ul>
+          <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_alias">(pcapkit.corekit.enum.EnumRegistry class method)</a>
+</li>
+        </ul></li>
+        <li><a href="pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register_aliases">register_aliases() (pcapkit.corekit.enum.EnumRegistry class method)</a>
 </li>
         <li><a href="pcapkit/foundation/registry.html#pcapkit.foundation.registry.protocols.register_apptype">register_apptype() (in module pcapkit.foundation.registry.protocols)</a>
 </li>
@@ -47239,10 +47279,10 @@
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_6690">reserved_6690 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_6696">reserved_6696 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_6696">reserved_6696 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.udp.UDP.reserved_6697">reserved_6697 (pcapkit.const.reg.apptype.udp.UDP attribute)</a>
 </li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.tcp.TCP.reserved_6699">reserved_6699 (pcapkit.const.reg.apptype.tcp.TCP attribute)</a>

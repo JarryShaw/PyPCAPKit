@@ -306,6 +306,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/context.html">Parsing Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/enum.html">Enumeration Base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/io.html">Seekable I/O Object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../corekit/module.html">Module Descriptor</a></li>
@@ -502,7 +503,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.error_code.ErrorCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.error_code.</span></span><span class="sig-name descname"><span class="pre">ErrorCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/error_code.html#ErrorCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.error_code.ErrorCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[ErrorCode] HTTP/2 Error Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.error_code.ErrorCode.NO_ERROR">
@@ -614,7 +615,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.frame.Frame">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.frame.Frame" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Frame] HTTP/2 Frame Type</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.frame.Frame.DATA">
@@ -724,7 +725,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.method.</span></span><span class="sig-name descname"><span class="pre">Method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></p>
 <p>[Method] HTTP Method</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -996,7 +997,7 @@ permanent member with both hollowed out to their defaults;
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
 <p>Leaves <a class="reference internal" href="#pcapkit.const.http.method.Method.safe" title="pcapkit.const.http.method.Method.safe"><code class="xref py py-attr docutils literal notranslate"><span class="pre">safe</span></code></a> and <a class="reference internal" href="#pcapkit.const.http.method.Method.idempotent" title="pcapkit.const.http.method.Method.idempotent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idempotent</span></code></a> at the same defaults
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself would, rather than missing entirely –
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>
+<a class="reference internal" href="../corekit/enum.html#id2" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
 bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> (it calls <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so
 those two attributes would otherwise be absent. There is no more
 specific value to reconstruct them from – a bare wire method verb
@@ -1079,7 +1080,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.setting.</span></span><span class="sig-name descname"><span class="pre">Setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/setting.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.setting.Setting" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Setting] HTTP/2 Settings</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.Reserved_0x0000">
@@ -1223,7 +1224,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.status_code.</span></span><span class="sig-name descname"><span class="pre">StatusCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[StatusCode] HTTP Status Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.message">
