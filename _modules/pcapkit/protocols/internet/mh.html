@@ -475,7 +475,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.access_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.ack_status_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACKStatusCode</span> <span class="k">as</span> <span class="n">Enum_ACKStatusCode</span>
@@ -935,7 +935,7 @@
     <span class="n">UpdateNotificationMessage</span> <span class="k">as</span> <span class="n">Schema_UpdateNotificationMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorSpecificOption</span> <span class="k">as</span> <span class="n">Schema_VendorSpecificOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1038,6 +1038,25 @@
 <span class="sd">        *incorrect interface identifier length* here but *home registration not</span>
 <span class="sd">        supported* there.</span>
 
+<span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
+<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
+<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
+<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
+<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
+<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
+<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
+<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
+<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
+<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
+<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
+<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
+<span class="sd">        just this one MH message. The walk defect predates this change and</span>
+<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
+<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
+<span class="sd">        reach it. See GitHub issue #880.</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Fast Binding Update accepted [:rfc:`5568#section-6.2.3`]</span>
@@ -1062,35 +1081,50 @@
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus.get">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The matching member.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: If ``key`` names no member -- raised for an</span>
+<span class="sd">                unknown name the same way :meth:`_missing_` raises for an</span>
+<span class="sd">                unknown value, so the two ways of getting this wrong do not</span>
+<span class="sd">                report differently. There is no ``default`` parameter: this</span>
+<span class="sd">                enumeration cannot grow, so a default that could only ever be</span>
+<span class="sd">                ignored would be worse than one that is absent.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="n">FastBindingAcknowledgmentStatus</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.2.3` names this value</span>
+<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
+<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
 </div>
 
 
@@ -1111,6 +1145,25 @@
 <span class="sd">        discovery IP address/prefix option of :rfc:`5568#section-6.4.1` is</span>
 <span class="sd">        likewise unregistered.</span>
 
+<span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5568` leaves</span>
+<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
+<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
+<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
+<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
+<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
+<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
+<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
+<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
+<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
+<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
+<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
+<span class="sd">        just this one MH message. The walk defect predates this change and</span>
+<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
+<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
+<span class="sd">        reach it. See GitHub issue #880.</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Old Care-of Address [:rfc:`5568#section-6.4.2`]</span>
@@ -1129,35 +1182,50 @@
 <div class="viewcode-block" id="IPv6AddressPrefixCode.get">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.get">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The matching member.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: If ``key`` names no member -- raised for an</span>
+<span class="sd">                unknown name the same way :meth:`_missing_` raises for an</span>
+<span class="sd">                unknown value, so the two ways of getting this wrong do not</span>
+<span class="sd">                report differently. There is no ``default`` parameter: this</span>
+<span class="sd">                enumeration cannot grow, so a default that could only ever be</span>
+<span class="sd">                ignored would be worse than one that is absent.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="n">IPv6AddressPrefixCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="IPv6AddressPrefixCode._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: Always. :rfc:`5568#section-6.4.2` names this value</span>
+<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
+<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
 </div>
 
 
@@ -1179,6 +1247,31 @@
 <span class="sd">        registered :class:`~pcapkit.const.mh.status_code.StatusCode`, whose</span>
 <span class="sd">        ``128`` and ``129`` mean something else entirely.</span>
 
+<span class="sd">        The enumeration is **closed**: an in-range value :rfc:`6705` leaves</span>
+<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
+<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
+<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
+<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
+<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
+<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
+<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
+<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
+<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
+<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
+<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
+<span class="sd">        just this one MH message. The walk defect predates this change and</span>
+<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
+<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
+<span class="sd">        reach it. See GitHub issue #880.</span>
+
+<span class="sd">        There is no ``get()`` backport here, unlike</span>
+<span class="sd">        :class:`FastBindingAcknowledgmentStatus` and</span>
+<span class="sd">        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests</span>
+<span class="sd">        included -- so GitHub issue #880 deleted it outright rather than</span>
+<span class="sd">        rebuilding it on the immutable contract.</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Success [:rfc:`6705#section-10.2`]</span>
@@ -1190,38 +1283,23 @@
     <span class="c1">#: MN Not Attached [:rfc:`6705#section-10.2`]</span>
     <span class="n">MN_Not_Attached</span> <span class="o">=</span> <span class="mi">129</span>
 
-<div class="viewcode-block" id="LocalizedRoutingStatus.get">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LocalizedRoutingStatus.get">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LocalizedRoutingStatus'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">LocalizedRoutingStatus</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LocalizedRoutingStatus</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="n">LocalizedRoutingStatus</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">LocalizedRoutingStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
-
-
 <div class="viewcode-block" id="LocalizedRoutingStatus._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LocalizedRoutingStatus._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LocalizedRoutingStatus'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: Always. :rfc:`6705#section-10.2` names this value</span>
+<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
+<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
 </div>
 
 
@@ -1239,6 +1317,31 @@
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`.</span>
 
+<span class="sd">        The enumeration is **closed**: an in-range value :rfc:`5949` leaves</span>
+<span class="sd">        unassigned is not minted a placeholder member. Per the owner's ruling</span>
+<span class="sd">        on GitHub issue #877, this RFC-inline value set stays immutable, so</span>
+<span class="sd">        :meth:`_missing_` raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">        instead of extending the class. That is not a capture-level failure</span>
+<span class="sd">        -- sibling frames are unaffected -- but the cost is bigger than one</span>
+<span class="sd">        message. Mobility Header is itself one of IPv6's own chained</span>
+<span class="sd">        extension headers, and IPv6's own extension-header walk then does</span>
+<span class="sd">        ``proto = info.next`` (:mod:`pcapkit.protocols.internet.ipv6`, line</span>
+<span class="sd">        338) on whatever :meth:`_import_next_layer` handed back; a ``Raw``</span>
+<span class="sd">        fallback's info carries no ``.next``. That :exc:`AttributeError`,</span>
+<span class="sd">        not this exception, is what a further-out ``@beholder`` actually</span>
+<span class="sd">        catches -- degrading the **whole IPv6 packet**, header fields</span>
+<span class="sd">        included, to :class:`~pcapkit.protocols.misc.raw.Raw`, rather than</span>
+<span class="sd">        just this one MH message. The walk defect predates this change and</span>
+<span class="sd">        already fires on a malformed extension header; a well-formed packet</span>
+<span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
+<span class="sd">        reach it. See GitHub issue #880.</span>
+
+<span class="sd">        There is no ``get()`` backport here, unlike</span>
+<span class="sd">        :class:`FastBindingAcknowledgmentStatus` and</span>
+<span class="sd">        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests</span>
+<span class="sd">        included -- so GitHub issue #880 deleted it outright rather than</span>
+<span class="sd">        rebuilding it on the immutable contract.</span>
+
 <span class="sd">    """</span>
 
     <span class="c1">#: Reserved [:rfc:`5949#section-6.2.2`]</span>
@@ -1250,38 +1353,23 @@
     <span class="c1">#: IPv4 local mobility anchor address [:rfc:`5949#section-6.2.2`]</span>
     <span class="n">IPv4_LMAA</span> <span class="o">=</span> <span class="mi">2</span>
 
-<div class="viewcode-block" id="LMAAddressCode.get">
-<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LMAAddressCode.get">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LMAAddressCode'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: Default value if not found.</span>
-
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">LMAAddressCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LMAAddressCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="n">LMAAddressCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">LMAAddressCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
-
-
 <div class="viewcode-block" id="LMAAddressCode._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LMAAddressCode._missing_">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'LMAAddressCode'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Lookup function used when value is not found.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to get enum item.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            EnumValueError: Always. :rfc:`5949#section-6.2.2` names this value</span>
+<span class="sd">                set inline with no IANA registry behind it, and the owner's</span>
+<span class="sd">                ruling on GitHub issue #877 is that it stays immutable rather</span>
+<span class="sd">                than minting an ``Unassigned_N`` placeholder member.</span>
+
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="c1">#: Unassigned</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">'Unassigned_</span><span class="si">%d</span><span class="s1">'</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
 </div>
 
 
