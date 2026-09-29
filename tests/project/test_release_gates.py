@@ -54,12 +54,57 @@ same split as ``test_the_rewritten_date_is_a_string_and_not_a_yaml_date`` in
 :file:`tests/project/test_bump_version.py`: the assertion that must run everywhere
 does not need the dependency, and the one that needs it guards the substitute.
 
+#888: every job past ``version_check`` used to share one guard -- "the ``v*``
+tag exists" -- as a proxy for "this version was already published", which
+diverges exactly when a release half-completes and made every downstream job
+skip silently while the run reported green. :class:`TestEvidenceBasedGating`
+below asserts the fix: ``tag``, ``pypi`` and ``conda`` each read their own
+evidence instead of that shared tag, and -- the part that is easy to get
+subtly wrong -- their ``if:`` conditions bypass GitHub's default status check
+explicitly (``!cancelled()``) rather than relying on evidence alone, because a
+job whose ``needs:`` includes a legitimately-skipped predecessor is skipped
+before its own ``if:`` is even evaluated otherwise. :func:`declared_if` is
+what makes an ``if:`` condition -- including the multi-line, folded-scalar
+form this fix introduces -- checkable the same coarse, textual way the rest of
+this module already checks ``environment:`` and ``needs:``.
+
+A cross-review of the #888 change (PR #905) found two defects that every test
+above -- being a string assertion over the YAML -- was structurally unable to
+catch, because none of them executed anything the workflow itself executes:
+
+* **``release_status``'s branch logic demanded uniformity across all four
+  release jobs**, reading a self-heal -- ``github``/``tag`` legitimately
+  skipping because their artefacts already exist, ``pypi``/``conda`` running
+  and succeeding because theirs did not -- as the stranded-partial shape #888
+  is about, and erroring on the very run that fixed it.
+  :class:`TestReleaseStatusScriptExecutesCorrectly` actually runs the
+  extracted shell script, over a table of the shapes a real run can take,
+  and checks which branch each one takes -- the uniformity bug fails exactly
+  the self-heal row.
+* **The ``python3 -c`` snippets computing PyPI/Anaconda evidence had their
+  source indented**, which only ``compile()``s on Python 3.14 -- every
+  interpreter from 3.9 through 3.13 raises ``IndentationError: unexpected
+  indent`` on the leading whitespace the surrounding YAML block scalar's own
+  indentation forces onto it, measured directly against each one. Two of the
+  three snippets run before ``actions/setup-python`` even installs a chosen
+  version, so ``python3`` there is whatever the runner image ships by
+  default -- 3.12 on ``ubuntu-latest`` as of writing, never 3.14.
+  :class:`TestPythonSnippetsSurviveOlderInterpreters` extracts each snippet
+  and actually runs it under an interpreter older than 3.14 when one can be
+  found on ``PATH``, skipping otherwise -- ``compile()`` under whatever
+  interpreter happens to be running this test suite proves nothing when that
+  interpreter is 3.14 itself, which is exactly how both defects shipped
+  despite every earlier test in this module passing.
+
 """
 
 from __future__ import annotations
 
 import pathlib
 import re
+import shutil
+import subprocess
+import sys
 import unittest
 from typing import TYPE_CHECKING
 
@@ -107,6 +152,11 @@ _ENVIRONMENT_NAME = re.compile(r'^ {6}name:[ \t]*(\S+)')
 #: extending it to the multi-line ``needs:\n  - a`` form is a maintenance
 #: obligation for whoever adds one, not something this scan infers.
 _NEEDS = re.compile(r'^ {4}needs:[ \t]*\[([^\]]*)\][ \t]*(?:#.*)?$')
+#: A job-level ``if:`` key, either inline (``if: ${{ ... }}``) or opening a
+#: folded block scalar (``if: >-``, continued below at six spaces). #888
+#: introduced the second form, since ``tag``/``pypi``/``conda``'s conditions
+#: grew past one comfortable line; :func:`declared_if` handles both.
+_IF = re.compile(r'^ {4}if:[ \t]*(.*)$')
 
 
 def strip_comments(text: 'str') -> 'str':
@@ -197,6 +247,39 @@ def declared_needs(block: 'str') -> 'list[str]':
     return []
 
 
+def declared_if(block: 'str') -> 'str':
+    """The job's own ``if:`` condition, flattened to one line; ``''`` if it has none.
+
+    Handles both the single-line ``if: ${{ ... }}`` form used elsewhere in this
+    file and the folded block-scalar form (``if: >-``, continued below at six
+    spaces) #888 introduces for ``tag``, ``pypi`` and ``conda``, whose
+    conditions grew past one line. Folding is exactly what YAML itself does to
+    a ``>``/``>-`` scalar -- join each continuation line with a single space --
+    so flattening it the same way here reproduces a real parse rather than
+    approximating one; :class:`TestYAMLAgreesWithTheScanner` is what checks
+    that claim against :func:`yaml.safe_load` when it is installed.
+
+    """
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        match = _IF.match(line)
+        if match is None:
+            continue
+
+        inline = match.group(1).split('#')[0].strip()
+        if inline and inline not in ('>', '>-', '|', '|-'):
+            return inline
+
+        parts = []
+        for nested in lines[index + 1:]:
+            if nested.strip() and not nested.startswith(' ' * 6):
+                break
+            if nested.strip():
+                parts.append(nested.strip())
+        return ' '.join(parts)
+    return ''
+
+
 def needs_closure(jobs: 'dict[str, str]', name: str) -> 'set[str]':
     """Every job ``name`` depends on, directly or transitively.
 
@@ -225,6 +308,97 @@ def publishing_reasons(block: 'str') -> 'list[str]':
     return [reason for marker, reason in sorted(PUBLISHING_MARKERS.items()) if marker in body]
 
 
+#: A job-level ``run:`` key opening a literal block scalar (``run: |``), at
+#: whatever indent the step it belongs to happens to sit -- unlike
+#: :data:`_ENVIRONMENT`/:data:`_NEEDS`/:data:`_IF`, this one is not pinned to
+#: a fixed column, since a step's ``run:`` is one level deeper than a job's
+#: own keys and this module has no reason to otherwise care how deep.
+_RUN_LITERAL = re.compile(r'^(\s*)run:\s*\|\s*$')
+
+
+def block_scalar_after(block: 'str', key: 're.Pattern[str]') -> 'str':
+    """The dedented body of the literal block scalar (``|``) opened by the
+    first line in ``block`` matching ``key``.
+
+    Only used for :data:`_RUN_LITERAL` against ``release_status``, which has
+    exactly one step and therefore exactly one ``run:`` -- ambiguous for a
+    job with more than one, which is why this is not the general-purpose
+    ``run:`` extractor the rest of this module reaches for. Dedents by the
+    body's *own* first line, the same rule a real YAML literal block scalar
+    follows, rather than assuming a fixed indent.
+
+    """
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        if key.match(line) is None:
+            continue
+
+        base_indent = None  # type: Optional[int]
+        body = []
+        for nested in lines[index + 1:]:
+            if not nested.strip():
+                body.append('')
+                continue
+            indent = len(nested) - len(nested.lstrip(' '))
+            if base_indent is None:
+                base_indent = indent
+            if indent < base_indent:
+                break
+            body.append(nested[base_indent:])
+        return '\n'.join(body)
+    raise AssertionError(f'no line in the block matches {key.pattern!r}')
+
+
+#: A ``printf '%s\n' "line" "line" ... | python3 -`` snippet, #905's fix for
+#: feeding Python source through a `python3 -c "..."` argument whose
+#: indentation only ``compile()``s on 3.14 -- see this module's docstring.
+#: Matches the exact shape :func:`printf_python_snippets` was written
+#: against; a differently-formatted equivalent (different quoting, `printf`
+#: on one line, ...) would need this pattern extended, same maintenance
+#: obligation as :data:`PUBLISHING_MARKERS`.
+_PRINTF_PYTHON_SNIPPET = re.compile(
+    r"printf '%s\\n' \\\n"
+    r"(?P<lines>(?:[ \t]*\"[^\"\n]*\"[ \t]*\\\n)+)"
+    r"[ \t]*\|[ \t]*python3 -",
+)
+_PRINTF_LINE = re.compile(r'"([^"\n]*)"')
+
+
+def printf_python_snippets(text: 'str') -> 'list[str]':
+    """Every :data:`_PRINTF_PYTHON_SNIPPET` in ``text``, reconstructed as the
+    Python source ``python3 -`` actually receives on stdin -- each snippet's
+    lines joined with ``\\n``, carrying none of the YAML block scalar's own
+    indentation, since that indentation is exactly what this scan is for:
+    confirming it never reaches the Python source itself.
+
+    """
+    snippets = []
+    for match in _PRINTF_PYTHON_SNIPPET.finditer(text):
+        lines = _PRINTF_LINE.findall(match.group('lines'))
+        snippets.append('\n'.join(lines))
+    return snippets
+
+
+def pre_314_interpreter() -> 'Optional[str]':
+    """A Python executable older than 3.14, or :data:`None` if none is found.
+
+    Only 3.14 tolerates the leading-whitespace-on-``-c``-source hazard
+    :class:`TestPythonSnippetsSurviveOlderInterpreters` exists to catch --
+    measured directly against 3.9 through 3.14, see this module's docstring.
+    :data:`sys.executable` is exactly that hazard's blind spot whenever *this*
+    test suite happens to be running under 3.14 itself, which is why this
+    looks for another interpreter on ``PATH`` rather than trusting its own.
+
+    """
+    if sys.version_info < (3, 14):
+        return sys.executable
+    for minor in (13, 12, 11, 10, 9):
+        candidate = shutil.which(f'python3.{minor}')
+        if candidate:
+            return candidate
+    return None
+
+
 class WorkflowMixin:
     """Reads and scans the workflow once per test."""
 
@@ -241,7 +415,7 @@ class TestPublishingJobsAreGated(WorkflowMixin, unittest.TestCase):
         """A scanner that finds nothing would pass every test below it."""
         self.assertEqual(
             sorted(self.jobs),
-            ['conda', 'github', 'pypi', 'tag', 'unit-tests', 'version_check'],
+            ['conda', 'github', 'pypi', 'release_status', 'tag', 'unit-tests', 'version_check'],
             'the job list moved; if that is intended, the expectations in this '
             'module need revisiting rather than this line being updated alone',
         )
@@ -356,6 +530,158 @@ class TestGatedJobsDependOnGithub(WorkflowMixin, unittest.TestCase):
                 )
 
 
+class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
+    """#888: ``tag``, ``pypi`` and ``conda`` read their own evidence now,
+    instead of ``PCAPKIT_TAG_EXISTS`` -- the tag ``github`` creates, which
+    answers "was this tagged" and not "was this published", and those diverge
+    exactly when a release half-completes.
+
+    """
+
+    def test_github_still_gates_on_the_v_tag_it_creates(self) -> None:
+        """The one job for which ``PCAPKIT_TAG_EXISTS`` *is* the right question.
+
+        ``github``'s own artefact is the ``v*`` tag that output answers for,
+        so this is deliberate asymmetry, not a leftover of the bug -- this
+        test is what stops a future "fix" from making it symmetric by mistake.
+
+        """
+        condition = declared_if(self.jobs['github'])
+        self.assertIn('PCAPKIT_TAG_EXISTS', condition)
+
+    def test_tag_gates_on_its_own_conda_tag_evidence(self) -> None:
+        condition = declared_if(self.jobs['tag'])
+        self.assertIn('PCAPKIT_CONDA_TAG_EXISTS', condition)
+        self.assertNotIn(
+            'PCAPKIT_TAG_EXISTS ==', condition,
+            '`tag` still reads the v* tag as its gating evidence, which is '
+            "github's artefact, not tag's",
+        )
+
+    def test_pypi_gates_on_its_own_file_count_evidence(self) -> None:
+        condition = declared_if(self.jobs['pypi'])
+        self.assertIn('PCAPKIT_PYPI_COMPLETE', condition)
+        self.assertNotIn('PCAPKIT_TAG_EXISTS ==', condition)
+
+    def test_conda_gates_on_its_own_aggregate_evidence(self) -> None:
+        condition = declared_if(self.jobs['conda'])
+        self.assertIn('PCAPKIT_CONDA_COMPLETE', condition)
+        self.assertNotIn('PCAPKIT_TAG_EXISTS ==', condition)
+
+    def test_evidence_gated_jobs_survive_a_legitimately_skipped_predecessor(self) -> None:
+        """The half of the fix that has nothing to do with *which* evidence is read.
+
+        ``tag``, ``pypi`` and ``conda`` each depend (directly) on ``github``,
+        and ``conda`` also on ``tag``. GitHub Actions skips a job whose
+        ``needs:`` included a job that itself skipped -- before that job's own
+        ``if:`` is even evaluated -- unless the ``if:`` itself calls a
+        status-check function. ``github`` legitimately skips whenever its own
+        tag already exists, which is exactly the retry case #888 is about, so
+        without this escape hatch the evidence checks above would never get a
+        chance to run: a correctly-computed "not yet on PyPI, please run"
+        would still be silently discarded by the default ``success()`` check.
+
+        The escape hatch has to be a real status-check function
+        (``!cancelled()``, ``always()``, ...), not just the *word* appearing
+        in a comment -- so this greps the condition text itself, the same
+        coarse substring style :data:`PUBLISHING_MARKERS` already uses.
+
+        Each dependency has to be checked for ``== 'success' || == 'skipped'``
+        explicitly, not merely ``!= 'failure'``: the latter still admits
+        ``cancelled``, and a cancelled ``tag`` would send ``conda`` into its
+        ``actions/checkout`` with ``ref: conda-<version>+0`` for a tag ``tag``
+        never pushed -- a checkout failure standing in for a clean skip,
+        found on the same cross-review as the two blocking defects above.
+
+        """
+        direct_deps = {
+            'tag': ['github'],
+            'pypi': ['github'],
+            'conda': ['github', 'tag'],
+        }
+        for name, deps in sorted(direct_deps.items()):
+            with self.subTest(job=name):
+                condition = declared_if(self.jobs[name])
+                self.assertTrue(
+                    'cancelled()' in condition or 'always()' in condition,
+                    f'`{name}`\'s `if:` ({condition!r}) calls neither `cancelled()` '
+                    f'nor `always()`, so the default `success()` check GitHub Actions '
+                    f'prepends will skip it the moment any direct dependency skips -- '
+                    f'including a dependency that skipped for the legitimate #888 '
+                    f'reason that its own artefact already exists',
+                )
+                for dep in deps:
+                    self.assertIn(
+                        f"needs.{dep}.result == 'success'", condition,
+                        f'`{name}` does not explicitly accept `{dep}` (a direct '
+                        f'dependency) succeeding',
+                    )
+                    self.assertIn(
+                        f"needs.{dep}.result == 'skipped'", condition,
+                        f'`{name}` does not explicitly accept `{dep}` (a direct '
+                        f'dependency) having legitimately skipped',
+                    )
+                    self.assertNotIn(
+                        f"needs.{dep}.result != 'failure'", condition,
+                        f'`{name}` checks `{dep}` with `!= \'failure\'`, which still '
+                        f'admits `cancelled` -- see this test\'s own docstring',
+                    )
+
+    def test_conda_checks_its_own_leg_before_uploading(self) -> None:
+        """The correctness half for ``conda``: ``anaconda/actions/upload-package``
+        has no ``skip-existing``, so the job-level evidence above is only a cost
+        saver -- each matrix leg has to check for itself.
+
+        """
+        block = self.jobs['conda']
+        self.assertIn('api.anaconda.org/release/jarryshaw/pypcapkit', block)
+        self.assertIn('PCAPKIT_LEG_EXISTS', block)
+        self.assertIn(
+            "steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true'", block,
+            "the 'Upload conda packages to Anaconda' step has no `if:` gating "
+            'it on the per-leg evidence check, so a leg that already has this '
+            'exact distribution would fail outright on retry instead of skipping',
+        )
+
+    def test_a_predicted_skip_is_announced(self) -> None:
+        """#888's other half: a skip must never be silent.
+
+        ``conda``'s per-leg skip gets its own ``::notice`` at the point of the
+        skip, since ``release_status`` only sees the job's aggregate result and
+        cannot say *which* leg was already published.
+
+        """
+        self.assertIn('::notice title=conda leg already published', self.jobs['conda'])
+
+    def test_version_check_exposes_the_new_evidence_outputs(self) -> None:
+        """The three outputs the jobs above actually read have to exist for
+        them to read anything at all -- a typo'd output name fails silently
+        (an empty string, not an error), so this is worth asserting directly.
+
+        """
+        block = self.jobs['version_check']
+        for output in ('PCAPKIT_CONDA_TAG_EXISTS', 'PCAPKIT_PYPI_COMPLETE', 'PCAPKIT_CONDA_COMPLETE'):
+            with self.subTest(output=output):
+                self.assertIn(f'{output}:', block)
+
+    def test_pypi_evidence_reads_the_per_version_endpoint(self) -> None:
+        """Not ``releases[<version>]``: that field was empty on every live
+        request made while building this check, including against a version
+        that genuinely has all 8 files -- ``urls`` is what the per-version
+        endpoint actually populates. A regression back to ``releases`` would
+        make the evidence check always read 0 files.
+
+        """
+        block = self.jobs['version_check']
+        self.assertIn('pypi.org/pypi/pypcapkit/', block)
+        self.assertIn("data.get('urls'", block)
+
+    def test_conda_evidence_checks_both_platforms(self) -> None:
+        block = self.jobs['version_check']
+        self.assertIn('linux-64', block)
+        self.assertIn('osx-64', block)
+
+
 class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
     """:data:`PUBLISHING_MARKERS` has to keep matching the file it describes."""
 
@@ -379,16 +705,275 @@ class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
         )
 
     def test_the_test_gate_is_not_mistaken_for_a_publisher(self) -> None:
-        """``unit-tests`` and ``version_check`` have no outward effect.
+        """``unit-tests``, ``version_check`` and ``release_status`` have no
+        outward effect.
 
         ``unit-tests`` could not carry an ``environment:`` even if it wanted one --
         a job that calls a reusable workflow may not declare one -- so a marker
         broad enough to match it would make the rule unsatisfiable.
+        ``release_status`` (#888) only reads the ``needs:`` context and prints
+        ``::notice``/``::warning``/``::error`` annotations; it touches neither
+        the repository nor either package index.
 
         """
-        for name in ('unit-tests', 'version_check'):
+        for name in ('unit-tests', 'version_check', 'release_status'):
             with self.subTest(job=name):
                 self.assertEqual(publishing_reasons(self.jobs[name]), [])
+
+
+class TestReleaseStatusReportsHonestly(WorkflowMixin, unittest.TestCase):
+    """#888's other job: a run that released nothing must say why, in one
+    place, regardless of which upstream job or gate made it release nothing.
+
+    """
+
+    def test_it_depends_directly_on_every_other_job(self) -> None:
+        """Not a closure -- a *direct* ``needs:`` on each one.
+
+        ``needs.<job>.result`` and ``needs.<job>.outputs`` are only readable
+        for jobs actually named in this job's own ``needs:``; a transitive
+        dependency (the shortcut :class:`TestGatedJobsDependOnGithub` allows
+        for the other four jobs) would leave this one unable to see, say,
+        ``pypi``'s result at all.
+
+        """
+        self.assertEqual(
+            declared_needs(self.jobs['release_status']),
+            ['unit-tests', 'version_check', 'github', 'tag', 'pypi', 'conda'],
+        )
+
+    def test_it_runs_regardless_of_what_upstream_did(self) -> None:
+        """``unit-tests`` and ``version_check`` can each skip before any
+        evidence output exists at all, so this job cannot condition on their
+        outputs the way the gated jobs do -- it has to bypass the default
+        status check outright.
+
+        """
+        condition = declared_if(self.jobs['release_status'])
+        self.assertTrue(
+            'cancelled()' in condition or 'always()' in condition,
+            f'`release_status`\'s `if:` ({condition!r}) would otherwise skip '
+            f'the moment anything it depends on skips, which is precisely the '
+            f'situation it exists to report on',
+        )
+
+    def test_it_has_no_outward_effect(self) -> None:
+        self.assertIsNone(declared_environment(self.jobs['release_status']))
+        self.assertEqual(publishing_reasons(self.jobs['release_status']), [])
+
+    def test_the_888_shape_is_reported_as_a_real_failure(self) -> None:
+        """The one case this job must never let pass as green: the tag exists,
+        the release is not fully out, and yet nothing ran to finish it. With
+        the evidence-based guards in place this should be unreachable, but if
+        it is ever reached it must fail loudly, not print a warning and exit 0
+        the way every other branch does.
+
+        """
+        block = self.jobs['release_status']
+        self.assertIn('::error title=Stranded partial release (#888)', block)
+        self.assertIn('exit 1', block)
+
+    def test_routine_skips_are_quiet(self) -> None:
+        """The steady state -- nothing to release, or a release that just
+        completed -- must not read as a problem.
+
+        """
+        block = self.jobs['release_status']
+        self.assertIn('::notice title=Nothing to release', block)
+        self.assertIn('::notice title=Release complete', block)
+
+
+class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase):
+    """Actually runs ``release_status``'s shell script, rather than only
+    grepping it, over a table of the shapes a real run can take.
+
+    A cross-review of the #888 change found that an earlier revision of this
+    script demanded the same outcome (all four release jobs ``skipped``, or
+    all four ``success``) before treating a run as complete, which reads a
+    self-heal -- ``github``/``tag`` skipping because their artefacts already
+    exist, ``pypi``/``conda`` running and succeeding because theirs did not --
+    as the #888 shape itself, erroring on the run that just fixed it. Every
+    other test in this module is a string assertion over the YAML, so none
+    of them executed the script and none of them could have caught that.
+
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        if shutil.which('bash') is None:
+            raise unittest.SkipTest('bash not found on PATH')
+        cls.script = block_scalar_after(cls.jobs['release_status'], _RUN_LITERAL)  # type: ignore[attr-defined]
+
+    def _run(self, overrides: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
+        env = {
+            'PCAPKIT_EVENT_NAME': 'workflow_run',
+            'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'success',
+            'PCAPKIT_UNIT_TESTS': 'success',
+            'PCAPKIT_VERSION_CHECK': 'success',
+            'PCAPKIT_GITHUB_JOB': 'success',
+            'PCAPKIT_TAG_JOB': 'success',
+            'PCAPKIT_PYPI_JOB': 'success',
+            'PCAPKIT_CONDA_JOB': 'success',
+            'PCAPKIT_VERSION': '1.5.0',
+            'PCAPKIT_TAG_EXISTS': 'false',
+            'PCAPKIT_CONDA_TAG_EXISTS': 'false',
+            'PCAPKIT_PYPI_COMPLETE': 'false',
+            'PCAPKIT_CONDA_COMPLETE': 'false',
+        }
+        env.update(overrides)
+        return subprocess.run(  # type: ignore[return-value]
+            ['bash', '-c', self.script],  # type: ignore[attr-defined]
+            env=env, capture_output=True, text=True, timeout=10,
+        )
+
+    #: ``(scenario name, env overrides, expected title substring, expected exit code)``.
+    #: The self-heal row is the one an earlier revision of the script got
+    #: wrong: mixed results, all reconciled against their own evidence.
+    VECTORS = [
+        (
+            'vendor_update_had_nothing_to_do',
+            {'PCAPKIT_UNIT_TESTS': 'skipped', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'skipped'},
+            '::notice title=Nothing to release',
+            0,
+        ),
+        (
+            'vendor_update_itself_broke',
+            {'PCAPKIT_UNIT_TESTS': 'skipped', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': 'failure'},
+            '::warning title=Release test gate skipped',
+            0,
+        ),
+        (
+            'version_check_failed',
+            {
+                'PCAPKIT_VERSION_CHECK': 'failure',
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+            },
+            '::warning title=Release blocked before it could start',
+            0,
+        ),
+        (
+            'steady_state_already_fully_released',
+            {
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+                'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_CONDA_TAG_EXISTS': 'true',
+                'PCAPKIT_PYPI_COMPLETE': 'true', 'PCAPKIT_CONDA_COMPLETE': 'true',
+            },
+            '::notice title=Nothing to release',
+            0,
+        ),
+        (
+            'self_heal_mixed_skip_and_success',
+            {
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'success', 'PCAPKIT_CONDA_JOB': 'success',
+                'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_CONDA_TAG_EXISTS': 'true',
+                'PCAPKIT_PYPI_COMPLETE': 'false', 'PCAPKIT_CONDA_COMPLETE': 'false',
+            },
+            '::notice title=Release complete',
+            0,
+        ),
+        (
+            'fresh_full_release_all_four_ran',
+            {},  # every override already defaults to `success` / `false`
+            '::notice title=Release complete',
+            0,
+        ),
+        (
+            'a_release_job_genuinely_failed',
+            {
+                'PCAPKIT_PYPI_JOB': 'failure',
+                'PCAPKIT_TAG_EXISTS': 'true', 'PCAPKIT_CONDA_TAG_EXISTS': 'true',
+                'PCAPKIT_CONDA_COMPLETE': 'true',
+            },
+            '::warning title=Release did not complete',
+            0,
+        ),
+        (
+            'stranded_partial_the_888_shape',
+            {
+                'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped',
+                'PCAPKIT_PYPI_JOB': 'skipped', 'PCAPKIT_CONDA_JOB': 'skipped',
+                'PCAPKIT_TAG_EXISTS': 'true',  # github's own evidence: reconciled
+                # everything else still incomplete, yet its job skipped anyway
+            },
+            '::error title=Stranded partial release (#888)',
+            1,
+        ),
+    ]
+
+    def test_each_scenario_takes_the_right_branch(self) -> None:
+        for name, overrides, expected_marker, expected_rc in self.VECTORS:
+            with self.subTest(scenario=name):
+                result = self._run(overrides)
+                self.assertEqual(
+                    result.returncode, expected_rc,
+                    f'scenario {name!r} exited {result.returncode}, expected '
+                    f'{expected_rc}. stdout={result.stdout!r} stderr={result.stderr!r}',
+                )
+                self.assertIn(
+                    expected_marker, result.stdout,
+                    f'scenario {name!r} did not print {expected_marker!r}. '
+                    f'stdout={result.stdout!r}',
+                )
+
+
+class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCase):
+    """A cross-review of the #888 change found that the ``python3 -c``
+    snippets computing PyPI/Anaconda evidence had their source indented by
+    the surrounding YAML block scalar, which only ``compile()``s on Python
+    3.14 -- 3.9 through 3.13 all raise ``IndentationError: unexpected
+    indent``, measured directly. Two of the three run before
+    ``actions/setup-python`` installs a chosen version, so ``python3`` there
+    is the runner image's default (3.12 on ``ubuntu-latest`` as of writing),
+    never 3.14. #905's fix feeds one line per ``printf`` argument instead, so
+    no line in the actual Python source is indented that Python did not
+    itself put there -- this class is what actually runs each snippet under
+    an older interpreter to check that claim, rather than trusting it.
+
+    """
+
+    def test_the_scan_found_the_snippets(self) -> None:
+        """A scan that finds nothing would pass every test below it."""
+        snippets = printf_python_snippets(self.text)  # type: ignore[attr-defined]
+        self.assertEqual(
+            len(snippets), 3,
+            'expected exactly 3 printf-fed python3 snippets (the PyPI and '
+            'Anaconda evidence checks in version_check, plus the per-leg '
+            'check in conda); found a different count -- if that is '
+            'intended, this expectation needs revisiting alongside it',
+        )
+
+    def test_each_snippet_runs_without_an_indentation_error(self) -> None:
+        interpreter = pre_314_interpreter()
+        if interpreter is None:
+            self.skipTest('no Python interpreter older than 3.14 found on PATH')
+
+        version = subprocess.run(
+            [interpreter, '--version'], capture_output=True, text=True,
+        ).stdout.strip()
+
+        for index, snippet in enumerate(printf_python_snippets(self.text)):  # type: ignore[attr-defined]
+            with self.subTest(snippet=index):
+                # `$target_platform`/`$py_tag` are bash interpolation the real
+                # step performs before Python ever sees this text; harmless
+                # stand-ins reproduce the same shape without needing bash here.
+                source = (
+                    snippet
+                    .replace('$target_platform', 'linux-64')
+                    .replace('$py_tag', 'py310')
+                )
+                result = subprocess.run(
+                    [interpreter, '-'], input=source, capture_output=True,
+                    text=True, timeout=10,
+                )
+                self.assertNotIn(
+                    'IndentationError', result.stderr,
+                    f'snippet {index} raised IndentationError under '
+                    f'{interpreter} ({version}):\n{result.stderr}',
+                )
 
 
 class TestScannerRecognisesTheDefect(unittest.TestCase):
@@ -512,6 +1097,32 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         self.assertEqual(scanned, expected,
                          'the indentation-based `needs:` scanner and yaml.safe_load '
                          'disagree about the dependency graph')
+
+    def test_the_same_job_to_if_mapping(self) -> None:
+        """:func:`declared_if` against the same real parse, for the same reason.
+
+        This is the one that actually exercises the folded block-scalar form
+        #888 introduces -- ``test_the_same_job_to_environment_mapping`` and
+        ``test_the_same_job_to_needs_mapping`` above only ever see single-line
+        values, so neither would have caught a folding mistake the way this
+        one does.
+
+        """
+        try:
+            import yaml
+        except ImportError:  # pragma: no cover
+            self.skipTest('PyYAML is not in the test extra; the textual scan is '
+                          'asserted by TestEvidenceBasedGating')
+
+        parsed = yaml.safe_load(self.text)
+        self.assertIsInstance(parsed, dict, 'the workflow is not a YAML mapping')
+
+        expected = {name: (job.get('if') or '') for name, job in parsed['jobs'].items()}
+        scanned = {name: declared_if(block) for name, block in self.jobs.items()}
+
+        self.assertEqual(scanned, expected,
+                         'the indentation-based `if:` scanner and yaml.safe_load '
+                         'disagree about at least one job\'s condition')
 
 
 if __name__ == '__main__':
