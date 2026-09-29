@@ -55,10 +55,10 @@ from typing import TYPE_CHECKING
 
 from aenum import IntEnum, IntFlag, StrEnum, auto
 
-from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
 
 __all__ = ['{NAME}']
 
@@ -102,6 +102,85 @@ class FEATCode(EnumRegistry, StrEnum):
 
     def __repr__(self) -> 'str':
         return f'<{{self.__class__.__name__}} [{{self._name_}}]>'
+
+    @classmethod
+    def get(cls, key: 'Any', default: 'Any' = NO_DEFAULT) -> 'FEATCode':
+        """Resolve ``key`` case-insensitively, per :rfc:`5797#section-2`.
+
+        One of the few case-insensitive overrides the ruling on GitHub issue
+        #877 allows, and the registry's own defining document states the
+        comparison rule outright rather than leaving it to be inferred --
+        :rfc:`5797#section-2`, on the ``FEAT Code`` column this class is
+        generated from: *"IANA maintains uniqueness of feature names (FEAT
+        codes) based on case-insensitive comparison."* Two FEAT codes
+        therefore cannot differ only by case, so folding the caller's key
+        cannot resolve ambiguously.
+
+        :rfc:`2389#section-3.2`, which defines the ``FEAT`` response the
+        codes appear in, points the same way from the wire side: *"The
+        feature-label and feature-parms are nominally case sensitive,
+        however ... it is to be expected that those definitions will usually
+        specify the label and parameters in a case independent manner. Where
+        this is done, implementations are recommended to use upper case
+        letters when transmitting the feature response."* A caller feeding a
+        ``FEAT`` response line is therefore holding upper case by
+        recommendation, while 5 of this registry's 15 codes are registered in
+        lower case -- measured on the IANA CSV: 10 distinct all-upper-case
+        keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,
+        with none mixed. Without this override ``get('BASE')`` raised
+        :exc:`KeyError`, which is the defect GitHub issue #903's audit found.
+
+        The obvious objection, answered: :rfc:`5797` uses case *presentationally*
+        to tell a real keyword from a placeholder -- *"defined FEAT keywords
+        codes are listed in all uppercase, whereas placeholder keywords ... are
+        listed in lowercase"* -- so folding might look like it discards that
+        distinction. It does not. Only the inbound ``key`` is folded; every
+        member keeps the registrar's own casing, per the same ruling's *"enum
+        should honour and keep their original writings as in the registrars"*,
+        so ``get('BASE').name`` is still ``'base'`` and still says placeholder.
+        And the uniqueness rule quoted above is what makes that safe: a real
+        keyword ``BASE`` could not be registered alongside the placeholder
+        ``base``, so there is no second member for the fold to hide.
+
+        Folds only as a *fallback*. An exact name or value hit is delegated to
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` untouched, so the base's
+        own precedence -- name before value -- and its non-minting ``str``
+        path both survive: nothing here calls ``cls(key)``, so a key matching
+        no member, folded or not, still raises rather than growing the
+        registry. ``get('ZZ-NOT-REAL')`` therefore still raises
+        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an
+        unregistered member, exactly as before.
+
+        Args:
+            key: Name or value to look up. A non-``str`` key is passed
+                straight through, since case cannot apply to it.
+            default: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`. Not
+                folded -- it names an already-registered value rather than
+                arriving from the wire, so the caller spells it from this
+                module.
+
+        Returns:
+            The canonical member for ``key``, or for ``default``.
+
+        Raises:
+            KeyError: If no member matches ``key`` exactly or case-insensitively
+                and there is no usable ``default``.
+            ValueError: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`, for a
+                non-``str`` key.
+
+        """
+        if isinstance(key, str) and not (
+            key in cls._member_map_ or  # pylint: disable=no-member
+            key in cls._value2member_map_
+        ):
+            folded = key.casefold()
+            for name, member in cls._member_map_.items():  # pylint: disable=no-member
+                if name.casefold() == folded:
+                    return member
+            for member in cls._value2member_map_.values():
+                if member.value.casefold() == folded:
+                    return member
+        return super().get(key, default)
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'FEATCode':

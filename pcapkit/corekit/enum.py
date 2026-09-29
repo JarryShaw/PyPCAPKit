@@ -432,7 +432,10 @@ class EnumLookup:
         unrecognised value, routing a failed *name* lookup through the
         constructor would let a mere ``get()`` call mint a permanent member
         where it previously just raised. Defensive rather than observed: of
-        the 125 classes that reach this method, the ``str``-valued ones
+        the 127 classes that reach this method -- 125 until GitHub issue #880's
+        own PR added ``pcapkit/const/ngap/procedure_code.py`` and
+        ``pcapkit/const/ngap/protocol_ie.py``, remeasured while auditing
+        GitHub issue #903 -- the ``str``-valued ones
         (:class:`~pcapkit.const.ftp.command.Command`, :class:`~pcapkit.const.
         ftp.command.FEATCode`, :class:`~pcapkit.const.http.method.Method`,
         :class:`~pcapkit.const.pcapng.option_type.OptionType`,
