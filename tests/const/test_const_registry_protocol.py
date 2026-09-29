@@ -1356,12 +1356,21 @@ class NoDefaultSentinelTests(unittest.TestCase):
         self.assertEqual(rendered, '<NO_DEFAULT>')
         self.assertNotIn('0x', rendered)
 
-    def test_type_is_the_dedicated_sentinel_class_and_both_are_exported(self) -> None:
+    def test_type_is_the_dedicated_sentinel_class_and_only_the_object_is_exported(self) -> None:
+        """GitHub issue #911 reversed half of what this used to assert.
+
+        It read ``assertIn('NoDefaultType', enum_module.__all__)`` -- the type
+        *and* the object were exported. The owner's ruling: *"we should ONLY
+        export the objects (like* ``NULL`` *) to users"*, so the type is out of
+        :attr:`__all__` while staying importable by its dotted path, which is
+        what the last assertion here pins.
+        """
         import pcapkit.corekit.enum as enum_module
 
         self.assertIs(type(enum_module.NO_DEFAULT), enum_module.NoDefaultType)
         self.assertIn('NO_DEFAULT', enum_module.__all__)
-        self.assertIn('NoDefaultType', enum_module.__all__)
+        self.assertNotIn('NoDefaultType', enum_module.__all__)
+        self.assertTrue(hasattr(enum_module, 'NoDefaultType'))
 
     def test_constructing_the_type_again_returns_the_same_instance(self) -> None:
         """The ``__new__`` singleton guard: a caller who does not realise

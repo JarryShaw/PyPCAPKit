@@ -137,7 +137,7 @@ caller might legitimately pass. The house rule, from the maintainer:
    Keep the sentinel object's type class naming as ``<SENTINEL>Type``.
 
 That is, the class takes the instance's name in CamelCase with ``Type`` appended. The
-three in the tree follow it:
+four in the tree follow it:
 
 .. list-table::
    :header-rows: 1
@@ -155,18 +155,46 @@ three in the tree follow it:
    * - ``NO_DEFAULT``
      - ``NoDefaultType``
      - :mod:`pcapkit.corekit.enum`
+   * - ``_Absent``
+     - ``_AbsentType``
+     - :mod:`pcapkit.protocols.protocol`
 
 Note what the rule does **not** fix: the **instance** name's casing is deliberately
 free, which is why ``NULL`` and ``NoValue`` disagree and both are correct. Pick
 whichever reads better at the call site, and where a name already exists, keep it --
 renaming a published sentinel costs every caller for no gain.
 
+Nor does it fix the **leading underscore**. ``_Absent`` is private -- it is read in
+``_declared_keywords`` and discarded there, never leaving
+:mod:`pcapkit.protocols.protocol` -- and it is still held to the convention, which is
+why its type is ``_AbsentType`` and not ``_Absent_t`` or ``Absent``. It is a
+deliberate fourth rather than an accident, and its own docstring
+(:file:`pcapkit/protocols/protocol.py`, line 95) says so:
+
+   A distinct class rather than a bare :obj:`object` so that the sentinel has a name
+   of its own in a traceback or a debugger, and so that a type checker has something
+   to name where ``object()`` would give it nothing. It follows
+   :class:`~pcapkit.corekit.fields.field.NoValueType`, which does the same job for an
+   unset field default; this is a sibling of it rather than a reuse [...]
+
+The private name is also why this table listed three for as long as it did: a sweep
+filtered on capitalised names does not see it. When adding a sentinel, add it here
+whether or not it is public.
+
+What reaches users is the **object only**. The maintainer's ruling: *"we should ONLY
+export the objects (like* ``NULL`` *) to users"* -- so a public sentinel names its
+instance in its module's ``__all__`` and leaves the type out of it (GitHub issue #911).
+The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
+is ``import *`` that no longer offers it. A private sentinel such as ``_Absent`` is in
+neither, which is what private means here.
+
 .. note::
 
-   Of the three, only :class:`~pcapkit.corekit.module.NullType` is a full worked
+   Of the four, only :class:`~pcapkit.corekit.module.NullType` is a full worked
    example. ``NoValueType`` follows the naming rule but is **not** a singleton
    (``NoValueType() is NoValue`` is :obj:`False`) and has no ``__repr__`` of its own,
-   so it demonstrates the name and nothing else. Copy ``NullType`` when you need a
+   so it demonstrates the name and nothing else; ``_AbsentType`` has a ``__repr__``
+   (``<absent>``) but no singleton guard either. Copy ``NullType`` when you need a
    pattern to follow.
 
 Why a class and not ``object()``
@@ -192,33 +220,45 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
    identity ``__eq__`` and is exactly as safe as ``object()``. That argument appeared
    in an early draft of :mod:`pcapkit.corekit.enum` and was wrong.
 
+**Ported code is exempt.** ``_NOT_FOUND = object()`` at
+:file:`pcapkit/utilities/compat.py`, line 73, sits inside the ``cached_property``
+backport taken for interpreters below 3.8, which tracks CPython's own
+:mod:`functools` implementation down to that name. It is **not** to be converted: the
+value of a vendored backport is that it can still be diffed against upstream, and a
+house-style rewrite destroys that in exchange for a sentinel nobody outside those forty
+lines ever sees. The rule above is for sentinels this package writes itself.
+
 What to implement, and what not to
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The three sentinels deliberately differ, and the differences are **needs, not
+The four sentinels deliberately differ, and the differences are **needs, not
 inconsistencies**:
 
 ``__new__`` returning a cached instance
    Guards against a caller constructing a second, non-identical sentinel that then
-   fails every ``is`` check. Worth having wherever the type is exported.
+   fails every ``is`` check. Worth having wherever the type is reachable by a caller at
+   all -- which, since the type is kept out of ``__all__``, means wherever it is
+   importable by its dotted path rather than wherever it is star-exported.
    :class:`~pcapkit.corekit.module.NullType` documents the limit honestly: a module
    **reload** re-executes the class statement, so the guard does not survive one, and
    code holding the pre-reload instance will fail ``is``.
 
 ``__bool__`` returning :obj:`False`
-   ``NULL`` and ``NoValue`` have it, because each stands for an *absent value* and
-   reads naturally in a boolean test. ``NO_DEFAULT`` deliberately does **not**: it is a
-   marker meaning *no default was supplied*, it is only ever tested with ``is``, and
-   making it falsy would invite ``if not default:`` -- which would then treat a
-   caller's genuine falsy default (``0``, ``''``, :obj:`None`, :obj:`False`) the same
-   as the sentinel, the very confusion the sentinel exists to prevent.
+   ``NULL``, ``NoValue`` and ``_Absent`` have it, because each stands for an *absent
+   value* and reads naturally in a boolean test. ``NO_DEFAULT`` deliberately does
+   **not**: it is a marker meaning *no default was supplied*, it is only ever tested
+   with ``is``, and making it falsy would invite ``if not default:`` -- which would
+   then treat a caller's genuine falsy default (``0``, ``''``, :obj:`None`,
+   :obj:`False`) the same as the sentinel, the very confusion the sentinel exists to
+   prevent.
 
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
    :class:`~pcapkit.corekit.module.NullType` has them because ``NULL`` is stored in a
    :class:`~pcapkit.corekit.module.ModuleDescriptor` field, so a caller's
    :func:`copy.deepcopy` or :mod:`pickle` can walk into it and would otherwise
-   reconstruct a second instance. ``NO_DEFAULT`` has none, because it is never stored
-   in any structure a caller copies -- it only ever appears as a default argument.
+   reconstruct a second instance. ``NO_DEFAULT`` and ``_Absent`` have none, because
+   neither is ever stored in any structure a caller copies -- one only ever appears as
+   a default argument, and the other never leaves the module that reads it.
    Add them when, and only when, the sentinel becomes reachable from something
    copyable.
 

@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 from pcapkit.utilities.compat import final
 from pcapkit.utilities.exceptions import ProtocolError
 
-__all__ = ['NULL', 'NullType', 'ModuleDescriptor']
+__all__ = ['NULL', 'ModuleDescriptor']
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Type

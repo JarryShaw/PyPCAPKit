@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 from pcapkit.utilities.compat import final
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
-__all__ = ['Field']
+__all__ = ['NoValue', 'Field']
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Iterator, Optional
