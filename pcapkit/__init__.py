@@ -116,7 +116,7 @@ __all__ = [
     'L2TPv2', 'OSPF', 'RARP', 'S_Tag', 'VLAN',
 
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',      # Internet Layer
-    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
+    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_GenericExt', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
 
     'TCP', 'UDP', 'SCTP',                                   # Transport Layer

@@ -117,6 +117,9 @@ __all__ = [
     # IPv6 Fragment Header
     'IPv6_Frag',
 
+    # Generic IPv6 Extension Header
+    'IPv6_GenericExt',
+
     # IPv6 Destination Options Header
     'IPv6_Opts',
     'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
