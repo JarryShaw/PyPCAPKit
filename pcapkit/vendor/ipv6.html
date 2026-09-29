@@ -519,8 +519,29 @@ which is automatically generating <a class="reference internal" href="../const/i
 <p>IPv6 Extension Header Types</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">LINK</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ipv6-parameters/extension-header.csv'</span></span><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK" title="Link to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Until GitHub issue #925, this pointed at the <em>Protocol Numbers</em>
+registry (<code class="docutils literal notranslate"><span class="pre">protocol-numbers/protocol-numbers-1.csv</span></code>), filtered on
+its <code class="docutils literal notranslate"><span class="pre">IPv6</span> <span class="pre">Extension</span> <span class="pre">Header</span></code> column – a derived signal, not the
+registry <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4"><strong>RFC 8200 Section 4</strong></a> names as authoritative for this
+enumeration. That registry disagreed with this one on header 147
+(<code class="docutils literal notranslate"><span class="pre">BIT-EMU</span></code>): it flagged 147 as an IPv6 extension header, citing
+<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9801.html"><strong>RFC 9801</strong></a>, while this registry omits 147 entirely – see the issue
+for the reading of <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9801.html"><strong>RFC 9801</strong></a> that makes the omission look
+intentional rather than an erratum. Fixing <a class="reference internal" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK" title="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> also let
+<a class="reference internal" href="../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> drop
+<code class="docutils literal notranslate"><span class="pre">BIT_EMU</span></code>: <code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.IPv6</span>
+<span class="pre">._decode_next_layer</span></code>’s walk used to rely on <code class="docutils literal notranslate"><span class="pre">ExtensionHeader(147)</span></code>
+resolving, but its own test (<code class="docutils literal notranslate"><span class="pre">tests.protocols.internet</span>
+<span class="pre">.test_ipv6_ext_unit.IPv6ExtUnitTests</span>
+<span class="pre">.test_unimplemented_terminal_code_stops_the_walk_not_the_packet</span></code>)
+now exercises the identical code path on 253 – a code this
+registry <em>does</em> list – so nothing outside this package depends on
+147 resolving any more.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

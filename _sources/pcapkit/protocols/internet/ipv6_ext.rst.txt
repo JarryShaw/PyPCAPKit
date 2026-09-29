@@ -31,10 +31,9 @@ so those two octets are parseable without knowing anything else about
 the header. See the module docstring below for the closed exception
 table (``IPv6-Frag`` and ``AH`` each use their own length rule; ``ESP``
 has a dedicated parser whose own info reports no next header rather than
-lacking one, and ``BIT-EMU``, ``253`` and ``254`` have no dedicated
-parser at all -- none of the four ever reaches this class), the two ways
-this class is dispatched to, and why an overrun stops the walk instead of
-clipping it.
+lacking one, and ``253`` and ``254`` have no dedicated parser at all --
+none of the three ever reaches this class), the two ways this class is
+dispatched to, and why an overrun stops the walk instead of clipping it.
 
 .. autoclass:: pcapkit.protocols.internet.ipv6_ext.IPv6_Ext
    :no-members:

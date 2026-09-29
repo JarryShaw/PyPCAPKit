@@ -513,19 +513,19 @@
 <span class="sd">                                                          encrypted trailer (:rfc:`4303`), so its own</span>
 <span class="sd">                                                          info's ``next`` is :data:`None` rather than a</span>
 <span class="sd">                                                          value to continue on</span>
-<span class="sd">``BIT-EMU``, ``253``, ``254``                            terminal -- no dedicated parser exists, so no</span>
+<span class="sd">``253``, ``254``                                         terminal -- no dedicated parser exists, so no</span>
 <span class="sd">                                                          next header field is ever read at all, either</span>
 <span class="sd">======================================================= ===========================================</span>
 
-<span class="sd">This table classifies by *wire format* alone, over the twelve codes</span>
-<span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates.</span>
-<span class="sd">Note that IANA's own *IPv6 Extension Header Types* registry has **eleven**:</span>
-<span class="sd">the twelfth, ``BIT_EMU`` (147), comes from this package generating that</span>
-<span class="sd">enumeration out of the *Protocol Numbers* registry's extension-header</span>
-<span class="sd">column instead, where 147 is flagged ``Y`` while the extension-header</span>
-<span class="sd">registry omits it. That discrepancy is GitHub issue #925 and is not this</span>
-<span class="sd">class's to resolve; the classification below holds either way, since 147</span>
-<span class="sd">is not reachable through here.</span>
+<span class="sd">This table classifies by *wire format* alone, over the eleven codes</span>
+<span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates --</span>
+<span class="sd">matching IANA's own *IPv6 Extension Header Types* registry exactly, as of</span>
+<span class="sd">GitHub issue #925. Before that fix this package generated the enumeration</span>
+<span class="sd">out of the *Protocol Numbers* registry's extension-header column instead,</span>
+<span class="sd">which carried a twelfth code, ``BIT_EMU`` (147), that the authoritative</span>
+<span class="sd">registry does not; 147 was never reachable through this class either way</span>
+<span class="sd">(it had no dedicated parser and was never generic-dispatched here), so</span>
+<span class="sd">fixing the enumeration's source changed nothing this table classifies.</span>
 
 <span class="sd">``Shim6`` conforms to it (:rfc:`5533`), but this package has never</span>
 <span class="sd">had a dedicated parser class for it to begin with -- see "Two entry paths"</span>
@@ -539,18 +539,18 @@
 <span class="sd">Next Header inside the encrypted trailer, with no length field anywhere</span>
 <span class="sd">in the cleartext part; and 253/254 are reserved for private</span>
 <span class="sd">experimentation (:rfc:`3692`) with no wire format at all. None of the</span>
-<span class="sd">four is reachable through this class, by construction -- see</span>
+<span class="sd">three is reachable through this class, by construction -- see</span>
 <span class="sd">:meth:`pcapkit.protocols.internet.ipv6.IPv6._import_next_layer`. Each of</span>
 <span class="sd">them still enters :meth:`IPv6._decode_next_layer</span>
 <span class="sd">&lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`'s walk (it is a</span>
 <span class="sd">real :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member),</span>
-<span class="sd">but the four part ways there: ``ESP`` resolves to its own dedicated parser,</span>
+<span class="sd">but the three part ways there: ``ESP`` resolves to its own dedicated parser,</span>
 <span class="sd">whose info carries a ``next`` that is simply :data:`None` -- so the walk</span>
 <span class="sd">ends the ordinary way, ``ExtensionHeader(None)`` failing at the top of the</span>
-<span class="sd">next iteration, exactly as it did before this class existed. ``BIT-EMU``,</span>
-<span class="sd">``253`` and ``254`` have no dedicated parser and resolve to plain</span>
+<span class="sd">next iteration, exactly as it did before this class existed. ``253`` and</span>
+<span class="sd">``254`` have no dedicated parser and resolve to plain</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no ``next``</span>
-<span class="sd">*attribute* at all; for these three (and any future IANA code nobody has</span>
+<span class="sd">*attribute* at all; for these two (and any future IANA code nobody has</span>
 <span class="sd">implemented yet) the walk stops on a *structural* check -- does the parsed</span>
 <span class="sd">layer carry a ``next`` at all? -- rather than on a list of codes.</span>
 

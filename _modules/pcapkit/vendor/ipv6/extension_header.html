@@ -511,8 +511,53 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ExtensionHeader</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""IPv6 Extension Header Types"""</span>
 
+    <span class="c1">#: Keyword-style names carried over from this crawler's *previous* data</span>
+    <span class="c1">#: source, keyed by protocol number. The Protocol Numbers registry</span>
+    <span class="c1">#: (``protocol-numbers-1.csv``, this crawler's :attr:`LINK` before GitHub</span>
+    <span class="c1">#: issue #925) paired each of these headers with a short ``Keyword``</span>
+    <span class="c1">#: column value, e.g. ``IPv6-Route`` for header 43. The registry</span>
+    <span class="c1">#: :attr:`LINK` now points at -- IANA's authoritative *IPv6 Extension</span>
+    <span class="c1">#: Header Types* registry -- has no such column, only a verbose</span>
+    <span class="c1">#: ``Description`` (``Routing Header for IPv6`` for the same header), so</span>
+    <span class="c1">#: deriving names the same way :meth:`process` does for every other</span>
+    <span class="c1">#: 3-column registry (see e.g. :class:`~pcapkit.vendor.ipv6.router_alert.</span>
+    <span class="c1">#: RouterAlert`) would silently rename these members. This mapping keeps</span>
+    <span class="c1">#: the existing, shorter names instead; any header not listed here still</span>
+    <span class="c1">#: falls back to a name derived from its description, same as always.</span>
+    <span class="n">NAMES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="s1">'HOPOPT'</span><span class="p">,</span>
+        <span class="mi">43</span><span class="p">:</span> <span class="s1">'IPv6-Route'</span><span class="p">,</span>
+        <span class="mi">44</span><span class="p">:</span> <span class="s1">'IPv6-Frag'</span><span class="p">,</span>
+        <span class="mi">50</span><span class="p">:</span> <span class="s1">'ESP'</span><span class="p">,</span>
+        <span class="mi">51</span><span class="p">:</span> <span class="s1">'AH'</span><span class="p">,</span>
+        <span class="mi">60</span><span class="p">:</span> <span class="s1">'IPv6-Opts'</span><span class="p">,</span>
+        <span class="mi">139</span><span class="p">:</span> <span class="s1">'HIP'</span><span class="p">,</span>
+        <span class="mi">140</span><span class="p">:</span> <span class="s1">'Shim6'</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
+
     <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: .. note::</span>
+    <span class="c1">#:</span>
+    <span class="c1">#:    Until GitHub issue #925, this pointed at the *Protocol Numbers*</span>
+    <span class="c1">#:    registry (``protocol-numbers/protocol-numbers-1.csv``), filtered on</span>
+    <span class="c1">#:    its ``IPv6 Extension Header`` column -- a derived signal, not the</span>
+    <span class="c1">#:    registry :rfc:`8200#section-4` names as authoritative for this</span>
+    <span class="c1">#:    enumeration. That registry disagreed with this one on header 147</span>
+    <span class="c1">#:    (``BIT-EMU``): it flagged 147 as an IPv6 extension header, citing</span>
+    <span class="c1">#:    :rfc:`9801`, while this registry omits 147 entirely -- see the issue</span>
+    <span class="c1">#:    for the reading of :rfc:`9801` that makes the omission look</span>
+    <span class="c1">#:    intentional rather than an erratum. Fixing :attr:`LINK` also let</span>
+    <span class="c1">#:    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` drop</span>
+    <span class="c1">#:    ``BIT_EMU``: :attr:`pcapkit.protocols.internet.ipv6.IPv6</span>
+    <span class="c1">#:    ._decode_next_layer`'s walk used to rely on ``ExtensionHeader(147)``</span>
+    <span class="c1">#:    resolving, but its own test (``tests.protocols.internet</span>
+    <span class="c1">#:    .test_ipv6_ext_unit.IPv6ExtUnitTests</span>
+    <span class="c1">#:    .test_unimplemented_terminal_code_stops_the_walk_not_the_packet``)</span>
+    <span class="c1">#:    now exercises the identical code path on 253 -- a code this</span>
+    <span class="c1">#:    registry *does* list -- so nothing outside this package depends on</span>
+    <span class="c1">#:    147 resolving any more.</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/ipv6-parameters/extension-header.csv'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Counter[str]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count field records.</span>
@@ -526,8 +571,9 @@
 <span class="sd">        """</span>
         <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                                       <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">reader</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">reader</span><span class="p">)))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[list[str], list[str]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Process CSV data.</span>
@@ -545,12 +591,12 @@
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
-            <span class="n">flag</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">flag</span> <span class="o">!=</span> <span class="s1">'Y'</span><span class="p">:</span>
-                <span class="k">continue</span>
+            <span class="n">code_str</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-            <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">keyword</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code_str</span><span class="p">))</span> <span class="k">if</span> <span class="n">code_str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">keyword</span> <span class="ow">or</span> <span class="n">desc</span>
 
             <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
             <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\[|\]'</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
@@ -559,31 +605,17 @@
                     <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[:rfc:`</span><span class="si">{</span><span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s1">`]'</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]'</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'_'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">))</span>
-            <span class="n">lrfc</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'( )( )*'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">))</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">''</span>
-
-            <span class="n">subd</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'( )( )*'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">))</span>
-            <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">' </span><span class="si">{</span><span class="n">subd</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">else</span> <span class="s1">''</span>
-
-            <span class="n">split</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">' ('</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">cmmt</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">cmmt</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="s1">''</span>  <span class="c1"># pylint: disable=self-assigning-variable</span>
-
-            <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
-                <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">',</span><span class="si">{</span><span class="n">tmp1</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">tmp1</span> <span class="k">else</span> <span class="s1">''</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">tmp1</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">''</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">tmp1</span><span class="si">}{</span><span class="n">lrfc</span><span class="si">}{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="n">name_part</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">keyword</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span> <span class="k">if</span> <span class="n">keyword</span> <span class="k">else</span> <span class="n">desc</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\r*\n'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="s1">'</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span>  <span class="c1"># pylint: disable=consider-using-f-string</span>
+                <span class="n">name_part</span><span class="p">,</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">''</span><span class="p">,</span>
+            <span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">))</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-                    <span class="n">name</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">''</span>
-                <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">code_str</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">code_str</span><span class="p">)</span>
+                <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">keyword</span><span class="p">)</span>
 
                 <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">"</span>
-                <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"#: </span><span class="si">{</span><span class="n">comment</span><span class="si">}</span><span class="s2">"</span>
 
                 <span class="c1">#if len(pres) &gt; 74:</span>
                 <span class="c1">#    sufs = f"\n{' '*80}{sufs}"</span>
@@ -591,10 +623,10 @@
                 <span class="c1">#enum.append(f'{pres.ljust(76)}{sufs}')</span>
                 <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">)</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">code_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'-'</span><span class="p">)</span>
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">comment</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    return extend_enum(cls, '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d' % value, value)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span>
 

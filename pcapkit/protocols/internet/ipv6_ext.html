@@ -522,10 +522,9 @@ since April 2012 carries the same first two octets:</p>
 the header. See the module docstring below for the closed exception
 table (<code class="docutils literal notranslate"><span class="pre">IPv6-Frag</span></code> and <code class="docutils literal notranslate"><span class="pre">AH</span></code> each use their own length rule; <code class="docutils literal notranslate"><span class="pre">ESP</span></code>
 has a dedicated parser whose own info reports no next header rather than
-lacking one, and <code class="docutils literal notranslate"><span class="pre">BIT-EMU</span></code>, <code class="docutils literal notranslate"><span class="pre">253</span></code> and <code class="docutils literal notranslate"><span class="pre">254</span></code> have no dedicated
-parser at all – none of the four ever reaches this class), the two ways
-this class is dispatched to, and why an overrun stops the walk instead of
-clipping it.</p>
+lacking one, and <code class="docutils literal notranslate"><span class="pre">253</span></code> and <code class="docutils literal notranslate"><span class="pre">254</span></code> have no dedicated parser at all –
+none of the three ever reaches this class), the two ways this class is
+dispatched to, and why an overrun stops the walk instead of clipping it.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_ext.</span></span><span class="sig-name descname"><span class="pre">IPv6_Ext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_ext.html#IPv6_Ext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="Link to this definition">¶</a></dt>
