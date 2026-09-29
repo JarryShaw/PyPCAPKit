@@ -57,6 +57,67 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     """This class implements Internet Protocol version 6."""
 
     ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Extension header codes that have a *dedicated* parser class in this
+    #: package whose own layout follows :rfc:`6564#section-4`'s generic
+    #: ``next`` + ``Hdr Ext Len`` format (see the module docstring of
+    #: :mod:`pcapkit.protocols.internet.ipv6_generic_ext` for the exception
+    #: table in full). When that dedicated parser raises,
+    #: :meth:`_import_next_layer` substitutes
+    #: :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+    #: instead of letting the generic
+    #: :func:`~pcapkit.utilities.decorators.beholder` fall back to plain
+    #: :class:`~pcapkit.protocols.misc.raw.Raw`, which has no ``next`` field
+    #: and used to crash the whole packet at :meth:`_decode_next_layer`'s
+    #: ``proto = info.next`` (GitHub issue #891).
+    #:
+    #: :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
+    #: is deliberately absent, even though its wire format also conforms:
+    #: this package has never had a dedicated parser for it to begin with
+    #: (``pcapkit/protocols/internet/NotImplemented/shim6.py`` is a 0-byte
+    #: placeholder, excluded from the wheel by ``MANIFEST.in``), so there is
+    #: no "own parser" here for it to raise from -- ``Shim6`` reaches
+    #: :class:`IPv6_GenericExt` by *direct* registration instead (see the
+    #: bottom of :mod:`pcapkit.protocols.internet.ipv6_generic_ext`), which
+    #: already produces exactly this class without needing this set to name
+    #: it. ``ESP``, ``BIT-EMU``, ``253`` and ``254`` are absent, but not for
+    #: the same reason as each other, and not because a generic fallback
+    #: would help them:
+    #:
+    #: * ``ESP`` *does* have a dedicated, registered parser
+    #:   (:class:`~pcapkit.protocols.internet.esp.ESP`) -- it is excluded
+    #:   because :rfc:`4303` places the real Next Header byte inside the
+    #:   encrypted trailer, so its own info always *carries* a ``next``
+    #:   attribute (unlike ``BIT-EMU``/``253``/``254`` below), just one that is
+    #:   :data:`None` whenever the payload could not be decrypted -- which,
+    #:   with no key material available to a generic parse, is always. The
+    #:   :meth:`_decode_next_layer` walk below still ends there, one iteration
+    #:   later, because :data:`None` fails
+    #:   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`'s
+    #:   constructor at the top of the loop -- the *existing* end-of-chain
+    #:   path, unrelated to the structural check this set exists for.
+    #: * ``BIT-EMU``, ``253`` and ``254`` have no dedicated parser at all, so
+    #:   they resolve to plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose
+    #:   info has no ``next`` *attribute* -- this is what the structural check
+    #:   catches.
+    #:
+    #: :meth:`_decode_next_layer`'s walk stops cleanly at whichever of these
+    #: (or any other IANA code this package has not implemented) it meets,
+    #: and keeps this layer's own header intact instead of losing the whole
+    #: packet as it used to.
+    __generic_ext_codes__ = frozenset({
+        Enum_ExtensionHeader.HOPOPT,
+        Enum_ExtensionHeader.IPv6_Route,
+        Enum_ExtensionHeader.IPv6_Opts,
+        Enum_ExtensionHeader.Mobility_Header,
+        Enum_ExtensionHeader.HIP,
+        Enum_ExtensionHeader.IPv6_Frag,
+        Enum_ExtensionHeader.AH,
+    })
+
+    ##########################################################################
     # Properties.
     ##########################################################################
 
@@ -335,7 +396,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
-            proto = info.next
 
             # update header & payload length
             hdr_len += next_.length  # type: ignore[assignment]
@@ -349,6 +409,45 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # this must happen before any exit from the loop, since the payload
             # is what gets handed to ``super()._decode_next_layer`` below
             payload = payload[next_.length:]
+
+            # GitHub issue #891: a layer with no ``next`` field cannot
+            # safely continue the walk. This is a *structural* check --
+            # does the parsed info even carry a ``next`` attribute? -- not
+            # a fixed set of codes, and deliberately so: HOPOPT, IPv6-Route,
+            # IPv6-Opts, MH, HIP, IPv6-Frag and AH all have dedicated
+            # parsers whose data carries ``next``, and Shim6 and any
+            # recognised header whose own parser raised are both handled by
+            # :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`,
+            # which also carries ``next`` (possibly :data:`None`, on an
+            # overrun -- see its module docstring). Every IANA extension
+            # header code this package has not implemented a dedicated
+            # parser for -- today that is ``BIT-EMU``, ``253`` and ``254``,
+            # and tomorrow it is whatever IANA assigns next -- has no
+            # generic fallback either (see :attr:`__generic_ext_codes__`'s
+            # docstring for why), so :meth:`_import_next_layer` returns a
+            # plain :class:`~pcapkit.protocols.misc.raw.Raw`, whose info
+            # carries no ``next`` at all. Reading ``info.next`` on that
+            # unconditionally is what used to raise ``AttributeError``
+            # here and let a further-out :func:`~pcapkit.utilities.decorators.beholder`
+            # catch it and degrade the *whole* packet -- the actual #891
+            # defect, for every code nobody has implemented. Stopping here
+            # instead keeps this layer's own fields (still recorded above,
+            # in ``self._exthdr`` and in the packet dict) and reports no
+            # further next header, exactly like the overrun case.
+            #
+            # This has to run -- and, on a hit, has to set ``proto`` --
+            # *before* the fragment-header special case below: IPv6-Frag
+            # always carries a real ``next`` (the ``hasattr`` check above
+            # never actually fires for it), and that ``next`` is the real
+            # transport layer's code, which the fragment branch's own
+            # ``break`` must leave in ``proto`` for the final
+            # ``super()._decode_next_layer`` call below the loop to dispatch
+            # to correctly.
+            if not hasattr(info, 'next'):
+                proto = None
+                break
+
+            proto = info.next
 
             # keep original data after fragment header
             if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
@@ -387,6 +486,35 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         Returns:
             Instance of next layer.
 
+        Notes:
+            If the dedicated parser for a code in :attr:`__generic_ext_codes__`
+            raises, this substitutes
+            :class:`~pcapkit.protocols.internet.ipv6_generic_ext.IPv6_GenericExt`
+            for it rather than letting the exception reach the
+            :func:`~pcapkit.utilities.decorators.beholder` decorating this
+            method, which would otherwise substitute plain
+            :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no
+            ``next`` field, which is what used to crash the whole packet at
+            :meth:`_decode_next_layer`'s ``proto = info.next`` (GitHub issue
+            #891). Every other exception -- including one raised by
+            ``IPv6_GenericExt`` itself, or by ``ESP``'s own dedicated
+            parser -- still reaches ``beholder`` unchanged, so *this
+            method's own* behaviour for anything outside that closed set is
+            exactly what it was before this method learned the
+            substitution: a plain ``Raw`` for that one layer. What changed
+            for ``BIT-EMU``, ``253`` and ``254`` -- which have no dedicated
+            parser at all, so they were *already* reaching plain ``Raw``
+            with no exception involved -- is one level up:
+            :meth:`_decode_next_layer` now stops its walk structurally on
+            any layer whose info carries no ``next`` attribute, ``Raw``
+            included, instead of reading ``info.next`` unconditionally and
+            crashing the whole packet. ``ESP`` is unaffected either way: its
+            info always carries a ``next`` (:data:`None`, since :rfc:`4303`
+            encrypts the real value), so neither this substitution nor that
+            structural check ever engages for it, and the walk ends after it
+            exactly as it always has -- see :attr:`__generic_ext_codes__`'s
+            docstring for the full distinction.
+
         """
         if TYPE_CHECKING:
             protocol: 'Type[ProtocolBase]'
@@ -407,7 +535,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         else:
             protocol = self._lookup_next_layer(self.__proto__, proto)
 
-        next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
-                         alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
-                         __context__=self._exctx)
+        try:
+            next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract]
+                             alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto,
+                             __context__=self._exctx)
+        except Exception as exc:
+            from pcapkit.protocols.internet.ipv6_generic_ext import \
+                IPv6_GenericExt  # isort: skip # pylint: disable=import-outside-toplevel
+
+            if not (extension and protocol is not IPv6_GenericExt
+                    and proto in self.__generic_ext_codes__):
+                raise
+
+            next_ = IPv6_GenericExt(file_, length, version=version, extension=extension,
+                                    alias=proto, error=exc, packet=packet, layer=self._exlayer,
+                                    protocol=self._exproto, __context__=self._exctx)
         return next_

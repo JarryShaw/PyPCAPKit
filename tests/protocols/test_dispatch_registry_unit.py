@@ -2,7 +2,8 @@
 """Every ``__proto__`` dispatch-registry entry, enumerated rather than hand-picked.
 
 GitHub issue #496: :file:`pcapkit/foundation/registry/protocols.py` documents
-seven registries -- 38 entries in total -- that decide which
+seven registries -- 39 entries in total as of #904, which added
+``Internet.__proto__[TransType.Shim6]`` -- that decide which
 :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the next layer.
 Nothing walked all of them. :file:`test_registry_runtime.py` checks that a
 table entry *resolves* to the right class object, and
@@ -211,7 +212,7 @@ class DispatchRegistryTests(unittest.TestCase):
                 )
 
     def test_cases_cover_every_table_named_in_the_issue(self) -> None:
-        """The enumeration finds all 38 entries the issue counted, across all seven tables.
+        """The enumeration finds all 39 entries the issue counted, across all seven tables.
 
         A guard on the shape of the result rather than on any one case: if the
         registries grow or shrink without this module noticing, the per-family
@@ -219,8 +220,12 @@ class DispatchRegistryTests(unittest.TestCase):
 
         """
         cases = self.dispatch.cases()
-        self.assertEqual(len(cases), 38,
-                         'expected exactly 38 entries across the seven __proto__ '
+        # #904: 38 -> 39, and the internet count 16 -> 17 below with it -- one
+        # new entry, Internet.__proto__[TransType.Shim6], registered at
+        # IPv6_GenericExt where it previously had none at all (defaulted to
+        # Raw). Diffed against origin/main: no other table changed shape.
+        self.assertEqual(len(cases), 39,
+                         'expected exactly 39 entries across the seven __proto__ '
                          'tables named in GitHub issue #496; a different count '
                          'means a registry changed shape and this module was not '
                          'updated to match')
@@ -229,7 +234,7 @@ class DispatchRegistryTests(unittest.TestCase):
         for case in cases:
             by_family[case.family] = by_family.get(case.family, 0) + 1
         self.assertEqual(by_family, {
-            'link': 7, 'internet': 16, 'tcp': 4, 'udp': 3, 'sctp': 2,
+            'link': 7, 'internet': 17, 'tcp': 4, 'udp': 3, 'sctp': 2,
             'pcap-frame': 3, 'pcapng-frame': 3,
         })
 

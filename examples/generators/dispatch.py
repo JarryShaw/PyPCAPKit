@@ -392,6 +392,13 @@ def _internet_payload(code: 'int') -> 'bytes':
     if code == TransType.OSPFIGP:
         from pcapkit.protocols.link.ospf import OSPF
         return bytes(OSPF())
+    if code == TransType.Shim6:
+        # #904: no dedicated dissector exists for Shim6 -- IPv6_GenericExt
+        # parses only the two octets RFC 6564 §4 guarantees (next header,
+        # Hdr Ext Len), so this is hand-built rather than constructed
+        # through a class: next=TCP(6), Hdr Ext Len=0 -> an 8-octet header,
+        # six of them padding.
+        return bytes([int(TransType.TCP), 0]) + b'\x00' * 6 + _tcp(9999)
     raise LookupError(f'internet: no payload builder for {code!r}')  # pragma: no cover
 
 
@@ -621,6 +628,12 @@ PINNED_TARGETS = {
     'internet/HIP': ('pcapkit.protocols.internet.hip', 'HIP'),
     'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
     'internet/OSPFIGP': ('pcapkit.protocols.link.ospf', 'OSPF'),
+    # #904: Shim6 (140) previously had no entry at all, and the default
+    # factory made it resolve to Raw. It is now registered directly at
+    # IPv6_GenericExt, which parses the RFC 6564 §4 generic layout it has
+    # never had a dedicated dissector for -- a deliberate addition, not a
+    # regression.
+    'internet/Shim6': ('pcapkit.protocols.internet.ipv6_generic_ext', 'IPv6_GenericExt'),
 
     # -- TCP.__proto__ (port) --------------------------------------------------
     'tcp/20': ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
