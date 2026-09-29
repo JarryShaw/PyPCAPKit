@@ -490,8 +490,10 @@ New Engines
 ``engine='pypcap'`` selects :class:`pcapkit.foundation.engines.pypcap.PyPCAP`;
 each has a matching :mod:`pcapkit.toolkit` module
 (:mod:`pcapkit.toolkit.pypcapfile`, :mod:`pcapkit.toolkit.pypcap`), a
-``pyproject.toml`` extra (``PyPCAPFile``, which ``all`` includes, and
-``PyPCAP``, which it deliberately does not -- see below), docs
+``pyproject.toml`` extra (``PyPCAPFile`` and ``PyPCAP``, neither of which
+``all`` includes -- ``PyPCAP`` for the installability reason below, and
+``PyPCAPFile`` because GitHub issue #910 narrowed ``all`` to core addons
+only), docs
 under :doc:`/pcapkit/foundation/engines/index`, and tests under
 ``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
 end-to-end against the sample captures: each agrees with the ``default`` engine
@@ -538,8 +540,10 @@ both of the following are worth knowing before reaching for them:
   build. Since there is no wheel to fall back on, the extra is kept **out of**
   ``all``: otherwise ``pip install pypcapkit[all]`` would demand a compiler and
   the libpcap development files from every user, and it broke the docs, conda
-  and release workflows -- all of which install ``.[all]`` -- on the macOS
-  runner, where :file:`pcap.h` is present but no ``libpcap.dylib`` is.
+  and release workflows -- all of which install ``.[all]``, and some now
+  ``.[all,dev]`` since GitHub issue #910 narrowed ``all`` to core addons only
+  -- on the macOS runner, where :file:`pcap.h` is present but no
+  ``libpcap.dylib`` is.
 
   This is now solved, though not by changing the ``PyPCAP`` extra. `pcap-ct
   <https://pypi.org/project/pcap-ct/>`__ re-implements the ``pypcap`` API in pure

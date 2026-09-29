@@ -470,10 +470,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">IntFlag</span><span class="p">,</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">auto</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">EnumRegistry</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Command'</span><span class="p">]</span>
 
@@ -545,6 +545,85 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name_</span><span class="si">}</span><span class="s1">]&gt;'</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="n">NO_DEFAULT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FEATCode'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Resolve ``key`` case-insensitively, per :rfc:`5797#section-2`.</span>
+
+<span class="sd">        One of the few case-insensitive overrides the ruling on GitHub issue</span>
+<span class="sd">        #877 allows, and the registry's own defining document states the</span>
+<span class="sd">        comparison rule outright rather than leaving it to be inferred --</span>
+<span class="sd">        :rfc:`5797#section-2`, on the ``FEAT Code`` column this class is</span>
+<span class="sd">        generated from: *"IANA maintains uniqueness of feature names (FEAT</span>
+<span class="sd">        codes) based on case-insensitive comparison."* Two FEAT codes</span>
+<span class="sd">        therefore cannot differ only by case, so folding the caller's key</span>
+<span class="sd">        cannot resolve ambiguously.</span>
+
+<span class="sd">        :rfc:`2389#section-3.2`, which defines the ``FEAT`` response the</span>
+<span class="sd">        codes appear in, points the same way from the wire side: *"The</span>
+<span class="sd">        feature-label and feature-parms are nominally case sensitive,</span>
+<span class="sd">        however ... it is to be expected that those definitions will usually</span>
+<span class="sd">        specify the label and parameters in a case independent manner. Where</span>
+<span class="sd">        this is done, implementations are recommended to use upper case</span>
+<span class="sd">        letters when transmitting the feature response."* A caller feeding a</span>
+<span class="sd">        ``FEAT`` response line is therefore holding upper case by</span>
+<span class="sd">        recommendation, while 5 of this registry's 15 codes are registered in</span>
+<span class="sd">        lower case -- measured on the IANA CSV: 10 distinct all-upper-case</span>
+<span class="sd">        keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,</span>
+<span class="sd">        with none mixed. Without this override ``get('BASE')`` raised</span>
+<span class="sd">        :exc:`KeyError`, which is the defect GitHub issue #903's audit found.</span>
+
+<span class="sd">        The obvious objection, answered: :rfc:`5797` uses case *presentationally*</span>
+<span class="sd">        to tell a real keyword from a placeholder -- *"defined FEAT keywords</span>
+<span class="sd">        codes are listed in all uppercase, whereas placeholder keywords ... are</span>
+<span class="sd">        listed in lowercase"* -- so folding might look like it discards that</span>
+<span class="sd">        distinction. It does not. Only the inbound ``key`` is folded; every</span>
+<span class="sd">        member keeps the registrar's own casing, per the same ruling's *"enum</span>
+<span class="sd">        should honour and keep their original writings as in the registrars"*,</span>
+<span class="sd">        so ``get('BASE').name`` is still ``'base'`` and still says placeholder.</span>
+<span class="sd">        And the uniqueness rule quoted above is what makes that safe: a real</span>
+<span class="sd">        keyword ``BASE`` could not be registered alongside the placeholder</span>
+<span class="sd">        ``base``, so there is no second member for the fold to hide.</span>
+
+<span class="sd">        Folds only as a *fallback*. An exact name or value hit is delegated to</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` untouched, so the base's</span>
+<span class="sd">        own precedence -- name before value -- and its non-minting ``str``</span>
+<span class="sd">        path both survive: nothing here calls ``cls(key)``, so a key matching</span>
+<span class="sd">        no member, folded or not, still raises rather than growing the</span>
+<span class="sd">        registry. ``get('ZZ-NOT-REAL')`` therefore still raises</span>
+<span class="sd">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an</span>
+<span class="sd">        unregistered member, exactly as before.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Name or value to look up. A non-``str`` key is passed</span>
+<span class="sd">                straight through, since case cannot apply to it.</span>
+<span class="sd">            default: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`. Not</span>
+<span class="sd">                folded -- it names an already-registered value rather than</span>
+<span class="sd">                arriving from the wire, so the caller spells it from this</span>
+<span class="sd">                module.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The canonical member for ``key``, or for ``default``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            KeyError: If no member matches ``key`` exactly or case-insensitively</span>
+<span class="sd">                and there is no usable ``default``.</span>
+<span class="sd">            ValueError: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`, for a</span>
+<span class="sd">                non-``str`` key.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span> <span class="ow">or</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+        <span class="p">):</span>
+            <span class="n">folded</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># pylint: disable=no-member</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span> <span class="o">==</span> <span class="n">folded</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">member</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">member</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span> <span class="o">==</span> <span class="n">folded</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">member</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FEATCode'</span><span class="p">:</span>

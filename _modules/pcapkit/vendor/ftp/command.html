@@ -510,10 +510,10 @@
 
 <span class="s1">from aenum import IntEnum, IntFlag, StrEnum, auto</span>
 
-<span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
+<span class="s1">from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
-<span class="s1">    from typing import Optional, Type</span>
+<span class="s1">    from typing import Any, Optional, Type</span>
 
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -557,6 +557,85 @@
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
 <span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self._name_</span><span class="se">}}</span><span class="s1">]&gt;'</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def get(cls, key: 'Any', default: 'Any' = NO_DEFAULT) -&gt; 'FEATCode':</span>
+<span class="s1">        """Resolve ``key`` case-insensitively, per :rfc:`5797#section-2`.</span>
+
+<span class="s1">        One of the few case-insensitive overrides the ruling on GitHub issue</span>
+<span class="s1">        #877 allows, and the registry's own defining document states the</span>
+<span class="s1">        comparison rule outright rather than leaving it to be inferred --</span>
+<span class="s1">        :rfc:`5797#section-2`, on the ``FEAT Code`` column this class is</span>
+<span class="s1">        generated from: *"IANA maintains uniqueness of feature names (FEAT</span>
+<span class="s1">        codes) based on case-insensitive comparison."* Two FEAT codes</span>
+<span class="s1">        therefore cannot differ only by case, so folding the caller's key</span>
+<span class="s1">        cannot resolve ambiguously.</span>
+
+<span class="s1">        :rfc:`2389#section-3.2`, which defines the ``FEAT`` response the</span>
+<span class="s1">        codes appear in, points the same way from the wire side: *"The</span>
+<span class="s1">        feature-label and feature-parms are nominally case sensitive,</span>
+<span class="s1">        however ... it is to be expected that those definitions will usually</span>
+<span class="s1">        specify the label and parameters in a case independent manner. Where</span>
+<span class="s1">        this is done, implementations are recommended to use upper case</span>
+<span class="s1">        letters when transmitting the feature response."* A caller feeding a</span>
+<span class="s1">        ``FEAT`` response line is therefore holding upper case by</span>
+<span class="s1">        recommendation, while 5 of this registry's 15 codes are registered in</span>
+<span class="s1">        lower case -- measured on the IANA CSV: 10 distinct all-upper-case</span>
+<span class="s1">        keywords against ``base``, ``feat``, ``hist``, ``nat6`` and ``secu``,</span>
+<span class="s1">        with none mixed. Without this override ``get('BASE')`` raised</span>
+<span class="s1">        :exc:`KeyError`, which is the defect GitHub issue #903's audit found.</span>
+
+<span class="s1">        The obvious objection, answered: :rfc:`5797` uses case *presentationally*</span>
+<span class="s1">        to tell a real keyword from a placeholder -- *"defined FEAT keywords</span>
+<span class="s1">        codes are listed in all uppercase, whereas placeholder keywords ... are</span>
+<span class="s1">        listed in lowercase"* -- so folding might look like it discards that</span>
+<span class="s1">        distinction. It does not. Only the inbound ``key`` is folded; every</span>
+<span class="s1">        member keeps the registrar's own casing, per the same ruling's *"enum</span>
+<span class="s1">        should honour and keep their original writings as in the registrars"*,</span>
+<span class="s1">        so ``get('BASE').name`` is still ``'base'`` and still says placeholder.</span>
+<span class="s1">        And the uniqueness rule quoted above is what makes that safe: a real</span>
+<span class="s1">        keyword ``BASE`` could not be registered alongside the placeholder</span>
+<span class="s1">        ``base``, so there is no second member for the fold to hide.</span>
+
+<span class="s1">        Folds only as a *fallback*. An exact name or value hit is delegated to</span>
+<span class="s1">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` untouched, so the base's</span>
+<span class="s1">        own precedence -- name before value -- and its non-minting ``str``</span>
+<span class="s1">        path both survive: nothing here calls ``cls(key)``, so a key matching</span>
+<span class="s1">        no member, folded or not, still raises rather than growing the</span>
+<span class="s1">        registry. ``get('ZZ-NOT-REAL')`` therefore still raises</span>
+<span class="s1">        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an</span>
+<span class="s1">        unregistered member, exactly as before.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            key: Name or value to look up. A non-``str`` key is passed</span>
+<span class="s1">                straight through, since case cannot apply to it.</span>
+<span class="s1">            default: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`. Not</span>
+<span class="s1">                folded -- it names an already-registered value rather than</span>
+<span class="s1">                arriving from the wire, so the caller spells it from this</span>
+<span class="s1">                module.</span>
+
+<span class="s1">        Returns:</span>
+<span class="s1">            The canonical member for ``key``, or for ``default``.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            KeyError: If no member matches ``key`` exactly or case-insensitively</span>
+<span class="s1">                and there is no usable ``default``.</span>
+<span class="s1">            ValueError: As :meth:`~pcapkit.corekit.enum.EnumLookup.get`, for a</span>
+<span class="s1">                non-``str`` key.</span>
+
+<span class="s1">        """</span>
+<span class="s1">        if isinstance(key, str) and not (</span>
+<span class="s1">            key in cls._member_map_ or  # pylint: disable=no-member</span>
+<span class="s1">            key in cls._value2member_map_</span>
+<span class="s1">        ):</span>
+<span class="s1">            folded = key.casefold()</span>
+<span class="s1">            for name, member in cls._member_map_.items():  # pylint: disable=no-member</span>
+<span class="s1">                if name.casefold() == folded:</span>
+<span class="s1">                    return member</span>
+<span class="s1">            for member in cls._value2member_map_.values():</span>
+<span class="s1">                if member.value.casefold() == folded:</span>
+<span class="s1">                    return member</span>
+<span class="s1">        return super().get(key, default)</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: 'str') -&gt; 'FEATCode':</span>

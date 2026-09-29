@@ -831,20 +831,212 @@ to make a lookup work – which is what keeps
 <a class="reference internal" href="../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">R1_Counter</span> <span class="pre">=</span> <span class="pre">128</span></code> and
 <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span> <span class="pre">=</span> <span class="pre">129</span></code>, two IANA-registered HIP parameters differing only in case, both
 resolvable.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Auditing every registry’s existing case behaviour against the specification its
-values come from is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>,
-not something this page records per class. The owner’s scope for it, verbatim:
-<em>“we should audit all registries and then decide if case (in)sensitive.”</em> Two
-findings already have their own issues –
-<a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">value.upper()</span></code> is backed by
-<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> (<em>“Upper and lower case alphabetic characters are to be
-treated identically”</em>), while
-<a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code> contradicts
-<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>, which makes the method token case-sensitive, and is tracked
-as <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>.</p>
+</section>
+<section id="the-lenient-criterion-in-two-limbs">
+<h3>The Lenient Criterion, in Two Limbs<a class="headerlink" href="#the-lenient-criterion-in-two-limbs" title="Link to this heading">¶</a></h3>
+<p>The ruling above leaves one question open, and
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> settled it: does a
+specification have to state a <strong>comparison rule</strong> for a registry to be treated
+case-insensitively, or does it also count when the authorities merely <strong>disagree
+about spelling</strong>? The owner’s answer, verbatim:</p>
+<blockquote>
+<div><p>I say lenient. TransportProtocol for example should be case-insensitive. Upper or
+lower cases are being used everywhere in RFC and IANA themselves so that’s an
+indication of case insensitivity.</p>
+</div></blockquote>
+<p>So the test a new registry has to pass has <strong>two limbs</strong>, and satisfying either one
+justifies case-insensitivity:</p>
+<ol class="arabic simple">
+<li><p><strong>A comparison rule in the governing document.</strong> <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> for FTP
+command codes, <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a> for FTP FEAT codes, <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a>
+for IANA service names.</p></li>
+<li><p><strong>A documented spelling disagreement between the specification and the registry.</strong>
+If the RFC writes a field one way throughout and the live IANA data writes it
+another, then neither authority is treating case as significant, and a lookup that
+does would reject a caller holding the spec’s own spelling.</p></li>
+</ol>
+<p>Limb 2 has to be <strong>measured, not assumed</strong> – count the casings in the registry the
+crawler actually reads, and say how many rows carried each. A guess about which way
+IANA spells a column is not evidence.</p>
+<p>Where neither limb holds, the lookup is case-sensitive and inherits
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> unchanged.</p>
+</section>
+<section id="the-audit-per-class">
+<h3>The Audit, per Class<a class="headerlink" href="#the-audit-per-class" title="Link to this heading">¶</a></h3>
+<p><a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
+registry added later has something to check itself against. The owner’s scope for it,
+verbatim: <em>“we should audit all registries and then decide if case (in)sensitive.”</em></p>
+<p>The population it covers, with the counting convention spelled out because the
+figures move: <strong>127</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code> subclasses, every
+one of them under <a class="reference internal" href="../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, across 124 files – 117 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued
+(of which 5 are flag registries) and 10 <code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code>-valued. Plus <strong>24</strong>
+non-registry enumerations counted by a runtime walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> flavours and including nested classes: 17 top level (3 of them under
+<a class="reference internal" href="../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> itself) and 7 nested, the nested ones being
+<code class="docutils literal notranslate"><span class="pre">FrameType.Flags</span></code> in <a class="reference internal" href="../pcapkit/protocols/application/httpv2.html#module-pcapkit.protocols.schema.application.httpv2" title="pcapkit.protocols.schema.application.httpv2"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.application.httpv2</span></code></a> plus its
+6 concrete per-frame subclasses. 151 enumerations in total.</p>
+<p><strong>The</strong> <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><strong>-valued tier, all 117, is case-sensitive, and the criterion is
+vacuous on it rather than merely unmet.</strong> A registry whose values are numbers has
+nothing for case to apply to; the only way a string reaches
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> on one is as a member <em>name</em>, and a name
+is the Python identifier <a class="reference internal" href="../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.safe_name" title="pcapkit.vendor.default.Vendor.safe_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor.safe_name()</span></code></a> derives from
+the registry’s own name column – it preserves the registrar’s casing exactly, but it
+is not itself a value any specification states a comparison rule for. Measured across
+all 151 enumerations: exactly <strong>one</strong> would collide if names were folded –
+<a class="reference internal" href="../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>, on <code class="docutils literal notranslate"><span class="pre">R1_Counter</span></code> against
+<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> – and <strong>no</strong> enumeration anywhere has two <code class="docutils literal notranslate"><span class="pre">str</span></code> <em>values</em> that
+collide when folded. So folding names is not merely unjustified, it is unsafe in a
+measured case; folding values is safe but unjustified except where the table below
+says otherwise.</p>
+<p>That leaves the classes with something to decide:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 18.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Governing source</p></th>
+<th class="head"><p>What it says</p></th>
+<th class="head"><p>Verdict</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a></p></td>
+<td><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a></p></td>
+<td><p><em>“Upper and lower case alphabetic characters are to be treated
+identically.”</em> Limb 1.</p></td>
+<td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code>/<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> fold, correctly</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></p></td>
+<td><p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a>, <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html#section-3.2"><strong>RFC 2389 Section 3.2</strong></a></p></td>
+<td><p><em>“IANA maintains uniqueness of feature names (FEAT codes) based on
+case-insensitive comparison.”</em> Limb 1. Limb 2 holds too: RFC 2389 recommends
+upper case on the wire while the registry spells 5 of its 15 codes lower case
+(measured: of 64 rows, 11 upper-case / 10 distinct, 52 lower-case / 5
+distinct, 1 blank, 0 mixed). Read §3.2 to the end before concluding it
+disagrees: it <em>opens</em> by calling the feature-label <em>“nominally case
+sensitive”</em>, then defers to <em>“the definitions of specific labels”</em>, which
+RFC 5797 §2 above is. Note also that the §2 sentence is wrapped across a
+line break in the RFC’s text file, at <code class="docutils literal notranslate"><span class="pre">case-</span></code> / <code class="docutils literal notranslate"><span class="pre">insensitive</span></code>, so a
+line-oriented grep for the phrase finds nothing.</p></td>
+<td><p><strong>case-insensitive</strong> – was a defect; <code class="docutils literal notranslate"><span class="pre">get</span></code> now folds</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></p></td>
+<td><p><span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a></p></td>
+<td><p><em>“The method token is case-sensitive.”</em> Explicitly the opposite of limb 1.</p></td>
+<td><p><strong>case-sensitive</strong> – was a defect, fixed by
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>
+<td><p>Nothing states a rule; the draft never discusses option-name case.</p></td>
+<td><p><strong>case-sensitive</strong> – already exact-matches, conforms</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a></p></td>
+<td><p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9850.html#section-4.2"><strong>RFC 9850 Section 4.2</strong></a></p></td>
+<td><p>Nothing states a rule. Limb 2 fails on measurement: all 10 rows of the RFC’s
+table and all 10 of the live IANA CSV are upper case, so the authorities
+agree. (RFC 9850 notes the labels <em>“correspond to lowercase labels in the TLS
+key schedule”</em>, but those are a different document’s secret names, not a
+second spelling of the log label.)</p></td>
+<td><p><strong>case-sensitive</strong> – no override, conforms</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code></p></td>
+<td><p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-8.1.1"><strong>RFC 6335 Section 8.1.1</strong></a></p></td>
+<td><p>Nothing states a rule for the <code class="docutils literal notranslate"><span class="pre">Transport</span> <span class="pre">Protocol</span></code> field – only <em>“limited
+to one or more of TCP, UDP, SCTP, and DCCP”</em>. Limb 2 carries it: the RFC and
+its §10.2 templates write the field upper case, the live CSV is lower case in
+all 14,536 rows (<code class="docutils literal notranslate"><span class="pre">tcp</span></code> 6608, <code class="docutils literal notranslate"><span class="pre">udp</span></code> 6357, blank 1467, <code class="docutils literal notranslate"><span class="pre">sctp</span></code> 93,
+<code class="docutils literal notranslate"><span class="pre">dccp</span></code> 11, zero upper-case).</p></td>
+<td><p><strong>case-insensitive</strong> – <code class="docutils literal notranslate"><span class="pre">get</span></code> folds, and this is the owner’s own example</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a></p></td>
+<td><p>–</p></td>
+<td><p>Moot: its <code class="docutils literal notranslate"><span class="pre">get</span></code> takes a port number and refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> outright,
+so there is no string to fold. It does inherit the row above through
+<code class="docutils literal notranslate"><span class="pre">_dispatch</span></code>, which resolves a <code class="docutils literal notranslate"><span class="pre">proto</span></code> string via <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code>.</p></td>
+<td><p><strong>n/a</strong> – int-keyed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TCP</span></code>, <code class="docutils literal notranslate"><span class="pre">UDP</span></code>, <code class="docutils literal notranslate"><span class="pre">SCTP</span></code>, <code class="docutils literal notranslate"><span class="pre">DCCP</span></code></p></td>
+<td><p><span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a></p></td>
+<td><p><em>“case is ignored for comparison purposes, so both “http” and “HTTP” denote
+the same service.”</em> Limb 1, emphatically – and these registries’ <strong>values
+are</strong> service names.</p></td>
+<td><p><strong>unimplemented</strong> – no service-name lookup exists to fold; see below</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code>, <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code></p></td>
+<td><p><span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a>, <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#section-2"><strong>RFC 5797 Section 2</strong></a></p></td>
+<td><p>Limb 2 holds on measurement: the RFC and registry pages present the kind and
+conformance letters upper case (<code class="docutils literal notranslate"><span class="pre">A</span></code>/<code class="docutils literal notranslate"><span class="pre">P</span></code>/<code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span></code>/<code class="docutils literal notranslate"><span class="pre">O</span></code>/<code class="docutils literal notranslate"><span class="pre">H</span></code>) while
+the CSV columns the crawler reads are lower case in every row (<code class="docutils literal notranslate"><span class="pre">s</span></code> 26,
+<code class="docutils literal notranslate"><span class="pre">a</span></code> 18, <code class="docutils literal notranslate"><span class="pre">s/p</span></code> 3, blank 1; <code class="docutils literal notranslate"><span class="pre">o</span></code> 28, <code class="docutils literal notranslate"><span class="pre">m</span></code> 27, <code class="docutils literal notranslate"><span class="pre">h</span></code> 7, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">[1]</span></code> 2).</p></td>
+<td><p><strong>open</strong> – see below</p></td>
+</tr>
+<tr class="row-odd"><td><p>The 5 <a class="reference internal" href="../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mh</span></code></a> and
+<a class="reference internal" href="../pcapkit/protocols/application/ngap.html#module-pcapkit.protocols.application.ngap" title="pcapkit.protocols.application.ngap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ngap</span></code></a> helper enumerations</p></td>
+<td><p>IANA Mobility Header registries, 3GPP TS 38.413</p></td>
+<td><p>Their values are numeric codes, so the criterion is vacuous exactly as for the
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> tier above. Three of them – <code class="docutils literal notranslate"><span class="pre">Criticality</span></code>,
+<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code> – do override
+<code class="docutils literal notranslate"><span class="pre">get</span></code>, but for signature reasons (no <code class="docutils literal notranslate"><span class="pre">default</span></code>, and an
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>/<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> dispatch) rather than for case: each does an exact
+<code class="docutils literal notranslate"><span class="pre">Cls[key]</span></code>. <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code> and <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code> carry no
+<code class="docutils literal notranslate"><span class="pre">get</span></code> at all, so they have no string lookup to fold. Verified by reading all
+five.</p></td>
+<td><p><strong>case-sensitive</strong> – conforms</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">WireGuardKeyLabel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">draft-tuexen-opsawg-pcapng</span></code></p></td>
+<td><p>The draft names the four labels outright (<em>“The key type is one of
+LOCAL_STATIC_PRIVATE_KEY, …”</em>) and, as for <code class="docutils literal notranslate"><span class="pre">OptionType</span></code> above, never
+discusses their case. Both authorities write them upper case.</p></td>
+<td><p><strong>case-sensitive</strong> – no override, conforms</p></td>
+</tr>
+<tr class="row-odd"><td><p>Every other non-registry enumeration</p></td>
+<td><p>–</p></td>
+<td><p>pcapkit’s own discriminators and bit labels, with no registrar behind them
+at all – <code class="docutils literal notranslate"><span class="pre">Completion</span></code>, <code class="docutils literal notranslate"><span class="pre">ftp.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">httpv1.Type</span></code>, <code class="docutils literal notranslate"><span class="pre">FinalisedState</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketDirection</span></code>, <code class="docutils literal notranslate"><span class="pre">PacketReception</span></code>, and the 7 httpv2
+<code class="docutils literal notranslate"><span class="pre">Flags</span></code>. <code class="docutils literal notranslate"><span class="pre">PDUKind</span></code> is the one with an external source and it points the
+same way: its values are ASN.1 identifiers from 3GPP TS 38.413, and ASN.1
+identifiers are case-significant by construction.</p></td>
+<td><p><strong>case-sensitive</strong> – nothing to cite, nothing to change</p></td>
+</tr>
+</tbody>
+</table>
 </div>
+<p>Two rows the audit deliberately left open rather than acting on, because each is
+wider than a case fix:</p>
+<ul class="simple">
+<li><p><strong>A service-name lookup on the</strong> <code class="docutils literal notranslate"><span class="pre">AppType</span></code> <strong>transport registries.</strong> This is the
+inverse of every other row: <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html#section-5.1"><strong>RFC 6335 Section 5.1</strong></a> <em>does</em> make service names
+case-insensitive, and <code class="docutils literal notranslate"><span class="pre">TCP</span></code>/<code class="docutils literal notranslate"><span class="pre">UDP</span></code>/<code class="docutils literal notranslate"><span class="pre">SCTP</span></code>/<code class="docutils literal notranslate"><span class="pre">DCCP</span></code> hold service names as their
+values – but <code class="docutils literal notranslate"><span class="pre">AppType.get</span></code> refuses a non-<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> key, so no service-name
+lookup exists for the rule to apply to. Implementing one is new public API on a
+6,000-member registry where one name maps to many ports, which is a <code class="docutils literal notranslate"><span class="pre">get_all</span></code>
+design question rather than a case fold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CommandType</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code>. By parity with
+<code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code> – an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued enumeration whose <em>names</em> are the
+specification’s own tokens – the measured spelling disagreement above would make
+these two case-insensitive. Nothing looks them up by string today, though: the
+crawler translates the CSV’s lower-case letters to the upper-case member names at
+generation time, and neither class inherits
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> yet. Re-parenting them is phase 2 of
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, which is where the
+question belongs.</p></li>
+</ul>
+<p>One case fold also lives <strong>outside</strong> any <code class="docutils literal notranslate"><span class="pre">get</span></code>, and so escapes this convention
+entirely: <code class="docutils literal notranslate"><span class="pre">_resolve</span></code> in <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> upper-cases its
+<code class="docutils literal notranslate"><span class="pre">value</span></code> before matching it against <a class="reference internal" href="../pcapkit/const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> and
+<a class="reference internal" href="../pcapkit/const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> member names. <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7296.html"><strong>RFC 7296</strong></a> states no
+comparison rule for IKEv2 transform names – checked, it does not discuss case at all
+– so that fold is a convenience with no citation behind it. It is a protocol-level
+resolver rather than a registry override, which is why the audit records it here
+rather than changing it.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The obstacle this page used to record – that the base’s string-key path does not
@@ -860,17 +1052,27 @@ when the name lookup misses, so such a value resolves:</p>
 <span class="go">&lt;FEATCode [base]&gt;</span>
 </pre></div>
 </div>
-<p>Measure it on a registry that does <strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code>. Four do –
+<p>The example above is <code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code>’s shape, and it
+still resolves exactly as shown – but since
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> that class overrides
+<code class="docutils literal notranslate"><span class="pre">get</span></code> too, so the output is only the base’s because its override delegates an
+exact name-or-value hit straight through. Measure the base on a registry that does
+<strong>not</strong> override <code class="docutils literal notranslate"><span class="pre">get</span></code> at all. <strong>Five</strong> do –
 <a class="reference internal" href="../pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code>,
 <a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
 <a class="reference internal" href="../pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
 <a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
-measures the override rather than the base. <code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
+measures the override rather than the base. The unconditionally clean witness is
+<code class="docutils literal notranslate"><span class="pre">tests/corekit/test_enum_lookup_base_unit.py</span></code>’s own <code class="docutils literal notranslate"><span class="pre">_Str</span></code>, a purpose-built
+closed set carrying <code class="docutils literal notranslate"><span class="pre">angled</span> <span class="pre">=</span> <span class="pre">'&lt;angled&gt;'</span></code> precisely so that the value
+fall-through can be measured on a class that defines no <code class="docutils literal notranslate"><span class="pre">get</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
 before matching, which makes it look as though the base were case-insensitive –
-deliberately, since <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> treats FTP command codes identically
+deliberately, since <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> treats FTP command codes identically
 regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
-case-sensitive instead: <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
+case-sensitive instead: <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
 case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
 <code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the
 caller’s exact casing, the same way an unrecognised value always does.</p>
@@ -965,6 +1167,8 @@ the next regeneration would discard it.</p>
 <li><a class="reference internal" href="#where-the-registry-protocol-lives">Where the registry protocol lives</a><ul>
 <li><a class="reference internal" href="#the-two-tiers-and-what-lives-on-each">The Two Tiers, and What Lives on Each</a></li>
 <li><a class="reference internal" href="#case-sensitivity-is-rfc-directed">Case Sensitivity Is RFC-Directed</a></li>
+<li><a class="reference internal" href="#the-lenient-criterion-in-two-limbs">The Lenient Criterion, in Two Limbs</a></li>
+<li><a class="reference internal" href="#the-audit-per-class">The Audit, per Class</a></li>
 </ul>
 </li>
 </ul>

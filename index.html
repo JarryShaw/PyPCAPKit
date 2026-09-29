@@ -868,10 +868,12 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>PCAP_CT<span class="o">]</span>
 <span class="c1"># for ESP payload decryption</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>crypto<span class="o">]</span>
-<span class="c1"># and to install the optional packages -- note this excludes PyPCAP and pcap-ct</span>
+<span class="c1"># and to install every core addon at once -- CLI display, ESP decryption</span>
+<span class="c1"># and NGAP decoding; none of the engines above are included, install each</span>
+<span class="c1"># on demand as shown</span>
 pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="o">[</span>all<span class="o">]</span>
 <span class="c1"># or to do this explicitly</span>
-pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="w"> </span>dpkt<span class="w"> </span>scapy<span class="w"> </span>pyshark<span class="w"> </span>pypcapfile
+pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="w"> </span>emoji<span class="w"> </span>cryptography<span class="w"> </span>pycrate
 </pre></div>
 </div>
 <div class="admonition important">
