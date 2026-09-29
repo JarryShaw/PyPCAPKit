@@ -42,8 +42,10 @@ Two things this deliberately does **not** test, because it cannot:
   tier runs on a fresh clone with no network and no token. It is written down in
   the workflow's own comment and in #641 instead.
 * **Whether GitHub requests one approval per environment or one per matrix leg.**
-  ``pypi`` is a 7-leg matrix and ``conda`` a 10-leg one. That is a property of the
-  Actions runner, observable only from a real run.
+  ``pypi`` is a 7-leg matrix and ``conda`` a 10-leg one. That is a property of
+  the Actions runner, observable only from a real run -- and now moot for both,
+  since #887 removed their required reviewers. The question would resurface
+  only if a matrix job were gated by its own environment again.
 
 :mod:`yaml` is not in the ``test`` extra, so the scanner in this module is
 hand-rolled and dependency-free, and :class:`TestYAMLAgreesWithTheScanner` checks
@@ -99,6 +101,12 @@ _JOB_HEADER = re.compile(r'^ {2}([A-Za-z_][A-Za-z0-9_-]*):[ \t]*(?:#.*)?$')
 _ENVIRONMENT = re.compile(r'^ {4}environment:[ \t]*(.*)$')
 #: The ``name:`` of an ``environment:`` written in its mapping form.
 _ENVIRONMENT_NAME = re.compile(r'^ {6}name:[ \t]*(\S+)')
+#: A job-level ``needs:`` key written as a single-line inline list, i.e.
+#: ``needs: [ a, b ]``. The only form this workflow uses -- confirmed by
+#: :class:`TestYAMLAgreesWithTheScanner` -- so, like :data:`PUBLISHING_MARKERS`,
+#: extending it to the multi-line ``needs:\n  - a`` form is a maintenance
+#: obligation for whoever adds one, not something this scan infers.
+_NEEDS = re.compile(r'^ {4}needs:[ \t]*\[([^\]]*)\][ \t]*(?:#.*)?$')
 
 
 def strip_comments(text: 'str') -> 'str':
@@ -175,6 +183,42 @@ def declared_environment(block: 'str') -> 'Optional[str]':
     return None
 
 
+def declared_needs(block: 'str') -> 'list[str]':
+    """The job names in this job's ``needs: [ ... ]`` list, empty if it has none.
+
+    ``unit-tests`` has no ``needs:`` at all and correctly returns ``[]`` rather
+    than raising, since it is the root of the graph this module walks.
+
+    """
+    for line in block.splitlines():
+        match = _NEEDS.match(line)
+        if match is not None:
+            return [name.strip() for name in match.group(1).split(',') if name.strip()]
+    return []
+
+
+def needs_closure(jobs: 'dict[str, str]', name: str) -> 'set[str]':
+    """Every job ``name`` depends on, directly or transitively.
+
+    A plain graph walk over :func:`declared_needs`, not a topological sort --
+    nothing here needs an order, only membership. A dependency that is not a
+    key of ``jobs`` (there is none in this workflow, but a rename could produce
+    one) is walked as if it declared no ``needs:`` of its own, rather than
+    raising, so a scanner bug surfaces as a missing closure member instead of
+    an exception unrelated to what the caller is checking.
+
+    """
+    seen = set()  # type: set[str]
+    stack = list(declared_needs(jobs[name]))
+    while stack:
+        dep = stack.pop()
+        if dep in seen:
+            continue
+        seen.add(dep)
+        stack.extend(declared_needs(jobs.get(dep, '')))
+    return seen
+
+
 def publishing_reasons(block: 'str') -> 'list[str]':
     """Why this job has an effect outside the run, empty when it has none."""
     body = strip_comments(block)
@@ -205,8 +249,14 @@ class TestPublishingJobsAreGated(WorkflowMixin, unittest.TestCase):
     def test_every_publishing_job_declares_an_environment(self) -> None:
         """No job may reach PyPI, Anaconda, a Release or a git push unapproved.
 
-        An ``environment:`` is the only thing in Actions that will hold a job for
-        a human. Without one the job runs the moment its ``needs:`` are met, which
+        An ``environment:`` is what lets Actions hold a job for a human, but
+        since #887 only ``github-release``'s actually does -- ``conda-tag``,
+        ``pypi`` and ``anaconda`` kept their environments with no reviewer on
+        them, and are held instead by depending on ``github`` through
+        ``needs:``. This test only checks that the line is present, not that
+        it still carries a reviewer or that the dependency exists;
+        :class:`TestGatedJobsDependOnGithub` below is what checks the latter.
+        Without either, the job runs the moment its ``needs:`` are met, which
         for this workflow means "whenever a version bump lands".
 
         """
@@ -238,11 +288,16 @@ class TestEnvironmentsAreNotShared(WorkflowMixin, unittest.TestCase):
     def test_each_gated_job_has_its_own_environment(self) -> None:
         """Approval is granted to an environment, so sharing one merges two gates.
 
-        A single ``release`` environment approved once releases PyPI *and*
-        Anaconda, which is the outcome #641's fix is supposed to prevent rather
-        than rename. Different credentials reach the two indexes -- OIDC trusted
-        publishing and ``ANACONDA_TOKEN`` -- and ``tag``'s write to ``main`` uses a
-        third, so each gets an approval that can be refused on its own.
+        A single ``release`` environment approved once would release PyPI
+        *and* Anaconda together, which is the outcome #641's fix was meant to
+        prevent rather than rename. Different credentials reach the two
+        indexes -- OIDC trusted publishing and ``ANACONDA_TOKEN`` -- and
+        ``tag``'s write to ``main`` uses a third, so sharing one environment
+        would still merge those blast radii even though, since #887, only
+        ``github-release`` carries a reviewer of its own; the other three are
+        held by depending on it instead. That each *does* depend on it is
+        :class:`TestGatedJobsDependOnGithub`'s check, not this one -- this
+        test only stops the four gates from being collapsed back into one.
 
         """
         environments = {}  # type: dict[str, list[str]]
@@ -265,6 +320,40 @@ class TestEnvironmentsAreNotShared(WorkflowMixin, unittest.TestCase):
         self.assertIsNotNone(pypi)
         self.assertIsNotNone(anaconda)
         self.assertNotEqual(pypi, anaconda)
+
+
+class TestGatedJobsDependOnGithub(WorkflowMixin, unittest.TestCase):
+    """#887: with only ``github-release`` still holding a required reviewer,
+    the other three gated jobs have to reach it through ``needs:`` instead,
+    or removing their own reviewer left them ungated in every sense that
+    matters.
+
+    Nothing above this class reads ``needs:`` at all -- :class:`WorkflowMixin`
+    aside, every test in :class:`TestPublishingJobsAreGated` and
+    :class:`TestEnvironmentsAreNotShared` passes identically if ``tag``'s
+    ``needs:`` is reverted to ``[ version_check ]``, which is the exact
+    regression #887 fixed. This is the one test in the module that would
+    catch it.
+
+    """
+
+    def test_every_gated_job_depends_on_github(self) -> None:
+        """Every ``environment:``-declaring job but ``github`` itself must
+        have ``github`` in its ``needs:`` closure, directly or transitively.
+
+        """
+        for name, block in sorted(self.jobs.items()):
+            if name == 'github' or declared_environment(block) is None:
+                continue
+            with self.subTest(job=name):
+                closure = needs_closure(self.jobs, name)
+                self.assertIn(
+                    'github', closure,
+                    f'`{name}` declares an environment but its `needs:` closure '
+                    f'{sorted(closure)} does not include `github` -- removing '
+                    f'its own required reviewer (#887) would let it run before '
+                    f'the one approval left to gate it',
+                )
 
 
 class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
@@ -404,6 +493,25 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
         self.assertEqual(scanned, expected,
                          'the indentation-based scanner and yaml.safe_load disagree '
                          'about which jobs are gated')
+
+    def test_the_same_job_to_needs_mapping(self) -> None:
+        """:func:`declared_needs` against the same real parse, for the same reason."""
+        try:
+            import yaml
+        except ImportError:  # pragma: no cover
+            self.skipTest('PyYAML is not in the test extra; the textual scan is '
+                          'asserted by TestGatedJobsDependOnGithub')
+
+        parsed = yaml.safe_load(self.text)
+        self.assertIsInstance(parsed, dict, 'the workflow is not a YAML mapping')
+
+        expected = {name: list(job.get('needs', []))
+                    for name, job in parsed['jobs'].items()}
+        scanned = {name: declared_needs(block) for name, block in self.jobs.items()}
+
+        self.assertEqual(scanned, expected,
+                         'the indentation-based `needs:` scanner and yaml.safe_load '
+                         'disagree about the dependency graph')
 
 
 if __name__ == '__main__':
