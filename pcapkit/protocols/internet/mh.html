@@ -8074,12 +8074,21 @@ the “alternate” care-of address option [<span class="target" id="index-212">
 <dd class="field-odd"><p>The matching member.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> names no member – raised for an
-    unknown name the same way <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises for an
-    unknown value, so the two ways of getting this wrong do not
-    report differently. There is no <code class="docutils literal notranslate"><span class="pre">default</span></code> parameter: this
-    enumeration cannot grow, so a default that could only ever be
-    ignored would be worse than one that is absent.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><strong>EnumKeyError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> names no member. A <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, per the
+    owner’s ruling on GitHub issue #923 – <em>“Either ``ValueError``
+    or ``KeyError``, that’s depending on how stdlib’s ``Enum`` would
+    raise on these circumstances”</em> – since a stdlib
+    <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and only the <em>value</em>
+    miss <a class="reference internal" href="#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_" title="pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> reports is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-shaped. This
+    used to raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+    so that the two ways of getting it wrong reported identically;
+    that is exactly the conversion #923 rejects, and 119 of this
+    tree’s 127 concrete
+    <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> subclasses already
+    answered a name miss with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>. There is no
+    <code class="docutils literal notranslate"><span class="pre">default</span></code> parameter: this enumeration cannot grow, so a
+    default that could only ever be ignored would be worse than one
+    that is absent.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -8180,12 +8189,21 @@ of valid leading bits in the prefix [<span class="target" id="index-226"></span>
 <dd class="field-odd"><p>The matching member.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>EnumValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> names no member – raised for an
-    unknown name the same way <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> raises for an
-    unknown value, so the two ways of getting this wrong do not
-    report differently. There is no <code class="docutils literal notranslate"><span class="pre">default</span></code> parameter: this
-    enumeration cannot grow, so a default that could only ever be
-    ignored would be worse than one that is absent.</p>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><strong>EnumKeyError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> names no member. A <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>, per the
+    owner’s ruling on GitHub issue #923 – <em>“Either ``ValueError``
+    or ``KeyError``, that’s depending on how stdlib’s ``Enum`` would
+    raise on these circumstances”</em> – since a stdlib
+    <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and only the <em>value</em>
+    miss <a class="reference internal" href="#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_" title="pcapkit.protocols.internet.mh.IPv6AddressPrefixCode._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> reports is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-shaped. This
+    used to raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>
+    so that the two ways of getting it wrong reported identically;
+    that is exactly the conversion #923 rejects, and 119 of this
+    tree’s 127 concrete
+    <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> subclasses already
+    answered a name miss with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>. There is no
+    <code class="docutils literal notranslate"><span class="pre">default</span></code> parameter: this enumeration cannot grow, so a
+    default that could only ever be ignored would be worse than one
+    that is absent.</p>
 </dd>
 </dl>
 </dd></dl>

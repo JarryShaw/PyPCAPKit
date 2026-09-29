@@ -547,6 +547,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">extend_enum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">NoDefaultType</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -650,7 +651,12 @@
 <span class="sd">        :meth:`get`'s own ``except ValueError`` and falls back to ``default``</span>
 <span class="sd">        just as any other unresolvable value does. An override raising something</span>
 <span class="sd">        outside that hierarchy would instead propagate past ``default``, which is</span>
-<span class="sd">        a real difference in behaviour rather than a stylistic preference.</span>
+<span class="sd">        a real difference in behaviour rather than a stylistic preference. With</span>
+<span class="sd">        no usable ``default``, a rejection from this hook reaches the caller</span>
+<span class="sd">        exactly as the override raised it -- :meth:`get` re-raises an in-library</span>
+<span class="sd">        ``ValueError`` unchanged rather than re-wrapping it, so the override's own</span>
+<span class="sd">        message and the single log record it already emitted are what the caller</span>
+<span class="sd">        sees.</span>
 
 <span class="sd">        Called from exactly two places, and the omissions are deliberate:</span>
 
@@ -793,6 +799,46 @@
 <span class="sd">        on the same terms; the ``str`` path does not call the hook, for the reason</span>
 <span class="sd">        given on :meth:`_validate_value` itself.</span>
 
+<span class="sd">        Both failure paths raise from :mod:`pcapkit.utilities.exceptions` rather</span>
+<span class="sd">        than a builtin, per the owner's ruling on GitHub issue #923: *"Either</span>
+<span class="sd">        ``ValueError`` or ``KeyError``, that's depending on how stdlib's</span>
+<span class="sd">        ``Enum`` would raise on these circumstances. And we should raise one</span>
+<span class="sd">        from ``pcapkit.utilities.exceptions`` rather builtin exceptions."* The</span>
+<span class="sd">        *shape* is unchanged by that ruling and deliberately so -- a name miss</span>
+<span class="sd">        stays :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,</span>
+<span class="sd">        matching ``E['nosuch']`` and ``E(999)`` on a stdlib</span>
+<span class="sd">        :class:`~enum.Enum`, and matching the 119 of this tree's 127 concrete</span>
+<span class="sd">        subclasses that already answered a name miss that way. Only the</span>
+<span class="sd">        provenance changed, so every ``except KeyError`` and ``except</span>
+<span class="sd">        ValueError`` around a call to this method keeps catching.</span>
+
+<span class="sd">        Two details of that conversion are worth stating, since neither is</span>
+<span class="sd">        visible from the exception type alone:</span>
+
+<span class="sd">        * **The name miss is raised quietly** --</span>
+<span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with ``quiet=True``,</span>
+<span class="sd">          so nothing is logged and :data:`sys.tracebacklimit` is left alone.</span>
+<span class="sd">          That is not a cosmetic choice: this method's name miss is in-library</span>
+<span class="sd">          control flow at six call sites, and at</span>
+<span class="sd">          :meth:`~pcapkit.const.http.method.Method.get` it is part of a</span>
+<span class="sd">          *successful* call -- that override catches it in order to mint. A loud</span>
+<span class="sd">          error there would put a :data:`logging.CRITICAL` record on every such</span>
+<span class="sd">          call and set :data:`sys.tracebacklimit` to ``0`` process-wide, which</span>
+<span class="sd">          is exactly the GitHub issue #362 defect</span>
+<span class="sd">          :class:`~pcapkit.utilities.exceptions.BaseError` documents ``quiet``</span>
+<span class="sd">          for. The value miss takes no such fallback anywhere in this tree, so</span>
+<span class="sd">          it stays loud.</span>
+<span class="sd">        * **An in-library rejection propagates unchanged.** A ``ValueError``</span>
+<span class="sd">          that is already a :exc:`~pcapkit.utilities.exceptions.BaseError` --</span>
+<span class="sd">          typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a</span>
+<span class="sd">          subclass's :meth:`_validate_value` -- is re-raised as it stands rather</span>
+<span class="sd">          than wrapped, so the subclass's own message survives and the error is</span>
+<span class="sd">          logged once instead of twice. Only :mod:`aenum`'s and :mod:`enum`'s</span>
+<span class="sd">          own "no member carries this value" is converted. This is the same</span>
+<span class="sd">          discrimination :meth:`EnumField.post_process</span>
+<span class="sd">          &lt;pcapkit.corekit.fields.numbers.EnumField.post_process&gt;` already</span>
+<span class="sd">          makes for the same reason.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            key: Name or value to look up.</span>
 <span class="sd">            default: An already-registered value to fall back to when</span>
@@ -807,13 +853,15 @@
 <span class="sd">            The canonical member for ``key``, or for ``default``.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If a value does not resolve and there is no usable</span>
-<span class="sd">                default -- including a value a subclass's</span>
-<span class="sd">                :meth:`_validate_value` rejects, since</span>
-<span class="sd">                :exc:`~pcapkit.utilities.exceptions.EnumValueError` is a</span>
-<span class="sd">                :exc:`ValueError`.</span>
-<span class="sd">            KeyError: If a name does not resolve and there is no usable</span>
-<span class="sd">                default.</span>
+<span class="sd">            EnumValueError: If a value does not resolve and there is no usable</span>
+<span class="sd">                default. Also what a subclass's :meth:`_validate_value`</span>
+<span class="sd">                rejection reaches the caller as, since that hook is documented</span>
+<span class="sd">                to raise this very class and it is passed through rather than</span>
+<span class="sd">                re-wrapped. A :exc:`ValueError`, so an</span>
+<span class="sd">                ``except ValueError`` caller is unaffected.</span>
+<span class="sd">            EnumKeyError: If a name does not resolve and there is no usable</span>
+<span class="sd">                default. A :exc:`KeyError`, so an ``except KeyError`` caller is</span>
+<span class="sd">                unaffected.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -823,14 +871,17 @@
                 <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
                     <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">NO_DEFAULT</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
-                    <span class="k">raise</span>
+                    <span class="k">raise</span> <span class="n">EnumKeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+                                       <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">default</span><span class="p">]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">NO_DEFAULT</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
-                <span class="k">raise</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">BaseError</span><span class="p">):</span>
+                    <span class="k">raise</span>
+                <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">default</span><span class="p">]</span></div>
 
 
@@ -857,8 +908,8 @@
 <span class="sd">            carrying the same value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: As :meth:`get` with no default, for a value.</span>
-<span class="sd">            KeyError: As :meth:`get` with no default, for a name.</span>
+<span class="sd">            EnumValueError: As :meth:`get` with no default, for a value.</span>
+<span class="sd">            EnumKeyError: As :meth:`get` with no default, for a name.</span>
 
 <span class="sd">        """</span>
         <span class="n">canonical</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>

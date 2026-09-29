@@ -560,7 +560,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ngap.procedure_code</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcedureCode</span> <span class="k">as</span> <span class="n">Enum_ProcedureCode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ngap.protocol_ie</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolIE</span> <span class="k">as</span> <span class="n">Enum_ProtocolIE</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span><span class="p">,</span> <span class="n">EnumLookup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.application.application</span><span class="w"> </span><span class="kn">import</span> <span class="n">Application</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.application.ngap</span><span class="w"> </span><span class="kn">import</span> <span class="n">IE</span> <span class="k">as</span> <span class="n">Data_IE</span>
@@ -683,9 +683,30 @@
 <span class="w">    </span><span class="sd">"""[Criticality] What a receiver must do with an IE it does not understand.</span>
 
 <span class="sd">    Members are named for the ASN.1 identifiers rather than upper-cased, so</span>
-<span class="sd">    that :meth:`Criticality.get` resolves a name decoded by |pycrate|_ through</span>
-<span class="sd">    the standard member map. The values are the ``ENUMERATED`` indices, which</span>
-<span class="sd">    is what goes on the wire.</span>
+<span class="sd">    that :meth:`~pcapkit.corekit.enum.EnumLookup.get` resolves a name decoded</span>
+<span class="sd">    by |pycrate|_ through the standard member map. The values are the</span>
+<span class="sd">    ``ENUMERATED`` indices, which is what goes on the wire.</span>
+
+<span class="sd">    Carries no ``get`` of its own. GitHub issue #877 re-parented this class onto</span>
+<span class="sd">    :class:`~pcapkit.corekit.enum.EnumLookup` and kept a delegating override for</span>
+<span class="sd">    one reason only: it converted the base's name-miss :exc:`KeyError` into a</span>
+<span class="sd">    :exc:`ValueError`, so that an unknown *name* and an unknown *value* reported</span>
+<span class="sd">    identically. GitHub issue #923's ruling retired that conversion -- a name</span>
+<span class="sd">    miss is :exc:`KeyError`-shaped, exactly as ``E['nosuch']`` is on a stdlib</span>
+<span class="sd">    :class:`~enum.Enum` -- which left the override a pure pass-through, so it</span>
+<span class="sd">    went with it.</span>
+
+<span class="sd">    The one thing that could have made the deletion unsafe is ``default``</span>
+<span class="sd">    handling, and there the inherited base is identical to what the override</span>
+<span class="sd">    forwarded: ``get('nosuch', Criticality.reject)`` answers ``reject`` on both,</span>
+<span class="sd">    and ``get('nosuch', 99)`` raises on both, since a ``default`` naming no</span>
+<span class="sd">    registered value is not honoured. That is also what keeps the deletion safe</span>
+<span class="sd">    on a closed ASN.1 ``ENUMERATED`` with no extension marker -- a member-valued</span>
+<span class="sd">    ``default`` resolves through ``_value2member_map_`` and never through the</span>
+<span class="sd">    constructor, so no path here can mint a fourth value; see :meth:`_missing_`,</span>
+<span class="sd">    which refuses one outright. The only loss is the narrower</span>
+<span class="sd">    ``int | str | Criticality`` key annotation, a typing nicety rather than</span>
+<span class="sd">    behaviour.</span>
 
 <span class="sd">    """</span>
 
@@ -696,99 +717,6 @@
     <span class="c1">#: Ignore the IE, carry on, and report it.</span>
     <span class="n">notify</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'int | str | Criticality'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="n">NO_DEFAULT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Criticality'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
-
-<span class="sd">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub</span>
-<span class="sd">        issue #877's re-parenting. For every key the signature admits, the</span>
-<span class="sd">        base reproduces the branch this override used to hand-roll: a</span>
-<span class="sd">        ``Criticality`` key is also an :class:`int` (this is an</span>
-<span class="sd">        :class:`~aenum.IntEnum`) and resolves through the base's non-``str``</span>
-<span class="sd">        path, ``cls(key)``, which -- exactly like the removed</span>
-<span class="sd">        ``isinstance(key, Criticality): return key`` branch -- hands back the</span>
-<span class="sd">        identical, canonical member rather than a new one; a plain</span>
-<span class="sd">        :class:`str` resolves through the base's name lookup, the same</span>
-<span class="sd">        ``Criticality[key]`` this override used to spell directly.</span>
-
-<span class="sd">        Outside that signature the two do differ, which is worth stating</span>
-<span class="sd">        rather than leaving for someone to discover. ``cls(key)`` accepts</span>
-<span class="sd">        anything :class:`int` equality accepts, so ``get(1.0)`` now returns</span>
-<span class="sd">        ``Criticality.ignore`` where the removed code raised</span>
-<span class="sd">        :exc:`ValueError`, and an unhashable key raises :exc:`ValueError`</span>
-<span class="sd">        rather than the :exc:`TypeError` the old ``Criticality[key]`` lookup</span>
-<span class="sd">        produced. Both are out of contract, no caller in this tree can reach</span>
-<span class="sd">        them -- the three live call sites pass pycrate-decoded :class:`str`</span>
-<span class="sd">        or :class:`int` -- and the new shape is what every other</span>
-<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup` subclass already does, so</span>
-<span class="sd">        this is alignment rather than a regression.</span>
-
-<span class="sd">        The one behaviour the base does not reproduce is the exception this</span>
-<span class="sd">        class has always raised for an unresolved name: a bare</span>
-<span class="sd">        :exc:`KeyError` there, versus this class's own :exc:`ValueError`</span>
-<span class="sd">        naming the rejected key -- so a name miss is still caught and</span>
-<span class="sd">        re-raised in that shape. An unresolved *value* is unaffected either</span>
-<span class="sd">        way: it already reaches the caller as :exc:`ValueError`, raised by</span>
-<span class="sd">        :meth:`_missing_` below, on both the removed code path and the</span>
-<span class="sd">        base's.</span>
-
-<span class="sd">        The base is a :class:`classmethod`</span>
-<span class="sd">        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override</span>
-<span class="sd">        moves from :class:`staticmethod` to :class:`classmethod` to</span>
-<span class="sd">        delegate at all -- the same move GitHub issue #908 and #915 made for</span>
-<span class="sd">        :meth:`~pcapkit.const.http.method.Method.get`. Every call site in</span>
-<span class="sd">        this tree calls this method by name; none take it as a bare</span>
-<span class="sd">        callable or introspect ``__func__``, so the switch is not</span>
-<span class="sd">        caller-visible.</span>
-
-<span class="sd">        Unlike :meth:`ProcedureCode.get &lt;pcapkit.corekit.enum.EnumRegistry.get&gt;`</span>
-<span class="sd">        and :meth:`ProtocolIE.get &lt;pcapkit.corekit.enum.EnumRegistry.get&gt;`,</span>
-<span class="sd">        this still never manufactures a member for an in-range value it has</span>
-<span class="sd">        not seen -- ``Criticality`` cannot grow, unlike those two, which</span>
-<span class="sd">        answer with a throwaway, non-registering member (see</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`) for</span>
-<span class="sd">        a registry 3GPP keeps assigning new codes to. It is an ASN.1</span>
-<span class="sd">        ``ENUMERATED`` with no extension marker, so a fourth value is</span>
-<span class="sd">        unencodable and a lookup for one is a bug rather than a version skew</span>
-<span class="sd">        -- see :meth:`_missing_`.</span>
-
-<span class="sd">        ``default`` did not exist on this override before this change --</span>
-<span class="sd">        the original had no such parameter at all, which is a genuine LSP</span>
-<span class="sd">        violation once this class' ``get`` is a :class:`classmethod`</span>
-<span class="sd">        override of one that has it (mypy's ``[override]`` check catches</span>
-<span class="sd">        exactly this shape). Forwarded verbatim to</span>
-<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than</span>
-<span class="sd">        reimplemented, so it behaves exactly as the base's own ``default``</span>
-<span class="sd">        does: a fallback to an *already-registered* member, resolved</span>
-<span class="sd">        through ``_value2member_map_`` and never through the constructor,</span>
-<span class="sd">        so passing one still cannot mint a fourth. Every call site in this</span>
-<span class="sd">        tree omits it, so this is purely an added, backward-compatible</span>
-<span class="sd">        capability -- not the "declared, documented and ignored" shape an</span>
-<span class="sd">        earlier revision of this docstring rejected, since it is now</span>
-<span class="sd">        genuinely honoured rather than a parameter that would have to be</span>
-<span class="sd">        silently dropped.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item.</span>
-<span class="sd">            default: An already-registered value to fall back to when</span>
-<span class="sd">                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.</span>
-<span class="sd">                NO_DEFAULT`, the default, means *no default*.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The matching member.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If ``key`` names no member and there is no usable</span>
-<span class="sd">                ``default``. Raised for an unknown name as well as an</span>
-<span class="sd">                unknown value, so that the two ways of getting this wrong</span>
-<span class="sd">                do not report differently.</span>
-
-<span class="sd">        :meta private:</span>
-<span class="sd">        """</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
 <div class="viewcode-block" id="Criticality._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ngap.html#pcapkit.protocols.application.ngap.Criticality._missing_">[docs]</a>

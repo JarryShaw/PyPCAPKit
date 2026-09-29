@@ -917,6 +917,38 @@ same situation via its own <code class="docutils literal notranslate"><span clas
 <p>Invalid packet dict.</p>
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.EnumKeyError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">EnumKeyError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#EnumKeyError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.EnumKeyError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyError</span></code></a></p>
+<p>No member of an enumeration carries this name.</p>
+<p>The name-miss half of the pair whose value-miss half is
+<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code>, and the split between
+them follows stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> rather than this package’s own
+taste: <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so a lookup that misses by <em>name</em> is
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived and one that misses by <em>value</em> is
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived. The owner’s ruling on GitHub issue #923,
+verbatim: <em>“Either ``ValueError`` or ``KeyError``, that’s depending on how
+stdlib’s ``Enum`` would raise on these circumstances. And we should raise
+one from ``pcapkit.utilities.exceptions`` rather builtin exceptions.”</em></p>
+<p>Deriving from <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> is what makes that ruling cheap to carry out:
+<a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> raised a bare builtin
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> on a name miss until #923, and six in-library call sites
+catch it – <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> catches it in
+order to <em>mint</em>, so for that one a failed name lookup is part of a
+successful call. Every one of them keeps catching, unchanged.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Distinct from <a class="reference internal" href="#pcapkit.utilities.exceptions.MissingKeyError" title="pcapkit.utilities.exceptions.MissingKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a>,
+which is deliberately not reused here: that one reports an absent
+<em>mapping</em> key, as <a class="reference internal" href="../corekit/multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> and the
+<a class="reference internal" href="../toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a> extractors raise it, and conflating the two
+would leave a caller unable to tell a registry that has no such member
+from a packet dict that has no such field.</p>
+</div>
+</dd></dl>
+
 </section>
 <section id="modulenotfounderror-category">
 <h2><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a> Category<a class="headerlink" href="#modulenotfounderror-category" title="Link to this heading">¶</a></h2>

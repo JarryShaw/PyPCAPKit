@@ -943,7 +943,8 @@
     <span class="n">UpdateNotificationMessage</span> <span class="k">as</span> <span class="n">Schema_UpdateNotificationMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorSpecificOption</span> <span class="k">as</span> <span class="n">Schema_VendorSpecificOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1099,12 +1100,21 @@
 <span class="sd">            The matching member.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            EnumValueError: If ``key`` names no member -- raised for an</span>
-<span class="sd">                unknown name the same way :meth:`_missing_` raises for an</span>
-<span class="sd">                unknown value, so the two ways of getting this wrong do not</span>
-<span class="sd">                report differently. There is no ``default`` parameter: this</span>
-<span class="sd">                enumeration cannot grow, so a default that could only ever be</span>
-<span class="sd">                ignored would be worse than one that is absent.</span>
+<span class="sd">            EnumKeyError: If ``key`` names no member. A :exc:`KeyError`, per the</span>
+<span class="sd">                owner's ruling on GitHub issue #923 -- *"Either ``ValueError``</span>
+<span class="sd">                or ``KeyError``, that's depending on how stdlib's ``Enum`` would</span>
+<span class="sd">                raise on these circumstances"* -- since a stdlib</span>
+<span class="sd">                ``E['nosuch']`` raises :exc:`KeyError` and only the *value*</span>
+<span class="sd">                miss :meth:`_missing_` reports is :exc:`ValueError`-shaped. This</span>
+<span class="sd">                used to raise :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">                so that the two ways of getting it wrong reported identically;</span>
+<span class="sd">                that is exactly the conversion #923 rejects, and 119 of this</span>
+<span class="sd">                tree's 127 concrete</span>
+<span class="sd">                :class:`~pcapkit.corekit.enum.EnumLookup` subclasses already</span>
+<span class="sd">                answered a name miss with a :exc:`KeyError`. There is no</span>
+<span class="sd">                ``default`` parameter: this enumeration cannot grow, so a</span>
+<span class="sd">                default that could only ever be ignored would be worse than one</span>
+<span class="sd">                that is absent.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -1112,8 +1122,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
-                                 <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
+            <span class="k">raise</span> <span class="n">EnumKeyError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
+                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus._missing_">
@@ -1200,12 +1210,21 @@
 <span class="sd">            The matching member.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            EnumValueError: If ``key`` names no member -- raised for an</span>
-<span class="sd">                unknown name the same way :meth:`_missing_` raises for an</span>
-<span class="sd">                unknown value, so the two ways of getting this wrong do not</span>
-<span class="sd">                report differently. There is no ``default`` parameter: this</span>
-<span class="sd">                enumeration cannot grow, so a default that could only ever be</span>
-<span class="sd">                ignored would be worse than one that is absent.</span>
+<span class="sd">            EnumKeyError: If ``key`` names no member. A :exc:`KeyError`, per the</span>
+<span class="sd">                owner's ruling on GitHub issue #923 -- *"Either ``ValueError``</span>
+<span class="sd">                or ``KeyError``, that's depending on how stdlib's ``Enum`` would</span>
+<span class="sd">                raise on these circumstances"* -- since a stdlib</span>
+<span class="sd">                ``E['nosuch']`` raises :exc:`KeyError` and only the *value*</span>
+<span class="sd">                miss :meth:`_missing_` reports is :exc:`ValueError`-shaped. This</span>
+<span class="sd">                used to raise :exc:`~pcapkit.utilities.exceptions.EnumValueError`</span>
+<span class="sd">                so that the two ways of getting it wrong reported identically;</span>
+<span class="sd">                that is exactly the conversion #923 rejects, and 119 of this</span>
+<span class="sd">                tree's 127 concrete</span>
+<span class="sd">                :class:`~pcapkit.corekit.enum.EnumLookup` subclasses already</span>
+<span class="sd">                answered a name miss with a :exc:`KeyError`. There is no</span>
+<span class="sd">                ``default`` parameter: this enumeration cannot grow, so a</span>
+<span class="sd">                default that could only ever be ignored would be worse than one</span>
+<span class="sd">                that is absent.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -1213,8 +1232,8 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
-                                 <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
+            <span class="k">raise</span> <span class="n">EnumKeyError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
+                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="IPv6AddressPrefixCode._missing_">

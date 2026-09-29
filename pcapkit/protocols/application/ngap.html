@@ -759,9 +759,28 @@ lookup contract – pure re-parenting, since this class defines neither
 <dd><p>Bases: <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Criticality] What a receiver must do with an IE it does not understand.</p>
 <p>Members are named for the ASN.1 identifiers rather than upper-cased, so
-that <code class="xref py py-meth docutils literal notranslate"><span class="pre">Criticality.get()</span></code> resolves a name decoded by <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> through
-the standard member map. The values are the <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> indices, which
-is what goes on the wire.</p>
+that <a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> resolves a name decoded
+by <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a> through the standard member map. The values are the
+<code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> indices, which is what goes on the wire.</p>
+<p>Carries no <code class="docutils literal notranslate"><span class="pre">get</span></code> of its own. GitHub issue #877 re-parented this class onto
+<a class="reference internal" href="../../corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> and kept a delegating override for
+one reason only: it converted the base’s name-miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so that an unknown <em>name</em> and an unknown <em>value</em> reported
+identically. GitHub issue #923’s ruling retired that conversion – a name
+miss is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-shaped, exactly as <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> is on a stdlib
+<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> – which left the override a pure pass-through, so it
+went with it.</p>
+<p>The one thing that could have made the deletion unsafe is <code class="docutils literal notranslate"><span class="pre">default</span></code>
+handling, and there the inherited base is identical to what the override
+forwarded: <code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">Criticality.reject)</span></code> answers <code class="docutils literal notranslate"><span class="pre">reject</span></code> on both,
+and <code class="docutils literal notranslate"><span class="pre">get('nosuch',</span> <span class="pre">99)</span></code> raises on both, since a <code class="docutils literal notranslate"><span class="pre">default</span></code> naming no
+registered value is not honoured. That is also what keeps the deletion safe
+on a closed ASN.1 <code class="docutils literal notranslate"><span class="pre">ENUMERATED</span></code> with no extension marker – a member-valued
+<code class="docutils literal notranslate"><span class="pre">default</span></code> resolves through <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> and never through the
+constructor, so no path here can mint a fourth value; see <a class="reference internal" href="#pcapkit.protocols.application.ngap.Criticality._missing_" title="pcapkit.protocols.application.ngap.Criticality._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a>,
+which refuses one outright. The only loss is the narrower
+<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">Criticality</span></code> key annotation, a typing nicety rather than
+behaviour.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.ngap.Criticality.reject">
 <span class="sig-name descname"><span class="pre">reject</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.protocols.application.ngap.Criticality.reject" title="Link to this definition">¶</a></dt>
