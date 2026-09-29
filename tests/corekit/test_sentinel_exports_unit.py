@@ -24,7 +24,7 @@ is labelled for, and
 pins it so a later reading of the ruling cannot escalate into deleting the types.
 
 The population is **four**, not the three
-:file:`docs/source/conventions.rst` documented -- ``_Absent`` /
+:file:`docs/source/contributing/conventions.rst` documented -- ``_Absent`` /
 ``_AbsentType`` in :mod:`pcapkit.protocols.protocol` is the fourth, missed because a
 sweep filtered on capitalised names does not see a leading underscore.
 :class:`SentinelPopulationTests` pins the count and the doc together, so the next
@@ -76,7 +76,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
 #: as ``(instance name, instance, type, module)``. Four, not the three
-#: :file:`docs/source/conventions.rst` used to document -- see the module docstring.
+#: :file:`docs/source/contributing/conventions.rst` used to document -- see the module docstring.
 SENTINELS = (
     ('NULL', NULL, NullType, 'pcapkit.corekit.module'),
     ('NoValue', NoValue, NoValueType, 'pcapkit.corekit.fields.field'),
@@ -124,7 +124,7 @@ def _star_import(module: 'str') -> 'dict[str, object]':
 
 
 def _sentinel_section() -> 'str':
-    """The "Naming a sentinel" section of :file:`docs/source/conventions.rst`.
+    """The "Naming a sentinel" section of :file:`docs/source/contributing/conventions.rst`.
 
     Sliced by its own section markers rather than by line number, so an edit
     elsewhere in the file -- or the move to
@@ -167,7 +167,7 @@ class SentinelExportTests(unittest.TestCase):
         """``EnumLookup`` and ``EnumRegistry`` are not sentinels and stay.
 
         ``EnumLookup`` in particular: GitHub issue #906 split it out as a public
-        base and :file:`docs/source/conventions.rst` cites its ``get``, so dropping
+        base and :file:`docs/source/contributing/conventions.rst` cites its ``get``, so dropping
         it while removing the sentinel type next to it would break that reference.
 
         """
@@ -309,7 +309,7 @@ class SentinelPopulationTests(unittest.TestCase):
 
 
 class SentinelBehaviourTests(unittest.TestCase):
-    """The per-sentinel differences :file:`docs/source/conventions.rst` documents.
+    """The per-sentinel differences :file:`docs/source/contributing/conventions.rst` documents.
 
     Not part of the export change, and asserted here because the doc edit that goes
     with it makes claims about all four -- an undocumented ``__bool__`` or a missing
