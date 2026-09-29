@@ -243,10 +243,41 @@ Where the registry protocol lives
 
 A handful of registries define their own ``__new__`` to carry extra attributes and so
 do not share the generated template; bringing them onto the base is tracked in
-`#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__, which also records why
-it cannot simply be done -- the base's string-key path does not fall through to a
-value lookup, so a :class:`~aenum.StrEnum` registry would stop resolving a valid
-value that is not also a name.
+`#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__.
+
+.. note::
+
+   The obstacle this page used to record -- that the base's string-key path does not
+   fall through to a value lookup, so a :class:`~aenum.StrEnum` registry would stop
+   resolving a valid value that is not also a name -- **no longer applies.**
+   :meth:`~pcapkit.corekit.enum.EnumRegistry.get` now checks ``_value2member_map_``
+   when the name lookup misses, so such a value resolves:
+
+   .. code-block:: pycon
+
+      >>> FEATCode['base'].value
+      '<base>'
+      >>> '<base>' in FEATCode._member_map_
+      False
+      >>> FEATCode.get('<base>')
+      <FEATCode [base]>
+
+   Measure it on a registry that does **not** override ``get``. Four do --
+   :class:`~pcapkit.const.ftp.command.Command`,
+   :class:`~pcapkit.const.http.method.Method`,
+   :class:`~pcapkit.const.pcapng.option_type.OptionType` and
+   :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- and probing one of those
+   measures the override rather than the base. ``Method.get`` upper-cases its key,
+   which makes it look as though the base were case-insensitive.
+
+What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
+value resolves through ``cls(value)`` but not through ``get(value)``, because
+:meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` returns it without
+growing either lookup table. ``FEATCode.get('ZZ-NOT-REAL')`` raises :exc:`KeyError`
+while ``FEATCode('ZZ-NOT-REAL')`` yields an unregistered member. Closing that gap would
+mean calling ``cls(key)`` for a ``str`` value too, which reopens the minting hazard
+above -- so the asymmetry is intended, and ``get``'s own docstring carries the full
+reasoning.
 
 .. seealso::
 
