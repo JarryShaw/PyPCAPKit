@@ -342,6 +342,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -362,6 +363,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
 </ul>
@@ -373,6 +375,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../conventions.html">Registry Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -687,28 +690,42 @@
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            key: Key to get enum item. Looked up case-insensitively, since</span>
-<span class="sd">                member names are canonicalised to upper case on registration.</span>
+<span class="sd">            key: Key to get enum item. Looked up case-**sensitively**,</span>
+<span class="sd">                per :rfc:`9110#section-9.1` -- the method token is</span>
+<span class="sd">                case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.</span>
+<span class="sd">                Command.get`'s equivalent override, which stays</span>
+<span class="sd">                case-insensitive because :rfc:`959#section-4.1` says FTP</span>
+<span class="sd">                command codes are not.</span>
 <span class="sd">            default: Default value if not found.</span>
 
 <span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Method</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># type: ignore[misc]  # pylint: disable=no-member</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Method</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># type: ignore[misc]  # pylint: disable=no-member</span>
             <span class="c1"># NOTE: the value is ``default`` if the caller supplied one, or</span>
             <span class="c1"># else ``key`` exactly as given -- never ``name`` -- so an</span>
             <span class="c1"># unregistered member's value is the caller's own casing, the</span>
             <span class="c1"># same convention :meth:`_unregistered_member` documents and</span>
             <span class="c1"># :class:`~pcapkit.const.ftp.command.FEATCode` already followed</span>
-            <span class="c1"># unchanged. Two calls naming the same method in different</span>
-            <span class="c1"># case, e.g. ``get('frob')`` and ``get('FROB')``, therefore build</span>
-            <span class="c1"># results that are *not* equal -- each is exactly what its own</span>
-            <span class="c1"># caller passed, which minting's ``_member_map_`` cache used to</span>
-            <span class="c1"># paper over by returning the *first* casing seen for every</span>
-            <span class="c1"># later call regardless of case. Losing that is the one</span>
-            <span class="c1"># observable behaviour change in GitHub issue #860's conversion.</span>
+            <span class="c1"># unchanged. Matching against ``Method._member_map_`` is on</span>
+            <span class="c1"># ``key`` itself now, not ``key.upper()`` -- GitHub issue #896:</span>
+            <span class="c1"># a token differing only in case from a registered member's</span>
+            <span class="c1"># name, e.g. ``get('get')`` against ``GET``, no longer resolves</span>
+            <span class="c1"># to it and instead builds an unregistered member of its own,</span>
+            <span class="c1"># since RFC 9110 makes that a distinct wire token rather than a</span>
+            <span class="c1"># differently-spelled name for the same one. ``name`` stays the</span>
+            <span class="c1"># canonical upper-case form -- only the identifier is</span>
+            <span class="c1"># canonicalised, matching :meth:`_missing_` and every registered</span>
+            <span class="c1"># member's own name. Two calls naming the same method in</span>
+            <span class="c1"># different case, e.g. ``get('frob')`` and ``get('FROB')``,</span>
+            <span class="c1"># therefore build results that are *not* equal -- each is</span>
+            <span class="c1"># exactly what its own caller passed, which minting's</span>
+            <span class="c1"># ``_member_map_`` cache used to paper over by returning the</span>
+            <span class="c1"># *first* casing seen for every later call regardless of case.</span>
+            <span class="c1"># Losing that was the one observable behaviour change in GitHub</span>
+            <span class="c1"># issue #860's conversion.</span>
             <span class="k">return</span> <span class="n">Method</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Method</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="k">return</span> <span class="n">Method</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="Method._missing_">
 <a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.method.Method._missing_">[docs]</a>

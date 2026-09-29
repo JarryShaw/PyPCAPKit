@@ -349,6 +349,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -369,6 +370,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
 </ul>
@@ -380,6 +382,7 @@
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Registry Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pep.html">Help Wanted</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -697,6 +700,110 @@ copyable.</p>
 <p>A handful of registries define their own <code class="docutils literal notranslate"><span class="pre">__new__</span></code> to carry extra attributes and so
 do not share the generated template; bringing them onto the base is tracked in
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>.</p>
+<section id="the-two-tiers-and-what-lives-on-each">
+<h3>The Two Tiers, and What Lives on Each<a class="headerlink" href="#the-two-tiers-and-what-lives-on-each" title="Link to this heading">¶</a></h3>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code> is not the only base any more. Since
+phase 1 of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> it has a
+parent, and the line between them is whether the enumeration may <em>grow</em>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, <code class="docutils literal notranslate"><span class="pre">_validate_value</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">register</span></code>, <code class="docutils literal notranslate"><span class="pre">register_alias</span></code>, <code class="docutils literal notranslate"><span class="pre">register_aliases</span></code>,
+<code class="docutils literal notranslate"><span class="pre">_extend</span></code>, <code class="docutils literal notranslate"><span class="pre">_unregistered_member</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The owner’s ruling, verbatim: <em>“they may subclass a bare base enum from
+pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
+mutable ones.”</em> So a <strong>closed</strong> set inherits <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code>
+directly and is never handed a <code class="docutils literal notranslate"><span class="pre">register</span></code> it would have to refuse; an <strong>open</strong>
+registry inherits <code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code> exactly as before.</p>
+<p>What settled the split is the owner’s own second thought about carrying <code class="docutils literal notranslate"><span class="pre">register</span></code>
+on the base: <em>“if it carries ``register``, then why not ``register_alias``. We might
+be creating a bad ruling.”</em> Following that through leaves
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code> holding only three methods, too thin to
+justify a second class – so the two tiers collapse into one, which is the opposite of
+what was ruled.</p>
+<p><strong>Both tiers are plain classes, and that is load-bearing.</strong> Inserting a parent above
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code> leaves the member data type exactly where
+it was – <code class="docutils literal notranslate"><span class="pre">LinkType</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span> <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntEnum</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> – so
+<code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from the enum base. Had either tier subclassed
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code> in order to “be an enum”, it would have become the member type
+itself and broken <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and flag registries at once.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code> is what the base carries
+<em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: <em>“there must
+be some sort of range validation logic for the inherited classes to hook in.”</em> The
+base implementation accepts everything; an override states a range, in the shape the
+generated registries currently spell by hand in <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">EnumValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not a valid </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Three things about it are easy to get wrong:</p>
+<ul class="simple">
+<li><p><strong>It guards, it does not convert.</strong> The return type is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> deliberately, so
+that an override cannot normalise a value on its way through and silently change
+what a lookup resolves to.</p></li>
+<li><p><strong>Raise from</strong> <a class="reference internal" href="pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>.
+<code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code> is the fitting one, and because
+it subclasses <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> a rejection is caught by <code class="docutils literal notranslate"><span class="pre">get</span></code>’s own <code class="docutils literal notranslate"><span class="pre">except</span></code> and
+falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code> like any other unresolvable value. An override raising
+outside that hierarchy propagates past <code class="docutils literal notranslate"><span class="pre">default</span></code> instead.</p></li>
+<li><p><strong>A</strong> <code class="docutils literal notranslate"><span class="pre">str</span></code> <strong>key never reaches it.</strong> That path never calls <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code>, so it
+resolves only against already-populated lookup tables, where every value present is
+legal by construction. <code class="docutils literal notranslate"><span class="pre">register</span></code> does call it, after its duplicate check.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Re-parenting the remaining helper enumerations onto
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code> is <strong>phase 2</strong> of
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> and has not happened
+yet. Phase 1 is deliberately behaviour-preserving on its own, which is what let it
+land while other work was still in flight on the files the re-parent touches.</p>
+</div>
+</section>
+<section id="case-sensitivity-is-rfc-directed">
+<h3>Case Sensitivity Is RFC-Directed<a class="headerlink" href="#case-sensitivity-is-rfc-directed" title="Link to this heading">¶</a></h3>
+<p>The rule, in the owner’s own wording on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>:</p>
+<blockquote>
+<div><p>if RFC states the values are case-insensitive, then our enum should also treat them
+that way. otherwise, we should treat them case sensitive.</p>
+</div></blockquote>
+<p>And the reason a registry’s spelling is never quietly normalised, from the same thread:
+<em>“enum should honour and keep their original writings as in the registrars. case
+in-sensitivity only applies to certain selected ones, where logically it makes sense
+(like ``TransportProtocol``) and/or RFC documentation itself recognises them as
+case-insensitive (like, maybe, FTP/HTTP commands).”</em></p>
+<p>So <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> is <strong>case-sensitive</strong>, and that is the
+default every enumeration gets. Case-insensitivity is a per-class <code class="docutils literal notranslate"><span class="pre">get</span></code> override that
+has to cite the RFC or IANA registry making the values case-insensitive; without one it
+is a defect rather than a convenience. That also means no public member is ever renamed
+to make a lookup work – which is what keeps
+<a class="reference internal" href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">R1_Counter</span> <span class="pre">=</span> <span class="pre">128</span></code> and
+<code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span> <span class="pre">=</span> <span class="pre">129</span></code>, two IANA-registered HIP parameters differing only in case, both
+resolvable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Auditing every registry’s existing case behaviour against the specification its
+values come from is <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>,
+not something this page records per class. The owner’s scope for it, verbatim:
+<em>“we should audit all registries and then decide if case (in)sensitive.”</em> Two
+findings already have their own issues –
+<a class="reference internal" href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">value.upper()</span></code> is backed by
+<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> (<em>“Upper and lower case alphabetic characters are to be
+treated identically”</em>), while
+<a class="reference internal" href="pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code> contradicts
+<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>, which makes the method token case-sensitive, and is tracked
+as <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The obstacle this page used to record – that the base’s string-key path does not
@@ -717,8 +824,15 @@ when the name lookup misses, so such a value resolves:</p>
 <a class="reference internal" href="pcapkit/const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
 <a class="reference internal" href="pcapkit/const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a> and
 <a class="reference internal" href="pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> – and probing one of those
-measures the override rather than the base. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> upper-cases its key,
-which makes it look as though the base were case-insensitive.</p>
+measures the override rather than the base. <code class="docutils literal notranslate"><span class="pre">Command.get</span></code> upper-cases its key
+before matching, which makes it look as though the base were case-insensitive –
+deliberately, since <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959 Section 4.1</strong></a> treats FTP command codes identically
+regardless of case. <code class="docutils literal notranslate"><span class="pre">Method.get</span></code> used to fold case the same way, but
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a> made it
+case-sensitive instead: <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> says the HTTP method token is
+case-sensitive, so <code class="docutils literal notranslate"><span class="pre">Method.get('get')</span></code> no longer resolves to
+<code class="docutils literal notranslate"><span class="pre">Method.GET</span></code> – it builds its own unregistered member, preserving the
+caller’s exact casing, the same way an unrecognised value always does.</p>
 </div>
 <p>What does survive is narrower and deliberate: a <strong>declared-but-unassigned</strong> <code class="docutils literal notranslate"><span class="pre">str</span></code>
 value resolves through <code class="docutils literal notranslate"><span class="pre">cls(value)</span></code> but not through <code class="docutils literal notranslate"><span class="pre">get(value)</span></code>, because
@@ -735,6 +849,7 @@ generated registry belongs in the crawler or in
 <a class="reference internal" href="pcapkit/vendor/default.html#module-pcapkit.vendor.default" title="pcapkit.vendor.default"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor.default</span></code></a>’s template, never in the generated file alone –
 the next regeneration would discard it.</p>
 </div>
+</section>
 </section>
 </section>
 
@@ -806,7 +921,11 @@ the next regeneration would discard it.</p>
 <li><a class="reference internal" href="#what-to-implement-and-what-not-to">What to implement, and what not to</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#where-the-registry-protocol-lives">Where the registry protocol lives</a></li>
+<li><a class="reference internal" href="#where-the-registry-protocol-lives">Where the registry protocol lives</a><ul>
+<li><a class="reference internal" href="#the-two-tiers-and-what-lives-on-each">The Two Tiers, and What Lives on Each</a></li>
+<li><a class="reference internal" href="#case-sensitivity-is-rfc-directed">Case Sensitivity Is RFC-Directed</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

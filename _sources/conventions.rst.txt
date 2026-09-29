@@ -227,8 +227,8 @@ inconsistencies**:
 Where the registry protocol lives
 ---------------------------------
 
-:meth:`~pcapkit.corekit.enum.EnumRegistry.get`,
-:meth:`~pcapkit.corekit.enum.EnumRegistry.get_all`,
+:meth:`~pcapkit.corekit.enum.EnumLookup.get`,
+:meth:`~pcapkit.corekit.enum.EnumLookup.get_all`,
 :meth:`~pcapkit.corekit.enum.EnumRegistry.register` and
 :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias` are expected to exist on
 **every** registry, per the ruling on
@@ -245,12 +245,118 @@ A handful of registries define their own ``__new__`` to carry extra attributes a
 do not share the generated template; bringing them onto the base is tracked in
 `#860 <https://github.com/JarryShaw/PyPCAPKit/issues/860>`__.
 
+The Two Tiers, and What Lives on Each
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:class:`~pcapkit.corekit.enum.EnumRegistry` is not the only base any more. Since
+phase 1 of `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ it has a
+parent, and the line between them is whether the enumeration may *grow*:
+
+=================================================== ==============================================================
+:class:`~pcapkit.corekit.enum.EnumLookup`           ``get``, ``get_all``, ``_validate_value``
+:class:`~pcapkit.corekit.enum.EnumRegistry`         ``register``, ``register_alias``, ``register_aliases``,
+                                                    ``_extend``, ``_unregistered_member``
+=================================================== ==============================================================
+
+The owner's ruling, verbatim: *"they may subclass a bare base enum from
+pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
+mutable ones."* So a **closed** set inherits :class:`~pcapkit.corekit.enum.EnumLookup`
+directly and is never handed a ``register`` it would have to refuse; an **open**
+registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry` exactly as before.
+
+What settled the split is the owner's own second thought about carrying ``register``
+on the base: *"if it carries ``register``, then why not ``register_alias``. We might
+be creating a bad ruling."* Following that through leaves
+:class:`~pcapkit.corekit.enum.EnumRegistry` holding only three methods, too thin to
+justify a second class -- so the two tiers collapse into one, which is the opposite of
+what was ruled.
+
+**Both tiers are plain classes, and that is load-bearing.** Inserting a parent above
+:class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type exactly where
+it was -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
+``_member_type_`` still comes from the enum base. Had either tier subclassed
+:class:`~aenum.Enum` in order to "be an enum", it would have become the member type
+itself and broken ``int``, ``str`` and flag registries at once.
+
+:meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` is what the base carries
+*instead* of ``register``, and it answers the owner's other requirement: *"there must
+be some sort of range validation logic for the inherited classes to hook in."* The
+base implementation accepts everything; an override states a range, in the shape the
+generated registries currently spell by hand in ``_missing_``:
+
+.. code-block:: python
+
+   @classmethod
+   def _validate_value(cls, value: 'Any') -> 'None':
+       if not (isinstance(value, int) and 0 <= value <= 0xFF):
+           raise EnumValueError(f'{value!r} is not a valid {cls.__name__}')
+
+Three things about it are easy to get wrong:
+
+* **It guards, it does not convert.** The return type is :obj:`None` deliberately, so
+  that an override cannot normalise a value on its way through and silently change
+  what a lookup resolves to.
+* **Raise from** :mod:`pcapkit.utilities.exceptions`.
+  :exc:`~pcapkit.utilities.exceptions.EnumValueError` is the fitting one, and because
+  it subclasses :exc:`ValueError` a rejection is caught by ``get``'s own ``except`` and
+  falls back to ``default`` like any other unresolvable value. An override raising
+  outside that hierarchy propagates past ``default`` instead.
+* **A** ``str`` **key never reaches it.** That path never calls ``cls(key)``, so it
+  resolves only against already-populated lookup tables, where every value present is
+  legal by construction. ``register`` does call it, after its duplicate check.
+
+.. note::
+
+   Re-parenting the remaining helper enumerations onto
+   :class:`~pcapkit.corekit.enum.EnumLookup` is **phase 2** of
+   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__ and has not happened
+   yet. Phase 1 is deliberately behaviour-preserving on its own, which is what let it
+   land while other work was still in flight on the files the re-parent touches.
+
+Case Sensitivity Is RFC-Directed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The rule, in the owner's own wording on
+`#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__:
+
+   if RFC states the values are case-insensitive, then our enum should also treat them
+   that way. otherwise, we should treat them case sensitive.
+
+And the reason a registry's spelling is never quietly normalised, from the same thread:
+*"enum should honour and keep their original writings as in the registrars. case
+in-sensitivity only applies to certain selected ones, where logically it makes sense
+(like ``TransportProtocol``) and/or RFC documentation itself recognises them as
+case-insensitive (like, maybe, FTP/HTTP commands)."*
+
+So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
+default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
+has to cite the RFC or IANA registry making the values case-insensitive; without one it
+is a defect rather than a convenience. That also means no public member is ever renamed
+to make a lookup work -- which is what keeps
+:class:`~pcapkit.const.hip.parameter.Parameter`'s ``R1_Counter = 128`` and
+``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
+resolvable.
+
+.. note::
+
+   Auditing every registry's existing case behaviour against the specification its
+   values come from is `#903 <https://github.com/JarryShaw/PyPCAPKit/issues/903>`__,
+   not something this page records per class. The owner's scope for it, verbatim:
+   *"we should audit all registries and then decide if case (in)sensitive."* Two
+   findings already have their own issues --
+   :class:`~pcapkit.const.ftp.command.Command`'s ``value.upper()`` is backed by
+   :rfc:`959#section-4.1` (*"Upper and lower case alphabetic characters are to be
+   treated identically"*), while
+   :class:`~pcapkit.const.http.method.Method`'s ``key.upper()`` contradicts
+   :rfc:`9110#section-9.1`, which makes the method token case-sensitive, and is tracked
+   as `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__.
+
 .. note::
 
    The obstacle this page used to record -- that the base's string-key path does not
    fall through to a value lookup, so a :class:`~aenum.StrEnum` registry would stop
    resolving a valid value that is not also a name -- **no longer applies.**
-   :meth:`~pcapkit.corekit.enum.EnumRegistry.get` now checks ``_value2member_map_``
+   :meth:`~pcapkit.corekit.enum.EnumLookup.get` now checks ``_value2member_map_``
    when the name lookup misses, so such a value resolves:
 
    .. code-block:: pycon
@@ -267,8 +373,15 @@ do not share the generated template; bringing them onto the base is tracked in
    :class:`~pcapkit.const.http.method.Method`,
    :class:`~pcapkit.const.pcapng.option_type.OptionType` and
    :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- and probing one of those
-   measures the override rather than the base. ``Method.get`` upper-cases its key,
-   which makes it look as though the base were case-insensitive.
+   measures the override rather than the base. ``Command.get`` upper-cases its key
+   before matching, which makes it look as though the base were case-insensitive --
+   deliberately, since :rfc:`959#section-4.1` treats FTP command codes identically
+   regardless of case. ``Method.get`` used to fold case the same way, but
+   `#896 <https://github.com/JarryShaw/PyPCAPKit/issues/896>`__ made it
+   case-sensitive instead: :rfc:`9110#section-9.1` says the HTTP method token is
+   case-sensitive, so ``Method.get('get')`` no longer resolves to
+   ``Method.GET`` -- it builds its own unregistered member, preserving the
+   caller's exact casing, the same way an unrecognised value always does.
 
 What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
 value resolves through ``cls(value)`` but not through ``get(value)``, because

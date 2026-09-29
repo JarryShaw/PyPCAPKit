@@ -93,3 +93,4 @@ Application Layer
 
    ftp
    http
+   ngap

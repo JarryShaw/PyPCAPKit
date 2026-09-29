@@ -349,6 +349,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/const/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Constant Enumerations</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/vendor/index.html">Vendor Crawlers</a><input aria-label="Toggle navigation of Vendor Crawlers" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -369,6 +370,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/vendor/ngap.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">NGAP</span></code> Vendor Crawlers</a></li>
 </ul>
 </li>
 </ul>
@@ -380,6 +382,7 @@
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conventions.html">Registry Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">GitHub Actions Workflows</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pep.html">Help Wanted</a></li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Changelog</a><input aria-label="Toggle navigation of Changelog" checked="" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
@@ -477,49 +480,130 @@ registries and bumps the version. They carry no library changes, and are
 collapsed into a single line per release below. Where a post-release did
 carry something real, it is called out.</p>
 </div></blockquote>
-<p>Each release has its own page below, newest first. The repository root’s
-<code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> carries only the version currently being released; this is
-the whole history.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.4.0.html">1.4.0 – 2026-08-21</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.3.5.html">1.3.5 – 2024-11-16</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.3.4.html">1.3.4 – 2024-11-14</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.3.3.html">1.3.3 – 2024-11-03</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.3.1.html">1.3.1 – 2023-12-21</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.3.0.html">1.3.0 – 2023-10-04</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.2.2.html">1.2.2 – 2023-09-14</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.2.1.html">1.2.1 – 2023-08-27</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.2.0.html">1.2.0 – 2023-08-26</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.1.1.html">1.1.1 – 2023-08-15</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.1.0.html">1.1.0 – 2023-07-09</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.0.3.html">1.0.3 – 2023-06-29</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.0.2.html">1.0.2 – 2023-06-05</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.0.1.html">1.0.1 – 2023-05-14</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/1.0.0.html">1.0.0 – 2023-05-09</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.16.3.html">0.16.3 – 2022-10-31</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.16.2.html">0.16.2 – 2022-08-03</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.16.1.html">0.16.1 – 2022-06-07</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.16.0.html">0.16.0 – 2022-05-31</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.5.html">0.15.5 – 2020-10-11</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.4.html">0.15.4 – 2020-08-28</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.3.html">0.15.3 – 2020-08-17</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.2.html">0.15.2 – 2020-06-27</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.1.html">0.15.1 – 2020-06-18</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.15.0.html">0.15.0 – 2020-06-07</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.5.html">0.14.5 – 2019-10-24</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.4.html">0.14.4 – 2019-09-01</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.3.html">0.14.3 – 2019-08-08</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.2.html">0.14.2 – 2019-03-28</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.1.html">0.14.1 – 2019-03-07</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.14.0.html">0.14.0 – 2019-03-02</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.13.3.html">0.13.3 – 2019-02-26</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.13.2.html">0.13.2 – 2019-01-24</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.13.1.html">0.13.1 – 2019-01-23</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog/0.13.0.html">0.13.0 – 2018-12-08</a></li>
+<p>Each release below has a short summary and a link to its own page, newest
+first. The repository root’s <code class="file docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> carries only the version
+currently being released; this is the whole history.</p>
+<ul class="simple">
+<li><p><strong>1.5.0</strong> (unreleased) – The largest release since 1.0, and the first
+recorded here as it happened rather than reconstructed: three more
+extraction engines, ESP with payload decryption, SCTP and NGAP over SCTP,
+and a logger that no longer hijacks the consumer’s. <a class="reference internal" href="changelog/1.5.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.4.1</strong> (2026-08-22) – Release engineering only – no library behaviour
+changed: a new unit-test CI workflow now gates the packaging, vendor-cron
+and documentation workflows, the vendor cron refuses to publish when the
+registry update itself failed, and unit-test compatibility on Python 3.10
+was fixed. <a class="reference internal" href="changelog/1.4.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.4.0</strong> (2026-08-21) – The first release in nearly two years to carry
+code changes, and the first with a test suite, covering the core kit, the
+extraction engines, reassembly, flow tracing, the protocol schemas, the CLI
+and the utility modules. <a class="reference internal" href="changelog/1.4.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.3.5</strong> (2024-11-16) – Fixed a regression, introduced by 1.3.4, that
+mis-decoded every TCP and UDP frame under IPv4/IPv6 as raw payload – skip
+1.3.4 entirely. <a class="reference internal" href="changelog/1.3.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.3.4</strong> (2024-11-14) – Fixed IPv6 Routing header length handling and
+extension-header chain extraction (#218), but introduced the
+transport-layer regression fixed in 1.3.5 – upgrade past this version
+rather than to it. <a class="reference internal" href="changelog/1.3.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.3.3</strong> (2024-11-03) – Fixed PCAP reading from the CLI and library
+(#240), a source install broken by <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> (#221), and PCAP output
+during flow tracing (#180); 1.3.2 was never released. <a class="reference internal" href="changelog/1.3.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.3.1</strong> (2023-12-21) – Renamed <code class="docutils literal notranslate"><span class="pre">register_port()</span></code> to
+<code class="docutils literal notranslate"><span class="pre">register_apptype()</span></code> with no alias left behind, and revised the
+documentation across <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code>, <code class="docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code>. <a class="reference internal" href="changelog/1.3.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.3.0</strong> (2023-10-04) – A redesign of the extension points onto
+metaclasses, adding <code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code> so a registry entry can name a
+module and class imported lazily on first use. <a class="reference internal" href="changelog/1.3.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.2.2</strong> (2023-09-14) – Fixed extraction failing outright (#166).
+<a class="reference internal" href="changelog/1.2.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.2.1</strong> (2023-08-27) – Fixed bugs in <code class="docutils literal notranslate"><span class="pre">SeekableReader</span></code> introduced one
+day earlier in 1.2.0. <a class="reference internal" href="changelog/1.2.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.2.0</strong> (2023-08-26) – Added streaming input through
+<code class="docutils literal notranslate"><span class="pre">SeekableReader</span></code>, so a capture can be read from <code class="docutils literal notranslate"><span class="pre">stdin</span></code> or a pipe
+(#156), and fixed reassembly, broken since 0.16.3 (#155). <a class="reference internal" href="changelog/1.2.0.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>1.1.1</strong> (2023-08-15) – Fixed <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration lookups,
+<code class="docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code> compatibility on older interpreters, the flow-tracing
+output file name, and <code class="docutils literal notranslate"><span class="pre">Schema</span></code> dumping through a custom dumper. <a class="reference internal" href="changelog/1.1.1.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>1.1.0</strong> (2023-07-09) – Rebuilt the schema and field classes on
+metaclasses, with <code class="docutils literal notranslate"><span class="pre">EnumSchema</span></code> for enum-dispatched schemas, and revised
+the IPv4, HOPOPT, IPv6-Opts, IPv6-Route, HIP, MH, TCP, HTTP/2 and PCAP-NG
+schemas onto them. <a class="reference internal" href="changelog/1.1.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.0.3</strong> (2023-06-29) – Added the IANA service-name and port registry as
+the <code class="docutils literal notranslate"><span class="pre">AppType</span></code> enumeration [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6335.html"><strong>RFC 6335</strong></a>], wiring TCP and UDP parsing to
+resolve ports to service names. <a class="reference internal" href="changelog/1.0.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.0.2</strong> (2023-06-05) – Added Mobility Header parsing and construction
+[<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>], and fixed <code class="docutils literal notranslate"><span class="pre">pcapkit.extract</span></code> failing on interpreters where
+<code class="docutils literal notranslate"><span class="pre">decimal.localcontext</span></code> takes no keyword arguments (#139). <a class="reference internal" href="changelog/1.0.2.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>1.0.1</strong> (2023-05-14) – Changed <code class="docutils literal notranslate"><span class="pre">Info</span></code> and <code class="docutils literal notranslate"><span class="pre">Schema</span></code> subclasses to
+finalise at class creation rather than on each instantiation, a straight
+runtime saving on parsing. <a class="reference internal" href="changelog/1.0.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>1.0.0</strong> (2023-05-09) – The 1.0 rewrite: parsing and construction became
+one declarative schema and field definition per protocol, the extraction
+backend became pluggable (with PCAP-NG support and the DPKT, Scapy and
+PyShark engines), and roughly 55,000 lines changed across 617 files.
+<a class="reference internal" href="changelog/1.0.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.16.3</strong> (2022-10-31) – Fixed import crashes on some interpreters (#114,
+#116), the reassembly property caches, and README rendering for PyPI; the
+build chain was revised. <a class="reference internal" href="changelog/0.16.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.16.2</strong> (2022-08-03) – Fixed <code class="docutils literal notranslate"><span class="pre">Info</span></code> <code class="docutils literal notranslate"><span class="pre">__init__</span></code> generation for
+classes without annotations (#113), and the IP reassembly algorithm (#82).
+<a class="reference internal" href="changelog/0.16.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.16.1</strong> (2022-06-07) – Changed warnings to raise through
+<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code> instead of <code class="docutils literal notranslate"><span class="pre">warnings.warn</span></code> directly, and
+warn on a missing optional CLI or vendor dependency too. <a class="reference internal" href="changelog/0.16.1.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>0.16.0</strong> (2022-05-31) – A project-wide revision and the last release of
+the pre-1.0 design: type annotations and linter compliance throughout,
+protocol classes separated from their data models, and
+<code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.registry</span></code> for subscribing protocols by name. <a class="reference internal" href="changelog/0.16.0.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>0.15.5</strong> (2020-10-11) – Added a fallback encoder so <code class="docutils literal notranslate"><span class="pre">DictDumper</span></code> no
+longer raises on data it cannot encode (#65). <a class="reference internal" href="changelog/0.15.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.15.4</strong> (2020-08-28) – Fixed the missing <code class="docutils literal notranslate"><span class="pre">stacklevel</span></code> attribute on
+<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code> (#58); Travis CI was set up. <a class="reference internal" href="changelog/0.15.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.15.3</strong> (2020-08-17) – Fixed ARP parsing (#55), and added logging
+through a <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger. <a class="reference internal" href="changelog/0.15.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.15.2</strong> (2020-06-27) – Added a register interface on the protocol
+classes and on <code class="docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code>, so both extend without
+patching the library, and fixed flow-tracing output consistency. <a class="reference internal" href="changelog/0.15.2.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>0.15.1</strong> (2020-06-18) – Maintenance release: revised the constant
+enumerations and the vendor crawlers that generate them. <a class="reference internal" href="changelog/0.15.1.html"><span class="doc">Full
+changelog</span></a>.</p></li>
+<li><p><strong>0.15.0</strong> (2020-06-07) – Merged the parsing and construction logic so a
+protocol is no longer implemented twice, added full API documentation, and
+fixed the <code class="docutils literal notranslate"><span class="pre">DictDumper</span></code> dependency (#37, #40). <a class="reference internal" href="changelog/0.15.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.5</strong> (2019-10-24) – Added a CLI for the vendor crawlers, and
+deferred vendor imports so the crawler dependencies are not needed just to
+import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>. <a class="reference internal" href="changelog/0.14.5.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.4</strong> (2019-09-01) – Shipped the vendor crawler scripts in the
+distribution, and split the CLI and vendor dependencies into separate
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> extras. <a class="reference internal" href="changelog/0.14.4.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.3</strong> (2019-08-08) – Fixed reported bugs (#29, #30) and a Wikipedia
+block that broke a vendor crawler; the constant enumerations and sample
+output were regenerated. <a class="reference internal" href="changelog/0.14.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.2</strong> (2019-03-28) – Fixed the exception classes and the TCP
+reassembly algorithm. <a class="reference internal" href="changelog/0.14.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.1</strong> (2019-03-07) – Added the <code class="docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code> environment
+variable, turning on development-mode behaviour without a code change.
+<a class="reference internal" href="changelog/0.14.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.14.0</strong> (2019-03-02) – Changed the TCP reassembly pipeline to handle
+the RST flag, and added Docker build files. <a class="reference internal" href="changelog/0.14.0.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.13.3</strong> (2019-02-26) – Fixed numeric literals in the constant modules
+incompatible with Python 3.5. <a class="reference internal" href="changelog/0.13.3.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.13.2</strong> (2019-01-24) – Maintenance release: updated the <code class="docutils literal notranslate"><span class="pre">tbtrim</span></code>
+dependency. <a class="reference internal" href="changelog/0.13.2.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.13.1</strong> (2019-01-23) – Added <code class="docutils literal notranslate"><span class="pre">tbtrim</span></code> to trim <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>’s own
+frames out of tracebacks through a custom <code class="docutils literal notranslate"><span class="pre">excepthook</span></code>, and fixed
+compatibility issues via a new <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code> module.
+<a class="reference internal" href="changelog/0.13.1.html"><span class="doc">Full changelog</span></a>.</p></li>
+<li><p><strong>0.13.0</strong> (2018-12-08) – No library changes – a licence and packaging
+metadata refresh. <a class="reference internal" href="changelog/0.13.0.html"><span class="doc">Full changelog</span></a>.</p></li>
 </ul>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 
