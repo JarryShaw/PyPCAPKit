@@ -233,28 +233,42 @@ class Method(EnumRegistry, StrEnum):
         """Backport support for original codes.
 
         Args:
-            key: Key to get enum item. Looked up case-insensitively, since
-                member names are canonicalised to upper case on registration.
+            key: Key to get enum item. Looked up case-**sensitively**,
+                per :rfc:`9110#section-9.1` -- the method token is
+                case-sensitive, unlike :meth:`~pcapkit.const.ftp.command.
+                Command.get`'s equivalent override, which stays
+                case-insensitive because :rfc:`959#section-4.1` says FTP
+                command codes are not.
             default: Default value if not found.
 
         :meta private:
         """
         name = key.upper()
-        if name not in Method._member_map_:  # type: ignore[misc]  # pylint: disable=no-member
+        if key not in Method._member_map_:  # type: ignore[misc]  # pylint: disable=no-member
             # NOTE: the value is ``default`` if the caller supplied one, or
             # else ``key`` exactly as given -- never ``name`` -- so an
             # unregistered member's value is the caller's own casing, the
             # same convention :meth:`_unregistered_member` documents and
             # :class:`~pcapkit.const.ftp.command.FEATCode` already followed
-            # unchanged. Two calls naming the same method in different
-            # case, e.g. ``get('frob')`` and ``get('FROB')``, therefore build
-            # results that are *not* equal -- each is exactly what its own
-            # caller passed, which minting's ``_member_map_`` cache used to
-            # paper over by returning the *first* casing seen for every
-            # later call regardless of case. Losing that is the one
-            # observable behaviour change in GitHub issue #860's conversion.
+            # unchanged. Matching against ``Method._member_map_`` is on
+            # ``key`` itself now, not ``key.upper()`` -- GitHub issue #896:
+            # a token differing only in case from a registered member's
+            # name, e.g. ``get('get')`` against ``GET``, no longer resolves
+            # to it and instead builds an unregistered member of its own,
+            # since RFC 9110 makes that a distinct wire token rather than a
+            # differently-spelled name for the same one. ``name`` stays the
+            # canonical upper-case form -- only the identifier is
+            # canonicalised, matching :meth:`_missing_` and every registered
+            # member's own name. Two calls naming the same method in
+            # different case, e.g. ``get('frob')`` and ``get('FROB')``,
+            # therefore build results that are *not* equal -- each is
+            # exactly what its own caller passed, which minting's
+            # ``_member_map_`` cache used to paper over by returning the
+            # *first* casing seen for every later call regardless of case.
+            # Losing that was the one observable behaviour change in GitHub
+            # issue #860's conversion.
             return Method._unregistered_member(default if default is not None else key, name)
-        return Method[name]  # type: ignore[misc]
+        return Method[key]  # type: ignore[misc]
 
     @classmethod
     def _missing_(cls, value: 'str') -> 'Method':
