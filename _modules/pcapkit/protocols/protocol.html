@@ -489,7 +489,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.protochain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoChain</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">_Absent</span><span class="p">,</span> <span class="n">_AbsentType</span>  <span class="c1"># pylint: disable=unused-import</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABSENT</span><span class="p">,</span> <span class="n">AbsentType</span>  <span class="c1"># pylint: disable=unused-import</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">data_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span> <span class="k">as</span> <span class="n">schema_module</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
@@ -612,7 +612,7 @@
         <span class="c1"># as a parameter is invisible to :func:`inspect.signature`, so the class</span>
         <span class="c1"># says so itself. Read per class in the MRO, for the same reason the</span>
         <span class="c1"># methods are: a subclass should not have to repeat its parents'.</span>
-        <span class="n">keywords</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__keywords__'</span><span class="p">,</span> <span class="n">_Absent</span><span class="p">)</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__keywords__'</span><span class="p">,</span> <span class="n">ABSENT</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># NOTE: The :obj:`None` opt-out is *not* inherited, unlike a set,</span>
             <span class="c1"># which is unioned down the MRO. It describes how the class that</span>
@@ -626,7 +626,7 @@
             <span class="c1"># can be checked. A subclass that dispatches in turn says so itself.</span>
             <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="bp">cls</span><span class="p">:</span>
                 <span class="n">unchecked</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">elif</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_Absent</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ABSENT</span><span class="p">:</span>
             <span class="n">names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">_KEYWORD_CONSUMERS</span><span class="p">:</span>

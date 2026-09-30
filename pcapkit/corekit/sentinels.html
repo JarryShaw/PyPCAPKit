@@ -481,7 +481,7 @@ that it can never be confused with a value a caller might legitimately pass.</p>
 <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> in <a class="reference internal" href="module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a> in
 <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoDefaultType</span></code></a> in
 <a class="reference internal" href="enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> – until GitHub issue #911 moved all four
-definitions here, the private <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code>/<code class="docutils literal notranslate"><span class="pre">_Absent</span></code> included. Each
+definitions here, the private <code class="docutils literal notranslate"><span class="pre">AbsentType</span></code>/<code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> included. Each
 original module keeps a re-export, so every existing <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">&lt;module&gt;</span> <span class="pre">import</span>
 <span class="pre">&lt;name&gt;</span></code> keeps working unchanged.</p>
 <dl class="py class">
@@ -580,7 +580,7 @@ keeps working.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NoValueType">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NoValueType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#NoValueType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.NoValueType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValue" title="pcapkit.corekit.sentinels.NoValue"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoValue</span></code></a>, the default value for <a class="reference internal" href="fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
+<p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a>, the default value for <a class="reference internal" href="fields/index.html#module-pcapkit.corekit.fields" title="pcapkit.corekit.fields"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields</span></code></a>.</p>
 <p>Housed here per GitHub issue #911 rather than in
 <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a>, where it used to be defined and where
 <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
@@ -588,12 +588,14 @@ still documents it as the field-default sentinel.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NoValue">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NoValue</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NoValue" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.NO_VALUE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">NO_VALUE</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.NO_VALUE" title="Link to this definition">¶</a></dt>
 <dd><p>Default value for
 <a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>.
 <a class="reference internal" href="fields/field.html#module-pcapkit.corekit.fields.field" title="pcapkit.corekit.fields.field"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.fields.field</span></code></a> keeps a re-export, since that
-attribute’s own documentation is a published contract naming this object.</p>
+attribute’s own documentation is a published contract naming this object.
+Renamed from <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> to <code class="docutils literal notranslate"><span class="pre">NO_VALUE</span></code> by GitHub issue #937, which
+normalised all four sentinel <em>objects</em> to SCREAMING_SNAKE.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType">NoValueType</a></p>
@@ -618,16 +620,20 @@ signature, in <a class="reference external" href="https://docs.python.org/3/buil
 – via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
 <p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
 convention is settled: both <a class="reference internal" href="#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>
-use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. The <em>instance</em>’s own name is not similarly settled –
-the owner’s follow-up on #859 is explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>)
-and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagree, and “mainly depends on how we need
-it.” The need here is continuity: <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> is already the name on
-<code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in <a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature, its docstring, and both
-comparison sites – and this change is to <em>what the sentinel is</em>, not to
-<em>what it is called</em>, so it keeps that name rather than being renamed to
-match either precedent’s instance casing for its own sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> is the closer match regardless, since <a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>
-was already spelled that way.</p>
+use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
+similarly settled – the owner’s follow-up on #859 was explicit that
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and
+“mainly depends on how we need it.” The need here was continuity:
+<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
+<a class="reference internal" href="enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
+its docstring, and both comparison sites – and that change was to <em>what
+the sentinel is</em>, not to <em>what it is called</em>, so it kept that name rather
+than being renamed to match either precedent’s instance casing for its own
+sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s <code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> was the closer match regardless, since
+<a class="reference internal" href="#pcapkit.corekit.sentinels.NO_DEFAULT" title="pcapkit.corekit.sentinels.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> was already spelled that way – and GitHub issue #937
+later settled the question this paragraph left open: <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> became
+<a class="reference internal" href="#pcapkit.corekit.sentinels.NO_VALUE" title="pcapkit.corekit.sentinels.NO_VALUE"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code></a> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> became <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a>, so every instance
+name now agrees on SCREAMING_SNAKE.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
 already exists, rather than building a new one. That guards against a
@@ -777,6 +783,70 @@ names this object in its signature and docstring.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.NoDefaultType" title="pcapkit.corekit.sentinels.NoDefaultType">NoDefaultType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> are <strong>private</strong> – never imported outside
+<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, and named in no module’s <code class="docutils literal notranslate"><span class="pre">__all__</span></code>. Until
+GitHub issue #937, the leading underscore they carried (<code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code>/
+<code class="docutils literal notranslate"><span class="pre">_Absent</span></code>) hid them from Sphinx automatically, the way it hides every other
+<code class="docutils literal notranslate"><span class="pre">_</span></code>-prefixed name; dropping the underscore for SCREAMING_SNAKE consistency with
+the other three sentinels (see <a class="reference internal" href="../../contributing/conventions.html#sentinel-convention"><span class="std std-ref">Naming a sentinel</span></a>) means Sphinx would
+otherwise document them as though they were public. They are documented below
+instead, explicitly marked private, per the maintainer’s ruling on #937: <em>“we can
+change</em> <code class="docutils literal notranslate"><span class="pre">_ABSENT</span></code> <em>to</em> <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> <em>just document it as private type/class in the
+documentation and not for public use is enough.”</em> Neither is for use outside this
+package.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.AbsentType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">AbsentType</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/sentinels.html#AbsentType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.sentinels.AbsentType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Type of <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a>, the absent-key sentinel.</p>
+<p>A distinct class rather than a bare <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a> so that the sentinel has a
+name of its own in a traceback or a debugger, and so that a type checker has
+something to name where <code class="docutils literal notranslate"><span class="pre">object()</span></code> would give it nothing. It
+follows <a class="reference internal" href="#pcapkit.corekit.sentinels.NoValueType" title="pcapkit.corekit.sentinels.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>, which does the same job for an unset field
+default; this is a sibling of it rather than a reuse, since that one is
+documented as the default value of
+<a class="reference internal" href="fields/field.html#pcapkit.corekit.fields.field.FieldBase.default" title="pcapkit.corekit.fields.field.FieldBase.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FieldBase.default</span></code></a>
+and means “no value was given”, not “this key is not here”.</p>
+<p>Defined here, alongside the package’s other sentinels, per the owner’s
+ruling on GitHub issue #911. Originally named <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code>/<code class="docutils literal notranslate"><span class="pre">_Absent</span></code>,
+with the leading underscore standing in for “private” – GitHub issue #937
+normalised every sentinel <em>object</em> to SCREAMING_SNAKE and dropped it, so
+this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings
+and privacy is no longer signalled by the name at all. The owner’s ruling
+on #937, verbatim: <em>“we can change</em> <code class="docutils literal notranslate"><span class="pre">_ABSENT</span></code> <em>to</em> <code class="docutils literal notranslate"><span class="pre">ABSENT</span></code> <em>just
+document it as private type/class in the documentation and not for public
+use is enough.”</em> So this class and <a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a> stay exactly as private
+as they were: nothing outside <a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a> reads
+<a class="reference internal" href="#pcapkit.corekit.sentinels.ABSENT" title="pcapkit.corekit.sentinels.ABSENT"><code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code></a>, from here or from there, and neither this module’s nor
+that module’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">__all__</span></code> names either one. This docstring, and the
+“Naming a sentinel” section of
+<code class="file docutils literal notranslate"><span class="pre">docs/source/contributing/conventions.rst</span></code>, are what now records
+that fact in place of the leading underscore.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.corekit.sentinels.ABSENT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.sentinels.</span></span><span class="sig-name descname"><span class="pre">ABSENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;absent&gt;</span></span><a class="headerlink" href="#pcapkit.corekit.sentinels.ABSENT" title="Link to this definition">¶</a></dt>
+<dd><p>Absent-versus-<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> sentinel for
+<code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol._declared_keywords()</span></code> to read a class’s
+own <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> out of its <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#object.__dict__" title="(in Python v3.14)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__dict__</span></code></a>, where
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> is itself a meaningful value – the opt-out that says the
+class cannot enumerate its keywords, c.f.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__keywords__</span></code>. Never leaves
+<a class="reference internal" href="../protocols/protocol.html#module-pcapkit.protocols.protocol" title="pcapkit.protocols.protocol"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol</span></code></a>, which keeps a private re-export of it
+for exactly that one read. Private by convention and documentation only,
+not by a leading underscore – see <a class="reference internal" href="#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsentType</span></code></a>’s own docstring for
+why, per GitHub issue #937.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.sentinels.AbsentType" title="pcapkit.corekit.sentinels.AbsentType">AbsentType</a></p>
 </dd>
 </dl>
 </dd></dl>

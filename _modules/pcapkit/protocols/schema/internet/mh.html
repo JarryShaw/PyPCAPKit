@@ -929,7 +929,7 @@
 <span class="sd">        :attr:`Option.length` is declared as a</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped</span>
 <span class="sd">        for it. A skipped conditional field is *recorded* in the packet data as</span>
-<span class="sd">        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left</span>
+<span class="sd">        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left</span>
 <span class="sd">        out of it, so the test below has to be on the **value** and not on the</span>
 <span class="sd">        presence of the key: ``pkt.get('length', 0)`` on its own hands that</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
@@ -940,7 +940,7 @@
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NoValue`` (skipped) or :obj:`None` (unset)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NO_VALUE`` (skipped) or :obj:`None` (unset)</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">length</span></div>
 
@@ -967,7 +967,7 @@
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NoValue`` (skipped) or :obj:`None` (unset)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NO_VALUE`` (skipped) or :obj:`None` (unset)</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">length</span></div>
 

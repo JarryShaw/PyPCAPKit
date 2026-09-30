@@ -466,7 +466,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">NoValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">FieldBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">FinalisedState</span>
@@ -564,7 +564,7 @@
     <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">__excluded__</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">)</span>
 
-    <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
+    <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NO_VALUE'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
     <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
     <span class="c1"># NOTE: We shall only attempt to generate ``__init__`` method if the class</span>
@@ -973,10 +973,10 @@
             <span class="c1"># generated ``__init__`` is not the only caller: :meth:`from_dict`</span>
             <span class="c1"># seeds only the keys its argument carries, so a field the caller left</span>
             <span class="c1"># out is missing from ``__dict__`` entirely rather than holding</span>
-            <span class="c1"># ``NoValue``, and subscripting it raised :exc:`KeyError` naming the</span>
+            <span class="c1"># ``NO_VALUE``, and subscripting it raised :exc:`KeyError` naming the</span>
             <span class="c1"># field.</span>
             <span class="c1">#</span>
-            <span class="c1"># What is tested is ``NoValue`` alone, not ``NoValue`` or ``None``.</span>
+            <span class="c1"># What is tested is ``NO_VALUE`` alone, not ``NO_VALUE`` or ``None``.</span>
             <span class="c1"># This method fills in what the caller did not say, and a ``None`` the</span>
             <span class="c1"># caller passed *is* something said: on an optional field it is the</span>
             <span class="c1"># chosen value, meaning this packet does not carry the field. It is</span>
@@ -986,16 +986,16 @@
             <span class="c1"># substituting the default here would leave a constructed schema</span>
             <span class="c1"># disagreeing with a parsed one about the same packet, and</span>
             <span class="c1"># ``from_dict(parsed.to_dict())`` no longer reproducing what it was</span>
-            <span class="c1"># given. Telling the two apart is what ``NoValue`` is for.</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoValue</span><span class="p">:</span>
+            <span class="c1"># given. Telling the two apart is what ``NO_VALUE`` is for.</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">NO_VALUE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoValue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: Nothing to fill an unset field with, so the ``NoValue``</span>
+                <span class="c1"># NOTE: Nothing to fill an unset field with, so the ``NO_VALUE``</span>
                 <span class="c1"># the generated ``__init__`` seeded it with is dropped rather than</span>
                 <span class="c1"># kept: it is a *field* sentinel, not a value a schema may hold.</span>
                 <span class="c1"># Dropping it rather than storing ``None`` also keeps the name out</span>
@@ -1458,7 +1458,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">NoValue</span>
+                    <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
                     <span class="k">continue</span>
                 <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 

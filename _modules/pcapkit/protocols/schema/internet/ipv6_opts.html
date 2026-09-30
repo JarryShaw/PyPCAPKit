@@ -470,7 +470,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.tagger_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">Enum_TaggerID</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionField</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">IPv6AddressField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">NoValueField</span><span class="p">,</span>
                                          <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
@@ -770,7 +770,7 @@
 <span class="sd">        :attr:`Option.len` is declared as a</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped</span>
 <span class="sd">        for it. A skipped conditional field is *recorded* in the packet data as</span>
-<span class="sd">        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left</span>
+<span class="sd">        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left</span>
 <span class="sd">        out of it, so the test below has to be on the **value** and not on the</span>
 <span class="sd">        presence of the key: ``pkt.get('len', 0)`` on its own hands that</span>
 <span class="sd">        :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to</span>
@@ -781,7 +781,7 @@
 
 <span class="sd">    """</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'len'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NoValue`` (skipped) or :obj:`None` (unset)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># ``NO_VALUE`` (skipped) or :obj:`None` (unset)</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">return</span> <span class="n">length</span></div>
 
@@ -1277,7 +1277,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'src'</span><span class="p">,</span> <span class="n">NoValue</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'src'</span><span class="p">,</span> <span class="n">NO_VALUE</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 

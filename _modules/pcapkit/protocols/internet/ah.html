@@ -511,11 +511,17 @@
 <span class="w">    </span><span class="sd">"""This class implements Authentication Header.</span>
 
 <span class="sd">    Double-inherited (GitHub issue #917): ``AH`` is both a member of the</span>
-<span class="sd">    IPsec family and an IPv6 extension header -- IANA's</span>
-<span class="sd">    ``protocol-numbers-1.csv`` marks it ``Y`` in the *IPv6 Extension Header*</span>
-<span class="sd">    column (:rfc:`4302`), and this package's own</span>
+<span class="sd">    IPsec family and an IPv6 extension header -- IANA's *IPv6 Extension</span>
+<span class="sd">    Header Types* registry lists it at 51 (:rfc:`4302#section-3.1.1` has</span>
+<span class="sd">    it appear after the hop-by-hop, routing and fragmentation extension</span>
+<span class="sd">    headers in the IPv6 header chain), and this package's own</span>
 <span class="sd">    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry</span>
-<span class="sd">    agrees. :class:`~pcapkit.protocols.internet.ipsec.IPsec` is first in the</span>
+<span class="sd">    agrees. The same section separately states that, in the context of</span>
+<span class="sd">    IPv4, AH is placed after the IP header and before the next-layer</span>
+<span class="sd">    protocol -- the primary-source evidence that it also travels</span>
+<span class="sd">    directly as an IPv4 payload, which is what qualifies it for a base</span>
+<span class="sd">    besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipsec.IPsec` is first in the</span>
 <span class="sd">    bases so that its :meth:`~pcapkit.protocols.internet.ipsec.IPsec.id`</span>
 <span class="sd">    keeps precedence.</span>
 

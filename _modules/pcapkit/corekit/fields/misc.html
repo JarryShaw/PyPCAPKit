@@ -461,7 +461,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span><span class="p">,</span> <span class="n">NoValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span><span class="p">,</span> <span class="n">FieldBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldError</span><span class="p">,</span> <span class="n">NoDefaultValue</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -491,7 +491,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NoValueField</span><span class="p">(</span><span class="n">FieldBase</span><span class="p">[</span><span class="n">_TN</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">"""Schema field for no value type (or :obj:`None`)."""</span>
 
-    <span class="n">_default</span> <span class="o">=</span> <span class="n">NoValue</span>
+    <span class="n">_default</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -573,7 +573,7 @@
     <span class="nd">@default</span><span class="o">.</span><span class="n">deleter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Delete field default value."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NoValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -792,7 +792,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="o">=</span> <span class="n">protocol</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">'_TP | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'_TP | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
                  <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Optional[Type[_TP] | str]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1">#self._name = '&lt;payload&gt;'</span>
@@ -857,7 +857,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="n">NoValue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NoDefaultValue</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no default value.'</span><span class="p">)</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TP'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">)</span>
 
@@ -933,7 +933,7 @@
     <span class="nd">@default</span><span class="o">.</span><span class="n">deleter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Delete field default value."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NoValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -995,7 +995,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">NoValue</span>  <span class="c1"># type: ignore[unreachable]</span>
+            <span class="k">return</span> <span class="n">NO_VALUE</span>  <span class="c1"># type: ignore[unreachable]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 
 
@@ -1031,7 +1031,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">NoValue</span>  <span class="c1"># type: ignore[unreachable]</span>
+            <span class="k">return</span> <span class="n">NO_VALUE</span>  <span class="c1"># type: ignore[unreachable]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span></div>
 
 
@@ -1177,7 +1177,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">schema</span><span class="p">:</span> <span class="s1">'Optional[Type[_TS]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">default</span><span class="p">:</span> <span class="s1">'_TS | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
+                 <span class="n">default</span><span class="p">:</span> <span class="s1">'_TS | NoValueType | bytes'</span> <span class="o">=</span> <span class="n">NO_VALUE</span><span class="p">,</span>
                  <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">'Callable[[Self, dict[str, Any]], None]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1">#self._name = '&lt;schema&gt;'</span>
@@ -1244,7 +1244,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="n">NoValue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="n">NO_VALUE</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NoDefaultValue</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no default value.'</span><span class="p">)</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TS'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">)</span>
 
@@ -1319,7 +1319,7 @@
     <span class="nd">@default</span><span class="o">.</span><span class="n">deleter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Delete field default value."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NoValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">NO_VALUE</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>

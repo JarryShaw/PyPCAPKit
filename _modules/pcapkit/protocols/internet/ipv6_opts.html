@@ -492,7 +492,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.smf_dpd_mode</span><span class="w"> </span><span class="kn">import</span> <span class="n">SMFDPDMode</span> <span class="k">as</span> <span class="n">Enum_SMFDPDMode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipv6.tagger_id</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">Enum_TaggerID</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoValue</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_VALUE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CALIPSOOption</span> <span class="k">as</span> <span class="n">Data_CALIPSOOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFFFlags</span> <span class="k">as</span> <span class="n">Data_DFFFlags</span>
@@ -1582,7 +1582,7 @@
                 <span class="n">drop</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">'drop'</span><span class="p">]),</span>
             <span class="p">),</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
-            <span class="n">seed_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoValue</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
+            <span class="n">seed_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_VALUE</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">opt</span></div>
 

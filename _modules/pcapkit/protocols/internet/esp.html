@@ -1492,12 +1492,19 @@
 <span class="w">    </span><span class="sd">"""This class implements Encapsulating Security Payload.</span>
 
 <span class="sd">    Double-inherited (GitHub issue #917), mirroring</span>
-<span class="sd">    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's</span>
-<span class="sd">    ``protocol-numbers-1.csv`` marks ``ESP`` ``Y`` in the *IPv6 Extension</span>
-<span class="sd">    Header* column (:rfc:`4303`), and this package's own</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension</span>
+<span class="sd">    Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`</span>
+<span class="sd">    has it appear after the hop-by-hop, routing and fragmentation</span>
+<span class="sd">    extension headers in the IPv6 header chain), and this package's own</span>
 <span class="sd">    :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry</span>
-<span class="sd">    agrees (``ESP = 50``), so it must honour the same extension-mode contract</span>
-<span class="sd">    as its siblings. :attr:`payload` and :attr:`protochain` come from</span>
+<span class="sd">    agrees (``ESP = 50``), so it must honour the same extension-mode</span>
+<span class="sd">    contract as its siblings. The same section separately states that,</span>
+<span class="sd">    in the context of IPv4, ESP is placed after the IP header and</span>
+<span class="sd">    before the next-layer protocol -- the primary-source evidence that</span>
+<span class="sd">    it also travels directly as an IPv4 payload, which is what</span>
+<span class="sd">    qualifies it for a base besides</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.</span>
+<span class="sd">    :attr:`payload` and :attr:`protochain` come from</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`</span>
 <span class="sd">    is spelled out below for the reason given there.</span>
 

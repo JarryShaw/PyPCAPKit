@@ -1163,16 +1163,20 @@ signature, in <a class="reference external" href="https://docs.python.org/3/buil
 – via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
 <p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
 convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
-use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. The <em>instance</em>’s own name is not similarly settled –
-the owner’s follow-up on #859 is explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>)
-and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagree, and “mainly depends on how we need
-it.” The need here is continuity: <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> is already the name on
-<code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature, its docstring, and both
-comparison sites – and this change is to <em>what the sentinel is</em>, not to
-<em>what it is called</em>, so it keeps that name rather than being renamed to
-match either precedent’s instance casing for its own sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> is the closer match regardless, since <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>
-was already spelled that way.</p>
+use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
+similarly settled – the owner’s follow-up on #859 was explicit that
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and
+“mainly depends on how we need it.” The need here was continuity:
+<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
+its docstring, and both comparison sites – and that change was to <em>what
+the sentinel is</em>, not to <em>what it is called</em>, so it kept that name rather
+than being renamed to match either precedent’s instance casing for its own
+sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s <code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> was the closer match regardless, since
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> was already spelled that way – and GitHub issue #937
+later settled the question this paragraph left open: <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> became
+<code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code>, so every instance
+name now agrees on SCREAMING_SNAKE.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
 already exists, rather than building a new one. That guards against a
@@ -1324,16 +1328,20 @@ signature, in <a class="reference external" href="https://docs.python.org/3/buil
 – via <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> below – prints as <code class="docutils literal notranslate"><span class="pre">&lt;NO_DEFAULT&gt;</span></code>.</p>
 <p>Named <code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code> for the <em>class</em> because that half of the house
 convention is settled: both <code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code>
-use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. The <em>instance</em>’s own name is not similarly settled –
-the owner’s follow-up on #859 is explicit that <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>)
-and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagree, and “mainly depends on how we need
-it.” The need here is continuity: <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> is already the name on
-<code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature, its docstring, and both
-comparison sites – and this change is to <em>what the sentinel is</em>, not to
-<em>what it is called</em>, so it keeps that name rather than being renamed to
-match either precedent’s instance casing for its own sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> is the closer match regardless, since <a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a>
-was already spelled that way.</p>
+use <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Type</span></code>. At the time, the <em>instance</em>’s own name was not
+similarly settled – the owner’s follow-up on #859 was explicit that
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code> (<code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code>) and <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> (<code class="docutils literal notranslate"><span class="pre">CapWords</span></code>) disagreed, and
+“mainly depends on how we need it.” The need here was continuity:
+<code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> was already the name on <code class="docutils literal notranslate"><span class="pre">main</span></code> – referenced in
+<a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumLookup.get</span></code></a>’s signature,
+its docstring, and both comparison sites – and that change was to <em>what
+the sentinel is</em>, not to <em>what it is called</em>, so it kept that name rather
+than being renamed to match either precedent’s instance casing for its own
+sake. <code class="docutils literal notranslate"><span class="pre">NULL</span></code>’s <code class="docutils literal notranslate"><span class="pre">SCREAMING_CASE</span></code> was the closer match regardless, since
+<a class="reference internal" href="#pcapkit.corekit.enum.NO_DEFAULT" title="pcapkit.corekit.enum.NO_DEFAULT"><code class="xref py py-data docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></a> was already spelled that way – and GitHub issue #937
+later settled the question this paragraph left open: <code class="docutils literal notranslate"><span class="pre">NoValue</span></code> became
+<code class="xref py py-data docutils literal notranslate"><span class="pre">NO_VALUE</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> became <code class="xref py py-data docutils literal notranslate"><span class="pre">ABSENT</span></code>, so every instance
+name now agrees on SCREAMING_SNAKE.</p>
 <p>Genuinely a singleton, not merely a class this module happens to
 instantiate once: <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> always hands back the one instance that
 already exists, rather than building a new one. That guards against a

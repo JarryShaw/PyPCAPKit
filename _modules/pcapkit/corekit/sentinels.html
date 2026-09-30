@@ -473,7 +473,7 @@
 <span class="sd">used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,</span>
 <span class="sd">:class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,</span>
 <span class="sd">:class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and</span>
-<span class="sd">:class:`_AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
+<span class="sd">:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling</span>
 <span class="sd">on GitHub issue #911, verbatim -- *"Okay one module for all four it is."* --</span>
 <span class="sd">moves the four *definitions* here; each original module keeps a three-line</span>
 <span class="sd">re-export so that no existing ``from &lt;module&gt; import &lt;name&gt;`` breaks,</span>
@@ -484,23 +484,27 @@
 <span class="sd">:mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`</span>
 <span class="sd">already carry.</span>
 
-<span class="sd">``NoValue`` and ``_Absent`` differ in how far the ruling reaches. ``NoValue``</span>
+<span class="sd">``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``</span>
 <span class="sd">is documented as the value of</span>
 <span class="sd">:attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`,</span>
 <span class="sd">so it is a published contract and the re-export at</span>
 <span class="sd">:mod:`pcapkit.corekit.fields.field` is load-bearing for callers outside this</span>
-<span class="sd">package. ``_Absent`` is private to :mod:`pcapkit.protocols.protocol` --</span>
+<span class="sd">package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --</span>
 <span class="sd">nothing outside that module ever imports it, from here or from there -- so</span>
 <span class="sd">its re-export exists only so that module's own code keeps reading</span>
-<span class="sd">``_Absent`` rather than a fully-qualified name; see :class:`_AbsentType`'s</span>
-<span class="sd">own docstring below for why it stays private after the move.</span>
+<span class="sd">``ABSENT`` rather than a fully-qualified name; see :class:`AbsentType`'s</span>
+<span class="sd">own docstring below for why it stays private after the move. GitHub issue</span>
+<span class="sd">#937 later dropped the leading underscore both used to carry (``_Absent``,</span>
+<span class="sd">``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like their two</span>
+<span class="sd">siblings; the privacy this paragraph describes did not move with the name --</span>
+<span class="sd">see :class:`AbsentType`'s docstring for what carries it now.</span>
 
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">final</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'NoValue'</span><span class="p">,</span> <span class="s1">'NO_DEFAULT'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'NULL'</span><span class="p">,</span> <span class="s1">'NO_VALUE'</span><span class="p">,</span> <span class="s1">'NO_DEFAULT'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
@@ -668,7 +672,7 @@
 <a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.NoValueType">[docs]</a>
 <span class="nd">@final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NoValueType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Type of :data:`NoValue`, the default value for :mod:`pcapkit.corekit.fields`.</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.</span>
 
 <span class="sd">    Housed here per GitHub issue #911 rather than in</span>
 <span class="sd">    :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where</span>
@@ -687,7 +691,9 @@
 <span class="c1">#: :attr:`FieldBase.default &lt;pcapkit.corekit.fields.field.FieldBase.default&gt;`.</span>
 <span class="c1">#: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that</span>
 <span class="c1">#: attribute's own documentation is a published contract naming this object.</span>
-<span class="n">NoValue</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
+<span class="c1">#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue #937, which</span>
+<span class="c1">#: normalised all four sentinel *objects* to SCREAMING_SNAKE.</span>
+<span class="n">NO_VALUE</span> <span class="o">=</span> <span class="n">NoValueType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="NoDefaultType">
@@ -709,17 +715,20 @@
 
 <span class="sd">    Named ``NoDefaultType`` for the *class* because that half of the house</span>
 <span class="sd">    convention is settled: both :class:`NullType` and :class:`NoValueType`</span>
-<span class="sd">    use ``&lt;Name&gt;Type``. The *instance*'s own name is not similarly settled --</span>
-<span class="sd">    the owner's follow-up on #859 is explicit that ``NULL`` (``SCREAMING_CASE``)</span>
-<span class="sd">    and ``NoValue`` (``CapWords``) disagree, and "mainly depends on how we need</span>
-<span class="sd">    it." The need here is continuity: ``NO_DEFAULT`` is already the name on</span>
-<span class="sd">    ``main`` -- referenced in :meth:`EnumLookup.get</span>
-<span class="sd">    &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature, its docstring, and both</span>
-<span class="sd">    comparison sites -- and this change is to *what the sentinel is*, not to</span>
-<span class="sd">    *what it is called*, so it keeps that name rather than being renamed to</span>
-<span class="sd">    match either precedent's instance casing for its own sake. ``NULL``'s</span>
-<span class="sd">    ``SCREAMING_CASE`` is the closer match regardless, since :data:`NO_DEFAULT`</span>
-<span class="sd">    was already spelled that way.</span>
+<span class="sd">    use ``&lt;Name&gt;Type``. At the time, the *instance*'s own name was not</span>
+<span class="sd">    similarly settled -- the owner's follow-up on #859 was explicit that</span>
+<span class="sd">    ``NULL`` (``SCREAMING_CASE``) and ``NoValue`` (``CapWords``) disagreed, and</span>
+<span class="sd">    "mainly depends on how we need it." The need here was continuity:</span>
+<span class="sd">    ``NO_DEFAULT`` was already the name on ``main`` -- referenced in</span>
+<span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;`'s signature,</span>
+<span class="sd">    its docstring, and both comparison sites -- and that change was to *what</span>
+<span class="sd">    the sentinel is*, not to *what it is called*, so it kept that name rather</span>
+<span class="sd">    than being renamed to match either precedent's instance casing for its own</span>
+<span class="sd">    sake. ``NULL``'s ``SCREAMING_CASE`` was the closer match regardless, since</span>
+<span class="sd">    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue #937</span>
+<span class="sd">    later settled the question this paragraph left open: ``NoValue`` became</span>
+<span class="sd">    :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`, so every instance</span>
+<span class="sd">    name now agrees on SCREAMING_SNAKE.</span>
 
 <span class="sd">    Genuinely a singleton, not merely a class this module happens to</span>
 <span class="sd">    instantiate once: :meth:`__new__` always hands back the one instance that</span>
@@ -892,9 +901,11 @@
 <span class="n">NO_DEFAULT</span> <span class="o">=</span> <span class="n">NoDefaultType</span><span class="p">()</span>
 
 
+<div class="viewcode-block" id="AbsentType">
+<a class="viewcode-back" href="../../../pcapkit/corekit/sentinels.html#pcapkit.corekit.enum.AbsentType">[docs]</a>
 <span class="nd">@final</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">_AbsentType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Type of :data:`_Absent`, the absent-key sentinel.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbsentType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Type of :data:`ABSENT`, the absent-key sentinel.</span>
 
 <span class="sd">    A distinct class rather than a bare :obj:`object` so that the sentinel has a</span>
 <span class="sd">    name of its own in a traceback or a debugger, and so that a type checker has</span>
@@ -906,11 +917,20 @@
 <span class="sd">    and means "no value was given", not "this key is not here".</span>
 
 <span class="sd">    Defined here, alongside the package's other sentinels, per the owner's</span>
-<span class="sd">    ruling on GitHub issue #911 -- but it stays exactly as private as it was</span>
-<span class="sd">    in :mod:`pcapkit.protocols.protocol`: nothing outside that module reads</span>
-<span class="sd">    :data:`_Absent`, from here or from there, and this module's own</span>
-<span class="sd">    :attr:`__all__` does not name it. The move relocates the *definition*,</span>
-<span class="sd">    not the visibility.</span>
+<span class="sd">    ruling on GitHub issue #911. Originally named ``_AbsentType``/``_Absent``,</span>
+<span class="sd">    with the leading underscore standing in for "private" -- GitHub issue #937</span>
+<span class="sd">    normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so</span>
+<span class="sd">    this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings</span>
+<span class="sd">    and privacy is no longer signalled by the name at all. The owner's ruling</span>
+<span class="sd">    on #937, verbatim: *"we can change* ``_ABSENT`` *to* ``ABSENT`` *just</span>
+<span class="sd">    document it as private type/class in the documentation and not for public</span>
+<span class="sd">    use is enough."* So this class and :data:`ABSENT` stay exactly as private</span>
+<span class="sd">    as they were: nothing outside :mod:`pcapkit.protocols.protocol` reads</span>
+<span class="sd">    :data:`ABSENT`, from here or from there, and neither this module's nor</span>
+<span class="sd">    that module's :attr:`__all__` names either one. This docstring, and the</span>
+<span class="sd">    "Naming a sentinel" section of</span>
+<span class="sd">    :file:`docs/source/contributing/conventions.rst`, are what now records</span>
+<span class="sd">    that fact in place of the leading underscore.</span>
 
 <span class="sd">    """</span>
 
@@ -920,10 +940,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return :obj:`str` representation of the sentinel."""</span>
-        <span class="k">return</span> <span class="s1">'&lt;absent&gt;'</span>
+        <span class="k">return</span> <span class="s1">'&lt;absent&gt;'</span></div>
 
 
-<span class="c1">#: _AbsentType: Absent-versus-:obj:`None` sentinel for</span>
+
+<span class="c1">#: AbsentType: Absent-versus-:obj:`None` sentinel for</span>
 <span class="c1">#: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's</span>
 <span class="c1">#: own ``__keywords__`` out of its :attr:`~object.__dict__`, where</span>
 <span class="c1">#: :obj:`None` is itself a meaningful value -- the opt-out that says the</span>
@@ -931,8 +952,10 @@
 <span class="c1">#: :attr:`ProtocolBase.__keywords__</span>
 <span class="c1">#: &lt;pcapkit.protocols.protocol.ProtocolBase.__keywords__&gt;`. Never leaves</span>
 <span class="c1">#: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it</span>
-<span class="c1">#: for exactly that one read.</span>
-<span class="n">_Absent</span> <span class="o">=</span> <span class="n">_AbsentType</span><span class="p">()</span>
+<span class="c1">#: for exactly that one read. Private by convention and documentation only,</span>
+<span class="c1">#: not by a leading underscore -- see :class:`AbsentType`'s own docstring for</span>
+<span class="c1">#: why, per GitHub issue #937.</span>
+<span class="n">ABSENT</span> <span class="o">=</span> <span class="n">AbsentType</span><span class="p">()</span>
 </pre></div>
         </article>
       </div>

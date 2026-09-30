@@ -527,11 +527,17 @@ as below:</p>
 <dd><p>Bases: <a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ah.AH" title="pcapkit.protocols.data.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.ah.AH" title="pcapkit.protocols.schema.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>], <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ah.AH" title="pcapkit.protocols.data.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.schema.internet.ah.AH" title="pcapkit.protocols.schema.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>]</p>
 <p>This class implements Authentication Header.</p>
 <p>Double-inherited (GitHub issue #917): <code class="docutils literal notranslate"><span class="pre">AH</span></code> is both a member of the
-IPsec family and an IPv6 extension header – IANA’s
-<code class="docutils literal notranslate"><span class="pre">protocol-numbers-1.csv</span></code> marks it <code class="docutils literal notranslate"><span class="pre">Y</span></code> in the <em>IPv6 Extension Header</em>
-column (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>), and this package’s own
+IPsec family and an IPv6 extension header – IANA’s <em>IPv6 Extension
+Header Types</em> registry lists it at 51 (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-3.1.1"><strong>RFC 4302 Section 3.1.1</strong></a> has
+it appear after the hop-by-hop, routing and fragmentation extension
+headers in the IPv6 header chain), and this package’s own
 <a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a> registry
-agrees. <a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> is first in the
+agrees. The same section separately states that, in the context of
+IPv4, AH is placed after the IP header and before the next-layer
+protocol – the primary-source evidence that it also travels
+directly as an IPv4 payload, which is what qualifies it for a base
+besides <a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>.
+<a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> is first in the
 bases so that its <a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec.id" title="pcapkit.protocols.internet.ipsec.IPsec.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">id()</span></code></a>
 keeps precedence.</p>
 <dl class="py property">

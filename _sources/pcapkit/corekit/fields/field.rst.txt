@@ -23,7 +23,7 @@ Auxiliaries
 -----------
 
 .. autoclass:: pcapkit.corekit.fields.field.NoValueType
-.. autodata:: pcapkit.corekit.fields.field.NoValue
+.. autodata:: pcapkit.corekit.fields.field.NO_VALUE
    :no-value:
 
 Internal Definitions
