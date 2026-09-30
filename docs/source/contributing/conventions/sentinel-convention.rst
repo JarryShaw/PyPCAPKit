@@ -6,14 +6,14 @@ Naming a sentinel
 A *sentinel* here is a module-level singleton whose only job is to be recognised by
 identity -- ``value is SENTINEL`` -- so that it can never be confused with a value a
 caller might legitimately pass. The house rule, from the maintainer, covers the type:
-
-   Keep the sentinel object's type class naming as ``<SENTINEL>Type``.
+the sentinel object's type class is named ``<SENTINEL>Type``.
 
 That is, the class takes the instance's name in CamelCase with ``Type`` appended. It
 says nothing about the **object**'s own name, which is what let three casings diverge
-with no rule naming any of them wrong. GitHub issue #937 closed that gap, verbatim:
-*"take SCREAMING_SNAKE and accept the breaking change (no backport needed)."* So the
-object is named in SCREAMING_SNAKE, and the type-naming rule above derives from it
+with no rule naming any of them wrong. GitHub issue #937 closed that gap: the owner
+ruled for SCREAMING_SNAKE and accepted the resulting breaking change outright, with no
+backport. So the object is named in SCREAMING_SNAKE, and the type-naming rule above
+derives from it
 mechanically -- title-case each underscore-separated word and append ``Type``, no
 per-sentinel exception needed. The four in the tree follow it:
 
@@ -40,9 +40,9 @@ per-sentinel exception needed. The four in the tree follow it:
 All four used to live beside the one class that used them --
 :mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
 :mod:`pcapkit.corekit.enum` and :mod:`pcapkit.protocols.protocol` respectively.
-GitHub issue #911's housing ruling, verbatim -- *"Okay one module for all four it
-is."* -- moved the four definitions into the single shared module the table now
-names; each original module keeps a re-export so every existing
+GitHub issue #911's housing ruling -- one module for all four -- moved the four
+definitions into the single shared module the table now names; each original module
+keeps a re-export so every existing
 ``from <module> import <name>`` keeps working, including the
 ``if TYPE_CHECKING:``-only imports of the types.
 
@@ -59,9 +59,9 @@ every caller for no further gain.
 The rename also dropped the **leading underscore** ``_Absent``/``_AbsentType`` used to
 carry. ``ABSENT`` is private -- it is read in ``_declared_keywords`` and discarded
 there, never leaving :mod:`pcapkit.protocols.protocol` -- and the underscore used to be
-the mechanical signal of that. The maintainer's ruling on #937, verbatim: *"we can
-change* ``_ABSENT`` *to* ``ABSENT`` *just document it as private type/class in the
-documentation and not for public use is enough."* So privacy is documentation-only from
+the mechanical signal of that. The owner ruled on #937 that dropping it is fine, so
+long as the documentation states that the type and class are private and not for public
+use -- that alone is enough. So privacy is documentation-only from
 here on, carried by this paragraph and by
 :class:`~pcapkit.corekit.sentinels.AbsentType`'s own docstring
 (:file:`pcapkit/corekit/sentinels.py`, line 439), which still says so:
@@ -78,9 +78,9 @@ filtered on capitalised names did not see ``_Absent`` -- and that history does n
 change now that nothing in the name itself marks it out. When adding a sentinel, add
 it here whether or not it is public.
 
-What reaches users is the **object only**. The maintainer's ruling: *"we should ONLY
-export the objects (like* ``NULL`` *) to users"* -- so a public sentinel names its
-instance in its module's ``__all__`` and leaves the type out of it (GitHub issue #911).
+What reaches users is the **object only**. The owner ruled on GitHub issue #911 that
+the objects alone -- ``NULL`` and its siblings -- are exported to users, so a public
+sentinel names its instance in its module's ``__all__`` and leaves the type out of it.
 The type stays importable by its dotted path, for an annotation or an ``is`` guard; it
 is ``import *`` that no longer offers it. A private sentinel such as ``ABSENT`` is in
 neither, which is what private means here -- dropping its leading underscore did not
