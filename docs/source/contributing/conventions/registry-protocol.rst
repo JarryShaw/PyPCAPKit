@@ -273,8 +273,9 @@ and it is the trap for whoever writes the next override: the base branches on
 ``isinstance(key, str)`` and treats everything else as a *value*, while those two
 branched on ``isinstance(key, int)`` and fell through to the *name* path for anything
 else. ``get(None)`` therefore raised a quiet
-:exc:`~pcapkit.utilities.exceptions.EnumKeyError` on two classes and a loud
-:exc:`~pcapkit.utilities.exceptions.EnumValueError` on the other five, and no prose
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` on those two and a loud
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` on the other four of the six
+locally-defined helpers in those two modules, and no prose
 anywhere said so. Re-implementing the dispatch is how an override acquires a
 divergence nobody wrote down; delegating to it is how it does not.
 
@@ -457,7 +458,7 @@ That leaves the classes with something to decide:
        the CSV columns the crawler reads are lower case in every row (``s`` 26,
        ``a`` 18, ``s/p`` 3, blank 1; ``o`` 28, ``m`` 27, ``h`` 7, ``m [1]`` 2).
      - **open** -- see below
-   * - The 5 :mod:`~pcapkit.protocols.internet.mh` and
+   * - The 6 :mod:`~pcapkit.protocols.internet.mh` and
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
      - Their values are numeric codes, so the criterion is vacuous exactly as for the
