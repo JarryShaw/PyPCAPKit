@@ -585,9 +585,12 @@ regrouping of scattered entries rather than a transposition of three tidy blocks
 <p class="admonition-title">Note</p>
 <p>One case the rule does not settle by itself: an entry whose change spans modules –
 the reassembly and extraction ones touch <a class="reference internal" href="../../pcapkit/foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> and
-<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> together. The intent is to file each under the module the
-change is <em>about</em> and name the others in the text, rather than duplicating the
-entry, but that has not been ruled on. Raised on #918.</p>
+<a class="reference internal" href="../../pcapkit/protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a> together. Ruled on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/952">#952</a>: file it under the
+module the change is <em>about</em>, name the others in the entry’s own text, and do
+<strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
+section wants that module’s changes; the same prose appearing twice reads as two
+separate changes. Raised originally on #918.</p>
 <p>The restructure itself belongs to #657, which owns the file and merges last; doing
 it earlier would conflict with every open change that touches an entry.</p>
 </div>
