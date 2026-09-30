@@ -1606,6 +1606,96 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
                                           chksum=parsed.chksum, data=parsed)), hi_raw)
 
+    def test_mh_get_default_works_uniformly_through_the_inherited_method(self) -> None:
+        """GitHub issue #935: the two kept ``get`` overrides are deleted, not widened.
+
+        GitHub issue #930 re-parented :class:`FastBindingAcknowledgmentStatus`
+        and :class:`IPv6AddressPrefixCode` onto
+        :class:`~pcapkit.corekit.enum.EnumLookup`, which made both
+        **advertise** the base's two-argument ``get(key, default)`` through
+        inheritance while their own kept ``@staticmethod`` overrides still
+        only accepted one -- calling either with a ``default`` raised
+        ``TypeError: get() takes 1 positional argument but 2 were given``.
+        GitHub issue #935's first ruling, verbatim *"I lean on 1"*, widened
+        both signatures to accept ``default`` rather than delete them; asked
+        next *"why must we have the two overrides tho? cant they directly
+        fall back to the base class's?"*, the owner's final ruling went
+        further, verbatim: *"I prefer (2) directly"* -- deleting both
+        overrides outright. Both classes now inherit ``get`` from the base
+        exactly as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus`
+        -- the two pure re-parents already in this module -- always have, so
+        ``default`` now works the same way on all four, uniformly, because
+        there is only one implementation left to call. This test fails with
+        the ``TypeError`` above against the tree at 382375811, before either
+        of #935's rulings landed.
+        """
+        import sys
+
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode, LMAAddressCode,
+                                                   LocalizedRoutingStatus)
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
+
+        def _drop_tracebacklimit() -> None:
+            # The int-value-miss subTest below reaches the loud
+            # ``_missing_`` on ``key`` itself, which sets this process-wide
+            # -- restore it so a later test in the same run does not read
+            # truncated tracebacks because of what this one did.
+            if hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
+
+        self.addCleanup(_drop_tracebacklimit)
+
+        classes = (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
+                   LMAAddressCode, LocalizedRoutingStatus)
+
+        with self.subTest('a default argument no longer raises TypeError'):
+            # This is exactly the call GitHub issue #935 reports as failing
+            # on the tree before either ruling landed: a second positional
+            # argument to a ``@staticmethod`` that only declared one.
+            for cls in classes:
+                member = next(iter(cls))
+                try:
+                    cls.get('bogus', member)
+                except TypeError as error:
+                    self.fail(f'{cls.__name__}.get() still rejects a default argument: {error}')
+
+        with self.subTest('a name miss falls back to a default naming a real member'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    member = next(iter(cls))
+                    self.assertIs(cls.get('bogus', member), member)
+                    self.assertIs(cls.get('bogus', int(member)), member)
+
+        with self.subTest('an int value miss falls back to a default naming a real member'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    member = next(iter(cls))
+                    self.assertIs(cls.get(9999, member), member)
+
+        with self.subTest('a default naming no registered member still raises, not TypeError'):
+            # The issue's own repro: a default that does not itself resolve
+            # does not silently swallow the miss -- it falls through to the
+            # same EnumKeyError ``key`` alone would have raised, uniformly
+            # on all four now.
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumKeyError) as caught:
+                        cls.get('bogus', 'also-bogus')
+                    self.assertIn('bogus', str(caught.exception))
+
+        with self.subTest('an unusable default on an int value miss still raises EnumValueError'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumValueError):
+                        cls.get(9999, 99999)
+
+        with self.subTest('omitting default still raises EnumKeyError, exactly as before'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumKeyError):
+                        cls.get('bogus')
+
     def test_mh_local_enums_raise_and_do_not_alias(self) -> None:
         """GitHub issue #880: the four RFC-inline helper enums stay immutable.
 
