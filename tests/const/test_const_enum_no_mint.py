@@ -2108,7 +2108,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         ``Method.get`` is probed with its exact registered casing
         (``'GET'``), not the lower-cased ``'get'`` this test used before
         GitHub issue #896: ``Command``'s FTP command codes stay
-        case-insensitive per :rfc:`959#section-4.1`, but the HTTP method
+        case-insensitive per :rfc:`959#section-5`, but the HTTP method
         token :rfc:`9110#section-9.1` covers is case-sensitive, so
         ``Method.get('get')`` no longer resolves to :attr:`Method.GET` --
         see :class:`BespokeGetUnchangedTests`'s
