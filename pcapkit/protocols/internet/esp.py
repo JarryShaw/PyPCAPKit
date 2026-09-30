@@ -976,12 +976,19 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
     """This class implements Encapsulating Security Payload.
 
     Double-inherited (GitHub issue #917), mirroring
-    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's
-    ``protocol-numbers-1.csv`` marks ``ESP`` ``Y`` in the *IPv6 Extension
-    Header* column (:rfc:`4303`), and this package's own
+    :class:`~pcapkit.protocols.internet.ah.AH`: IANA's *IPv6 Extension
+    Header Types* registry lists ``ESP`` at 50 (:rfc:`4303#section-3.1.1`
+    has it appear after the hop-by-hop, routing and fragmentation
+    extension headers in the IPv6 header chain), and this package's own
     :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` registry
-    agrees (``ESP = 50``), so it must honour the same extension-mode contract
-    as its siblings. :attr:`payload` and :attr:`protochain` come from
+    agrees (``ESP = 50``), so it must honour the same extension-mode
+    contract as its siblings. The same section separately states that,
+    in the context of IPv4, ESP is placed after the IP header and
+    before the next-layer protocol -- the primary-source evidence that
+    it also travels directly as an IPv4 payload, which is what
+    qualifies it for a base besides
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`.
+    :attr:`payload` and :attr:`protochain` come from
     :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; :attr:`protocol`
     is spelled out below for the reason given there.
 
