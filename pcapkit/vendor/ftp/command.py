@@ -65,7 +65,7 @@ __all__ = ['{NAME}']
 
 class FEATCode(EnumRegistry, StrEnum):
     """Keyword returned in FEAT response line for this command/extension,
-    c.f., :rfc:`5797#secion-3`.
+    c.f., :rfc:`5797#section-3`.
 
     .. note::
 
@@ -266,7 +266,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
     if TYPE_CHECKING:
         #: Feature code. Keyword returned in FEAT response line for this command/extension,
-        #: c.f., :rfc:`5797#secion-2.2`.
+        #: c.f., :rfc:`5797#section-2.2`.
         feat: 'Optional[FEATCode]'
         #: Brief description of command / extension.
         desc: 'Optional[str]'

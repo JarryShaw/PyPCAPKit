@@ -1143,7 +1143,7 @@ class AppType(Vendor):
                         temp.append(f'[{rfc}]')
                     else:
                         if match.group('sec') is not None:
-                            temp.append(f'[:rfc:`{match.group("rfc")}#{match.group("sec")}`]')
+                            temp.append(f'[:rfc:`{match.group("rfc")}#section-{match.group("sec")}`]')
                         else:
                             temp.append(f'[:rfc:`{match.group("rfc")}`]')
                 else:

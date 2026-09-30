@@ -265,7 +265,7 @@ class TCP(AppType):
        * - ``dns-llq-tls``
          - [TCP] DNS Long-Lived Queries over TLS [RFC 6281]
        * - ``dns-push-tls``
-         - [TCP] DNS Push Notification Service Type [:rfc:`8765#6.1`]
+         - [TCP] DNS Push Notification Service Type [:rfc:`8765#section-6.1`]
        * - ``dns-query-tls``
          - [TCP] DNS queries to the authoritative server over TLS
        * - ``dns-update``
