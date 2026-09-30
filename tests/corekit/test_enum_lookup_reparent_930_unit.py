@@ -13,40 +13,65 @@ module pins that the remainder actually took the base -- finishing phase 2 at 24
 non-registry enumerations, with zero still outside the hierarchy.
 
 Two of the seven, :class:`FastBindingAcknowledgmentStatus` and
-:class:`IPv6AddressPrefixCode`, already defined their own ``get`` -- both as a
-:class:`staticmethod`, the exact shape GitHub issue #908 found dangerous once a base
+:class:`IPv6AddressPrefixCode`, defined their own ``get`` at #930's own revision -- both as
+a :class:`staticmethod`, the exact shape GitHub issue #908 found dangerous once a base
 ``get`` becomes a :class:`classmethod`: calling ``super().get(...)`` from a
 ``staticmethod`` raises :exc:`RuntimeError: super(): no arguments`. Neither override
-calls ``super()`` at all, so the trap does not fire, and per this issue's own brief they
-are left **untouched** -- their ``except KeyError: raise EnumKeyError(...)`` conversions
-were put there by GitHub issue #923 and already answer a name miss in exactly the shape
-the base now uses. Keeping the plain ``@staticmethod`` does cost something, though:
-``mypy``'s ``[override]`` check and ``pylint``'s ``arguments-differ`` both flag the
-resulting shape mismatch against the base's ``classmethod`` (``cls, key, default``)
-signature, and both are silenced rather than resolved by widening the signature --
-:class:`ReparentedBasesTests` pins, alongside each class's own base-tuple change,
-that the decorator itself survived the re-parenting, which is what makes those
-suppressions still apply to the right thing.
+called ``super()`` at all, so the trap never fired, and per this issue's own brief they
+were left **untouched** there -- their ``except KeyError: raise EnumKeyError(...)``
+conversions were put there by GitHub issue #923 and already answered a name miss in
+exactly the shape the base now uses. Keeping the plain ``@staticmethod`` cost something at
+that revision, though: re-parenting made both **advertise** the base's two-argument
+``get(key, default)`` through inheritance while still only accepting one, so a ``default``
+argument raised :exc:`TypeError` instead of resolving through the base's own fallback, and
+``mypy``'s ``[override]`` check plus ``pylint``'s ``arguments-differ`` both flagged the
+resulting shape mismatch, silenced with a suppression. GitHub issue #935 first answered
+that on the owner's ruling, verbatim: *"I lean on 1"* -- widen both signatures to accept
+``default`` and delete the suppression. Asked, on the same issue, *"why must we have the
+two overrides tho? cant they directly fall back to the base class's?"*, the owner's final
+ruling went further, verbatim: *"I prefer (2) directly"* -- deleting both overrides
+outright rather than widening them.
 
-Re-parenting also makes both kept overrides reachable through a door that
-did not exist before: :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`,
-inherited from the base for the first time, calls ``get`` internally. Before
-this issue, that mattered because ``get`` itself raised **loud**: both
-overrides used to log once at :data:`logging.CRITICAL` and set
-:data:`sys.tracebacklimit` to ``0`` process-wide on a name miss, unlike the
-base's own quiet raise. GitHub issue #930 converges both onto the base's
-quiet shape instead -- a real behaviour change, not merely a re-parent --
-settled on GitHub issue #933's follow-up ruling, verbatim: *"Oh wait. I
-meant, they should follow house convention and not to be loud."*
-:class:`KeptOverrideQuietnessTests` pins both halves of that: the ``get``
-half, which genuinely changes (loud on the tree before this issue, quiet
-here), and the ``get_all`` half, which is new outright (the attribute does
-not exist on that tree at all).
+Measured before acting on that final ruling: neither override ever minted an alias --
+``__members__`` and ``list(cls)`` agree at 6 and 4 -- so what each docstring called
+"Backport support for original codes" was the int-or-name dual resolution
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` already provides for every other
+:class:`int`-valued registry in this tree, and none of the 20 call sites either override
+had (all in tests, none in :mod:`pcapkit`) passed a key the base would have resolved
+differently. There was nothing left to backport, so ``get``/``get_all`` on both now come
+from the base alone, the same as the five classes below that were pure re-parents from the
+start. :class:`ReparentedBasesTests` used to pin, alongside each class's own base-tuple
+change, that the ``@staticmethod`` decorator survived re-parenting and then the signature
+widening; now that the method is deleted rather than converted, there is nothing left to
+decorate, and :class:`AllSevenInheritTheBareClassmethodTests` covers these two the same way
+it always covered the other five.
+
+Deleting the overrides is a real behaviour change, deliberately so: each branched on
+``isinstance(key, int)`` and routed every other type -- ``None``, a :class:`float`, ... --
+through its own *name* path, so ``get(None)`` and ``get(1.5)`` used to answer with a quiet
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` on these two while the base -- branching
+on ``isinstance(key, str)`` instead -- answers every other
+:class:`~pcapkit.corekit.enum.EnumLookup` subclass with a loud
+:exc:`~pcapkit.utilities.exceptions.EnumValueError`.
+:class:`NonCanonicalKeyConvergenceTests` pins the convergence this deletion produces: all
+seven now answer such a key alike, for the first time.
+
+Re-parenting separately made both former overrides reachable through a door that did not
+exist before: :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`, inherited from the base for
+the first time, calls ``get`` internally. Before this issue, that mattered because ``get``
+itself raised **loud**: both overrides used to log once at :data:`logging.CRITICAL` and set
+:data:`sys.tracebacklimit` to ``0`` process-wide on a name miss, unlike the base's own quiet
+raise. GitHub issue #930 converged both onto the base's quiet shape instead -- a real
+behaviour change, not merely a re-parent -- settled on GitHub issue #933's follow-up ruling,
+verbatim: *"Oh wait. I meant, they should follow house convention and not to be loud."*
+:class:`InheritedQuietnessTests` (renamed from ``KeptOverrideQuietnessTests`` once GitHub
+issue #935 deleted the overrides that name described) pins that the quiet shape survived
+the deletion too -- purely inherited now, rather than reconciled by hand on each class.
 
 The other five -- :class:`CommandType`, :class:`ConformanceRequirement`,
-:class:`ESPStatus`, :class:`LocalizedRoutingStatus` and :class:`LMAAddressCode` -- are
-pure re-parents: none defines a ``get`` of its own to reconcile with the base, so each
-gains ``get``/``get_all`` for the first time. :class:`CommandType`,
+:class:`ESPStatus`, :class:`LocalizedRoutingStatus` and :class:`LMAAddressCode` -- were
+pure re-parents from the start: none defines a ``get`` of its own to reconcile with the
+base, so each gained ``get``/``get_all`` for the first time in #930. :class:`CommandType`,
 :class:`LocalizedRoutingStatus` and :class:`LMAAddressCode` do carry their own
 ``_missing_`` range guards, which are untouched -- :class:`EnumLookup` does not
 override that hook, so a re-parent cannot change what it does.
@@ -97,14 +122,15 @@ without that resolution a ``subTest``-only failure is recorded against
   base-tuple/MRO change is real for all seven regardless of whether ``get``
   itself was already working.
 
-Neither method of :class:`KeptOverrideQuietnessTests` holds, and deliberately
-so -- both are pinning the one thing this issue actually changes about the two
-kept overrides. ``test_get_is_now_quiet_on_both_classes`` fails against the
-reverted tree because ``get`` really was loud there (see that class's own
-docstring): this is not a scaffolding failure, it is the behaviour change
-itself, caught in the act. ``test_get_all_is_new_and_quiet_too`` fails with
-``AttributeError`` instead, since ``get_all`` does not exist on the reverted
-tree at all.
+Neither of the first two methods of :class:`InheritedQuietnessTests` (called
+``KeptOverrideQuietnessTests`` at the time this measurement was taken, before GitHub issue
+#935 deleted the overrides that name described) holds against the reverted tree, and
+deliberately so -- both pin the one thing this issue actually changes about the two
+classes' ``get``. ``test_get_is_now_quiet_on_both_classes`` fails against the reverted tree
+because ``get`` really was loud there (see that class's own docstring): this is not a
+scaffolding failure, it is the behaviour change itself, caught in the act.
+``test_get_all_is_new_and_quiet_too`` fails with ``AttributeError`` instead, since
+``get_all`` does not exist on the reverted tree at all.
 
 """
 from __future__ import annotations
@@ -122,8 +148,8 @@ from tests.utilities._harness import capture
 
 __all__ = [
     'ReparentedBasesTests', 'GetByNameAndValueTests', 'FailedLookupTests',
-    'KeptOverrideQuietnessTests', 'NoMintingTests', 'PureReparentClassmethodTests',
-    'ZeroRemainOutsideEnumLookupTests',
+    'InheritedQuietnessTests', 'NoMintingTests', 'AllSevenInheritTheBareClassmethodTests',
+    'NonCanonicalKeyConvergenceTests', 'ZeroRemainOutsideEnumLookupTests',
 ]
 
 
@@ -172,10 +198,11 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertEqual(len(list(ESPStatus)), 6)
 
     def test_fast_binding_acknowledgment_status(self) -> None:
-        """Also pins that its kept ``get`` override is still a
-        :class:`staticmethod` -- unlike ``TransportProtocol.get`` and
-        ``Criticality.get`` in GitHub issue #921, it never calls
-        ``super().get(...)``, so there is no delegation to convert it for."""
+        """GitHub issue #935 later deleted its kept ``get`` override outright
+        (the owner's ruling, verbatim: *"I prefer (2) directly"*), so the
+        decorator this once pinned no longer exists to pin --
+        :class:`AllSevenInheritTheBareClassmethodTests` now covers this class
+        alongside the other six."""
         from aenum import IntEnum
 
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
@@ -184,13 +211,9 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertIn(EnumLookup, FastBindingAcknowledgmentStatus.__mro__)
         self.assertEqual(len(FastBindingAcknowledgmentStatus.__members__), 6)
         self.assertEqual(len(list(FastBindingAcknowledgmentStatus)), 6)
-        self.assertIsInstance(
-            inspect.getattr_static(FastBindingAcknowledgmentStatus, 'get'), staticmethod)
 
     def test_ipv6_address_prefix_code(self) -> None:
-        """Also pins that its kept ``get`` override is still a
-        :class:`staticmethod`, for the same reason as
-        :class:`FastBindingAcknowledgmentStatus`."""
+        """Same history as :class:`FastBindingAcknowledgmentStatus`."""
         from aenum import IntEnum
 
         from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
@@ -199,8 +222,6 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertIn(EnumLookup, IPv6AddressPrefixCode.__mro__)
         self.assertEqual(len(IPv6AddressPrefixCode.__members__), 4)
         self.assertEqual(len(list(IPv6AddressPrefixCode)), 4)
-        self.assertIsInstance(
-            inspect.getattr_static(IPv6AddressPrefixCode, 'get'), staticmethod)
 
     def test_localized_routing_status(self) -> None:
         from aenum import IntEnum
@@ -268,8 +289,11 @@ class NoMintingTests(unittest.TestCase):
 
 
 class GetByNameAndValueTests(unittest.TestCase):
-    """``get`` resolves by name and by value on each of the seven, whether
-    the ``get`` reached is the base's own or one of the two kept overrides."""
+    """``get`` resolves by name and by value on each of the seven, now
+    uniformly through the base's own inherited implementation -- GitHub
+    issue #935 deleted the two hand-rolled overrides that used to answer
+    this for :class:`FastBindingAcknowledgmentStatus` and
+    :class:`IPv6AddressPrefixCode`."""
 
     def test_command_type(self) -> None:
         from pcapkit.const.ftp.command import CommandType
@@ -324,8 +348,10 @@ class FailedLookupTests(unittest.TestCase):
     """What a miss raises on each of the seven -- a name miss is
     :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
     matching stdlib :class:`~enum.Enum`'s own shape (GitHub issue #923) on
-    every one of the seven regardless of whether its ``get`` is the base's
-    own or a kept :class:`staticmethod` override.
+    every one of the seven, now uniformly through the base's own ``get``
+    since GitHub issue #935 deleted the two hand-rolled overrides that used
+    to answer this for :class:`FastBindingAcknowledgmentStatus` and
+    :class:`IPv6AddressPrefixCode`.
     """
 
     def test_command_type(self) -> None:
@@ -362,10 +388,9 @@ class FailedLookupTests(unittest.TestCase):
         self.assertIsInstance(value_miss.exception, EnumValueError)
 
     def test_fast_binding_acknowledgment_status(self) -> None:
-        """Its own kept ``get`` raises :exc:`EnumKeyError` directly for a
-        name miss (GitHub issue #923's conversion, left untouched by this
-        change) and delegates to :meth:`_missing_` for a value miss, which
-        always raises :exc:`EnumValueError`."""
+        """Since GitHub issue #935 deleted its kept override, this now
+        resolves through the base's own ``get`` -- the same mechanism
+        :meth:`test_localized_routing_status` below exercises."""
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
 
         with self.assertRaises(KeyError) as name_miss:
@@ -414,30 +439,43 @@ class FailedLookupTests(unittest.TestCase):
         self.assertIsInstance(value_miss.exception, EnumValueError)
 
 
-class KeptOverrideQuietnessTests(unittest.TestCase):
-    """The now-quiet raise of the two kept ``get`` overrides, and the new
-    way this re-parenting opens to reach it.
+class InheritedQuietnessTests(unittest.TestCase):
+    """The quiet raise :class:`FastBindingAcknowledgmentStatus` and
+    :class:`IPv6AddressPrefixCode` answer a name miss with, and the door
+    this re-parenting opened to reach it -- both now purely inherited from
+    the base rather than reconciled by a hand-rolled override.
 
-    :meth:`FastBindingAcknowledgmentStatus.get` and
-    :meth:`IPv6AddressPrefixCode.get` used to raise **loud** on a name
-    miss -- logging once at :data:`logging.CRITICAL` and setting
-    :data:`sys.tracebacklimit` to ``0`` process-wide, unlike the base's own
-    quiet raise at :meth:`~pcapkit.corekit.enum.EnumLookup.get`
-    (:mod:`pcapkit.corekit.enum`). GitHub issue #930 converges both onto
-    that quiet shape instead, settled on GitHub issue #933's follow-up
-    ruling, verbatim: *"Oh wait. I meant, they should follow house
-    convention and not to be loud."* (An earlier message on the same issue
-    said the opposite -- plain *"No."* -- and an earlier revision of this
-    file briefly pinned loud as the settled answer on the strength of that
+    Named for what survives rather than for what used to sit here: this
+    class was ``KeptOverrideQuietnessTests`` while both classes still
+    carried their own ``get``, first through #930's re-parenting and
+    briefly again through GitHub issue #935's first attempt, which widened
+    that override to accept ``default`` rather than delete it. The owner's
+    final ruling on #935 deleted both outright instead, verbatim: *"I
+    prefer (2) directly"*. What this class pins did not change with that
+    deletion -- the quiet raise -- only *how* it is produced: through
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get`
+    (:mod:`pcapkit.corekit.enum`) directly now, rather than through an
+    override that reconciled itself onto the base's shape.
+
+    Before either override existed, ``get`` on both classes raised
+    **loud** -- logging once at :data:`logging.CRITICAL` and setting
+    :data:`sys.tracebacklimit` to ``0`` process-wide on a name miss, unlike
+    the base's own quiet raise. GitHub issue #930 converged both onto that
+    quiet shape instead, settled on GitHub issue #933's follow-up ruling,
+    verbatim: *"Oh wait. I meant, they should follow house convention and
+    not to be loud."* (An earlier message on the same issue said the
+    opposite -- plain *"No."* -- and an earlier revision of this file
+    briefly pinned loud as the settled answer on the strength of that
     message; the follow-up four minutes later superseded it, and what
     follows is the corrected version.)
 
-    Both halves are pinned quiet, and for two different reasons against the
-    reverted tree. :meth:`test_get_is_now_quiet_on_both_classes` covers
-    ``get`` itself, which existed and was already loud on the tree before
-    this issue -- so this test fails against that reverted tree not because
-    ``get`` is structurally different there, but because its behaviour
-    genuinely changes: reverted, it is loud; here, it is quiet.
+    The first two methods are pinned quiet, and for two different reasons
+    against the tree reverted to before #930.
+    :meth:`test_get_is_now_quiet_on_both_classes` covers ``get`` itself,
+    which existed and was already loud on the tree before that issue -- so
+    this test fails against that reverted tree not because ``get`` is
+    structurally different there, but because its behaviour genuinely
+    changes: reverted, it is loud; here, it is quiet.
     :meth:`test_get_all_is_new_and_quiet_too` covers
     :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`, which did not exist
     on either class before #930 at all and is now inherited from the base,
@@ -498,31 +536,121 @@ class KeptOverrideQuietnessTests(unittest.TestCase):
                 self.assertFalse(hasattr(sys, 'tracebacklimit'))
                 self.assertEqual(recorder.messages, [])
 
+    def test_get_with_unusable_default_is_quiet_too(self) -> None:
+        """The base's own ``get`` (:mod:`pcapkit.corekit.enum`) has always
+        accepted ``default``; a name miss whose ``default`` does not itself
+        resolve falls through to the same quiet
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` a bare miss would
+        have raised -- not a new, louder path. Before GitHub issue #935
+        deleted the two hand-rolled overrides, this same call raised
+        ``TypeError`` on a second positional argument instead; between
+        #935's first attempt and its final ruling, the overrides answered
+        it themselves rather than through this inherited path.
+        """
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode)
 
-class PureReparentClassmethodTests(unittest.TestCase):
-    """The five pure re-parents inherit the base's ``classmethod`` outright,
-    having defined no ``get`` of their own to begin with -- unlike
+        for cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+            with self.subTest(cls=cls.__name__):
+                if hasattr(sys, 'tracebacklimit'):
+                    del sys.tracebacklimit
+                with capture(logger) as recorder:
+                    with self.assertRaises(EnumKeyError):
+                        cls.get('NOT_A_REAL_MEMBER', 'ALSO_NOT_A_REAL_MEMBER')
+                self.assertFalse(hasattr(sys, 'tracebacklimit'))
+                self.assertEqual(recorder.messages, [])
+
+                # A default that *does* resolve returns it without raising
+                # at all.
+                member = next(iter(cls))
+                self.assertIs(cls.get('NOT_A_REAL_MEMBER', member), member)
+
+
+class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
+    """All seven now inherit the base's ``classmethod`` outright, none
+    declaring a ``get`` of its own.
+
+    Five were always this way -- pure re-parents, having defined no
+    ``get`` of their own to begin with. The other two,
     :class:`FastBindingAcknowledgmentStatus` and
-    :class:`IPv6AddressPrefixCode`, whose kept ``get`` overrides stay
-    :class:`staticmethod` and are pinned alongside their base-tuple change in
-    :class:`ReparentedBasesTests` instead, since a test that only checked the
-    decorator would pass identically before and after this change and pin
-    nothing about it.
+    :class:`IPv6AddressPrefixCode`, joined them only at GitHub issue #935's
+    final revision: their own kept ``get`` stayed a :class:`staticmethod`
+    through #930's re-parenting and briefly again through #935's first
+    attempt (which widened it to accept ``default`` rather than delete it),
+    and only the owner's final ruling there -- verbatim, *"I prefer (2)
+    directly"* -- deleted it outright, collapsing the seven-way split this
+    class used to test as five-plus-two into one uniform case. This class
+    was named for the five alone before that ruling, and
+    :class:`ReparentedBasesTests` pinned the other two's surviving
+    ``@staticmethod`` separately, since a test that only checked the
+    decorator would have passed identically whether ``get`` were kept or
+    converted, and pinned nothing about which.
     """
 
-    def test_the_five_pure_reparents_inherit_the_bare_classmethod(self) -> None:
+    def test_all_seven_inherit_the_bare_classmethod(self) -> None:
         from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
         from pcapkit.protocols.internet.esp import ESPStatus
-        from pcapkit.protocols.internet.mh import LMAAddressCode, LocalizedRoutingStatus
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode, LMAAddressCode,
+                                                   LocalizedRoutingStatus)
 
         for cls in (CommandType, ConformanceRequirement, ESPStatus,
-                    LocalizedRoutingStatus, LMAAddressCode):
+                    LocalizedRoutingStatus, LMAAddressCode,
+                    FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(cls=cls.__name__):
                 self.assertIsInstance(inspect.getattr_static(cls, 'get'), classmethod)
-                # Inherited, not redeclared: the class's own ``__dict__`` carries no
-                # ``get`` of its own, which is the difference between a pure
-                # re-parent and a kept-and-converted override.
+                # Inherited, not redeclared: the class's own ``__dict__`` carries
+                # no ``get`` of its own -- the fact that used to distinguish a
+                # pure re-parent from a kept-and-converted override, and now
+                # holds for all seven alike.
                 self.assertNotIn('get', vars(cls))
+
+
+class NonCanonicalKeyConvergenceTests(unittest.TestCase):
+    """The point of GitHub issue #935's final ruling, made literally true:
+    ``get(None)`` and ``get(1.5)`` now answer alike on all seven.
+
+    Before the two overrides were deleted, each branched on
+    ``isinstance(key, int)`` and routed every other type through its own
+    *name* path -- so a key that is neither an :class:`int` nor a
+    :class:`str` fell through to a subscript lookup that always misses,
+    answering with a quiet
+    :exc:`~pcapkit.utilities.exceptions.EnumKeyError`. The base
+    (:mod:`pcapkit.corekit.enum`) branches on ``isinstance(key, str)``
+    instead, so the same key falls through to
+    :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` and the
+    constructor, reaching :meth:`_missing_` and answering with a loud
+    :exc:`~pcapkit.utilities.exceptions.EnumValueError`. Deleting the
+    overrides removes the branch that disagreed, so all seven now answer
+    both keys the same way -- measured here rather than assumed, since
+    "all seven behave alike" is exactly the claim GitHub issue #935 set
+    out to make true, and the two overrides are exactly what kept it from
+    being true before this.
+
+    Verified before writing this test: no call site in this tree -- tests
+    included -- ever passed ``get`` a key that is neither an :class:`int`
+    nor a :class:`str`, so this divergence was live on the two overrides
+    but never actually reached; its removal changes no behaviour any
+    caller in this tree observed, only what a caller passing such a key
+    would see.
+    """
+
+    def test_none_and_float_keys_all_raise_enumvalueerror(self) -> None:
+        from pcapkit.const.ftp.command import CommandType, ConformanceRequirement
+        from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode, LMAAddressCode,
+                                                   LocalizedRoutingStatus)
+
+        for cls in (CommandType, ConformanceRequirement, ESPStatus,
+                    LocalizedRoutingStatus, LMAAddressCode,
+                    FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+            with self.subTest(cls=cls.__name__, key=None):
+                with self.assertRaises(EnumValueError):
+                    cls.get(None)
+            with self.subTest(cls=cls.__name__, key=1.5):
+                with self.assertRaises(EnumValueError):
+                    cls.get(1.5)
 
 
 class ZeroRemainOutsideEnumLookupTests(unittest.TestCase):
