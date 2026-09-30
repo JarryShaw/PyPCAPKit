@@ -73,6 +73,7 @@ Application Layer
 
    ftp
    http
+   ngap
 
 Command Line Tool
 =================

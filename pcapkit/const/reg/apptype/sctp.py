@@ -64,40 +64,40 @@ class SCTP(AppType):
 
     #: - [TCP] Discard
     #: - [UDP] Discard
-    #: - [SCTP] Discard [:rfc:`9260`]
-    #: - [DCCP] Discard [:rfc:`4340`]
+    #: - [SCTP] Discard [RFC 9260]
+    #: - [DCCP] Discard [RFC 4340]
     discard = 9, 'discard', TransportProtocol.sctp
 
     #: - [TCP] File Transfer [Default Data]
     #: - [UDP] File Transfer [Default Data]
-    #: - [SCTP] FTP [:rfc:`9260`]
+    #: - [SCTP] FTP [RFC 9260]
     ftp_data = 20, 'ftp-data', TransportProtocol.sctp
 
-    #: - [TCP] File Transfer Protocol [Control] [:rfc:`959`]
-    #: - [UDP] File Transfer Protocol [Control] [:rfc:`959`]
-    #: - [SCTP] FTP [:rfc:`9260`]
+    #: - [TCP] File Transfer Protocol [Control] [RFC 959]
+    #: - [UDP] File Transfer Protocol [Control] [RFC 959]
+    #: - [SCTP] FTP [RFC 9260]
     ftp = 21, 'ftp', TransportProtocol.sctp
 
-    #: - [TCP] World Wide Web HTTP [:rfc:`9110`]
-    #: - [UDP] World Wide Web HTTP [:rfc:`9110`]
-    #: - [SCTP] HTTP [:rfc:`9260`]
+    #: - [TCP] World Wide Web HTTP [RFC 9110]
+    #: - [UDP] World Wide Web HTTP [RFC 9110]
+    #: - [SCTP] HTTP [RFC 9260]
     http = 80, 'http', TransportProtocol.sctp
 
     #: - [TCP] Border Gateway Protocol
     #: - [UDP] Border Gateway Protocol
-    #: - [SCTP] BGP [:rfc:`9260`]
+    #: - [SCTP] BGP [RFC 9260]
     bgp = 179, 'bgp', TransportProtocol.sctp
 
-    #: - [TCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [UDP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [SCTP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [DCCP] RFC3692-style Experiment 1 [1][:rfc:`4727`][:rfc:`6335`]
+    #: - [TCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 1 [1][RFC 4727][RFC 6335]
     exp1 = 1021, 'exp1', TransportProtocol.sctp
 
-    #: - [TCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [UDP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [SCTP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
-    #: - [DCCP] RFC3692-style Experiment 2 [1][:rfc:`4727`][:rfc:`6335`]
+    #: - [TCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [UDP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [SCTP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
+    #: - [DCCP] RFC3692-style Experiment 2 [1][RFC 4727][RFC 6335]
     exp2 = 1022, 'exp2', TransportProtocol.sctp
 
     #: - [TCP] Cisco IP SLAs Control Protocol
@@ -117,7 +117,7 @@ class SCTP(AppType):
 
     #: - [TCP] Network File System - Sun Microsystems
     #: - [UDP] Network File System - Sun Microsystems
-    #: - [SCTP] Network File System [:rfc:`5665`]
+    #: - [SCTP] Network File System [RFC 5665]
     nfs = 2049, 'nfs', TransportProtocol.sctp
 
     #: - [TCP] Resource Connection Initiation Protocol
@@ -129,8 +129,8 @@ class SCTP(AppType):
     #: - [SCTP] M2UA
     m2ua = 2904, 'm2ua', TransportProtocol.sctp
 
-    #: - [TCP] M3UA [:rfc:`4666`]
-    #: - [SCTP] M3UA [:rfc:`4666`]
+    #: - [TCP] M3UA [RFC 4666]
+    #: - [SCTP] M3UA [RFC 4666]
     m3ua = 2905, 'm3ua', TransportProtocol.sctp
 
     #: - [TCP] Megaco H-248
@@ -146,18 +146,18 @@ class SCTP(AppType):
     #: [SCTP] ITU-T Q.1902.1/Q.2150.3
     itu_bicc_stc = 3097, 'itu-bicc-stc', TransportProtocol.sctp
 
-    #: - [TCP] M2PA [:rfc:`4165`]
-    #: - [SCTP] M2PA [:rfc:`4165`]
+    #: - [TCP] M2PA [RFC 4165]
+    #: - [SCTP] M2PA [RFC 4165]
     m2pa = 3565, 'm2pa', TransportProtocol.sctp
 
-    #: [SCTP] asap sctp [:rfc:`5352`]
+    #: [SCTP] asap sctp [RFC 5352]
     asap_sctp = 3863, 'asap-sctp', TransportProtocol.sctp
 
-    #: [SCTP] asap-sctp/tls [:rfc:`5352`]
+    #: [SCTP] asap-sctp/tls [RFC 5352]
     asap_sctp_tls = 3864, 'asap-sctp-tls', TransportProtocol.sctp
 
     #: - [TCP] DIAMETER
-    #: - [SCTP] DIAMETER [:rfc:`3588`]
+    #: - [SCTP] DIAMETER [RFC 3588]
     diameter = 3868, 'diameter', TransportProtocol.sctp
 
     #: - [TCP] AWS protocol for cloud remoting solution
@@ -189,20 +189,20 @@ class SCTP(AppType):
     #: - [UDP] ipfix protocol over DTLS
     ipfixs = 4740, 'ipfixs', TransportProtocol.sctp
 
-    #: - [TCP] SIP [:rfc:`3263`]
-    #: - [UDP] SIP [:rfc:`3263`]
-    #: - [SCTP] SIP [:rfc:`4168`]
+    #: - [TCP] SIP [RFC 3263]
+    #: - [UDP] SIP [RFC 3263]
+    #: - [SCTP] SIP [RFC 4168]
     sip = 5060, 'sip', TransportProtocol.sctp
 
-    #: - [TCP] SIP-TLS [:rfc:`3263`]
-    #: - [UDP] SIP-TLS [:rfc:`3263`]
-    #: - [SCTP] SIP-TLS [:rfc:`4168`]
+    #: - [TCP] SIP-TLS [RFC 3263]
+    #: - [UDP] SIP-TLS [RFC 3263]
+    #: - [SCTP] SIP-TLS [RFC 4168]
     sips = 5061, 'sips', TransportProtocol.sctp
 
     #: [SCTP] Candidate AR
     car = 5090, 'car', TransportProtocol.sctp
 
-    #: [SCTP] Context Transfer Protocol [:rfc:`4065`]
+    #: [SCTP] Context Transfer Protocol [RFC 4065]
     cxtp = 5091, 'cxtp', TransportProtocol.sctp
 
     #: - [TCP] NOTEZA Data Safety Service
@@ -218,13 +218,13 @@ class SCTP(AppType):
     #: - [SCTP] AMQP
     amqp = 5672, 'amqp', TransportProtocol.sctp
 
-    #: - [TCP] V5UA application port [:rfc:`3807`]
-    #: - [UDP] V5UA application port [:rfc:`3807`]
-    #: - [SCTP] V5UA application port [:rfc:`3807`]
+    #: - [TCP] V5UA application port [RFC 3807]
+    #: - [UDP] V5UA application port [RFC 3807]
+    #: - [SCTP] V5UA application port [RFC 3807]
     v5ua = 5675, 'v5ua', TransportProtocol.sctp
 
-    #: - [TCP] Diameter over TLS/TCP [:rfc:`6733`]
-    #: - [SCTP] Diameter over DTLS/SCTP [:rfc:`6733`]
+    #: - [TCP] Diameter over TLS/TCP [RFC 6733]
+    #: - [SCTP] Diameter over DTLS/SCTP [RFC 6733]
     diameters = 5868, 'diameters', TransportProtocol.sctp
 
     #: - [TCP] Flight & Flow Info for Collaborative Env
@@ -285,19 +285,19 @@ class SCTP(AppType):
     #: [SCTP] Unassigned
     unassigned_6702 = 6702, 'unassigned', TransportProtocol.sctp
 
-    #: [SCTP] ForCES HP (High Priority) channel [:rfc:`5811`]
+    #: [SCTP] ForCES HP (High Priority) channel [RFC 5811]
     frc_hp = 6704, 'frc-hp', TransportProtocol.sctp
 
-    #: [SCTP] ForCES MP (Medium Priority) channel [:rfc:`5811`]
+    #: [SCTP] ForCES MP (Medium Priority) channel [RFC 5811]
     frc_mp = 6705, 'frc-mp', TransportProtocol.sctp
 
-    #: [SCTP] ForCES LP (Low priority) channel [:rfc:`5811`]
+    #: [SCTP] ForCES LP (Low priority) channel [RFC 5811]
     frc_lp = 6706, 'frc-lp', TransportProtocol.sctp
 
     #: [SCTP] conductor for multiplex
     conductor_mpx = 6970, 'conductor-mpx', TransportProtocol.sctp
 
-    #: - [TCP] SImple Middlebox COnfiguration (SIMCO) Server [:rfc:`4540`]
+    #: - [TCP] SImple Middlebox COnfiguration (SIMCO) Server [RFC 4540]
     #: - [SCTP] SImple Middlebox COnfiguration (SIMCO)
     simco = 7626, 'simco', TransportProtocol.sctp
 
@@ -313,8 +313,8 @@ class SCTP(AppType):
     #: - [DCCP] Reserved
     reserved_8282 = 8282, 'reserved', TransportProtocol.sctp
 
-    #: - [TCP] PIM over Reliable Transport [:rfc:`6559`]
-    #: - [SCTP] PIM over Reliable Transport [:rfc:`6559`]
+    #: - [TCP] PIM over Reliable Transport [RFC 6559]
+    #: - [SCTP] PIM over Reliable Transport [RFC 6559]
     pim_port = 8471, 'pim-port', TransportProtocol.sctp
 
     #: [SCTP] LCS Application Protocol
@@ -330,10 +330,10 @@ class SCTP(AppType):
     #: - [SCTP] IUA
     iua = 9900, 'iua', TransportProtocol.sctp
 
-    #: [SCTP] enrp server channel [:rfc:`5353`]
+    #: [SCTP] enrp server channel [RFC 5353]
     enrp_sctp = 9901, 'enrp-sctp', TransportProtocol.sctp
 
-    #: [SCTP] enrp/tls server channel [:rfc:`5353`]
+    #: [SCTP] enrp/tls server channel [RFC 5353]
     enrp_sctp_tls = 9902, 'enrp-sctp-tls', TransportProtocol.sctp
 
     #: - [TCP] numerical systems messaging
@@ -364,9 +364,9 @@ class SCTP(AppType):
     #: - [SCTP] Distributed Network Protocol
     dnp = 20000, 'dnp', TransportProtocol.sctp
 
-    #: - [TCP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    #: - [UDP] Network File System (NFS) over RDMA [:rfc:`8267`]
-    #: - [SCTP] Network File System (NFS) over RDMA [:rfc:`8267`]
+    #: - [TCP] Network File System (NFS) over RDMA [RFC 8267]
+    #: - [UDP] Network File System (NFS) over RDMA [RFC 8267]
+    #: - [SCTP] Network File System (NFS) over RDMA [RFC 8267]
     nfsrdma = 20049, 'nfsrdma', TransportProtocol.sctp
 
     #: [SCTP] RNSAP User Adaptation for Iurh
@@ -421,12 +421,12 @@ class SCTP(AppType):
     #: [SCTP] F1 Control Plane (3GPP)
     f1_control = 38472, 'f1-control', TransportProtocol.sctp
 
-    #: - [TCP] http protocol over TLS/SSL [:rfc:`9110`]
-    #: - [UDP] http protocol over TLS/SSL [:rfc:`9110`]
-    #: - [SCTP] HTTPS [:rfc:`9260`]
+    #: - [TCP] http protocol over TLS/SSL [RFC 9110]
+    #: - [UDP] http protocol over TLS/SSL [RFC 9110]
+    #: - [SCTP] HTTPS [RFC 9260]
     https_443 = 443, 'https', TransportProtocol.sctp
 
-    #: - [TCP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
-    #: - [UDP] The Secure Shell (SSH) Protocol [:rfc:`4251`]
-    #: - [SCTP] SSH [:rfc:`9260`]
+    #: - [TCP] The Secure Shell (SSH) Protocol [RFC 4251]
+    #: - [UDP] The Secure Shell (SSH) Protocol [RFC 4251]
+    #: - [SCTP] SSH [RFC 9260]
     ssh_22 = 22, 'ssh', TransportProtocol.sctp

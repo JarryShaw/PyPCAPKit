@@ -777,7 +777,8 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownOption)
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # Per the mint/unmint ruling for #775
+        # (``docs/source/contributing/conventions/mint-criterion.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
         # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label
@@ -1259,10 +1260,20 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(PCAPNG.__dict__['__secrets__'][SecretsType.TLS_Key_Log], 'tls')
 
     def test_tls_key_label_tracks_rfc_9850_plus_documented_rsa_exception(self) -> None:
+        # GitHub issue #886: the canonical definition moved from a hand-written
+        # class in this module to a generated one under
+        # :mod:`pcapkit.const.pcapng.tls_key_label`, with a re-export left here
+        # so ``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` keeps
+        # working. Both names have to resolve to the *same* object, not merely
+        # to two classes that happen to agree.
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as CanonicalTLSKeyLabel
         from pcapkit.protocols.misc.pcapng import TLSKeyLabel
 
-        # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry,
-        # plus the NSS-historical ``RSA`` label this module documents and retains.
+        self.assertIs(TLSKeyLabel, CanonicalTLSKeyLabel)
+
+        # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry
+        # (10 rows as of 2026-09-28), plus the NSS-historical ``RSA`` label this
+        # module documents and retains -- it has no row of its own.
         expected = {
             'RSA',
             'CLIENT_RANDOM',
@@ -1277,10 +1288,29 @@ class PCAPNGUnitTests(unittest.TestCase):
             'ECH_CONFIG',
         }
         self.assertEqual(set(TLSKeyLabel.__members__), expected)
+        self.assertEqual(len(TLSKeyLabel.__members__), 11)
+
+        # Every member's value pinned exactly -- this is a value-matched
+        # registry (``TLSKeyLabel(label.upper())`` at
+        # pcapkit/protocols/schema/misc/pcapng.py:2108), so the value, not
+        # merely the name, is what callers depend on.
+        for name in expected:
+            with self.subTest(name=name):
+                member = TLSKeyLabel[name]
+                self.assertEqual(member.value, name)
+                self.assertIs(TLSKeyLabel(name), member)
 
         self.assertIs(TLSKeyLabel('ECH_SECRET'), TLSKeyLabel.ECH_SECRET)
         self.assertIs(TLSKeyLabel('ECH_CONFIG'), TLSKeyLabel.ECH_CONFIG)
         self.assertIs(TLSKeyLabel('RSA'), TLSKeyLabel.RSA)
+
+        # Matching stays by value, not name -- lower-case never resolves, and
+        # an unrecognised label still raises rather than minting, unchanged
+        # from before this class was generated.
+        with self.assertRaises(ValueError):
+            TLSKeyLabel('client_random')
+        with self.assertRaises(ValueError):
+            TLSKeyLabel('NOT_A_REGISTERED_LABEL')
 
     def test_pcapng_schema_helpers_and_post_process_branches(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
@@ -1924,7 +1954,8 @@ class PCAPNGUnitTests(unittest.TestCase):
                                                           UnknownSecrets as SchemaUnknownSecrets)
         from pcapkit.utilities.exceptions import ProtocolError
 
-        # Per the mint/unmint ruling for #775 (``docs/source/conventions.rst``),
+        # Per the mint/unmint ruling for #775
+        # (``docs/source/contributing/conventions/mint-criterion.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
         # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label
@@ -2717,7 +2748,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Regression for #366, cause 1: ``PacketBlock.padding_data`` and
         # ``DecryptionSecretsBlock.padding_data`` were declared ``BytesField``,
         # which ``Schema.pack`` does not fill in, so packing them handed
-        # ``struct.pack`` the ``NoValue`` sentinel.
+        # ``struct.pack`` the ``NO_VALUE`` sentinel.
         from pcapkit.corekit.fields.strings import PaddingField
         from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
                                                           EnhancedPacketBlock, PacketBlock)

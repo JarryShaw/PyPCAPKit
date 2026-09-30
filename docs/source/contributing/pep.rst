@@ -96,7 +96,7 @@ registers considerably more than :rfc:`9260` defines, and the surplus falls
 through to the generic handlers rather than failing the extraction -- so a
 capture using one parses, but yields an opaque chunk instead of its fields.
 As things stand that is 17 of the 30 registered chunk types, 24 of the 32
-chunk parameters and 10 of the 23 error causes; :doc:`pcapkit/const/sctp`
+chunk parameters and 10 of the 23 error causes; :doc:`/pcapkit/const/sctp`
 lists them all.
 
 The other thing wanted for SCTP is reassembly, which no protocol beyond IP and
@@ -113,7 +113,7 @@ Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
 What is still wanted there is wider algorithm coverage. The two enumerations
-under :doc:`pcapkit/const/esp` carry every transform IANA has registered -- 36
+under :doc:`/pcapkit/const/esp` carry every transform IANA has registered -- 36
 :class:`~pcapkit.const.esp.cipher.Cipher` members and 15
 :class:`~pcapkit.const.esp.integrity.Integrity` members -- but
 :data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
@@ -169,7 +169,7 @@ The sub-registries turned out to be the easy half, as predicted: binding
 revocation types and triggers, handoff indicators, access network identifier
 sub-options, flow identification and flow binding sub-options, LMA-controlled MAG
 parameters, DNS update status, traffic selector formats and QoS attributes were
-already generated in full under :doc:`pcapkit/const/mh`, and **no new
+already generated in full under :doc:`/pcapkit/const/mh`, and **no new
 enumeration or vendor crawler was needed**. Two value sets did have to be added
 to ``mh.py`` itself rather than to :mod:`pcapkit.const.mh`, because IANA
 registers neither: the localized routing acknowledgment status codes of
@@ -275,7 +275,7 @@ Registered, But Not Dissected
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A different shape of gap from the empty stubs, and easy to miss because nothing
-announces it. The :doc:`pcapkit/const/reg` enumerations are complete, but only a
+announces it. The :doc:`/pcapkit/const/reg` enumerations are complete, but only a
 small part of each is bound to a dissector; everything else resolves to
 :class:`~pcapkit.protocols.misc.raw.Raw`, so the capture parses without
 complaint and yields nothing useful.
@@ -383,7 +383,7 @@ PCAPNG Support
 
 **Done.** The builtin default engine parses PCAP-NG files;
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implements the format, with its
-block and option enumerations under :doc:`pcapkit/const/pcapng`. This closes
+block and option enumerations under :doc:`/pcapkit/const/pcapng`. This closes
 the request in `#35 <https://github.com/JarryShaw/PyPCAPKit/issues/35>`__, which
 the thread raised when only PCAP was supported.
 
@@ -474,7 +474,7 @@ with a hard-wired handler. It now provides:
   flow-tracing setup -- so that ``DEBUG`` explains what PyPCAPKit did with a
   file without descending into per-field parsing.
 
-See :doc:`pcapkit/utilities/logging` for the configuration recipes, including
+See :doc:`/pcapkit/utilities/logging` for the configuration recipes, including
 the one-line restore of the pre-existing :obj:`sys.stderr` output.
 
 One item remains wanted, called out there as deliberately out of scope:
@@ -490,9 +490,11 @@ New Engines
 ``engine='pypcap'`` selects :class:`pcapkit.foundation.engines.pypcap.PyPCAP`;
 each has a matching :mod:`pcapkit.toolkit` module
 (:mod:`pcapkit.toolkit.pypcapfile`, :mod:`pcapkit.toolkit.pypcap`), a
-``pyproject.toml`` extra (``PyPCAPFile``, which ``all`` includes, and
-``PyPCAP``, which it deliberately does not -- see below), docs
-under :doc:`pcapkit/foundation/engines/index`, and tests under
+``pyproject.toml`` extra (``PyPCAPFile`` and ``PyPCAP``, neither of which
+``all`` includes -- ``PyPCAP`` for the installability reason below, and
+``PyPCAPFile`` because GitHub issue #910 narrowed ``all`` to core addons
+only), docs
+under :doc:`/pcapkit/foundation/engines/index`, and tests under
 ``tests/foundation/engines/`` and ``tests/toolkit/``. Both were verified
 end-to-end against the sample captures: each agrees with the ``default`` engine
 on frame count, per-record capture length, timestamp and Ethernet header.
@@ -538,8 +540,10 @@ both of the following are worth knowing before reaching for them:
   build. Since there is no wheel to fall back on, the extra is kept **out of**
   ``all``: otherwise ``pip install pypcapkit[all]`` would demand a compiler and
   the libpcap development files from every user, and it broke the docs, conda
-  and release workflows -- all of which install ``.[all]`` -- on the macOS
-  runner, where :file:`pcap.h` is present but no ``libpcap.dylib`` is.
+  and release workflows -- all of which install ``.[all]``, and some now
+  ``.[all,dev]`` since GitHub issue #910 narrowed ``all`` to core addons only
+  -- on the macOS runner, where :file:`pcap.h` is present but no
+  ``libpcap.dylib`` is.
 
   This is now solved, though not by changing the ``PyPCAP`` extra. `pcap-ct
   <https://pypi.org/project/pcap-ct/>`__ re-implements the ``pypcap`` API in pure
@@ -569,7 +573,7 @@ noisily: `pypcap`_ performs no protocol dissection, so it disables reassembly
 reassembly while keeping IPv4 and TCP. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
 rather than by silently returning nothing --
-:doc:`pcapkit/foundation/engines/index` tabulates them.
+:doc:`/pcapkit/foundation/engines/index` tabulates them.
 
 Adding a further engine no longer means adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes: the
@@ -577,7 +581,7 @@ engine interface has been refactored since. A new engine subclasses
 :class:`pcapkit.foundation.engines.engine.Engine` and implements just two
 methods, :meth:`~pcapkit.foundation.engines.engine.Engine.run`
 and :meth:`~pcapkit.foundation.engines.engine.Engine.read_frame`; subclassing
-registers it automatically. See :doc:`ext` for a worked example. What does
+registers it automatically. See :doc:`/ext` for a worked example. What does
 still apply is the unified auxiliary tools in :mod:`pcapkit.toolkit`, where
 each engine has a matching module.
 
@@ -619,7 +623,7 @@ Reassembly Beyond IP and TCP
 ----------------------------
 
 **Still open**, and newer than the rest of this page --
-:doc:`pcapkit/foundation/reassembly/index` covers three protocols and no more.
+:doc:`/pcapkit/foundation/reassembly/index` covers three protocols and no more.
 IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
@@ -774,7 +778,7 @@ Two smaller items in the same subsystem:
 Reassembly is also unavailable on some engines rather than merely slower, which
 is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 ``pcap_ct`` disable it entirely, and ``pypcapfile`` disables the IPv6 half of it.
-:doc:`pcapkit/foundation/engines/index` tabulates that.
+:doc:`/pcapkit/foundation/engines/index` tabulates that.
 
 Checksum and Integrity Verification
 -----------------------------------

@@ -15,6 +15,7 @@ internet layer, with detailed implementation and methods.
    ip
    ipv4
    ipv6
+   ipv6_ext
    ipv6_frag
    ipv6_opts
    ipv6_route

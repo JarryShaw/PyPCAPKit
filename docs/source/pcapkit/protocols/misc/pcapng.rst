@@ -197,10 +197,12 @@ Auxiliary Data
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.misc.pcapng.TLSKeyLabel
-   :members:
-   :undoc-members:
-   :show-inheritance:
+:class:`TLSKeyLabel <pcapkit.const.pcapng.tls_key_label.TLSKeyLabel>` moved to
+:mod:`pcapkit.const.pcapng.tls_key_label` (GitHub issue #886), generated the
+same way as its :mod:`pcapkit.const.pcapng` siblings since :rfc:`9850#section-4.2`
+makes it an IANA registry rather than a hand-picked helper enum. This module
+still re-exports it under its own name, so
+``from pcapkit.protocols.misc.pcapng import TLSKeyLabel`` keeps working.
 
 .. autoclass:: pcapkit.protocols.misc.pcapng.WireGuardKeyLabel
    :members:

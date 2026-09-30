@@ -3,8 +3,9 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.infoclass import Info, info_final
-from pcapkit.utilities.compat import StrEnum
+from pcapkit.utilities.compat import StrEnum, auto
 
 __all__ = ['ReassemblyData', 'Completion', 'Deferred', 'DeferredPacket']
 
@@ -17,8 +18,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import ProtocolBase
 
 
-class Completion(StrEnum):
+class Completion(EnumLookup, StrEnum):
     """How completely a datagram was reassembled, and why it stopped.
+
+    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
+    issue #877's ruling that every non-registry enumeration shares that
+    lookup contract -- pure re-parenting, since this class defines neither
+    ``get`` nor ``_missing_`` of its own to reconcile with the base.
 
     This is the value of
     :attr:`Datagram.completed <pcapkit.foundation.reassembly.data.ip.Datagram.completed>`.
@@ -38,13 +44,23 @@ class Completion(StrEnum):
     against a member instead.
 
     It derives from :class:`~pcapkit.utilities.compat.StrEnum`, as
-    :class:`~pcapkit.protocols.application.httpv1.Type` and
-    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` do, which buys two things
-    a plain :class:`enum.Enum` does not: the value survives
+    :class:`~pcapkit.protocols.application.httpv1.Type` does, which buys two
+    things a plain :class:`enum.Enum` does not: the value survives
     :func:`json.dumps` -- a plain enumeration raises :exc:`TypeError` there, and
     :meth:`Datagram.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` hands this
     field straight out -- and ``datagram.completed == 'timeout'`` works, so the
     new state can be tested for without importing this class.
+    :class:`~pcapkit.protocols.misc.pcapng.TLSKeyLabel` used to be a third
+    precedent for the same :class:`~pcapkit.utilities.compat.StrEnum` base, but
+    GitHub issue #886 moved its canonical definition to
+    :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, generated like its
+    :mod:`pcapkit.const.pcapng` siblings: it now derives from :class:`aenum`'s
+    own ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`) rather than
+    from :mod:`pcapkit.utilities.compat`'s version-branched one. Both
+    properties above still hold for it either way -- ``aenum.StrEnum`` is a
+    :class:`str` subclass same as the stdlib one -- but ``isinstance``/
+    ``issubclass`` against :class:`pcapkit.utilities.compat.StrEnum` no longer
+    does, which is why it is called out here rather than left silently stale.
 
     Warning:
         Being a :class:`str` whose :attr:`PARTIAL` and :attr:`TIMEOUT` members are
@@ -57,13 +73,13 @@ class Completion(StrEnum):
     """
 
     #: Reassembled in whole: every octet of the datagram was received.
-    COMPLETE = 'complete'
+    COMPLETE = auto()
 
     #: Fragments were still outstanding when the buffer was flushed -- at the end
     #: of the capture, or when the session was torn down (a TCP FIN/RST, or an
     #: IPv4 datagram whose identifier was reused by an unfragmented packet).
     #: The missing octets may simply not have been captured.
-    PARTIAL = 'partial'
+    PARTIAL = auto()
 
     #: Reassembly was **abandoned** under the reassembly timeout, i.e. the
     #: capture clock advanced past the deadline of
@@ -71,7 +87,7 @@ class Completion(StrEnum):
     #: seconds after the first-arriving fragment while the datagram was still
     #: incomplete. :rfc:`8200#section-4.5` requires the held fragments be
     #: discarded, so no further fragment will ever be added to this datagram.
-    TIMEOUT = 'timeout'
+    TIMEOUT = auto()
 
     def __bool__(self) -> 'bool':
         """Whether the datagram was reassembled in whole.

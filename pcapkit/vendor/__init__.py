@@ -49,6 +49,7 @@ from pcapkit.vendor.ipv6 import *
 from pcapkit.vendor.ipx import *
 from pcapkit.vendor.l2tp import *
 from pcapkit.vendor.mh import *
+from pcapkit.vendor.ngap import *
 from pcapkit.vendor.ospf import *
 from pcapkit.vendor.sctp import *
 from pcapkit.vendor.tcp import *
@@ -97,6 +98,8 @@ __all__ = [
     'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
     'MH_LMAControlledMAGSuboption', 'MH_LLACode', 'MH_CGAType',
     'MH_CGAExtension', 'MH_CGASec', 'MH_BindingError',
+    # NGAP
+    'NGAP_ProcedureCode', 'NGAP_ProtocolIE',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
     # SCTP
@@ -109,5 +112,5 @@ __all__ = [
     # PCAPNG
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
-    'PCAPNG_FilterType',
+    'PCAPNG_FilterType', 'PCAPNG_TLSKeyLabel',
 ]

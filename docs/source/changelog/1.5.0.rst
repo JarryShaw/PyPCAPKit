@@ -126,7 +126,7 @@ Fixed
   raised ``TypeError: 'RETR' already in use`` rather than resolving. Reachable
   from wire data for FTP: ``pcapkit.protocols.application.ftp`` compiles its
   request pattern with ``re.I`` and passes the match verbatim, and
-  :rfc:`959#section-5.3` makes FTP commands case-insensitive -- "Upper and lower
+  :rfc:`959#section-5` makes FTP commands case-insensitive -- "Upper and lower
   case alphabetic characters are to be treated identically", listing
   ``RETR Retr retr ReTr rETr`` as the same command -- so ``retr file.txt`` was a
   valid request this library could not parse. Both ``get()`` and ``_missing_``

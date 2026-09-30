@@ -35,7 +35,7 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.field import NoValue
+from pcapkit.corekit.fields.field import NO_VALUE
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as Data_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as Data_DFFFlags
@@ -64,7 +64,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
 from pcapkit.protocols.data.internet.ipv6_opts import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as Data_UnassignedOption
-from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.schema.internet.ipv6_opts import CALIPSOOption as Schema_CALIPSOOption
 from pcapkit.protocols.schema.internet.ipv6_opts import \
     HomeAddressOption as Schema_HomeAddressOption
@@ -124,7 +124,7 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Opts']
 
 
-class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
+class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
                 schema=Schema_IPv6_Opts, data=Data_IPv6_Opts):
     """This class implements Destination Options for IPv6.
 
@@ -1073,7 +1073,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 drop=bool(schema.flags['drop']),
             ),
             seq=schema.seq,
-            seed_id=schema.seed if schema.seed is not NoValue else None,  # type: ignore[comparison-overlap]
+            seed_id=schema.seed if schema.seed is not NO_VALUE else None,  # type: ignore[comparison-overlap]
         )
         return opt
 

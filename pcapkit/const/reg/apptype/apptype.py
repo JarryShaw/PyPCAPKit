@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, cast
 
 from aenum import IntEnum, StrEnum, auto, extend_enum
 
-from pcapkit.corekit.enum import EnumRegistry
+from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry
 
 __all__ = ['TransportProtocol', 'AppType']
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import MultiDict
 
 
-class TransportProtocol(IntEnum):
+class TransportProtocol(EnumLookup, IntEnum):
     """Transport layer protocol."""
 
     # mypy has no aenum plugin, so this class is a plain class to it: every
@@ -87,19 +87,82 @@ class TransportProtocol(IntEnum):
     #: Datagram Congestion Control Protocol.
     dccp = cast('TransportProtocol', auto())
 
-    @staticmethod
-    def get(key: 'int | str') -> 'TransportProtocol':
+    @classmethod
+    def get(cls, key: 'int | str', default: 'Any' = NO_DEFAULT) -> 'TransportProtocol':
         """Backport support for original codes.
+
+        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
+        issue #877's re-parenting, but keeps this override rather than dropping
+        it, for one behaviour the base does not reproduce on its own: **case
+        folding**. This class has always matched a name case-insensitively
+        (``key.lower()``); the base's own ``str`` branch is case-sensitive.
+        Lowering ``key`` before delegating reproduces that: every member name
+        here is already lower-case, so a lowered ``key`` still hits the base's
+        exact ``_member_map_`` lookup.
+
+        Case folding is now the *only* thing this override adds. It used to
+        convert the base's name-miss exception as well -- this class raised
+        :exc:`ValueError` where the base raised :exc:`KeyError` -- and GitHub
+        issue #923's ruling retired that conversion: *"Either ``ValueError``
+        or ``KeyError``, that's depending on how stdlib's ``Enum`` would raise
+        on these circumstances."* A stdlib ``E['nosuch']`` raises
+        :exc:`KeyError`, and #923's census of the 127 concrete
+        :class:`~pcapkit.corekit.enum.EnumLookup` subclasses -- taken before
+        #921 re-parented this class, so this class is not among them -- found
+        119 already answering a name miss that way against 5 answering with
+        :exc:`ValueError`. Those 5 are :class:`AppType` and its four transport
+        registries, and they land there only because their own ``get()`` takes
+        an :class:`int` port and never accepts a name at all, rather than from
+        any name-miss policy. So there was no policy here to preserve, and a
+        name miss now reaches the caller as
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
+        Maintainer ruling on GitHub PR #836 -- "Do not allow extension of
+        TransportProtocol at all" -- is untouched by that: the refusal is still
+        a refusal and still mints nothing, only its exception class moved.
+
+        The base is a :class:`classmethod`
+        (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
+        moves from :class:`staticmethod` to :class:`classmethod` to
+        delegate at all -- the same move GitHub issue #908 and #915 made for
+        :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call
+        site in this tree for GitHub issue #877: all call this method by
+        name, none take it as a bare callable or introspect ``__func__``,
+        so the switch is not caller-visible.
+
+        ``default`` did not exist on this override before this change --
+        the original had no such parameter at all, which is a genuine LSP
+        violation once this class' ``get`` is a :class:`classmethod`
+        override of one that has it: a caller holding a
+        :class:`~pcapkit.corekit.enum.EnumLookup`-typed reference could pass
+        ``default=`` and, before this, would have hit a
+        :exc:`TypeError` at this subclass. Forwarded verbatim to
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than
+        reimplemented, so it behaves exactly as the base's own ``default``
+        does: a fallback to an *already-registered* value, resolved through
+        ``_value2member_map_`` and never through the constructor, so
+        passing one still cannot mint. Every call site in this tree omits
+        it, so this is purely an added, backward-compatible capability, not
+        a change to anything this tree exercises today.
 
         Args:
             key: Key to get enum item.
+            default: An already-registered value to fall back to when
+                ``key`` resolves to nothing. :data:`~pcapkit.corekit.enum.
+                NO_DEFAULT`, the default, means *no default* -- see
+                :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
+
+        Raises:
+            EnumKeyError: If ``key`` names no member and there is no usable
+                ``default``. A :exc:`KeyError`, from the base, since GitHub
+                issue #923 -- it used to be a plain :exc:`ValueError` raised
+                here.
+            EnumValueError: If ``key`` is a value no member carries and there
+                is no usable ``default``. A :exc:`ValueError`, from the base.
 
         :meta private:
         """
-        if isinstance(key, int):
-            return TransportProtocol(key)
-        if key.lower() in TransportProtocol.__members__:
-            return TransportProtocol[key.lower()]  # type: ignore[misc]
+        if isinstance(key, str):
+            return super().get(key.lower(), default)
         # NOTE: maintainer ruling on this PR (#836): "Do not allow extension
         # of TransportProtocol at all." A name that is not a declared member
         # used to mint a brand-new one here, at ``max_val + 1`` (before that,
@@ -117,7 +180,21 @@ class TransportProtocol(IntEnum):
         # splitting." A ``'|'``-joined name is therefore not special any
         # more -- it is simply not the name of a declared member, and gets
         # the same message as any other one that is not.
-        raise ValueError(f'{key!r} is not a valid {TransportProtocol.__name__}')
+        #
+        # NOTE: the delegation below is exception-compatible for the keys this
+        # signature admits -- an unrecognised :class:`int` still reaches the
+        # caller as a :exc:`ValueError`, now the base's own
+        # :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue
+        # #923 rather than :mod:`aenum`'s bare one. It is not compatible for
+        # keys outside it: ``None``, a :class:`float` and an unhashable key
+        # used to raise :exc:`AttributeError` from the ``key.lower()`` this
+        # branch no longer reaches, and now raise :exc:`ValueError` (or, for a
+        # :class:`float`, resolve -- ``get(1.0)`` answers ``tcp``, since
+        # ``cls(key)`` accepts whatever :class:`int` equality accepts). No
+        # caller in this tree can reach any of those: the only live call site
+        # passes ``proto.lower()``, always a :class:`str`. The new shape is
+        # what every other ``EnumLookup`` subclass already does.
+        return super().get(key, default)
 
     # NOTE: ``_missing_`` used to range-check ``value`` and then defer to
     # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an
@@ -531,7 +608,7 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Unassigned
        * - ``reserved``
          - 49151
-         - [N/A] Reserved [:rfc:`6335`]
+         - [N/A] Reserved [RFC 6335]
        * - ``argus``
          - N/A
          - [N/A] ARGUS Protocol
@@ -690,13 +767,13 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Management Information Base
        * - ``mihcs``
          - N/A
-         - [N/A] MIH Command Services [:rfc:`5679`]
+         - [N/A] MIH Command Services [RFC 5679]
        * - ``mihes``
          - N/A
-         - [N/A] MIH Event Services [:rfc:`5679`]
+         - [N/A] MIH Event Services [RFC 5679]
        * - ``mihis``
          - N/A
-         - [N/A] MIH Information Services [:rfc:`5679`]
+         - [N/A] MIH Information Services [RFC 5679]
        * - ``mfe-nsp``
          - N/A
          - [N/A] MFE Network Services Protocol
@@ -717,13 +794,13 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Remote Job Service
        * - ``netconf-beep``
          - N/A
-         - [N/A] NETCONF over BEEP [:rfc:`4744`][:rfc:`9900`]
+         - [N/A] NETCONF over BEEP [RFC 4744][RFC 9900]
        * - ``netconfsoapbeep``
          - N/A
-         - [N/A] NETCONF for SOAP over BEEP [:rfc:`4743`][:rfc:`9900`]
+         - [N/A] NETCONF for SOAP over BEEP [RFC 4743][RFC 9900]
        * - ``netconfsoaphttp``
          - N/A
-         - [N/A] NETCONF for SOAP over HTTPS [:rfc:`4743`][:rfc:`9900`]
+         - [N/A] NETCONF for SOAP over HTTPS [RFC 4743][RFC 9900]
        * - ``nfile``
          - N/A
          - [N/A] A File Access Protocol
@@ -1251,7 +1328,7 @@ class AppType(EnumRegistry, StrEnum):
            protocol
        * - ``help``
          - N/A
-         - [N/A] HELP command [:rfc:`1078`]
+         - [N/A] HELP command [RFC 1078]
        * - ``hg``
          - N/A
          - [N/A] Mercurial web-based repository access
@@ -1702,8 +1779,8 @@ class AppType(EnumRegistry, StrEnum):
          - [N/A] Pedestal Interface Unit by RPM-PSI
        * - ``pkixrep``
          - N/A
-         - [N/A] Public Key Infrastructure Repository Locator Service
-           [:rfc:`4386`]
+         - [N/A] Public Key Infrastructure Repository Locator Service [RFC
+           4386]
        * - ``poch``
          - N/A
          - [N/A] Parallel OperatiOn and Control Heuristic (Pooch)
@@ -2882,10 +2959,10 @@ class AppType(EnumRegistry, StrEnum):
         # ruling for the whole family: *"only IANA registered ones are legit
         # values and we need register to properly create new entries."*
         if 225 <= value <= 241:
-            #: [N/A] Reserved [:rfc:`1060`]
+            #: [N/A] Reserved [RFC 1060]
             return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 249 <= value <= 255:
-            #: [N/A] Reserved [:rfc:`1060`]
+            #: [N/A] Reserved [RFC 1060]
             return cls._unregistered_member(value, 'reserved', TransportProtocol.undefined)
         if 272 <= value <= 279:
             #: [N/A] Unassigned

@@ -111,7 +111,17 @@ jobs:
 
           python -m pip install -U pip setuptools wheel packaging
           python -m pip install -U isort
-          python -m pip install -e .[all]
+
+          # `all` carries `pycrate` since #910 (a core addon there now, see its
+          # own comment in pyproject.toml), but not `requests`/`beautifulsoup4`
+          # any more -- #910 moved those to the `dev` extra instead, which is
+          # for the toolchain rather than for a vendor crawl. `vendor` is
+          # installed alongside `all` for those two: `pcapkit-vendor` below
+          # regenerates every crawler with no target given, and seven of them
+          # import `bs4` at module scope while `pcapkit.vendor.default` imports
+          # `requests` the same way (#507). See the `vendor` extra's own
+          # comment in pyproject.toml for the full reasoning.
+          python -m pip install -e .[all,vendor]
 
       - name: Update Vendor
         run: |

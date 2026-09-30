@@ -332,7 +332,7 @@ class SchemaUnitTests(unittest.TestCase):
 
         # ``__post_init__`` ran: ``size`` carries its declared default, and the
         # two that declare none are left absent rather than holding the
-        # ``NoValue`` the generated ``__init__`` seeded them with
+        # ``NO_VALUE`` the generated ``__init__`` seeded them with
         self.assertEqual(schema.to_dict(), {'kind': 9, 'size': 0x0102})
 
         # so the schema packs, where before the fix the fields left out reached
@@ -367,7 +367,7 @@ class SchemaUnitTests(unittest.TestCase):
             spare: int = UInt8Field()
 
         # a field the caller left out is filled from its declared default, and one
-        # declaring none is left absent rather than holding ``NoValue``
+        # declaring none is left absent rather than holding ``NO_VALUE``
         self.assertEqual(OptionalSchema(kind=9).to_dict(), {'kind': 9, 'maybe': 0xCC})
 
         # a ``None`` the caller passed is a value they chose, not a field they
@@ -390,7 +390,7 @@ class SchemaUnitTests(unittest.TestCase):
 
     def test_schema_mapping_payload_list_and_default_edge_branches(self) -> None:
         NestedSchema, FeatureSchema, PayloadOnlySchema, _, _ = self._make_schema_classes()
-        from pcapkit.corekit.fields.field import NoValue
+        from pcapkit.corekit.fields.field import NO_VALUE
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.protocols.schema.schema import Schema, schema_final
         from pcapkit.utilities.exceptions import ProtocolUnbound

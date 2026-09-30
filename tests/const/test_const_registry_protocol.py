@@ -2,7 +2,7 @@
 """Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
 Tier 1 (#838) removed the mint from the two sites in
-:data:`pcapkit.vendor.default.LINE` that the 105 default-template registries
+:data:`pcapkit.vendor.default.LINE` that the 107 default-template registries
 inherit. It could not reach the eleven crawlers that replace that template with
 their own, because each of those carries a hand-copied ``get()`` -- and none of
 them carries ``register``, ``register_alias`` or ``get_all`` at all.
@@ -674,7 +674,7 @@ class UnregisteredMemberTests(unittest.TestCase):
         self.assertNotIn('unit_test_absent', _Str.__members__)
 
 
-#: Sample of the 105 default-template registries GitHub issue #775's tier 3
+#: Sample of the 107 default-template registries GitHub issue #775's tier 3
 #: moved onto :class:`~pcapkit.corekit.enum.EnumRegistry`, chosen to cover
 #: the two shapes the census turned up in ``pcapkit/vendor/default.py``'s
 #: ``LINE`` template: a registry whose own ``_missing_`` mints directly via
@@ -712,31 +712,89 @@ GENERATED_SAMPLE = (
 #: custom ``__new__`` needed one. They stay excluded from *this* file's
 #: tier-3 sweep regardless, because the exclusion here is about their
 #: bespoke ``process()``/``get()`` shape not sharing the generated template,
-#: which conversion onto the base does not change -- unlike the 105
-#: :data:`GENERATED_SAMPLE` registries below, none of these five classes'
-#: (nine files') own ``get``/``get_all``/``register``/``register_alias``
-#: became the base's generic implementation; each kept or gained its own,
-#: matching its own contract. ``TransportProtocol`` alone is excluded for
+#: which conversion onto the base does not change -- unlike the 107
+#: :data:`GENERATED_SAMPLE` registries below, each of these five classes'
+#: (nine files') own ``_missing_`` stays bespoke rather than sharing the
+#: generated template, and several also keep a bespoke
+#: ``_unregistered_member`` (``Command``, ``Method``, ``OptionType``,
+#: ``ReturnCode``, ``StatusCode``) or a bespoke ``get`` of their own
+#: (``Command``, ``Method``, ``OptionType``; ``AppType`` and its four
+#: transport subclasses keep all four ``get``/``get_all``/``register``/
+#: ``register_alias``, added in PR 2) -- but not every one does:
+#: ``FEATCode``, ``ResponseKind`` and ``GroupingInformation`` resolve every
+#: protocol method to the base's generic implementation unchanged.
+#: ``TransportProtocol`` alone is excluded for
 #: the separate reason it always was: it never mixes in
 #: :class:`~pcapkit.corekit.enum.EnumRegistry` at all, by the owner's own
 #: ruling against extending it (GitHub PR #836) -- there is no registry
 #: protocol here to inherit or shadow.
-EXCLUDED_STILL_BESPOKE = frozenset({
-    'pcapkit/const/ftp/command.py',
-    'pcapkit/const/ftp/return_code.py',
-    'pcapkit/const/http/method.py',
-    'pcapkit/const/http/status_code.py',
-    'pcapkit/const/pcapng/option_type.py',
-    'pcapkit/const/reg/apptype/apptype.py',
-    'pcapkit/const/reg/apptype/dccp.py',
-    'pcapkit/const/reg/apptype/sctp.py',
-    'pcapkit/const/reg/apptype/tcp.py',
-    'pcapkit/const/reg/apptype/udp.py',
+#:
+#: The name below is deliberately about what the set *does*, not why: it is
+#: everything this file's ``IntEnum``-only census (:data:`GENERATED_SAMPLE`
+#: and the ``generated`` list below) leaves out, historical and anchored at
+#: commit ``05468a06b`` like the counts in
+#: ``test_every_generated_const_module_is_accounted_for`` below -- not a
+#: claim that every entry shares one reason. At least three apply, and the
+#: grouping below tags each entry with its own: (a) is a
+#: :class:`~aenum.StrEnum` registry, so would miss this file's
+#: ``class \w+(EnumRegistry, IntEnum):`` regex regardless of anything else;
+#: (b) mixes in the base but overrides its generic protocol with a bespoke
+#: one, per the paragraph above; (c) ``TransportProtocol`` alone, which never
+#: mixes in the base at all. A file can carry more than one -- ``apptype.py``
+#: is (a) via ``AppType`` and (c) via ``TransportProtocol`` in the same
+#: module.
+#:
+#: ``pcapkit/const/pcapng/tls_key_label.py`` (GitHub issue #886) is reason
+#: (a) too, but on narrower grounds worth spelling out, since -- unlike the
+#: rest of that group -- it does not carry a bespoke ``get()``/``register()``
+#: at all; its own ``get``/``get_all``/``register``/``register_alias`` are
+#: exactly the base's generic implementation, same as every one of the 107
+#: :data:`GENERATED_SAMPLE`-shaped registries below. What excludes it is
+#: simply that this whole census, and its
+#: ``class \w+(EnumRegistry, IntEnum):`` regex a few lines down, is scoped to
+#: the :class:`~aenum.IntEnum` batch tier 3 of #775 converted.
+#: ``TLSKeyLabel`` is :class:`~aenum.StrEnum`-valued -- RFC 9850's labels are
+#: strings, matched by value -- and it was generated after that batch
+#: closed, so it was never a candidate for it either way. Excluding it here
+#: is not a judgement about its own inherited-protocol cleanliness;
+#: :mod:`tests.const.test_const_enum_get`,
+#: :mod:`tests.const.test_const_enum_lookup` and
+#: :mod:`tests.const.test_const_enum_builtin_parity`'s dynamic
+#: ``pkgutil.walk_packages`` sweeps already discover and cover it
+#: generically -- it is simply outside what this file's historical,
+#: IntEnum-only census counts.
+EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
+    # (a) str-valued: not an IntEnum, so excluded from the regex census
+    # regardless of override.
+    'pcapkit/const/ftp/command.py',           # Command, FEATCode
+    'pcapkit/const/http/method.py',           # Method
+    'pcapkit/const/pcapng/option_type.py',    # OptionType
+    'pcapkit/const/pcapng/tls_key_label.py',  # TLSKeyLabel -- see the paragraph above
+    'pcapkit/const/reg/apptype/dccp.py',      # DCCP
+    'pcapkit/const/reg/apptype/sctp.py',      # SCTP
+    'pcapkit/const/reg/apptype/tcp.py',       # TCP
+    'pcapkit/const/reg/apptype/udp.py',       # UDP
+
+    # (b) int-valued and mixes in the base, but carries a custom __new__
+    # plus its own _unregistered_member override, so it is not the
+    # generated shape -- get()/get_all()/register()/register_alias() all
+    # still resolve to the base's generic implementation.
+    'pcapkit/const/ftp/return_code.py',       # ReturnCode (ResponseKind and
+                                               # GroupingInformation, same file,
+                                               # are clean; excluded only as
+                                               # co-residents)
+    'pcapkit/const/http/status_code.py',      # StatusCode
+
+    # (a) and (c) together: AppType is str-valued like the group above (and
+    # overrides get()/get_all()/register()/register_alias() more fully than
+    # either (b) file above); TransportProtocol, in the same file, never
+    # mixes in the base at all.
+    'pcapkit/const/reg/apptype/apptype.py',   # AppType, TransportProtocol
 })
 
 
 class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
-    """The 105 default-template registries must inherit the protocol too,
+    """The 107 default-template registries must inherit the protocol too,
     not just the six bespoke ones :class:`GeneratedSourceInheritsTests`
     above (tier 2) already covers."""
 
@@ -762,17 +820,33 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
                 self.assertIn("def _missing_(cls, value: 'int')", source)
 
     def test_every_generated_const_module_is_accounted_for(self) -> None:
-        """The full census, measured on this batch rather than assumed: 121
+        """The full census, measured on this batch rather than assumed: 124
         modules under :mod:`pcapkit.const`, splitting exactly three ways --
-        the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 10
-        :data:`EXCLUDED_STILL_BESPOKE` deliberately left alone, and the
-        remaining 105 this tier converts. Measured by me on the prior head
+        the 6 :data:`CONVERTED` bespoke ones tier 2 already handled, the 11
+        :data:`EXCLUDED_FROM_INTENUM_CENSUS` deliberately left alone, and the
+        remaining 107 this tier converts. Measured by me on the prior head
         (commit ``05468a06b``, this batch's own base): of those 121, 6 carried
         :class:`~pcapkit.corekit.enum.EnumRegistry` and 111 carried the
         literal "Backport support for original codes." docstring (including
         the 6 bespoke StrEnum/AppType files, since a hand-copied docstring is
         not proof of a shared template) -- 105 is what is left once the 6
         converted and the 10 excluded are both taken out.
+
+        121 became 122 with GitHub issue #886's
+        ``pcapkit/const/pcapng/tls_key_label.py``, and the 10 excluded became
+        11 to hold it -- see the comment directly above
+        :data:`EXCLUDED_FROM_INTENUM_CENSUS` for why it lands there rather
+        than among the 105. 105 itself does not move there: the new file is
+        absorbed by the excluded side of the split, not the generated side.
+
+        122 became 124 with GitHub issue #880's
+        ``pcapkit/const/ngap/procedure_code.py`` and
+        ``pcapkit/const/ngap/protocol_ie.py``. Unlike #886's file, both are
+        the generated shape outright -- plain ``EnumRegistry`` + ``IntEnum``,
+        no bespoke ``get()``/``_missing_``-carrying ``__new__`` -- so neither
+        joins :data:`EXCLUDED_FROM_INTENUM_CENSUS`; they land on the
+        *generated* side instead. 6 and 11 hold; 105 becomes 107, and 122
+        becomes 124.
         """
         const_root = REPO_ROOT / 'pcapkit' / 'const'
         all_files = sorted(
@@ -782,10 +856,10 @@ class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
         )
         converted_relpaths = {relpath for _, _, relpath in CONVERTED}
         generated = [path for path in all_files
-                     if path not in converted_relpaths and path not in EXCLUDED_STILL_BESPOKE]
+                     if path not in converted_relpaths and path not in EXCLUDED_FROM_INTENUM_CENSUS]
 
-        self.assertEqual(len(all_files), 121)
-        self.assertEqual(len(generated), 105)
+        self.assertEqual(len(all_files), 124)
+        self.assertEqual(len(generated), 107)
 
         for relpath in generated:
             with self.subTest(module=relpath):
@@ -902,7 +976,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
 class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestCase):
     """The residue #855 disclosed and this tier's own instructions name:
     ``register()`` on an already-registered value used to silently alias
-    rather than mint or raise, on every one of the 105 generated registries
+    rather than mint or raise, on every one of the 107 generated registries
     (they had no guard of their own -- only the six bespoke ones tier 2
     already fixed did). Measured directly, before and after, in the
     docstring below rather than only asserted.
@@ -1108,9 +1182,11 @@ class StrEnumValueFallbackTests(unittest.TestCase):
     #855, which never converted a :class:`~aenum.StrEnum` registry either),
     found during #858's review on a synthetic registry rather than a real
     one, since at the time none of the four bespoke ``StrEnum`` const
-    registries mixed in this base yet (:data:`EXCLUDED_STILL_BESPOKE` above,
-    which still holds them out of *this* file's tier-3 sweep for a different
-    reason -- their bespoke ``__new__``/``get()`` shapes, not their base) --
+    registries mixed in this base yet (:data:`EXCLUDED_FROM_INTENUM_CENSUS`
+    above, which still holds them out of *this* file's tier-3 sweep for a
+    different reason -- they are :class:`~aenum.StrEnum`, not
+    :class:`~aenum.IntEnum`, which is reason (a) there regardless of
+    whether any one of them also overrides the base) --
     that conversion was #860's separate step 2, landed by PR 1 for three of
     the four (``FEATCode``, ``Command``, ``Method``) and by PR 2 for the
     fourth (``AppType``, along with its four transport subclasses, which
@@ -1280,12 +1356,21 @@ class NoDefaultSentinelTests(unittest.TestCase):
         self.assertEqual(rendered, '<NO_DEFAULT>')
         self.assertNotIn('0x', rendered)
 
-    def test_type_is_the_dedicated_sentinel_class_and_both_are_exported(self) -> None:
+    def test_type_is_the_dedicated_sentinel_class_and_only_the_object_is_exported(self) -> None:
+        """GitHub issue #911 reversed half of what this used to assert.
+
+        It read ``assertIn('NoDefaultType', enum_module.__all__)`` -- the type
+        *and* the object were exported. The owner's ruling: *"we should ONLY
+        export the objects (like* ``NULL`` *) to users"*, so the type is out of
+        :attr:`__all__` while staying importable by its dotted path, which is
+        what the last assertion here pins.
+        """
         import pcapkit.corekit.enum as enum_module
 
         self.assertIs(type(enum_module.NO_DEFAULT), enum_module.NoDefaultType)
         self.assertIn('NO_DEFAULT', enum_module.__all__)
-        self.assertIn('NoDefaultType', enum_module.__all__)
+        self.assertNotIn('NoDefaultType', enum_module.__all__)
+        self.assertTrue(hasattr(enum_module, 'NoDefaultType'))
 
     def test_constructing_the_type_again_returns_the_same_instance(self) -> None:
         """The ``__new__`` singleton guard: a caller who does not realise
@@ -1507,9 +1592,15 @@ class GetDefaultNoMintTests(unittest.TestCase):
         self.assertEqual(before, len(EtherType.__members__))
 
     def test_default_still_resolves_when_registered_str(self) -> None:
-        """As above, on a ``str``-valued registry -- synthetic, since no
-        shipped :class:`~aenum.StrEnum` registry mixes in the base yet (see
-        :data:`EXCLUDED_STILL_BESPOKE`)."""
+        """As above, on a ``str``-valued registry. Not a hypothetical shape
+        any more: ten shipped :class:`~aenum.StrEnum` registries mix in the
+        base now (``Command``, ``FEATCode``, ``Method``, ``OptionType``,
+        ``TLSKeyLabel``, ``AppType`` and its four transport subclasses --
+        :data:`EXCLUDED_FROM_INTENUM_CENSUS` holds all ten out of *this*
+        file's ``IntEnum``-only sweep, not out of existence). This case
+        still builds its own rather than importing one of them, so the
+        assertion stays pinned to the base's fallback behaviour itself
+        rather than to a shipped registry's incidental member values."""
         class _Str(EnumRegistry, StrEnum):
             KNOWN = 'known-value'
             OTHER = 'other-value'

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
 from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
+from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
@@ -123,8 +124,19 @@ class FrameType(EnumSchema[Enum_Frame]):
 
     __enum__ = collections.defaultdict(lambda: UnassignedFrame)
 
-    class Flags(enum.IntFlag):
-        """Flags enumeration for HTTP/2 frames."""
+    class Flags(EnumLookup, enum.IntFlag):
+        """Flags enumeration for HTTP/2 frames.
+
+        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per
+        GitHub issue #877's ruling that every non-registry enumeration
+        shares that lookup contract. The six concrete per-frame subclasses
+        below each declare ``class Flags(FrameType.Flags):`` with no base
+        list of their own, so they inherit :class:`EnumLookup` transitively
+        through this one re-parent rather than needing it repeated --
+        verified at runtime for GitHub issue #877 (see the session report),
+        not merely assumed from the MRO rules.
+
+        """
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -206,7 +218,7 @@ class DataFrame(FrameType, code=Enum_Frame.DATA):
     # ``b''`` and nothing raised or warned. The parentheses also keep
     # ``pkt['pad_len']`` from being read at all when ``PADDED`` is clear, where
     # the :class:`~pcapkit.corekit.fields.misc.ConditionalField` above has left
-    # it as :data:`~pcapkit.corekit.fields.field.NoValue`. See #668.
+    # it as :data:`~pcapkit.corekit.fields.field.NO_VALUE`. See #668.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (
         pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))

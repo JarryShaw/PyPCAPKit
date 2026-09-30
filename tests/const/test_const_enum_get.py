@@ -109,22 +109,23 @@ EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
 })
 
 #: Enums carrying no ``get(key, default)``, so there is no ``default`` to drop.
-#: The first two are helper enums describing a registry's columns rather than
-#: registries themselves and have no ``get`` at all;
-#: :class:`~pcapkit.const.reg.apptype.TransportProtocol` has a ``get`` whose
-#: signature takes no ``default`` -- which is why the rewrite had to check the
-#: signature rather than pattern-match the body.
+#: Empty since GitHub issue #930: its two occupants,
+#: :class:`~pcapkit.const.ftp.command.CommandType` and
+#: :class:`~pcapkit.const.ftp.command.ConformanceRequirement`, were the last
+#: of #877's non-registry enumerations still outside
+#: :class:`~pcapkit.corekit.enum.EnumLookup` -- held here rather than moved by
+#: GitHub issue #877's own PR because :mod:`pcapkit.const.ftp.command` was
+#: still held by #913 at the time. Re-parenting them gave each the base
+#: ``get(key, default)`` for the first time, so both moved into the main
+#: sweep below instead, the same way #877's own re-parenting already moved
+#: :class:`~pcapkit.const.reg.apptype.TransportProtocol` out of this set.
 #:
 #: :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
 #: :class:`~pcapkit.const.ftp.return_code.ResponseKind` were here too until
 #: GitHub issue #860 step 2 brought them onto
 #: :class:`~pcapkit.corekit.enum.EnumRegistry` -- they inherit the base
 #: ``get(key, default)`` now, so they moved into the main sweep below instead.
-EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset({
-    'pcapkit.const.ftp.command.CommandType',
-    'pcapkit.const.ftp.command.ConformanceRequirement',
-    'pcapkit.const.reg.apptype.apptype.TransportProtocol',
-})
+EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset()  # type: frozenset[str]
 
 #: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
 #: members at all -- every one of its 256 codes reaches ``_missing_``. Before
@@ -307,15 +308,19 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_the_sweep_size_is_pinned(self) -> None:
         # If this drifts, a const enum was added, removed or renamed, and the
         # exception sets below need a fresh look rather than a silent pass.
+        # 118 became 120 with GitHub issue #880's ngap.ProcedureCode and
+        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
+        # classes in pcapkit.protocols.application.ngap; neither needs an
+        # exception-set entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
-        self.assertEqual(len(self.enums), 118)
+        self.assertEqual(len(self.enums), 120)
         for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
                           EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK):
             self.assertTrue(expected.issubset(names),
                             f'sweep is missing: {expected - names}')
 
     def test_every_integer_path_consults_the_default(self) -> None:
-        """The registry-wide form of #584, across all 118 integer registries."""
+        """The registry-wide form of #584, across all 120 integer registries."""
         covered = 0
         for obj in self.enums:
             qualname = _qualname(obj)
@@ -355,8 +360,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # issue #860 step 2, which gave ``GroupingInformation`` and
         # ``ResponseKind`` the base ``get(key, default)`` they never had
         # before, moving them out of ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT``
-        # and into this sweep.
-        self.assertEqual(covered, 112)
+        # and into this sweep; plus 2 for GitHub issue #880's
+        # ngap.ProcedureCode and ngap.ProtocolIE, which take the base
+        # ``get(key, default)`` from the moment they exist under
+        # pcapkit.const at all; plus 1 for GitHub issue #877's re-parenting of
+        # ``TransportProtocol`` onto ``EnumLookup``, which gave its own ``get``
+        # override a forwarding ``default`` parameter and moved it out of
+        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` the same way; plus 2 for
+        # GitHub issue #930's re-parenting of ``CommandType`` and
+        # ``ConformanceRequirement`` onto ``EnumLookup``, which gave each the
+        # base ``get(key, default)`` for the first time and emptied
+        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` entirely.
+        self.assertEqual(covered, 117)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
         """The two registries excused from the sweep, and why.

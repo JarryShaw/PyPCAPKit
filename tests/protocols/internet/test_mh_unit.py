@@ -1362,13 +1362,6 @@ class MHUnitTests(unittest.TestCase):
             }, {'status': FastBindingAcknowledgmentStatus.Incorrect_interface_identifier_length,
                 'key_mngt': True, 'seq': 0x1234,
                 'lifetime': datetime.timedelta(seconds=40)}),
-            # ... and as a bare integer, for a value the RFC leaves unassigned
-            ('FBack, unassigned status', Packet.Fast_Binding_Acknowledgment, {
-                'status': 77, 'key_mngt': False, 'seq': 1, 'lifetime': 4,
-                'options': [(acoa_type, {'address': '2001:db8:1::3'}),
-                            (badf_type, {'spi': 1, 'data': bytes(range(12))})],
-            }, {'status': 77, 'key_mngt': False, 'seq': 1,
-                'lifetime': datetime.timedelta(seconds=4)}),
             ('FNA', Packet.Fast_Neighbor_Advertisement, {
                 'options': [(mhlla_type, {'address': b'\x00\x11\x22\x33\x44'})],
             }, {}),
@@ -1415,13 +1408,42 @@ class MHUnitTests(unittest.TestCase):
                                    chksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
+        with self.subTest('FBack, unassigned status now raises on construction'):
+            # This used to be in ``cases`` above, round-tripping a bare int for
+            # a status value RFC 5568 leaves unassigned. Constructing from
+            # ``data=`` builds the wire bytes and then reads them straight
+            # back to populate ``.info`` -- that read-back is what used to
+            # mint ``Unassigned_77`` harmlessly. Per the owner's ruling on
+            # GitHub issue #877 (see
+            # ``test_mh_rfc5568_local_enums_cover_unregistered_value_sets``),
+            # the closed :class:`FastBindingAcknowledgmentStatus` now raises
+            # instead, and it does so on construction itself, before there is
+            # any wire-format bytes object to round-trip at all.
+            from pcapkit.utilities.exceptions import EnumValueError
+
+            with self.assertRaises(EnumValueError):
+                MH(next=TransType.UDP, chksum=b'\x12\x34',
+                   type=Packet.Fast_Binding_Acknowledgment,
+                   data={'status': 77, 'key_mngt': False, 'seq': 1, 'lifetime': 4,
+                         'options': [(acoa_type, {'address': '2001:db8:1::3'}),
+                                     (badf_type, {'spi': 1, 'data': bytes(range(12))})]})
+
     def test_mh_rfc5568_local_enums_cover_unregistered_value_sets(self) -> None:
         """:rfc:`5568` defines two value sets inline, with no IANA registry.
 
         Both are therefore enumerated in :mod:`pcapkit.protocols.internet.mh`
-        itself rather than in :mod:`pcapkit.const.mh`, and both have to tolerate
-        the values the RFC leaves unassigned -- a capture in the wild carries
-        whatever it carries, so an unassigned code must parse rather than raise.
+        itself rather than in :mod:`pcapkit.const.mh`. Per the owner's ruling
+        on GitHub issue #877, both stay **closed**: GitHub issue #880 found
+        that a value the RFC leaves unassigned used to be minted a
+        ``Unassigned_N`` placeholder member -- through a path that bypassed
+        ``_missing_``'s own ``0 <= value <= 255`` guard and, for an unknown
+        *name*, aliased a second unknown key onto the first at a shared ``-1``
+        sentinel. Both enums now raise instead of minting, so an unassigned
+        code degrades the MH parse to :class:`~pcapkit.protocols.misc.raw.Raw`
+        via ``@beholder`` rather than silently growing the class -- one
+        message's worth of damage over IPv4, the whole packet's over IPv6 --
+        see ``test_mh_local_enums_raise_and_do_not_alias`` for that
+        distinction and the other two RFC-inline enums.
         """
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
@@ -1429,14 +1451,17 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumValueError
 
         apfx_type = Option.Mobility_Header_IPv6_Address_Prefix
         badf_type = Option.Binding_Authorization_Data_for_FMIPv6
         acoa_type = Option.Alternate_Care_of_Address
         mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
 
-        # The membership assertions come first: ``_missing_`` extends the class in
-        # place, so any unassigned lookup below would otherwise show up here.
+        # The membership assertions come first, before any lookup that raises
+        # gets a chance to run: ``_missing_`` is closed now, but pinning the
+        # declared set up front keeps this test honest about exactly what is
+        # -- and is not -- a member, independent of the raise behaviour below.
         with self.subTest('FBack status members, RFC 5568 section 6.2.3'):
             self.assertEqual(
                 {int(member): member.name for member in FastBindingAcknowledgmentStatus},
@@ -1500,45 +1525,56 @@ class MHUnitTests(unittest.TestCase):
             ]:
                 self.assertIs(handover_initiate(wire).options[apfx_type].code, member, wire)
 
-        with self.subTest('unassigned values parse without raising'):
+        with self.subTest('unassigned values raise instead of minting'):
             # 2..127 is the unassigned half of the "accepted" range, 132..255 of
-            # the "rejected" one; both must survive a parse.
+            # the "rejected" one; both must now raise rather than parse.
             for wire in (2, 77, 127, 132, 255):
-                status = fback(wire).status
-                self.assertIsInstance(status, FastBindingAcknowledgmentStatus)
-                self.assertEqual(status, wire)
-                self.assertEqual(status.name, 'Unassigned_%d' % wire)
+                with self.assertRaises(EnumValueError):
+                    fback(wire)
 
             # RFC 5568 assigns 1 through 4 only, so 0 and 5..255 are unassigned.
             for wire in (0, 5, 200, 255):
-                code = handover_initiate(wire).options[apfx_type].code
-                self.assertIsInstance(code, IPv6AddressPrefixCode)
-                self.assertEqual(code, wire)
-                self.assertEqual(code.name, 'Unassigned_%d' % wire)
+                with self.assertRaises(EnumValueError):
+                    handover_initiate(wire)
 
         with self.subTest('out-of-octet values are still rejected'):
             for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
                 for value in (-1, 256):
-                    with self.assertRaises(ValueError):
+                    with self.assertRaises(EnumValueError):
                         enum_cls(value)
 
-        with self.subTest('get() backports string and integer lookups'):
+        with self.subTest('get() backports string and integer lookups, and no longer mints'):
+            # An unknown *name* is ``EnumKeyError`` since GitHub issue #923 --
+            # both ``get`` overrides used to raise ``EnumValueError`` for it, so
+            # that a name miss and a value miss reported identically, and that
+            # is the conversion #923's ruling rejects: stdlib ``E['nosuch']``
+            # raises ``KeyError``, so the name half is ``KeyError``-derived and
+            # only ``_missing_``'s value half stays ``ValueError``-derived.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
             self.assertIs(FastBindingAcknowledgmentStatus.get(130),
                           FastBindingAcknowledgmentStatus.Insufficient_resources)
             self.assertIs(FastBindingAcknowledgmentStatus.get('Reason_unspecified'),
                           FastBindingAcknowledgmentStatus.Reason_unspecified)
-            self.assertEqual(FastBindingAcknowledgmentStatus.get('Vendor_specific', 200), 200)
+            with self.assertRaises(EnumKeyError) as caught:
+                FastBindingAcknowledgmentStatus.get('Vendor_specific')
+            self.assertIsInstance(caught.exception, KeyError)
+            self.assertNotIsInstance(caught.exception, ValueError)
+            self.assertIn('Vendor_specific', str(caught.exception))
             self.assertIs(IPv6AddressPrefixCode.get(4), IPv6AddressPrefixCode.NAR_Prefix)
             self.assertIs(IPv6AddressPrefixCode.get('New_Care_of_Address'),
                           IPv6AddressPrefixCode.New_Care_of_Address)
-            self.assertEqual(IPv6AddressPrefixCode.get('Vendor_specific', 201), 201)
+            with self.assertRaises(EnumKeyError) as caught:
+                IPv6AddressPrefixCode.get('Vendor_specific')
+            self.assertIsInstance(caught.exception, KeyError)
+            self.assertNotIsInstance(caught.exception, ValueError)
 
         with self.subTest('make round trips both enums byte-identically'):
             for status, code in [
                 (FastBindingAcknowledgmentStatus.Insufficient_resources,
                  IPv6AddressPrefixCode.NAR_Prefix),
-                # unassigned on the wire, and handed in as a bare integer
-                (99, 250),
+                (FastBindingAcknowledgmentStatus.Fast_Binding_Update_accepted_but_NCoA_is_invalid,
+                 IPv6AddressPrefixCode.Old_Care_of_Address),
             ]:
                 fback_raw = bytes(MH(next=TransType.UDP, chksum=b'\x12\x34',
                                      type=Packet.Fast_Binding_Acknowledgment,
@@ -1569,6 +1605,271 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(parsed.options[apfx_type].code, int(code))
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
                                           chksum=parsed.chksum, data=parsed)), hi_raw)
+
+    def test_mh_get_default_works_uniformly_through_the_inherited_method(self) -> None:
+        """GitHub issue #935: the two kept ``get`` overrides are deleted, not widened.
+
+        GitHub issue #930 re-parented :class:`FastBindingAcknowledgmentStatus`
+        and :class:`IPv6AddressPrefixCode` onto
+        :class:`~pcapkit.corekit.enum.EnumLookup`, which made both
+        **advertise** the base's two-argument ``get(key, default)`` through
+        inheritance while their own kept ``@staticmethod`` overrides still
+        only accepted one -- calling either with a ``default`` raised
+        ``TypeError: get() takes 1 positional argument but 2 were given``.
+        GitHub issue #935's first ruling, verbatim *"I lean on 1"*, widened
+        both signatures to accept ``default`` rather than delete them; asked
+        next *"why must we have the two overrides tho? cant they directly
+        fall back to the base class's?"*, the owner's final ruling went
+        further, verbatim: *"I prefer (2) directly"* -- deleting both
+        overrides outright. Both classes now inherit ``get`` from the base
+        exactly as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus`
+        -- the two pure re-parents already in this module -- always have, so
+        ``default`` now works the same way on all four, uniformly, because
+        there is only one implementation left to call. This test fails with
+        the ``TypeError`` above against the tree at 382375811, before either
+        of #935's rulings landed.
+        """
+        import sys
+
+        from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode, LMAAddressCode,
+                                                   LocalizedRoutingStatus)
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
+
+        def _drop_tracebacklimit() -> None:
+            # The int-value-miss subTest below reaches the loud
+            # ``_missing_`` on ``key`` itself, which sets this process-wide
+            # -- restore it so a later test in the same run does not read
+            # truncated tracebacks because of what this one did.
+            if hasattr(sys, 'tracebacklimit'):
+                del sys.tracebacklimit
+
+        self.addCleanup(_drop_tracebacklimit)
+
+        classes = (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
+                   LMAAddressCode, LocalizedRoutingStatus)
+
+        with self.subTest('a default argument no longer raises TypeError'):
+            # This is exactly the call GitHub issue #935 reports as failing
+            # on the tree before either ruling landed: a second positional
+            # argument to a ``@staticmethod`` that only declared one.
+            for cls in classes:
+                member = next(iter(cls))
+                try:
+                    cls.get('bogus', member)
+                except TypeError as error:
+                    self.fail(f'{cls.__name__}.get() still rejects a default argument: {error}')
+
+        with self.subTest('a name miss falls back to a default naming a real member'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    member = next(iter(cls))
+                    self.assertIs(cls.get('bogus', member), member)
+                    self.assertIs(cls.get('bogus', int(member)), member)
+
+        with self.subTest('an int value miss falls back to a default naming a real member'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    member = next(iter(cls))
+                    self.assertIs(cls.get(9999, member), member)
+
+        with self.subTest('a default naming no registered member still raises, not TypeError'):
+            # The issue's own repro: a default that does not itself resolve
+            # does not silently swallow the miss -- it falls through to the
+            # same EnumKeyError ``key`` alone would have raised, uniformly
+            # on all four now.
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumKeyError) as caught:
+                        cls.get('bogus', 'also-bogus')
+                    self.assertIn('bogus', str(caught.exception))
+
+        with self.subTest('an unusable default on an int value miss still raises EnumValueError'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumValueError):
+                        cls.get(9999, 99999)
+
+        with self.subTest('omitting default still raises EnumKeyError, exactly as before'):
+            for cls in classes:
+                with self.subTest(cls=cls.__name__):
+                    with self.assertRaises(EnumKeyError):
+                        cls.get('bogus')
+
+    def test_mh_local_enums_raise_and_do_not_alias(self) -> None:
+        """GitHub issue #880: the four RFC-inline helper enums stay immutable.
+
+        Companion to :meth:`test_mh_rfc5568_local_enums_cover_unregistered_value_sets`,
+        which covers :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode`. This one covers the two enums that
+        never had wire-level coverage in that test --
+        :class:`LocalizedRoutingStatus` (:rfc:`6705#section-10.2`) and
+        :class:`LMAAddressCode` (:rfc:`5949#section-6.2.2`) -- plus three
+        properties the issue measured that are not specific to any one of the
+        four: the ``get()``-level aliasing defect, the ``_missing_`` range
+        invariant, and the consequence of the raise once it reaches a real
+        capture -- which turns out to differ by wrapping protocol, see the
+        last two subtests.
+        """
+        import socket
+        import struct
+
+        from pcapkit.const.mh.packet import Packet
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.internet.ipv4 import IPv4
+        from pcapkit.protocols.internet.mh import (MH, FastBindingAcknowledgmentStatus,
+                                                   IPv6AddressPrefixCode, LMAAddressCode,
+                                                   LocalizedRoutingStatus)
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.utilities.exceptions import EnumValueError
+
+        with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and now have get()'):
+            # Both had zero callers repo-wide (tests included), so GitHub issue
+            # #880 deleted the hand-rolled ``get()`` outright rather than
+            # rebuilding it on the immutable contract -- true on the tree #880
+            # left behind, where neither class carried ``get`` at all. GitHub
+            # issue #930 re-parented both onto
+            # :class:`~pcapkit.corekit.enum.EnumLookup`, which is what gives
+            # every non-registry enumeration ``get``/``get_all`` for free, so
+            # ``hasattr`` now reads the other way -- the immutable contract
+            # itself is what this subtest still pins: the base's own ``get``
+            # still cannot mint, so an unassigned value raises there exactly
+            # as it does through the bare constructor.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
+            for enum_cls, unassigned in ((LocalizedRoutingStatus, 50), (LMAAddressCode, 50)):
+                with self.assertRaises(EnumValueError):
+                    enum_cls(unassigned)
+                self.assertTrue(hasattr(enum_cls, 'get'))
+                with self.assertRaises(EnumValueError):
+                    enum_cls.get(unassigned)
+                with self.assertRaises(EnumKeyError):
+                    enum_cls.get('NOT_A_REAL_MEMBER')
+
+        with self.subTest('the shared -1 aliasing defect is gone'):
+            # Before the fix, ``get('bogus_one')`` minted a member at the
+            # shared sentinel -1, and ``get('bogus_two')`` then resolved to
+            # that same member -- a name that lies about itself. Both calls
+            # must now raise independently, and neither may touch the
+            # class's own lookup tables while doing so.
+            #
+            # ``EnumKeyError`` rather than ``EnumValueError`` since GitHub
+            # issue #923: these are *name* misses, and #923's ruling keeps a
+            # name miss ``KeyError``-shaped after stdlib ``E['nosuch']``.
+            from pcapkit.utilities.exceptions import EnumKeyError
+
+            for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
+                before_members = dict(enum_cls._member_map_)  # pylint: disable=no-member
+                before_values = dict(enum_cls._value2member_map_)  # pylint: disable=no-member
+                with self.assertRaises(EnumKeyError):
+                    enum_cls.get('bogus_one')
+                with self.assertRaises(EnumKeyError):
+                    enum_cls.get('bogus_two')
+                self.assertEqual(enum_cls._member_map_, before_members)  # pylint: disable=no-member
+                self.assertEqual(enum_cls._value2member_map_, before_values)  # pylint: disable=no-member
+
+        with self.subTest("_missing_'s range invariant holds for all four"):
+            # ``extend_enum`` used to install a member at an explicit value
+            # without consulting ``_missing_`` at all, which is how a value
+            # the class's own guard rejects (e.g. -1) ended up a member of it.
+            # With no minting path left, no lookup -- in range or out of it --
+            # may change the declared member set.
+            for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
+                             LocalizedRoutingStatus, LMAAddressCode):
+                before = len(list(enum_cls))
+                for bad_value in (-1, 50, 256):
+                    with self.assertRaises(EnumValueError):
+                        enum_cls(bad_value)
+                self.assertEqual(len(list(enum_cls)), before)
+                self.assertTrue(all(0 <= int(member) <= 255 for member in enum_cls))
+
+        with self.subTest('over IPv4, an unassigned wire byte degrades just that one MH layer'):
+            # All four are read by direct construction from an unvalidated
+            # wire byte under ``_import_next_layer``, which is
+            # ``@beholder``-decorated and re-parses the layer as ``Raw`` on
+            # any exception. Over IPv4, which dispatches to Mobility Header
+            # through the base, non-chain-walking ``_import_next_layer``,
+            # that is the whole story: the raise costs one MH message, not
+            # the packet or the capture. IPv4 is deliberately the wrapping
+            # protocol in *this* subtest -- the next one shows IPv6 does not
+            # get off this lightly.
+            def wrap_in_ipv4(mh_payload: bytes) -> IPv4:
+                header = struct.pack(
+                    '>BBHHHBBH4s4s', 0x45, 0, 20 + len(mh_payload), 0, 0, 64,
+                    int(TransType.Mobility_Header), 0,
+                    socket.inet_aton('127.0.0.1'), socket.inet_aton('127.0.0.1'),
+                )
+                raw = header + mh_payload
+                return IPv4(io.BytesIO(raw), len(raw))
+
+            fback_raw = bytearray(bytes(MH(
+                next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Fast_Binding_Acknowledgment,
+                data={'status': FastBindingAcknowledgmentStatus.Insufficient_resources,
+                      'key_mngt': True, 'seq': 0x1234, 'lifetime': 40, 'options': []})))
+            fback_raw[6] = 50  # unassigned FastBindingAcknowledgmentStatus byte
+            ip = wrap_in_ipv4(bytes(fback_raw))
+            self.assertIsInstance(ip.payload, Raw)
+            self.assertEqual(bytes(ip.payload), bytes(fback_raw))
+
+            lra_raw = bytearray(bytes(MH(
+                next=TransType.UDP, chksum=b'\x12\x34', type=Packet.Localized_Routing_Acknowledgment,
+                data={'seq': 4, 'unsolicited': True,
+                      'status': LocalizedRoutingStatus.Localized_Routing_Not_Allowed,
+                      'lifetime': 600})))
+            lra_raw[9] = 50  # unassigned LocalizedRoutingStatus byte
+            ip = wrap_in_ipv4(bytes(lra_raw))
+            self.assertIsInstance(ip.payload, Raw)
+            self.assertEqual(bytes(ip.payload), bytes(lra_raw))
+
+        with self.subTest('over IPv6, the raise now costs only the MH slot (GitHub issue #891)'):
+            # Mobility Header is *also* one of IPv6's own chained extension
+            # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135 --
+            # ``pcapkit/const/ipv6/extension_header.py:42``), so IPv6 never
+            # reaches the fallback through the base ``_import_next_layer`` at
+            # all -- it walks its own ``@beholder``-decorated override
+            # (``pcapkit/protocols/internet/ipv6.py:_import_next_layer``).
+            #
+            # Before GitHub issue #891, that override let any exception from
+            # MH's own parser reach ``@beholder`` unchanged, which substituted
+            # plain ``Raw`` for the MH slot; ``Raw``'s info carries no
+            # ``.next``, so ``proto = info.next``
+            # (``pcapkit/protocols/internet/ipv6.py:_decode_next_layer``)
+            # raised ``AttributeError`` on it regardless -- and it was *that*,
+            # unrelated, exception that a further-out ``@beholder``
+            # (Ethernet's) actually caught, degrading the whole IPv6 packet,
+            # header fields and MH message alike, to ``Raw``.
+            #
+            # #891 gives ``IPv6._import_next_layer`` its own catch, one layer
+            # in from ``@beholder``: for an extension header whose wire
+            # format RFC 6564 guarantees (Mobility Header among them), the MH
+            # slot becomes
+            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
+            # instead of ``Raw``. It parses the two guaranteed octets
+            # generically -- next header ``UDP`` and a length that exactly
+            # matches this ``fback_raw`` payload -- so ``IPv6.read`` returns
+            # normally: IPv6's own header fields (source, destination, hop
+            # limit) survive, and the chain now ends honestly at the bad
+            # header's replacement rather than swallowing the packet.
+            def wrap_in_ethernet_ipv6(mh_payload: bytes) -> Ethernet:
+                ipv6_header = struct.pack(
+                    '>IHBB', 6 << 28, len(mh_payload), int(TransType.Mobility_Header), 64,
+                ) + (b'\x00' * 15 + b'\x01') * 2
+                eth_header = bytes.fromhex('001122334455' '667788990011') + struct.pack('>H', 0x86DD)
+                raw = eth_header + ipv6_header + mh_payload
+                return Ethernet(io.BytesIO(raw), len(raw))
+
+            from pcapkit.protocols.internet.ipv6 import IPv6
+            from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
+
+            eth = wrap_in_ethernet_ipv6(bytes(fback_raw))
+            self.assertIsInstance(eth.payload, IPv6)
+            self.assertEqual(str(eth.protochain), 'Ethernet:IPv6:IPv6-Ext')
+
+            genext = next(iter(eth.payload.extension_headers.items(multi=True)))[1]
+            self.assertIsInstance(genext, IPv6_Ext)
+            self.assertEqual(genext.next, TransType.UDP)
+            self.assertEqual(genext.length, len(fback_raw))
 
     def test_mh_message_flags_pack_each_bit_independently(self) -> None:
         """Regression test: a cleared flag must not be emitted as a set bit.
@@ -1655,17 +1956,17 @@ class MHUnitTests(unittest.TestCase):
 
         :func:`~pcapkit.protocols.schema.internet.mh.pad_opt_data_len` has to read
         a skipped conditional field -- which is recorded as
-        :data:`~pcapkit.corekit.fields.field.NoValue`, not omitted -- as zero
+        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, not omitted -- as zero
         padding octets, rather than handing that singleton to
         :class:`~pcapkit.corekit.fields.strings.PaddingField` where it becomes an
         unusable :mod:`struct` template.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.corekit.fields.field import NoValue
+        from pcapkit.corekit.fields.field import NO_VALUE
         from pcapkit.protocols.schema.internet import mh as schema
 
         self.assertEqual(schema.pad_opt_data_len({}), 0)
-        self.assertEqual(schema.pad_opt_data_len({'length': NoValue}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'length': NO_VALUE}), 0)
         self.assertEqual(schema.pad_opt_data_len({'length': None}), 0)
         self.assertEqual(schema.pad_opt_data_len({'length': 4}), 4)
 

@@ -15,7 +15,7 @@ __all__ = [
 
     # classes
     'Collection', 'cached_property',
-    'StrEnum',
+    'StrEnum', 'auto',
 
     # modules
     'pathlib',
@@ -139,10 +139,21 @@ else:
 # ``# novermin`` is Vermin's documented escape hatch for precisely this shape.
 # It is applied per line rather than by turning on ``lax`` mode, so that an
 # *unguarded* use of a new feature anywhere else is still caught.
+#
+# ``auto`` rides the same branch as ``StrEnum`` rather than a guard of its own,
+# because the two are not interchangeable across implementations: an
+# ``aenum.auto`` value in a stdlib ``enum.StrEnum`` class body raises
+# ``TypeError: auto(<no_value>, *(), **{}) is not a string``, and an
+# ``enum.auto`` value in an ``aenum.StrEnum`` body raises ``TypeError: values
+# must be str [auto(_auto_null) is a <class 'enum.auto'>]`` (both measured) --
+# each metaclass only recognises its own library's sentinel class. Splitting
+# ``auto`` onto a second, parallel ``sys.version_info`` check would let it
+# drift from whichever library ``StrEnum`` actually resolved to; sharing this
+# branch makes that impossible by construction.
 if sys.version_info < (3, 11):
-    from aenum import StrEnum
+    from aenum import StrEnum, auto
 else:
-    from enum import StrEnum  # novermin
+    from enum import StrEnum, auto  # novermin
 
 # The guard is 3.11 rather than 3.8, which is when the *name* arrived, because
 # what this library needs from ``final`` is not the name but the side effect:

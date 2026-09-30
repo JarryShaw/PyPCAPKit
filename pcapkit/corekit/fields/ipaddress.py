@@ -6,7 +6,7 @@ import contextlib
 import ipaddress
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.corekit.fields.field import NO_VALUE, Field
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -310,7 +310,7 @@ class IPv4AddressField(_IPAddressField[ipaddress.IPv4Address]):
         """IP version number."""
         return 4
 
-    def __init__(self, default: 'IPv4Address | NoValueType' = NoValue,
+    def __init__(self, default: 'IPv4Address | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(4, default, callback)
 
@@ -332,7 +332,7 @@ class IPv6AddressField(_IPAddressField[ipaddress.IPv6Address]):
         """IP version number."""
         return 6
 
-    def __init__(self, default: 'IPv6Address | NoValueType' = NoValue,
+    def __init__(self, default: 'IPv6Address | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(16, default, callback)
 
@@ -367,7 +367,7 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
         """IP version number."""
         return 4
 
-    def __init__(self, default: 'IPv4Interface | NoValueType' = NoValue,
+    def __init__(self, default: 'IPv4Interface | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(8, default, callback)
 
@@ -455,7 +455,7 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
         """IP version number."""
         return 6
 
-    def __init__(self, default: 'IPv6Interface | NoValueType' = NoValue,
+    def __init__(self, default: 'IPv6Interface | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(17, default, callback)
 

@@ -68,6 +68,7 @@ __all__ = [
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
     'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
     'IPv6_Frag',
+    'IPv6_Ext',
     'IPv6_Opts',
     'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
     'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',

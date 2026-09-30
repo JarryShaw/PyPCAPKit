@@ -8,32 +8,19 @@ import re
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.utilities.compat import final
+from pcapkit.corekit.sentinels import NO_VALUE, NoValueType  # pylint: disable=unused-import
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
 
-__all__ = ['Field']
+__all__ = ['NO_VALUE', 'Field']
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Iterator, Optional
 
-    from typing_extensions import Literal, Self
+    from typing_extensions import Self
 
     from pcapkit.protocols.schema.schema import Schema
 
 _T = TypeVar('_T')
-
-
-@final
-class NoValueType:
-    """Default value for fields."""
-
-    def __bool__(self) -> 'Literal[False]':
-        """Return :obj:`False`."""
-        return False
-
-
-#: NoValueType: Default value for :attr:`FieldBase.default`.
-NoValue = NoValueType()
 
 #: int: Ceiling on the zero-padding :meth:`FieldBase.unpack` will still perform
 #: for a field whose declared length outruns its buffer.
@@ -261,7 +248,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
     # fields takes no default value of its own -- and reading :attr:`default` off
     # one of those raised :exc:`AttributeError` for a private attribute rather
     # than reporting that the field declares no default. See #422.
-    _default: '_T | NoValueType' = NoValue
+    _default: '_T | NoValueType' = NO_VALUE
 
     @property
     def name(self) -> 'str':
@@ -286,7 +273,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
     @default.deleter
     def default(self) -> 'None':
         """Delete field default value."""
-        self._default = NoValue
+        self._default = NO_VALUE
 
     @property
     def template(self) -> 'str':
@@ -360,7 +347,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         if not hasattr(self, '_name'):
             self._name = f'<{type(self).__name__[:-5].lower()}>'
 
-        self._default = NoValue
+        self._default = NO_VALUE
         self._template = '0s'
         self._callback = lambda *_: None
 
@@ -441,7 +428,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         """
         if value is None:
-            if self._default is NoValue:
+            if self._default is NO_VALUE:
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_T', self._default)
 
@@ -622,7 +609,7 @@ class Field(FieldBase[_T], Generic[_T]):
         return self._template
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue,
+                 default: '_T | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<unknown>'
         if not hasattr(self, '_name'):

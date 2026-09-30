@@ -113,8 +113,8 @@ class Gap(NamedTuple):
     #:
     #: Make it as specific as the message allows, because a fragment that matches
     #: half the tree does not pin anything: ``'invalid format'`` alone occurs 205
-    #: times across 13 modules (31 in :file:`internet/hip.py`, 26 in
-    #: :file:`transport/tcp.py`), so it is satisfied by a regression at any of
+    #: times across 13 modules (31 in :file:`pcapkit/protocols/internet/hip.py`, 26 in
+    #: :file:`pcapkit/protocols/transport/tcp.py`), so it is satisfied by a regression at any of
     #: them. Prefer the alias and whatever bracketed code the message carries --
     #: ``'TCP: [OptNo 28] invalid format'`` narrows those 26 sites to the one
     #: option that can print ``28``. The tuple form is for messages whose stable

@@ -408,10 +408,12 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         # ``-`` underlined sub-heading was joined onto its heading text by rule 6 and
         # would have vanished into a paragraph -- which is what this rejected. The
         # by-module changelog restructure made ``-`` and ``~`` real heading levels
-        # that rule 1 now converts, so the old input is no longer residual markup and
-        # this test would have passed for the wrong reason. ``^`` is still outside the
-        # supported set while remaining in ``_RESIDUAL``'s alternation, so it exercises
-        # the same guard on a character the converter genuinely does not handle.
+        # that rule 1 now converts, so the old input converts cleanly and **this test
+        # failed**: ``_reject`` is built on ``assertRaises(ResidualMarkupError)``, and
+        # nothing raises any more. The retarget was required to keep the guard
+        # exercised, not a tidy-up of a weak assertion. ``^`` is still outside rule 1's
+        # level map while remaining in ``_RESIDUAL``'s alternation, so it tests the
+        # same guard on a character the converter genuinely does not handle.
         self._reject('\nA sub heading\n^^^^^^^^^^^^^\n\nSome prose.\n',
                      'setext underline joined')
 
@@ -419,8 +421,10 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         # The other half of the same change: ``-`` and ``~`` must now *convert*
         # rather than be rejected, one ATX level deeper each, so that the by-module
         # sections and their Added/Changed/Fixed subsections survive into
-        # ``CHANGELOG.md``. Without rule 1 handling them this renders
-        # ``A module -------`` as prose and the assertions below fail.
+        # ``CHANGELOG.md``. Against the old converter this does not reach the
+        # assertions at all -- ``render()`` raises ``ResidualMarkupError`` on the
+        # joined ``A module --------`` first, which is what makes this a real check
+        # rather than a restatement of current behaviour.
         index = self.make_tree(
             entry=ENTRY + '\nA module\n--------\n\nAdded\n~~~~~\n\nSome prose.\n')
 
@@ -430,6 +434,16 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         self.assertIn('#### Added', rendered)
         self.assertNotIn('A module --------', rendered)
         self.assertNotIn('Added ~~~~~', rendered)
+
+    def test_an_over_long_sub_heading_underline_is_fatal(self) -> None:
+        # ``_RESIDUAL``'s comment now claims ``=``, ``-`` and ``~`` all need to stay in
+        # its alternation, because rule 1 fires only on an *exact* length match while
+        # reStructuredText merely requires the underline to be no shorter. Only ``=``
+        # was pinned, so the other two thirds of that claim rode on the comment alone.
+        for underline in ('-' * 18, '~' * 18):
+            with self.subTest(underline=underline[0]):
+                self._reject(f'\nA sub heading\n{underline}\n\nSome prose.\n',
+                             'setext underline joined')
 
     def test_an_over_long_equals_underline_is_fatal(self) -> None:
         # Rule 1 fires only when the underline is exactly as long as the title,
@@ -717,6 +731,36 @@ class RepositoryStateTests(unittest.TestCase):
             changelog_md.render(),
             'CHANGELOG.md is stale; regenerate it with util/changelog_md.py',
         )
+
+    def test_index_summary_bullets_track_each_pages_own_heading(self) -> None:
+        # #909's summary list duplicates each page's version and release date
+        # by hand -- nothing else would catch 1.5.0's bullet still reading
+        # "(unreleased)" once its own page picks up a real date, or a new
+        # page landing with no bullet at all.
+        if not changelog_md.INDEX.is_file():
+            self.skipTest(f'{changelog_md.INDEX} is absent')
+
+        toctree = changelog_md.read_toctree(changelog_md.INDEX)
+        versions = [entry.rsplit('/', 1)[-1] for entry in toctree]
+
+        index_text = changelog_md.INDEX.read_text(encoding='utf-8')
+        bullets = re.findall(r'(?m)^\* \*\*([^*]+)\*\* \(([^)]+)\)', index_text)
+
+        self.assertEqual(
+            versions, [version for version, _ in bullets],
+            'the index summary bullets are missing an entry, carry an extra '
+            'one, or are not in the toctree order',
+        )
+
+        for entry, (version, stated) in zip(toctree, bullets):
+            page = changelog_md.INDEX.parent / f'{entry}.rst'
+            heading = page.read_text(encoding='utf-8').split('\n', 1)[0]
+            _, _, released = heading.partition(' -- ')
+            self.assertEqual(
+                stated, released,
+                f'the index bullet for {version} says {stated!r}, but {page} '
+                f'itself says {released!r}',
+            )
 
 
 if __name__ == '__main__':

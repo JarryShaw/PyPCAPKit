@@ -24,6 +24,8 @@ enumerations include:
      - Secrets Types [*]_
    * - :class:`PCAPNG_FilterType <pcapkit.const.pcapng.filter_type.FilterType>`
      - Filter Types [*]_
+   * - :class:`PCAPNG_TLSKeyLabel <pcapkit.const.pcapng.tls_key_label.TLSKeyLabel>`
+     - TLS Key Log Labels [*]_
 
 Block Types
 ===========
@@ -116,6 +118,19 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.filter_type.
    :undoc-members:
    :show-inheritance:
 
+TLS Key Log Labels
+===================
+
+.. module:: pcapkit.const.pcapng.tls_key_label
+
+This module contains the constant enumeration for **TLS Key Log Labels**,
+which is automatically generated from :class:`pcapkit.vendor.pcapng.tls_key_label.TLSKeyLabel`.
+
+.. autoclass:: pcapkit.const.pcapng.tls_key_label.TLSKeyLabel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <br />
@@ -127,3 +142,4 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.filter_type.
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-name-resolution-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-decryption-secrets-block
 .. [*] https://www.ietf.org/archive/id/draft-tuexen-opsawg-pcapng-03.html#name-interface-description-block
+.. [*] https://www.iana.org/assignments/tls-parameters/tls-sslkeylogfile-labels.csv, c.f., :rfc:`9850#section-4.2`

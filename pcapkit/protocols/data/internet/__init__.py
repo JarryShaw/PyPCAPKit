@@ -131,6 +131,9 @@ from pcapkit.protocols.data.internet.ipv6 import IPv6
 # IPv6 Fragment Header
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
 
+# IPv6 Extension Header (base + generic fallback)
+from pcapkit.protocols.data.internet.ipv6_ext import IPv6_Ext
+
 # IPv6 Destination Options
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as IPv6_Opts_DFFFlags
@@ -265,6 +268,9 @@ __all__ = [
 
     # IPv6 Fragment Header
     'IPv6_Frag',
+
+    # IPv6 Extension Header (base + generic fallback)
+    'IPv6_Ext',
 
     # IPv6 Destination Options Header
     'IPv6_Opts',

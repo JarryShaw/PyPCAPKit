@@ -25,6 +25,7 @@ from pcapkit.protocols.internet.ipx import IPX
 from pcapkit.protocols.internet.hip import HIP
 from pcapkit.protocols.internet.hopopt import HOPOPT
 from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.internet.mh import MH
@@ -39,6 +40,6 @@ from pcapkit.protocols.internet.ipsec import IPsec
 __all__ = [
     'ETHERTYPE',                                        # Protocol Numbers
     'AH', 'ESP', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',  # Internet Layer
-    'HIP', 'HOPOPT', 'IPv6_Frag',
+    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Ext',
     'IPv6_Opts', 'IPv6_Route', 'MH',                    # IPv6 Extension Header
 ]

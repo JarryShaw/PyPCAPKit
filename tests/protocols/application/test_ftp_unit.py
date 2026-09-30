@@ -63,24 +63,46 @@ class FTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             ftp.read(length=4)
 
+    def test_ftp_type_values_are_pinned(self) -> None:
+        """GitHub issue #884: pin every member's exact value and the member set.
+
+        :class:`~pcapkit.protocols.application.ftp.Type` was converted from
+        spelled-out literals to ``auto()`` -- which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``
+        and so is value-preserving here -- but a future change to
+        ``_generate_next_value_`` could silently alter these wire-visible
+        strings without this test noticing unless every member and every
+        value is asserted explicitly.
+
+        """
+        from pcapkit.protocols.application.ftp import Type
+
+        self.assertEqual([member.name for member in Type], ['REQUEST', 'RESPONSE'])
+
+        self.assertEqual(Type.REQUEST, 'request')
+        self.assertEqual(Type.RESPONSE, 'response')
+
     def test_command_get_is_case_insensitive(self) -> None:
         """``Command.get`` normalised the key it registered but not the key it
         looked up, so the first lowercase command raised ``TypeError`` instead
         of resolving -- #582.
 
-        :rfc:`959#section-5.3` makes FTP commands case-insensitive -- "Upper and
+        :rfc:`959#section-5` makes FTP commands case-insensitive -- "Upper and
         lower case alphabetic characters are to be treated identically. Thus, any
         of the following may represent the retrieve command: ``RETR Retr retr
         ReTr rETr``" -- so every casing of a registered command has to resolve to
         the *same* member rather than to a second one registered alongside it.
 
-        The citation is section 5.3 (COMMANDS, which gives the command syntax),
+        The rule is in section 5.3 (COMMANDS, which gives the command syntax),
         not section 4.1 (FTP COMMANDS, which only lists the per-command
         semantics); #582 cited 4.1 and a cross-review caught it. Verified against
         the RFC text: the sentence sits between the 5.3 and 5.4 headings. The
-        ``:rfc:`959#section-4.1``` citations in
-        :mod:`pcapkit.const.ftp.command` are a different claim -- the command
-        *kind* (access control, transfer parameter, service) -- and are correct.
+        *link* above says ``#section-5`` rather than ``#section-5.3`` because RFC
+        959 renders anchors only for its eight top-level sections -- GitHub issue
+        #944 -- so ``#section-5.3`` was a live link to nothing. The
+        ``:rfc:`959#section-4``` citations in :mod:`pcapkit.const.ftp.command` are
+        a different claim -- the command *kind* (access control, transfer
+        parameter, service) -- and are correct.
         """
         from pcapkit.const.ftp.command import Command
 

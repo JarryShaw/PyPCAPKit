@@ -43,13 +43,14 @@ __all__ = [
     'FileNotFound',                                                 # FileNotFoundError
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
-    'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
+    'EndianError', 'KeyExists', 'NoDefaultValue', 'EnumValueError', # ValueError
     'FieldValueError', 'SchemaError', 'SeekError', 'TruncateError', # ValueError
     'VendorPathNotFound',                                           # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'StreamEOFError',                                               # EOFError
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
+    'EnumKeyError',                                                 # KeyError
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
 
@@ -371,6 +372,17 @@ class NoDefaultValue(BaseError, ValueError):
     """No default value."""
 
 
+class EnumValueError(BaseError, ValueError):
+    """No member of an enumeration carries this value.
+
+    The value-miss half of the pair whose name-miss half is
+    :exc:`~pcapkit.utilities.exceptions.EnumKeyError`; see that one for the
+    stdlib :class:`~enum.Enum` shape both follow, and for why the two halves
+    derive from different builtins.
+
+    """
+
+
 class FieldValueError(BaseError, ValueError):
     """Invalid field value."""
 
@@ -462,6 +474,38 @@ class FragmentError(BaseError, KeyError):
 
 class PacketError(BaseError, KeyError):
     """Invalid packet dict."""
+
+
+class EnumKeyError(BaseError, KeyError):
+    """No member of an enumeration carries this name.
+
+    The name-miss half of the pair whose value-miss half is
+    :exc:`~pcapkit.utilities.exceptions.EnumValueError`, and the split between
+    them follows stdlib :class:`~enum.Enum` rather than this package's own
+    taste: ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises
+    :exc:`ValueError`, so a lookup that misses by *name* is
+    :exc:`KeyError`-derived and one that misses by *value* is
+    :exc:`ValueError`-derived. The owner's ruling on GitHub issue #923,
+    verbatim: *"Either ``ValueError`` or ``KeyError``, that's depending on how
+    stdlib's ``Enum`` would raise on these circumstances. And we should raise
+    one from ``pcapkit.utilities.exceptions`` rather builtin exceptions."*
+
+    Deriving from :exc:`KeyError` is what makes that ruling cheap to carry out:
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get` raised a bare builtin
+    :exc:`KeyError` on a name miss until #923, and six in-library call sites
+    catch it -- :meth:`~pcapkit.const.http.method.Method.get` catches it in
+    order to *mint*, so for that one a failed name lookup is part of a
+    successful call. Every one of them keeps catching, unchanged.
+
+    Note:
+        Distinct from :exc:`~pcapkit.utilities.exceptions.MissingKeyError`,
+        which is deliberately not reused here: that one reports an absent
+        *mapping* key, as :class:`~pcapkit.corekit.multidict.MultiDict` and the
+        :mod:`pcapkit.toolkit` extractors raise it, and conflating the two
+        would leave a caller unable to tell a registry that has no such member
+        from a packet dict that has no such field.
+
+    """
 
 
 ##############################################################################

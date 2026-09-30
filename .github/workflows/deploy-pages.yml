@@ -99,6 +99,10 @@ jobs:
       # so an autodoc import failure is legible in the run log. Both are read at
       # import time, so they are exported before anything imports `pcapkit` --
       # `docs/source/conf.py` sets `PCAPKIT_SPHINX` itself for the same reason.
+      # `.[all,dev]`, not `.[all]` alone: autodoc imports every module, including
+      # the engine wrappers, so it needs the same imports resolvable that
+      # `lint.yml` does and for the same reason (#910's `dev` extra, added when
+      # that issue narrowed `all` to core addons only).
       - name: Install and Build 🔧
         run: |
           set -x
@@ -108,7 +112,7 @@ jobs:
 
           python -m pip install -U pip setuptools wheel
           python -m pip install -r docs/requirements.txt
-          python -m pip install -e .[all]
+          python -m pip install -e .[all,dev]
 
           rm -rf docs/build
           make -C docs html

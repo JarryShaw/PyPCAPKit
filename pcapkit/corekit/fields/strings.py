@@ -4,7 +4,7 @@
 import urllib.parse as urllib_parse
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.corekit.fields.field import NO_VALUE, Field
 from pcapkit.utilities.chardet import detect
 from pcapkit.utilities.compat import Dict
 from pcapkit.utilities.exceptions import FieldValueError
@@ -41,7 +41,7 @@ class _TextField(Field[_T], Generic[_T]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue,
+                 default: '_T | NoValueType' = NO_VALUE,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)  # type: ignore[arg-type]
 
@@ -121,7 +121,7 @@ class StringField(_TextField[str]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
+                 default: 'str | NoValueType' = NO_VALUE, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
@@ -189,7 +189,7 @@ class BitField(_TextField[Dict[str, Any]]):
     """
 
     def __init__(self, length: 'int',
-                 default: 'dict[str, Any] | NoValueType' = NoValue,
+                 default: 'dict[str, Any] | NoValueType' = NO_VALUE,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)

@@ -366,16 +366,27 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # dropping its ``IntFlag`` base, one for one, so the sum each of those
         # counts on stays the same even though the two addends moved.
         #
-        # Five of the nine string registries are the application layer one, which
+        # Five of the ten string registries are the application layer one, which
         # GitHub issue #732 split into a package: the memberless
         # pcapkit.const.reg.apptype.apptype.AppType base plus one registry per
         # transport protocol. It is discovered exactly like a member-bearing
         # registry, since this sweep is structural and never looks at members.
-        self.assertEqual(len(ints), 112)
+        # The tenth is GitHub issue #886's
+        # pcapkit.const.pcapng.tls_key_label.TLSKeyLabel, moved here from a
+        # hand-written class under pcapkit.protocols.misc.pcapng -- it defines
+        # no ``_missing_`` of its own, so it is not among the three ``value.
+        # upper()`` outliers #647 fixed above, and it never reached
+        # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
+        # sweep, so that module's own pinned count does not move.
+        # 112 became 114 with GitHub issue #880's ngap.ProcedureCode and
+        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
+        # classes in pcapkit.protocols.application.ngap -- two more IntEnum
+        # registries, two more modules, no change to the flag or str counts.
+        self.assertEqual(len(ints), 114)
         self.assertEqual(len(flags), 6)
-        self.assertEqual(len(strs), 9)
-        self.assertEqual(len(self.enums), 127)
-        self.assertEqual(len({obj.__module__ for obj in self.enums}), 121)
+        self.assertEqual(len(strs), 10)
+        self.assertEqual(len(self.enums), 130)
+        self.assertEqual(len({obj.__module__ for obj in self.enums}), 124)
 
     def test_every_registry_rejects_a_negative_value(self) -> None:
         """The registry-wide form of GitHub issue #647.
@@ -724,10 +735,18 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         from pcapkit.const.reg.apptype import TransportProtocol
         from pcapkit.const.tcp.flags import Flags
 
-        # String paths, which bypass ``_missing_``.
+        # String paths, which bypass ``_missing_``. ``Method.get`` is probed
+        # with the exact registered casing rather than ``'get'`` -- GitHub
+        # issue #896 made its matching case-sensitive, so a lower-cased probe
+        # would no longer resolve to ``Method.GET`` at all; that behaviour
+        # change is pinned on its own in
+        # :mod:`tests.const.test_const_enum_no_mint`
+        # (``BespokeGetUnchangedTests.test_method_get_is_now_case_sensitive``)
+        # rather than here, where the point is only that the string path
+        # still bypasses the guard this test is about.
         self.assertIs(Flags.get('SYN'), Flags.SYN)
         self.assertIs(Command.get('abor'), Command.ABOR)
-        self.assertIs(Method.get('get'), Method.GET)
+        self.assertIs(Method.get('GET'), Method.GET)
         self.assertIs(TransportProtocol.get('tcp'), TransportProtocol.tcp)
 
         # Integer paths, which do.
@@ -853,7 +872,10 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             TransportProtocol(9)
 
         before = len(TransportProtocol.__members__)
-        with self.assertRaises(ValueError):
+        # KeyError, not ValueError, since GitHub issue #923 retired this
+        # override's ``KeyError`` -> ``ValueError`` conversion. What this test
+        # is about -- refused rather than registered -- is unchanged.
+        with self.assertRaises(KeyError):
             TransportProtocol.get('quic')
         self.assertNotIn('quic', TransportProtocol.__members__)
         self.assertEqual(len(TransportProtocol.__members__), before)
@@ -861,7 +883,7 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         # A second unrecognised name is refused identically -- there is no
         # ``max + 1`` left to walk to, since nothing registers in the first
         # place.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             TransportProtocol.get('quic2')
         self.assertEqual(len(TransportProtocol.__members__), before)
 

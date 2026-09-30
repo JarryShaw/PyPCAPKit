@@ -1002,14 +1002,58 @@ class DependencyRequirementTests(unittest.TestCase):
     def test_a_bracket_inside_a_requirement_does_not_end_the_array(self) -> None:
         """``vendor`` is the case a "slice to the first ``]``" parse gets wrong.
 
-        ``vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]`` holds two
-        closing brackets before its own, so a naive scan stops inside the first
-        requirement and reports an extra with one malformed entry.
+        ``vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]``
+        holds two closing brackets before its own, so a naive scan stops inside
+        the first requirement and reports an extra with one malformed entry.
+        ``pycrate`` (added for GitHub issue #880's NGAP crawlers -- the owner's
+        ruling was to declare it in this extra rather than install it ad hoc in
+        a workflow) carries no brackets of its own; it is here so the third
+        entry does not silently vanish from the sweep the way a truncated parse
+        would drop it too.
 
         """
         declared = _dependency_gates.declared_requirements()
         self.assertEqual({requirement.name for requirement in declared['vendor']},
-                         {'requests', 'beautifulsoup4'})
+                         {'requests', 'beautifulsoup4', 'pycrate'})
+
+    def test_all_is_narrowed_to_core_addons_by_910(self) -> None:
+        """#910: ``all`` means core addons only, not every engine an end user might want.
+
+        The owner's ruling narrowed ``all`` from 8 requirements to 3 -- ``cli``,
+        ``crypto`` and ``pycrate`` (``NGAP``) stay, and the four 3rd-party
+        capture engines that used to be bundled here (``dpkt``, ``scapy``,
+        ``pyshark``, ``pypcapfile``) move out to their own on-demand extras,
+        covered by :meth:`test_dev_carries_what_all_used_to_for_the_toolchain`.
+
+        """
+        declared = _dependency_gates.declared_requirements()
+        for provider in ('emoji', 'cryptography', 'pycrate'):
+            with self.subTest(provider=provider):
+                self.assertTrue(_dependency_gates.provided_by(declared['all'], provider))
+        for removed in ('dpkt', 'scapy', 'pyshark', 'pypcapfile', 'requests', 'beautifulsoup4'):
+            with self.subTest(removed=removed):
+                self.assertFalse(_dependency_gates.provided_by(declared['all'], removed))
+
+    def test_dev_carries_what_all_used_to_for_the_toolchain(self) -> None:
+        """#910's new extra: what pylint/mypy/Sphinx need to see, not what an end user wants.
+
+        Installed alongside ``all`` (``.[all,dev]``) by ``lint.yml``,
+        ``deploy-pages.yml`` and ``cron-conda.yml``'s ``conda-update`` job, so
+        that narrowing ``all`` above did not also grow ``lint.yml``'s own count
+        of 8 ``import-error`` messages. Deliberately does *not* repeat
+        ``pypcap``/``pcap-ct``: those two stay out of every extra, and adding
+        them here would install a C extension or a pre-release just to resolve
+        an import CI has already decided to carry as an advisory finding.
+
+        """
+        declared = _dependency_gates.declared_requirements()
+        self.assertIn('dev', declared)
+        for provider in ('dpkt', 'scapy', 'pyshark', 'pypcapfile', 'requests', 'beautifulsoup4'):
+            with self.subTest(provider=provider):
+                self.assertTrue(_dependency_gates.provided_by(declared['dev'], provider))
+        for absent in ('pypcap', 'pcap-ct'):
+            with self.subTest(absent=absent):
+                self.assertFalse(_dependency_gates.provided_by(declared['dev'], absent))
 
     def test_the_core_dependencies_are_read_from_project_not_build_system(self) -> None:
         """``[build-system] requires`` also holds ``setuptools``; this is not it."""
@@ -1270,10 +1314,12 @@ class DependencyGateSelectionTests(unittest.TestCase):
 
         The ``changelog`` job of this workflow installs nothing and runs a
         generator, and six of the seven other workflows install ``.[all]``
-        somewhere -- which carries ``pypcapfile``, ``pyshark`` and ``scapy`` --
-        without ever invoking :program:`pytest`. A guard that looked at install
-        lines anywhere in :file:`.github/workflows/` would find nearly every
-        extra it wanted and pass without checking anything.
+        somewhere, several as ``.[all,dev]`` -- which carries ``pypcapfile``,
+        ``pyshark`` and ``scapy`` through the ``dev`` extra #910 added when it
+        narrowed ``all`` to core addons only -- without ever invoking
+        :program:`pytest`. A guard that looked at install lines anywhere in
+        :file:`.github/workflows/` would find nearly every extra it wanted and
+        pass without checking anything.
 
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')

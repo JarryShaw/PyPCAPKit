@@ -32,9 +32,10 @@ concurrency:
   cancel-in-progress: false
 
 # Every job below with an effect outside this run declares a deployment
-# ``environment:``, which is what holds it at "Waiting" until a required reviewer
-# approves. Four jobs qualify, and they get four environments rather than one
-# shared ``release``:
+# ``environment:``, but as of #887 only one of them -- ``github-release`` --
+# carries a required reviewer. Four jobs still get four environments rather than
+# one shared ``release``, for credential and blast-radius separation, not for
+# approval count:
 #
 #   github -> github-release  the public GitHub Release, and the ``v*`` tag that
 #                             ``action-gh-release``'s ``tag_name`` creates with it
@@ -42,29 +43,44 @@ concurrency:
 #   pypi   -> pypi            an upload to PyPI, and to TestPyPI
 #   conda  -> anaconda        an upload to anaconda.org/jarryshaw
 #
-# One environment per distinct credential and blast radius, because approval is
-# granted to an *environment* and not to a job: a single ``release`` approved once
-# would release PyPI and Anaconda together, and those are different credentials
-# (OIDC trusted publishing versus ``ANACONDA_TOKEN``) reaching different indexes.
-# PyPI is the one that has to be answerable alone -- a version number it has
-# accepted cannot be reused, and ``skip-existing: true`` below means the re-upload
-# then *succeeds* having published nothing, so an unintended publish consumes the
-# number the intended release wanted. ``github`` and ``tag`` are split on the same
-# principle: ``github`` spends the run's own ``GITHUB_TOKEN``, whereas ``tag``
-# spends a long-lived PAT and a deploy key to write to the default branch.
+# Approving the GitHub Release is now the release's *only* approval.
+# ``tag`` and ``pypi`` both carry ``needs: [ github, ... ]``, and ``conda`` needs
+# ``tag`` and ``github`` too, so nothing downstream of ``github`` can start before
+# that approval lands, and rejecting it leaves nothing tagged and nothing
+# published. See :file:`docs/source/contributing/releasing.rst` for the full pipeline and the
+# reasoning behind one approval being enough.
 #
-# The cost is two approval waves, not four: ``github`` and ``tag`` need only
-# ``version_check`` so they arrive together, and ``pypi`` and ``conda`` then arrive
-# together too, each wave answerable in one visit to "Review pending deployments".
+# The other three environments keep their names -- ``pypi``'s matters because
+# PyPI trusted publishing matches its OIDC claim against it -- and keep their
+# secret scoping, they just no longer hold a required reviewer of their own. Do
+# not add one back to any of them without re-examining the ``needs:`` chain: a
+# reviewer on ``conda-tag`` with its old ``needs: [ version_check ]`` is exactly
+# the bug #887 fixed, because it let the commit-to-``main`` and ``conda-*`` tag
+# run *before* the GitHub Release was ever approved.
+# ``tests/project/test_release_gates.py``'s ``TestGatedJobsDependOnGithub``
+# asserts that every gated job's ``needs:`` closure includes ``github``, which
+# is the checkable half of this paragraph -- reverting the line above to
+# ``needs: [ version_check ]`` fails only that one test.
+#
+# One environment per distinct credential and blast radius regardless of who
+# gates it: a single ``release`` approved once would release PyPI and Anaconda
+# together, and those are different credentials (OIDC trusted publishing versus
+# ``ANACONDA_TOKEN``) reaching different indexes. PyPI in particular cannot afford
+# an unintended publish -- a version number it has accepted cannot be reused, and
+# ``skip-existing: true`` below means a re-upload then *succeeds* having published
+# nothing, so the number the intended release wanted is gone regardless. ``github``
+# and ``tag`` were split on the same principle: ``github`` spends the run's own
+# ``GITHUB_TOKEN``, whereas ``tag`` spends a long-lived PAT and a deploy key to
+# write to the default branch.
 #
 # Two things about this that are not self-enforcing, and #641 is the first of them:
 #
 #   * An ``environment:`` naming an environment that does not exist is created
 #     implicitly, with no protection rules, and the job proceeds unapproved. So
-#     these four lines are inert until each environment exists under
-#     Settings -> Environments with a required reviewer on it. This repository
-#     already ships the worked example of that failure: ``github-pages`` has
-#     existed since 2021 with ``"protection_rules": []``.
+#     the ``github-release`` line above is inert until that environment exists
+#     under Settings -> Environments with a required reviewer on it. This
+#     repository already ships the worked example of that failure:
+#     ``github-pages`` has existed since 2021 with ``"protection_rules": []``.
 #   * Leave each one's "Deployment branches and tags" as "No restriction". This
 #     workflow's ``push`` trigger is ``tags: v*``, and a branch policy that does
 #     not list that tag pattern does not pause the job for approval -- it fails it
@@ -73,6 +89,52 @@ concurrency:
 # ``tests/project/test_release_gates.py`` asserts the first bullet's workflow half,
 # i.e. that no job here publishes without naming an environment. It cannot assert
 # the repository settings, which is why they are written down here.
+#
+# #888: every job below ``version_check`` used to share one guard --
+# ``startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS
+# == 'false'`` -- using "the v* tag exists" as a proxy for "this version was
+# already published". Those diverge exactly when a release half-completes: the
+# ``github`` job tags, a later job fails or is rejected, and the next
+# ``workflow_run``-triggered attempt reads a tag that already exists and skips
+# every job, reporting green. ``github`` still uses that guard for its own
+# artefact -- the tag it checks is the one it is about to create -- but ``tag``,
+# ``pypi`` and ``conda`` now each read their own evidence instead: ``tag`` checks
+# for the ``conda-<version>+0`` tag it creates, ``pypi`` checks PyPI's file count
+# for the version against the 8 expected, and ``conda`` both checks Anaconda's
+# aggregate count as a job-level cost saver and, per leg, whether that leg's own
+# platform/Python distribution is already there -- the correctness fix, since
+# retrying an upload Anaconda already has fails outright rather than skipping
+# (``anaconda/actions/upload-package`` has no ``skip-existing`` equivalent, only
+# ``force:``, never set below).
+#
+# Reading your own evidence instead of the tag is not enough on its own, though:
+# ``tag``, ``pypi`` and ``conda`` each depend on ``github`` (and ``conda`` also on
+# ``tag``), and GitHub Actions skips a job whose ``needs:`` included a job that
+# itself skipped, *before* that job's own ``if:`` is even evaluated -- unless the
+# ``if:`` calls a status-check function itself. ``github`` legitimately skips
+# whenever its own tag already exists, which is exactly the retry case this fix is
+# for, so ``tag``, ``pypi`` and ``conda`` all reach for the same escape hatch
+# ``unit-tests``'s callers already use for the identical problem --
+# ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` all open with
+# ``!cancelled() && needs.unit-tests.result != 'failure'`` so that a skipped
+# gate does not cascade-skip them, while an outright failure or a genuine run
+# cancellation still does. ``tag``, ``pypi`` and ``conda`` below do the same for
+# each of their own direct dependencies, but spelled as ``!cancelled() &&
+# (needs.<job>.result == 'success' || needs.<job>.result == 'skipped')`` rather
+# than the sibling files' ``!= 'failure'`` -- ``!= 'failure'`` alone still
+# admits ``cancelled``, and a cancelled ``tag`` would send ``conda`` into its
+# ``actions/checkout`` with ``ref: conda-<version>+0`` for a tag ``tag`` never
+# pushed, trading a clean skip for a checkout failure. Either spelling bypasses
+# the default ``success()`` GitHub Actions would otherwise prepend to an
+# ``if:`` that does not itself call a status-check function.
+#
+# See ``release_status`` at the bottom of this file for the other half: a job
+# that runs whenever the run itself was not cancelled (``if: !cancelled()``,
+# the same escape hatch) and reports, in one place, why a run released nothing
+# -- because the triggering Vendor Update run had nothing to do, because the
+# version is already fully out, or because something is stuck only partly
+# published. The third is the shape #888 was actually about, and the one this
+# job treats as loud (``::error``, non-zero exit) rather than quiet.
 
 jobs:
   # No ``environment:`` here, and none needed: this is a test gate with no outward
@@ -122,17 +184,158 @@ jobs:
         with:
           tag: "v${{ steps.get_version.outputs.PCAPKIT_VERSION }}"
 
+      # #888: ``PCAPKIT_TAG_EXISTS`` answers "was this tagged", which ``github``
+      # above legitimately uses since the ``v*`` tag *is* its own artefact. It is
+      # the wrong question for ``tag``, ``pypi`` and ``conda``, whose artefacts
+      # are a different tag, PyPI, and Anaconda respectively -- a half-failed
+      # release leaves the ``v*`` tag behind while those three are still
+      # incomplete, and gating them on it is what made every one of them skip
+      # silently. Each gets its own evidence step below instead.
+      - uses: mukunku/tag-exists-action@v1.7.0
+        id: check_conda_tag
+        with:
+          tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+0"
+
+      # PyPI evidence: compare the file count for this version against the 8
+      # expected -- 7 matrix legs (``pypi``'s ``strategy.matrix.python-version``)
+      # each producing a wheel, plus the sdist that the "No Source Distribution"
+      # step keeps only on the 3.14 leg. A release-level 200 only proves *some*
+      # file landed, not all of them, so presence alone -- ``PCAPKIT_TAG_EXISTS``'s
+      # mistake, repeated -- is not enough.
+      #
+      # The per-version endpoint's own ``releases`` mapping was empty on every
+      # request checked while writing this, including against a version that
+      # genuinely has all 8 files -- so this reads ``urls``, the field the
+      # per-version endpoint actually populates for the requested version.
+      # ``/pypi/pypcapkit/json`` (no version) does populate ``releases``, but at
+      # ~950KB against this endpoint's ~15KB, for one release's worth of data.
+      #
+      # This endpoint is Fastly-fronted with a 900s max-age, so a check right
+      # after an upload can read a stale response -- but only stale in the
+      # direction of *undercounting*: a file just uploaded is invisible until the
+      # cache catches up, never the reverse, since PyPI never removes a file once
+      # accepted. So the only failure mode staleness can cause here is treating a
+      # genuinely-complete release as incomplete, which just re-enters the
+      # ``pypi`` job's matrix -- harmless, because every leg's ``skip-existing:
+      # true`` absorbs the redundant attempt. It cannot cause the opposite
+      # mistake of calling an incomplete release complete.
+      - name: Check PyPI publish completeness
+        id: check_pypi
+        env:
+          PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+        run: |
+          set -euo pipefail
+
+          expected=8
+          # `--retry-connrefused` and the `|| status=000` fallback keep a
+          # transient pypi.org outage from failing this step outright: under
+          # `set -e` a bare curl failure here would fail `version_check`,
+          # which every one of `tag`/`pypi`/`conda` requires to have
+          # succeeded -- coupling the whole release to index availability,
+          # which it was not coupled to before this check existed.
+          # "Incomplete" (status != 200) is the safe default either way.
+          status="$(curl -s --retry 3 --retry-connrefused \
+            -o /tmp/pypi_release.json -w '%{http_code}' \
+            "https://pypi.org/pypi/pypcapkit/${PCAPKIT_VERSION}/json" || echo 000)"
+
+          count=0
+          if [ "$status" = "200" ]; then
+            # A `python3 -c` argument with indented source only compiles on
+            # Python 3.14 -- every earlier interpreter (3.9 through 3.13,
+            # measured directly) raises `IndentationError: unexpected indent`
+            # on the leading whitespace this YAML block scalar's own
+            # indentation would otherwise force onto the source. This step
+            # runs before `actions/setup-python@v7`, so `python3` here is
+            # whatever the runner image ships (3.12 on ubuntu-latest as of
+            # writing), not 3.14. Feeding one line per `printf` argument
+            # keeps each line's YAML indentation off the actual Python source
+            # `python3 -` reads from stdin, so nothing is indented that
+            # Python did not itself put there.
+            count="$(printf '%s\n' \
+              "import json" \
+              "with open('/tmp/pypi_release.json') as f:" \
+              "    data = json.load(f)" \
+              "print(len(data.get('urls', [])))" \
+              | python3 -)"
+          fi
+
+          complete=false
+          if [ "$count" -ge "$expected" ]; then
+            complete=true
+          fi
+
+          echo "http $status, found $count of $expected expected files for ${PCAPKIT_VERSION} on PyPI"
+          echo "PCAPKIT_PYPI_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
+
+      # Anaconda evidence, same shape as PyPI's above but for the 10-leg
+      # ``conda`` matrix (2 OS x 5 Python versions). Unlike PyPI's, this endpoint
+      # reported ``cf-cache-status: DYNAMIC`` on every request checked while
+      # writing this, i.e. not cached -- so there is no staleness direction to
+      # reason about here. This is the job-level cost saver mirroring ``pypi``'s;
+      # ``conda``'s own per-leg checks (see that job) are the actual correctness
+      # fix and still run underneath it, since a release with only 9 of 10 legs
+      # complete must not have the missing leg mistaken for "nothing to do".
+      - name: Check Anaconda publish completeness
+        id: check_conda
+        env:
+          PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+        run: |
+          set -euo pipefail
+
+          expected=10
+          # Same coupling risk, and the same fix, as the PyPI check above.
+          status="$(curl -s --retry 3 --retry-connrefused \
+            -o /tmp/anaconda_release.json -w '%{http_code}' \
+            "https://api.anaconda.org/release/jarryshaw/pypcapkit/${PCAPKIT_VERSION}" || echo 000)"
+
+          count=0
+          if [ "$status" = "200" ]; then
+            # Same Python-3.14-only-dedent hazard as the PyPI check above --
+            # one line per `printf` argument, no line indented in the actual
+            # source `python3 -` reads.
+            count="$(printf '%s\n' \
+              "import json" \
+              "with open('/tmp/anaconda_release.json') as f:" \
+              "    data = json.load(f)" \
+              "platforms = {'linux-64', 'osx-64'}" \
+              "py_tags = {'py310', 'py311', 'py312', 'py313', 'py314'}" \
+              "seen = {" \
+              "    (d.get('attrs', {}).get('subdir'), tag)" \
+              "    for d in data.get('distributions', [])" \
+              "    for tag in py_tags" \
+              "    if d.get('attrs', {}).get('build', '').startswith(tag + '_')" \
+              "    and d.get('attrs', {}).get('subdir') in platforms" \
+              "}" \
+              "print(len(seen))" \
+              | python3 -)"
+          fi
+
+          complete=false
+          if [ "$count" -ge "$expected" ]; then
+            complete=true
+          fi
+
+          echo "http $status, found $count of $expected expected platform/Python combinations for ${PCAPKIT_VERSION} on Anaconda"
+          echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
+
     outputs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
       PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
+      PCAPKIT_CONDA_TAG_EXISTS: ${{ steps.check_conda_tag.outputs.exists }}
+      PCAPKIT_PYPI_COMPLETE: ${{ steps.check_pypi.outputs.PCAPKIT_PYPI_COMPLETE }}
+      PCAPKIT_CONDA_COMPLETE: ${{ steps.check_conda.outputs.PCAPKIT_CONDA_COMPLETE }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
 
   github:
     name: GitHub Release
     runs-on: ubuntu-latest
     # Gated: publishes the Release, and creates the ``v*`` tag that every job
-    # below then checks out. See the note above ``jobs:``.
+    # below then checks out. Since #887 this is the release's only approval --
+    # see the note above ``jobs:``. Still gated on ``PCAPKIT_TAG_EXISTS``,
+    # unlike the three jobs below it: the tag that output answers for is this
+    # job's own artefact, not a proxy for someone else's -- see the #888 note
+    # above ``jobs:``.
     environment: github-release
     permissions:
       contents: write
@@ -222,14 +425,26 @@ jobs:
     # two check rows reading `Conda Tag` with nothing to tell them apart.
     name: Conda Tag (release)
     runs-on: ubuntu-latest
-    # Gated: pushes a commit to ``main`` and the ``conda-*`` tag. ``permissions: {}``
+    # Pushes a commit to ``main`` and the ``conda-*`` tag. ``permissions: {}``
     # does not constrain it -- the write goes through the deploy key and PAT below,
-    # not the run's token -- which is why it needs an approval of its own. See the
-    # note above ``jobs:``.
+    # not the run's token. It carried its own required reviewer until #887; now it
+    # depends on ``github`` rather than on ``version_check`` alone, precisely so
+    # the single ``github-release`` approval still gates it -- without that
+    # ``needs:``, this job would start the moment ``version_check`` finished,
+    # ahead of any approval. See the note above ``jobs:``.
+    #
+    # #888: gated on its own evidence (whether ``conda-<version>+0`` already
+    # exists) rather than on ``PCAPKIT_TAG_EXISTS``, and opened with
+    # ``!cancelled()`` so that ``github`` legitimately skipping (its own tag
+    # already existing) does not cascade-skip this job before its ``if:`` is
+    # even evaluated -- see the #888 note above ``jobs:``.
     environment: conda-tag
     permissions: {}
-    needs: [ version_check ]
-    if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    needs: [ github, version_check ]
+    if: >-
+      ${{ !cancelled() && needs.version_check.result == 'success' &&
+      (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS == 'false') }}
     steps:
       - name: Load maintenance deploy key
         uses: webfactory/ssh-agent@v0.9.1
@@ -283,18 +498,31 @@ jobs:
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    # Gated, and named ``pypi`` rather than the upstream snippet's ``release``: see
-    # the note above ``jobs:`` for why each target gets its own. #641 was that this
-    # line stayed commented while the rest of the same snippet did not -- the
+    # Named ``pypi`` rather than the upstream snippet's ``release``: see the note
+    # above ``jobs:`` for why each target gets its own. #641 was that this line
+    # stayed commented while the rest of the same snippet did not -- the
     # ``id-token: write`` that *enables* trusted publishing was re-added below, so
-    # the block read as disabled as a unit when only its gate still was.
+    # the block read as disabled as a unit when only its gate still was. #887
+    # removed this environment's own required reviewer; it is gated only
+    # transitively now, through ``needs: [ github, version_check ]`` below, and the
+    # name still matters because PyPI's trusted-publishing claim match is keyed on it.
+    #
+    # #888: gated on its own evidence (PyPI's file count for this version) rather
+    # than on ``PCAPKIT_TAG_EXISTS`` -- this job is already idempotent
+    # (``skip-existing: true`` below), so the evidence check here is a cost
+    # saver, not the correctness fix. Opened with ``!cancelled()`` for the same
+    # reason as ``tag`` above: ``github`` legitimately skipping must not
+    # cascade-skip this job. See the #888 note above ``jobs:``.
     environment: pypi
     permissions:
       contents: write
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     needs: [ github, version_check ]
-    if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: >-
+      ${{ !cancelled() && needs.version_check.result == 'success' &&
+      (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE == 'false') }}
     strategy:
       ## one leg failing must not cancel its siblings: each leg still has its own
       ## wheel to attach to the GitHub Release, and a cancelled leg never does
@@ -372,15 +600,29 @@ jobs:
   conda:
     name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
-    # Gated: uploads to anaconda.org/jarryshaw with ``ANACONDA_TOKEN``. This job
-    # never had an ``environment:`` at all, not even a commented one, so it was the
-    # half of #641 that was not written down as a thing to turn on. See the note
-    # above ``jobs:``.
+    # Uploads to anaconda.org/jarryshaw with ``ANACONDA_TOKEN``. This job never had
+    # an ``environment:`` at all, not even a commented one, so it was the half of
+    # #641 that was not written down as a thing to turn on. #887 later removed
+    # this environment's own required reviewer; gating is transitive now, through
+    # ``needs: [ tag, github, version_check ]`` below. See the note above ``jobs:``.
+    #
+    # #888: gated on Anaconda's aggregate evidence for this version (job-level
+    # cost saver, mirroring ``pypi``) rather than on ``PCAPKIT_TAG_EXISTS``, and
+    # opened with ``!cancelled()`` for the same reason as ``tag`` and ``pypi``
+    # above. Unlike them, an aggregate check is not the correctness fix here --
+    # ``anaconda/actions/upload-package`` has no ``skip-existing``, only
+    # ``force:`` (never set below), so each *leg* also checks whether its own
+    # platform/Python distribution already exists and skips only its own upload
+    # step if so. See "Check whether this leg is already on Anaconda" below.
     environment: anaconda
     permissions:
       contents: write
     needs: [ tag, github, version_check ]
-    if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: >-
+      ${{ !cancelled() && needs.version_check.result == 'success' &&
+      (needs.github.result == 'success' || needs.github.result == 'skipped') &&
+      (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
+      (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE == 'false') }}
     strategy:
       fail-fast: false
       matrix:
@@ -399,6 +641,75 @@ jobs:
         with:
           ref: conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
           fetch-depth: 0
+
+      # #888: this is the per-leg correctness fix -- see the job comment above.
+      # Anaconda's read API reported ``cf-cache-status: DYNAMIC`` on every
+      # request checked while writing this, i.e. not cached, so unlike PyPI's
+      # evidence check in ``version_check`` there is no staleness to reason
+      # about here: this reads the live state.
+      - name: Check whether this leg is already on Anaconda
+        id: check_leg
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+        run: |
+          set -euo pipefail
+
+          case "${{ matrix.os }}" in
+            macos-latest)
+              target_platform="osx-64"
+              ;;
+            ubuntu-latest)
+              target_platform="linux-64"
+              ;;
+            windows-latest)
+              target_platform="win-64"
+              ;;
+            *)
+              target_platform=""
+              ;;
+          esac
+          py_tag="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
+
+          # Same coupling risk, and the same fix, as version_check's checks.
+          status="$(curl -s --retry 3 --retry-connrefused \
+            -o /tmp/anaconda_release.json -w '%{http_code}' \
+            "https://api.anaconda.org/release/jarryshaw/pypcapkit/${PCAPKIT_VERSION}" || echo 000)"
+
+          exists=false
+          if [ "$status" = "200" ]; then
+            # This step runs before `actions/setup-python@v7` below, so
+            # `python3` here is the runner image's default -- 3.12 on
+            # ubuntu-latest, 3.13 on macos-latest, neither of which is 3.14.
+            # A `python3 -c` argument with indented source only compiles on
+            # 3.14 (measured directly: 3.9 through 3.13 all raise
+            # `IndentationError: unexpected indent` on exactly the leading
+            # whitespace this YAML block scalar's own indentation would
+            # otherwise force onto the source); every earlier interpreter
+            # fails this step outright under `set -e` -- and only on the
+            # branch entered when Anaconda already has *something* for this
+            # version, i.e. only on the retry this feature exists for. Feeding
+            # one line per `printf` argument instead keeps each line's YAML
+            # indentation off the actual Python source `python3 -` reads from
+            # stdin, so nothing is indented that Python did not put there.
+            exists="$(printf '%s\n' \
+              "import json" \
+              "with open('/tmp/anaconda_release.json') as f:" \
+              "    data = json.load(f)" \
+              "target_platform = '$target_platform'" \
+              "py_tag = '$py_tag'" \
+              "found = any(" \
+              "    d.get('attrs', {}).get('subdir') == target_platform" \
+              "    and d.get('attrs', {}).get('build', '').startswith(py_tag + '_')" \
+              "    for d in data.get('distributions', [])" \
+              ")" \
+              "print('true' if found else 'false')" \
+              | python3 -)"
+          fi
+
+          echo "PCAPKIT_LEG_EXISTS=$exists" >> "$GITHUB_OUTPUT"
+          if [ "$exists" = "true" ]; then
+            echo "::notice title=conda leg already published::pypcapkit ${PCAPKIT_VERSION} for ${target_platform} / ${py_tag} is already on anaconda.org/jarryshaw (http ${status}); skipping this leg's upload."
+          fi
 
       - uses: actions/setup-python@v7
         with:
@@ -509,6 +820,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload conda packages to Anaconda
+        if: ${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
         uses: anaconda/actions/upload-package@v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
@@ -524,3 +836,150 @@ jobs:
           files: ${{ steps.conda_build.outputs.packages }}
           tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
+
+  # #888: the point of this job is that a run which released nothing must say
+  # why, in one place, regardless of which upstream job or gate is what made it
+  # release nothing. ``unit-tests`` and ``version_check`` can each skip (a
+  # ``workflow_run`` whose Vendor Update did not conclude ``success``, or a
+  # release test-gate failure) before any evidence output the jobs above rely on
+  # even exists, so this job cannot simply read those outputs the way
+  # ``tag``/``pypi``/``conda`` do -- it has to run unconditionally and
+  # reconstruct what happened from ``needs.*.result`` and the trigger context
+  # instead. ``if: !cancelled()`` is what makes that possible: without it, the
+  # default status check this file relies on everywhere else (see the note
+  # above ``jobs:``) would skip this job the moment anything upstream skipped,
+  # which is precisely the situation it exists to report on. ``!cancelled()``
+  # rather than ``always()``, same as ``tag``/``pypi``/``conda`` above, so that
+  # cancelling the run still cancels this report rather than having it run
+  # anyway with a run it cannot fully see.
+  #
+  # No ``environment:`` -- it has no outward effect, only annotations, and
+  # ``permissions: {}`` reflects that: it reads only the ``needs:`` context and
+  # the trigger event, never the repository.
+  release_status:
+    name: Release status
+    runs-on: ubuntu-latest
+    needs: [ unit-tests, version_check, github, tag, pypi, conda ]
+    if: ${{ !cancelled() }}
+    permissions: {}
+    steps:
+      - name: Report why this run did or did not release anything
+        env:
+          PCAPKIT_EVENT_NAME: ${{ github.event_name }}
+          PCAPKIT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PCAPKIT_UNIT_TESTS: ${{ needs.unit-tests.result }}
+          PCAPKIT_VERSION_CHECK: ${{ needs.version_check.result }}
+          PCAPKIT_GITHUB_JOB: ${{ needs.github.result }}
+          PCAPKIT_TAG_JOB: ${{ needs.tag.result }}
+          PCAPKIT_PYPI_JOB: ${{ needs.pypi.result }}
+          PCAPKIT_CONDA_JOB: ${{ needs.conda.result }}
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_TAG_EXISTS: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS }}
+          PCAPKIT_CONDA_TAG_EXISTS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS }}
+          PCAPKIT_PYPI_COMPLETE: ${{ needs.version_check.outputs.PCAPKIT_PYPI_COMPLETE }}
+          PCAPKIT_CONDA_COMPLETE: ${{ needs.version_check.outputs.PCAPKIT_CONDA_COMPLETE }}
+        run: |
+          set -euo pipefail
+
+          # Case 1: the release test gate itself never ran. On a `workflow_run`
+          # trigger this means the triggering Vendor Update run did not
+          # conclude `success` -- most commonly because it found nothing to
+          # update (`skipped`), which is routine and gets a quiet notice; any
+          # other conclusion gets a warning, because it means Vendor Update
+          # itself needs attention, even though it is not #888 -- no tag exists
+          # here that could be left stranded.
+          if [ "$PCAPKIT_UNIT_TESTS" = "skipped" ]; then
+            if [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ] && [ "$PCAPKIT_WORKFLOW_RUN_CONCLUSION" = "skipped" ]; then
+              echo "::notice title=Nothing to release::the triggering Vendor Update run found nothing to update, so this run correctly released nothing."
+            elif [ "$PCAPKIT_EVENT_NAME" = "workflow_run" ]; then
+              echo "::warning title=Release test gate skipped::the triggering Vendor Update run concluded '${PCAPKIT_WORKFLOW_RUN_CONCLUSION}', not 'success', so the release test gate and every release job were skipped. Not #888 -- no tag was created that could be left stranded -- but Vendor Update likely needs attention."
+            else
+              echo "::warning title=Release test gate skipped for an unexpected reason::unit-tests reported 'skipped' with event_name='${PCAPKIT_EVENT_NAME}', which is not the workflow_run non-success case this job otherwise expects. Check the unit-tests job's own if: condition."
+            fi
+            exit 0
+          fi
+
+          # Case, still before any evidence exists: the gate ran but
+          # version_check itself did not succeed. A test or workflow failure,
+          # not #888 -- but still worth saying plainly why nothing released.
+          if [ "$PCAPKIT_VERSION_CHECK" != "success" ]; then
+            echo "::warning title=Release blocked before it could start::the release test gate ran but version_check did not succeed (result: '${PCAPKIT_VERSION_CHECK}'), so no release job ran. This is a test or workflow failure, not #888."
+            exit 0
+          fi
+
+          # From here, version_check succeeded, so the evidence outputs above
+          # are meaningful.
+          #
+          # Reconcile each of the four release jobs against its OWN evidence,
+          # not against each other. A self-heal is a MIXED outcome by design
+          # -- github/tag skip because their artefacts already existed going
+          # in, pypi/conda run and succeed because theirs did not -- and
+          # demanding uniformity across all four (either all skipped, or all
+          # succeeded, as an earlier revision of this job did) reads that
+          # mix as the #888 shape itself, firing the error below on the run
+          # that just finished the release. "Reconciled" means: this target
+          # either actually succeeded, or skipped *because* its own evidence
+          # already said it was done -- anything else (skipped while its
+          # evidence says incomplete, or an outright failure/cancellation)
+          # is not reconciled.
+          reconciled_github=false
+          [ "$PCAPKIT_GITHUB_JOB" = "success" ] && reconciled_github=true
+          [ "$PCAPKIT_GITHUB_JOB" = "skipped" ] && [ "$PCAPKIT_TAG_EXISTS" = "true" ] && reconciled_github=true
+
+          reconciled_tag=false
+          [ "$PCAPKIT_TAG_JOB" = "success" ] && reconciled_tag=true
+          [ "$PCAPKIT_TAG_JOB" = "skipped" ] && [ "$PCAPKIT_CONDA_TAG_EXISTS" = "true" ] && reconciled_tag=true
+
+          reconciled_pypi=false
+          [ "$PCAPKIT_PYPI_JOB" = "success" ] && reconciled_pypi=true
+          [ "$PCAPKIT_PYPI_JOB" = "skipped" ] && [ "$PCAPKIT_PYPI_COMPLETE" = "true" ] && reconciled_pypi=true
+
+          reconciled_conda=false
+          [ "$PCAPKIT_CONDA_JOB" = "success" ] && reconciled_conda=true
+          [ "$PCAPKIT_CONDA_JOB" = "skipped" ] && [ "$PCAPKIT_CONDA_COMPLETE" = "true" ] && reconciled_conda=true
+
+          all_reconciled=false
+          if [ "$reconciled_github" = "true" ] && [ "$reconciled_tag" = "true" ] \
+             && [ "$reconciled_pypi" = "true" ] && [ "$reconciled_conda" = "true" ]; then
+            all_reconciled=true
+          fi
+
+          all_skipped=true
+          any_broken=false
+          for result in "$PCAPKIT_GITHUB_JOB" "$PCAPKIT_TAG_JOB" "$PCAPKIT_PYPI_JOB" "$PCAPKIT_CONDA_JOB"; do
+            [ "$result" = "skipped" ] || all_skipped=false
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              any_broken=true
+            fi
+          done
+
+          # Case 2: every target reconciled by skipping, none of them ran.
+          # Quiet -- this is the steady state most runs are in.
+          if [ "$all_reconciled" = "true" ] && [ "$all_skipped" = "true" ]; then
+            echo "::notice title=Nothing to release::pypcapkit ${PCAPKIT_VERSION} is already fully released -- the v* tag, the conda-*+0 tag, all 8 PyPI files and all 10 Anaconda files are present. This run correctly released nothing."
+            exit 0
+          fi
+
+          # Every target reconciled, but at least one of them actually ran --
+          # either a fresh full release (all four `success`) or a self-heal
+          # (a mix of `success` and legitimately-`skipped`). Both are the
+          # release working as intended, so both are quiet.
+          if [ "$all_reconciled" = "true" ]; then
+            echo "::notice title=Release complete::pypcapkit ${PCAPKIT_VERSION} is now fully released -- github=${PCAPKIT_GITHUB_JOB} tag=${PCAPKIT_TAG_JOB} pypi=${PCAPKIT_PYPI_JOB} conda=${PCAPKIT_CONDA_JOB}. A 'skipped' entry there means that target's own artefact already existed before this run, not that anything was missed."
+            exit 0
+          fi
+
+          if [ "$any_broken" = "true" ]; then
+            echo "::warning title=Release did not complete::github=${PCAPKIT_GITHUB_JOB} tag=${PCAPKIT_TAG_JOB} pypi=${PCAPKIT_PYPI_JOB} conda=${PCAPKIT_CONDA_JOB} for ${PCAPKIT_VERSION}. At least one release job failed or was cancelled outright -- see its own log; this run's checks already show that failure in red."
+            exit 0
+          fi
+
+          # Case 3, the shape #888 is actually about: at least one target
+          # skipped despite its own evidence saying it is still incomplete,
+          # and nothing else failed or was cancelled to explain that. With
+          # the evidence-based `if:` above this should be unreachable -- a
+          # target's own incomplete evidence makes its job run, not skip --
+          # so reaching this branch means that assumption itself broke. Loud,
+          # and a real failure: this must never report green.
+          echo "::error title=Stranded partial release (#888)::${PCAPKIT_VERSION} is only partially published (tag exists=${PCAPKIT_TAG_EXISTS}, conda tag exists=${PCAPKIT_CONDA_TAG_EXISTS}, pypi complete=${PCAPKIT_PYPI_COMPLETE}, conda complete=${PCAPKIT_CONDA_COMPLETE}) but github=${PCAPKIT_GITHUB_JOB} tag=${PCAPKIT_TAG_JOB} pypi=${PCAPKIT_PYPI_JOB} conda=${PCAPKIT_CONDA_JOB} -- at least one target skipped despite its own evidence saying it is not done. Re-running this workflow should let the incomplete jobs self-heal; if this recurs on the next run too, the evidence checks in version_check are the first thing to check."
+          exit 1

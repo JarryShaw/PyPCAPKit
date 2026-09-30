@@ -184,7 +184,8 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         ``0x0bad0bad`` is in one of the ``Reserved_*`` ranges
         :meth:`BlockType._missing_
         <pcapkit.const.pcapng.block_type.BlockType._missing_>` covers. Per the
-        mint/unmint ruling recorded for #775 (``docs/source/conventions.rst``),
+        mint/unmint ruling recorded for #775
+        (``docs/source/contributing/conventions/mint-criterion.rst``),
         ``Reserved`` names a procedure rather than a party, so this range no
         longer *mints* a registered ``Reserved_0bad0bad`` member -- it now
         returns an unregistered member via ``_unregistered_member``, bearing the

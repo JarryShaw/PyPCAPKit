@@ -1477,23 +1477,51 @@ class HTTPUnitTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             proto._read_http_header(b'BAD nope nope\r\nHost: example')
 
-    def test_method_get_is_case_insensitive(self) -> None:
-        """``Method.get`` tested the raw key and registered the upper-cased one,
-        so a mixed-case method raised ``TypeError`` -- #583, item 1.
+    def test_method_get_is_now_case_sensitive(self) -> None:
+        """``Method.get`` used to test the upper-cased key, so a mixed-case
+        method resolved to the same registered member regardless of its own
+        casing -- #583, item 1, at the time framed the same way as #582's fix
+        in :mod:`pcapkit.const.ftp.command` (`Command.get` stays that way; see
+        its own RFC 959 Section 4.1 rationale). GitHub issue #896 retired that
+        for ``Method`` specifically: RFC 9110 Section 9.1 makes the HTTP
+        method *token* case-sensitive -- "standardized methods are defined in
+        all-uppercase US-ASCII letters" by convention, not by requirement --
+        so a request whose method token is ``get`` is a distinct,
+        non-standardised method from ``GET``, and conflating the two through
+        ``.get()`` was the defect.
 
-        The same mismatch as #582 in :mod:`pcapkit.const.ftp.command`. Resolving
-        to the existing member matters beyond not crashing: a duplicate
-        registered alongside ``GET`` would carry neither its ``safe`` nor its
-        ``idempotent`` attribute.
+        This replaces the class's own former pin of the opposite behaviour
+        (same method name, opposite body) rather than adding a second test
+        beside it, since the two claims cannot both be true.
         """
         from pcapkit.const.http.method import Method
 
-        for key in ('GET', 'Get', 'get', 'gEt'):
-            with self.subTest(key=key):
-                self.assertIs(Method.get(key), Method.GET)
+        # The exact registered casing still resolves.
+        self.assertIs(Method.get('GET'), Method.GET)
+        self.assertTrue(Method.get('GET').safe)
 
+        # A differently-cased token no longer resolves to the registered
+        # member -- each becomes its own unregistered member instead,
+        # carrying the caller's own casing on its value (same convention
+        # :meth:`Method._unregistered_member` documents) and never
+        # registering.
+        before = len(Method.__members__)
+        for key in ('Get', 'get', 'gEt'):
+            with self.subTest(key=key):
+                probed = Method.get(key)
+                self.assertIsNot(probed, Method.GET)
+                self.assertNotEqual(probed, 'GET')
+                self.assertEqual(probed, key)
+                # Building the pseudo-member never registers it -- 'GET'
+                # itself is the only real member these differently-cased
+                # names could collide with, and membership does not grow.
+                self.assertEqual(len(Method.__members__), before)
+
+        # The constructor path (``Method(...)`` -> ``_missing_``) is a
+        # separate mechanism from ``.get()`` and #896 does not touch it --
+        # it still folds case, exactly as before.
         self.assertIs(Method('Get'), Method.GET)
-        self.assertTrue(Method.get('Get').safe)
+
         self.assertEqual([name for name in Method._member_map_
                           if name.upper() == 'GET'], ['GET'])
 
@@ -2570,6 +2598,25 @@ class HTTPUnitTests(unittest.TestCase):
             DemoApplication._decode_next_layer(app, object())
         with self.assertRaises(UnsupportedCall):
             DemoApplication._import_next_layer(app, 80)
+
+    def test_httpv1_type_values_are_pinned(self) -> None:
+        """GitHub issue #884: pin every member's exact value and the member set.
+
+        :class:`~pcapkit.protocols.application.httpv1.Type` was converted
+        from spelled-out literals to ``auto()`` -- which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``
+        and so is value-preserving here -- but a future change to
+        ``_generate_next_value_`` could silently alter these wire-visible
+        strings without this test noticing unless every member and every
+        value is asserted explicitly.
+
+        """
+        from pcapkit.protocols.application.httpv1 import Type
+
+        self.assertEqual([member.name for member in Type], ['REQUEST', 'RESPONSE'])
+
+        self.assertEqual(Type.REQUEST, 'request')
+        self.assertEqual(Type.RESPONSE, 'response')
 
 
 if __name__ == '__main__':

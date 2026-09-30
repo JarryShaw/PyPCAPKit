@@ -92,8 +92,11 @@ create new ones."* That reasoning reaches ``get()`` as well as
 and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
 wire string carries -- so both classes' own ``get()`` (a second, independent
 mint site bypassing ``_missing_`` entirely) converts too, alongside
-``_missing_``; :class:`FEATCode` has no custom ``__new__`` and no ``get()``
-of its own, so only its one ``_missing_`` branch was in play.
+``_missing_``; :class:`FEATCode` has no custom ``__new__``, and had no
+``get()`` of its own at the time either, so only its one ``_missing_`` branch
+was in play. (It has one now -- GitHub issue #903's audit gave it a
+case-insensitive ``get`` per :rfc:`5797#section-2` -- but that override never
+calls ``cls(key)``, so it added no mint site to this file's concern.)
 
 GitHub issue #860 step 2's PR 2 has now converted the last of the 9:
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four per-transport
@@ -2100,14 +2103,27 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         """A word IANA already assigned still resolves to the same,
         genuinely-registered, identical member every time -- this
         conversion only changes what happens for a word that is not one of
-        those."""
+        those.
+
+        ``Method.get`` is probed with its exact registered casing
+        (``'GET'``), not the lower-cased ``'get'`` this test used before
+        GitHub issue #896: ``Command``'s FTP command codes stay
+        case-insensitive per :rfc:`959#section-5`, but the HTTP method
+        token :rfc:`9110#section-9.1` covers is case-sensitive, so
+        ``Method.get('get')`` no longer resolves to :attr:`Method.GET` --
+        see :class:`BespokeGetUnchangedTests`'s
+        ``test_method_get_is_now_case_sensitive`` for that behaviour
+        directly. ``Method('GET')`` (the constructor, reaching
+        :meth:`Method._missing_` rather than :meth:`Method.get`) is
+        untouched either way, since #896 is scoped to ``get`` alone.
+        """
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.http.method import Method
 
         self.assertIs(Command('RETR'), Command.RETR)  # type: ignore[attr-defined]
         self.assertIs(Command.get('retr'), Command.RETR)  # type: ignore[attr-defined]
         self.assertIs(Method('GET'), Method.GET)  # type: ignore[attr-defined]
-        self.assertIs(Method.get('get'), Method.GET)  # type: ignore[attr-defined]
+        self.assertIs(Method.get('GET'), Method.GET)  # type: ignore[attr-defined]
 
     def test_all_three_carry_the_registry_protocol(self) -> None:
         """#842's ruling is that ``get``/``get_all``/``register``/
@@ -2235,14 +2251,26 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     :class:`~pcapkit.const.http.method.Method` and
     :class:`~pcapkit.const.pcapng.option_type.OptionType` keep their own
     hand-written ``get()`` in PR 1, because each does real dispatch the
-    base's generic ``get()`` does not replicate and at least two of the three
-    are pinned, tested behaviour already: :class:`Command`/:class:`Method`
-    resolve case-insensitively (GitHub issues #582/#583 -- ``Command.
-    get('abor')`` must return :attr:`Command.ABOR`, not raise, and
-    ``Method.get('Get')`` must return :attr:`Method.GET` with its
-    :attr:`safe`/:attr:`idempotent` attributes intact), which the base's
-    plain ``_member_map_``/``_value2member_map_`` lookup does not do --
-    swapping in the base would silently reintroduce #582/#583.
+    base's generic ``get()`` does not replicate. :class:`Command` resolves
+    case-insensitively (GitHub issue #582 -- ``Command.get('abor')`` must
+    return :attr:`Command.ABOR`, not raise), which the base's plain
+    ``_member_map_``/``_value2member_map_`` lookup does not do -- swapping in
+    the base would silently reintroduce #582.
+
+    :class:`Method` used to resolve case-insensitively the same way (#583),
+    but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP
+    method token case-sensitive, unlike FTP's command codes (RFC 959 Section
+    4.1), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
+    see ``test_method_get_is_now_case_sensitive`` below, which replaces the
+    case-insensitive pin this class used to carry for it. ``Method`` still
+    keeps its own ``get()`` rather than the base's, because it still needs to
+    build an unregistered member preserving the caller's own casing on a
+    miss (the base's generic ``get()`` only ever raises or falls back to an
+    already-registered ``default`` for a ``str`` key, per
+    :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own docstring) -- what
+    #896 changed is only whether the lookup that precedes that fallback is
+    case-sensitive.
+
     :class:`OptionType`'s ``get()`` does its own multi-namespace dispatch via
     :attr:`__members_ns__` with no base equivalent at all. These are
     regression guards, not new coverage.
@@ -2261,13 +2289,40 @@ class BespokeGetUnchangedTests(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertIs(Command.get(key), Command.RETR)  # type: ignore[attr-defined]
 
-    def test_method_get_is_still_case_insensitive(self) -> None:
+    def test_method_get_is_now_case_sensitive(self) -> None:
+        """GitHub issue #896: only the exact registered casing resolves.
+
+        Replaces this class's own ``test_method_get_is_still_case_
+        insensitive``, whose title and body pinned the opposite -- that
+        ``Method.get('Get')``/``Method.get('get')`` resolved to
+        :attr:`Method.GET`. RFC 9110 Section 9.1 makes the method token
+        case-sensitive, so a differently-cased probe now builds its own
+        unregistered member (preserving the caller's casing, same
+        convention as :meth:`Method._unregistered_member`) rather than
+        resolving to :attr:`Method.GET`.
+        """
         from pcapkit.const.http.method import Method
 
-        for key in ('GET', 'Get', 'get', 'gEt'):
+        self.assertIs(Method.get('GET'), Method.GET)  # type: ignore[attr-defined]
+        self.assertTrue(Method.get('GET').safe)
+
+        before = len(Method.__members__)
+        for key in ('Get', 'get', 'gEt'):
             with self.subTest(key=key):
-                self.assertIs(Method.get(key), Method.GET)  # type: ignore[attr-defined]
-        self.assertTrue(Method.get('Get').safe)
+                probed = Method.get(key)  # type: ignore[attr-defined]
+                self.assertIsNot(probed, Method.GET)
+                # Building the pseudo-member never registers it -- 'GET'
+                # itself is the only real member these differently-cased
+                # names could collide with, and membership does not grow.
+                self.assertEqual(len(Method.__members__), before)
+                # The caller's own casing survives on the value; only the
+                # (unregistered) member's name is canonicalised.
+                self.assertEqual(probed.value, key)
+                self.assertEqual(probed.name, key.upper())
+                # Neither attribute a bare wire token cannot supply is
+                # fabricated -- same as any other unregistered member.
+                self.assertFalse(probed.safe)
+                self.assertFalse(probed.idempotent)
 
     def test_optiontype_get_namespace_dispatch_is_unchanged(self) -> None:
         from pcapkit.const.pcapng.option_type import OptionType
@@ -2627,10 +2682,14 @@ class TransportProtocolAutoTests(unittest.TestCase):
         """GitHub PR #836's ruling against extending ``TransportProtocol``
         at all is untouched by the ``auto()`` change -- :meth:`~pcapkit.const.
         reg.apptype.apptype.TransportProtocol.get` still has no ``_missing_``
-        of its own and still refuses outright rather than minting."""
+        of its own and still refuses outright rather than minting.
+
+        :exc:`KeyError`-shaped since GitHub issue #923, which retired the
+        override's ``KeyError`` -> ``ValueError`` conversion; the refusal itself
+        is what this test is about and that is unchanged."""
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             TransportProtocol.get('not-a-real-transport')
 
     def test_stale_power_of_two_comment_is_gone(self) -> None:
