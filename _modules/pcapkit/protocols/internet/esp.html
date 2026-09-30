@@ -305,6 +305,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
@@ -629,6 +630,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.esp.integrity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Integrity</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.esp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESP</span> <span class="k">as</span> <span class="n">Data_ESP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.ipsec</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPsec</span>
@@ -927,8 +929,15 @@
 
 <div class="viewcode-block" id="ESPStatus">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp.ESPStatus">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ESPStatus</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Outcome of ESP payload processing."""</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ESPStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Outcome of ESP payload processing.</span>
+
+<span class="sd">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">    issue #930, finishing #877's phase 2 -- pure re-parenting, since this</span>
+<span class="sd">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
+<span class="sd">    with the base.</span>
+
+<span class="sd">    """</span>
 
     <span class="c1">#: The payload was decrypted and its trailer recovered.</span>
     <span class="n">DECRYPTED</span> <span class="o">=</span> <span class="mi">0</span>

@@ -312,6 +312,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
@@ -624,19 +625,19 @@ four in the tree follow it:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NULL</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NullType</span></code></p></td>
-<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
+<td><p><a class="reference internal" href="../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NoValue</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NoValueType</span></code></p></td>
-<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
+<td><p><a class="reference internal" href="../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NoDefaultType</span></code></p></td>
-<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
+<td><p><a class="reference internal" href="../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">_Absent</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code></p></td>
-<td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></p></td>
+<td><p><a class="reference internal" href="../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -677,7 +678,7 @@ is <code class="docutils literal notranslate"><span class="pre">import</span> <s
 neither, which is what private means here.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Of the four, only <a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> is a full worked
+<p>Of the four, only <a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> is a full worked
 example. <code class="docutils literal notranslate"><span class="pre">NoValueType</span></code> follows the naming rule but is <strong>not</strong> a singleton
 (<code class="docutils literal notranslate"><span class="pre">NoValueType()</span> <span class="pre">is</span> <span class="pre">NoValue</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) and has no <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> of its own,
 so it demonstrates the name and nothing else; <code class="docutils literal notranslate"><span class="pre">_AbsentType</span></code> has a <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>
@@ -721,10 +722,10 @@ inconsistencies</strong>:</p>
 fails every <code class="docutils literal notranslate"><span class="pre">is</span></code> check. Worth having wherever the type is reachable by a caller at
 all – which, since the type is kept out of <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, means wherever it is
 importable by its dotted path rather than wherever it is star-exported.
-<a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> documents the limit honestly: a module
+<a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> documents the limit honestly: a module
 <strong>reload</strong> re-executes the class statement, so the guard does not survive one, and
 code holding the pre-reload instance will fail <code class="docutils literal notranslate"><span class="pre">is</span></code>. Since GitHub issue #911,
-that means reloading <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code> itself – reloading
+that means reloading <a class="reference internal" href="../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> itself – reloading
 <a class="reference internal" href="../pcapkit/corekit/module.html#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>, which now only re-exports the sentinel, no longer
 has any effect on it.</p>
 </dd>
@@ -736,7 +737,7 @@ then treat a caller’s genuine falsy default (<code class="docutils literal not
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) the same as the sentinel, the very confusion the sentinel exists to
 prevent.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">__copy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code></dt><dd><p><a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> has them because <code class="docutils literal notranslate"><span class="pre">NULL</span></code> is stored in a
+<dt><code class="docutils literal notranslate"><span class="pre">__copy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__deepcopy__</span></code> / <code class="docutils literal notranslate"><span class="pre">__reduce__</span></code></dt><dd><p><a class="reference internal" href="../pcapkit/corekit/sentinels.html#pcapkit.corekit.sentinels.NullType" title="pcapkit.corekit.sentinels.NullType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullType</span></code></a> has them because <code class="docutils literal notranslate"><span class="pre">NULL</span></code> is stored in a
 <a class="reference internal" href="../pcapkit/corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a> field, so a caller’s
 <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.deepcopy" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.deepcopy()</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> can walk into it and would otherwise
 reconstruct a second instance. <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> and <code class="docutils literal notranslate"><span class="pre">_Absent</span></code> have none, because
@@ -839,22 +840,24 @@ legal by construction. <code class="docutils literal notranslate"><span class="p
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Re-parenting the remaining helper enumerations onto
-<a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> is <strong>phase 2</strong> of
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is <strong>partly
-done</strong> rather than pending: the phase landed for 17 of the 24 non-registry
-enumerations. <strong>Seven are still outside the hierarchy</strong>, measured by a runtime
-walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> flavours: <code class="docutils literal notranslate"><span class="pre">CommandType</span></code> and
-<code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code> in <a class="reference internal" href="../pcapkit/const/ftp.html#module-pcapkit.const.ftp.command" title="pcapkit.const.ftp.command"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code></a>, <code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code> in
-<a class="reference internal" href="../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a>, and all four
-<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> helpers
-(<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>, <code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>,
-<code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>). Each sat in a file another pull
-request held open while phase 2 ran, which is the whole reason the phase was split
-in two: phase 1 is behaviour-preserving on its own, so it could land while work
-was still in flight on the files a re-parent touches. Do not read the seven as a
-ruling against re-parenting them – they are the remainder of a phase, not an
-exception to it.</p>
+<p>Re-parenting every non-registry enumeration onto
+<a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> was <strong>phase 2</strong> of
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, and it is now
+<strong>complete</strong>: the phase landed for 24 of the 24 non-registry enumerations.
+<strong>Zero enumerations remain outside the hierarchy</strong>, measured by the same runtime
+walk over both the <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> flavours that once found seven.</p>
+<p>It landed in two pull requests rather than one. Seven of the 24 sat in files
+other pull requests were editing around the same time: <code class="docutils literal notranslate"><span class="pre">CommandType</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ConformanceRequirement</span></code> in <a class="reference internal" href="../pcapkit/const/ftp.html#module-pcapkit.const.ftp.command" title="pcapkit.const.ftp.command"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const.ftp.command</span></code></a> and its vendor
+template, both touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/913">#913</a>;
+and <code class="docutils literal notranslate"><span class="pre">ESPStatus</span></code> in <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> plus all four
+<a class="reference internal" href="../pcapkit/protocols/internet/mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> helpers (<code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus</span></code>,
+<code class="docutils literal notranslate"><span class="pre">IPv6AddressPrefixCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LMAAddressCode</span></code>, <code class="docutils literal notranslate"><span class="pre">LocalizedRoutingStatus</span></code>), both
+files touched by <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a>. The
+first pass (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/921">#921</a>) is
+behaviour-preserving on its own, so the other 17 could land without waiting on
+those files; the remaining seven followed once both had merged
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a>).</p>
 </div>
 </section>
 <section id="what-a-failed-lookup-raises">
@@ -1141,11 +1144,13 @@ design question rather than a case fold.</p></li>
 specification’s own tokens – the measured spelling disagreement above would make
 these two case-insensitive. Nothing looks them up by string today, though: the
 crawler translates the CSV’s lower-case letters to the upper-case member names at
-generation time, and neither class inherits
-<a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> yet – both are in the seven phase 2 has
-not reached, per the note above. Re-parenting them is phase 2 of
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>, which is where the
-question belongs.</p></li>
+generation time. Both classes now inherit
+<a class="reference internal" href="../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> –
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/930">#930</a> finished re-parenting
+them, per the note above – so a <code class="docutils literal notranslate"><span class="pre">get</span></code> exists on each, case-sensitive like the
+base’s own. Whether to fold case to match <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>’s own override is a
+design question for whoever writes the first string-keyed caller, not one this
+audit settles.</p></li>
 </ul>
 <p>One case fold also lives <strong>outside</strong> any <code class="docutils literal notranslate"><span class="pre">get</span></code>, and so escapes this convention
 entirely: <code class="docutils literal notranslate"><span class="pre">_resolve</span></code> in <a class="reference internal" href="../pcapkit/protocols/internet/esp.html#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> upper-cases its

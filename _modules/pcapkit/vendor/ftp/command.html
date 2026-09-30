@@ -305,6 +305,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
@@ -511,7 +512,7 @@
 
 <span class="s1">from aenum import IntEnum, IntFlag, StrEnum, auto</span>
 
-<span class="s1">from pcapkit.corekit.enum import NO_DEFAULT, EnumRegistry</span>
+<span class="s1">from pcapkit.corekit.enum import NO_DEFAULT, EnumLookup, EnumRegistry</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Any, Optional, Type</span>
@@ -651,8 +652,17 @@
 <span class="s1">        return cls._unregistered_member(value, value.upper())</span>
 
 
-<span class="s1">class CommandType(IntFlag):</span>
-<span class="s1">    """Type of "kind" of command, based on :rfc:`959#section-4.1`."""</span>
+<span class="s1">class CommandType(EnumLookup, IntFlag):</span>
+<span class="s1">    """Type of "kind" of command, based on :rfc:`959#section-4.1`.</span>
+
+<span class="s1">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="s1">    issue #930, finishing #877's phase 2. Pure re-parenting as far as</span>
+<span class="s1">    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its</span>
+<span class="s1">    own to reconcile with the base -- and its own :meth:`_missing_` range</span>
+<span class="s1">    guard below is untouched, since :class:`EnumLookup` does not touch that</span>
+<span class="s1">    hook.</span>
+
+<span class="s1">    """</span>
 
 <span class="s1">    undefined = 0</span>
 
@@ -676,8 +686,15 @@
 <span class="s1">        return super()._missing_(value)</span>
 
 
-<span class="s1">class ConformanceRequirement(IntEnum):</span>
-<span class="s1">    """Expectation for support in modern FTP implementations."""</span>
+<span class="s1">class ConformanceRequirement(EnumLookup, IntEnum):</span>
+<span class="s1">    """Expectation for support in modern FTP implementations.</span>
+
+<span class="s1">    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="s1">    issue #930, finishing #877's phase 2 -- pure re-parenting, since this</span>
+<span class="s1">    class defines neither ``get`` nor ``_missing_`` of its own to reconcile</span>
+<span class="s1">    with the base.</span>
+
+<span class="s1">    """</span>
 
 <span class="s1">    #: Mandatory to implement.</span>
 <span class="s1">    M = auto()</span>

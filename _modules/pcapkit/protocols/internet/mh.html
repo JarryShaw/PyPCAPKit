@@ -305,6 +305,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/module.html">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
 </ul>
 </li>
@@ -533,6 +534,7 @@
     <span class="n">UpdateNotificationACKStatus</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationACKStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.mh.upn_reason</span><span class="w"> </span><span class="kn">import</span> <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_ip_address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Data_MH</span>
@@ -1029,7 +1031,7 @@
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.</span>
 
 <span class="sd">    Status values of the fast binding acknowledgment (FBack) message, c.f.,</span>
@@ -1038,6 +1040,23 @@
 <span class="sd">    above that it was rejected.</span>
 
 <span class="sd">    Note:</span>
+<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">        issue #930, finishing #877's phase 2. :meth:`get` and</span>
+<span class="sd">        :meth:`_missing_` below are untouched -- #923 already converted</span>
+<span class="sd">        :meth:`get`'s own name-miss to the in-library</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, which is exactly</span>
+<span class="sd">        the shape the base's own ``get`` uses, so there is nothing to</span>
+<span class="sd">        reconcile. Unlike :meth:`~pcapkit.const.reg.apptype.apptype.</span>
+<span class="sd">        TransportProtocol.get` and :meth:`~pcapkit.protocols.application.</span>
+<span class="sd">        ngap.Criticality.get` in GitHub issue #921, :meth:`get` keeps its</span>
+<span class="sd">        ``@staticmethod`` decorator rather than becoming a delegating</span>
+<span class="sd">        ``classmethod`` -- it never calls ``super().get(...)``, so the</span>
+<span class="sd">        :exc:`RuntimeError` trap a ``staticmethod`` delegating to a</span>
+<span class="sd">        ``classmethod`` base would hit does not apply here, and the</span>
+<span class="sd">        resulting ``mypy`` ``[override]`` complaint about the signature</span>
+<span class="sd">        mismatch (no ``cls``, no ``default``) is silenced rather than</span>
+<span class="sd">        resolved by widening the signature.</span>
+
 <span class="sd">        :rfc:`5568#section-6.2.3` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`. It is also **not** interchangeable with the</span>
@@ -1090,8 +1109,26 @@
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus.get">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus.get">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+            <span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'FastBindingAcknowledgmentStatus'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Raises quietly on a name miss, matching the base's own</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get`</span>
+<span class="sd">        (:mod:`pcapkit.corekit.enum`, the ``EnumKeyError`` raised at its</span>
+<span class="sd">        ``str`` branch) rather than diverging from it. This override used</span>
+<span class="sd">        to raise loud instead -- logging once at :data:`logging.CRITICAL`</span>
+<span class="sd">        and setting :data:`sys.tracebacklimit` to ``0`` process-wide --</span>
+<span class="sd">        until GitHub issue #930 converged it onto house convention,</span>
+<span class="sd">        settled on GitHub issue #933's follow-up ruling, verbatim: *"Oh</span>
+<span class="sd">        wait. I meant, they should follow house convention and not to be</span>
+<span class="sd">        loud."* Re-parenting onto</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup` is what makes the</span>
+<span class="sd">        convergence reach further than this one method: :meth:`get_all</span>
+<span class="sd">        &lt;pcapkit.corekit.enum.EnumLookup.get_all&gt;` did not exist on this</span>
+<span class="sd">        class before #930 and is now inherited from the base, which calls</span>
+<span class="sd">        this ``get`` internally -- so a name miss reached through</span>
+<span class="sd">        ``get_all`` is quiet too, for the same reason.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
@@ -1123,7 +1160,8 @@
             <span class="k">return</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">EnumKeyError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
-                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
+                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">FastBindingAcknowledgmentStatus</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                               <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="FastBindingAcknowledgmentStatus._missing_">
@@ -1149,7 +1187,7 @@
 
 <div class="viewcode-block" id="IPv6AddressPrefixCode">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IPv6AddressPrefixCode</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.</span>
 
 <span class="sd">    Option codes of the mobility header IPv6 address/prefix option, which</span>
@@ -1157,6 +1195,23 @@
 <span class="sd">    :rfc:`5568#section-6.4.2`.</span>
 
 <span class="sd">    Note:</span>
+<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">        issue #930, finishing #877's phase 2. :meth:`get` and</span>
+<span class="sd">        :meth:`_missing_` below are untouched -- #923 already converted</span>
+<span class="sd">        :meth:`get`'s own name-miss to the in-library</span>
+<span class="sd">        :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, which is exactly</span>
+<span class="sd">        the shape the base's own ``get`` uses, so there is nothing to</span>
+<span class="sd">        reconcile. Unlike :meth:`~pcapkit.const.reg.apptype.apptype.</span>
+<span class="sd">        TransportProtocol.get` and :meth:`~pcapkit.protocols.application.</span>
+<span class="sd">        ngap.Criticality.get` in GitHub issue #921, :meth:`get` keeps its</span>
+<span class="sd">        ``@staticmethod`` decorator rather than becoming a delegating</span>
+<span class="sd">        ``classmethod`` -- it never calls ``super().get(...)``, so the</span>
+<span class="sd">        :exc:`RuntimeError` trap a ``staticmethod`` delegating to a</span>
+<span class="sd">        ``classmethod`` base would hit does not apply here, and the</span>
+<span class="sd">        resulting ``mypy`` ``[override]`` complaint about the signature</span>
+<span class="sd">        mismatch (no ``cls``, no ``default``) is silenced rather than</span>
+<span class="sd">        resolved by widening the signature.</span>
+
 <span class="sd">        :rfc:`5568#section-6.4.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`. The identical code space of the neighbor</span>
@@ -1200,8 +1255,26 @@
 <div class="viewcode-block" id="IPv6AddressPrefixCode.get">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.IPv6AddressPrefixCode.get">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+            <span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6AddressPrefixCode'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+
+<span class="sd">        Raises quietly on a name miss, matching the base's own</span>
+<span class="sd">        :meth:`~pcapkit.corekit.enum.EnumLookup.get`</span>
+<span class="sd">        (:mod:`pcapkit.corekit.enum`, the ``EnumKeyError`` raised at its</span>
+<span class="sd">        ``str`` branch) rather than diverging from it. This override used</span>
+<span class="sd">        to raise loud instead -- logging once at :data:`logging.CRITICAL`</span>
+<span class="sd">        and setting :data:`sys.tracebacklimit` to ``0`` process-wide --</span>
+<span class="sd">        until GitHub issue #930 converged it onto house convention,</span>
+<span class="sd">        settled on GitHub issue #933's follow-up ruling, verbatim: *"Oh</span>
+<span class="sd">        wait. I meant, they should follow house convention and not to be</span>
+<span class="sd">        loud."* Re-parenting onto</span>
+<span class="sd">        :class:`~pcapkit.corekit.enum.EnumLookup` is what makes the</span>
+<span class="sd">        convergence reach further than this one method: :meth:`get_all</span>
+<span class="sd">        &lt;pcapkit.corekit.enum.EnumLookup.get_all&gt;` did not exist on this</span>
+<span class="sd">        class before #930 and is now inherited from the base, which calls</span>
+<span class="sd">        this ``get`` internally -- so a name miss reached through</span>
+<span class="sd">        ``get_all`` is quiet too, for the same reason.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key to get enum item.</span>
@@ -1233,7 +1306,8 @@
             <span class="k">return</span> <span class="n">IPv6AddressPrefixCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">EnumKeyError</span><span class="p">(</span><span class="s1">'</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span>
-                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
+                               <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">IPv6AddressPrefixCode</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                               <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="IPv6AddressPrefixCode._missing_">
@@ -1259,7 +1333,7 @@
 
 <div class="viewcode-block" id="LocalizedRoutingStatus">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LocalizedRoutingStatus">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LocalizedRoutingStatus</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LocalizedRoutingStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[LocalizedRoutingStatus] Localized Routing Acknowledgment Status Codes.</span>
 
 <span class="sd">    Status values of the localized routing acknowledgment (LRA) message, c.f.,</span>
@@ -1267,6 +1341,13 @@
 <span class="sd">    was processed successfully, values of ``128`` and above that it was rejected.</span>
 
 <span class="sd">    Note:</span>
+<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">        issue #930, finishing #877's phase 2 -- pure re-parenting as far as</span>
+<span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
+<span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
+<span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
+<span class="sd">        not touch that hook.</span>
+
 <span class="sd">        :rfc:`6705#section-10.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them -- neither a dedicated one nor entries in the general</span>
 <span class="sd">        *Status Codes* registry -- so the enumeration lives here rather than in</span>
@@ -1293,11 +1374,15 @@
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
 <span class="sd">        reach it. See GitHub issue #880.</span>
 
-<span class="sd">        There is no ``get()`` backport here, unlike</span>
+<span class="sd">        There is no hand-rolled ``get()`` backport here, unlike</span>
 <span class="sd">        :class:`FastBindingAcknowledgmentStatus` and</span>
 <span class="sd">        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests</span>
 <span class="sd">        included -- so GitHub issue #880 deleted it outright rather than</span>
-<span class="sd">        rebuilding it on the immutable contract.</span>
+<span class="sd">        rebuilding it on the immutable contract. GitHub issue #930's</span>
+<span class="sd">        re-parenting above gives this class ``get``/``get_all`` again, but as</span>
+<span class="sd">        the base's own bare lookup rather than a bespoke override -- it still</span>
+<span class="sd">        cannot mint, so an unassigned value raises through ``get`` exactly as</span>
+<span class="sd">        it does through the bare constructor.</span>
 
 <span class="sd">    """</span>
 
@@ -1333,13 +1418,20 @@
 
 <div class="viewcode-block" id="LMAAddressCode">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.LMAAddressCode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LMAAddressCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LMAAddressCode</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[LMAAddressCode] Local Mobility Anchor Address Option Codes.</span>
 
 <span class="sd">    Option codes of the local mobility anchor address option, which say which</span>
 <span class="sd">    address family the option carries, c.f., :rfc:`5949#section-6.2.2`.</span>
 
 <span class="sd">    Note:</span>
+<span class="sd">        Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub</span>
+<span class="sd">        issue #930, finishing #877's phase 2 -- pure re-parenting as far as</span>
+<span class="sd">        ``get``/``get_all`` are concerned, since this class defines no</span>
+<span class="sd">        ``get`` of its own to reconcile with the base; its own</span>
+<span class="sd">        :meth:`_missing_` below is untouched, since :class:`EnumLookup` does</span>
+<span class="sd">        not touch that hook.</span>
+
 <span class="sd">        :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no</span>
 <span class="sd">        registry of them, so the enumeration lives here rather than in</span>
 <span class="sd">        :mod:`pcapkit.const.mh`.</span>
@@ -1363,11 +1455,15 @@
 <span class="sd">        naming merely an unassigned byte is simply a more likely way to</span>
 <span class="sd">        reach it. See GitHub issue #880.</span>
 
-<span class="sd">        There is no ``get()`` backport here, unlike</span>
+<span class="sd">        There is no hand-rolled ``get()`` backport here, unlike</span>
 <span class="sd">        :class:`FastBindingAcknowledgmentStatus` and</span>
 <span class="sd">        :class:`IPv6AddressPrefixCode`: it had zero callers repo-wide -- tests</span>
 <span class="sd">        included -- so GitHub issue #880 deleted it outright rather than</span>
-<span class="sd">        rebuilding it on the immutable contract.</span>
+<span class="sd">        rebuilding it on the immutable contract. GitHub issue #930's</span>
+<span class="sd">        re-parenting above gives this class ``get``/``get_all`` again, but as</span>
+<span class="sd">        the base's own bare lookup rather than a bespoke override -- it still</span>
+<span class="sd">        cannot mint, so an unassigned value raises through ``get`` exactly as</span>
+<span class="sd">        it does through the bare constructor.</span>
 
 <span class="sd">    """</span>
 

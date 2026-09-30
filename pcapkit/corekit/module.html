@@ -312,6 +312,7 @@
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Module Descriptor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sentinels.html">Sentinel Objects</a></li>
 <li class="toctree-l3"><a class="reference internal" href="version.html">Version Info</a></li>
 </ul>
 </li>
@@ -600,7 +601,7 @@ live registry this sentinel could be re-read from. The pre-#833 <code class="doc
 sentinel had the same fragility for the same reason – it is a property
 of sharing one module-level binding across a reload, not something this
 class’s singleton guarantees claim to solve – and nothing in this
-package reloads <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code> after import.</p>
+package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
 <p>A second caveat, specific to this class now living apart from its one
 caller-visible re-export: reloading <a class="reference internal" href="#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>
 itself – rather than this module – no longer has any effect on the
@@ -673,7 +674,7 @@ live registry this sentinel could be re-read from. The pre-#833 <code class="doc
 sentinel had the same fragility for the same reason – it is a property
 of sharing one module-level binding across a reload, not something this
 class’s singleton guarantees claim to solve – and nothing in this
-package reloads <code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code> after import.</p>
+package reloads <a class="reference internal" href="sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a> after import.</p>
 <p>A second caveat, specific to this class now living apart from its one
 caller-visible re-export: reloading <a class="reference internal" href="#module-pcapkit.corekit.module" title="pcapkit.corekit.module"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.module</span></code></a>
 itself – rather than this module – no longer has any effect on the
