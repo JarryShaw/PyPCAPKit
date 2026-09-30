@@ -9,7 +9,7 @@ import itertools
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.field import FieldBase, NoValue
+from pcapkit.corekit.fields.field import NO_VALUE, FieldBase
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.corekit.infoclass import FinalisedState
@@ -105,7 +105,7 @@ def schema_final(cls: '_ST', *, _finalised: 'bool' = True) -> '_ST':
     cls.__builtin__ = set(temp)
     cls.__excluded__.extend(cls.__builtin__)
 
-    args_ = [f'{key}=NoValue' for key in cls.__fields__]
+    args_ = [f'{key}=NO_VALUE' for key in cls.__fields__]
     dict_ = [f'{key}={key}' for key in cls.__fields__]
 
     # NOTE: We shall only attempt to generate ``__init__`` method if the class
@@ -502,10 +502,10 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # generated ``__init__`` is not the only caller: :meth:`from_dict`
             # seeds only the keys its argument carries, so a field the caller left
             # out is missing from ``__dict__`` entirely rather than holding
-            # ``NoValue``, and subscripting it raised :exc:`KeyError` naming the
+            # ``NO_VALUE``, and subscripting it raised :exc:`KeyError` naming the
             # field.
             #
-            # What is tested is ``NoValue`` alone, not ``NoValue`` or ``None``.
+            # What is tested is ``NO_VALUE`` alone, not ``NO_VALUE`` or ``None``.
             # This method fills in what the caller did not say, and a ``None`` the
             # caller passed *is* something said: on an optional field it is the
             # chosen value, meaning this packet does not carry the field. It is
@@ -515,16 +515,16 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             # substituting the default here would leave a constructed schema
             # disagreeing with a parsed one about the same packet, and
             # ``from_dict(parsed.to_dict())`` no longer reproducing what it was
-            # given. Telling the two apart is what ``NoValue`` is for.
-            value = self.__dict__.get(name, NoValue)
-            if value is not NoValue:
+            # given. Telling the two apart is what ``NO_VALUE`` is for.
+            value = self.__dict__.get(name, NO_VALUE)
+            if value is not NO_VALUE:
                 continue
 
             default = field.default
-            if default is not NoValue:
+            if default is not NO_VALUE:
                 self.__dict__[name] = default
             else:
-                # NOTE: Nothing to fill an unset field with, so the ``NoValue``
+                # NOTE: Nothing to fill an unset field with, so the ``NO_VALUE``
                 # the generated ``__init__`` seeded it with is dropped rather than
                 # kept: it is a *field* sentinel, not a value a schema may hold.
                 # Dropping it rather than storing ``None`` also keeps the name out
@@ -967,7 +967,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 if not field.test(packet):
                     self.__buffer__[field.name] = b''
                     setattr(self, field.name, None)
-                    packet[field.name] = NoValue
+                    packet[field.name] = NO_VALUE
                     continue
                 field = field.field(packet)
 

@@ -24,13 +24,13 @@ is labelled for, and
 pins it so a later reading of the ruling cannot escalate into deleting the types.
 
 The population is **four**, not the three
-:file:`docs/source/contributing/conventions.rst` documented -- ``_Absent`` /
-``_AbsentType`` in :mod:`pcapkit.protocols.protocol` is the fourth, missed because a
-sweep filtered on capitalised names does not see a leading underscore.
-:class:`SentinelPopulationTests` pins the count and the doc together, so the next
-sentinel cannot be added to one without the other. ``_Absent`` is private and stays
-out of :attr:`__all__` in both directions, which is what the ruling means by "to
-users".
+:file:`docs/source/contributing/conventions.rst` documented -- ``ABSENT`` /
+``AbsentType`` in :mod:`pcapkit.protocols.protocol` is the fourth, missed because a
+sweep filtered on capitalised names did not see it when it was still spelled
+``_Absent``/``_AbsentType``, with a leading underscore. :class:`SentinelPopulationTests`
+pins the count and the doc together, so the next sentinel cannot be added to one
+without the other. ``ABSENT`` is private and stays out of :attr:`__all__` in both
+directions, which is what the ruling means by "to users".
 
 A follow-up to this same issue moved all four *definitions* into
 :mod:`pcapkit.corekit.sentinels`, per the owner's later ruling -- *"Okay one module
@@ -40,6 +40,17 @@ changed is only :attr:`type.__module__` for the four types, which
 :meth:`SentinelExportTests.test_every_sentinel_type_is_still_importable_by_name` now
 checks against :data:`CANONICAL_MODULE` rather than against a different module per
 sentinel.
+
+GitHub issue #937 later renamed two of the four *objects* to SCREAMING_SNAKE --
+``NoValue`` to ``NO_VALUE`` and ``_Absent`` to ``ABSENT``, the latter also dropping
+its leading underscore -- so every instance name agrees on one casing. Privacy for
+what is now ``ABSENT`` stopped being signalled by the name at all and became
+documentation-only, per the owner's ruling on #937: *"we can change* ``_ABSENT`` *to*
+``ABSENT`` *just document it as private type/class in the documentation and not for
+public use is enough."*
+:meth:`SentinelExportTests.test_the_private_sentinel_is_exported_neither_way` is what
+now pins that privacy under the new name, since the mechanical underscore signal it
+used to double-check is gone.
 
 One sentinel is deliberately **not** held to any of this: ``_NOT_FOUND = object()``
 at :file:`pcapkit/utilities/compat.py`, line 73, inside the ``cached_property``
@@ -68,6 +79,30 @@ The rest pass either way and are regression guards: the sibling exports that mus
 survive the edit (``ModuleDescriptor``, ``Field``, ``EnumLookup``,
 ``EnumRegistry``), the types staying importable, and the naming convention itself.
 
+GitHub issue #937 also adds one genuinely new assertion rather than only renaming
+existing ones: :meth:`SentinelPopulationTests.test_every_sentinel_object_is_screaming_snake`
+pins the object's own casing directly, which nothing before it did --
+``test_every_sentinel_follows_the_naming_convention`` only ever pinned that
+``<SENTINEL>Type`` derives from whatever the object is called, by design, via
+:func:`_expected_type_name`, which is precisely why it passed on ``main`` at
+``382375811`` even though ``NoValue`` and ``_Absent`` were not SCREAMING_SNAKE
+there -- its two special cases (a ``bare.isupper()`` guard and a leading-underscore
+carry-through) existed *because* the objects disagreed, so the check that derives
+the type from the object could never by itself catch the object's casing being
+wrong. The new test fails twice on that commit, measured directly::
+
+    $ git show 382375811:pcapkit/corekit/sentinels.py | grep -n 'NoValue = \\|_Absent = '
+    227:NoValue = NoValueType()
+    469:_Absent = _AbsentType()
+    $ python3 -c "import re; p = re.compile(r'^[A-Z][A-Z0-9_]*$'); \\
+        print([n for n in ('NULL', 'NoValue', 'NO_DEFAULT', '_Absent') if not p.match(n)])"
+    ['NoValue', '_Absent']
+
+Now that every object is SCREAMING_SNAKE, :func:`_expected_type_name` collapses to
+the one mechanical rule those two special cases used to carve exceptions around;
+see its own docstring below for what dropped and why the assertion strength survives
+the drop.
+
 """
 from __future__ import annotations
 
@@ -76,9 +111,9 @@ import re
 import unittest
 
 from pcapkit.corekit.enum import NO_DEFAULT, NoDefaultType
-from pcapkit.corekit.fields.field import NoValue, NoValueType
+from pcapkit.corekit.fields.field import NO_VALUE, NoValueType
 from pcapkit.corekit.module import NULL, NullType
-from pcapkit.protocols.protocol import _Absent, _AbsentType
+from pcapkit.protocols.protocol import ABSENT, AbsentType
 
 #: Repository root, for the two tests that read a file rather than import it.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -98,17 +133,18 @@ CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 #: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
 SENTINELS = (
     ('NULL', NULL, NullType),
-    ('NoValue', NoValue, NoValueType),
+    ('NO_VALUE', NO_VALUE, NoValueType),
     ('NO_DEFAULT', NO_DEFAULT, NoDefaultType),
-    ('_Absent', _Absent, _AbsentType),
+    ('ABSENT', ABSENT, AbsentType),
 )
 
 #: The public three of :data:`SENTINELS`, as ``(module, object name, type name)``.
-#: ``_Absent`` is absent from it deliberately: it is private, so it is exported
-#: neither way and the export rule does not reach it.
+#: ``ABSENT`` is absent from it deliberately: it is private, so it is exported
+#: neither way and the export rule does not reach it -- GitHub issue #937 dropped
+#: its leading underscore, but not its privacy.
 PUBLIC_SENTINELS = (
     ('pcapkit.corekit.module', 'NULL', 'NullType'),
-    ('pcapkit.corekit.fields.field', 'NoValue', 'NoValueType'),
+    ('pcapkit.corekit.fields.field', 'NO_VALUE', 'NoValueType'),
     ('pcapkit.corekit.enum', 'NO_DEFAULT', 'NoDefaultType'),
 )
 
@@ -116,18 +152,18 @@ PUBLIC_SENTINELS = (
 def _expected_type_name(instance_name: 'str') -> 'str':
     """The type name the house convention derives from an instance name.
 
-    ``NULL`` gives ``NullType`` and ``NO_DEFAULT`` gives ``NoDefaultType``, so an
-    all-caps name is title-cased word by word. ``NoValue`` is already CamelCase and
-    is left as it is -- ``str.capitalize`` would lowercase its tail into
-    ``Novalue``. A leading underscore is carried through, which is what makes
-    ``_Absent`` give ``_AbsentType`` rather than ``AbsentType``.
+    One mechanical rule since GitHub issue #937 made every instance name
+    SCREAMING_SNAKE: split on ``_``, title-case each word, and append ``Type``.
+    ``NULL`` gives ``NullType``, ``NO_VALUE`` gives ``NoValueType``, ``NO_DEFAULT``
+    gives ``NoDefaultType`` and ``ABSENT`` gives ``AbsentType``. Before #937 this
+    needed two special cases that are gone now: ``NoValue`` was already CamelCase,
+    so a ``bare.isupper()`` guard skipped re-title-casing it, and ``_Absent``
+    carried a leading underscore that had to be stripped and re-added around that
+    guard. Neither input shape exists any more, so neither does the code that
+    handled it.
 
     """
-    lead = '_' if instance_name.startswith('_') else ''
-    bare = instance_name.lstrip('_')
-    if bare.isupper():
-        bare = ''.join(word.capitalize() for word in bare.split('_'))
-    return f'{lead}{bare}Type'
+    return ''.join(word.capitalize() for word in instance_name.split('_')) + 'Type'
 
 
 def _star_import(module: 'str') -> 'dict[str, object]':
@@ -197,16 +233,18 @@ class SentinelExportTests(unittest.TestCase):
         self.assertIn('EnumRegistry', enum.__all__)
 
     def test_field_exports_the_object_and_not_the_type(self) -> 'None':
-        """The direction that is an *addition*: ``NoValue`` was exported by neither.
+        """The direction that is an *addition*: ``NO_VALUE`` was exported by neither.
 
         :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`
         is documented as being this object, so the ruling reaches it: a value a
         caller is told to compare against is a value ``import *`` should provide.
+        Named ``NoValue`` in :attr:`__all__` until GitHub issue #937 renamed the
+        object to ``NO_VALUE``; the type stayed ``NoValueType`` throughout.
 
         """
         import pcapkit.corekit.fields.field as field
 
-        self.assertIn('NoValue', field.__all__)
+        self.assertIn('NO_VALUE', field.__all__)
         self.assertNotIn('NoValueType', field.__all__)
         self.assertIn('Field', field.__all__)
 
@@ -249,19 +287,24 @@ class SentinelExportTests(unittest.TestCase):
                 self.assertEqual(type_.__module__, CANONICAL_MODULE)
 
     def test_the_private_sentinel_is_exported_neither_way(self) -> 'None':
-        """``_Absent`` is private, so the export rule does not reach it.
+        """``ABSENT`` is private, so the export rule does not reach it.
 
         Pinned rather than assumed: the ruling says *export the objects*, and a
-        literal reading of that would add ``_Absent`` to
+        literal reading of that would add ``ABSENT`` to
         :attr:`pcapkit.protocols.protocol.__all__`, which would publish a sentinel
-        whose own docstring says it never leaves the module.
+        whose own docstring says it never leaves the module. This kept pinning the
+        same fact under ``_Absent``/``_AbsentType`` before GitHub issue #937 dropped
+        the leading underscore that used to be the mechanical signal of "private" --
+        the rename makes this test the *only* thing enforcing that any more, which
+        is why it still checks both the object and the type, and both directions of
+        ``import *``.
 
         """
         import pcapkit.protocols.protocol as protocol
 
-        self.assertNotIn('_Absent', protocol.__all__)
-        self.assertNotIn('_AbsentType', protocol.__all__)
-        self.assertNotIn('_Absent', _star_import('pcapkit.protocols.protocol'))
+        self.assertNotIn('ABSENT', protocol.__all__)
+        self.assertNotIn('AbsentType', protocol.__all__)
+        self.assertNotIn('ABSENT', _star_import('pcapkit.protocols.protocol'))
 
 
 class SentinelPopulationTests(unittest.TestCase):
@@ -272,6 +315,37 @@ class SentinelPopulationTests(unittest.TestCase):
         for name, _, type_ in SENTINELS:
             with self.subTest(sentinel=name):
                 self.assertEqual(type_.__name__, _expected_type_name(name))
+
+    def test_every_sentinel_object_is_screaming_snake(self) -> 'None':
+        """GitHub issue #937's own rule: every sentinel **object** is SCREAMING_SNAKE.
+
+        The naming-convention test above already pins that ``<SENTINEL>Type`` derives
+        mechanically from the object's name, but that alone does not pin what the
+        object's own casing *is* -- a tree where every object were, say, CamelCase
+        would satisfy it just as well, so long as the type followed suit. This test
+        is what actually pins SCREAMING_SNAKE, independent of the type-derivation
+        rule, which is the rule this issue's ruling adds and the gap that let
+        ``NULL``, ``NoValue``, ``NO_DEFAULT`` and ``_Absent`` disagree on ``main``
+        before it landed.
+
+        Fails on the tree before this change, at ``382375811``: ``NoValue`` and
+        ``_Absent`` are the two objects that were not SCREAMING_SNAKE, measured
+        directly against that commit rather than assumed::
+
+            $ git show 382375811:pcapkit/corekit/sentinels.py | grep -n 'NoValue = \\|_Absent = '
+            227:NoValue = NoValueType()
+            469:_Absent = _AbsentType()
+
+        Neither ``NoValue`` (``N``, ``o``, ``V``, ... mixed case) nor ``_Absent``
+        (leading underscore, mixed case) matches ``^[A-Z][A-Z0-9_]*$``, so this test
+        fails twice over on that tree -- once for each -- and passes on this one for
+        all four.
+
+        """
+        pattern = re.compile(r'^[A-Z][A-Z0-9_]*$')
+        for name, _, _ in SENTINELS:
+            with self.subTest(sentinel=name):
+                self.assertRegex(name, pattern)
 
     def test_conventions_doc_lists_every_sentinel_in_the_tree(self) -> 'None':
         """The doc said "three" and listed three; ``_Absent`` was the fourth.
@@ -342,8 +416,8 @@ class SentinelBehaviourTests(unittest.TestCase):
     """
 
     def test_the_absent_value_sentinels_are_falsy(self) -> 'None':
-        """``NULL``, ``NoValue`` and ``_Absent`` each stand for an absent value."""
-        for sentinel in (NULL, NoValue, _Absent):
+        """``NULL``, ``NO_VALUE`` and ``ABSENT`` each stand for an absent value."""
+        for sentinel in (NULL, NO_VALUE, ABSENT):
             with self.subTest(sentinel=repr(sentinel)):
                 self.assertFalse(sentinel)
 
@@ -361,25 +435,26 @@ class SentinelBehaviourTests(unittest.TestCase):
         """``<absent>``, not ``<object object at 0x...>``.
 
         The reason the house rule prefers a class at all, and the reason the doc
-        can now name ``_AbsentType`` as having a ``__repr__`` where ``NoValueType``
+        can now name ``AbsentType`` as having a ``__repr__`` where ``NoValueType``
         does not.
 
         """
-        self.assertEqual(repr(_Absent), '<absent>')
-        self.assertNotIn('0x', repr(_Absent))
+        self.assertEqual(repr(ABSENT), '<absent>')
+        self.assertNotIn('0x', repr(ABSENT))
         self.assertNotIn('__repr__', vars(NoValueType))
 
 
 class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
-    """Why the ruling reaches ``NoValue`` at all.
+    """Why the ruling reaches ``NO_VALUE`` at all.
 
-    ``NoValue``'s own comment in :mod:`pcapkit.corekit.fields.field` reads *"Default
+    ``NO_VALUE``'s own comment in :mod:`pcapkit.corekit.fields.field` reads *"Default
     value for* :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`*"*,
     so it is the value a caller is told to compare a field's default against -- which
     is what makes withholding it from ``import *`` the defect rather than a
     preference. That contract had no test: the ``default`` setter and deleter were
     both uncovered, and the deleter is the only code path that puts the sentinel
-    *back*.
+    *back*. Named ``NoValue`` at the time #911 landed; GitHub issue #937 renamed the
+    object to ``NO_VALUE`` without touching this contract.
 
     :class:`~pcapkit.corekit.fields.strings.BytesField` is the concrete field under
     test, following :file:`tests/corekit/test_fields_field.py`: a real user-facing
@@ -392,10 +467,10 @@ class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
         """``is``, not ``==`` -- the whole point of a sentinel."""
         from pcapkit.corekit.fields.strings import BytesField
 
-        self.assertIs(BytesField(length=4).default, NoValue)
+        self.assertIs(BytesField(length=4).default, NO_VALUE)
 
     def test_setting_and_deleting_a_default_round_trips_through_the_sentinel(self) -> 'None':
-        """Deleting a default restores ``NoValue``, rather than :obj:`None` or ``b''``.
+        """Deleting a default restores ``NO_VALUE``, rather than :obj:`None` or ``b''``.
 
         :obj:`None` and ``b''`` are both values a caller may legitimately want as a
         default, so either would be indistinguishable from "no default given" --
@@ -407,10 +482,10 @@ class NoValueIsTheDocumentedFieldDefaultTests(unittest.TestCase):
         field = BytesField(length=4)
         field.default = b'\x00\x01\x02\x03'
         self.assertEqual(field.default, b'\x00\x01\x02\x03')
-        self.assertIsNot(field.default, NoValue)
+        self.assertIsNot(field.default, NO_VALUE)
 
         del field.default
-        self.assertIs(field.default, NoValue)
+        self.assertIs(field.default, NO_VALUE)
         self.assertFalse(field.default)
 
 

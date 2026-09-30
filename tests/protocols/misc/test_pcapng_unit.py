@@ -2746,7 +2746,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Regression for #366, cause 1: ``PacketBlock.padding_data`` and
         # ``DecryptionSecretsBlock.padding_data`` were declared ``BytesField``,
         # which ``Schema.pack`` does not fill in, so packing them handed
-        # ``struct.pack`` the ``NoValue`` sentinel.
+        # ``struct.pack`` the ``NO_VALUE`` sentinel.
         from pcapkit.corekit.fields.strings import PaddingField
         from pcapkit.protocols.schema.misc.pcapng import (DecryptionSecretsBlock,
                                                           EnhancedPacketBlock, PacketBlock)

@@ -16,7 +16,7 @@ Before this module existed, each of the four lived beside the one class that
 used it: :class:`NullType` in :mod:`pcapkit.corekit.module`,
 :class:`NoValueType` in :mod:`pcapkit.corekit.fields.field`,
 :class:`NoDefaultType` in :mod:`pcapkit.corekit.enum` and
-:class:`_AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling
+:class:`AbsentType` in :mod:`pcapkit.protocols.protocol`. The owner's ruling
 on GitHub issue #911, verbatim -- *"Okay one module for all four it is."* --
 moves the four *definitions* here; each original module keeps a three-line
 re-export so that no existing ``from <module> import <name>`` breaks,
@@ -27,23 +27,27 @@ including the ``if TYPE_CHECKING:``-only imports of the *types* that
 :mod:`~pcapkit.corekit.fields.numbers` and :mod:`~pcapkit.corekit.fields.strings`
 already carry.
 
-``NoValue`` and ``_Absent`` differ in how far the ruling reaches. ``NoValue``
+``NO_VALUE`` and ``ABSENT`` differ in how far the ruling reaches. ``NO_VALUE``
 is documented as the value of
 :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`,
 so it is a published contract and the re-export at
 :mod:`pcapkit.corekit.fields.field` is load-bearing for callers outside this
-package. ``_Absent`` is private to :mod:`pcapkit.protocols.protocol` --
+package. ``ABSENT`` is private to :mod:`pcapkit.protocols.protocol` --
 nothing outside that module ever imports it, from here or from there -- so
 its re-export exists only so that module's own code keeps reading
-``_Absent`` rather than a fully-qualified name; see :class:`_AbsentType`'s
-own docstring below for why it stays private after the move.
+``ABSENT`` rather than a fully-qualified name; see :class:`AbsentType`'s
+own docstring below for why it stays private after the move. GitHub issue
+#937 later dropped the leading underscore both used to carry (``_Absent``,
+``_AbsentType``) in favour of SCREAMING_SNAKE/CamelCase like their two
+siblings; the privacy this paragraph describes did not move with the name --
+see :class:`AbsentType`'s docstring for what carries it now.
 
 """
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import final
 
-__all__ = ['NULL', 'NoValue', 'NO_DEFAULT']
+__all__ = ['NULL', 'NO_VALUE', 'NO_DEFAULT']
 
 if TYPE_CHECKING:
     from typing import Any, Callable
@@ -206,7 +210,7 @@ def _get_null() -> 'NullType':
 
 @final
 class NoValueType:
-    """Type of :data:`NoValue`, the default value for :mod:`pcapkit.corekit.fields`.
+    """Type of :data:`NO_VALUE`, the default value for :mod:`pcapkit.corekit.fields`.
 
     Housed here per GitHub issue #911 rather than in
     :mod:`pcapkit.corekit.fields.field`, where it used to be defined and where
@@ -224,7 +228,9 @@ class NoValueType:
 #: :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`.
 #: :mod:`pcapkit.corekit.fields.field` keeps a re-export, since that
 #: attribute's own documentation is a published contract naming this object.
-NoValue = NoValueType()
+#: Renamed from ``NoValue`` to ``NO_VALUE`` by GitHub issue #937, which
+#: normalised all four sentinel *objects* to SCREAMING_SNAKE.
+NO_VALUE = NoValueType()
 
 
 @final
@@ -244,17 +250,20 @@ class NoDefaultType:
 
     Named ``NoDefaultType`` for the *class* because that half of the house
     convention is settled: both :class:`NullType` and :class:`NoValueType`
-    use ``<Name>Type``. The *instance*'s own name is not similarly settled --
-    the owner's follow-up on #859 is explicit that ``NULL`` (``SCREAMING_CASE``)
-    and ``NoValue`` (``CapWords``) disagree, and "mainly depends on how we need
-    it." The need here is continuity: ``NO_DEFAULT`` is already the name on
-    ``main`` -- referenced in :meth:`EnumLookup.get
-    <pcapkit.corekit.enum.EnumLookup.get>`'s signature, its docstring, and both
-    comparison sites -- and this change is to *what the sentinel is*, not to
-    *what it is called*, so it keeps that name rather than being renamed to
-    match either precedent's instance casing for its own sake. ``NULL``'s
-    ``SCREAMING_CASE`` is the closer match regardless, since :data:`NO_DEFAULT`
-    was already spelled that way.
+    use ``<Name>Type``. At the time, the *instance*'s own name was not
+    similarly settled -- the owner's follow-up on #859 was explicit that
+    ``NULL`` (``SCREAMING_CASE``) and ``NoValue`` (``CapWords``) disagreed, and
+    "mainly depends on how we need it." The need here was continuity:
+    ``NO_DEFAULT`` was already the name on ``main`` -- referenced in
+    :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>`'s signature,
+    its docstring, and both comparison sites -- and that change was to *what
+    the sentinel is*, not to *what it is called*, so it kept that name rather
+    than being renamed to match either precedent's instance casing for its own
+    sake. ``NULL``'s ``SCREAMING_CASE`` was the closer match regardless, since
+    :data:`NO_DEFAULT` was already spelled that way -- and GitHub issue #937
+    later settled the question this paragraph left open: ``NoValue`` became
+    :data:`NO_VALUE` and ``_Absent`` became :data:`ABSENT`, so every instance
+    name now agrees on SCREAMING_SNAKE.
 
     Genuinely a singleton, not merely a class this module happens to
     instantiate once: :meth:`__new__` always hands back the one instance that
@@ -427,8 +436,8 @@ NO_DEFAULT = NoDefaultType()
 
 
 @final
-class _AbsentType:
-    """Type of :data:`_Absent`, the absent-key sentinel.
+class AbsentType:
+    """Type of :data:`ABSENT`, the absent-key sentinel.
 
     A distinct class rather than a bare :obj:`object` so that the sentinel has a
     name of its own in a traceback or a debugger, and so that a type checker has
@@ -440,11 +449,20 @@ class _AbsentType:
     and means "no value was given", not "this key is not here".
 
     Defined here, alongside the package's other sentinels, per the owner's
-    ruling on GitHub issue #911 -- but it stays exactly as private as it was
-    in :mod:`pcapkit.protocols.protocol`: nothing outside that module reads
-    :data:`_Absent`, from here or from there, and this module's own
-    :attr:`__all__` does not name it. The move relocates the *definition*,
-    not the visibility.
+    ruling on GitHub issue #911. Originally named ``_AbsentType``/``_Absent``,
+    with the leading underscore standing in for "private" -- GitHub issue #937
+    normalised every sentinel *object* to SCREAMING_SNAKE and dropped it, so
+    this pair now reads as CamelCase/SCREAMING_SNAKE like their two siblings
+    and privacy is no longer signalled by the name at all. The owner's ruling
+    on #937, verbatim: *"we can change* ``_ABSENT`` *to* ``ABSENT`` *just
+    document it as private type/class in the documentation and not for public
+    use is enough."* So this class and :data:`ABSENT` stay exactly as private
+    as they were: nothing outside :mod:`pcapkit.protocols.protocol` reads
+    :data:`ABSENT`, from here or from there, and neither this module's nor
+    that module's :attr:`__all__` names either one. This docstring, and the
+    "Naming a sentinel" section of
+    :file:`docs/source/contributing/conventions.rst`, are what now records
+    that fact in place of the leading underscore.
 
     """
 
@@ -457,7 +475,7 @@ class _AbsentType:
         return '<absent>'
 
 
-#: _AbsentType: Absent-versus-:obj:`None` sentinel for
+#: AbsentType: Absent-versus-:obj:`None` sentinel for
 #: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's
 #: own ``__keywords__`` out of its :attr:`~object.__dict__`, where
 #: :obj:`None` is itself a meaningful value -- the opt-out that says the
@@ -465,5 +483,7 @@ class _AbsentType:
 #: :attr:`ProtocolBase.__keywords__
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
 #: :mod:`pcapkit.protocols.protocol`, which keeps a private re-export of it
-#: for exactly that one read.
-_Absent = _AbsentType()
+#: for exactly that one read. Private by convention and documentation only,
+#: not by a leading underscore -- see :class:`AbsentType`'s own docstring for
+#: why, per GitHub issue #937.
+ABSENT = AbsentType()

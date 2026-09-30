@@ -13,7 +13,7 @@ from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.field import NoValue
+from pcapkit.corekit.fields.field import NO_VALUE
 from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField, SwitchField)
@@ -272,7 +272,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
         :attr:`Option.len` is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
-        :data:`~pcapkit.corekit.fields.field.NoValue`, rather than being left
+        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, rather than being left
         out of it, so the test below has to be on the **value** and not on the
         presence of the key: ``pkt.get('len', 0)`` on its own hands that
         :obj:`~pcapkit.corekit.fields.field.NoValueType` straight to
@@ -283,7 +283,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     """
     length = pkt.get('len', 0)
-    if not isinstance(length, int):  # ``NoValue`` (skipped) or :obj:`None` (unset)
+    if not isinstance(length, int):  # ``NO_VALUE`` (skipped) or :obj:`None` (unset)
         return 0
     return length
 
@@ -711,7 +711,7 @@ class MPLOption(Option, code=Enum_Option.MPL_Option):
 
         """
         if self.flags['type'] == Enum_SeedID.IPV6_SOURCE_ADDRESS:
-            self.seed = packet.get('src', NoValue)
+            self.seed = packet.get('src', NO_VALUE)
         return self
 
     if TYPE_CHECKING:

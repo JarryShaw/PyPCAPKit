@@ -1866,17 +1866,17 @@ class MHUnitTests(unittest.TestCase):
 
         :func:`~pcapkit.protocols.schema.internet.mh.pad_opt_data_len` has to read
         a skipped conditional field -- which is recorded as
-        :data:`~pcapkit.corekit.fields.field.NoValue`, not omitted -- as zero
+        :data:`~pcapkit.corekit.fields.field.NO_VALUE`, not omitted -- as zero
         padding octets, rather than handing that singleton to
         :class:`~pcapkit.corekit.fields.strings.PaddingField` where it becomes an
         unusable :mod:`struct` template.
         """
         from pcapkit.const.mh.option import Option
-        from pcapkit.corekit.fields.field import NoValue
+        from pcapkit.corekit.fields.field import NO_VALUE
         from pcapkit.protocols.schema.internet import mh as schema
 
         self.assertEqual(schema.pad_opt_data_len({}), 0)
-        self.assertEqual(schema.pad_opt_data_len({'length': NoValue}), 0)
+        self.assertEqual(schema.pad_opt_data_len({'length': NO_VALUE}), 0)
         self.assertEqual(schema.pad_opt_data_len({'length': None}), 0)
         self.assertEqual(schema.pad_opt_data_len({'length': 4}), 4)
 

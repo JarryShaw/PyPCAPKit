@@ -4,7 +4,7 @@
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.fields.field import FieldBase, NoValue
+from pcapkit.corekit.fields.field import NO_VALUE, FieldBase
 from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
@@ -32,7 +32,7 @@ _TN = TypeVar('_TN', bound='NoValueType')
 class NoValueField(FieldBase[_TN]):
     """Schema field for no value type (or :obj:`None`)."""
 
-    _default = NoValue
+    _default = NO_VALUE
 
     @property
     def template(self) -> 'str':
@@ -105,7 +105,7 @@ class ConditionalField(FieldBase[_TC]):
     @default.deleter
     def default(self) -> 'None':
         """Delete field default value."""
-        self._field.default = NoValue
+        self._field.default = NO_VALUE
 
     @property
     def template(self) -> 'str':
@@ -303,7 +303,7 @@ class PayloadField(FieldBase[_TP]):
         self._protocol = protocol
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 default: '_TP | NoValueType | bytes' = NoValue,
+                 default: '_TP | NoValueType | bytes' = NO_VALUE,
                  protocol: 'Optional[Type[_TP] | str]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<payload>'
@@ -363,7 +363,7 @@ class PayloadField(FieldBase[_TP]):
 
         """
         if value is None:
-            if self._default is NoValue:
+            if self._default is NO_VALUE:
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TP', self._default)
 
@@ -432,7 +432,7 @@ class SwitchField(FieldBase[_TC]):
     @default.deleter
     def default(self) -> 'None':
         """Delete field default value."""
-        self._field.default = NoValue
+        self._field.default = NO_VALUE
 
     @property
     def template(self) -> 'str':
@@ -489,7 +489,7 @@ class SwitchField(FieldBase[_TC]):
 
         """
         if self._field is None:
-            return NoValue  # type: ignore[unreachable]
+            return NO_VALUE  # type: ignore[unreachable]
         return self._field.pre_process(value, packet)
 
     def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
@@ -519,7 +519,7 @@ class SwitchField(FieldBase[_TC]):
 
         """
         if self._field is None:
-            return NoValue  # type: ignore[unreachable]
+            return NO_VALUE  # type: ignore[unreachable]
         return self._field.post_process(value, packet)
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
@@ -658,7 +658,7 @@ class SchemaField(FieldBase[_TS]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  schema: 'Optional[Type[_TS]]' = None,
-                 default: '_TS | NoValueType | bytes' = NoValue,
+                 default: '_TS | NoValueType | bytes' = NO_VALUE,
                  packet: 'Optional[dict[str, Any]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         #self._name = '<schema>'
@@ -720,7 +720,7 @@ class SchemaField(FieldBase[_TS]):
 
         """
         if value is None:
-            if self._default is NoValue:
+            if self._default is NO_VALUE:
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TS', self._default)
 
@@ -788,7 +788,7 @@ class ForwardMatchField(FieldBase[_TC]):
     @default.deleter
     def default(self) -> 'None':
         """Delete field default value."""
-        self._field.default = NoValue
+        self._field.default = NO_VALUE
 
     @property
     def template(self) -> 'str':
