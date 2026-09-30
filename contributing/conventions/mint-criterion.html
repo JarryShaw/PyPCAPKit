@@ -495,14 +495,12 @@ from the first.</p>
 </dl>
 <section id="the-criterion">
 <h2>The criterion<a class="headerlink" href="#the-criterion" title="Link to this heading">¶</a></h2>
-<p>The test, in the maintainer’s words:</p>
-<blockquote>
-<div><p>Is this considered as the final concrete assigned name (<strong>mint</strong>), or just a
-notation for the readers (<strong>unmint</strong>)?</p>
-</div></blockquote>
-<p>Settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a> and confirmed
-as “a core concept of the ruling” on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>.</p>
+<p>The test, paraphrased from the maintainer’s ruling: does the upstream registry treat
+the label as the final, concrete assigned name (<strong>mint</strong>), or only as a notation for a
+human reading the table (<strong>unmint</strong>)?</p>
+<p>Settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a> and reaffirmed
+on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> as a core concept of
+the ruling.</p>
 <p>So the question to ask of a range is <strong>what the upstream registry actually did</strong>, not
 what the generated code happens to look like:</p>
 <ul class="simple">
@@ -545,10 +543,9 @@ what the label tells you: a party, or a procedure.</p>
 <h2>Why the company names mint<a class="headerlink" href="#why-the-company-names-mint" title="Link to this heading">¶</a></h2>
 <p>The ethertype case looks like an exception to the rule and is not. The maintainer’s
 reasoning, settled on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> after
-being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a>:</p>
-<blockquote>
-<div><p>Proprietary protocols won’t have public names so company names serve this purpose.</p>
-</div></blockquote>
+being raised on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/847">#847</a>: a
+proprietary protocol will never have a public name, so the company name is what serves
+that purpose in its place.</p>
 <p>So the company name is not a note <em>about</em> the code – it is the best name that will ever
 exist <em>for</em> it, which makes it the final concrete assigned name under the test above.
 That is also why <code class="docutils literal notranslate"><span class="pre">DEC</span> <span class="pre">Unassigned</span></code> goes the other way despite carrying the same

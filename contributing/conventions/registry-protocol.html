@@ -513,14 +513,16 @@ parent, and the line between them is whether the enumeration may <em>grow</em>:<
 </tbody>
 </table>
 </div>
-<p>The owner’s ruling, verbatim: <em>“they may subclass a bare base enum from
-pcapkit.corekit.enum - where EnumRegistry subclasses it for using in the other
-mutable ones.”</em> So a <strong>closed</strong> set inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
+<p>The owner ruled on #877 that a registry may subclass a bare base enum out of
+<a class="reference internal" href="../../pcapkit/corekit/enum.html#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a>, with <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>
+subclassing that base in turn for use by the mutable ones. So a <strong>closed</strong> set
+inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>
 directly and is never handed a <code class="docutils literal notranslate"><span class="pre">register</span></code> it would have to refuse; an <strong>open</strong>
 registry inherits <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> exactly as before.</p>
 <p>What settled the split is the owner’s own second thought about carrying <code class="docutils literal notranslate"><span class="pre">register</span></code>
-on the base: <em>“if it carries ``register``, then why not ``register_alias``. We might
-be creating a bad ruling.”</em> Following that through leaves
+on the base: if the base carries <code class="docutils literal notranslate"><span class="pre">register</span></code>, there is no principled reason for it
+not to carry <code class="docutils literal notranslate"><span class="pre">register_alias</span></code> as well, and the ruling would be the worse for it.
+Following that through leaves
 <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> holding only three methods, too thin to
 justify a second class – so the two tiers collapse into one, which is the opposite of
 what was ruled.</p>
@@ -531,8 +533,8 @@ it was – <code class="docutils literal notranslate"><span class="pre">LinkType
 <code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> in order to “be an enum”, it would have become the member type
 itself and broken <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and flag registries at once.</p>
 <p><a class="reference internal" href="../../pcapkit/corekit/enum.html#id0" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> is what the base carries
-<em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: <em>“there must
-be some sort of range validation logic for the inherited classes to hook in.”</em> The
+<em>instead</em> of <code class="docutils literal notranslate"><span class="pre">register</span></code>, and it answers the owner’s other requirement: the base has
+to offer range-validation logic for its inheriting classes to hook into. The
 base implementation accepts everything; an override states a range, in the shape the
 generated registries currently spell by hand in <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
@@ -591,14 +593,11 @@ those files; the remaining seven followed once both had merged
 </section>
 <section id="what-a-failed-lookup-raises">
 <h2>What a Failed Lookup Raises<a class="headerlink" href="#what-a-failed-lookup-raises" title="Link to this heading">¶</a></h2>
-<p>Two rules govern it, and they pull in opposite directions on purpose. The owner’s
-ruling, verbatim, on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>:</p>
-<blockquote>
-<div><p>Either <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> or <code class="docutils literal notranslate"><span class="pre">KeyError</span></code>, that’s depending on how stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code>
-would raise on these circumstances. And we should raise one from
-<code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code> rather builtin exceptions.</p>
-</div></blockquote>
+<p>Two rules govern it, and they pull in opposite directions on purpose. The owner ruled
+on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a> that the choice between
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> and <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> follows whichever stdlib’s <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>
+would raise in the same circumstance, and that whichever it is comes from
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a> rather than from builtins.</p>
 <p>So the <strong>provenance</strong> is in-library and the <strong>shape</strong> is stdlib’s:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> raises
@@ -621,8 +620,8 @@ one into the other is exactly what #923 retired, and it was retired in three pla
 at once: <code class="docutils literal notranslate"><span class="pre">TransportProtocol.get</span></code> and <code class="docutils literal notranslate"><span class="pre">Criticality.get</span></code> had each turned the
 base’s <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a> into a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, and
 <code class="docutils literal notranslate"><span class="pre">FastBindingAcknowledgmentStatus.get</span></code> raised
-<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss so that “the
-two ways of getting it wrong reported identically”.</p>
+<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> for a name miss, so that the two
+ways of getting it wrong reported identically.</p>
 <p>One asymmetry between the two is deliberate and is <strong>not</strong> visible from the
 exception class: the <strong>name</strong> miss is raised quietly
 (<a class="reference internal" href="../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>, so nothing is
@@ -746,17 +745,15 @@ what it adds to the base, and goes when the answer is nothing.</strong></p>
 </section>
 <section id="case-sensitivity-is-rfc-directed">
 <h2>Case Sensitivity Is RFC-Directed<a class="headerlink" href="#case-sensitivity-is-rfc-directed" title="Link to this heading">¶</a></h2>
-<p>The rule, in the owner’s own wording on
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>:</p>
-<blockquote>
-<div><p>if RFC states the values are case-insensitive, then our enum should also treat them
-that way. otherwise, we should treat them case sensitive.</p>
-</div></blockquote>
+<p>The rule, as the owner ruled it on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a>: where the RFC states the
+values are case-insensitive, the enumeration treats them that way too; otherwise it
+treats them as case-sensitive.</p>
 <p>And the reason a registry’s spelling is never quietly normalised, from the same thread:
-<em>“enum should honour and keep their original writings as in the registrars. case
-in-sensitivity only applies to certain selected ones, where logically it makes sense
-(like ``TransportProtocol``) and/or RFC documentation itself recognises them as
-case-insensitive (like, maybe, FTP/HTTP commands).”</em></p>
+an enumeration honours and keeps the original writing the registrar used, and
+case-insensitivity applies only to the selected registries where it makes logical sense
+– <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code> being one – or where the RFC documentation itself recognises
+the values as case-insensitive, FTP and HTTP commands being the likely candidates.</p>
 <p>So <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> is <strong>case-sensitive</strong>, and that is the
 default every enumeration gets. Case-insensitivity is a per-class <code class="docutils literal notranslate"><span class="pre">get</span></code> override that
 has to cite the RFC or IANA registry making the values case-insensitive; without one it
@@ -787,12 +784,9 @@ to diff it against the base to find out that it is not.</p>
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a> settled it: does a
 specification have to state a <strong>comparison rule</strong> for a registry to be treated
 case-insensitively, or does it also count when the authorities merely <strong>disagree
-about spelling</strong>? The owner’s answer, verbatim:</p>
-<blockquote>
-<div><p>I say lenient. TransportProtocol for example should be case-insensitive. Upper or
-lower cases are being used everywhere in RFC and IANA themselves so that’s an
-indication of case insensitivity.</p>
-</div></blockquote>
+about spelling</strong>? The owner ruled for the lenient reading, with <code class="docutils literal notranslate"><span class="pre">TransportProtocol</span></code>
+as his own example: upper and lower casings are used throughout the RFCs and IANA’s own
+data, and that mixed usage is itself an indication of case-insensitivity.</p>
 <p>So the test a new registry has to pass has <strong>two limbs</strong>, and satisfying either one
 justifies case-insensitivity:</p>
 <ol class="arabic simple">
@@ -813,8 +807,8 @@ IANA spells a column is not evidence.</p>
 <section id="the-audit-per-class">
 <h2>The Audit, per Class<a class="headerlink" href="#the-audit-per-class" title="Link to this heading">¶</a></h2>
 <p><a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/903">#903</a>’s sweep, so that a
-registry added later has something to check itself against. The owner’s scope for it,
-verbatim: <em>“we should audit all registries and then decide if case (in)sensitive.”</em></p>
+registry added later has something to check itself against. The owner set its scope:
+audit every registry first, and decide case-sensitivity per registry from that.</p>
 <p>The population it covers, with the counting convention spelled out because the
 figures move: <strong>127</strong> <a class="reference internal" href="../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> subclasses, every
 one of them under <a class="reference internal" href="../../pcapkit/const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, across 124 files – 117 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued

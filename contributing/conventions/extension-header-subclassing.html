@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/contributing/conventions/extension-header-subclassing.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner’s words, on#924: I think on subcla..." />
-<meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner’s words, on#924: I think on subcla..." />
+<meta property="og:description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
+<meta name="description" content="Every IPv6 extension header in this package subclasses IPv6_Ext. Some name a second base as well, and which ones do is a ruling rather than an accident. The owner ruled on#924 that a header usable ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="How the repository itself is run" href="process.html"><link rel="prev" title="Where the registry protocol lives" href="registry-protocol.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -482,15 +482,11 @@
 <span id="extension-header-subclassing"></span><h1>Which bases an IPv6 extension header names<a class="headerlink" href="#which-bases-an-ipv6-extension-header-names" title="Link to this heading">¶</a></h1>
 <p>Every IPv6 extension header in this package subclasses
 <a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>. Some name a <strong>second</strong> base
-as well, and which ones do is a ruling rather than an accident. The owner’s words,
-on <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a>:</p>
-<blockquote>
-<div><p>I think on subclassing, we might wanna keep this convention: if the IPv6
-extension header is only usable as an extension header, then it only inherit
-from <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code>, like <code class="docutils literal notranslate"><span class="pre">IPv6_Frag</span></code>; but if it is useable as a standalone
-protocol itself, then it herit from both <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and <code class="docutils literal notranslate"><span class="pre">Internet</span></code> (or
-<code class="docutils literal notranslate"><span class="pre">IPsec</span></code>), like <code class="docutils literal notranslate"><span class="pre">ESP</span></code>.</p>
-</div></blockquote>
+as well, and which ones do is a ruling rather than an accident. The owner ruled on
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/924">#924</a> that a header usable <em>only</em>
+as an extension header inherits <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and nothing else – <code class="docutils literal notranslate"><span class="pre">IPv6_Frag</span></code> being
+the example – while one that is usable as a standalone protocol in its own right
+inherits both <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> and <code class="docutils literal notranslate"><span class="pre">Internet</span></code> (or <code class="docutils literal notranslate"><span class="pre">IPsec</span></code>), as <code class="docutils literal notranslate"><span class="pre">ESP</span></code> does.</p>
 <p>The family as it stands:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
@@ -528,7 +524,7 @@ protocol itself, then it herit from both <code class="docutils literal notransla
 </div>
 <p><a class="reference internal" href="../../pcapkit/protocols/internet/ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a> is itself an
 <a class="reference internal" href="../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a> subclass, which is the
-parenthetical <em>“(or</em> <code class="docutils literal notranslate"><span class="pre">IPsec</span></code><em>)”</em> in the ruling: naming it satisfies the
+parenthetical <code class="docutils literal notranslate"><span class="pre">IPsec</span></code> alternative in the ruling: naming it satisfies the
 convention, and it is the right second base for a header whose standalone form is an
 IPsec one.</p>
 <section id="the-code-cannot-be-used-as-evidence">
@@ -556,12 +552,10 @@ whether the same header is also a protocol in its own right.</p>
 </section>
 <section id="the-operative-test-is-what-the-rfcs-say">
 <h2>The operative test is what the RFCs say<a class="headerlink" href="#the-operative-test-is-what-the-rfcs-say" title="Link to this heading">¶</a></h2>
-<p>So the census is read out of the specifications, on the owner’s instruction:</p>
-<blockquote>
-<div><p>So my suggestion is to read through the RFCs to figure out any of the defined
-IPv6 extension headers are extension header only or standalone protocol as well.
-Then we can decide if they should inherit only <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> or additional bases.</p>
-</div></blockquote>
+<p>So the census is read out of the specifications, on the owner’s instruction: work
+through the RFCs to establish, for each defined IPv6 extension header, whether it is
+extension-header-only or a standalone protocol as well, and decide from that whether it
+inherits <code class="docutils literal notranslate"><span class="pre">IPv6_Ext</span></code> alone or names additional bases.</p>
 <p>And the limb that decides is <strong>whether a primary source shows the header carried
 directly as an IPv4 payload</strong>:</p>
 <ul class="simple">
@@ -617,10 +611,9 @@ held to the convention whether or not anyone remembers this page.</p>
 extension header (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/891">#891</a>), and
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a> merged that role with
 the shared-base role into one class under the shorter name. No compatibility alias
-was left behind, and that was deliberate. The owner’s ruling:</p>
-<blockquote>
-<div><p>No more <code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> name. Its an intermediate state and never released.</p>
-</div></blockquote>
+was left behind, and that was deliberate. The owner ruled that the
+<code class="docutils literal notranslate"><span class="pre">IPv6_GenericExt</span></code> name goes for good: it was an intermediate state, and it was never
+released.</p>
 <p>The reasoning is what makes it safe rather than merely decided: the old name existed
 on <code class="docutils literal notranslate"><span class="pre">main</span></code> from <code class="docutils literal notranslate"><span class="pre">b3551cb63</span></code> to <code class="docutils literal notranslate"><span class="pre">93cf940b3</span></code> – under four hours on one day, and
 after the most recent release tag – so it appears in <strong>no</strong> release, and the break
